@@ -14,12 +14,10 @@ public class HoveredThresholdNode extends StackPane {
 
         final Label label = createDataThresholdLabel(priorValue, value);
 
-        setOnMouseEntered(new EventHandler<MouseEvent>() {
-            @Override public void handle(MouseEvent mouseEvent) {
-                getChildren().setAll(label);
-                setCursor(Cursor.NONE);
-                toFront();
-            }
+        setOnMouseEntered(mouseEvent -> {
+            getChildren().setAll(label);
+            setCursor(Cursor.NONE);
+            toFront();
         });
         setOnMouseExited(new EventHandler<MouseEvent>() {
             @Override public void handle(MouseEvent mouseEvent) {

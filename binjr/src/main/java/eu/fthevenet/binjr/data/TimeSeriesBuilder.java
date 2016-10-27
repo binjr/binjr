@@ -58,11 +58,11 @@ public class TimeSeriesBuilder {
 
                     for (int i = 1; i < data.length - 1; i++) {
                         Double val =  Double.parseDouble(data[i]);
-                        if (!val.isNaN()) {
-                            XYChart.Data<Date, Number> d = new XYChart.Data<>(timeStamp, val);
+
+                            XYChart.Data<Date, Number> d = new XYChart.Data<>(timeStamp, val.isNaN()?0:val );
                             //  d.setNode(new HoveredThresholdNode(0, (int)timeStamp));
                             dataBuckets.get(i - 1).add(d);
-                        }
+
                     }
                 }
                 for (int i = 0; i < nbSeries; i++) {

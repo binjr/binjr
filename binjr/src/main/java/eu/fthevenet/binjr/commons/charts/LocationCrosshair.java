@@ -49,7 +49,6 @@ class LocationCrosshair extends Application {
         });
         crosshairArea.setOnMouseExited(event -> label.setVisible(false));
         root.getChildren().add(crosshairArea);
-
         Scene scene = new Scene(root);
         stage.setScene(scene);
         stage.setTitle("Location Crosshair");

@@ -23,7 +23,7 @@ public class JrdsSourceTester {
     private static final Logger logger = LogManager.getLogger(JrdsSourceTester.class);
     public static void main(String[] args) {
         String jrdsHost = "ngwps006:31001";
-        String target = "ngwps006.mshome.net";
+        String target = "ngwps006";
         String probe = "memprocPdh";
 
         Instant end = Instant.now();
