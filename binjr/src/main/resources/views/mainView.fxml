@@ -66,7 +66,7 @@
                      <children>
                         <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <AreaChart fx:id="chart"  prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <AreaChart fx:id="chart" createSymbols="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <xAxis>
                                   <DateAxis animated="true" side="BOTTOM" />
                                 </xAxis>

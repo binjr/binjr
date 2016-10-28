@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.charts;
+package eu.fthevenet.binjr.commons.samples;
 
 import javafx.event.EventHandler;
 import javafx.scene.Cursor;

@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.charts;
+package eu.fthevenet.binjr.commons.samples;
 
 
         import com.sun.javafx.charts.ChartLayoutAnimator;
