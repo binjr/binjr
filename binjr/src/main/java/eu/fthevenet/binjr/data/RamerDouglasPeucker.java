@@ -53,6 +53,7 @@ public class RamerDouglasPeucker {
 //        double s = ((a.y - p.y) * (b.x - a.x) - (a.x - p.x) * (b.y - a.y)) / ((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
 //        return Math.abs(s) * Math.sqrt(((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y)));
 
+
         double n = Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y));
         double d = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
         return n / d;
