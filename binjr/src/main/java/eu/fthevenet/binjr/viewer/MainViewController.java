@@ -1,6 +1,5 @@
 package eu.fthevenet.binjr.viewer;
 
-import eu.fthevenet.binjr.commons.charts.DateAxis;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
@@ -8,26 +7,16 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.Axis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
-import javafx.scene.shape.StrokeType;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gillius.jfxutils.chart.ChartCrossHairManager;
-import org.gillius.jfxutils.chart.ChartPanManager;
+import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
 import java.io.ByteArrayInputStream;
@@ -38,7 +27,6 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.function.Function;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
@@ -72,46 +60,15 @@ public class MainViewController implements Initializable {
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert root != null : "fx:id\"root\" was not injected!";
 
-       // chartInfo = new XYChartInfo(chart);
 
-//        final javafx.scene.control.Label xLabel = new javafx.scene.control.Label("");
-//        xLabel.getStyleClass().addAll("default-color3", "chart-line-symbol", "chart-series-line");
-//        xLabel.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
-//        xLabel.setTextFill(javafx.scene.paint.Color.DARKGRAY);
-//        xLabel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE, javafx.scene.control.Label.USE_PREF_SIZE);
-//        xLabel.setMouseTransparent(true);
-//
-//        final javafx.scene.control.Label yLabel = new javafx.scene.control.Label("");
-//        yLabel.getStyleClass().addAll("default-color3", "chart-line-symbol", "chart-series-line");
-//        yLabel.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
-//        yLabel.setTextFill(javafx.scene.paint.Color.DARKGRAY);
-//        yLabel.setMinSize(javafx.scene.control.Label.USE_PREF_SIZE, javafx.scene.control.Label.USE_PREF_SIZE);
-//        yLabel.setMouseTransparent(true);
-
-
-        Instant end = Instant.now();// Instant.parse("2016-10-24T10:15:30Z");
-        Instant begin = end.minus(60, ChronoUnit.MINUTES);
+        Instant end =  Instant.parse("2016-10-25T18:30:00Z");
+        Instant begin = end.minus(6*60, ChronoUnit.MINUTES);
         beginDateTime.setCalendar(Calendar.getInstance());
         beginDateTime.getCalendar().setTime(Date.from(begin));
         endDateTime.setCalendar(Calendar.getInstance());
+        endDateTime.getCalendar().setTime(Date.from(end));
 
-//        final Line horizontalLine = new Line(0.5, 0.5, 0.5, 0.5);
-//        horizontalLine.setMouseTransparent(true);
-//        final Line verticalLine = new Line(0, 0, 0, 0);
-//        verticalLine.setMouseTransparent(true);
-//        verticalLine.setSmooth(false);
-//        verticalLine.setStrokeWidth(0.2);
-//
-//        horizontalLine.setSmooth(false);
-//       horizontalLine.setStrokeWidth(1);
-//        horizontalLine.setVisible(false);
-//        horizontalLine.setStrokeType(StrokeType.CENTERED);
-//        verticalLine.setVisible(false);
-//        yLabel.setVisible(false);
-//        xLabel.setVisible(false);
-//
-//        chartParent.getChildren().addAll(xLabel, yLabel);
-//        chartParent.getChildren().addAll(horizontalLine, verticalLine);
+
 
         editRefresh.setOnAction(a -> refreshChart());
 
@@ -121,231 +78,12 @@ public class MainViewController implements Initializable {
 
 
 
-        final javafx.scene.shape.Rectangle selection = new Rectangle(0, 0, 0, chart.getYAxis().getHeight());
+
 
         ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(chart, chartParent, Date::toString, Object::toString);
 
-        crossHair.start();
-
-//        chart.getParent().add(horizontalLine);
-//        chart.add(verticalLine);
-//
-//        crosshairArea.setOnMouseMoved(event -> {
-//            label.setVisible(true);
-//            label.setText(" Location: "+event.getX()+", "+event.getY());
-//
-//            horizontalLine.setStartY(event.getY());
-//            horizontalLine.setEndY(event.getY());
-//
-//            verticalLine.setStartX(event.getX());
-//            verticalLine.setEndX(event.getX());
-//
-//        });
-//        crosshairArea.setOnMouseExited(event -> label.setVisible(false));
-
-
-//            SimpleDateFormat format = new SimpleDateFormat( "HH:mm:ss" );
-//            format.setTimeZone( TimeZone.getTimeZone( "GMT" ) );
-//            ((StableTicksAxis) chart.getXAxis()).setAxisTickFormatter(
-//                    new FixedFormatTickFormatter( format ) );
-
-//        boolean ctrlPressed;
-//        chart.setOnKeyPressed(event->{
-//            if (event.getCode() == KeyCode.CONTROL){
-//                verticalLine.setVisible(true);
-//                label.setVisible(true);
-//            }
-//
-//        });
-//
-//        chart.setOnKeyReleased(event->{
-//            if (event.getCode() == KeyCode.CONTROL){
-//                verticalLine.setVisible(false);
-//                label.setVisible(false);
-//            }
-//        });
-
-//        root.addEventFilter(KeyEvent.KEY_RELEASED, (event) -> {
-//            if (event.getCode() == KeyCode.CONTROL) {
-//                horizontalLine.setVisible(false);
-//                verticalLine.setVisible(false);
-//
-//                yLabel.setVisible(false);
-//                xLabel.setVisible(false);
-//                event.consume();
-//            }
-//        });
-//
-//        root.addEventFilter(KeyEvent.KEY_PRESSED, (event) -> {
-//            if (event.getCode() == KeyCode.CONTROL) {
-//                logger.debug(()-> event.getTarget().toString());
-//                horizontalLine.setVisible(true);
-//                verticalLine.setVisible(true);
-//                yLabel.setVisible(true);
-//                xLabel.setVisible(true);
-//                event.consume();
-//            }
-//        });
-
-
-//        chart.setOnMouseMoved(mouseEvent -> {
-//
-//
-////                verticalLine.setVisible(true);
-////                label.setVisible(true);
-//                if (mouseEvent.isShortcutDown() &&chartInfo.isInPlotArea(mouseEvent.getX(), mouseEvent.getY())) {
-//
-//                    double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
-//                    double axisYRelativeMousePosition = mouseEvent.getY() - yStart*1.5;
-//
-//                    logger.info("axisYRelativeMousePosition = " + axisYRelativeMousePosition);
-//                    logger.info("yStart = " + yStart);
-//                    logger.info("mouseEvent.getY = " + mouseEvent.getY());
-//
-//                    logger.info("chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition) = " + chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition));
-//                    logger.info("chart.getYAxis().getValueForDisplay(mouseEvent.getY()) = " + chart.getYAxis().getValueForDisplay(mouseEvent.getY()));
-//
-//                    horizontalLine.setStartX(chartInfo.getPlotArea().getMinX()+0.5);
-//                    horizontalLine.setEndX(chartInfo.getPlotArea().getMaxX()+0.5);
-//                    horizontalLine.setStartY(mouseEvent.getY()+0.5);
-//                    horizontalLine.setEndY(mouseEvent.getY()+0.5);
-//                    yLabel.setLayoutX(Math.max( chart.getLayoutX(),chartInfo.getPlotArea().getMinX() - yLabel.getWidth() - 2));
-//                    yLabel.setLayoutY( Math.min(mouseEvent.getY(),chartInfo.getPlotArea().getMaxY() - yLabel.getHeight()));
-//                    yLabel.setText(String.format("%.2f", chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition).doubleValue()));
-//
-//
-//                    double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
-//                    double axisXRelativeMousePosition = mouseEvent.getX() - xStart;
-//                    verticalLine.setStartX(mouseEvent.getX()+0.5);
-//                    verticalLine.setEndX(mouseEvent.getX()+0.5);
-//                    verticalLine.setStartY(chartInfo.getPlotArea().getMinY()+0.5);
-//                    verticalLine.setEndY(chartInfo.getPlotArea().getMaxY()+0.5);
-//                    xLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
-//                    xLabel.setLayoutX( Math.min(mouseEvent.getX(),chartInfo.getPlotArea().getMaxX() - xLabel.getWidth()));
-//                    xLabel.setText(chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition).toString());
-//
-//                }
-//
-//            }
-//
-//        );
-
-        SimpleDoubleProperty rectinitX = new SimpleDoubleProperty();
-
-//        EventHandler<MouseEvent> mouseHandler = new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent mouseEvent) {
-//
-//                if (mouseEvent.getEventType() == MouseEvent.MOUSE_PRESSED) {
-//                    rectinitX.set(mouseEvent.getX());
-//                } else if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED || mouseEvent.getEventType() == MouseEvent.MOUSE_MOVED) {
-//                 //   XYChart<Date, Number> lineChart = chart;
-//                    DateAxis xAxis = (DateAxis) chart.getXAxis();
-//
-//                    double newXlower = xAxis.getLowerBound(), newXupper = xAxis.getUpperBound();
-//                    Date Delta;// = 0.3;
-//
-//                    if (mouseEvent.getEventType() == MouseEvent.MOUSE_DRAGGED) {
-//                        if (rectinitX.get() < mouseEvent.getX()) {
-//                            Delta *= -1;
-//                        }
-//                        newXlower = xAxis.getLowerBound() + Delta;
-//                        newXupper = xAxis.getUpperBound() + Delta;
-//
-//                        xAxis.setLowerBound(newXlower);
-//                        xAxis.setUpperBound(newXupper);
-//
-//                        DoubleProperty p1 = xAxis.scaleXProperty();
-//                        DoubleProperty p2 = xAxis.translateXProperty();
-//
-//                        double horizontalValueRange =  xAxis.getUpperBound() - xAxis.getLowerBound();
-//                        double horizontalWidthPixels = xAxis.getWidth();
-//                        //pixels per unit
-//                        double xScale = horizontalWidthPixels / horizontalValueRange;
-//
-//                        Set<Node> nodes = chart.lookupAll(".chart-vertical-grid-lines");
-//                        for (Node n: nodes) {
-//                            Path p = (Path) n;
-//                            double currLayoutX = p.getLayoutX();
-//                            p.setLayoutX(currLayoutX + (Delta*-1) * xScale);
-//                        }
-//                        double lox = xAxis.getLayoutX();
-//                    }
-//                    rectinitX.set(mouseEvent.getX());
-//                }
-//            }
-//        };
-
-
-        //Panning works via either secondary (right) mouse or primary with ctrl held down
-//        ChartPanManager panner = new ChartPanManager( chart );
-//        panner.setMouseFilter(mouseEvent -> {
-//            if ( mouseEvent.getButton() == MouseButton.SECONDARY ||
-//                    ( mouseEvent.getButton() == MouseButton.PRIMARY &&
-//                            mouseEvent.isShortcutDown() ) ) {
-//                //let it through
-//            } else {
-//                mouseEvent.consume();
-//            }
-//        });
-//        panner.start();
-
-//        //Zooming works only via primary mouse button without ctrl held down
-//        JFXChartUtil.setupZooming( chart, mouseEvent -> {
-//            if ( mouseEvent.getButton() != MouseButton.PRIMARY ||
-//                    mouseEvent.isShortcutDown() )
-//                mouseEvent.consume();
-//        });
-        //       JFXChartUtil.addDoublePrimaryClickAutoRangeHandler( chart );
 
     }
-//
-//    private void startDrag( MouseEvent event ) {
-//        DefaultChartInputContext context = new DefaultChartInputContext( chartInfo, event.getX(), event.getY() );
-//
-//           lastY = event.getY();
-//
-//            wasYAnimated = chart.getYAxis().getAnimated();
-//
-//        chart.getYAxis().setAnimated( false );
-//        chart.getYAxis().setAutoRanging( false );
-//
-//            dragging = true;
-//        }
-//    }
-//
-//    private void drag( MouseEvent event ) {
-//        if ( !dragging )
-//            return;
-//
-//        if ( panMode == AxisConstraint.Both || panMode == AxisConstraint.Horizontal ) {
-//            double dX = ( event.getX() - lastX ) / -xAxis.getScale();
-//            lastX = event.getX();
-//            xAxis.setAutoRanging( false );
-//            xAxis.setLowerBound( xAxis.getLowerBound() + dX );
-//            xAxis.setUpperBound( xAxis.getUpperBound() + dX );
-//        }
-//
-//        if ( panMode == AxisConstraint.Both || panMode == AxisConstraint.Vertical ) {
-//            double dY = ( event.getY() - lastY ) / -yAxis.getScale();
-//            lastY = event.getY();
-//            yAxis.setAutoRanging( false );
-//            yAxis.setLowerBound( yAxis.getLowerBound() + dY );
-//            yAxis.setUpperBound( yAxis.getUpperBound() + dY );
-//        }
-//    }
-//
-//    private void release() {
-//        if ( !dragging )
-//            return;
-//
-//        dragging = false;
-//
-//        xAxis.setAnimated( wasXAnimated );
-//        yAxis.setAnimated( wasYAnimated );
-//    }
-//
-
 
     private void refreshChart() {
         try (Profiler p = Profiler.start("Refreshing chart view")) {
@@ -357,10 +95,14 @@ public class MainViewController implements Initializable {
 //                    series.get("PrivilegedTime"),
 //                    series.get("UserTime"),
 //                    series.get("IdleTime"));
-            chart.getData().add(series.get("InterruptTime"));
-            chart.getData().add(series.get("DPCTime"));
+            //  chart.getData().add(series.get("InterruptTime"));
+            //  chart.getData().add(series.get("DPCTime"));
+
             chart.getData().add(series.get("PrivilegedTime"));
             chart.getData().add(series.get("ProcessorTime"));
+
+            chart.getData().add(series.get("FreeVirtualMemory"));
+            chart.getData().add(series.get("TotalVirtualMemory"));
 //            );
         } catch (IOException e) {
             logger.error(() -> "Error getting data", e);
