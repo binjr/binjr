@@ -1,24 +1,25 @@
 package eu.fthevenet.binjr.viewer;
 
+import eu.fthevenet.binjr.commons.charts.DateAxis;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.shape.Rectangle;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import org.gillius.jfxutils.chart.XYChartInfo;
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -61,8 +62,8 @@ public class MainViewController implements Initializable {
         assert root != null : "fx:id\"root\" was not injected!";
 
 
-        Instant end =  Instant.parse("2016-10-25T18:30:00Z");
-        Instant begin = end.minus(6*60, ChronoUnit.MINUTES);
+        Instant end = Instant.now();// Instant.parse("2016-10-25T22:00:00Z");
+        Instant begin = end.minus(12*60, ChronoUnit.MINUTES);
         beginDateTime.setCalendar(Calendar.getInstance());
         beginDateTime.getCalendar().setTime(Date.from(begin));
         endDateTime.setCalendar(Calendar.getInstance());
@@ -72,7 +73,13 @@ public class MainViewController implements Initializable {
 
         editRefresh.setOnAction(a -> refreshChart());
 
-        chart.getYAxis().setAutoRanging(false);
+//        chart.getYAxis().setAutoRanging(false);
+//        ((ValueAxis<Number>) chart.getYAxis()).setLowerBound(134700000);
+//        ((ValueAxis<Number>) chart.getYAxis()).setUpperBound(135200000);
+
+        chart.getYAxis().setAutoRanging(true);
+        logger.debug(chart.getYAxis().getScaleY());
+
 
         this.refreshChart();
 
@@ -87,7 +94,9 @@ public class MainViewController implements Initializable {
 
     private void refreshChart() {
         try (Profiler p = Profiler.start("Refreshing chart view")) {
+
             chart.getData().clear();
+
             Map<String, XYChart.Series<Date, Number>> series = getRawData();
 //            chart.getData().addAll(
 ////                    series.get("InterruptTime"),
@@ -98,11 +107,11 @@ public class MainViewController implements Initializable {
             //  chart.getData().add(series.get("InterruptTime"));
             //  chart.getData().add(series.get("DPCTime"));
 
-            chart.getData().add(series.get("PrivilegedTime"));
-            chart.getData().add(series.get("ProcessorTime"));
+//            chart.getData().add(series.get("PrivilegedTime"));
+//            chart.getData().add(series.get("ProcessorTime"));
 
             chart.getData().add(series.get("FreeVirtualMemory"));
-            chart.getData().add(series.get("TotalVirtualMemory"));
+//            chart.getData().add(series.get("TotalVirtualMemory"));
 //            );
         } catch (IOException e) {
             logger.error(() -> "Error getting data", e);
@@ -121,10 +130,13 @@ public class MainViewController implements Initializable {
 
         JRDSDataProvider dp = new JRDSDataProvider(jrdsHost);
 
+
+
+
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             if (dp.getData(target, probe, begin, end, out)) {
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return TimeSeriesBuilder.fromCSV(in);
+                return TimeSeriesBuilder.fromCSV(in, chart, "FreeVirtualMemory");
             }
             else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));

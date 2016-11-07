@@ -34,7 +34,7 @@ public class JrdsSourceTester {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             if (dp.getData(target, probe, begin, end, out)) {
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-                Map<String,XYChart.Series<Date, Number>> series = TimeSeriesBuilder.fromCSV(in);
+          //      Map<String,XYChart.Series<Date, Number>> series = TimeSeriesBuilder.fromCSV(in);
 
             }
             else {
