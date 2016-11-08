@@ -1,25 +1,26 @@
 package eu.fthevenet.binjr.viewer;
 
-import eu.fthevenet.binjr.commons.charts.DateAxis;
+import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.converter.DoubleStringConverter;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import org.gillius.jfxutils.chart.XYChartInfo;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -27,13 +28,18 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.ResourceBundle;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
 
     @FXML
     public VBox root;
+    @FXML
+    public TextField RDPEpsilon;
 
     @FXML
     public AnchorPane chartParent;
@@ -48,9 +54,18 @@ public class MainViewController implements Initializable {
     private Menu editMenu;
     @FXML
     private MenuItem editRefresh;
+
+    @FXML
+    private CheckBox chkBoxEnableRDP;
+
+    @FXML
+    private CheckBox showChartSymbols;
+//
+
     XYChartInfo chartInfo;
     private boolean dragging;
     private boolean wasYAnimated;
+    private ObjectProperty<Double> rdpEpsilon = new SimpleObjectProperty<>(0.0002);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -60,18 +75,30 @@ public class MainViewController implements Initializable {
         assert endDateTime != null : "fx:id\"endDateTime\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert root != null : "fx:id\"root\" was not injected!";
+        assert RDPEpsilon != null : "fx:id\"RDPEpsilon\" was not injected!";
+        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
 
+
+        chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
+
+        final TextFormatter<Double> formatter = new TextFormatter<>(new DoubleStringConverter());
+        // rdpEpsilon.bindBidirectional(DoubleProperty.doubleProperty(formatter.valueProperty()));
+        formatter.valueProperty().bindBidirectional(rdpEpsilon);
+        formatter.valueProperty().addListener((observable, oldValue, newValue) -> refreshChart());
+        RDPEpsilon.setTextFormatter(formatter);
 
         Instant end = Instant.now();// Instant.parse("2016-10-25T22:00:00Z");
-        Instant begin = end.minus(12*60, ChronoUnit.MINUTES);
+        Instant begin = end.minus(12 * 60, ChronoUnit.MINUTES);
         beginDateTime.setCalendar(Calendar.getInstance());
         beginDateTime.getCalendar().setTime(Date.from(begin));
         endDateTime.setCalendar(Calendar.getInstance());
         endDateTime.getCalendar().setTime(Date.from(end));
-
-
-
         editRefresh.setOnAction(a -> refreshChart());
+
+
+        beginDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
+        endDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
+        chkBoxEnableRDP.selectedProperty().addListener((o,oldval, newVal) -> refreshChart());
 
 //        chart.getYAxis().setAutoRanging(false);
 //        ((ValueAxis<Number>) chart.getYAxis()).setLowerBound(134700000);
@@ -80,13 +107,7 @@ public class MainViewController implements Initializable {
         chart.getYAxis().setAutoRanging(true);
         logger.debug(chart.getYAxis().getScaleY());
 
-
         this.refreshChart();
-
-
-
-
-
         ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(chart, chartParent, Date::toString, Object::toString);
 
 
@@ -94,9 +115,7 @@ public class MainViewController implements Initializable {
 
     private void refreshChart() {
         try (Profiler p = Profiler.start("Refreshing chart view")) {
-
             chart.getData().clear();
-
             Map<String, XYChart.Series<Date, Number>> series = getRawData();
 //            chart.getData().addAll(
 ////                    series.get("InterruptTime"),
@@ -105,14 +124,12 @@ public class MainViewController implements Initializable {
 //                    series.get("UserTime"),
 //                    series.get("IdleTime"));
             //  chart.getData().add(series.get("InterruptTime"));
-            //  chart.getData().add(series.get("DPCTime"));
-
+          //  chart.getData().add(series.get("DPCTime"));
 //            chart.getData().add(series.get("PrivilegedTime"));
 //            chart.getData().add(series.get("ProcessorTime"));
-
-            chart.getData().add(series.get("FreeVirtualMemory"));
+//            chart.getData().add(series.get("FreeVirtualMemory"));
 //            chart.getData().add(series.get("TotalVirtualMemory"));
-//            );
+            chart.getData().addAll(series.values());
         } catch (IOException e) {
             logger.error(() -> "Error getting data", e);
             throw new RuntimeException(e);
@@ -131,12 +148,10 @@ public class MainViewController implements Initializable {
         JRDSDataProvider dp = new JRDSDataProvider(jrdsHost);
 
 
-
-
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             if (dp.getData(target, probe, begin, end, out)) {
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return TimeSeriesBuilder.fromCSV(in, chart, "FreeVirtualMemory");
+                return TimeSeriesBuilder.fromCSV(in, chart, rdpEpsilon.get(), chkBoxEnableRDP.selectedProperty().get(), "PrivilegedTime", "ProcessorTime");//,"FreeVirtualMemory","TotalVirtualMemory");
             }
             else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));

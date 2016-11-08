@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data;
 
+import javafx.geometry.Point2D;
 import javafx.util.Pair;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,11 +18,11 @@ public class RamerDouglasPeucker {
 
 private static final Logger logger = LogManager.getLogger(RamerDouglasPeucker.class);
 
-    public static List<Point> simplify(List<Point> points, double epsilon) {
+    public static List<Point2D> simplify(List<Point2D> points, double epsilon) {
         if (points.size() < 2) {
             return points;
         }
-        List<Point> resultList =  new ArrayList<>();
+        List<Point2D> resultList =  new ArrayList<>();
         double dmax = -1.0;
         int index = 0;
         int end = points.size() -1;
@@ -34,8 +35,8 @@ private static final Logger logger = LogManager.getLogger(RamerDouglasPeucker.cl
             }
         }
         if (dmax > epsilon) {
-            List<Point> res1 = simplify(points.subList(0,index), epsilon);
-            List<Point> res2 = simplify(points.subList(index, end+1), epsilon);
+            List<Point2D> res1 = simplify(points.subList(0,index), epsilon);
+            List<Point2D> res2 = simplify(points.subList(index, end+1), epsilon);
             resultList.addAll(res1);
             resultList.addAll(res2);
         }
@@ -52,13 +53,13 @@ private static final Logger logger = LogManager.getLogger(RamerDouglasPeucker.cl
 /// to a simplified version that loses detail,
 /// but maintains the general shape of the series.
 /// </summary>
-    private static BitSet getReductionMask(List<Point> points, double epsilon) {
+    private static BitSet getReductionMask(List<Point2D> points, double epsilon) {
         Stack<Pair<Integer, Integer>> stk = new Stack<>();
         int startIndex = 0;
         int lastIndex = points.size() - 1;
         stk.push(new Pair<>(startIndex, lastIndex));
         BitSet bitMask = new BitSet(lastIndex+1);
-        bitMask.set(0, lastIndex, true);
+        bitMask.set(0, lastIndex+1, true);
 
         while (stk.size() > 0) {
             startIndex = stk.peek().getKey();
@@ -81,22 +82,19 @@ private static final Logger logger = LogManager.getLogger(RamerDouglasPeucker.cl
             if (dmax > epsilon) {
                 stk.push(new Pair<>(startIndex, index));
                 stk.push(new Pair<>(index, lastIndex));
-               //
             }
             else{
                 bitMask.set((startIndex + 1), lastIndex, false);
             }
-
-            logger.info("dmax = " + dmax);
         }
 
         return bitMask;
     }
 
-    public static List<Point> reduce(List<Point> points, double epsilon, final double xScaling, final double yScaling) {
-        List<Point> scaledPoints = points.stream().map(p-> new Point(p.x * xScaling, p.y * yScaling)).collect(Collectors.toList());
+    public static List<Point2D> reduce(List<Point2D> points, double epsilon, final double xScaling, final double yScaling) {
+        List<Point2D> scaledPoints = points.stream().map(p-> new Point2D(p.getX() * xScaling, p.getY() * yScaling)).collect(Collectors.toList());
         BitSet bitMask = getReductionMask(scaledPoints, epsilon);
-        List<Point> resList = new ArrayList<>();
+        List<Point2D> resList = new ArrayList<>();
 
         for (int i = 0, n = points.size(); i < n; ++i) {
             if (bitMask.get(i)) {
@@ -107,38 +105,13 @@ private static final Logger logger = LogManager.getLogger(RamerDouglasPeucker.cl
     }
 
 
-    private static double perpendicularDistance(Point p, Point a, Point b) {
+
+    private static double perpendicularDistance(Point2D p, Point2D a, Point2D b) {
         if (a.equals(b)){
             return p.distance(a);
         }
-        double n = Math.abs((b.x - a.x) * (a.y - p.y) - (a.x - p.x) * (b.y - a.y));
-        double d = Math.sqrt((b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y));
+        double n = Math.abs((b.getX() - a.getX()) * (a.getY() - p.getY()) - (a.getX() - p.getX()) * (b.getY() - a.getY()));
+        double d = Math.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
         return n / d;
-    }
-
-    public static class Point {
-        final public double y;
-        final public double x;
-
-        public Point(double x, double y) {
-            this.y = y;
-            this.x = x;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (!(obj instanceof Point)) {
-                return false;
-            }
-            Point p = (Point) obj;
-            return x == p.x && y == p.y;
-        }
-
-        public double distance(Point p) {
-            double dx = x - p.x;
-            double dy = y - p.y;
-
-            return Math.sqrt(dx * dx + dy * dy);
-        }
     }
 }

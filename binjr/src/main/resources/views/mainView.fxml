@@ -5,6 +5,7 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
@@ -12,6 +13,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
@@ -66,7 +68,7 @@
                      <children>
                         <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
-                              <AreaChart animated="true" focusTraversable="true" fx:id="chart" createSymbols="true" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              <AreaChart fx:id="chart" animated="false" createSymbols="true" focusTraversable="true" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <xAxis>
                                   <DateAxis animated="false" side="BOTTOM" />
                                 </xAxis>
@@ -86,6 +88,9 @@
                         <CalendarTextField fx:id="beginDateTime" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="333.0" showTime="true" />
                         <CalendarTextField fx:id="endDateTime" layoutX="353.0" layoutY="14.0" prefHeight="25.0" prefWidth="310.0" showTime="true" />
                         <DatePicker layoutX="14.0" layoutY="46.0" />
+                        <TextField fx:id="RDPEpsilon" layoutX="124.0" layoutY="81.0" prefHeight="25.0" prefWidth="73.0" text="0.0002" />
+                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="85.0" mnemonicParsing="false" text="Enable RDP" />
+                        <CheckBox fx:id="showChartSymbols" layoutX="246.0" layoutY="85.0" mnemonicParsing="false" text="CheckBox" />
                      </children></AnchorPane>
               </items>
             </SplitPane>
