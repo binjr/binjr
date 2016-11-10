@@ -6,8 +6,6 @@ import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
@@ -16,6 +14,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import javafx.util.converter.DoubleStringConverter;
+import javafx.util.converter.IntegerStringConverter;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,10 +27,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
@@ -65,7 +61,7 @@ public class MainViewController implements Initializable {
     XYChartInfo chartInfo;
     private boolean dragging;
     private boolean wasYAnimated;
-    private ObjectProperty<Double> rdpEpsilon = new SimpleObjectProperty<>(0.0002);
+    private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -81,9 +77,9 @@ public class MainViewController implements Initializable {
 
         chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
 
-        final TextFormatter<Double> formatter = new TextFormatter<>(new DoubleStringConverter());
-        // rdpEpsilon.bindBidirectional(DoubleProperty.doubleProperty(formatter.valueProperty()));
-        formatter.valueProperty().bindBidirectional(rdpEpsilon);
+        final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());
+        // reductionTarget.bindBidirectional(DoubleProperty.doubleProperty(formatter.valueProperty()));
+        formatter.valueProperty().bindBidirectional(reductionTarget);
         formatter.valueProperty().addListener((observable, oldValue, newValue) -> refreshChart());
         RDPEpsilon.setTextFormatter(formatter);
 
@@ -98,7 +94,7 @@ public class MainViewController implements Initializable {
 
         beginDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
         endDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-        chkBoxEnableRDP.selectedProperty().addListener((o,oldval, newVal) -> refreshChart());
+        chkBoxEnableRDP.selectedProperty().addListener((o, oldval, newVal) -> refreshChart());
 
 //        chart.getYAxis().setAutoRanging(false);
 //        ((ValueAxis<Number>) chart.getYAxis()).setLowerBound(134700000);
@@ -124,7 +120,7 @@ public class MainViewController implements Initializable {
 //                    series.get("UserTime"),
 //                    series.get("IdleTime"));
             //  chart.getData().add(series.get("InterruptTime"));
-          //  chart.getData().add(series.get("DPCTime"));
+            //  chart.getData().add(series.get("DPCTime"));
 //            chart.getData().add(series.get("PrivilegedTime"));
 //            chart.getData().add(series.get("ProcessorTime"));
 //            chart.getData().add(series.get("FreeVirtualMemory"));
@@ -141,17 +137,31 @@ public class MainViewController implements Initializable {
         String jrdsHost = "ngwps006:31001";
         String target = "ngwps006.mshome.net";
         String probe = "memprocPdh";
-        String fileName = "e:\\temp\\test.csv";
         Instant end = endDateTime.getCalendar().getTime().toInstant();
         Instant begin = beginDateTime.getCalendar().getTime().toInstant();
 
         JRDSDataProvider dp = new JRDSDataProvider(jrdsHost);
 
+        String[] counters = new String[]{
+                "UserTime",
+                "AvailableBytes",
+                "IdleTime",
+                "DPCTime",
+                "PrivilegedTime",
+                "PagesOutputPerSec",
+                "LoadPercentage",
+                "PagesInputPerSec",
+                "ProcessorTime",
+                "TotalPhysicalMemory",
+                "FreeVirtualMemory",
+                "TotalVirtualMemory",
+                "InterruptTime"
+        };
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             if (dp.getData(target, probe, begin, end, out)) {
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return TimeSeriesBuilder.fromCSV(in, chart, rdpEpsilon.get(), chkBoxEnableRDP.selectedProperty().get(), "PrivilegedTime", "ProcessorTime");//,"FreeVirtualMemory","TotalVirtualMemory");
+                return TimeSeriesBuilder.fromCSV(in, reductionTarget.get(), chkBoxEnableRDP.selectedProperty().get(), counters);
             }
             else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));

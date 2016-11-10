@@ -23,11 +23,11 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TimeSeriesBuilder {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBuilder.class);
 
-    static public Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, XYChart<Date, Number> chart, double epsilon, boolean rdpReduce, String... seriesNames) throws IOException {
-        return fromCSV(in, ",", "utf-8", rdpReduce, chart, epsilon, seriesNames);
+    static public Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, int threshold, boolean useReduction, String... seriesNames) throws IOException {
+        return fromCSV(in, ",", "utf-8", useReduction, threshold, seriesNames);
     }
 
-    public static Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, String separator, String encoding, boolean RDPReduce, XYChart<Date, Number> chart, double epsilon, String... names) throws IOException {
+    public static Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, String separator, String encoding, boolean downSample, int threshold, String... names) throws IOException {
         try (Profiler profiler = Profiler.start("Building time series from csv data", logger::trace)) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
 
@@ -40,8 +40,6 @@ public class TimeSeriesBuilder {
                 Map<String, XYChart.Series<Date, Number>> series = new HashMap<>();
                 Map<String, List<Point2D>> rawPointSeries = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
-                double maxY = 0;
-                int nbSamples = 0;
                 for (String line = br.readLine(); line != null; line = br.readLine()) {
                     nbpoints.incrementAndGet();
                     String[] data = line.split(separator);
@@ -56,7 +54,6 @@ public class TimeSeriesBuilder {
                         if (isInNameList(names, currentName)) {
                             Double val = Double.parseDouble(data[i]);
                             val = val.isNaN() ? 0 : val;
-                            maxY = Math.max(maxY, val);
                             Point2D point = new Point2D(timeStamp, val);
                             List<Point2D> l = rawPointSeries.get(currentName);
                             if (l == null) {
@@ -66,23 +63,16 @@ public class TimeSeriesBuilder {
                             l.add(point);
                         }
                     }
-                    nbSamples++;
-                }
-                double xScale = 1.0;
-                if (maxY != 0) {
-                    xScale = chart.getPrefWidth() / maxY;
-                }
-                double yScale = 1.0;
-                if (nbSamples > 0) {
-                    yScale = chart.getPrefHeight() / nbSamples;
                 }
                 for (Map.Entry<String, List<Point2D>> entry : rawPointSeries.entrySet()) {
                     XYChart.Series<Date, Number> s = new XYChart.Series<>();
                     s.setName(entry.getKey());
                     List<Point2D> reduced =entry.getValue();
-                    if (RDPReduce) {
+                    if (downSample) {
                         try (Profiler p2 = Profiler.start("Reducing " +entry.getKey(), logger::trace)) {
-                            reduced = RamerDouglasPeucker.reduce(entry.getValue(), epsilon, xScale, yScale);
+                           // reduced = RamerDouglasPeucker.reduce(entry.getValue(), threshold);
+                            reduced = LargestTriangleThreeBuckets.reduce(entry.getValue(), threshold);
+
                         }
                         logger.debug(String.format("%s: %d -> %d", entry.getKey(), entry.getValue().size(), reduced.size()));
                     }
@@ -96,7 +86,7 @@ public class TimeSeriesBuilder {
                 }
 
                 logger.debug(() -> String.format("Built %d serie(s) with %d point(s)", nbSeries, nbpoints.get()));
-                logger.debug(() -> "RDP reduction used: " + Boolean.toString(RDPReduce));
+                logger.debug(() -> "RDP reduction used: " + Boolean.toString(downSample));
                 return series;
             }
         }

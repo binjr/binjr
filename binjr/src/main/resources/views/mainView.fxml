@@ -6,7 +6,6 @@
 <?import javafx.scene.chart.AreaChart?>
 <?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -87,10 +86,10 @@
                      <children>
                         <CalendarTextField fx:id="beginDateTime" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="333.0" showTime="true" />
                         <CalendarTextField fx:id="endDateTime" layoutX="353.0" layoutY="14.0" prefHeight="25.0" prefWidth="310.0" showTime="true" />
-                        <DatePicker layoutX="14.0" layoutY="46.0" />
-                        <TextField fx:id="RDPEpsilon" layoutX="124.0" layoutY="81.0" prefHeight="25.0" prefWidth="73.0" text="0.0002" />
-                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="85.0" mnemonicParsing="false" text="Enable RDP" />
-                        <CheckBox fx:id="showChartSymbols" layoutX="246.0" layoutY="85.0" mnemonicParsing="false" text="CheckBox" />
+                        <TextField fx:id="RDPEpsilon" layoutX="156.0" layoutY="46.0" prefHeight="25.0" prefWidth="50.0" text="2000" />
+                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="50.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
+                        <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="78.0" mnemonicParsing="false" text="Show data points" />
+                        <Label layoutX="215.0" layoutY="50.0" text="points per series." />
                      </children></AnchorPane>
               </items>
             </SplitPane>

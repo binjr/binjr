@@ -1,8 +1,5 @@
 package eu.fthevenet.binjr.commons.logging;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -14,7 +11,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Frederic Thevenet
  */
 public class Profiler implements AutoCloseable {
-	static private final Log logger = LogFactory.getLog(Profiler.class);
 	private final Elapsed elapsed;
 	private final OutputDelegate writeCallback;
 	private final AtomicBoolean closed = new AtomicBoolean(false);
@@ -74,7 +70,6 @@ public class Profiler implements AutoCloseable {
 		public void setMessage(String message) {
 			this.message = message;
 		}
-
 
 		/**
 		 * Gets the {@link Elapsed} time in ns.
@@ -169,6 +164,15 @@ public class Profiler implements AutoCloseable {
 
 	/**
 	 * Returns a new instance of the {@link Profiler} class.
+	 * @param writeCallback The callback that will be invoked to log the results of the totalTime.
+	 * @return The new instance of the Profiler class.
+	 */
+	public static Profiler start(OutputDelegate writeCallback){
+        return new Profiler(new Elapsed(""), writeCallback);
+    }
+
+	/**
+	 * Returns a new instance of the {@link Profiler} class.
 	 *
 	 * @param elapsed A Elapsed object that will be used to store the results of the totalTime.
 	 * @return The newly created Profiler instance.
@@ -188,13 +192,9 @@ public class Profiler implements AutoCloseable {
 		if (closed.compareAndSet(false, true)) {
 			long stopTime = System.nanoTime();
 			this.elapsed.nanoSec += stopTime - this.startTime;
-			if (logger.isDebugEnabled()) {
-				logger.debug(this.elapsed.toMilliString());
-			}
 			if (writeCallback != null) {
 				writeCallback.invoke(this.elapsed);
 			}
 		}
 	}
-
 }
