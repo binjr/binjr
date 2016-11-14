@@ -1,20 +1,26 @@
 package eu.fthevenet.binjr.viewer;
 
+import com.sun.javafx.binding.StringFormatter;
 import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.IntegerStringConverter;
+import javafx.util.converter.NumberStringConverter;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -28,6 +34,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Supplier;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
@@ -57,6 +64,14 @@ public class MainViewController implements Initializable {
     @FXML
     private CheckBox showChartSymbols;
 //
+    @FXML
+    private CheckBox yAutoRange;
+
+    @FXML
+    private TextField yMinRange;
+    @FXML
+    private TextField yMaxRange;
+
 
     XYChartInfo chartInfo;
     private boolean dragging;
@@ -73,7 +88,9 @@ public class MainViewController implements Initializable {
         assert root != null : "fx:id\"root\" was not injected!";
         assert RDPEpsilon != null : "fx:id\"RDPEpsilon\" was not injected!";
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
-
+        assert yAutoRange != null : "fx:id\"yAutoRange\" was not injected!";
+        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
+        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
 
         chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
 
@@ -100,13 +117,28 @@ public class MainViewController implements Initializable {
 //        ((ValueAxis<Number>) chart.getYAxis()).setLowerBound(134700000);
 //        ((ValueAxis<Number>) chart.getYAxis()).setUpperBound(135200000);
 
-        chart.getYAxis().setAutoRanging(true);
+
+
+        chart.getYAxis().autoRangingProperty().bindBidirectional(yAutoRange.selectedProperty());
+      //  ((ValueAxis<Number>) chart.getYAxis()).lowerBoundProperty().bindBidirectional();
+        ((ValueAxis<Number>) chart.getYAxis()).setUpperBound(135200000);
+        setAndBingTextFormatter(yMinRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).lowerBoundProperty(), (o, oldval, newVal) -> refreshChart());
+        setAndBingTextFormatter(yMaxRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).upperBoundProperty(), (o, oldval, newVal) -> refreshChart());
+
+
         logger.debug(chart.getYAxis().getScaleY());
 
         this.refreshChart();
-        ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(chart, chartParent, Date::toString, Object::toString);
+        ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(chart, chartParent, Date::toString, (n)-> String.format("%,.2f", n.doubleValue()));
 
 
+    }
+
+    private<T extends Number> void setAndBingTextFormatter(TextField textField, StringConverter<T> converter, Property<T> property, ChangeListener<? super T> listener){
+        final TextFormatter<T> formatter = new TextFormatter<T>(converter);
+        formatter.valueProperty().bindBidirectional(property);
+        formatter.valueProperty().addListener(listener);
+        textField.setTextFormatter(formatter);
     }
 
     private void refreshChart() {
@@ -134,9 +166,13 @@ public class MainViewController implements Initializable {
 
     private Map<String, XYChart.Series<Date, Number>> getRawData() throws IOException {
 
-        String jrdsHost = "ngwps006:31001";
-        String target = "ngwps006.mshome.net";
-        String probe = "memprocPdh";
+        //String jrdsHost = "ngwps006:31001";
+        //String target = "ngwps006.mshome.net";
+        //String probe = "memprocPdh";
+
+        String jrdsHost = "localhost:10001";
+        String target = "dos729.eng12.ocl";
+        String probe = "DiskIOPdh-null";
         Instant end = endDateTime.getCalendar().getTime().toInstant();
         Instant begin = beginDateTime.getCalendar().getTime().toInstant();
 
@@ -161,7 +197,7 @@ public class MainViewController implements Initializable {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             if (dp.getData(target, probe, begin, end, out)) {
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return TimeSeriesBuilder.fromCSV(in, reductionTarget.get(), chkBoxEnableRDP.selectedProperty().get(), counters);
+                return TimeSeriesBuilder.fromCSV(in, reductionTarget.get(), chkBoxEnableRDP.selectedProperty().get());//, counters);
             }
             else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));

@@ -23,6 +23,10 @@ import java.util.concurrent.atomic.AtomicLong;
 public class TimeSeriesBuilder {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBuilder.class);
 
+    static public Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, int threshold, boolean useReduction)throws IOException{
+        return fromCSV(in, ",", "utf-8", useReduction, threshold, new String[0]);
+    }
+
     static public Map<String, XYChart.Series<Date, Number>> fromCSV(InputStream in, int threshold, boolean useReduction, String... seriesNames) throws IOException {
         return fromCSV(in, ",", "utf-8", useReduction, threshold, seriesNames);
     }

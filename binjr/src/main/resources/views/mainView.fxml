@@ -49,7 +49,7 @@
         </Menu>
         <Menu mnemonicParsing="false" text="Help">
           <items>
-            <MenuItem mnemonicParsing="false" text="About PrettyPerfPlotter" />
+            <MenuItem mnemonicParsing="false" text="About binjr" />
           </items>
         </Menu>
       </menus>
@@ -58,10 +58,10 @@
       <items>
         <AnchorPane>
                <children>
-                  <TreeView fx:id="treeview" layoutX="14.0" layoutY="76.0" prefHeight="551.0" prefWidth="222.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <TreeView fx:id="treeview" fixedCellSize="24.0" layoutX="14.0" layoutY="76.0" prefHeight="551.0" prefWidth="222.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
         </AnchorPane>
-            <SplitPane dividerPositions="0.7840290381125227" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane dividerPositions="0.7078039927404719" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
               <items>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
@@ -86,10 +86,16 @@
                      <children>
                         <CalendarTextField fx:id="beginDateTime" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="333.0" showTime="true" />
                         <CalendarTextField fx:id="endDateTime" layoutX="353.0" layoutY="14.0" prefHeight="25.0" prefWidth="310.0" showTime="true" />
-                        <TextField fx:id="RDPEpsilon" layoutX="156.0" layoutY="46.0" prefHeight="25.0" prefWidth="50.0" text="2000" />
-                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="50.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
-                        <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="78.0" mnemonicParsing="false" text="Show data points" />
-                        <Label layoutX="215.0" layoutY="50.0" text="points per series." />
+                        <TextField fx:id="RDPEpsilon" layoutX="156.0" layoutY="76.0" prefHeight="25.0" prefWidth="50.0" text="2000" />
+                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="80.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
+                        <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="109.0" mnemonicParsing="false" text="Show data points" />
+                        <Label layoutX="213.0" layoutY="80.0" text="points per series." />
+                        <TextField fx:id="yMinRange" layoutX="222.0" layoutY="46.0" prefHeight="25.0" prefWidth="81.0" promptText="Range  lower bound" text="0" />
+                        <TextField fx:id="yMaxRange" layoutX="353.0" layoutY="46.0" prefHeight="25.0" prefWidth="81.0" promptText="Range upper bound" text="100" />
+                        <CheckBox fx:id="yAutoRange" layoutX="116.0" layoutY="50.0" mnemonicParsing="false" text="Auto" selected="true" />
+                        <Label layoutX="189.0" layoutY="50.0" text="Min:" />
+                        <Label layoutX="323.0" layoutY="50.0" text="Max:" />
+                        <Label layoutX="14.0" layoutY="50.0" text="Range:" />
                      </children></AnchorPane>
               </items>
             </SplitPane>
@@ -105,7 +111,7 @@
             <Color blue="0.625" green="0.625" red="0.625" fx:id="x4" />
           </textFill>
         </Label>
-        <Pane prefHeight="-1.0" prefWidth="-1.0" HBox.hgrow="ALWAYS" />
+        <Pane prefWidth="776.0" HBox.hgrow="ALWAYS" />
         <Label font="$x3" maxWidth="-1.0" text="Right status" textFill="$x4" HBox.hgrow="NEVER" />
       </children>
       <padding>

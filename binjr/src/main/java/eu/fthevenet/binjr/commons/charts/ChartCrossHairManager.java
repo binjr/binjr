@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
+import java.security.Key;
 import java.util.function.Function;
 
 
@@ -69,36 +70,56 @@ public class ChartCrossHairManager<X, Y> {
     }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
-        if (event.getCode() == KeyCode.CONTROL) {
-                horizontalLine.setVisible(pressed);
-                verticalLine.setVisible(pressed);
-                yAxisLabel.setVisible(pressed);
-                xAxisLabel.setVisible(pressed);
-                event.consume();
-            }
+       switch (event.getCode()){
+           case SHIFT:
+               horizontalLine.setVisible(pressed);
+               yAxisLabel.setVisible(pressed);
+               event.consume();
+               break;
+
+           case CONTROL:
+               verticalLine.setVisible(pressed);
+               xAxisLabel.setVisible(pressed);
+               event.consume();
+               break;
+
+           default:
+               //do nothing
+       }
+//        if (event.getCode() == KeyCode.CONTROL) {
+//                horizontalLine.setVisible(pressed);
+//                verticalLine.setVisible(pressed);
+//                yAxisLabel.setVisible(pressed);
+//                xAxisLabel.setVisible(pressed);
+//                event.consume();
+//            }
     }
 
     private void handleMouseMoved(MouseEvent event){
-        if (event.isShortcutDown() && chartInfo.isInPlotArea(event.getX(), event.getY())) {
-            double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
-            double axisYRelativeMousePosition = event.getY() - yStart * 1.5;
-            horizontalLine.setStartX(chartInfo.getPlotArea().getMinX() + 0.5);
-            horizontalLine.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
-            horizontalLine.setStartY(event.getY() + 0.5);
-            horizontalLine.setEndY(event.getY() + 0.5);
-            yAxisLabel.setLayoutX(Math.max(chart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
-            yAxisLabel.setLayoutY(Math.min(event.getY(), chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
-            yAxisLabel.setText(yValuesFormatter.apply(chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition)));
+        if (chartInfo.isInPlotArea(event.getX(), event.getY())) {
+            if (event.isShiftDown()) {
+                double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
+                double axisYRelativeMousePosition = event.getY() - yStart * 1.5;
+                horizontalLine.setStartX(chartInfo.getPlotArea().getMinX() + 0.5);
+                horizontalLine.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
+                horizontalLine.setStartY(event.getY() + 0.5);
+                horizontalLine.setEndY(event.getY() + 0.5);
+                yAxisLabel.setLayoutX(Math.max(chart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
+                yAxisLabel.setLayoutY(Math.min(event.getY(), chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
+                yAxisLabel.setText(yValuesFormatter.apply(chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition)));
+            }
 
-            double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
-            double axisXRelativeMousePosition = event.getX() - xStart;
-            verticalLine.setStartX(event.getX() + 0.5);
-            verticalLine.setEndX(event.getX() + 0.5);
-            verticalLine.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
-            verticalLine.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
-            xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
-            xAxisLabel.setLayoutX(Math.min(event.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
-            xAxisLabel.setText(xValuesFormatter.apply(chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition)));
+            if (event.isControlDown()) {
+                double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
+                double axisXRelativeMousePosition = event.getX() - xStart;
+                verticalLine.setStartX(event.getX() + 0.5);
+                verticalLine.setEndX(event.getX() + 0.5);
+                verticalLine.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
+                verticalLine.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
+                xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
+                xAxisLabel.setLayoutX(Math.min(event.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
+                xAxisLabel.setText(xValuesFormatter.apply(chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition)));
+            }
         }
     }
 
