@@ -2,6 +2,7 @@ package eu.fthevenet.binjr.commons.charts;
 
 import javafx.beans.value.ObservableValue;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
@@ -35,9 +36,11 @@ public class ChartCrossHairManager<X, Y> {
     final Function<X, String> xValuesFormatter;
     final Function<Y, String> yValuesFormatter;
     final XYChartInfo chartInfo;
+    private final Node root;
 
 
-    public ChartCrossHairManager(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
+    public ChartCrossHairManager(Node root, XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
+       this.root = root;
         this.chart = chart;
         this.verticalLine = newCrossHairLine();
         this.horizontalLine = newCrossHairLine();
@@ -50,8 +53,8 @@ public class ChartCrossHairManager<X, Y> {
         this.chartInfo = new XYChartInfo(this.chart);
 
         this.chart.addEventHandler( MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
-        this.chart.addEventHandler( KeyEvent.KEY_PRESSED, event -> handleControlKey(event, true));
-        this.chart.addEventHandler( KeyEvent.KEY_RELEASED,  event -> handleControlKey(event, false));
+        this.root.addEventHandler( KeyEvent.KEY_PRESSED, event -> handleControlKey(event, true));
+        this.root.addEventHandler( KeyEvent.KEY_RELEASED,  event -> handleControlKey(event, false));
 
         chart.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
             focusState(newValue);
@@ -132,7 +135,7 @@ public class ChartCrossHairManager<X, Y> {
         label.setTextFill(javafx.scene.paint.Color.DARKGRAY);
         label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
         label.setMouseTransparent(true);
-        label.setVisible(true);
+        label.setVisible(false);
         return label;
     }
 
@@ -141,7 +144,7 @@ public class ChartCrossHairManager<X, Y> {
         line.setMouseTransparent(true);
         line.setSmooth(false);
         line.setStrokeWidth(1.0);
-        line.setVisible(true);
+        line.setVisible(false);
         line.setStrokeType(StrokeType.CENTERED);
         line.setStroke(Color.DARKGREY);
         return line;
