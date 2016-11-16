@@ -4,23 +4,29 @@ import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.JRDSDataProvider;
 import eu.fthevenet.binjr.data.TimeSeriesBuilder;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.util.Callback;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -37,7 +43,6 @@ import java.net.URL;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
@@ -58,6 +63,9 @@ public class MainViewController implements Initializable {
     private AreaChart<Date, Number> chart;
     @FXML
     private Menu editMenu;
+
+    @FXML
+    private Menu helpMenu;
     @FXML
     private MenuItem editRefresh;
 
@@ -81,14 +89,35 @@ public class MainViewController implements Initializable {
     @FXML
     ListView<SelectableListItem> seriesList;
 
+    @FXML
+    private CheckBox enableChartAnimation;
+
+    @FXML protected void handleAboutAction(ActionEvent event) throws IOException {
+//
+//        Dialog<String> dialog = new Dialog<>();
+//        dialog.initStyle(StageStyle.TRANSPARENT);
+//        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml.copy")));
+//        dialog.showAndWait();
+
+        Stage dialog = new Stage();
+        dialog.initModality(Modality.APPLICATION_MODAL);
+        //dialog.initStyle(StageStyle.TRANSPARENT);
+        dialog.setScene(new Scene(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml.copy"))));
+        dialog.show();
+    }
+
+    @FXML protected void handleQuitAction(ActionEvent event){
+        Platform.exit();
+    }
+
 
     XYChartInfo chartInfo;
     private boolean dragging;
     private boolean wasYAnimated;
     private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
-    private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001");
+    private Property<String> currentHost = new SimpleStringProperty("http://nglps016:34001/");//"ngwps006:31001");
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
+    private Property<String> currentProbe = new SimpleStringProperty("memproc");
 
 
     private void buildTreeViewForTarget(String target) {
@@ -340,6 +369,8 @@ public class MainViewController implements Initializable {
         assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert treeview != null : "fx:id\"treeview\" was not injected!";
         assert seriesList != null : "fx:id\"seriesList\" was not injected!";
+        assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
+
 
         treeview.setRoot(new TreeItem<>("Hosts"));
         treeview.getSelectionModel().selectedItemProperty()
@@ -351,12 +382,14 @@ public class MainViewController implements Initializable {
                     }
                 });
 
+
         seriesList.setCellFactory(CheckBoxListCell.forListView(item -> item.selectedProperty()));
 
         buildTreeViewForTarget("memprocPdh");
 
         chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
 
+        chart.animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
 
 
         final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());

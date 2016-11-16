@@ -23,24 +23,24 @@
 <?import javafx.scene.text.Font?>
 <?import jfxtras.scene.control.CalendarTextField?>
 
-<VBox fx:id="root" prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.viewer.MainViewController">
+<VBox fx:id="root" prefHeight="629.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.viewer.MainViewController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
         <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
           <items>
-            <MenuItem mnemonicParsing="false" text="New" />
-            <MenuItem mnemonicParsing="false" text="Open…" />
-            <Menu mnemonicParsing="false" text="Open Recent" />
+            <!--<MenuItem mnemonicParsing="false" text="New" />-->
+            <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
+            <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
+            <!--<SeparatorMenuItem mnemonicParsing="false" />-->
+            <!--<MenuItem mnemonicParsing="false" text="Close" />-->
+            <!--<MenuItem mnemonicParsing="false" text="Save" />-->
+            <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
+            <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Close" />
-            <MenuItem mnemonicParsing="false" text="Save" />
-            <MenuItem mnemonicParsing="false" text="Save As…" />
-            <MenuItem mnemonicParsing="false" text="Revert" />
+            <MenuItem disable="true" mnemonicParsing="false" text="Preferences…" />
             <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Preferences…" />
-            <SeparatorMenuItem mnemonicParsing="false" />
-            <MenuItem mnemonicParsing="false" text="Quit" />
+            <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
           </items>
         </Menu>
         <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
@@ -48,9 +48,9 @@
             <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" text="Refresh" />
           </items>
         </Menu>
-        <Menu mnemonicParsing="false" text="Help">
+        <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
           <items>
-            <MenuItem mnemonicParsing="false" text="About binjr" />
+            <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr" />
           </items>
         </Menu>
       </menus>
@@ -110,12 +110,13 @@
                         <Label layoutX="189.0" layoutY="50.0" text="Min:" />
                         <Label layoutX="323.0" layoutY="50.0" text="Max:" />
                         <Label layoutX="14.0" layoutY="50.0" text="Range:" />
+                        <CheckBox fx:id="enableChartAnimation" layoutX="158.0" layoutY="109.0" mnemonicParsing="false" text="Animate chart" />
                      </children></AnchorPane>
               </items>
             </SplitPane>
       </items>
     </SplitPane>
-    <HBox id="HBox" alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+    <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
       <children>
         <Label maxHeight="1.7976931348623157E308" maxWidth="-1.0" text="Left status" HBox.hgrow="ALWAYS">
           <font>

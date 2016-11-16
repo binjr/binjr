@@ -17,6 +17,7 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception{
         logger.info(()-> "Starting binjr");
         Parent root = FXMLLoader.load(getClass().getResource("/views/mainView.fxml"));
+
         primaryStage.setTitle("binjr");
 
         try(Profiler p= Profiler.start("Set scene", logger::trace)) {
