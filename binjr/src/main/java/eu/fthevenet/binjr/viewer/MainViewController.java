@@ -115,9 +115,9 @@ public class MainViewController implements Initializable {
     private boolean dragging;
     private boolean wasYAnimated;
     private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
-    private Property<String> currentHost = new SimpleStringProperty("http://nglps016:34001/");//"ngwps006:31001");
-    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty("memproc");
+    private Property<String> currentHost = new SimpleStringProperty("nglps016:34001");//"ngwps006:31001");
+    private Property<String> currentTarget = new SimpleStringProperty("exalead2");// "ngwps006.mshome.net");
+    private Property<String> currentProbe = new SimpleStringProperty("meminfo");
 
 
     private void buildTreeViewForTarget(String target) {
