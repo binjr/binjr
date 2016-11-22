@@ -4,6 +4,14 @@
 #ifndef UNICODE
 #define UNICODE
 #endif 
+#ifdef _M_X64
+bool need64BitJRE = true;
+#define BITS_STR L"64-bit"
+#else
+bool need64BitJRE = false;
+#define BITS_STR L"32-bit"
+#endif
+
 
 using namespace std;
 
@@ -18,6 +26,13 @@ JVMInfo::JVMInfo() {
 bool JVMInfo::IsFound()
 {
 	return found;
+}
+
+bool JVMInfo::Is64Bit()
+{
+	wstring cfgPath(rootPath);
+	return IsValidPath(rootPath.append(L"\\lib\\amd64\\jvm.cfg"));
+	
 }
 
 wstring JVMInfo::RootPath()
@@ -38,12 +53,12 @@ bool JVMInfo::FindFromEnv(wstring path)
 	return false;
 }
 
-
 bool JVMInfo::IsValidPath(wstring path) {
 	return GetFileAttributesW(path.c_str()) != INVALID_FILE_ATTRIBUTES;
 }
 
-bool JVMInfo::FindValidJVM(const wchar_t* path)
+
+bool JVMInfo::ContainValidJVM(wstring path)
 {
 	wstring _rootPath(path);
 	if (_rootPath[_rootPath.size() - 1] != L'\\')
@@ -62,29 +77,34 @@ bool JVMInfo::FindValidJVM(const wchar_t* path)
 		if (IsValidPath(_dllPath.append(*it))) {
 			this->rootPath = _rootPath;
 			this->dllPath = _dllPath;
-			return true;
+
+			if (this->Is64Bit() == need64BitJRE) {
+				return true;
+			}
+			else 
+			{
+				L_(lerror) << L"The JVM found at " << rootPath << " is " << (Is64Bit() ? L"64 bits" : L"32 bits") << L" but the host process is " << BITS_STR ;
+			}		
 		}
 	}
-
 	return false;
 }
 
 
-bool JVMInfo::LocateFromEnv(wstring envVarName, bool& result)
+bool JVMInfo::LocateFromEnv(wstring envVarName)
 {
 	wchar_t envVarValue[_MAX_PATH];
 	if (GetEnvironmentVariableW(envVarName.c_str(), envVarValue, _MAX_PATH - 1))
 	{
-		if (FindValidJVM(envVarValue))
+		if (ContainValidJVM(envVarValue))
 		{
-			result = true;
+			L_(linfo) << L"JVM located via environment variable.";
+			return true;
 		}
 		else
 		{
-			L_(lerror) << L"Failed to find a suitable installation of the JVM from the environment variable " << envVarName << L"=" << envVarValue;			
-			result = false;
+			L_(lerror) << L"Failed to find a suitable installation of the JVM from the environment variable " << envVarName << L"=" << envVarValue;
 		}
-		return true;
 	}
 	else
 	{
@@ -95,10 +115,9 @@ bool JVMInfo::LocateFromEnv(wstring envVarName, bool& result)
 
 bool JVMInfo::LocateJVM()
 {
-	bool result;
-	if (LocateFromEnv(L"JAVA_HOME", result))
+	if (LocateFromEnv(L"JAVA_HOME"))
 	{
-		return result;
+		return true;
 	}
 
 	//if (FindJVMInSettings()) return true;

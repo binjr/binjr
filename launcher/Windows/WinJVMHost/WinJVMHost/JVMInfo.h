@@ -14,13 +14,15 @@ public:
 
 	bool IsFound();
 
+	bool Is64Bit();
+
 	wstring RootPath();
 
 	wstring DllPath();
 
 
 private:
-	bool found;
+	bool found, is64Bit;
 
 	wstring rootPath, dllPath;
 
@@ -28,9 +30,9 @@ private:
 
 	bool IsValidPath(wstring path);
 
-	bool FindValidJVM(const wchar_t * path);
+	bool ContainValidJVM(wstring path);
 
-	bool LocateFromEnv(wstring envVarName, bool & result);
+	bool LocateFromEnv(wstring envVarName);
 
 	bool LocateJVM();
 
