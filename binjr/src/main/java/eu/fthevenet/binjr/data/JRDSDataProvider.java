@@ -37,7 +37,7 @@ public class JRDSDataProvider implements DataProvider {
                 URI requestUrl = new URIBuilder()
                         .setScheme("http")
                         .setHost(jrdsHost)
-                        .setPath("/perf-ui/download/probe/" + targetHost + "/" + probe)
+                        .setPath("/download/probe/" + targetHost + "/" + probe)
                         .addParameter("begin", Long.toString(begin.toEpochMilli()))
                         .addParameter("end", Long.toString(end.toEpochMilli())).build();
                 logger.debug(() -> "requestUrl = " + requestUrl);

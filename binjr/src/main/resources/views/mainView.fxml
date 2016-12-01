@@ -13,6 +13,8 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -23,7 +25,7 @@
 <?import javafx.scene.text.Font?>
 <?import jfxtras.scene.control.CalendarTextField?>
 
-<VBox fx:id="root" prefHeight="629.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.viewer.MainViewController">
+<VBox fx:id="root" prefHeight="629.0" prefWidth="923.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.viewer.MainViewController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
@@ -68,52 +70,94 @@
                         </AnchorPane>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
-                              <ListView fx:id="seriesList" layoutX="10.0" layoutY="-44.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                              <CheckBox fx:id="chkBoxEnableRDP" layoutX="12.0" layoutY="19.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
+                              <CheckBox fx:id="showChartSymbols" layoutX="12.0" layoutY="50.0" mnemonicParsing="false" text="Show data points" />
+                              <TextField fx:id="RDPEpsilon" layoutX="166.0" layoutY="16.0" prefHeight="25.0" prefWidth="50.0" text="1000" />
+                              <CheckBox fx:id="enableChartAnimation" layoutX="12.0" layoutY="76.0" mnemonicParsing="false" text="Animate chart" />
                            </children>
                         </AnchorPane>
                     </items>
                   </SplitPane>
                </children>
         </AnchorPane>
-            <SplitPane dividerPositions="0.7078039927404719" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
-              <items>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                     <children>
-                        <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+              <tabs>
+                <Tab text="Untitled Tab 1">
+                  <content>
+                    <AnchorPane>
                            <children>
-                              <AreaChart fx:id="chart" animated="false" createSymbols="true" focusTraversable="true" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <xAxis>
-                                  <DateAxis animated="false" side="BOTTOM" />
-                                </xAxis>
-                                <yAxis>
-                                  <NumberAxis animated="false" side="LEFT" />
-                                </yAxis>
-                              </AreaChart>
+                              <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
+                                       <children>
+                                          <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                             <children>
+                                                <CalendarTextField fx:id="beginDateTime" prefHeight="46.0" prefWidth="330.0" showTime="true" />
+                                                <CalendarTextField fx:id="endDateTime" prefHeight="27.0" prefWidth="310.0" showTime="true" />
+                                             </children>
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </VBox.margin>
+                                          </HBox>
+                                          <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="10.0" VBox.vgrow="NEVER">
+                                             <children>
+                                                <Label text="Range:" />
+                                                <CheckBox fx:id="yAutoRange" mnemonicParsing="false" selected="true" text="Auto" />
+                                                <Label text="Min:" />
+                                                <TextField fx:id="yMinRange" prefHeight="25.0" prefWidth="81.0" promptText="Range  lower bound" text="0" />
+                                                <Label text="Max:" />
+                                                <TextField fx:id="yMaxRange" prefHeight="25.0" prefWidth="81.0" promptText="Range upper bound" text="100" />
+                                             </children>
+                                             <VBox.margin>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                             </VBox.margin>
+                                          </HBox>
+                                       </children>
+                                    </VBox>
+                                    <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+                                      <items>
+                                        <AnchorPane minHeight="0.0" minWidth="0.0">
+                                             <children>
+                                                <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                   <children>
+                                                      <AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                                        <xAxis>
+                                                          <DateAxis animated="false" side="BOTTOM" />
+                                                        </xAxis>
+                                                        <yAxis>
+                                                          <NumberAxis animated="false" side="LEFT" />
+                                                        </yAxis>
+                                                      </AreaChart>
+                                                   </children>
+                                                </AnchorPane>
+                                             </children>
+                                             <cursor>
+                                                <Cursor fx:constant="DEFAULT" />
+                                             </cursor>
+                                          </AnchorPane>
+                                        <AnchorPane>
+                                             <children>
+                                                <ListView fx:id="seriesList" layoutX="391.0" layoutY="-32.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                             </children>
+                                          </AnchorPane>
+                                      </items>
+                                       <VBox.margin>
+                                          <Insets />
+                                       </VBox.margin>
+                                    </SplitPane>
+                                 </children>
+                              </VBox>
                            </children>
                         </AnchorPane>
-                     </children>
-                     <cursor>
-                        <Cursor fx:constant="DEFAULT" />
-                     </cursor>
-                  </AnchorPane>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="89.0" prefWidth="670.0">
-                     <children>
-                        <CalendarTextField fx:id="beginDateTime" layoutX="14.0" layoutY="14.0" prefHeight="25.0" prefWidth="333.0" showTime="true" />
-                        <CalendarTextField fx:id="endDateTime" layoutX="353.0" layoutY="14.0" prefHeight="25.0" prefWidth="310.0" showTime="true" />
-                        <TextField fx:id="RDPEpsilon" layoutX="156.0" layoutY="76.0" prefHeight="25.0" prefWidth="50.0" text="2000" />
-                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="14.0" layoutY="80.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
-                        <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="109.0" mnemonicParsing="false" text="Show data points" />
-                        <Label layoutX="213.0" layoutY="80.0" text="points per series." />
-                        <TextField fx:id="yMinRange" layoutX="222.0" layoutY="46.0" prefHeight="25.0" prefWidth="81.0" promptText="Range  lower bound" text="0" />
-                        <TextField fx:id="yMaxRange" layoutX="353.0" layoutY="46.0" prefHeight="25.0" prefWidth="81.0" promptText="Range upper bound" text="100" />
-                        <CheckBox fx:id="yAutoRange" layoutX="116.0" layoutY="50.0" mnemonicParsing="false" selected="true" text="Auto" />
-                        <Label layoutX="189.0" layoutY="50.0" text="Min:" />
-                        <Label layoutX="323.0" layoutY="50.0" text="Max:" />
-                        <Label layoutX="14.0" layoutY="50.0" text="Range:" />
-                        <CheckBox fx:id="enableChartAnimation" layoutX="158.0" layoutY="109.0" mnemonicParsing="false" text="Animate chart" />
-                     </children></AnchorPane>
-              </items>
-            </SplitPane>
+                  </content>
+                </Tab>
+                <Tab text="Untitled Tab 2">
+                  <content>
+                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                  </content>
+                </Tab>
+              </tabs>
+            </TabPane>
       </items>
     </SplitPane>
     <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
