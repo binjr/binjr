@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data;
+package eu.fthevenet.binjr.data.providers;
 
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import org.apache.http.HttpEntity;

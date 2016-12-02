@@ -1,8 +1,6 @@
 package jrds;
 
-import eu.fthevenet.binjr.data.JRDSDataProvider;
-import eu.fthevenet.binjr.data.TimeSeriesBuilder;
-import javafx.scene.chart.XYChart;
+import eu.fthevenet.binjr.data.providers.JRDSDataProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,8 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.Map;
 
 
 /**

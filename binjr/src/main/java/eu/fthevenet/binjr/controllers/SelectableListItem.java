@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.viewer;
+package eu.fthevenet.binjr.controllers;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

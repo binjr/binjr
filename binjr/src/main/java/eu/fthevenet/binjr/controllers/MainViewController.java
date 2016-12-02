@@ -1,102 +1,66 @@
-package eu.fthevenet.binjr.viewer;
+package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
-import eu.fthevenet.binjr.commons.logging.Profiler;
-import eu.fthevenet.binjr.data.JRDSDataProvider;
-import eu.fthevenet.binjr.data.TimeSeriesBuilder;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxListCell;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.util.StringConverter;
-import javafx.util.converter.IntegerStringConverter;
-import javafx.util.converter.NumberStringConverter;
-import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-
     @FXML
     public VBox root;
     @FXML
     public TextField RDPEpsilon;
-
-    @FXML
-    public AnchorPane chartParent;
-
-    @FXML
-    public CalendarTextField beginDateTime;
-    @FXML
-    public CalendarTextField endDateTime;
-    @FXML
-    private AreaChart<Date, Number> chart;
     @FXML
     private Menu editMenu;
-
     @FXML
     private Menu helpMenu;
     @FXML
     private MenuItem editRefresh;
-
-    @FXML
-    private CheckBox chkBoxEnableRDP;
-
     @FXML
     private CheckBox showChartSymbols;
-    //
-    @FXML
-    private CheckBox yAutoRange;
-
-    @FXML
-    private TextField yMinRange;
-    @FXML
-    private TextField yMaxRange;
-
     @FXML
     TreeView<String> treeview;
-
     @FXML
-    ListView<SelectableListItem> seriesList;
-
+    private CheckBox chkBoxEnableRDP;
     @FXML
     private CheckBox enableChartAnimation;
 
-    @FXML protected void handleAboutAction(ActionEvent event) throws IOException {
+    @FXML private TabPane seriesTabPane;
+    @FXML
+    private MenuItem newTab;
+
+//    @FXML private AnchorPane  seriesTab1;
+//    @FXML private TimeSeriesController seriesTab1Controller;
+
+
+    @FXML
+    protected void handleAboutAction(ActionEvent event) throws IOException {
 //
 //        Dialog<String> dialog = new Dialog<>();
 //        dialog.initStyle(StageStyle.TRANSPARENT);
-//        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml.copy")));
+//        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/controllers/AboutBoxView.fxml.copy")));
 //        dialog.showAndWait();
 
         Stage dialog = new Stage();
@@ -106,19 +70,23 @@ public class MainViewController implements Initializable {
         dialog.show();
     }
 
-    @FXML protected void handleQuitAction(ActionEvent event){
+    @FXML
+    protected void handleQuitAction(ActionEvent event) {
         Platform.exit();
     }
 
+    private AtomicInteger nbSeries = new AtomicInteger(0);
+
+    @FXML
+    protected void handleNewTabAction(ActionEvent actionEvent) {
+        seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() +")"));
+    }
 
     XYChartInfo chartInfo;
     private boolean dragging;
     private boolean wasYAnimated;
     private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
-    private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
-    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
-
+    private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
     private void buildTreeViewForTarget(String target) {
         TreeItem<String> root = treeview.getRoot();
@@ -351,124 +319,94 @@ public class MainViewController implements Initializable {
         );
     }
 
-
+    private FXMLLoader fXMLLoader = new FXMLLoader();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
-        assert chart != null : "fx:id\"chart\" was not injected!";
         assert editMenu != null : "fx:id\"editMenu\" was not injected!";
-        assert beginDateTime != null : "fx:id\"beginDateTime\" was not injected!";
-        assert endDateTime != null : "fx:id\"endDateTime\" was not injected!";
-        assert chartParent != null : "fx:id\"chartParent\" was not injected!";
+
         assert root != null : "fx:id\"root\" was not injected!";
         assert RDPEpsilon != null : "fx:id\"RDPEpsilon\" was not injected!";
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
-        assert yAutoRange != null : "fx:id\"yAutoRange\" was not injected!";
-        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
-        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert treeview != null : "fx:id\"treeview\" was not injected!";
-        assert seriesList != null : "fx:id\"seriesList\" was not injected!";
         assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
+        assert  seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
+       // assert  seriesTab1Controller != null : "fx:id\"seriesTab1Controller\" was not injected!";
+
+
+
+
+       // this.seriesTab1Controller.setSceneRoot(root);
+        seriesTabPane.getSelectionModel().clearSelection();
+
+// Add Tab ChangeListener
+        seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+            @Override
+            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+                System.out.println("Tab selected: " + newValue.getText());
+                if (newValue.getContent() == null) {
+                    try {
+                        // Loading content on demand
+
+                       // Parent r = (Parent) fXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml").openStream());
+                        Parent p = FXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml"));
+                        newValue.setContent(p);
+
+                        // OPTIONAL : Store the controller if needed
+                        seriesControllers.put(newValue.getText(), fXMLLoader.getController());
+
+                    } catch (IOException ex) {
+                       logger.error("Error loading time series", ex);
+                    }
+                } else {
+                    // Content is already loaded. Update it if necessary.
+                    Parent root = (Parent) newValue.getContent();
+                    // Optionally get the controller from Map and manipulate the content
+                    // via its controller.
+                }
+            }
+        });
+// By default, select 1st tab and load its content.
+        seriesTabPane.getSelectionModel().selectFirst();
 
 
         treeview.setRoot(new TreeItem<>("Hosts"));
-        treeview.getSelectionModel().selectedItemProperty()
-                .addListener((observable, old_val, selected) -> {
-                    logger.debug(() -> "Selected Text : " + selected.getValue());
-                    if (selected.isLeaf()) {
-                        currentProbe.setValue(selected.getValue());
-                        refreshChart();
-                    }
-                });
+//        treeview.getSelectionModel().selectedItemProperty()
+//                .addListener((observable, old_val, selected) -> {
+//                    logger.debug(() -> "Selected Text : " + selected.getValue());
+//                    if (selected.isLeaf()) {
+//                        currentProbe.setValue(selected.getValue());
+//                        refreshChart();
+//                    }
+//                });
 
 
-        seriesList.setCellFactory(CheckBoxListCell.forListView(item -> item.selectedProperty()));
+        seriesTabPane.getTabs().add(new Tab("memprocPdh"));
 
         buildTreeViewForTarget("memprocPdh");
 
-        chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
-
-        chart.animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
-
-
-        final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());
-
-        formatter.valueProperty().bindBidirectional(reductionTarget);
-        formatter.valueProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-        RDPEpsilon.setTextFormatter(formatter);
-
-        Instant end = Instant.now();// Instant.parse("2016-10-25T22:00:00Z");
-        Instant begin = end.minus(12 * 60, ChronoUnit.MINUTES);
-        beginDateTime.setCalendar(Calendar.getInstance());
-        beginDateTime.getCalendar().setTime(Date.from(begin));
-        endDateTime.setCalendar(Calendar.getInstance());
-        endDateTime.getCalendar().setTime(Date.from(end));
-        editRefresh.setOnAction(a -> refreshChart());
+//        chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
+//
+//        chart.animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
 
 
-        beginDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-        endDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-        chkBoxEnableRDP.selectedProperty().addListener((o, oldval, newVal) -> refreshChart());
+//        final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());
+//
+//        formatter.valueProperty().bindBidirectional(reductionTarget);
+//        formatter.valueProperty().addListener((observable, oldValue, newValue) -> refreshChart());
 
-        chart.getYAxis().autoRangingProperty().bindBidirectional(yAutoRange.selectedProperty());
-        setAndBingTextFormatter(yMinRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).lowerBoundProperty(), (o, oldval, newVal) -> refreshChart());
-        setAndBingTextFormatter(yMaxRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).upperBoundProperty(), (o, oldval, newVal) -> refreshChart());
 
-        this.refreshChart();
-        ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(root, chart, chartParent, Date::toString, (n) -> String.format("%,.2f", n.doubleValue()));
+//        RDPEpsilon.setTextFormatter(formatter);
+
+
+        //   editRefresh.setOnAction(a -> refreshChart());
+
+
+        // chkBoxEnableRDP.selectedProperty().addListener((o, oldval, newVal) -> refreshChart());
 
 
     }
 
-    private <T extends Number> void setAndBingTextFormatter(TextField textField, StringConverter<T> converter, Property<T> property, ChangeListener<? super T> listener) {
-        final TextFormatter<T> formatter = new TextFormatter<T>(converter);
-        formatter.valueProperty().bindBidirectional(property);
-        formatter.valueProperty().addListener(listener);
-        textField.setTextFormatter(formatter);
-    }
 
-    Map<String, Boolean> selectedSeriesCache = new HashMap<>();
 
-    private void refreshChart() {
-        try (Profiler p = Profiler.start("Refreshing chart view")) {
-            chart.getData().clear();
-            Map<String, XYChart.Series<Date, Number>> series = getRawData(
-                    currentHost.getValue(),
-                    currentTarget.getValue(),
-                    currentProbe.getValue(),
-                    beginDateTime.getCalendar().getTime().toInstant(),
-                    endDateTime.getCalendar().getTime().toInstant());
-            chart.getData().addAll(series.values());
-            seriesList.getItems().clear();
-            for (XYChart.Series s : chart.getData()) {
-                SelectableListItem i = new SelectableListItem(s.getName(),true );
-
-                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-                    logger.trace(i.getName() + " changed on state from " + wasOn + " to " + isNowOn);
-                    selectedSeriesCache.put(s.getName(), isNowOn);
-                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
-                });
-                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
-                seriesList.getItems().add(i);
-            }
-        } catch (IOException e) {
-            logger.error(() -> "Error getting data", e);
-            throw new RuntimeException(e);
-        }
-    }
-
-    private Map<String, XYChart.Series<Date, Number>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException {
-        JRDSDataProvider dp = new JRDSDataProvider(jrdsHost);
-
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            if (dp.getData(target, probe, begin, end, out)) {
-                InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return TimeSeriesBuilder.fromCSV(in, reductionTarget.get(), chkBoxEnableRDP.selectedProperty().get());//, counters);
-            }
-            else {
-                throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));
-            }
-        }
-    }
 }

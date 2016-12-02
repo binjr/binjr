@@ -1,13 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import eu.fthevenet.binjr.commons.charts.DateAxis?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.chart.AreaChart?>
-<?import javafx.scene.chart.NumberAxis?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -23,15 +18,14 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
-<?import jfxtras.scene.control.CalendarTextField?>
 
-<VBox fx:id="root" prefHeight="629.0" prefWidth="923.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.viewer.MainViewController">
+<VBox fx:id="root" prefHeight="629.0" prefWidth="923.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
   <children>
     <MenuBar VBox.vgrow="NEVER">
       <menus>
         <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
           <items>
-            <!--<MenuItem mnemonicParsing="false" text="New" />-->
+            <MenuItem mnemonicParsing="false" text="New" onAction="#handleNewTabAction"/>
             <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
             <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
             <!--<SeparatorMenuItem mnemonicParsing="false" />-->
@@ -80,82 +74,18 @@
                   </SplitPane>
                </children>
         </AnchorPane>
-            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" fx:id="seriesTabPane">
               <tabs>
-                <Tab text="Untitled Tab 1">
-                  <content>
-                    <AnchorPane>
-                           <children>
-                              <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <children>
-                                    <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
-                                       <children>
-                                          <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                                             <children>
-                                                <CalendarTextField fx:id="beginDateTime" prefHeight="46.0" prefWidth="330.0" showTime="true" />
-                                                <CalendarTextField fx:id="endDateTime" prefHeight="27.0" prefWidth="310.0" showTime="true" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                          <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="10.0" VBox.vgrow="NEVER">
-                                             <children>
-                                                <Label text="Range:" />
-                                                <CheckBox fx:id="yAutoRange" mnemonicParsing="false" selected="true" text="Auto" />
-                                                <Label text="Min:" />
-                                                <TextField fx:id="yMinRange" prefHeight="25.0" prefWidth="81.0" promptText="Range  lower bound" text="0" />
-                                                <Label text="Max:" />
-                                                <TextField fx:id="yMaxRange" prefHeight="25.0" prefWidth="81.0" promptText="Range upper bound" text="100" />
-                                             </children>
-                                             <VBox.margin>
-                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-                                             </VBox.margin>
-                                          </HBox>
-                                       </children>
-                                    </VBox>
-                                    <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
-                                      <items>
-                                        <AnchorPane minHeight="0.0" minWidth="0.0">
-                                             <children>
-                                                <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                   <children>
-                                                      <AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                                        <xAxis>
-                                                          <DateAxis animated="false" side="BOTTOM" />
-                                                        </xAxis>
-                                                        <yAxis>
-                                                          <NumberAxis animated="false" side="LEFT" />
-                                                        </yAxis>
-                                                      </AreaChart>
-                                                   </children>
-                                                </AnchorPane>
-                                             </children>
-                                             <cursor>
-                                                <Cursor fx:constant="DEFAULT" />
-                                             </cursor>
-                                          </AnchorPane>
-                                        <AnchorPane>
-                                             <children>
-                                                <ListView fx:id="seriesList" layoutX="391.0" layoutY="-32.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                             </children>
-                                          </AnchorPane>
-                                      </items>
-                                       <VBox.margin>
-                                          <Insets />
-                                       </VBox.margin>
-                                    </SplitPane>
-                                 </children>
-                              </VBox>
-                           </children>
-                        </AnchorPane>
-                  </content>
-                </Tab>
-                <Tab text="Untitled Tab 2">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
+                <!--<Tab text="Untitled Tab 1">-->
+                     <!--<content>-->
+                        <!--<fx:include  source="TimeSeriesView.fxml" fx:id="seriesTab1" />-->
+                     <!--</content>-->
+                <!--</Tab>-->
+                <!--<Tab text="Untitled Tab 2">-->
+                  <!--<content>-->
+                    <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />-->
+                  <!--</content>-->
+                <!--</Tab>-->
               </tabs>
             </TabPane>
       </items>

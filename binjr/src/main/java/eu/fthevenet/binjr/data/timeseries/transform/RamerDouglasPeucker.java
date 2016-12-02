@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data;
+package eu.fthevenet.binjr.data.timeseries.transform;
 
 import javafx.geometry.Point2D;
 import javafx.util.Pair;
@@ -93,20 +93,6 @@ public class RamerDouglasPeucker {
             epsilon *=1.1;
             logger.trace("After reduction:"+ resList.size());
         }
-     //            BitSet bitMask = getReductionMask(scaledPoints, epsilon);
-//
-//            List<Point2D> resList = new ArrayList<>();
-//
-//            for (int i = 0, n = points.size(); i < n; ++i) {
-//                if (bitMask.get(i)) {
-//                    resList.add(points.get(i));
-//                }
-//            }
-//            nbPointAfterRDP.set(resList.size());
-//
-//            if (resList.size() > 2000 && runs < maxReductionIteration) {
-//                resList = reduce(resList, ++runs);
-//            }
         return resList;
     }
 
@@ -115,16 +101,9 @@ public class RamerDouglasPeucker {
         if (a.equals(b)) {
             return p.distance(a);
         }
-
         double n = Math.abs((b.getX() - a.getX()) * (a.getY() - p.getY()) - (a.getX() - p.getX()) * (b.getY() - a.getY()));
         double d = Math.sqrt((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
         return n / d;
-//
-//        double r = ((p.getX() - a.getX()) * (b.getX() - a.getX()) + (p.getY() - a.getY()) * (b.getY() - a.getY())) / ((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
-//        if (r <= 0.0) return p.distance(a);
-//        if (r >= 1.0) return p.distance(b);
-//        double s = ((a.getY() - p.getY()) * (b.getX() - a.getX()) - (a.getX() - p.getX()) * (b.getY() - a.getY())) / ((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY()));
-//        return Math.abs(s) * Math.sqrt(((b.getX() - a.getX()) * (b.getX() - a.getX()) + (b.getY() - a.getY()) * (b.getY() - a.getY())));
     }
 
 

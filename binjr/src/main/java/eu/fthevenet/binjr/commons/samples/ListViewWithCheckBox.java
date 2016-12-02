@@ -1,5 +1,5 @@
 package eu.fthevenet.binjr.commons.samples;
-import eu.fthevenet.binjr.viewer.SelectableListItem;
+import eu.fthevenet.binjr.controllers.SelectableListItem;
 import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;

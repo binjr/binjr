@@ -39,14 +39,15 @@ public class ChartCrossHairManager<X, Y> {
     private final Node root;
 
 
-    public ChartCrossHairManager(Node root, XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
-       this.root = root;
+    public ChartCrossHairManager(Node sceneRoot, XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
+
         this.chart = chart;
         this.verticalLine = newCrossHairLine();
         this.horizontalLine = newCrossHairLine();
         this.xAxisLabel = newAxisLabel();
         this.yAxisLabel = newAxisLabel();
         this.parent = parent;
+        this.root = sceneRoot;
         this.parent.getChildren().addAll(xAxisLabel, yAxisLabel, verticalLine, horizontalLine);
         this.xValuesFormatter = xValuesFormatter;
         this.yValuesFormatter = yValuesFormatter;

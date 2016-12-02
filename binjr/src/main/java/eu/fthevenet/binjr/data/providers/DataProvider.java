@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data;
+package eu.fthevenet.binjr.data.providers;
 
 import java.io.OutputStream;
 import java.time.Instant;
