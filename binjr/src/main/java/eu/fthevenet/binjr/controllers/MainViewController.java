@@ -2,6 +2,7 @@ package eu.fthevenet.binjr.controllers;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,12 +13,13 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.gillius.jfxutils.chart.XYChartInfo;
 
 import java.io.IOException;
 import java.net.URL;
@@ -25,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
@@ -46,28 +49,28 @@ public class MainViewController implements Initializable {
     private CheckBox chkBoxEnableRDP;
     @FXML
     private CheckBox enableChartAnimation;
-
-    @FXML private TabPane seriesTabPane;
+    @FXML
+    private TabPane seriesTabPane;
     @FXML
     private MenuItem newTab;
 
-//    @FXML private AnchorPane  seriesTab1;
-//    @FXML private TimeSeriesController seriesTab1Controller;
+    private SimpleBooleanProperty showVerticalGuide = new SimpleBooleanProperty();
+    private SimpleBooleanProperty showHorizontalGuide = new SimpleBooleanProperty();
 
 
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
-//
-//        Dialog<String> dialog = new Dialog<>();
-//        dialog.initStyle(StageStyle.TRANSPARENT);
-//        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/controllers/AboutBoxView.fxml.copy")));
-//        dialog.showAndWait();
 
-        Stage dialog = new Stage();
-        dialog.initModality(Modality.APPLICATION_MODAL);
-        //dialog.initStyle(StageStyle.TRANSPARENT);
-        dialog.setScene(new Scene(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml.copy"))));
-        dialog.show();
+        Dialog<String> dialog = new Dialog<>();
+        dialog.initStyle(StageStyle.TRANSPARENT);
+        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
+        dialog.showAndWait();
+
+//        Stage dialog = new Stage();
+//        dialog.initModality(Modality.APPLICATION_MODAL);
+//        //dialog.initStyle(StageStyle.TRANSPARENT);
+//        dialog.setScene(new Scene(FXMLLoader.load(getClass().getResource("/views/AboutBoxView2.fxml"))));
+//        dialog.show();
     }
 
     @FXML
@@ -79,12 +82,9 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleNewTabAction(ActionEvent actionEvent) {
-        seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() +")"));
+        seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() + ")"));
     }
 
-    XYChartInfo chartInfo;
-    private boolean dragging;
-    private boolean wasYAnimated;
     private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
     private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
@@ -319,7 +319,23 @@ public class MainViewController implements Initializable {
         );
     }
 
-    private FXMLLoader fXMLLoader = new FXMLLoader();
+
+    private void handleControlKey(KeyEvent event, boolean pressed) {
+        switch (event.getCode()) {
+            case SHIFT:
+                showHorizontalGuide.set(pressed);
+                event.consume();
+                break;
+
+            case CONTROL:
+                showVerticalGuide.set(pressed);
+                event.consume();
+                break;
+
+            default:
+                //do nothing
+        }
+    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -330,16 +346,14 @@ public class MainViewController implements Initializable {
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert treeview != null : "fx:id\"treeview\" was not injected!";
         assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
-        assert  seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
-       // assert  seriesTab1Controller != null : "fx:id\"seriesTab1Controller\" was not injected!";
+        assert seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
+        // assert  seriesTab1Controller != null : "fx:id\"seriesTab1Controller\" was not injected!";
 
+        root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
+        root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
 
-
-
-       // this.seriesTab1Controller.setSceneRoot(root);
         seriesTabPane.getSelectionModel().clearSelection();
 
-// Add Tab ChangeListener
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
@@ -347,18 +361,25 @@ public class MainViewController implements Initializable {
                 if (newValue.getContent() == null) {
                     try {
                         // Loading content on demand
-
-                       // Parent r = (Parent) fXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml").openStream());
-                        Parent p = FXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml"));
+                        FXMLLoader fXMLLoader = new FXMLLoader();
+                        Parent p = (Parent) fXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml").openStream());
+                        //    Parent p = FXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml"));
                         newValue.setContent(p);
 
                         // OPTIONAL : Store the controller if needed
-                        seriesControllers.put(newValue.getText(), fXMLLoader.getController());
+                        TimeSeriesController current = fXMLLoader.getController();
+                        current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalGuide);
+                        current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalGuide);
+                        current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
+                        current.getChart().animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
+
+                        seriesControllers.put(newValue.getText(), current);
 
                     } catch (IOException ex) {
-                       logger.error("Error loading time series", ex);
+                        logger.error("Error loading time series", ex);
                     }
-                } else {
+                }
+                else {
                     // Content is already loaded. Update it if necessary.
                     Parent root = (Parent) newValue.getContent();
                     // Optionally get the controller from Map and manipulate the content
@@ -385,10 +406,6 @@ public class MainViewController implements Initializable {
 
         buildTreeViewForTarget("memprocPdh");
 
-//        chart.createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
-//
-//        chart.animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
-
 
 //        final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());
 //
@@ -406,7 +423,6 @@ public class MainViewController implements Initializable {
 
 
     }
-
 
 
 }

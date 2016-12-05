@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.commons.charts.ChartCrossHairManager;
+import eu.fthevenet.binjr.commons.charts.ChartCrosshairManager;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.providers.JRDSDataProvider;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -47,6 +46,9 @@ public class TimeSeriesController implements Initializable {
     public CalendarTextField beginDateTime;
     @FXML
     public CalendarTextField endDateTime;
+
+
+
     @FXML
     private AreaChart<Date, Number> chart;
     @FXML
@@ -58,12 +60,12 @@ public class TimeSeriesController implements Initializable {
     @FXML
     ListView<SelectableListItem> seriesList;
 
-    private Node sceneRoot;
 
     private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
     private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
+   private ChartCrosshairManager<Date, Number> crossHair;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -88,7 +90,7 @@ public class TimeSeriesController implements Initializable {
 
         seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
 
-     //   ChartCrossHairManager<Date, Number> crossHair = new ChartCrossHairManager<>(sceneRoot,  chart, chartParent, Date::toString, (n) -> String.format("%,.2f", n.doubleValue()));
+        crossHair = new ChartCrosshairManager<>(chart, chartParent, Date::toString, (n) -> String.format("%,.2f", n.doubleValue()));
 
         chart.getYAxis().autoRangingProperty().bindBidirectional(yAutoRange.selectedProperty());
         setAndBingTextFormatter(yMinRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).lowerBoundProperty(), (o, oldval, newVal) -> refreshChart());
@@ -153,11 +155,11 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
-    public Node getSceneRoot() {
-        return sceneRoot;
+    public ChartCrosshairManager<Date, Number> getCrossHair() {
+        return crossHair;
     }
 
-    public void setSceneRoot(Node sceneRoot) {
-        this.sceneRoot = sceneRoot;
+    public AreaChart<Date, Number> getChart() {
+        return chart;
     }
 }
