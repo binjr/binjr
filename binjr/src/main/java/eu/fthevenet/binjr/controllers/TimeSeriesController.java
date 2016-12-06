@@ -46,9 +46,6 @@ public class TimeSeriesController implements Initializable {
     public CalendarTextField beginDateTime;
     @FXML
     public CalendarTextField endDateTime;
-
-
-
     @FXML
     private AreaChart<Date, Number> chart;
     @FXML
@@ -60,12 +57,11 @@ public class TimeSeriesController implements Initializable {
     @FXML
     ListView<SelectableListItem> seriesList;
 
-
     private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
     private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
-   private ChartCrosshairManager<Date, Number> crossHair;
+    private ChartCrosshairManager<Date, Number> crossHair;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -96,6 +92,17 @@ public class TimeSeriesController implements Initializable {
         setAndBingTextFormatter(yMinRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).lowerBoundProperty(), (o, oldval, newVal) -> refreshChart());
         setAndBingTextFormatter(yMaxRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).upperBoundProperty(), (o, oldval, newVal) -> refreshChart());
 
+        crossHair.onSelectionDone(s -> {
+            logger.debug(() -> "startSelectionDate=" + s.getStartX().toString() + " endSelectionDate=" + s.getEndX().toString());
+            beginDateTime.getCalendar().setTime(s.getStartX());
+            endDateTime.getCalendar().setTime(s.getEndX());
+//            yAutoRange.setSelected(false);
+//            yMinRange.setText(s.getStartY().toString());
+//            yMaxRange.setText(s.getEndY().toString());
+
+            this.refreshChart();
+        });
+
         this.refreshChart();
     }
 
@@ -106,9 +113,19 @@ public class TimeSeriesController implements Initializable {
         textField.setTextFormatter(formatter);
     }
 
-    public void invalidate(){
+    public void invalidate() {
         this.refreshChart();
     }
+
+
+    public ChartCrosshairManager<Date, Number> getCrossHair() {
+        return crossHair;
+    }
+
+    public AreaChart<Date, Number> getChart() {
+        return chart;
+    }
+
 
     private void refreshChart() {
         try (Profiler p = Profiler.start("Refreshing chart view")) {
@@ -155,11 +172,4 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
-    public ChartCrosshairManager<Date, Number> getCrossHair() {
-        return crossHair;
-    }
-
-    public AreaChart<Date, Number> getChart() {
-        return chart;
-    }
 }

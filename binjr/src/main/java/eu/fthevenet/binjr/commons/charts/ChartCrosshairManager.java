@@ -2,7 +2,6 @@ package eu.fthevenet.binjr.commons.charts;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.event.Event;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.chart.XYChart;
@@ -18,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 
@@ -26,6 +26,7 @@ import java.util.function.Function;
  */
 public class ChartCrosshairManager<X, Y> {
     private static final Logger logger = LogManager.getLogger(ChartCrosshairManager.class);
+    public static final double SELECTION_OPACITY = 0.5;
     final private Line horizontalMarker = new Line();
     final private Line verticalMarker = new Line();
     final private Label xAxisLabel;
@@ -40,9 +41,40 @@ public class ChartCrosshairManager<X, Y> {
     private Rectangle selection = new Rectangle(0, 0, 0, 0);
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
+    private Consumer<selectionArgs> selectionDoneEvent;
+    private boolean selecting;
 
     //private Event onDoneSelecting =new Event()
 
+    public class selectionArgs {
+        private final X startX;
+        private final X endX;
+        private final Y startY;
+        private final Y endY;
+
+        public X getStartX() {
+            return startX;
+        }
+
+        public X getEndX() {
+            return endX;
+        }
+
+        public Y getStartY() {
+            return startY;
+        }
+
+        public Y getEndY() {
+            return endY;
+        }
+
+        public selectionArgs(X startX, X endX, Y startY, Y endY) {
+            this.startX = startX;
+            this.endX = endX;
+            this.startY = startY;
+            this.endY = endY;
+        }
+    }
 
     public ChartCrosshairManager(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
         this.chart = chart;
@@ -65,10 +97,14 @@ public class ChartCrosshairManager<X, Y> {
         );
         this.chart.setOnMouseReleased(e -> isSelecting.set(e.isPrimaryButtonDown()));
 
-        isSelecting.addListener((observable,oldValue, newValue)->{
+        isSelecting.addListener((observable, oldValue, newValue) -> {
             drawSelection();
             selection.setVisible(newValue);
-        } );
+            if (oldValue && !newValue) {
+                fireSelectionDoneEvent();
+                selecting = false;
+            }
+        });
 
         showHorizontalMarker.addListener((observable, oldValue, newValue) -> {
             drawHorizontalMarker();
@@ -87,6 +123,23 @@ public class ChartCrosshairManager<X, Y> {
         });
     }
 
+    public void onSelectionDone(Consumer<selectionArgs> action) {
+        selectionDoneEvent = action;
+    }
+
+    private void fireSelectionDoneEvent() {
+        if (selecting && selectionDoneEvent != null && (selection.getWidth() > 0 || selection.getHeight() > 0)) {
+            selectionDoneEvent.accept(
+                    new selectionArgs(
+                            getValueFromXcoord(selection.getX()),
+                            getValueFromXcoord(selection.getX() + selection.getWidth()),
+                            getValueFromYcoord(selection.getY()),
+                            getValueFromYcoord(selection.getY() + selection.getHeight())
+                    )
+            );
+        }
+    }
+
     private void focusState(boolean value) {
         if (value) {
             logger.info("Focus Gained");
@@ -100,30 +153,38 @@ public class ChartCrosshairManager<X, Y> {
         if (mousePosition.getY() < 0) {
             return;
         }
-        double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
-        double axisYRelativeMousePosition = mousePosition.getY() - yStart * 1.5;
         horizontalMarker.setStartX(chartInfo.getPlotArea().getMinX() + 0.5);
         horizontalMarker.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
         horizontalMarker.setStartY(mousePosition.getY() + 0.5);
         horizontalMarker.setEndY(mousePosition.getY() + 0.5);
         yAxisLabel.setLayoutX(Math.max(chart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
         yAxisLabel.setLayoutY(Math.min(mousePosition.getY(), chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
-        yAxisLabel.setText(yValuesFormatter.apply(chart.getYAxis().getValueForDisplay(axisYRelativeMousePosition)));
+        yAxisLabel.setText(yValuesFormatter.apply(getValueFromYcoord(mousePosition.getY())));
+    }
+
+    private Y getValueFromYcoord(double yPosition) {
+        double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
+        double axisYRelativePosition = yPosition - yStart * 1.5;
+        return chart.getYAxis().getValueForDisplay(axisYRelativePosition);
+    }
+
+    private X getValueFromXcoord(double xPosition) {
+        double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
+        double axisXRelativeMousePosition = xPosition - xStart;
+        return chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition);
     }
 
     private void drawVerticalMarker() {
         if (mousePosition.getX() < 0) {
             return;
         }
-        double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
-        double axisXRelativeMousePosition = mousePosition.getX() - xStart;
         verticalMarker.setStartX(mousePosition.getX() + 0.5);
         verticalMarker.setEndX(mousePosition.getX() + 0.5);
         verticalMarker.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
         verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
-        xAxisLabel.setText(xValuesFormatter.apply(chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition)));
+        xAxisLabel.setText(xValuesFormatter.apply(getValueFromXcoord(mousePosition.getX())));
     }
 
     private void handleMouseMoved(MouseEvent event) {
@@ -137,6 +198,7 @@ public class ChartCrosshairManager<X, Y> {
             drawVerticalMarker();
         }
         if (event.isPrimaryButtonDown()) {
+            selecting = true;
             drawSelection();
         }
     }
@@ -146,17 +208,17 @@ public class ChartCrosshairManager<X, Y> {
             return;
         }
         if (showHorizontalMarker.get()) {
-            double height = mousePosition.getY() - (selectionStart.getY()-1.0);
-            selection.setY(height > 0 ? selectionStart.getY() : mousePosition.getY()+1);
-            selection.setHeight(Math.abs(height) );
+            double height = mousePosition.getY() - (selectionStart.getY() - 1.0);
+            selection.setY(height > 0 ? selectionStart.getY() : mousePosition.getY() + 1);
+            selection.setHeight(Math.abs(height));
         }
         else {
             selection.setY(verticalMarker.getStartY());
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
         if (showVerticalMarker.get()) {
-            double width = mousePosition.getX() - (selectionStart.getX()-1.0);
-            selection.setX(width > 0 ? selectionStart.getX() : mousePosition.getX()+1);
+            double width = mousePosition.getX() - (selectionStart.getX() - 1.0);
+            selection.setX(width > 0 ? selectionStart.getX() : mousePosition.getX() + 1);
             selection.setWidth(Math.abs(width));
         }
         else {
@@ -184,7 +246,12 @@ public class ChartCrosshairManager<X, Y> {
         shape.setVisible(false);
         shape.setStrokeType(StrokeType.CENTERED);
         shape.setStroke(Color.STEELBLUE);
-        shape.setFill(new Color(0.6901961f, 0.76862746f, 0.87058824f, 0.5));
+        Color fillColor = Color.LIGHTSTEELBLUE;
+        shape.setFill(new Color(
+                fillColor.getRed(),
+                fillColor.getGreen(),
+                fillColor.getBlue(),
+                SELECTION_OPACITY));
     }
 
     public SimpleBooleanProperty showVerticalMarkerProperty() {
