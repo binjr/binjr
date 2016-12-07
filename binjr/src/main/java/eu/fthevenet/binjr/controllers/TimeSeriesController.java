@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.commons.charts.ChartCrosshairManager;
+import eu.fthevenet.binjr.commons.charts.SelectionArgs;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.providers.JRDSDataProvider;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
@@ -62,6 +63,8 @@ public class TimeSeriesController implements Initializable {
     private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
     private ChartCrosshairManager<Date, Number> crossHair;
+    private Stack<SelectionArgs<Date, Number>> selectionHistory = new Stack<>();
+    private SelectionArgs<Date, Number> currentState;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -76,13 +79,24 @@ public class TimeSeriesController implements Initializable {
 
         Instant end = Instant.now();// Instant.parse("2016-10-25T22:00:00Z");
         Instant begin = end.minus(12 * 60, ChronoUnit.MINUTES);
+
+        this.currentState = new SelectionArgs<Date, Number>(Date.from(begin), Date.from(end), -1, -1);
+
+
         beginDateTime.setCalendar(Calendar.getInstance());
         beginDateTime.getCalendar().setTime(Date.from(begin));
         endDateTime.setCalendar(Calendar.getInstance());
         endDateTime.getCalendar().setTime(Date.from(end));
 
-        beginDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-        endDateTime.textProperty().addListener((observable, oldValue, newValue) -> refreshChart());
+        beginDateTime.textProperty().addListener((observable, oldValue, newValue) -> {
+            currentState.setStartX(beginDateTime.getCalendar().getTime());
+                 refreshChart();
+        });
+
+        endDateTime.textProperty().addListener((observable, oldValue, newValue) -> {
+           currentState.setEndX(endDateTime.getCalendar().getTime());
+                refreshChart();
+        });
 
         seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
 
@@ -93,15 +107,13 @@ public class TimeSeriesController implements Initializable {
         setAndBingTextFormatter(yMaxRange, new NumberStringConverter(), ((ValueAxis<Number>) chart.getYAxis()).upperBoundProperty(), (o, oldval, newVal) -> refreshChart());
 
         crossHair.onSelectionDone(s -> {
-            logger.debug(() -> "startSelectionDate=" + s.getStartX().toString() + " endSelectionDate=" + s.getEndX().toString());
-            beginDateTime.getCalendar().setTime(s.getStartX());
-            endDateTime.getCalendar().setTime(s.getEndX());
-//            yAutoRange.setSelected(false);
-//            yMinRange.setText(s.getStartY().toString());
-//            yMaxRange.setText(s.getEndY().toString());
+            logger.debug(() -> "Selection done: " + s.toString());
+
+            this.currentState = new SelectionArgs<>(s);
 
             this.refreshChart();
         });
+
 
         this.refreshChart();
     }
@@ -126,23 +138,37 @@ public class TimeSeriesController implements Initializable {
         return chart;
     }
 
+    private void restoreSelectionFromHistory() {
+        if (selectionHistory.size() > 0) {
+
+
+        }
+        else {
+            logger.debug(() -> "History is empty: nothing to go back to.");
+        }
+    }
+
+    private void setSelectionToCurrentView(SelectionArgs<Date, Number> selection) {
+        this.currentState = new SelectionArgs<>(selection);
+    }
 
     private void refreshChart() {
+        logger.trace(() -> "Refreshing chart");
+        this.selectionHistory.push(currentState);
+
         try (Profiler p = Profiler.start("Refreshing chart view")) {
             chart.getData().clear();
             Map<String, XYChart.Series<Date, Number>> series = getRawData(
                     currentHost.getValue(),
                     currentTarget.getValue(),
                     currentProbe.getValue(),
-                    beginDateTime.getCalendar().getTime().toInstant(),
-                    endDateTime.getCalendar().getTime().toInstant());
+                    currentState.getStartX().toInstant(),
+                    currentState.getEndX().toInstant());
             chart.getData().addAll(series.values());
             seriesList.getItems().clear();
             for (XYChart.Series s : chart.getData()) {
                 SelectableListItem i = new SelectableListItem(s.getName(), true);
-
                 i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-                    logger.trace(i.getName() + " changed on state from " + wasOn + " to " + isNowOn);
                     selectedSeriesCache.put(s.getName(), isNowOn);
                     s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
                 });

@@ -41,40 +41,10 @@ public class ChartCrosshairManager<X, Y> {
     private Rectangle selection = new Rectangle(0, 0, 0, 0);
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private Consumer<selectionArgs> selectionDoneEvent;
+    private Consumer<SelectionArgs<X, Y>> selectionDoneEvent;
     private boolean selecting;
 
     //private Event onDoneSelecting =new Event()
-
-    public class selectionArgs {
-        private final X startX;
-        private final X endX;
-        private final Y startY;
-        private final Y endY;
-
-        public X getStartX() {
-            return startX;
-        }
-
-        public X getEndX() {
-            return endX;
-        }
-
-        public Y getStartY() {
-            return startY;
-        }
-
-        public Y getEndY() {
-            return endY;
-        }
-
-        public selectionArgs(X startX, X endX, Y startY, Y endY) {
-            this.startX = startX;
-            this.endX = endX;
-            this.startY = startY;
-            this.endY = endY;
-        }
-    }
 
     public ChartCrosshairManager(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
         this.chart = chart;
@@ -91,31 +61,49 @@ public class ChartCrosshairManager<X, Y> {
         this.chart.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
         this.chart.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
         this.chart.setOnMousePressed(e -> {
-                    selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
-                    isSelecting.set(e.isPrimaryButtonDown());
+                    if (showHorizontalMarker.get() || showVerticalMarker.get()) {
+                        selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
+                        isSelecting.set(e.isPrimaryButtonDown());
+                    }
                 }
         );
-        this.chart.setOnMouseReleased(e -> isSelecting.set(e.isPrimaryButtonDown()));
+        this.chart.setOnMouseReleased(e -> {
+
+            if (isSelecting.get()) {
+               // setHorizontalMarkerVisibility(false);
+               // setVerticalMarkerVisibility(false);
+
+            //    selectionStart = new Point2D(-1, -1);
+                fireSelectionDoneEvent();
+
+                drawVerticalMarker();
+                drawHorizontalMarker();
+            }
+            isSelecting.set(false);
+        });
 
         isSelecting.addListener((observable, oldValue, newValue) -> {
+            logger.debug(()-> "observable=" + observable + " oldValue="+ oldValue + " newValue=" + newValue);
             drawSelection();
             selection.setVisible(newValue);
-            if (oldValue && !newValue) {
-                fireSelectionDoneEvent();
-                selecting = false;
-            }
         });
 
         showHorizontalMarker.addListener((observable, oldValue, newValue) -> {
             drawHorizontalMarker();
             horizontalMarker.setVisible(newValue);
             yAxisLabel.setVisible(newValue);
+            if (!newValue && !showVerticalMarker.get()){
+                isSelecting.set(false) ;
+            }
         });
 
         showVerticalMarker.addListener((observable, oldValue, newValue) -> {
             drawVerticalMarker();
             verticalMarker.setVisible(newValue);
             xAxisLabel.setVisible(newValue);
+            if (!newValue && !showHorizontalMarker.get()){
+                isSelecting.set(false) ;
+            }
         });
 
         chart.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -123,14 +111,14 @@ public class ChartCrosshairManager<X, Y> {
         });
     }
 
-    public void onSelectionDone(Consumer<selectionArgs> action) {
+    public void onSelectionDone(Consumer<SelectionArgs<X, Y>> action) {
         selectionDoneEvent = action;
     }
 
     private void fireSelectionDoneEvent() {
-        if (selecting && selectionDoneEvent != null && (selection.getWidth() > 0 || selection.getHeight() > 0)) {
+        if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             selectionDoneEvent.accept(
-                    new selectionArgs(
+                    new SelectionArgs<X, Y>(
                             getValueFromXcoord(selection.getX()),
                             getValueFromXcoord(selection.getX() + selection.getWidth()),
                             getValueFromYcoord(selection.getY()),
@@ -185,19 +173,20 @@ public class ChartCrosshairManager<X, Y> {
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
         xAxisLabel.setText(xValuesFormatter.apply(getValueFromXcoord(mousePosition.getX())));
+        logger.trace(xAxisLabel::getText);
     }
 
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
         mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX())), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY())));
-        logger.trace(mousePosition.toString());
+        // logger.trace(mousePosition.toString());
         if (event.isShiftDown()) {
             drawHorizontalMarker();
         }
         if (event.isControlDown()) {
             drawVerticalMarker();
         }
-        if (event.isPrimaryButtonDown()) {
+        if (event.isPrimaryButtonDown() && (showVerticalMarker.get() || showHorizontalMarker.get())) {
             selecting = true;
             drawSelection();
         }

@@ -11,12 +11,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -54,8 +51,8 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem newTab;
 
-    private SimpleBooleanProperty showVerticalGuide = new SimpleBooleanProperty();
-    private SimpleBooleanProperty showHorizontalGuide = new SimpleBooleanProperty();
+    private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
+    private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
 
 
     @FXML
@@ -323,12 +320,12 @@ public class MainViewController implements Initializable {
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT:
-                showHorizontalGuide.set(pressed);
+                showHorizontalMarker.set(pressed);
                 event.consume();
                 break;
 
             case CONTROL:
-                showVerticalGuide.set(pressed);
+                showVerticalMarker.set(pressed);
                 event.consume();
                 break;
 
@@ -368,8 +365,8 @@ public class MainViewController implements Initializable {
 
                         // OPTIONAL : Store the controller if needed
                         TimeSeriesController current = fXMLLoader.getController();
-                        current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalGuide);
-                        current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalGuide);
+                        current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
+                        current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
                         current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
                         current.getChart().animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
 
