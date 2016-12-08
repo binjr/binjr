@@ -41,7 +41,7 @@
         </Menu>
         <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
           <items>
-            <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" text="Refresh" />
+            <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" text="Refresh" onAction="#handleRefreshAction"/>
           </items>
         </Menu>
         <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">

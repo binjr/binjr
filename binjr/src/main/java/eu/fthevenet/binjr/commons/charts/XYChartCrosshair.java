@@ -4,6 +4,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Cursor;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -24,8 +25,8 @@ import java.util.function.Function;
 /**
  * @author Frederic Thevenet
  */
-public class ChartCrosshairManager<X, Y> {
-    private static final Logger logger = LogManager.getLogger(ChartCrosshairManager.class);
+public class XYChartCrosshair<X, Y> {
+    private static final Logger logger = LogManager.getLogger(XYChartCrosshair.class);
     public static final double SELECTION_OPACITY = 0.5;
     final private Line horizontalMarker = new Line();
     final private Line verticalMarker = new Line();
@@ -40,20 +41,28 @@ public class ChartCrosshairManager<X, Y> {
     private Point2D mousePosition = new Point2D(-1, -1);
     private Rectangle selection = new Rectangle(0, 0, 0, 0);
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
+
+    public boolean isShowVerticalMarker() {
+        return showVerticalMarker.get();
+    }
+
+    public boolean isShowHorizontalMarker() {
+        return showHorizontalMarker.get();
+    }
+
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private Consumer<SelectionArgs<X, Y>> selectionDoneEvent;
+    private Consumer<XYChartSelection<X,Y>> selectionDoneEvent;
     private boolean selecting;
 
     //private Event onDoneSelecting =new Event()
 
-    public ChartCrosshairManager(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
+    public XYChartCrosshair(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
         this.chart = chart;
         applyStyle(this.verticalMarker);
         applyStyle(this.horizontalMarker);
         applyStyle(this.selection);
         this.xAxisLabel = newAxisLabel();
         this.yAxisLabel = newAxisLabel();
-
         parent.getChildren().addAll(xAxisLabel, yAxisLabel, verticalMarker, horizontalMarker, selection);
         this.xValuesFormatter = xValuesFormatter;
         this.yValuesFormatter = yValuesFormatter;
@@ -63,19 +72,13 @@ public class ChartCrosshairManager<X, Y> {
         this.chart.setOnMousePressed(e -> {
                     if (showHorizontalMarker.get() || showVerticalMarker.get()) {
                         selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
-                        isSelecting.set(e.isPrimaryButtonDown());
                     }
                 }
         );
+
         this.chart.setOnMouseReleased(e -> {
-
             if (isSelecting.get()) {
-               // setHorizontalMarkerVisibility(false);
-               // setVerticalMarkerVisibility(false);
-
-            //    selectionStart = new Point2D(-1, -1);
                 fireSelectionDoneEvent();
-
                 drawVerticalMarker();
                 drawHorizontalMarker();
             }
@@ -83,7 +86,7 @@ public class ChartCrosshairManager<X, Y> {
         });
 
         isSelecting.addListener((observable, oldValue, newValue) -> {
-            logger.debug(()-> "observable=" + observable + " oldValue="+ oldValue + " newValue=" + newValue);
+            logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
             drawSelection();
             selection.setVisible(newValue);
         });
@@ -92,8 +95,8 @@ public class ChartCrosshairManager<X, Y> {
             drawHorizontalMarker();
             horizontalMarker.setVisible(newValue);
             yAxisLabel.setVisible(newValue);
-            if (!newValue && !showVerticalMarker.get()){
-                isSelecting.set(false) ;
+            if (!newValue && !showVerticalMarker.get()) {
+                isSelecting.set(false);
             }
         });
 
@@ -101,8 +104,8 @@ public class ChartCrosshairManager<X, Y> {
             drawVerticalMarker();
             verticalMarker.setVisible(newValue);
             xAxisLabel.setVisible(newValue);
-            if (!newValue && !showHorizontalMarker.get()){
-                isSelecting.set(false) ;
+            if (!newValue && !showHorizontalMarker.get()) {
+                isSelecting.set(false);
             }
         });
 
@@ -111,14 +114,14 @@ public class ChartCrosshairManager<X, Y> {
         });
     }
 
-    public void onSelectionDone(Consumer<SelectionArgs<X, Y>> action) {
+    public void onSelectionDone(Consumer<XYChartSelection<X,Y>> action) {
         selectionDoneEvent = action;
     }
 
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             selectionDoneEvent.accept(
-                    new SelectionArgs<X, Y>(
+                    new Selection<X, Y>(
                             getValueFromXcoord(selection.getX()),
                             getValueFromXcoord(selection.getX() + selection.getWidth()),
                             getValueFromYcoord(selection.getY()),
@@ -159,7 +162,7 @@ public class ChartCrosshairManager<X, Y> {
     private X getValueFromXcoord(double xPosition) {
         double xStart = chart.getXAxis().getLocalToParentTransform().getTx();
         double axisXRelativeMousePosition = xPosition - xStart;
-        return chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition);
+        return chart.getXAxis().getValueForDisplay(axisXRelativeMousePosition - 5);
     }
 
     private void drawVerticalMarker() {
@@ -179,7 +182,6 @@ public class ChartCrosshairManager<X, Y> {
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
         mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX())), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY())));
-        // logger.trace(mousePosition.toString());
         if (event.isShiftDown()) {
             drawHorizontalMarker();
         }
@@ -187,9 +189,10 @@ public class ChartCrosshairManager<X, Y> {
             drawVerticalMarker();
         }
         if (event.isPrimaryButtonDown() && (showVerticalMarker.get() || showHorizontalMarker.get())) {
-            selecting = true;
+            isSelecting.set(true);
             drawSelection();
         }
+
     }
 
     private void drawSelection() {
@@ -249,5 +252,63 @@ public class ChartCrosshairManager<X, Y> {
 
     public SimpleBooleanProperty showHorizontalMarkerProperty() {
         return showHorizontalMarker;
+    }
+
+    /**
+     * Created by FTT2 on 07/12/2016.
+     */
+    public static class Selection<X, Y> implements XYChartSelection<X, Y> {
+        private final X startX;
+        private final X endX;
+        private final Y startY;
+        private final Y endY;
+
+
+        @Override
+        public X getStartX() {
+            return startX;
+        }
+
+        @Override
+        public X getEndX() {
+            return endX;
+        }
+
+        @Override
+        public Y getStartY() {
+            return startY;
+        }
+
+        @Override
+        public Y getEndY() {
+            return endY;
+        }
+
+         public Selection(XYChartSelection<X,Y> selection){
+            this.startX = selection.getStartX();
+            this.endX = selection.getEndX();
+            this.startY = selection.getStartY();
+            this.endY = selection.getEndY();
+        }
+
+        public Selection(X startX, X endX, Y startY, Y endY) {
+            this.startX = startX;
+            this.endX = endX;
+            this.startY = startY;
+            this.endY = endY;
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder("Selection{");
+            sb.append("startX=").append(startX);
+            sb.append(", endX=").append(endX);
+            sb.append(", startY=").append(startY);
+            sb.append(", endY=").append(endY);
+            sb.append('}');
+            return sb.toString();
+        }
+
+
     }
 }

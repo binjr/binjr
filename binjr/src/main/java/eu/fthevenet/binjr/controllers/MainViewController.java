@@ -54,20 +54,12 @@ public class MainViewController implements Initializable {
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
 
-
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
-
         Dialog<String> dialog = new Dialog<>();
         dialog.initStyle(StageStyle.TRANSPARENT);
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
         dialog.showAndWait();
-
-//        Stage dialog = new Stage();
-//        dialog.initModality(Modality.APPLICATION_MODAL);
-//        //dialog.initStyle(StageStyle.TRANSPARENT);
-//        dialog.setScene(new Scene(FXMLLoader.load(getClass().getResource("/views/AboutBoxView2.fxml"))));
-//        dialog.show();
     }
 
     @FXML
@@ -315,7 +307,7 @@ public class MainViewController implements Initializable {
                 new TreeItem<String>("processPdh-searchserver-ss0")
         );
     }
-
+    private TimeSeriesController selectedTabController;
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
@@ -328,6 +320,7 @@ public class MainViewController implements Initializable {
                 showVerticalMarker.set(pressed);
                 event.consume();
                 break;
+
 
             default:
                 //do nothing
@@ -349,6 +342,8 @@ public class MainViewController implements Initializable {
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
 
+
+
         seriesTabPane.getSelectionModel().clearSelection();
 
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
@@ -365,6 +360,7 @@ public class MainViewController implements Initializable {
 
                         // OPTIONAL : Store the controller if needed
                         TimeSeriesController current = fXMLLoader.getController();
+                        selectedTabController = current;
                         current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
                         current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
@@ -403,23 +399,13 @@ public class MainViewController implements Initializable {
 
         buildTreeViewForTarget("memprocPdh");
 
-
-//        final TextFormatter<Integer> formatter = new TextFormatter<>(new IntegerStringConverter());
-//
-//        formatter.valueProperty().bindBidirectional(reductionTarget);
-//        formatter.valueProperty().addListener((observable, oldValue, newValue) -> refreshChart());
-
-
-//        RDPEpsilon.setTextFormatter(formatter);
-
-
-        //   editRefresh.setOnAction(a -> refreshChart());
-
-
-        // chkBoxEnableRDP.selectedProperty().addListener((o, oldval, newVal) -> refreshChart());
-
-
     }
 
 
+    public void handleRefreshAction(ActionEvent actionEvent) {
+        if (selectedTabController!= null){
+            selectedTabController.invalidate();
+        }
+
+    }
 }
