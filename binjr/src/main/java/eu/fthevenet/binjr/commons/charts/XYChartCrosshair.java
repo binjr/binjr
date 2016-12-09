@@ -121,7 +121,7 @@ public class XYChartCrosshair<X, Y> {
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             selectionDoneEvent.accept(
-                    new Selection<X, Y>(
+                    new XYChartSelection<X, Y>(
                             getValueFromXcoord(selection.getX()),
                             getValueFromXcoord(selection.getX() + selection.getWidth()),
                             getValueFromYcoord(selection.getY()),
@@ -176,7 +176,7 @@ public class XYChartCrosshair<X, Y> {
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
         xAxisLabel.setText(xValuesFormatter.apply(getValueFromXcoord(mousePosition.getX())));
-        logger.trace(xAxisLabel::getText);
+      //  logger.trace(xAxisLabel::getText);
     }
 
     private void handleMouseMoved(MouseEvent event) {
@@ -254,61 +254,5 @@ public class XYChartCrosshair<X, Y> {
         return showHorizontalMarker;
     }
 
-    /**
-     * Created by FTT2 on 07/12/2016.
-     */
-    public static class Selection<X, Y> implements XYChartSelection<X, Y> {
-        private final X startX;
-        private final X endX;
-        private final Y startY;
-        private final Y endY;
 
-
-        @Override
-        public X getStartX() {
-            return startX;
-        }
-
-        @Override
-        public X getEndX() {
-            return endX;
-        }
-
-        @Override
-        public Y getStartY() {
-            return startY;
-        }
-
-        @Override
-        public Y getEndY() {
-            return endY;
-        }
-
-         public Selection(XYChartSelection<X,Y> selection){
-            this.startX = selection.getStartX();
-            this.endX = selection.getEndX();
-            this.startY = selection.getStartY();
-            this.endY = selection.getEndY();
-        }
-
-        public Selection(X startX, X endX, Y startY, Y endY) {
-            this.startX = startX;
-            this.endX = endX;
-            this.startY = startY;
-            this.endY = endY;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder("Selection{");
-            sb.append("startX=").append(startX);
-            sb.append(", endX=").append(endX);
-            sb.append(", startY=").append(startY);
-            sb.append(", endY=").append(endY);
-            sb.append('}');
-            return sb.toString();
-        }
-
-
-    }
 }

@@ -85,9 +85,6 @@ public class TimeSeriesBuilder {
                     if (data.length < 2) {
                         throw new IOException("Not enough columns in csv to plot a time series");
                     }
-//                    DateFormat formatter =  DateFormat.getDateInstance();// new DateFormat("yyyy-MM-dd HH:mm:ss");//.withZone(ZoneId.systemDefault());
-//                    Date timeStamp = formatter.parse(data[0]);// .toLocalDate();
-
                     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
                     Date timeStamp = Date.from(ZonedDateTime.parse(data[0], formatter).toInstant());
 
@@ -98,11 +95,7 @@ public class TimeSeriesBuilder {
                             val = val.isNaN() ? 0 : val;
 
                             XYChart.Data<Date, Number> point = new XYChart.Data<>(timeStamp, val);
-                            List<XYChart.Data<Date, Number>> l = series.get(currentName);
-                            if (l == null) {
-                                l = new ArrayList<>();
-                                series.put(currentName, l);
-                            }
+                            List<XYChart.Data<Date, Number>> l = series.computeIfAbsent(currentName, k -> new ArrayList<>());
                             l.add(point);
                         }
                     }
