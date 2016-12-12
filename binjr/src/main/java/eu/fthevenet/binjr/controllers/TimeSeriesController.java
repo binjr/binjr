@@ -92,7 +92,7 @@ public class TimeSeriesController implements Initializable {
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
 
-        this.currentState = new State(LocalDateTime.now().minusDays(1), LocalDateTime.now(), 0, 100);
+        this.currentState = new State(LocalDateTime.now().minusDays(1), LocalDateTime.now(), 100, 0);
        // this.previousState = currentState.asSelection();
 
         backButton.disableProperty().bind(selectionHistory.emptyStackProperty);
@@ -144,8 +144,10 @@ public class TimeSeriesController implements Initializable {
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<T>(converter);
-        stateProperty.bind(formatter.valueProperty());
-        formatter.valueProperty().bind(axisBoundProperty);
+      //  stateProperty.bind(formatter.valueProperty());
+        formatter.valueProperty().bindBidirectional(stateProperty);
+     //   axisBoundProperty.bind(formatter.valueProperty());
+      //  formatter.valueProperty().bind(axisBoundProperty);
 
 //        formatter.valueProperty().bindBidirectional(stateProperty);
         formatter.valueProperty().addListener((observable, o, v) -> {
@@ -279,8 +281,14 @@ public class TimeSeriesController implements Initializable {
         public SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
 
         public XYChartSelection<Date, Number> push(XYChartSelection<Date, Number> state) {
-            emptyStackProperty.set(false);
-            return this.stack.push(state);
+            if (state == null){
+                logger.warn(()-> "Trying to push null state into history");
+                return null;
+            }
+            else {
+                emptyStackProperty.set(false);
+                return this.stack.push(state);
+            }
         }
 
         public XYChartSelection<Date, Number> pop() {
@@ -317,15 +325,14 @@ public class TimeSeriesController implements Initializable {
             );
         }
 
-        public void setSelection(XYChartSelection<Date, Number> selection, boolean historize) {
+        public void setSelection(XYChartSelection<Date, Number> selection, boolean toHistory) {
             frozen = true;
             try {
-                this.startX.set(LocalDateTime.ofInstant(selection.getStartX().toInstant(), ZoneId.systemDefault()));
-                this.endX.set(LocalDateTime.ofInstant(selection.getEndX().toInstant(), ZoneId.systemDefault()));
-                this.startY.set(selection.getStartY().doubleValue());
-                this.endY.set(selection.getEndY().doubleValue());
-                invalidate(historize);
-
+                this.startX.set(roundDateTime(LocalDateTime.ofInstant(selection.getStartX().toInstant(), ZoneId.systemDefault())));
+                this.endX.set(roundDateTime(LocalDateTime.ofInstant(selection.getEndX().toInstant(), ZoneId.systemDefault())));
+                this.startY.set(roundYValue(selection.getStartY().doubleValue()));
+                this.endY.set(roundYValue(selection.getEndY().doubleValue()));
+                invalidate(toHistory);
             }
             finally {
                 frozen = false;
@@ -333,15 +340,29 @@ public class TimeSeriesController implements Initializable {
         }
 
         public State(LocalDateTime startX, LocalDateTime endX, double startY, double endY) {
-            this.startX = new SimpleObjectProperty<>(startX);
-            this.endX = new SimpleObjectProperty<>(endX);
-            this.startY = new SimpleDoubleProperty(startY);
-            this.endY = new SimpleDoubleProperty(endY);
+            this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
+            this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
+            this.startY = new SimpleDoubleProperty(roundYValue(startY));
+            this.endY = new SimpleDoubleProperty(roundYValue(endY));
 
             this.startX.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true);});
             this.endX.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true);});
             this.startY.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true);});
             this.endY.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true);});
+        }
+
+        private double roundYValue(double y){
+            return Math.round(y);
+        }
+
+
+        private LocalDateTime roundDateTime(LocalDateTime ldt){
+            return  LocalDateTime.of(ldt.getYear(),
+                    ldt.getMonth(),
+                    ldt.getDayOfMonth(),
+                    ldt.getHour(),
+                    ldt.getMinute(),
+                    ldt.getSecond());
         }
 
         @Override
