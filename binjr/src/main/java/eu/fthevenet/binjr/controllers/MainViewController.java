@@ -408,4 +408,11 @@ public class MainViewController implements Initializable {
         }
 
     }
+
+    public void handleDumpHistoryAction(ActionEvent actionEvent) {
+        if (selectedTabController != null) {
+            TimeSeriesController.History h = selectedTabController.getHistory();
+            logger.debug(() -> "Current Tab selection history" + (h == null ? "null" : h.dump()));
+        }
+    }
 }

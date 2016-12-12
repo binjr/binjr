@@ -49,6 +49,11 @@
             <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr" />
           </items>
         </Menu>
+          <Menu fx:id="debugMenu" mnemonicParsing="false" text="Debug">
+          <items>
+              <MenuItem mnemonicParsing="false" onAction="#handleDumpHistoryAction" text="Dump History" />
+          </items>
+      </Menu>
       </menus>
     </MenuBar>
     <SplitPane dividerPositions="0.2505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
