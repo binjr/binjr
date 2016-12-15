@@ -404,7 +404,7 @@ public class MainViewController implements Initializable {
 
     public void handleRefreshAction(ActionEvent actionEvent) {
         if (selectedTabController!= null){
-            selectedTabController.invalidate(false);
+            selectedTabController.invalidate(false, true);
         }
 
     }

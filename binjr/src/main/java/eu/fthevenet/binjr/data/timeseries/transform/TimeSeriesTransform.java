@@ -11,23 +11,26 @@ import java.util.function.Function;
 /**
  * Created by FTT2 on 02/12/2016.
  */
-public abstract class TimeSeriesTransform {
+public abstract class TimeSeriesTransform<T extends Number> {
 
     private final String name;
-    private final Function<Map<String, List<XYChart.Data<ZonedDateTime, Number>>>, Map<String, List<XYChart.Data<ZonedDateTime, Number>>>> transformFunction;
-
-
-    protected TimeSeriesTransform(String name, Function<Map<String, List<XYChart.Data<ZonedDateTime, Number>>>, Map<String, List<XYChart.Data<ZonedDateTime, Number>>>> transformFunction) {
+//
+//    public Function<Map<String, List<XYChart.Data<ZonedDateTime, T>>>, Map<String, List<XYChart.Data<ZonedDateTime, T>>>> getTransformFunction() {
+//        return transformFunction;
+//    }
+//
+//   // private Function<Map<String, List<XYChart.Data<ZonedDateTime, T>>>, Map<String, List<XYChart.Data<ZonedDateTime, T>>>> transformFunction;
+//
+//
+    public TimeSeriesTransform(String name) {
         this.name = name;
-        this.transformFunction = transformFunction;
+
     }
 
-    public Map<String, List<XYChart.Data<ZonedDateTime, Number>>> transform(Map<String, List<XYChart.Data<ZonedDateTime, Number>>> series){
-       return  transform(series, true);
-    }
+    public abstract Map<String, List<XYChart.Data<ZonedDateTime, T>>> transform(Map<String, List<XYChart.Data<ZonedDateTime, T>>> series);
 
-    public Map<String, List<XYChart.Data<ZonedDateTime, Number>>> transform(Map<String, List<XYChart.Data<ZonedDateTime, Number>>> series, boolean enabled){
-        return enabled ? transformFunction.apply(series) : series;
+    public  Map<String, List<XYChart.Data<ZonedDateTime, T>>> transform(Map<String, List<XYChart.Data<ZonedDateTime, T>>> series, boolean enabled){
+        return enabled ? transform(series) : series;
     }
 
     public String getName() {

@@ -7,30 +7,31 @@ import javafx.util.StringConverter;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 /**
- * A DateTimePicker with configurable datetime format where both date and time can be changed
+ * A date picker with configurable datetime format where both date and time can be changed
  * via the text field and the date can additionally be changed via the JavaFX default date picker.
  */
 @SuppressWarnings("unused")
 public class ZonedDateTimePicker extends DatePicker {
-    public static final String DefaultFormat = "yyyy/MM/dd HH:mm:ss";
+  //  public static final String DefaultFormat = "yyyy/MM/dd HH:mm:ss";
 
-    private DateTimeFormatter formatter;
+    private DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
     private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
-    private ObjectProperty<String> format = new SimpleObjectProperty<String>() {
-        public void set(String newValue) {
-            super.set(newValue);
-            formatter = DateTimeFormatter.ofPattern(newValue);
-        }
-    };
+//    private ObjectProperty<String> format = new SimpleObjectProperty<String>() {
+//        public void set(String newValue) {
+//            super.set(newValue);
+//            formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
+//        }
+//    };
 
     public ZonedDateTimePicker(){
         this(ZoneId.systemDefault());
     }
     public ZonedDateTimePicker(ZoneId currentZoneId) {
         getStyleClass().add("datetime-picker");
-        setFormat(DefaultFormat);
+     //   setFormat(DefaultFormat);
         setConverter(new InternalConverter());
 
         // Synchronize changes to the underlying date value back to the dateTimeValue
@@ -75,17 +76,17 @@ public class ZonedDateTimePicker extends DatePicker {
         return dateTimeValue;
     }
 
-    public String getFormat() {
-        return format.get();
-    }
-
-    public ObjectProperty<String> formatProperty() {
-        return format;
-    }
-
-    public void setFormat(String format) {
-        this.format.set(format);
-    }
+//    public String getFormat() {
+//        return format.get();
+//    }
+//
+//    public ObjectProperty<String> formatProperty() {
+//        return format;
+//    }
+//
+//    public void setFormat(String format) {
+//        this.format.set(format);
+//    }
 
     class InternalConverter extends StringConverter<LocalDate> {
         public String toString(LocalDate object) {

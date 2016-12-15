@@ -69,12 +69,12 @@ public class XYChartCrosshair<X, Y> {
         this.chartInfo = new XYChartInfo(this.chart);
         this.chart.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
         this.chart.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
-        this.chart.setOnMousePressed(e -> {
-                    if (showHorizontalMarker.get() || showVerticalMarker.get()) {
-                        selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
-                    }
-                }
-        );
+//        this.chart.setOnMousePressed(e -> {
+//                    if (showHorizontalMarker.get() || showVerticalMarker.get()) {
+//                        selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
+//                    }
+//                }
+//        );
 
         this.chart.setOnMouseReleased(e -> {
             if (isSelecting.get()) {
@@ -87,6 +87,9 @@ public class XYChartCrosshair<X, Y> {
 
         isSelecting.addListener((observable, oldValue, newValue) -> {
             logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
+            if (!oldValue && newValue){
+                selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
+            }
             drawSelection();
             selection.setVisible(newValue);
         });

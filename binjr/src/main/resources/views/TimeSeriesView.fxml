@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import eu.fthevenet.binjr.commons.charts.ZonedDateTimeAxis?>
+<?import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.chart.AreaChart?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
+   <children>
+      <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <children>
+            <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
+               <children>
+                  <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+                     <children>
+                        <Button fx:id="backButton" contentDisplay="CENTER" graphicTextGap="1.0" mnemonicParsing="false" onAction="#handleHistoryBack" prefHeight="30.0" prefWidth="42.0" text="" textAlignment="CENTER">
+                           <font>
+                              <Font name="Segoe UI Symbol" size="14.0" />
+                           </font>
+                           <HBox.margin>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </HBox.margin>
+                        </Button>
+                        <VBox>
+                           <children>
+                              <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                                 <children>
+                                    <Label text="From:" />
+                                    <ZonedDateTimePicker fx:id="startDate" prefHeight="25.0" prefWidth="150.0" />
+                                    <Label prefHeight="17.0" prefWidth="26.0" text="To:" />
+                                    <ZonedDateTimePicker fx:id="endDate" prefHeight="25.0" prefWidth="150.0" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </VBox.margin>
+                              </HBox>
+                              <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="10.0" VBox.vgrow="NEVER">
+                                 <children>
+                                    <Label prefHeight="17.0" prefWidth="30.0" text="Min:" />
+                                    <Spinner fx:id="yMinRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
+                                    <Label text="Max:" />
+                                    <Spinner fx:id="yMaxRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
+                                    <Button fx:id="resetYButton" mnemonicParsing="false" onAction="#handleResetYRangeButton" text="Auto" />
+                                 </children>
+                                 <VBox.margin>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </VBox.margin>
+                              </HBox>
+                           </children>
+                        </VBox>
+                     </children>
+                  </HBox>
+               </children>
+            </VBox>
+            <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+               <items>
+                  <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           <children>
+                              <AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <xAxis>
+                                    <ZonedDateTimeAxis animated="false" side="BOTTOM" />
+                                 </xAxis>
+                                 <yAxis>
+                                    <NumberAxis animated="false" side="LEFT" />
+                                 </yAxis>
+                              </AreaChart>
+                           </children>
+                        </AnchorPane>
+                     </children>
+                     <cursor>
+                        <Cursor fx:constant="DEFAULT" />
+                     </cursor>
+                  </AnchorPane>
+                  <AnchorPane>
+                     <children>
+                        <ListView fx:id="seriesList" layoutY="-1.0" prefHeight="132.0" prefWidth="685.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+               </items>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </SplitPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>
