@@ -56,9 +56,9 @@ public class TimeSeriesController implements Initializable {
    // @FXML
   //  private CheckBox yAutoRange;
     @FXML
-    private Spinner<Double> yMinRange;
+    private TextField yMinRange;
     @FXML
-    private Spinner<Double> yMaxRange;
+    private TextField yMaxRange;
     @FXML
     ListView<SelectableListItem> seriesList;
     @FXML
@@ -93,7 +93,6 @@ public class TimeSeriesController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert chart != null : "fx:id\"chart\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
-     //   assert yAutoRange != null : "fx:id\"yAutoRange\" was not injected!";
         assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
         assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert seriesList != null : "fx:id\"seriesList\" was not injected!";
@@ -101,40 +100,23 @@ public class TimeSeriesController implements Initializable {
         assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
-        yMaxRange.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory( 0, Double.MAX_VALUE));
-        yMinRange.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0, Double.MAX_VALUE));
-
 
         ZonedDateTime now = ZonedDateTime.now();
         this.currentState = new State(now.minus(12, ChronoUnit.HOURS), now, 0, 0);
         plotChart(currentState.asSelection());
-
         backButton.disableProperty().bind(history.emptyStackProperty);
-
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
-
         seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
-        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);//DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         crossHair = new XYChartCrosshair<>(chart, chartParent, formatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
-
-
-       // setAndBindTextFormatter(,  .asObject(),.asObject());
-       // setAndBindTextFormatter(, currentState.startY.asObject(),((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().asObject());
-        yMinRange.getValueFactory().valueProperty().bindBidirectional(currentState.endY.asObject());
-        yMaxRange.getValueFactory().valueProperty().bindBidirectional(currentState.startY.asObject());
-        yMinRange.getValueFactory().valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
-        yMaxRange.getValueFactory().valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
-        ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.endY);
-        ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().bindBidirectional(currentState.startY);
-
+        setAndBindTextFormatter(yMinRange, new NumberStringConverter(), currentState.endY,((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
+        setAndBindTextFormatter(yMaxRange, new NumberStringConverter(), currentState.startY,((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
         crossHair.onSelectionDone(s-> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
         });
     }
-
-
 
     public void invalidate(boolean saveToHistory){
         invalidate(saveToHistory, false);
@@ -156,7 +138,15 @@ public class TimeSeriesController implements Initializable {
             logger.debug(() -> "State hasn't change, no need to redraw the graph");
         }
     }
-
+    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
+        final TextFormatter<T> formatter = new TextFormatter<T>(converter);
+        formatter.valueProperty().bindBidirectional(stateProperty);
+        axisBoundProperty.bindBidirectional(stateProperty);
+        formatter.valueProperty().addListener((observable, o, v) -> {
+            chart.getYAxis().setAutoRanging(false);
+        });
+        textField.setTextFormatter(formatter);
+    }
 
     public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
         return crossHair;

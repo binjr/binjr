@@ -49,9 +49,9 @@
                               <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="10.0" VBox.vgrow="NEVER">
                                  <children>
                                     <Label prefHeight="17.0" prefWidth="30.0" text="Min:" />
-                                    <Spinner fx:id="yMinRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
+                                    <TextField fx:id="yMinRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
                                     <Label text="Max:" />
-                                    <Spinner fx:id="yMaxRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
+                                    <TextField fx:id="yMaxRange" prefHeight="25.0" prefWidth="150.0" editable="true" />
                                     <Button fx:id="resetYButton" mnemonicParsing="false" onAction="#handleResetYRangeButton" text="Auto" />
                                  </children>
                                  <VBox.margin>

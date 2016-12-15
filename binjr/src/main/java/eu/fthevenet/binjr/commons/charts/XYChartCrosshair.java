@@ -69,13 +69,6 @@ public class XYChartCrosshair<X, Y> {
         this.chartInfo = new XYChartInfo(this.chart);
         this.chart.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
         this.chart.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
-//        this.chart.setOnMousePressed(e -> {
-//                    if (showHorizontalMarker.get() || showVerticalMarker.get()) {
-//                        selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
-//                    }
-//                }
-//        );
-
         this.chart.setOnMouseReleased(e -> {
             if (isSelecting.get()) {
                 fireSelectionDoneEvent();
@@ -88,7 +81,7 @@ public class XYChartCrosshair<X, Y> {
         isSelecting.addListener((observable, oldValue, newValue) -> {
             logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
             if (!oldValue && newValue){
-                selectionStart = new Point2D(mousePosition.getX(), mousePosition.getY());
+                selectionStart = new Point2D(verticalMarker.getStartX(), horizontalMarker.getStartY());
             }
             drawSelection();
             selection.setVisible(newValue);
@@ -125,10 +118,10 @@ public class XYChartCrosshair<X, Y> {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             selectionDoneEvent.accept(
                     new XYChartSelection<X, Y>(
-                            getValueFromXcoord(selection.getX()),
-                            getValueFromXcoord(selection.getX() + selection.getWidth()),
-                            getValueFromYcoord(selection.getY()),
-                            getValueFromYcoord(selection.getY() + selection.getHeight())
+                            getValueFromXcoord(selection.getX() - 0.5),
+                            getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
+                            getValueFromYcoord(selection.getY() - 0.5),
+                            getValueFromYcoord(selection.getY() + selection.getHeight() - 0.5)
                     )
             );
         }
@@ -179,7 +172,6 @@ public class XYChartCrosshair<X, Y> {
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
         xAxisLabel.setText(xValuesFormatter.apply(getValueFromXcoord(mousePosition.getX())));
-      //  logger.trace(xAxisLabel::getText);
     }
 
     private void handleMouseMoved(MouseEvent event) {
@@ -203,8 +195,8 @@ public class XYChartCrosshair<X, Y> {
             return;
         }
         if (showHorizontalMarker.get()) {
-            double height = mousePosition.getY() - (selectionStart.getY() - 1.0);
-            selection.setY(height > 0 ? selectionStart.getY() : mousePosition.getY() + 1);
+            double height = horizontalMarker.getStartY() - selectionStart.getY();
+            selection.setY(height < 0 ?horizontalMarker.getStartY(): selectionStart.getY());
             selection.setHeight(Math.abs(height));
         }
         else {
@@ -212,8 +204,8 @@ public class XYChartCrosshair<X, Y> {
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
         if (showVerticalMarker.get()) {
-            double width = mousePosition.getX() - (selectionStart.getX() - 1.0);
-            selection.setX(width > 0 ? selectionStart.getX() : mousePosition.getX() + 1);
+            double width = verticalMarker.getStartX() - selectionStart.getX();
+            selection.setX(width < 0 ?verticalMarker.getStartX() :selectionStart.getX());
             selection.setWidth(Math.abs(width));
         }
         else {
