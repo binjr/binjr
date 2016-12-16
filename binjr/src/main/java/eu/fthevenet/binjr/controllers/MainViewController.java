@@ -349,7 +349,9 @@ public class MainViewController implements Initializable {
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-                System.out.println("Tab selected: " + newValue.getText());
+              if (newValue == null){
+                  return;
+              }
                 if (newValue.getContent() == null) {
                     try {
                         // Loading content on demand

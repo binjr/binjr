@@ -224,6 +224,10 @@ public class TimeSeriesController implements Initializable {
         chart.getYAxis().setAutoRanging(true);
     }
 
+    public void handleRefresh(ActionEvent actionEvent) {
+        this.invalidate(false, true);
+    }
+
     public class History {
         private Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
         public SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);

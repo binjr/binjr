@@ -8,7 +8,6 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
@@ -25,7 +24,7 @@
       <menus>
         <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
           <items>
-            <MenuItem mnemonicParsing="false" text="New" onAction="#handleNewTabAction"/>
+            <MenuItem mnemonicParsing="false" onAction="#handleNewTabAction" text="New" />
             <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
             <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
             <!--<SeparatorMenuItem mnemonicParsing="false" />-->
@@ -41,7 +40,7 @@
         </Menu>
         <Menu fx:id="editMenu" mnemonicParsing="false" text="Edit">
           <items>
-            <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" text="Refresh" onAction="#handleRefreshAction"/>
+            <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh" />
           </items>
         </Menu>
         <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
@@ -56,18 +55,18 @@
       </Menu>
       </menus>
     </MenuBar>
-    <SplitPane dividerPositions="0.2505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+    <SplitPane dividerPositions="0.2779587404994571" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
-        <AnchorPane>
+        <AnchorPane SplitPane.resizableWithParent="false">
                <children>
-                  <SplitPane dividerPositions="0.7231329690346083" layoutX="31.0" layoutY="351.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <SplitPane dividerPositions="0.7231" layoutX="31.0" layoutY="351.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                            <children>
                               <TreeView fx:id="treeview" fixedCellSize="24.0" layoutX="-22.0" layoutY="-110.0" prefHeight="314.0" prefWidth="222.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                            </children>
                         </AnchorPane>
-                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+                      <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false">
                            <children>
                               <CheckBox fx:id="chkBoxEnableRDP" layoutX="12.0" layoutY="19.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
                               <CheckBox fx:id="showChartSymbols" layoutX="12.0" layoutY="50.0" mnemonicParsing="false" text="Show data points" />
@@ -79,7 +78,7 @@
                   </SplitPane>
                </children>
         </AnchorPane>
-            <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="ALL_TABS" fx:id="seriesTabPane">
+            <TabPane fx:id="seriesTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB">
               <tabs>
                 <!--<Tab text="Untitled Tab 1">-->
                      <!--<content>-->
