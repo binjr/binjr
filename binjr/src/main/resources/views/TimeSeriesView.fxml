@@ -19,6 +19,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
+<?import eu.fthevenet.binjr.commons.fxchart.StableTicksAxis?>
 <AnchorPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
    <children>
       <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -117,7 +118,7 @@
                                     <ZonedDateTimeAxis animated="false" side="BOTTOM" />
                                  </xAxis>
                                  <yAxis>
-                                    <NumberAxis animated="false" side="LEFT" />
+                                    <StableTicksAxis animated="false" side="LEFT" tickSpacing="30"/>
                                  </yAxis>
                               </AreaChart>
                            </children>
