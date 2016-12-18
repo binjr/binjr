@@ -189,7 +189,7 @@ public class TimeSeriesController implements Initializable {
             }
         } catch (IOException | ParseException e) {
             logger.error(() -> "Error getting data", e);
-            throw new RuntimeException(e);
+           // throw new RuntimeException(e);
         }
     }
 

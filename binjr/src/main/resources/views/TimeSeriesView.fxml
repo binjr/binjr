@@ -33,7 +33,7 @@
                               <Insets bottom="10.0" left="10.0" top="10.0" />
                            </HBox.margin>
                            <graphic>
-                              <ImageView>
+                              <ImageView fitHeight="14" fitWidth="14">
                                  <image>
                                     <Image url="@/images/backArrow.png" />
                                  </image>
@@ -45,7 +45,7 @@
                         </Button>
                         <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
                            <graphic>
-                              <ImageView>
+                              <ImageView fitHeight="14" fitWidth="14">
                                  <image>
                                     <Image url="@/images/refresh.png" />
                                  </image>
@@ -92,7 +92,7 @@
                               <Insets bottom="5.0" left="5.0" right="10.0" top="5.0" />
                            </HBox.margin>
                            <graphic>
-                              <ImageView>
+                              <ImageView fitHeight="15" fitWidth="11">
                                  <image>
                                     <Image url="@/images/autoScale.png" />
                                  </image>
