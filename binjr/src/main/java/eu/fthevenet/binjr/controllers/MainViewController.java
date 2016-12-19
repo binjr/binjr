@@ -14,9 +14,12 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
 import java.net.URL;
@@ -56,9 +59,13 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
+
         Dialog<String> dialog = new Dialog<>();
-        dialog.initStyle(StageStyle.TRANSPARENT);
+        dialog.initStyle(StageStyle.UTILITY);
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
+        dialog.initOwner(getStage());
+
+
         dialog.showAndWait();
     }
 
@@ -363,6 +370,8 @@ public class MainViewController implements Initializable {
                         // OPTIONAL : Store the controller if needed
                         TimeSeriesController current = fXMLLoader.getController();
                         selectedTabController = current;
+                        current.setMainViewController(MainViewController.this);
+                     //   current.invalidate(false, true);
                         current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
                         current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
@@ -416,5 +425,26 @@ public class MainViewController implements Initializable {
             TimeSeriesController.History h = selectedTabController.getHistory();
             logger.debug(() -> "Current Tab selection history" + (h == null ? "null" : h.dump()));
         }
+    }
+
+    public  void displayException(String header, Exception e) {
+        displayException(header, e, getStage());
+    }
+
+    public  void displayException(String header, Exception e, Window owner) {
+        logger.debug(()-> "Displaying following exception to end user", e);
+        ExceptionDialog dlg = new ExceptionDialog(e);
+        dlg.initStyle(StageStyle.UTILITY);
+        dlg.initOwner(owner);
+        dlg.getDialogPane().setHeaderText(header);
+        dlg.showAndWait();
+    }
+
+
+    private Stage getStage(){
+        if (root != null && root.getScene() != null){
+            return (Stage)root.getScene().getWindow();
+        }
+        return null;
     }
 }

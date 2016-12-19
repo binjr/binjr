@@ -4,6 +4,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.DatePicker;
 import javafx.util.StringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -15,30 +17,22 @@ import java.time.format.FormatStyle;
  */
 @SuppressWarnings("unused")
 public class ZonedDateTimePicker extends DatePicker {
-  //  public static final String DefaultFormat = "yyyy/MM/dd HH:mm:ss";
-
+    private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
     private DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
     private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
-//    private ObjectProperty<String> format = new SimpleObjectProperty<String>() {
-//        public void set(String newValue) {
-//            super.set(newValue);
-//            formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT);
-//        }
-//    };
+
 
     public ZonedDateTimePicker(){
         this(ZoneId.systemDefault());
     }
     public ZonedDateTimePicker(ZoneId currentZoneId) {
         getStyleClass().add("datetime-picker");
-     //   setFormat(DefaultFormat);
+
         setConverter(new InternalConverter());
 
         // Synchronize changes to the underlying date value back to the dateTimeValue
         valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) {
-                dateTimeValue.set(null);
-            } else {
+            if (newValue != null) {
                 if (dateTimeValue.get() == null) {
                     dateTimeValue.set(ZonedDateTime.of(newValue, LocalTime.now(),currentZoneId));
                 } else {
@@ -50,7 +44,13 @@ public class ZonedDateTimePicker extends DatePicker {
 
         // Synchronize changes to dateTimeValue back to the underlying date value
         dateTimeValue.addListener((observable, oldValue, newValue) -> {
+            logger.debug(() -> "observable = " + observable);
+            logger.debug(() -> "oldValue = " + oldValue);
+            logger.debug(() -> "newValue = " + newValue);
+            //Force valueProperty to be invalidated, even is the LocalDate part of the ZonedDateTime has not changed
+            setValue(null);
             setValue(newValue == null ? null : newValue.toLocalDate());
+
         });
 
         // Persist changes onblur
@@ -76,31 +76,20 @@ public class ZonedDateTimePicker extends DatePicker {
         return dateTimeValue;
     }
 
-//    public String getFormat() {
-//        return format.get();
-//    }
-//
-//    public ObjectProperty<String> formatProperty() {
-//        return format;
-//    }
-//
-//    public void setFormat(String format) {
-//        this.format.set(format);
-//    }
-
     class InternalConverter extends StringConverter<LocalDate> {
         public String toString(LocalDate object) {
             ZonedDateTime value = getDateTimeValue();
             return (value != null) ? value.format(formatter) : "";
         }
 
-        public LocalDate fromString(String value) {
-            if (value == null || value.isEmpty()) {
+        public LocalDate fromString(String stringValue) {
+            ZonedDateTime zdt = ZonedDateTime.parse(stringValue, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM));
+            if (stringValue == null || stringValue.isEmpty()) {
                 dateTimeValue.set(null);
                 return null;
             }
 
-            dateTimeValue.set(ZonedDateTime.parse(value, formatter));
+            dateTimeValue.set(zdt);
             return dateTimeValue.get().toLocalDate();
         }
     }
