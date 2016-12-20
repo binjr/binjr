@@ -27,34 +27,23 @@ import java.util.function.Function;
  */
 public class XYChartCrosshair<X, Y> {
     private static final Logger logger = LogManager.getLogger(XYChartCrosshair.class);
-    public static final double SELECTION_OPACITY = 0.5;
-    final private Line horizontalMarker = new Line();
-    final private Line verticalMarker = new Line();
-    final private Label xAxisLabel;
-    final private Label yAxisLabel;
-    final private XYChart<X, Y> chart;
+    private static final double SELECTION_OPACITY = 0.5;
+
+    private final Line horizontalMarker = new Line();
+    private final Line verticalMarker = new Line();
+    private final Label xAxisLabel;
+    private final Label yAxisLabel;
+    private final XYChart<X, Y> chart;
     private final Function<X, String> xValuesFormatter;
     private final Function<Y, String> yValuesFormatter;
     private final XYChartInfo chartInfo;
-    SimpleBooleanProperty isSelecting = new SimpleBooleanProperty(false);
+    private final SimpleBooleanProperty isSelecting = new SimpleBooleanProperty(false);
     private Point2D selectionStart = new Point2D(-1, -1);
     private Point2D mousePosition = new Point2D(-1, -1);
-    private Rectangle selection = new Rectangle(0, 0, 0, 0);
-    private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
-
-    public boolean isShowVerticalMarker() {
-        return showVerticalMarker.get();
-    }
-
-    public boolean isShowHorizontalMarker() {
-        return showHorizontalMarker.get();
-    }
-
-    private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private Consumer<XYChartSelection<X,Y>> selectionDoneEvent;
-    private boolean selecting;
-
-    //private Event onDoneSelecting =new Event()
+    private final Rectangle selection = new Rectangle(0, 0, 0, 0);
+    private final SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
+    private final SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
+    private  Consumer<XYChartSelection<X,Y>> selectionDoneEvent;
 
     public XYChartCrosshair(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
         this.chart = chart;
@@ -177,17 +166,18 @@ public class XYChartCrosshair<X, Y> {
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
         mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX())), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY())));
-        if (event.isShiftDown()) {
+       // if (event.isShiftDown()) {
+        if (showHorizontalMarker.get()){
             drawHorizontalMarker();
         }
-        if (event.isControlDown()) {
+        //if (event.isControlDown()) {
+        if (showVerticalMarker.get()){
             drawVerticalMarker();
         }
         if (event.isPrimaryButtonDown() && (showVerticalMarker.get() || showHorizontalMarker.get())) {
             isSelecting.set(true);
             drawSelection();
         }
-
     }
 
     private void drawSelection() {
@@ -225,7 +215,6 @@ public class XYChartCrosshair<X, Y> {
         return label;
     }
 
-
     private void applyStyle(Shape shape) {
         shape.setMouseTransparent(true);
         shape.setSmooth(false);
@@ -249,5 +238,19 @@ public class XYChartCrosshair<X, Y> {
         return showHorizontalMarker;
     }
 
+    public boolean isShowVerticalMarker() {
+        return showVerticalMarker.get();
+    }
 
+    public boolean isShowHorizontalMarker() {
+        return showHorizontalMarker.get();
+    }
+
+    public void setShowVerticalMarker(boolean showVerticalMarker) {
+        this.showVerticalMarker.set(showVerticalMarker);
+    }
+
+    public void setShowHorizontalMarker(boolean showHorizontalMarker) {
+        this.showHorizontalMarker.set(showHorizontalMarker);
+    }
 }

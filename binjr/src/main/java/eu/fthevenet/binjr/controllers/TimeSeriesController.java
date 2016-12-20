@@ -18,14 +18,12 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
-import javafx.stage.Window;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.dialog.ExceptionDialog;
+import org.controlsfx.control.ToggleSwitch;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -71,8 +69,9 @@ public class TimeSeriesController implements Initializable {
     @FXML
     private Button backButton;
     @FXML
+    private Button forwardButton;
+    @FXML
     private Button resetYButton;
-
     @FXML
     private ZonedDateTimePicker startDate;
     @FXML
@@ -90,7 +89,8 @@ public class TimeSeriesController implements Initializable {
     private State currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
 
-    private History history = new History();
+    private History backwardHistory = new History();
+    private History forwardHistory = new History();
 
     private ZoneId currentZoneId = ZoneId.systemDefault();
 
@@ -101,8 +101,8 @@ public class TimeSeriesController implements Initializable {
         return null;
     }
 
-    public History getHistory() {
-        return history;
+    public History getBackwardHistory() {
+        return backwardHistory;
     }
 
     @Override
@@ -114,9 +114,11 @@ public class TimeSeriesController implements Initializable {
         assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert seriesList != null : "fx:id\"seriesList\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
+        assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
         assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
+
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
@@ -125,7 +127,8 @@ public class TimeSeriesController implements Initializable {
         this.currentState = new State(now.minus(12, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
 
-        backButton.disableProperty().bind(history.emptyStackProperty);
+        backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
+        forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
         seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
@@ -145,10 +148,11 @@ public class TimeSeriesController implements Initializable {
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         if ( !currentSelection.equals(previousState)) {
             if (saveToHistory) {
-                this.history.push(previousState);
+                this.backwardHistory.push(previousState);
+                this.forwardHistory.clear();
             }
             previousState = currentState.asSelection();
-            logger.debug(() -> history.dump());
+            logger.debug(() -> backwardHistory.dump());
            if (plotChart) {
                plotChart(currentSelection);
            }
@@ -175,13 +179,12 @@ public class TimeSeriesController implements Initializable {
         return chart;
     }
 
-    private void restoreSelectionFromHistory() {
+    private void restoreSelectionFromHistory(History history, History toHistory) {
         if (!history.isEmpty()) {
-            XYChartSelection<ZonedDateTime, Double> state = history.pop();
-            logger.debug(()-> "Restoring selection from history: " + (state != null ? state.toString() : "null"));
-            currentState.setSelection(state, false);
+            toHistory.push(currentState.asSelection());
+            currentState.setSelection(history.pop(), false);
         }
-        else {
+          else {
             logger.debug(() -> "History is empty: nothing to go back to.");
         }
     }
@@ -242,7 +245,11 @@ public class TimeSeriesController implements Initializable {
 
 
     public void handleHistoryBack(ActionEvent actionEvent) {
-        this.restoreSelectionFromHistory();
+        restoreSelectionFromHistory(backwardHistory, forwardHistory);
+
+    }
+    public void handleHistoryForward(ActionEvent actionEvent) {
+        restoreSelectionFromHistory(forwardHistory,backwardHistory);
     }
 
     public void handleResetYRangeButton(ActionEvent actionEvent) {
@@ -261,19 +268,26 @@ public class TimeSeriesController implements Initializable {
         this.mainViewController = mainViewController;
     }
 
+
+
     public class History {
         private Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
         public SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
 
         public XYChartSelection<ZonedDateTime, Double> push(XYChartSelection<ZonedDateTime, Double> state) {
             if (state == null){
-                logger.warn(()-> "Trying to push null state into history");
+                logger.warn(()-> "Trying to push null state into backwardHistory");
                 return null;
             }
             else {
                 emptyStackProperty.set(false);
                 return this.stack.push(state);
             }
+        }
+
+        public void clear(){
+            this.stack.clear();
+            emptyStackProperty.set(true);
         }
 
         public XYChartSelection<ZonedDateTime, Double> pop() {

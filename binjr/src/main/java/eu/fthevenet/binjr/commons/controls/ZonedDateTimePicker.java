@@ -18,7 +18,7 @@ import java.time.format.FormatStyle;
 @SuppressWarnings("unused")
 public class ZonedDateTimePicker extends DatePicker {
     private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
-    private DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
+    private final DateTimeFormatter formatter;
     private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
 
 
@@ -27,7 +27,7 @@ public class ZonedDateTimePicker extends DatePicker {
     }
     public ZonedDateTimePicker(ZoneId currentZoneId) {
         getStyleClass().add("datetime-picker");
-
+        this.formatter= DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(currentZoneId);
         setConverter(new InternalConverter());
 
         // Synchronize changes to the underlying date value back to the dateTimeValue
@@ -83,13 +83,18 @@ public class ZonedDateTimePicker extends DatePicker {
         }
 
         public LocalDate fromString(String stringValue) {
-            ZonedDateTime zdt = ZonedDateTime.parse(stringValue, DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM));
+
             if (stringValue == null || stringValue.isEmpty()) {
                 dateTimeValue.set(null);
                 return null;
             }
-
-            dateTimeValue.set(zdt);
+            try{
+                dateTimeValue.set(ZonedDateTime.parse(stringValue, formatter));
+            }
+            catch (Exception ex){
+                logger.debug("Error parsing date", ex);
+                throw ex;
+            }
             return dateTimeValue.get().toLocalDate();
         }
     }

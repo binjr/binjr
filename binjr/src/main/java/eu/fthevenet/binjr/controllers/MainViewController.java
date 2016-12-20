@@ -19,6 +19,7 @@ import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class MainViewController implements Initializable {
     @FXML
     public TextField RDPEpsilon;
     @FXML
-    private Menu editMenu;
+    private Menu viewMenu;
     @FXML
     private Menu helpMenu;
     @FXML
@@ -53,6 +54,15 @@ public class MainViewController implements Initializable {
     private TabPane seriesTabPane;
     @FXML
     private MenuItem newTab;
+    @FXML
+    private ToggleSwitch hMarkerToggle;
+    @FXML
+    private ToggleSwitch vMarkerToggle;
+
+    @FXML
+    private CheckMenuItem showXmarkerMenuItem;
+    @FXML
+    private CheckMenuItem showYmarkerMenuItem;
 
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
@@ -336,7 +346,7 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        assert editMenu != null : "fx:id\"editMenu\" was not injected!";
+        assert viewMenu != null : "fx:id\"editMenu\" was not injected!";
 
         assert root != null : "fx:id\"root\" was not injected!";
         assert RDPEpsilon != null : "fx:id\"RDPEpsilon\" was not injected!";
@@ -348,6 +358,10 @@ public class MainViewController implements Initializable {
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
+        vMarkerToggle.selectedProperty().bindBidirectional(showHorizontalMarker);
+        hMarkerToggle.selectedProperty().bindBidirectional(showVerticalMarker);
+        showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
+        showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
 
 
@@ -372,6 +386,7 @@ public class MainViewController implements Initializable {
                         selectedTabController = current;
                         current.setMainViewController(MainViewController.this);
                      //   current.invalidate(false, true);
+
                         current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
                         current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
@@ -422,14 +437,15 @@ public class MainViewController implements Initializable {
 
     public void handleDumpHistoryAction(ActionEvent actionEvent) {
         if (selectedTabController != null) {
-            TimeSeriesController.History h = selectedTabController.getHistory();
-            logger.debug(() -> "Current Tab selection history" + (h == null ? "null" : h.dump()));
+            TimeSeriesController.History h = selectedTabController.getBackwardHistory();
+            logger.debug(() -> "Current Tab selection  history (backward):\n" + (h == null ? "null" : h.dump()));
         }
     }
 
     public  void displayException(String header, Exception e) {
         displayException(header, e, getStage());
     }
+
 
     public  void displayException(String header, Exception e, Window owner) {
         logger.debug(()-> "Displaying following exception to end user", e);
@@ -446,5 +462,18 @@ public class MainViewController implements Initializable {
             return (Stage)root.getScene().getWindow();
         }
         return null;
+    }
+
+    @FXML
+    public void handlePreferencesAction(ActionEvent actionEvent) {
+        try {
+            Dialog<String> dialog = new Dialog<>();
+            dialog.initStyle(StageStyle.UTILITY);
+            dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
+            dialog.initOwner(getStage());
+            dialog.showAndWait();
+        } catch (Exception ex) {
+            displayException("Failed to display preference dialog", ex);
+        }
     }
 }
