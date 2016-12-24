@@ -61,26 +61,26 @@
                               <Tooltip text="Go forward" />
                            </tooltip>
                         </Button>
-                        <!--<Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">-->
-                           <!--<graphic>-->
-                              <!--<ImageView fitHeight="14" fitWidth="14">-->
-                                 <!--<image>-->
-                                    <!--<Image url="@/images/refresh.png" />-->
-                                 <!--</image>-->
-                              <!--</ImageView>-->
-                           <!--</graphic>-->
-                           <!--<font>-->
-                              <!--<Font size="1.0" />-->
-                           <!--</font>-->
-                           <!--<tooltip>-->
-                              <!--<Tooltip text="Refresh">-->
-                                  <!--<font>-->
-                                      <!--<Font size="10.0" />-->
-                                  <!--</font>-->
-                              <!--</Tooltip>-->
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
+                           <graphic>
+                              <ImageView fitHeight="14" fitWidth="14">
+                                 <image>
+                                    <Image url="@/images/refresh.png" />
+                                 </image>
+                              </ImageView>
+                           </graphic>
+                           <font>
+                              <Font size="1.0" />
+                           </font>
+                           <tooltip>
+                              <Tooltip text="Refresh">
+                                  <font>
+                                      <Font size="10.0" />
+                                  </font>
+                              </Tooltip>
 
-                           <!--</tooltip>-->
-                        <!--</Button>-->
+                           </tooltip>
+                        </Button>
                         <Separator orientation="VERTICAL" prefHeight="200.0">
                             <HBox.margin>
                             <Insets left="10.0" />

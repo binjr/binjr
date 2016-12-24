@@ -119,7 +119,7 @@
                     <appName>${project.build.finalName}</appName>
                     <icon>${project.build.finalName}.ico</icon>
                     <bundleArguments>
-                        <!--<runtime />-->
+                        <runtime />
                     </bundleArguments>
                 </configuration>
                 <executions>

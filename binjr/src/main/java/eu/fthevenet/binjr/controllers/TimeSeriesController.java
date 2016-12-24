@@ -58,8 +58,8 @@ public class TimeSeriesController implements Initializable {
 //    public CalendarTextField endDateTime;
     @FXML
     private AreaChart<ZonedDateTime, Double> chart;
-   // @FXML
-  //  private CheckBox yAutoRange;
+    // @FXML
+    //  private CheckBox yAutoRange;
     @FXML
     private TextField yMinRange;
     @FXML
@@ -79,10 +79,13 @@ public class TimeSeriesController implements Initializable {
 
     private MainViewController mainViewController;
 
+    private String[] probes = new String[]{ "processor_Total", "memory", "system"};
+   static AtomicInteger currentProbeIdx = new AtomicInteger(0);
 
-    private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
-    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty("memprocPdh");
+
+    private Property<String> currentHost = new SimpleStringProperty("localhost:8080");//"ngwps006:31001/perf-ui");
+    private Property<String> currentTarget = new SimpleStringProperty("localhost");//"wps006.mshome.net");
+    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%3]);//memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
@@ -94,9 +97,9 @@ public class TimeSeriesController implements Initializable {
 
     private ZoneId currentZoneId = ZoneId.systemDefault();
 
-    private Stage getStage(){
-        if (chartParent != null && chartParent.getScene() != null){
-            return (Stage)chartParent.getScene().getWindow();
+    private Stage getStage() {
+        if (chartParent != null && chartParent.getScene() != null) {
+            return (Stage) chartParent.getScene().getWindow();
         }
         return null;
     }
@@ -134,33 +137,37 @@ public class TimeSeriesController implements Initializable {
         seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
 
-        setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY,((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
-        setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY,((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
-        crossHair.onSelectionDone(s-> {
+        setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
+        setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+        crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
         });
     }
 
     public void invalidate(boolean saveToHistory, boolean plotChart) {
+        invalidate(saveToHistory, plotChart, false);
+    }
+
+    public void invalidate(boolean saveToHistory, boolean plotChart, boolean forceRefresh) {
         logger.debug(() -> "Refreshing chart");
         XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-        if ( !currentSelection.equals(previousState)) {
+        if (!currentSelection.equals(previousState) || forceRefresh) {
             if (saveToHistory) {
                 this.backwardHistory.push(previousState);
                 this.forwardHistory.clear();
             }
             previousState = currentState.asSelection();
             logger.debug(() -> backwardHistory.dump());
-           if (plotChart) {
-               plotChart(currentSelection);
-           }
-        }
-        else {
+            if (plotChart) {
+                plotChart(currentSelection);
+            }
+        } else {
             logger.debug(() -> "State hasn't change, no need to redraw the graph");
         }
     }
+
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<T>(converter);
         formatter.valueProperty().bindBidirectional(stateProperty);
@@ -183,8 +190,7 @@ public class TimeSeriesController implements Initializable {
         if (!history.isEmpty()) {
             toHistory.push(currentState.asSelection());
             currentState.setSelection(history.pop(), false);
-        }
-          else {
+        } else {
             logger.debug(() -> "History is empty: nothing to go back to.");
         }
     }
@@ -214,7 +220,7 @@ public class TimeSeriesController implements Initializable {
             if (getMainViewController() != null) {
                 getMainViewController().displayException("Failed to retrieve data from source", e);
             }
-           // throw new RuntimeException(e);
+            // throw new RuntimeException(e);
         }
     }
 
@@ -234,22 +240,20 @@ public class TimeSeriesController implements Initializable {
                 return timeSeriesBuilder.fromCSV(in)
                         .transform(new LargestTriangleThreeBucketsTransform<>(1000))
                         .build();
-            }
-            else {
+            } else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));
             }
         }
     }
 
 
-
-
     public void handleHistoryBack(ActionEvent actionEvent) {
         restoreSelectionFromHistory(backwardHistory, forwardHistory);
 
     }
+
     public void handleHistoryForward(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(forwardHistory,backwardHistory);
+        restoreSelectionFromHistory(forwardHistory, backwardHistory);
     }
 
     public void handleResetYRangeButton(ActionEvent actionEvent) {
@@ -257,7 +261,7 @@ public class TimeSeriesController implements Initializable {
     }
 
     public void handleRefresh(ActionEvent actionEvent) {
-        this.invalidate(false, true);
+        this.invalidate(false, true, true);
     }
 
     public MainViewController getMainViewController() {
@@ -269,23 +273,21 @@ public class TimeSeriesController implements Initializable {
     }
 
 
-
     public class History {
         private Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
         public SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
 
         public XYChartSelection<ZonedDateTime, Double> push(XYChartSelection<ZonedDateTime, Double> state) {
-            if (state == null){
-                logger.warn(()-> "Trying to push null state into backwardHistory");
+            if (state == null) {
+                logger.warn(() -> "Trying to push null state into backwardHistory");
                 return null;
-            }
-            else {
+            } else {
                 emptyStackProperty.set(false);
                 return this.stack.push(state);
             }
         }
 
-        public void clear(){
+        public void clear() {
             this.stack.clear();
             emptyStackProperty.set(true);
         }
@@ -304,13 +306,12 @@ public class TimeSeriesController implements Initializable {
         public String dump() {
             final StringBuilder sb = new StringBuilder("History:");
             AtomicInteger pos = new AtomicInteger(0);
-            if (this.isEmpty()){
+            if (this.isEmpty()) {
                 sb.append(" { empty }");
-            }
-            else{
-                stack.forEach(h-> {
+            } else {
+                stack.forEach(h -> {
                     sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString());
-                } );
+                });
             }
 
             return sb.toString();
@@ -329,7 +330,7 @@ public class TimeSeriesController implements Initializable {
 
         private boolean frozen;
 
-     //   private final SimpleObjectProperty<State> state = new SimpleObjectProperty<>();
+        //   private final SimpleObjectProperty<State> state = new SimpleObjectProperty<>();
 
         public XYChartSelection<ZonedDateTime, Double> asSelection() {
             return new XYChartSelection<>(
@@ -351,8 +352,7 @@ public class TimeSeriesController implements Initializable {
                 this.startY.set(roundYValue(selection.getStartY()));
                 this.endY.set(roundYValue(selection.getEndY()));
                 invalidate(toHistory, plotChart);
-            }
-            finally {
+            } finally {
                 frozen = false;
             }
         }
@@ -363,18 +363,26 @@ public class TimeSeriesController implements Initializable {
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
             this.endY = new SimpleDoubleProperty(roundYValue(endY));
 
-            this.startX.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true, true);});
-            this.endX.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true, true);});
-            this.startY.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true, false);});
-            this.endY.addListener((observable, oldValue, newValue) -> { if (!frozen) invalidate(true, false);});
+            this.startX.addListener((observable, oldValue, newValue) -> {
+                if (!frozen) invalidate(true, true);
+            });
+            this.endX.addListener((observable, oldValue, newValue) -> {
+                if (!frozen) invalidate(true, true);
+            });
+            this.startY.addListener((observable, oldValue, newValue) -> {
+                if (!frozen) invalidate(true, false);
+            });
+            this.endY.addListener((observable, oldValue, newValue) -> {
+                if (!frozen) invalidate(true, false);
+            });
         }
 
-        private double roundYValue(double y){
+        private double roundYValue(double y) {
             return Math.round(y);
         }
 
-        private ZonedDateTime roundDateTime(ZonedDateTime zdt){
-            return  ZonedDateTime.of(zdt.getYear(),
+        private ZonedDateTime roundDateTime(ZonedDateTime zdt) {
+            return ZonedDateTime.of(zdt.getYear(),
                     zdt.getMonthValue(),
                     zdt.getDayOfMonth(),
                     zdt.getHour(),
@@ -382,7 +390,7 @@ public class TimeSeriesController implements Initializable {
                     zdt.getSecond(),
                     0,
                     zdt.getZone()
-                    );
+            );
         }
 
         @Override
