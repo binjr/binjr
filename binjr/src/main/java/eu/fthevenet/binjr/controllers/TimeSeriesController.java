@@ -23,7 +23,6 @@ import javafx.util.converter.NumberStringConverter;
 import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.ToggleSwitch;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -65,7 +64,7 @@ public class TimeSeriesController implements Initializable {
     @FXML
     private TextField yMaxRange;
     @FXML
-    ListView<SelectableListItem> seriesList;
+    private    ListView<SelectableListItem> seriesList;
     @FXML
     private Button backButton;
     @FXML
@@ -76,16 +75,19 @@ public class TimeSeriesController implements Initializable {
     private ZonedDateTimePicker startDate;
     @FXML
     private ZonedDateTimePicker endDate;
-
+    private static AtomicInteger currentProbeIdx = new AtomicInteger(0);
     private MainViewController mainViewController;
 
-    private String[] probes = new String[]{ "processor_Total", "memory", "system"};
-   static AtomicInteger currentProbeIdx = new AtomicInteger(0);
+    private String[] probes = new String[]{ "memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
 
 
-    private Property<String> currentHost = new SimpleStringProperty("localhost:8080");//"ngwps006:31001/perf-ui");
-    private Property<String> currentTarget = new SimpleStringProperty("localhost");//"wps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%3]);//memprocPdh");
+    private Property<Boolean> refreshing = new SimpleBooleanProperty(false);
+
+
+
+    private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
+    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
+    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%probes.length]);//memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
@@ -106,6 +108,18 @@ public class TimeSeriesController implements Initializable {
 
     public History getBackwardHistory() {
         return backwardHistory;
+    }
+
+    public Boolean getRefreshing() {
+        return refreshing.getValue();
+    }
+
+    public Property<Boolean> refreshingProperty() {
+        return refreshing;
+    }
+
+    public void setRefreshing(Boolean refreshing) {
+        this.refreshing.setValue(refreshing);
     }
 
     @Override
@@ -169,12 +183,10 @@ public class TimeSeriesController implements Initializable {
     }
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
-        final TextFormatter<T> formatter = new TextFormatter<T>(converter);
+        final TextFormatter<T> formatter = new TextFormatter<>(converter);
         formatter.valueProperty().bindBidirectional(stateProperty);
         axisBoundProperty.bindBidirectional(stateProperty);
-        formatter.valueProperty().addListener((observable, o, v) -> {
-            chart.getYAxis().setAutoRanging(false);
-        });
+        formatter.valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
         textField.setTextFormatter(formatter);
     }
 
@@ -196,6 +208,7 @@ public class TimeSeriesController implements Initializable {
     }
 
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
+        refreshing.setValue(true);
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
             Map<String, XYChart.Series<ZonedDateTime, Double>> series = getRawData(
@@ -221,6 +234,8 @@ public class TimeSeriesController implements Initializable {
                 getMainViewController().displayException("Failed to retrieve data from source", e);
             }
             // throw new RuntimeException(e);
+        }finally{
+            refreshing.setValue(false);
         }
     }
 
@@ -309,9 +324,7 @@ public class TimeSeriesController implements Initializable {
             if (this.isEmpty()) {
                 sb.append(" { empty }");
             } else {
-                stack.forEach(h -> {
-                    sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString());
-                });
+                stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString()));
             }
 
             return sb.toString();

@@ -10,6 +10,8 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
+
 public class Main extends Application {
 
     private static final Logger logger = LogManager.getLogger(Main.class);
@@ -33,7 +35,13 @@ public class Main extends Application {
         try(Profiler p= Profiler.start("show", logger::trace)) {
             primaryStage.show();
         }
+
+        SplashScreen splash=  SplashScreen.getSplashScreen();
+        if (splash !=null){
+            splash.close();
+        }
     }
+
 
 
     public static void main(String[] args) {

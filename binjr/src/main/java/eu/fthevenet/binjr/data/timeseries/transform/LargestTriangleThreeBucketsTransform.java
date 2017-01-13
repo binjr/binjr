@@ -50,7 +50,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
             avgRangeEnd = avgRangeEnd < dataLength ? avgRangeEnd : dataLength;
             int avgRangeLength = avgRangeEnd - avgRangeStart;
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
-                avgX += data.get(avgRangeStart).getXValue().toInstant().toEpochMilli(); // * 1 enforces Number (value may be Date)
+                avgX += data.get(avgRangeStart).getXValue().toEpochSecond();
                 avgY += data.get(avgRangeStart).getYValue().doubleValue();
             }
             avgX /= avgRangeLength;
@@ -60,7 +60,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
             int rangeTo = (int) (Math.floor((i + 1) * every) + 1);
 
             // Point a
-            double pointAx = data.get(a).getXValue().toEpochSecond(); // enforce Number (value may be Date)
+            double pointAx = data.get(a).getXValue().toEpochSecond();
             double pointAy = data.get(a).getYValue().doubleValue();
             double maxArea = -1;
             for (; rangeOffs < rangeTo; rangeOffs++) {

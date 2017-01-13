@@ -38,61 +38,67 @@
                 </configuration>
             </plugin>
 
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-source-plugin</artifactId>-->
-                <!--<version>3.0.0</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>attach-sources</id>-->
-                        <!--<goals>-->
-                            <!--<goal>jar</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>2.4.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <manifestEntries>
+                                        <Main-Class>eu.fthevenet.binjr.Main</Main-Class>
+                                        <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
+                                        <!--<Build-Number>123</Build-Number>-->
+                                    </manifestEntries>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
-            <!-- Javadoc generation -->
+
             <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-javadoc-plugin</artifactId>-->
-                <!--<version>2.10.3</version>-->
+                <!--<groupId>com.zenjava</groupId>-->
+                <!--<artifactId>javafx-maven-plugin</artifactId>-->
+                <!--<version>8.7.0</version>-->
                 <!--<configuration>-->
-                    <!--<encoding>UTF-8</encoding>-->
-                    <!--<source>1.8</source>-->
+                    <!--<mainClass>eu.fthevenet.binjr.Main</mainClass>-->
+                    <!--<vendor>Frederic Thevenet</vendor>-->
+                    <!--<bundleType>IMAGE</bundleType>-->
+                    <!--<nativeReleaseVersion>${project.version}</nativeReleaseVersion>-->
+                    <!--<appName>${project.build.finalName}</appName>-->
+                    <!--<icon>${project.build.finalName}.ico</icon>-->
+
+                    <!--<manifestAttributes>-->
+                        <!--<SplashScreen-Image>images/logo_med.png</SplashScreen-Image>-->
+
+                    <!--</manifestAttributes>-->
+                    <!--<bundleArguments>-->
+                        <!--<runtime />-->
+                    <!--</bundleArguments>-->
                 <!--</configuration>-->
                 <!--<executions>-->
                     <!--<execution>-->
-                        <!--<id>attach-javadocs</id>-->
-                        <!--<goals>-->
-                            <!--<goal>jar</goal>-->
-                        <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<additionalparam>-Xdoclint:none</additionalparam>-->
-                        <!--</configuration>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-            <!--</plugin>-->
-            <!--<plugin>-->
-                <!--<groupId>org.apache.maven.plugins</groupId>-->
-                <!--<artifactId>maven-shade-plugin</artifactId>-->
-                <!--<version>2.4.3</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
+                        <!--&lt;!&ndash; required before build-native &ndash;&gt;-->
+                        <!--<id>create-jfxjar</id>-->
                         <!--<phase>package</phase>-->
                         <!--<goals>-->
-                            <!--<goal>shade</goal>-->
+                            <!--<goal>build-jar</goal>-->
                         <!--</goals>-->
-                        <!--<configuration>-->
-                            <!--<transformers>-->
-                                <!--<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">-->
-                                    <!--<manifestEntries>-->
-                                        <!--<Main-Class>eu.fthevenet.binjr.Main</Main-Class>-->
-                                        <!--&lt;!&ndash;<Build-Number>123</Build-Number>&ndash;&gt;-->
-                                    <!--</manifestEntries>-->
-                                <!--</transformer>-->
-                            <!--</transformers>-->
-                        <!--</configuration>-->
+                    <!--</execution>-->
+                    <!--<execution>-->
+                        <!--<id>create-native</id>-->
+                        <!--<phase>package</phase>-->
+                        <!--<goals>-->
+                            <!--<goal>build-native</goal>-->
+                        <!--</goals>-->
                     <!--</execution>-->
                 <!--</executions>-->
             <!--</plugin>-->
@@ -106,39 +112,6 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.7.0</version>
-                <configuration>
-                    <mainClass>eu.fthevenet.binjr.Main</mainClass>
-                    <vendor>Frederic Thevenet</vendor>
-                    <bundleType>IMAGE</bundleType>
-                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
-                    <appName>${project.build.finalName}</appName>
-                    <icon>${project.build.finalName}.ico</icon>
-                    <bundleArguments>
-                        <runtime />
-                    </bundleArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <!-- required before build-native -->
-                        <id>create-jfxjar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build-jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>create-native</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build-native</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
