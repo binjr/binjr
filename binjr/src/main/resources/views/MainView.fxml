@@ -72,9 +72,9 @@
                                 </AnchorPane>
                                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" SplitPane.resizableWithParent="false">
                                     <children>
-                                        <CheckBox fx:id="chkBoxEnableRDP" layoutX="12.0" layoutY="19.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
+                                        <CheckBox fx:id="enableDownSampling" layoutX="12.0" layoutY="19.0" mnemonicParsing="false" selected="true" text="Down-sample to max:" />
                                         <CheckBox fx:id="showChartSymbols" layoutX="12.0" layoutY="50.0" mnemonicParsing="false" text="Show data points" />
-                                        <TextField fx:id="RDPEpsilon" layoutX="166.0" layoutY="16.0" prefHeight="25.0" prefWidth="50.0" text="1000" />
+                                        <TextField fx:id="downSamplingThreshold" layoutX="166.0" layoutY="16.0" prefHeight="25.0" prefWidth="50.0" text="1000" />
                                         <CheckBox fx:id="enableChartAnimation" layoutX="12.0" layoutY="76.0" mnemonicParsing="false" text="Animate chart" />
                                     </children>
                                 </AnchorPane>

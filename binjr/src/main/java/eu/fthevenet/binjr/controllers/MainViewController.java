@@ -1,11 +1,13 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -17,14 +19,18 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
+import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.PropertySheet;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.dialog.ExceptionDialog;
+import org.controlsfx.property.BeanProperty;
 
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,7 +41,7 @@ public class MainViewController implements Initializable {
     @FXML
     public VBox root;
     @FXML
-    public TextField RDPEpsilon;
+    public TextField downSamplingThreshold;
     @FXML
     private Menu viewMenu;
     @FXML
@@ -47,7 +53,7 @@ public class MainViewController implements Initializable {
     @FXML
     private TreeView<String> treeview;
     @FXML
-    private CheckBox chkBoxEnableRDP;
+    private CheckBox enableDownSampling;
     @FXML
     private CheckBox enableChartAnimation;
     @FXML
@@ -352,12 +358,12 @@ public class MainViewController implements Initializable {
         assert viewMenu != null : "fx:id\"editMenu\" was not injected!";
 
         assert root != null : "fx:id\"root\" was not injected!";
-        assert RDPEpsilon != null : "fx:id\"RDPEpsilon\" was not injected!";
+        assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert treeview != null : "fx:id\"treeview\" was not injected!";
         assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
-        // assert  seriesTab1Controller != null : "fx:id\"seriesTab1Controller\" was not injected!";
+        assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
@@ -366,10 +372,15 @@ public class MainViewController implements Initializable {
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
+//        enableChartAnimation.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().chartAnimationEnabledProperty());
+//        showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
+//        enableDownSampling.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingEnabledProperty());
+//        final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+//        downSamplingThreshold.setTextFormatter(formatter);
+//        formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
 
 
         seriesTabPane.getSelectionModel().clearSelection();
-
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
@@ -389,8 +400,9 @@ public class MainViewController implements Initializable {
                         current.setMainViewController(MainViewController.this);
                         current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
-                        current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
-                        current.getChart().animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
+//                        current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
+//                        current.getChart().animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
+
 
                         seriesControllers.put(newValue.getText(), current);
 
@@ -454,7 +466,7 @@ public class MainViewController implements Initializable {
     public void handlePreferencesAction(ActionEvent actionEvent) {
         try {
             Dialog<String> dialog = new Dialog<>();
-            dialog.initStyle(StageStyle.UTILITY);
+            dialog.initStyle(StageStyle.UNIFIED);
             dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
             dialog.initOwner(getStage());
             dialog.showAndWait();

@@ -5,18 +5,15 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import org.controlsfx.control.PropertySheet?>
 
-
-<DialogPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1">
+<DialogPane prefHeight="209.0" prefWidth="297.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
    <content>
       <AnchorPane>
          <children>
-            <PropertySheet fx:id="preferencePropertySheet" layoutX="20.0" layoutY="20.0" titleFilter="Preferences" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <PropertySheet fx:id="preferencePropertySheet" titleFilter="Preferences" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
          </children>
       </AnchorPane>
    </content>
    <buttonTypes>
-      <ButtonType fx:constant="APPLY" />
-      <ButtonType fx:constant="CANCEL" />
       <ButtonType fx:constant="CLOSE" />
    </buttonTypes>
 </DialogPane>

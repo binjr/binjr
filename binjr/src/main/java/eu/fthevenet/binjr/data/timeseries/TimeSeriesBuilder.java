@@ -24,38 +24,39 @@ import java.util.stream.Collectors;
 public class TimeSeriesBuilder<T extends Number> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBuilder.class);
     private Map<String, List<XYChart.Data<ZonedDateTime, T>>> timeSeries;
-    private final boolean useReduction;
-    private final int reductionThreshold;
     private final Function<String, T> numberParser;
     private final Function<String, ZonedDateTime> dateParser;
 
 
     public TimeSeriesBuilder(ZoneId zoneId, Function<String, T> numberParser, Function<String, ZonedDateTime> instantParser) {
-        this(true, 1000, numberParser, instantParser);
+        this(numberParser, instantParser);
     }
 
-    public TimeSeriesBuilder(boolean useReduction, int reductionThreshold, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser) {
-        this.reductionThreshold = reductionThreshold;
-        this.useReduction = useReduction;
+    public TimeSeriesBuilder(Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser) {
         this.numberParser = numberParser;
         this.dateParser = dateParser;
         this.timeSeries = new HashMap<>();
     }
 
 
-    public TimeSeriesBuilder<T> transform(TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
-        Set<String> nameSet = seriesNames.length == 0 ? timeSeries.keySet() : new HashSet<String>(Arrays.asList(seriesNames));
-        Map<String, List<XYChart.Data<ZonedDateTime, T>>> series = timeSeries.entrySet()
-                .stream()
-                .filter(s -> nameSet.contains(s.getKey()))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    public TimeSeriesBuilder<T> transform(boolean isTransformEnabled, TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
+        if (isTransformEnabled) {
+            Set<String> nameSet = seriesNames.length == 0 ? timeSeries.keySet() : new HashSet<String>(Arrays.asList(seriesNames));
+            Map<String, List<XYChart.Data<ZonedDateTime, T>>> series = timeSeries.entrySet()
+                    .stream()
+                    .filter(s -> nameSet.contains(s.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        if (series == null || series.size() != nameSet.size()) {
-            throw new IllegalArgumentException("Failed to retrieve all timeSeries with name " + Arrays.toString(seriesNames));
+            if (series == null || series.size() != nameSet.size()) {
+                throw new IllegalArgumentException("Failed to retrieve all timeSeries with name " + Arrays.toString(seriesNames));
+            }
+            try (Profiler ignored = Profiler.start("Applying transform" + seriesTransform.getName() + " to series " + Arrays.toString(nameSet.toArray()), logger::trace)) {
+                Map<String, List<XYChart.Data<ZonedDateTime, T>>> a = seriesTransform.transform(series);
+                timeSeries.putAll(a);
+            }
         }
-        try (Profiler ignored = Profiler.start("Applying transform" + seriesTransform.getName() + " to series " + Arrays.toString(nameSet.toArray()), logger::trace)) {
-            Map<String, List<XYChart.Data<ZonedDateTime, T>>> a = seriesTransform.transform(series);
-            timeSeries.putAll(a);
+        else{
+            logger.debug(()-> "Transform " + seriesTransform.getName() +" on series " + Arrays.toString(seriesNames) + " is disabled.");
         }
         return this;
     }

@@ -7,7 +7,9 @@ import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.providers.JRDSDataProvider;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -80,11 +82,6 @@ public class TimeSeriesController implements Initializable {
 
     private String[] probes = new String[]{ "memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
 
-
-    private Property<Boolean> refreshing = new SimpleBooleanProperty(false);
-
-
-
     private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
     private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%probes.length]);//memprocPdh");
@@ -98,6 +95,7 @@ public class TimeSeriesController implements Initializable {
     private History forwardHistory = new History();
 
     private ZoneId currentZoneId = ZoneId.systemDefault();
+    private GlobalPreferences globalPrefs;
 
     private Stage getStage() {
         if (chartParent != null && chartParent.getScene() != null) {
@@ -108,18 +106,6 @@ public class TimeSeriesController implements Initializable {
 
     public History getBackwardHistory() {
         return backwardHistory;
-    }
-
-    public Boolean getRefreshing() {
-        return refreshing.getValue();
-    }
-
-    public Property<Boolean> refreshingProperty() {
-        return refreshing;
-    }
-
-    public void setRefreshing(Boolean refreshing) {
-        this.refreshing.setValue(refreshing);
     }
 
     @Override
@@ -136,6 +122,12 @@ public class TimeSeriesController implements Initializable {
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
 
+        globalPrefs = GlobalPreferences.getInstance();
+
+        chart.createSymbolsProperty().bindBidirectional(globalPrefs.sampleSymbolsVisibleProperty());
+        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
+        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
+        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
@@ -208,7 +200,6 @@ public class TimeSeriesController implements Initializable {
     }
 
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
-        refreshing.setValue(true);
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
             Map<String, XYChart.Series<ZonedDateTime, Double>> series = getRawData(
@@ -234,8 +225,6 @@ public class TimeSeriesController implements Initializable {
                 getMainViewController().displayException("Failed to retrieve data from source", e);
             }
             // throw new RuntimeException(e);
-        }finally{
-            refreshing.setValue(false);
         }
     }
 
@@ -252,8 +241,10 @@ public class TimeSeriesController implements Initializable {
                         },
                         s -> ZonedDateTime.parse(s, formatter));
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
+
                 return timeSeriesBuilder.fromCSV(in)
-                        .transform(new LargestTriangleThreeBucketsTransform<>(1000))
+                        .transform(globalPrefs.getDownSamplingEnabled(),
+                                new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
                         .build();
             } else {
                 throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));
