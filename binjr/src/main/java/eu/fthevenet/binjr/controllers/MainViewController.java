@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.commons.controls.EditableTab;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
@@ -9,12 +10,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -35,13 +38,10 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     @FXML
     public VBox root;
-    @FXML
-    public TextField downSamplingThreshold;
     @FXML
     private Menu viewMenu;
     @FXML
@@ -49,13 +49,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem editRefresh;
     @FXML
-    private CheckBox showChartSymbols;
-    @FXML
     private TreeView<String> treeview;
-    @FXML
-    private CheckBox enableDownSampling;
-    @FXML
-    private CheckBox enableChartAnimation;
     @FXML
     private TabPane seriesTabPane;
     @FXML
@@ -64,27 +58,20 @@ public class MainViewController implements Initializable {
     private ToggleSwitch hMarkerToggle;
     @FXML
     private ToggleSwitch vMarkerToggle;
-
     @FXML
     private CheckMenuItem showXmarkerMenuItem;
     @FXML
     private CheckMenuItem showYmarkerMenuItem;
-
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
 
-
-
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
-
         Dialog<String> dialog = new Dialog<>();
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setTitle("About binjr");
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
         dialog.initOwner(getStage());
-
-
         dialog.showAndWait();
     }
 
@@ -97,7 +84,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleNewTabAction(ActionEvent actionEvent) {
-        seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() + ")"));
+        //seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() + ")"));
     }
 
     private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
@@ -347,7 +334,6 @@ public class MainViewController implements Initializable {
                 event.consume();
                 break;
 
-
             default:
                 //do nothing
         }
@@ -356,14 +342,9 @@ public class MainViewController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert viewMenu != null : "fx:id\"editMenu\" was not injected!";
-
         assert root != null : "fx:id\"root\" was not injected!";
-        assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
-        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert treeview != null : "fx:id\"treeview\" was not injected!";
-        assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
-        assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
@@ -372,21 +353,14 @@ public class MainViewController implements Initializable {
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
-//        enableChartAnimation.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().chartAnimationEnabledProperty());
-//        showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
-//        enableDownSampling.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingEnabledProperty());
-//        final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
-//        downSamplingThreshold.setTextFormatter(formatter);
-//        formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
-
 
         seriesTabPane.getSelectionModel().clearSelection();
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
             @Override
             public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-              if (newValue == null){
-                  return;
-              }
+                if (newValue == null) {
+                    return;
+                }
                 if (newValue.getContent() == null) {
                     try {
                         // Loading content on demand
@@ -400,11 +374,10 @@ public class MainViewController implements Initializable {
                         current.setMainViewController(MainViewController.this);
                         current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
-//                        current.getChart().createSymbolsProperty().bindBidirectional(showChartSymbols.selectedProperty());
-//                        current.getChart().animatedProperty().bindBidirectional(enableChartAnimation.selectedProperty());
-
-
                         seriesControllers.put(newValue.getText(), current);
+                        // add "+" tab
+                        ((Label)newValue.getGraphic()).setText("New series " + nbSeries.getAndIncrement());
+                        seriesTabPane.getTabs().add(new EditableTab("+"));
 
                     } catch (IOException ex) {
                         logger.error("Error loading time series", ex);
@@ -421,7 +394,7 @@ public class MainViewController implements Initializable {
         // By default, select 1st tab and load its content.
         seriesTabPane.getSelectionModel().selectFirst();
         treeview.setRoot(new TreeItem<>("Hosts"));
-        seriesTabPane.getTabs().add(new Tab("memprocPdh"));
+        seriesTabPane.getTabs().add(new EditableTab("memprocPdh"));
         buildTreeViewForTarget("memprocPdh");
     }
 
@@ -432,6 +405,47 @@ public class MainViewController implements Initializable {
         }
 
     }
+//    private Tab createEditableTab(String text) {
+//        final Label label = new Label(text);
+//        final Tab tab = new Tab();
+//        tab.setGraphic(label);
+//
+//        final TextField textField = new TextField();
+//        label.setOnMouseClicked(new EventHandler<MouseEvent>() {
+//            @Override
+//            public void handle(MouseEvent event) {
+//                if (event.getClickCount()==2) {
+//                    textField.setText(label.getText());
+//                    tab.setGraphic(textField);
+//                    textField.selectAll();
+//                    textField.requestFocus();
+//                }
+//            }
+//        });
+//
+//
+//        textField.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override
+//            public void handle(ActionEvent event) {
+//                label.setText(textField.getText());
+//                tab.setGraphic(label);
+//            }
+//        });
+//
+//
+//        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
+//            @Override
+//            public void changed(ObservableValue<? extends Boolean> observable,
+//                                Boolean oldValue, Boolean newValue) {
+//                if (! newValue) {
+//                    label.setText(textField.getText());
+//                    tab.setGraphic(label);
+//                }
+//            }
+//        });
+//        return tab ;
+//    }
+
 
     public void handleDumpHistoryAction(ActionEvent actionEvent) {
         if (selectedTabController != null) {
@@ -466,7 +480,8 @@ public class MainViewController implements Initializable {
     public void handlePreferencesAction(ActionEvent actionEvent) {
         try {
             Dialog<String> dialog = new Dialog<>();
-            dialog.initStyle(StageStyle.UNIFIED);
+            dialog.initStyle(StageStyle.UTILITY);
+            dialog.setTitle("Preferences");
             dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
             dialog.initOwner(getStage());
             dialog.showAndWait();

@@ -2,12 +2,13 @@ package eu.fthevenet.binjr.data.timeseries;
 
 import javafx.scene.chart.XYChart;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 
 /**
  * Created by FTT2 on 21/12/2016.
  */
-public class TimeSeries<T extends Number> {
+public class TimeSeries<T extends Number> implements Serializable {
 
     public String getName() {
         return name;

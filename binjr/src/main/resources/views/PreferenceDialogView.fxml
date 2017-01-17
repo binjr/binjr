@@ -1,15 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import org.controlsfx.control.PropertySheet?>
 
-<DialogPane prefHeight="209.0" prefWidth="297.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+<DialogPane prefHeight="216.0" prefWidth="297.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
    <content>
-      <AnchorPane>
+      <AnchorPane prefHeight="205.0" prefWidth="297.0">
          <children>
-            <PropertySheet fx:id="preferencePropertySheet" titleFilter="Preferences" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+            <Accordion layoutX="40.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <panes>
+                <TitledPane fx:id="chartPrefsPane" text="Chart preferences">
+                  <content>
+                    <AnchorPane>
+                           <children>
+                              <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="43.0" mnemonicParsing="false" text="Show sample symbols" />
+                              <CheckBox fx:id="enableChartAnimation" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Enable animation" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+                <TitledPane fx:id="reductionPrefsPane" text="Sample reduction">
+                  <content>
+                    <AnchorPane>
+                           <children>
+                              <TextField fx:id="downSamplingThreshold" layoutX="192.0" layoutY="42.0" prefHeight="25.0" prefWidth="63.0" text="1000" />
+                              <CheckBox fx:id="enableDownSampling" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="Enable sample reduction" />
+                              <Label fx:id="maxSampleLabel" layoutX="14.0" layoutY="46.0" text="Maximum number of samples:" />
+                           </children>
+                        </AnchorPane>
+                  </content>
+                </TitledPane>
+              </panes>
+            </Accordion>
          </children>
       </AnchorPane>
    </content>

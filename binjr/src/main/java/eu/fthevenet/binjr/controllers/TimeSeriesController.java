@@ -104,6 +104,16 @@ public class TimeSeriesController implements Initializable {
         return null;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    private String name;
+
     public History getBackwardHistory() {
         return backwardHistory;
     }
@@ -241,7 +251,6 @@ public class TimeSeriesController implements Initializable {
                         },
                         s -> ZonedDateTime.parse(s, formatter));
                 InputStream in = new ByteArrayInputStream(out.toByteArray());
-
                 return timeSeriesBuilder.fromCSV(in)
                         .transform(globalPrefs.getDownSamplingEnabled(),
                                 new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
