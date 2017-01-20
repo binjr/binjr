@@ -9,8 +9,6 @@ import java.time.Instant;
  */
 public interface DataProvider extends Serializable {
 
-
-    boolean getData(String targetHost, String probe, Instant begin, Instant end, OutputStream out );
-
+    long getData(String targetHost, String probe, Instant begin, Instant end, OutputStream out ) throws DataProviderException;
 
 }

@@ -4,12 +4,12 @@ import eu.fthevenet.binjr.commons.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.commons.charts.XYChartSelection;
 import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.commons.logging.Profiler;
-import eu.fthevenet.binjr.data.providers.JRDSDataProvider;
+import eu.fthevenet.binjr.data.providers.DataProviderException;
+import eu.fthevenet.binjr.data.providers.jrds.JRDSDataProvider;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -82,7 +82,9 @@ public class TimeSeriesController implements Initializable {
 
     private String[] probes = new String[]{ "memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
 
-    private Property<String> currentHost = new SimpleStringProperty("ngwps006:31001/perf-ui");
+    private Property<String> currentHost = new SimpleStringProperty("ngwps006");
+    private String jrdsPath = "/perf-ui";
+    private int jrdsPort = 31001;
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
     private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%probes.length]);//memprocPdh");
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
@@ -96,6 +98,7 @@ public class TimeSeriesController implements Initializable {
 
     private ZoneId currentZoneId = ZoneId.systemDefault();
     private GlobalPreferences globalPrefs;
+
 
     private Stage getStage() {
         if (chartParent != null && chartParent.getScene() != null) {
@@ -239,25 +242,24 @@ public class TimeSeriesController implements Initializable {
     }
 
     private Map<String, XYChart.Series<ZonedDateTime, Double>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException, ParseException {
-        JRDSDataProvider dp = new JRDSDataProvider(jrdsHost);
+        JRDSDataProvider dp = new JRDSDataProvider(jrdsHost, jrdsPort, jrdsPath);
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            if (dp.getData(target, probe, begin, end, out)) {
-                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
-                TimeSeriesBuilder<Double> timeSeriesBuilder = new TimeSeriesBuilder<>(currentZoneId,
-                        s -> {
-                            Double val = Double.parseDouble(s);
-                            return val.isNaN() ? 0 : val;
-                        },
-                        s -> ZonedDateTime.parse(s, formatter));
-                InputStream in = new ByteArrayInputStream(out.toByteArray());
-                return timeSeriesBuilder.fromCSV(in)
-                        .transform(globalPrefs.getDownSamplingEnabled(),
-                                new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
-                        .build();
-            } else {
-                throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()));
-            }
+            dp.getData(target, probe, begin, end, out);
+            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
+            TimeSeriesBuilder<Double> timeSeriesBuilder = new TimeSeriesBuilder<>(currentZoneId,
+                    s -> {
+                        Double val = Double.parseDouble(s);
+                        return val.isNaN() ? 0 : val;
+                    },
+                    s -> ZonedDateTime.parse(s, formatter));
+            InputStream in = new ByteArrayInputStream(out.toByteArray());
+            return timeSeriesBuilder.fromCSV(in)
+                    .transform(globalPrefs.getDownSamplingEnabled(),
+                            new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
+                    .build();
+        } catch (DataProviderException e) {
+            throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()), e);
         }
     }
 
