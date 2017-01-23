@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.timeseries;
 
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import javafx.scene.chart.XYChart;
 
 import java.io.Serializable;
@@ -30,18 +31,25 @@ public class TimeSeries<T extends Number> implements Serializable {
         return maxValue;
     }
 
+    public TimeSeriesBinding getBinding() {
+        return binding;
+    }
+
     private final String name;
     private final  XYChart.Series<ZonedDateTime, T> data;
     private final T minValue;
     private final T averageValue;
     private final T maxValue;
+    private final TimeSeriesBinding binding;
 
-
-    public TimeSeries(String name, XYChart.Series<ZonedDateTime, T> data, T minValue, T averageValue, T maxValue) {
+    public TimeSeries(String name, XYChart.Series<ZonedDateTime, T> data, T minValue, T averageValue, T maxValue, TimeSeriesBinding binding) {
         this.name = name;
         this.data = data;
         this.minValue = minValue;
         this.averageValue = averageValue;
         this.maxValue = maxValue;
+        this.binding = binding;
     }
+
+
 }

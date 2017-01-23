@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr.data.workspace;
 
-import eu.fthevenet.binjr.data.providers.DataProvider;
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
 
 import java.io.Serializable;
 import java.util.List;
@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Workspace implements Serializable {
     private List<Worksheet> worksheets;
-    private List<DataProvider> sources;
+    private List<DataAdapter> sources;
     private String name;
 
     public List<Worksheet> getWorksheets() {
@@ -21,11 +21,11 @@ public class Workspace implements Serializable {
         this.worksheets = worksheets;
     }
 
-    public List<DataProvider> getSources() {
+    public List<DataAdapter> getSources() {
         return sources;
     }
 
-    public void setSources(List<DataProvider> sources) {
+    public void setSources(List<DataAdapter> sources) {
         this.sources = sources;
     }
 

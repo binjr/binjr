@@ -1,14 +1,12 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.commons.controls.EditableTab;
-import eu.fthevenet.binjr.data.providers.DataProvider;
-import eu.fthevenet.binjr.data.providers.DataProviderException;
-import eu.fthevenet.binjr.data.providers.jrds.JRDSDataProvider;
-import eu.fthevenet.binjr.data.providers.jrds.JRDSTreeNode;
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
@@ -48,7 +46,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem editRefresh;
     @FXML
-    private TreeView<JRDSTreeNode> treeview;
+    private TreeView<TimeSeriesBinding> treeview;
     @FXML
     private TabPane seriesTabPane;
     @FXML
@@ -86,26 +84,21 @@ public class MainViewController implements Initializable {
         //seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() + ")"));
     }
 
-    private ObjectProperty<Integer> reductionTarget = new SimpleObjectProperty<>(2000);
     private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
     private void buildTreeViewForTarget(String target) {
-        JRDSDataProvider dp = new JRDSDataProvider(JRDS_HOSTNAME, JRDS_PORT, JRDS_PATH);
-
-
-      //root = null;
+        DataAdapter dp = JRDSDataAdapter.createHttp(JRDS_HOSTNAME, JRDS_PORT, JRDS_PATH);
         try {
-            TreeItem<JRDSTreeNode>   root = dp.getJRDSTree();
+            TreeItem<TimeSeriesBinding> root = dp.getTree();
             root.setExpanded(true);
 
             treeview.setRoot(root);
-        } catch (DataProviderException e) {
+        } catch (DataAdapterException e) {
             logger.error("Failed to build tree", e);
             displayException("Failed to build tree", e);
         }
-
-
     }
+
     private TimeSeriesController selectedTabController;
 
     private void handleControlKey(KeyEvent event, boolean pressed) {

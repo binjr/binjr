@@ -1,7 +1,6 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import com.sun.javafx.collections.ObservableListWrapper;
-import eu.fthevenet.binjr.data.providers.DataProvider;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
@@ -9,7 +8,6 @@ import javafx.collections.ObservableList;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by FTT2 on 17/01/2017.

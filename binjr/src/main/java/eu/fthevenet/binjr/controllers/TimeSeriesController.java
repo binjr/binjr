@@ -4,8 +4,9 @@ import eu.fthevenet.binjr.commons.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.commons.charts.XYChartSelection;
 import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.commons.logging.Profiler;
-import eu.fthevenet.binjr.data.providers.DataProviderException;
-import eu.fthevenet.binjr.data.providers.jrds.JRDSDataProvider;
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
@@ -16,7 +17,10 @@ import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.control.cell.CheckBoxListCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -66,7 +70,7 @@ public class TimeSeriesController implements Initializable {
     @FXML
     private TextField yMaxRange;
     @FXML
-    private    ListView<SelectableListItem> seriesList;
+    private ListView<SelectableListItem> seriesList;
     @FXML
     private Button backButton;
     @FXML
@@ -80,13 +84,13 @@ public class TimeSeriesController implements Initializable {
     private static AtomicInteger currentProbeIdx = new AtomicInteger(0);
     private MainViewController mainViewController;
 
-    private String[] probes = new String[]{ "memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
-
+    private String[] probes = new String[]{"memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
     private Property<String> currentHost = new SimpleStringProperty("ngwps006");
     private String jrdsPath = "/perf-ui";
     private int jrdsPort = 31001;
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement()%probes.length]);//memprocPdh");
+    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
+
     private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
@@ -182,7 +186,8 @@ public class TimeSeriesController implements Initializable {
             if (plotChart) {
                 plotChart(currentSelection);
             }
-        } else {
+        }
+        else {
             logger.debug(() -> "State hasn't change, no need to redraw the graph");
         }
     }
@@ -207,7 +212,8 @@ public class TimeSeriesController implements Initializable {
         if (!history.isEmpty()) {
             toHistory.push(currentState.asSelection());
             currentState.setSelection(history.pop(), false);
-        } else {
+        }
+        else {
             logger.debug(() -> "History is empty: nothing to go back to.");
         }
     }
@@ -242,7 +248,7 @@ public class TimeSeriesController implements Initializable {
     }
 
     private Map<String, XYChart.Series<ZonedDateTime, Double>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException, ParseException {
-        JRDSDataProvider dp = new JRDSDataProvider(jrdsHost, jrdsPort, jrdsPath);
+        DataAdapter dp = JRDSDataAdapter.createHttp(jrdsHost, jrdsPort, jrdsPath);
 
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             dp.getData(target, probe, begin, end, out);
@@ -258,7 +264,7 @@ public class TimeSeriesController implements Initializable {
                     .transform(globalPrefs.getDownSamplingEnabled(),
                             new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
                     .build();
-        } catch (DataProviderException e) {
+        } catch (DataAdapterException e) {
             throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()), e);
         }
     }
@@ -298,7 +304,8 @@ public class TimeSeriesController implements Initializable {
             if (state == null) {
                 logger.warn(() -> "Trying to push null state into backwardHistory");
                 return null;
-            } else {
+            }
+            else {
                 emptyStackProperty.set(false);
                 return this.stack.push(state);
             }
@@ -325,7 +332,8 @@ public class TimeSeriesController implements Initializable {
             AtomicInteger pos = new AtomicInteger(0);
             if (this.isEmpty()) {
                 sb.append(" { empty }");
-            } else {
+            }
+            else {
                 stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString()));
             }
 
@@ -379,16 +387,24 @@ public class TimeSeriesController implements Initializable {
             this.endY = new SimpleDoubleProperty(roundYValue(endY));
 
             this.startX.addListener((observable, oldValue, newValue) -> {
-                if (!frozen) invalidate(true, true);
+                if (!frozen) {
+                    invalidate(true, true);
+                }
             });
             this.endX.addListener((observable, oldValue, newValue) -> {
-                if (!frozen) invalidate(true, true);
+                if (!frozen) {
+                    invalidate(true, true);
+                }
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
-                if (!frozen) invalidate(true, false);
+                if (!frozen) {
+                    invalidate(true, false);
+                }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
-                if (!frozen) invalidate(true, false);
+                if (!frozen) {
+                    invalidate(true, false);
+                }
             });
         }
 

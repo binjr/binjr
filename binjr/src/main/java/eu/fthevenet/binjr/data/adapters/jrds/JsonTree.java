@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data.providers.jrds;
+package eu.fthevenet.binjr.data.adapters.jrds;
 
 /**
  * Created by FTT2 on 20/01/2017.

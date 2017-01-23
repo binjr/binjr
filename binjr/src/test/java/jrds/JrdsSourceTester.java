@@ -1,7 +1,7 @@
 package jrds;
 
-import eu.fthevenet.binjr.data.providers.DataProviderException;
-import eu.fthevenet.binjr.data.providers.jrds.JRDSDataProvider;
+import eu.fthevenet.binjr.data.adapters.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,7 +14,7 @@ import java.time.temporal.ChronoUnit;
  */
 public class JrdsSourceTester {
     private static final Logger logger = LogManager.getLogger(JrdsSourceTester.class);
-    public static void main(String[] args) throws DataProviderException {
+    public static void main(String[] args) throws DataAdapterException {
         String host = "ngwps006";
         String target = "ngwps006";
         String probe = "memprocPdh";
@@ -24,14 +24,14 @@ public class JrdsSourceTester {
         Instant end = Instant.now();
         Instant begin = end.minus(24*60*7, ChronoUnit.MINUTES);
 
-        JRDSDataProvider dp = new JRDSDataProvider(host,port, path);
+        JRDSDataAdapter dp = JRDSDataAdapter.createHttp(host,port, path);
 
         try{
 
-            System.out.printf(dp.getJsonTree("hoststab"));
-            dp.getJRDSTree();
+       //     System.out.printf(dp.getJsonTree("hoststab"));
+            dp.getTree();
         }
-        catch (DataProviderException e){
+        catch (DataAdapterException e){
             logger.error(e);
         }
 
