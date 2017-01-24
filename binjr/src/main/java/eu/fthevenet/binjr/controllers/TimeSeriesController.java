@@ -253,7 +253,7 @@ public class TimeSeriesController implements Initializable {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             dp.getData(target, probe, begin, end, out);
             final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
-            TimeSeriesBuilder<Double> timeSeriesBuilder = new TimeSeriesBuilder<>(currentZoneId,
+            TimeSeriesBuilder<Double> timeSeriesBuilder = new TimeSeriesBuilder<>(
                     s -> {
                         Double val = Double.parseDouble(s);
                         return val.isNaN() ? 0 : val;
@@ -269,10 +269,8 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
-
     public void handleHistoryBack(ActionEvent actionEvent) {
         restoreSelectionFromHistory(backwardHistory, forwardHistory);
-
     }
 
     public void handleHistoryForward(ActionEvent actionEvent) {

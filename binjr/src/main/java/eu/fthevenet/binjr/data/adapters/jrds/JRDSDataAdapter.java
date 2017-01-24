@@ -6,6 +6,7 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -23,6 +24,7 @@ import java.net.URISyntaxException;
 import java.time.Instant;
 
 import java.io.OutputStream;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -124,6 +126,21 @@ public class JRDSDataAdapter implements DataAdapter {
                 throw new ClientProtocolException("Unexpected response status: " + status);
             }
         });
+    }
+
+    @Override
+    public String getEncoding() {
+        return null;
+    }
+
+    @Override
+    public ZoneId getTimeZoneId() {
+        return null;
+    }
+
+    @Override
+    public <T extends Number> TimeSeriesBuilder<T> getTimesSeriesBuilder(List<TimeSeriesBinding> bindings) {
+        return null;
     }
 
     @Override

@@ -28,9 +28,9 @@ public class TimeSeriesBuilder<T extends Number> {
     private final Function<String, ZonedDateTime> dateParser;
 
 
-    public TimeSeriesBuilder(ZoneId zoneId, Function<String, T> numberParser, Function<String, ZonedDateTime> instantParser) {
-        this(numberParser, instantParser);
-    }
+//    public TimeSeriesBuilder(ZoneId zoneId, Function<String, T> numberParser, Function<String, ZonedDateTime> instantParser) {
+//        this(numberParser, instantParser);
+//    }
 
     public TimeSeriesBuilder(Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser) {
         this.numberParser = numberParser;
@@ -91,14 +91,11 @@ public class TimeSeriesBuilder<T extends Number> {
                     if (data.length < 2) {
                         throw new IOException("Not enough columns in csv to plot a time series");
                     }
-                    //   DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId);
-                    ZonedDateTime timeStamp = dateParser.apply(data[0]); // parse(data[0], formatter);
-
+                    ZonedDateTime timeStamp = dateParser.apply(data[0]);
                     for (int i = 1; i < data.length - 1; i++) {
                         String currentName = seriesNames[i];
                         if (isInNameList(names, currentName)) {
                             T val = numberParser.apply(data[i]);
-                            //   val = val.isNaN() ? 0 : val;
 
                             XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
                             List<XYChart.Data<ZonedDateTime, T>> l = series.computeIfAbsent(currentName, k -> new ArrayList<>());

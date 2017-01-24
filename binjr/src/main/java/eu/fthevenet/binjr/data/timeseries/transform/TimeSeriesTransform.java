@@ -14,14 +14,7 @@ import java.util.function.Function;
 public abstract class TimeSeriesTransform<T extends Number> {
 
     private final String name;
-//
-//    public Function<Map<String, List<XYChart.Data<ZonedDateTime, T>>>, Map<String, List<XYChart.Data<ZonedDateTime, T>>>> getTransformFunction() {
-//        return transformFunction;
-//    }
-//
-//   // private Function<Map<String, List<XYChart.Data<ZonedDateTime, T>>>, Map<String, List<XYChart.Data<ZonedDateTime, T>>>> transformFunction;
-//
-//
+
     public TimeSeriesTransform(String name) {
         this.name = name;
 
