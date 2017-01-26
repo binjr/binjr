@@ -6,8 +6,11 @@ import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
+import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
+import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransformer;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
@@ -91,7 +94,9 @@ public class TimeSeriesController implements Initializable {
     private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
     private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
 
-    private Map<String, Boolean> selectedSeriesCache = new HashMap<>();
+     private List<Boolean> selectedSeries = new ArrayList<>();
+    private List<TimeSeries<Double>> seriesData = new ArrayList<>();
+    private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
     private State currentState;
@@ -221,12 +226,19 @@ public class TimeSeriesController implements Initializable {
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
-            Map<String, XYChart.Series<ZonedDateTime, Double>> series = getRawData(
-                    currentHost.getValue(),
-                    currentTarget.getValue(),
-                    currentProbe.getValue(),
-                    currentSelection.getStartX().toInstant(),
-                    currentSelection.getEndX().toInstant());
+
+          seriesData = TimeSeriesFactory.getInstance().getSeries(
+                    seriesBindings,
+                    currentSelection.getStartX(),
+                    currentSelection.getEndX());
+//
+//            Map<String, XYChart.Series<ZonedDateTime, Double>> series = getRawData(
+//                    currentHost.getValue(),
+//                    currentTarget.getValue(),
+//                    currentProbe.getValue(),
+//                    currentSelection.getStartX().toInstant(),
+//                    currentSelection.getEndX().toInstant());
+            for ()
             chart.getData().addAll(series.values());
             seriesList.getItems().clear();
             for (XYChart.Series s : chart.getData()) {
@@ -247,27 +259,27 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
-    private Map<String, XYChart.Series<ZonedDateTime, Double>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException, ParseException {
-        DataAdapter dp = JRDSDataAdapter.createHttp(jrdsHost, jrdsPort, jrdsPath);
-
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            dp.getData(target, probe, begin, end, out);
-            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
-            TimeSeriesBuilder<Double> timeSeriesBuilder = new TimeSeriesBuilder<>(
-                    s -> {
-                        Double val = Double.parseDouble(s);
-                        return val.isNaN() ? 0 : val;
-                    },
-                    s -> ZonedDateTime.parse(s, formatter));
-            InputStream in = new ByteArrayInputStream(out.toByteArray());
-            return timeSeriesBuilder.fromCSV(in)
-                    .transform(globalPrefs.getDownSamplingEnabled(),
-                            new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
-                    .build();
-        } catch (DataAdapterException e) {
-            throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()), e);
-        }
-    }
+//    private Map<String, XYChart.Series<ZonedDateTime, Double>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException, ParseException {
+//        DataAdapter dp = JRDSDataAdapter.createHttp(jrdsHost, jrdsPort, jrdsPath);
+//
+//        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+//            dp.getData(target, probe, begin, end, out);
+//            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
+//            TimeSeriesTransformer<Double> timeSeriesBuilder = new TimeSeriesTransformer<>(
+//                    s -> {
+//                        Double val = Double.parseDouble(s);
+//                        return val.isNaN() ? 0 : val;
+//                    },
+//                    s -> ZonedDateTime.parse(s, formatter));
+//            InputStream in = new ByteArrayInputStream(out.toByteArray());
+//            return timeSeriesBuilder.fromCSV(in)
+//                    .transform(globalPrefs.getDownSamplingEnabled(),
+//                            new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
+//                    .toSeries();
+//        } catch (DataAdapterException e) {
+//            throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()), e);
+//        }
+//    }
 
     public void handleHistoryBack(ActionEvent actionEvent) {
         restoreSelectionFromHistory(backwardHistory, forwardHistory);

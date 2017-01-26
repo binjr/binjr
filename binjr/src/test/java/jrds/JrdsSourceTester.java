@@ -39,13 +39,13 @@ public class JrdsSourceTester {
 //            if (dp.getData(target, probe, begin, end, out) >0) {
 //                InputStream in = new ByteArrayInputStream(out.toByteArray());
 //                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
-//                TimeSeriesBuilder<Double> tb = new TimeSeriesBuilder<>(ZoneId.systemDefault(),
+//                TimeSeriesTransformer<Double> tb = new TimeSeriesTransformer<>(ZoneId.systemDefault(),
 //                        s -> {
 //                            Double val = Double.parseDouble(s);
 //                            return val.isNaN() ? 0 : val;
 //                        },
 //                        s -> ZonedDateTime.parse(s, formatter));
-//                Map<String,XYChart.Series<ZonedDateTime, Double>> series = tb.fromCSV(in).build();
+//                Map<String,XYChart.Series<ZonedDateTime, Double>> series = tb.parse(in).toSeries();
 //
 //            }
 //            else {

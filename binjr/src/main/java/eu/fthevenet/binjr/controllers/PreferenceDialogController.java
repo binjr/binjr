@@ -3,10 +3,7 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
+import javafx.scene.control.*;
 import javafx.util.converter.NumberStringConverter;
 
 import java.net.URL;
@@ -27,6 +24,8 @@ public class PreferenceDialogController implements Initializable {
     private CheckBox enableChartAnimation;
     @FXML
     private Label maxSampleLabel;
+    @FXML
+    private Accordion accordionPane;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -35,6 +34,7 @@ public class PreferenceDialogController implements Initializable {
         assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
+        assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -48,6 +48,12 @@ public class PreferenceDialogController implements Initializable {
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
+
+        if (accordionPane.getPanes() != null
+                && accordionPane.getPanes().size() > 0
+                && accordionPane.getPanes().get(0) != null){
+            accordionPane.getPanes().get(0).setExpanded(true);
+        }
 
     }
 }

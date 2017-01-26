@@ -6,7 +6,8 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
+import eu.fthevenet.binjr.data.parsers.CsvParser;
+import eu.fthevenet.binjr.data.parsers.DataParser;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -25,6 +26,8 @@ import java.time.Instant;
 
 import java.io.OutputStream;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,33 +35,38 @@ import java.util.stream.Collectors;
  * Created by FTT2 on 14/10/2016.
  */
 @DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
-public class JRDSDataAdapter implements DataAdapter {
+public class JRDSDataAdapter implements DataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(JRDSDataAdapter.class);
     private final String jrdsHost;
     private final int jrdsPort;
     private final String jrdsPath;
     private final String jrdsScheme;
+    private final ZoneId zoneId;
+    private final String encoding;
 
-    public static JRDSDataAdapter createHttp(String hostname, int port, String path){
-        return new JRDSDataAdapter(hostname, port, path, "http");
+
+    public static JRDSDataAdapter createHttp(String hostname, int port, String path, ZoneId zoneId, String encoding){
+        return new JRDSDataAdapter(hostname, port, path, zoneId, encoding, "http");
     }
 
-    public static JRDSDataAdapter createHttps(String hostname, int port, String path){
-        return new JRDSDataAdapter(hostname, port, path, "https");
+    public static JRDSDataAdapter createHttps(String hostname, int port, String path, ZoneId zoneId, String encoding){
+        return new JRDSDataAdapter(hostname, port, path, zoneId, encoding, "https");
     }
 
-    private JRDSDataAdapter(String hostname, int port, String path, String jrdsScheme) {
+    private JRDSDataAdapter(String hostname, int port, String path, ZoneId zoneId, String encoding, String jrdsScheme) {
         this.jrdsHost = hostname;
         this.jrdsPort = port;
         this.jrdsPath = path;
         this.jrdsScheme = jrdsScheme;
+        this.zoneId = zoneId;
+        this.encoding = encoding;
     }
 
-    public TreeItem<TimeSeriesBinding> getTree() throws DataAdapterException {
+    public TreeItem<TimeSeriesBinding<Double>> getTree() throws DataAdapterException {
         Gson gson = new Gson();
         JsonTree t = gson.fromJson(getJsonTree("hoststab"), JsonTree.class);
         Map<String, JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding> tree = new TreeItem<>(new JRDSSeriesBinding("JRDS" + ":" + jrdsHost, "/", this));
+        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JRDSSeriesBinding("JRDS" + ":" + jrdsHost, "/", this));
         List<TreeItem<JsonItem>> l = new ArrayList<>();
         for (JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
@@ -66,9 +74,9 @@ public class JRDSDataAdapter implements DataAdapter {
         return tree;
     }
 
-    private  TreeItem<TimeSeriesBinding> attachNode(TreeItem<TimeSeriesBinding> tree, String id, Map<String, JsonItem> nodes){
+    private  TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonItem> nodes){
         JsonItem n = nodes.get(id);
-        TreeItem<TimeSeriesBinding> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name, n.id, this));
+        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name, n.id, this));
         if (n.children != null){
             for (JsonTreeRef ref : n.children){
                 attachNode(newBranch, ref._reference, nodes);
@@ -101,13 +109,13 @@ public class JRDSDataAdapter implements DataAdapter {
     }
 
     @Override
-    public long getData(TimeSeriesBinding node, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
+    public long getData(String path, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsScheme)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/download")
-                .addParameter("id", node.getPath())
+                .addParameter("id", path)
                 .addParameter("begin", Long.toString(begin.toEpochMilli()))
                 .addParameter("end", Long.toString(end.toEpochMilli()));
 
@@ -130,17 +138,23 @@ public class JRDSDataAdapter implements DataAdapter {
 
     @Override
     public String getEncoding() {
-        return null;
+        return encoding;
     }
 
     @Override
     public ZoneId getTimeZoneId() {
-        return null;
+        return zoneId;
     }
 
     @Override
-    public <T extends Number> TimeSeriesBuilder<T> getTimesSeriesBuilder(List<TimeSeriesBinding> bindings) {
-        return null;
+    public  DataParser<Double> getParser() {
+        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
+        return new CsvParser<>(getEncoding(), ";",
+                s -> {
+                    Double val = Double.parseDouble(s);
+                    return val.isNaN() ? 0 : val;
+                },
+                s -> ZonedDateTime.parse(s, formatter));
     }
 
     @Override

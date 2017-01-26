@@ -13,7 +13,7 @@
    <content>
       <AnchorPane prefHeight="205.0" prefWidth="297.0">
          <children>
-            <Accordion layoutX="40.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <Accordion fx:id="accordionPane" layoutX="40.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <panes>
                 <TitledPane fx:id="chartPrefsPane" text="Chart preferences">
                   <content>

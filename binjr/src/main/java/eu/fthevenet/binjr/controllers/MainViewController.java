@@ -94,8 +94,8 @@ public class MainViewController implements Initializable {
 
             treeview.setRoot(root);
         } catch (DataAdapterException e) {
-            logger.error("Failed to build tree", e);
-            displayException("Failed to build tree", e);
+            logger.error("Failed to toSeries tree", e);
+            displayException("Failed to toSeries tree", e);
         }
     }
 

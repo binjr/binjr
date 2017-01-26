@@ -6,8 +6,8 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 /**
  * Created by FTT2 on 23/01/2017.
  */
-public class JRDSSeriesBinding implements TimeSeriesBinding {
-    private final DataAdapter adapter;
+public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
+    private final DataAdapter<Double> adapter;
     private final String label;
     private final String path;
 
@@ -22,11 +22,11 @@ public class JRDSSeriesBinding implements TimeSeriesBinding {
     }
 
     @Override
-    public DataAdapter getAdapter() {
+    public DataAdapter<Double> getAdapter() {
         return this.adapter;
     }
 
-    public JRDSSeriesBinding(String label, String path, DataAdapter adapter){
+    public JRDSSeriesBinding(String label, String path, DataAdapter<Double> adapter){
         this.adapter = adapter;
         this.label = label;
         this.path = path;
