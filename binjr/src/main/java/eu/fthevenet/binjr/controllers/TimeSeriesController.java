@@ -238,7 +238,7 @@ public class TimeSeriesController implements Initializable {
 //                    currentProbe.getValue(),
 //                    currentSelection.getStartX().toInstant(),
 //                    currentSelection.getEndX().toInstant());
-            for ()
+           // for ()
             chart.getData().addAll(series.values());
             seriesList.getItems().clear();
             for (XYChart.Series s : chart.getData()) {
