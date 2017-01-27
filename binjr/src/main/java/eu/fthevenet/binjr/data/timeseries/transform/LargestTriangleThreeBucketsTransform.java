@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.timeseries.transform;
 
+import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZoneId;
@@ -19,13 +20,19 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
         super("LargestTriangleThreeBucketsTransform");
         this.threshold = threshold;
     }
-
+  //  List<XYChart.Data<ZonedDateTime, T>>
     @Override
-    public Map<String, List<XYChart.Data<ZonedDateTime, T>>> transform(Map<String, List<XYChart.Data<ZonedDateTime, T>>> m) {
+    public Map<String, TimeSeries<T>> apply(Map<String, TimeSeries<T>> m) {
         return  m.entrySet()
                 .parallelStream()
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> applyLTTBReduction(e.getValue(), threshold)));
+                .collect(Collectors.toMap(Map.Entry::getKey, o ->{
+                   // List<XYChart.Data<ZonedDateTime, T>> bag = o.getValue().getData();
+                    o.getValue().setData(applyLTTBReduction(o.getValue().getData(), threshold));
+                    return o.getValue();
+                }));
     }
+
+
 
     private  List<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, T>> data, int threshold) {
         int dataLength = data.size();

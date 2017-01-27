@@ -5,6 +5,7 @@ import javafx.scene.chart.XYChart;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,23 +44,33 @@ public class TimeSeries<T extends Number> implements Serializable {
     }
 
     private final String name;
-    private final   List<XYChart.Data<ZonedDateTime, T>> data;
-    private final T minValue;
-    private final T averageValue;
-    private final T maxValue;
-    private final TimeSeriesBinding binding;
 
-//    public void setMinValue(T minValue) {
-//        this.minValue = minValue;
-//    }
-//
-//    public void setAverageValue(T averageValue) {
-//        this.averageValue = averageValue;
-//    }
-//
-//    public void setMaxValue(T maxValue) {
-//        this.maxValue = maxValue;
-//    }
+    public void setData(List<XYChart.Data<ZonedDateTime, T>> data) {
+        this.data = data;
+    }
+
+    private   List<XYChart.Data<ZonedDateTime, T>> data;
+    private  T minValue;
+    private  T averageValue;
+    private  T maxValue;
+    private  TimeSeriesBinding binding;
+
+    public void setMinValue(T minValue) {
+        this.minValue = minValue;
+    }
+
+    public void setAverageValue(T averageValue) {
+        this.averageValue = averageValue;
+    }
+
+    public void setMaxValue(T maxValue) {
+        this.maxValue = maxValue;
+    }
+
+    public TimeSeries(String name) {
+        this.data = new ArrayList<>();
+        this.name = name;
+    }
 
     public TimeSeries(String name, List<XYChart.Data<ZonedDateTime, T>> data,T minValue, T averageValue, T maxValue, TimeSeriesBinding binding) {
         this.name = name;

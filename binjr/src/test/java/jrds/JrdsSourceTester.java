@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 
 
@@ -24,7 +25,7 @@ public class JrdsSourceTester {
         Instant end = Instant.now();
         Instant begin = end.minus(24*60*7, ChronoUnit.MINUTES);
 
-        JRDSDataAdapter dp = JRDSDataAdapter.createHttp(host,port, path);
+        JRDSDataAdapter dp = JRDSDataAdapter.createHttp(host,port, path, ZoneId.systemDefault(), "utf-8");
 
         try{
 

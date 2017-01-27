@@ -8,6 +8,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
+import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -20,11 +21,11 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URISyntaxException;
+import java.text.ParseException;
 import java.time.Instant;
 
-import java.io.OutputStream;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -74,16 +75,34 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         return tree;
     }
 
-    private  TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonItem> nodes){
+    private  TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonItem> nodes) throws DataAdapterException {
         JsonItem n = nodes.get(id);
-        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name, n.id, this));
+        String currentPath = normalizeId(n.id);
+        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name,currentPath, this));
         if (n.children != null){
             for (JsonTreeRef ref : n.children){
                 attachNode(newBranch, ref._reference, nodes);
             }
+        } else{
+            try {
+                for (String storeName : getColumnDataStores(currentPath)) {
+                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(storeName, currentPath, this)));
+                }
+            }
+            catch (DataAdapterException e){
+                logger.debug("Ignoring", e);
+            }
         }
         tree.getChildren().add(newBranch);
         return tree;
+    }
+
+    private String normalizeId(String id){
+        if (id ==null || id.trim().length()==0){
+            throw new IllegalArgumentException("Argument id cannot be null or blank");
+        }
+        String[] data = id.split("\\.");
+        return data[data.length-1];
     }
 
     private String getJsonTree(String tabname) throws DataAdapterException {
@@ -106,6 +125,19 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 throw new ClientProtocolException("Unexpected response status: " + status);
             }
         });
+    }
+
+    private String[] getColumnDataStores(String id)throws DataAdapterException{
+        Instant now = ZonedDateTime.now().toInstant();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            getData(id, now, now.plusSeconds(60), out);
+            try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                Map<String, TimeSeries<Double>> m = getParser().parse(in);
+                return m.keySet().toArray(new String[0]);
+            }
+        } catch (IOException | ParseException e) {
+            throw new DataAdapterException(e);
+        }
     }
 
     @Override
@@ -149,7 +181,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     @Override
     public  DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvParser<>(getEncoding(), ";",
+        return new CsvParser<>(getEncoding(), ",",
                 s -> {
                     Double val = Double.parseDouble(s);
                     return val.isNaN() ? 0 : val;

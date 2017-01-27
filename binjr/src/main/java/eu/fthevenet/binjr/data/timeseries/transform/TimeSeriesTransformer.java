@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
  * Created by FTT2 on 24/10/2016.
  */
 public class TimeSeriesTransformer<T extends Number> {
+    /*
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransformer.class);
     private Map<String, List<XYChart.Data<ZonedDateTime, T>>> timeSeries;
 
@@ -22,11 +23,11 @@ public class TimeSeriesTransformer<T extends Number> {
         this.timeSeries = timeSeries;
     }
 
-    public TimeSeriesTransformer<T> transform(Supplier<Boolean> condition, TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
-        return transform(condition.get(), seriesTransform, seriesNames);
+    public TimeSeriesTransformer<T> apply(Supplier<Boolean> condition, TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
+        return apply(condition.get(), seriesTransform, seriesNames);
     }
 
-    public TimeSeriesTransformer<T> transform(boolean isTransformEnabled, TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
+    public TimeSeriesTransformer<T> apply(boolean isTransformEnabled, TimeSeriesTransform<T> seriesTransform, String... seriesNames) {
         if (isTransformEnabled) {
             Set<String> nameSet = seriesNames.length == 0 ? timeSeries.keySet() : new HashSet<String>(Arrays.asList(seriesNames));
             Map<String, List<XYChart.Data<ZonedDateTime, T>>> series = timeSeries.entrySet()
@@ -38,7 +39,7 @@ public class TimeSeriesTransformer<T extends Number> {
                 throw new IllegalArgumentException("Failed to retrieve all timeSeries with name " + Arrays.toString(seriesNames));
             }
             try (Profiler ignored = Profiler.start("Applying transform" + seriesTransform.getName() + " to series " + Arrays.toString(nameSet.toArray()), logger::trace)) {
-                Map<String, List<XYChart.Data<ZonedDateTime, T>>> a = seriesTransform.transform(series);
+                Map<String, List<XYChart.Data<ZonedDateTime, T>>> a = seriesTransform.apply(series);
                 timeSeries.putAll(a);
             }
         }
@@ -58,7 +59,7 @@ public class TimeSeriesTransformer<T extends Number> {
                     return s;
                 }));
     }
-
+*/
 }
 
 

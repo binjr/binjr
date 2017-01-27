@@ -7,4 +7,6 @@ public interface TimeSeriesBinding<T extends Number> {
     String getLabel();
     String getPath();
     DataAdapter<T> getAdapter();
+
+
 }

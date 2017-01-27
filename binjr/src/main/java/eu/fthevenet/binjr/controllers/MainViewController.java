@@ -27,6 +27,7 @@ import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -37,6 +38,8 @@ public class MainViewController implements Initializable {
     public static final String JRDS_HOSTNAME = "ngwps006";
     public static final int JRDS_PORT = 31001;
     public static final String JRDS_PATH = "/perf-ui";
+    public static final String DEFAULT_ENCODING = "utf-8";
+    public static final ZoneId DEFAULT_ZONEID = ZoneId.systemDefault();
     @FXML
     public VBox root;
     @FXML
@@ -87,12 +90,29 @@ public class MainViewController implements Initializable {
     private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
     private void buildTreeViewForTarget(String target) {
-        DataAdapter dp = JRDSDataAdapter.createHttp(JRDS_HOSTNAME, JRDS_PORT, JRDS_PATH);
+        DataAdapter dp = JRDSDataAdapter.createHttp(JRDS_HOSTNAME, JRDS_PORT, JRDS_PATH, DEFAULT_ZONEID, DEFAULT_ENCODING);
         try {
             TreeItem<TimeSeriesBinding> root = dp.getTree();
             root.setExpanded(true);
 
             treeview.setRoot(root);
+//            treeview.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//
+//                TreeItem<TimeSeriesBinding> selectedItem = (TreeItem<TimeSeriesBinding>) newValue;
+//               // System.out.println("Selected Text : " + selectedItem.getValue().getLabel());
+//                if (selectedTabController!= null){
+//                    selectedTabController.addBinding( selectedItem.getValue());
+//                }
+//                // do what ever you want
+//            });
+            treeview.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    TreeItem<TimeSeriesBinding> item = treeview.getSelectionModel().getSelectedItem();
+                    if (selectedTabController != null) {
+                        selectedTabController.addBinding(item.getValue());
+                    }
+                }
+            });
         } catch (DataAdapterException e) {
             logger.error("Failed to build tree", e);
             displayException("Failed to build tree", e);

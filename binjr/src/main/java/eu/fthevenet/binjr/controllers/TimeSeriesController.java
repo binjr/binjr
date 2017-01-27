@@ -8,6 +8,7 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
+import eu.fthevenet.binjr.data.adapters.jrds.JRDSSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransformer;
@@ -47,6 +48,7 @@ import java.time.format.FormatStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * Created by FTT2 on 02/12/2016.
@@ -87,16 +89,32 @@ public class TimeSeriesController implements Initializable {
     private static AtomicInteger currentProbeIdx = new AtomicInteger(0);
     private MainViewController mainViewController;
 
-    private String[] probes = new String[]{"memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
-    private Property<String> currentHost = new SimpleStringProperty("ngwps006");
-    private String jrdsPath = "/perf-ui";
-    private int jrdsPort = 31001;
-    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
+ //   private String[] probes = new String[]{"memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
+//    private Property<String> currentHost = new SimpleStringProperty("ngwps006");
+//    private String jrdsPath = "/perf-ui";
+//    private int jrdsPort = 31001;
+//    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
+//    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
 
      private List<Boolean> selectedSeries = new ArrayList<>();
     private List<TimeSeries<Double>> seriesData = new ArrayList<>();
+    DataAdapter<Double> adapter =    JRDSDataAdapter.createHttp(
+            MainViewController.JRDS_HOSTNAME,
+            MainViewController.JRDS_PORT,
+            MainViewController.JRDS_PATH,
+            MainViewController.DEFAULT_ZONEID,
+            MainViewController.DEFAULT_ENCODING);
+
     private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
+            //= Arrays.asList(new JRDSSeriesBinding[]{
+//            new JRDSSeriesBinding("ProcessorTime", "-1415939247",adapter),
+//            new JRDSSeriesBinding("DPCTime", "-1415939247",adapter),
+//            new JRDSSeriesBinding("PrivilegedTime", "-1415939247",adapter),
+//            new JRDSSeriesBinding("InterruptTime", "-1415939247",adapter)
+      //      new JRDSSeriesBinding("79488c0d", "-1573472440",adapter),
+        //    new JRDSSeriesBinding("TotalPhysicalMemory", "-1573472440",adapter),
+         //   new JRDSSeriesBinding("AvailableBytes", "-1573472440",adapter)
+  //  });
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
     private State currentState;
@@ -105,7 +123,7 @@ public class TimeSeriesController implements Initializable {
     private History backwardHistory = new History();
     private History forwardHistory = new History();
 
-    private ZoneId currentZoneId = ZoneId.systemDefault();
+ //   private ZoneId currentZoneId = ZoneId.systemDefault();
     private GlobalPreferences globalPrefs;
 
 
@@ -173,6 +191,11 @@ public class TimeSeriesController implements Initializable {
         });
     }
 
+    public void addBinding(TimeSeriesBinding<Double> binding){
+        this.seriesBindings.add(binding);
+        invalidate(false, true, true);
+    }
+
     public void invalidate(boolean saveToHistory, boolean plotChart) {
         invalidate(saveToHistory, plotChart, false);
     }
@@ -227,30 +250,23 @@ public class TimeSeriesController implements Initializable {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
 
-          seriesData = TimeSeriesFactory.getInstance().getSeries(
+              seriesData = TimeSeriesFactory.getInstance().getSeries(
                     seriesBindings,
                     currentSelection.getStartX(),
                     currentSelection.getEndX());
-//
-//            Map<String, XYChart.Series<ZonedDateTime, Double>> series = getRawData(
-//                    currentHost.getValue(),
-//                    currentTarget.getValue(),
-//                    currentProbe.getValue(),
-//                    currentSelection.getStartX().toInstant(),
-//                    currentSelection.getEndX().toInstant());
-           // for ()
-            chart.getData().addAll(series.values());
+
+            chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
             seriesList.getItems().clear();
-            for (XYChart.Series s : chart.getData()) {
-                SelectableListItem i = new SelectableListItem(s.getName(), true);
-                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-                    selectedSeriesCache.put(s.getName(), isNowOn);
-                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
-                });
-                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
-                seriesList.getItems().add(i);
-            }
-        } catch (IOException | ParseException e) {
+//            for (XYChart.Series s : chart.getData()) {
+//                SelectableListItem i = new SelectableListItem(s.getName(), true);
+//                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
+//                   selectedSeriesCache.put(s.getName(), isNowOn);
+//                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
+//                });
+//                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
+//                seriesList.getItems().add(i);
+//            }
+        } catch (DataAdapterException /*| IOException | ParseException*/ e) {
             logger.error(() -> "Error getting data", e);
             if (getMainViewController() != null) {
                 getMainViewController().displayException("Failed to retrieve data from source", e);
@@ -273,7 +289,7 @@ public class TimeSeriesController implements Initializable {
 //                    s -> ZonedDateTime.parse(s, formatter));
 //            InputStream in = new ByteArrayInputStream(out.toByteArray());
 //            return timeSeriesBuilder.fromCSV(in)
-//                    .transform(globalPrefs.getDownSamplingEnabled(),
+//                    .apply(globalPrefs.getDownSamplingEnabled(),
 //                            new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
 //                    .toSeries();
 //        } catch (DataAdapterException e) {
