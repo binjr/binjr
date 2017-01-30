@@ -1,7 +1,9 @@
 package eu.fthevenet.binjr.data.parsers;
 
 import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
 import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,9 +14,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -27,13 +27,14 @@ public class CsvParser<T extends Number> implements DataParser<T> {
     private final String separator;
     private final Function<String, T> numberParser;
     private final Function<String, ZonedDateTime> dateParser;
+    private final TimeSeriesFactory<T> timeSeriesFactory;
     private static final Logger logger = LogManager.getLogger(CsvParser.class);
 
 
-    public CsvParser(String encoding, String separator, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser){
-
+    public CsvParser(String encoding, String separator, TimeSeriesFactory<T> timeSeriesFactory, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser){
         this.encoding = encoding;
         this.separator = separator;
+        this.timeSeriesFactory = timeSeriesFactory;
         this.numberParser = numberParser;
         this.dateParser = dateParser;
     }
@@ -48,7 +49,6 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                 }
                 String[] seriesNames = header.split(separator);
                 final int nbSeries = seriesNames.length - 1;
-            //    Map<String, TimeSeries<T>> series = new HashMap<>();
                 Map<String,TimeSeries<T>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
                 for (String line = br.readLine(); line != null; line = br.readLine()) {
@@ -62,16 +62,14 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                         String currentName = seriesNames[i];
                         if (isInNameList(names, currentName)) {
                             T val = numberParser.apply(data[i]);
-
                             XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
-                           TimeSeries<T> l = series.computeIfAbsent(currentName, k -> new TimeSeries<T>(currentName));
+                            TimeSeries<T> l = series.computeIfAbsent(currentName, k -> timeSeriesFactory.create(currentName));
                             l.getData().add(point);
                         }
                     }
                 }
                 logger.debug(() -> String.format("Built %d serie(s) with %d point(s)", nbSeries, nbpoints.get()));
                 return series;
-
             }
         }
     }

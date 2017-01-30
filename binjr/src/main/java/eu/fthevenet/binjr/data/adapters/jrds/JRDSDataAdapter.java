@@ -8,6 +8,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
+import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
@@ -169,6 +170,11 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     }
 
     @Override
+    public String getSourceName(){
+        return "JRDS:" + jrdsHost + ":" + jrdsPort;
+    }
+
+    @Override
     public String getEncoding() {
         return encoding;
     }
@@ -182,6 +188,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     public  DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
         return new CsvParser<>(getEncoding(), ",",
+                DoubleTimeSeries::new,
                 s -> {
                     Double val = Double.parseDouble(s);
                     return val.isNaN() ? 0 : val;

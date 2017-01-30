@@ -96,15 +96,6 @@ public class MainViewController implements Initializable {
             root.setExpanded(true);
 
             treeview.setRoot(root);
-//            treeview.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//
-//                TreeItem<TimeSeriesBinding> selectedItem = (TreeItem<TimeSeriesBinding>) newValue;
-//               // System.out.println("Selected Text : " + selectedItem.getValue().getLabel());
-//                if (selectedTabController!= null){
-//                    selectedTabController.addBinding( selectedItem.getValue());
-//                }
-//                // do what ever you want
-//            });
             treeview.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
                     TreeItem<TimeSeriesBinding> item = treeview.getSelectionModel().getSelectedItem();
@@ -114,8 +105,7 @@ public class MainViewController implements Initializable {
                 }
             });
         } catch (DataAdapterException e) {
-            logger.error("Failed to build tree", e);
-            displayException("Failed to build tree", e);
+            displayException("An error occurred while building the tree from "+ dp!=null ? dp.getSourceName() : "null", e);
         }
     }
 
@@ -259,7 +249,7 @@ public class MainViewController implements Initializable {
 
 
     public  void displayException(String header, Exception e, Window owner) {
-        logger.debug(()-> "Displaying following exception to end user", e);
+        logger.error(e);
         ExceptionDialog dlg = new ExceptionDialog(e);
         dlg.initStyle(StageStyle.UTILITY);
         dlg.initOwner(owner);

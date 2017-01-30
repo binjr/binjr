@@ -20,13 +20,12 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
         super("LargestTriangleThreeBucketsTransform");
         this.threshold = threshold;
     }
-  //  List<XYChart.Data<ZonedDateTime, T>>
+
     @Override
     public Map<String, TimeSeries<T>> apply(Map<String, TimeSeries<T>> m) {
         return  m.entrySet()
                 .parallelStream()
                 .collect(Collectors.toMap(Map.Entry::getKey, o ->{
-                   // List<XYChart.Data<ZonedDateTime, T>> bag = o.getValue().getData();
                     o.getValue().setData(applyLTTBReduction(o.getValue().getData(), threshold));
                     return o.getValue();
                 }));

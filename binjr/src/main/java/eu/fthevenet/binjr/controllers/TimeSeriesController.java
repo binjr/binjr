@@ -8,24 +8,21 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
-import eu.fthevenet.binjr.data.adapters.jrds.JRDSSeriesBinding;
+import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
-import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransformer;
-import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.XYChart;
-import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
-import javafx.scene.control.cell.CheckBoxListCell;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -34,14 +31,7 @@ import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
-import java.text.ParseException;
-import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -75,7 +65,7 @@ public class TimeSeriesController implements Initializable {
     @FXML
     private TextField yMaxRange;
     @FXML
-    private ListView<SelectableListItem> seriesList;
+    private TableView<TimeSeries<Double>> seriesTable;
     @FXML
     private Button backButton;
     @FXML
@@ -96,25 +86,12 @@ public class TimeSeriesController implements Initializable {
 //    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
 //    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
 
-     private List<Boolean> selectedSeries = new ArrayList<>();
-    private List<TimeSeries<Double>> seriesData = new ArrayList<>();
-    DataAdapter<Double> adapter =    JRDSDataAdapter.createHttp(
-            MainViewController.JRDS_HOSTNAME,
-            MainViewController.JRDS_PORT,
-            MainViewController.JRDS_PATH,
-            MainViewController.DEFAULT_ZONEID,
-            MainViewController.DEFAULT_ENCODING);
-
+ //   private ObservableList<SelectableListItem> selectedSeries = FXCollections.observableArrayList();
+    private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
     private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
-            //= Arrays.asList(new JRDSSeriesBinding[]{
-//            new JRDSSeriesBinding("ProcessorTime", "-1415939247",adapter),
-//            new JRDSSeriesBinding("DPCTime", "-1415939247",adapter),
-//            new JRDSSeriesBinding("PrivilegedTime", "-1415939247",adapter),
-//            new JRDSSeriesBinding("InterruptTime", "-1415939247",adapter)
-      //      new JRDSSeriesBinding("79488c0d", "-1573472440",adapter),
-        //    new JRDSSeriesBinding("TotalPhysicalMemory", "-1573472440",adapter),
-         //   new JRDSSeriesBinding("AvailableBytes", "-1573472440",adapter)
-  //  });
+
+   // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
+
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
     private State currentState;
@@ -155,7 +132,7 @@ public class TimeSeriesController implements Initializable {
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
         assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
-        assert seriesList != null : "fx:id\"seriesList\" was not injected!";
+        assert seriesTable != null : "fx:id\"seriesTable\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
         assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
@@ -180,7 +157,8 @@ public class TimeSeriesController implements Initializable {
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
-        seriesList.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
+       // seriesTable.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
+       // seriesTable.getColumns()(selectableListItemTableColumn -> selectableListItemTableColumn.setCellFactory(CheckBoxTableCell.forTableColumn(param -> {param})));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
 
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
@@ -188,6 +166,19 @@ public class TimeSeriesController implements Initializable {
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
+        });
+
+        seriesTable.setItems(seriesData);
+        seriesTable.setOnKeyReleased(event -> {
+            if (event.getCode().equals(KeyCode.DELETE)) {
+              TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
+              if (current!= null){
+                //FIXME
+                  seriesTable.getItems().remove(current);
+//                  seriesBindings.remove(current);
+//                  invalidate(false, true, true);
+              }
+            }
         });
     }
 
@@ -249,22 +240,23 @@ public class TimeSeriesController implements Initializable {
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
-
-              seriesData = TimeSeriesFactory.getInstance().getSeries(
+            seriesData.clear();
+            seriesData.addAll(TimeSeriesBuilder.getInstance().getSeries(
                     seriesBindings,
                     currentSelection.getStartX(),
-                    currentSelection.getEndX());
+                    currentSelection.getEndX()));
 
             chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
-            seriesList.getItems().clear();
+//            seriesTable.getItems().clear();
+//
 //            for (XYChart.Series s : chart.getData()) {
 //                SelectableListItem i = new SelectableListItem(s.getName(), true);
-//                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-//                   selectedSeriesCache.put(s.getName(), isNowOn);
-//                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
-//                });
-//                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
-//                seriesList.getItems().add(i);
+////                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
+////                   selectedSeriesCache.put(s.getName(), isNowOn);
+////                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
+////                });
+////                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
+//                seriesTable.getItems().add(i);
 //            }
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {
             logger.error(() -> "Error getting data", e);

@@ -23,4 +23,6 @@ public interface DataAdapter<T extends Number> extends Serializable {
     ZoneId getTimeZoneId();
 
     DataParser<T> getParser();
+
+    String getSourceName();
 }
