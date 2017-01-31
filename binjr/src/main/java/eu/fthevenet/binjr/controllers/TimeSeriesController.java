@@ -4,24 +4,25 @@ import eu.fthevenet.binjr.commons.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.commons.charts.XYChartSelection;
 import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.commons.logging.Profiler;
-import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
-import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesBuilder;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.beans.property.*;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
@@ -41,15 +42,15 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
- * Created by FTT2 on 02/12/2016.
+ * The controller class for the time series view.
+ *
+ * @author Frederic Thevenet
  */
 public class TimeSeriesController implements Initializable {
     private static final Logger logger = LogManager.getLogger(TimeSeriesController.class);
 
-
     @FXML
     public AnchorPane root;
-
     @FXML
     public AnchorPane chartParent;
     @FXML
@@ -58,8 +59,7 @@ public class TimeSeriesController implements Initializable {
 //    public CalendarTextField endDateTime;
     @FXML
     private AreaChart<ZonedDateTime, Double> chart;
-    // @FXML
-    //  private CheckBox yAutoRange;
+
     @FXML
     private TextField yMinRange;
     @FXML
@@ -76,33 +76,18 @@ public class TimeSeriesController implements Initializable {
     private ZonedDateTimePicker startDate;
     @FXML
     private ZonedDateTimePicker endDate;
-    private static AtomicInteger currentProbeIdx = new AtomicInteger(0);
+
     private MainViewController mainViewController;
-
- //   private String[] probes = new String[]{"memprocPdh", "NetIOPdh", "DiskIOPdh-null"};
-//    private Property<String> currentHost = new SimpleStringProperty("ngwps006");
-//    private String jrdsPath = "/perf-ui";
-//    private int jrdsPort = 31001;
-//    private Property<String> currentTarget = new SimpleStringProperty("ngwps006.mshome.net");
-//    private Property<String> currentProbe = new SimpleStringProperty(probes[currentProbeIdx.getAndIncrement() % probes.length]);//memprocPdh");
-
- //   private ObservableList<SelectableListItem> selectedSeries = FXCollections.observableArrayList();
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
     private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
-
-   // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
-
+    // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
-
     private State currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
-
     private History backwardHistory = new History();
     private History forwardHistory = new History();
-
- //   private ZoneId currentZoneId = ZoneId.systemDefault();
     private GlobalPreferences globalPrefs;
-
+    private String name;
 
     private Stage getStage() {
         if (chartParent != null && chartParent.getScene() != null) {
@@ -118,8 +103,6 @@ public class TimeSeriesController implements Initializable {
     public void setName(String name) {
         this.name = name;
     }
-
-    private String name;
 
     public History getBackwardHistory() {
         return backwardHistory;
@@ -157,8 +140,8 @@ public class TimeSeriesController implements Initializable {
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
-       // seriesTable.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
-       // seriesTable.getColumns()(selectableListItemTableColumn -> selectableListItemTableColumn.setCellFactory(CheckBoxTableCell.forTableColumn(param -> {param})));
+        // seriesTable.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
+        // seriesTable.getColumns()(selectableListItemTableColumn -> selectableListItemTableColumn.setCellFactory(CheckBoxTableCell.forTableColumn(param -> {param})));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
 
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
@@ -171,18 +154,18 @@ public class TimeSeriesController implements Initializable {
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
-              TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
-              if (current!= null){
-                //FIXME
-                  seriesTable.getItems().remove(current);
+                TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
+                if (current != null) {
+                    //FIXME
+                    seriesTable.getItems().remove(current);
 //                  seriesBindings.remove(current);
 //                  invalidate(false, true, true);
-              }
+                }
             }
         });
     }
 
-    public void addBinding(TimeSeriesBinding<Double> binding){
+    public void addBinding(TimeSeriesBinding<Double> binding) {
         this.seriesBindings.add(binding);
         invalidate(false, true, true);
     }
@@ -241,7 +224,7 @@ public class TimeSeriesController implements Initializable {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
             seriesData.clear();
-            seriesData.addAll(TimeSeriesBuilder.getInstance().getSeries(
+            seriesData.addAll(TimeSeries.fromBinding(
                     seriesBindings,
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
@@ -263,31 +246,8 @@ public class TimeSeriesController implements Initializable {
             if (getMainViewController() != null) {
                 getMainViewController().displayException("Failed to retrieve data from source", e);
             }
-            // throw new RuntimeException(e);
         }
     }
-
-//    private Map<String, XYChart.Series<ZonedDateTime, Double>> getRawData(String jrdsHost, String target, String probe, Instant begin, Instant end) throws IOException, ParseException {
-//        DataAdapter dp = JRDSDataAdapter.createHttp(jrdsHost, jrdsPort, jrdsPath);
-//
-//        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-//            dp.getData(target, probe, begin, end, out);
-//            final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(currentZoneId);
-//            TimeSeriesTransformer<Double> timeSeriesBuilder = new TimeSeriesTransformer<>(
-//                    s -> {
-//                        Double val = Double.parseDouble(s);
-//                        return val.isNaN() ? 0 : val;
-//                    },
-//                    s -> ZonedDateTime.parse(s, formatter));
-//            InputStream in = new ByteArrayInputStream(out.toByteArray());
-//            return timeSeriesBuilder.fromCSV(in)
-//                    .apply(globalPrefs.getDownSamplingEnabled(),
-//                            new LargestTriangleThreeBucketsTransform<>(globalPrefs.getDownSamplingThreshold()))
-//                    .toSeries();
-//        } catch (DataAdapterException e) {
-//            throw new IOException(String.format("Failed to retrieve data from JRDS for %s %s %s %s", target, probe, begin.toString(), end.toString()), e);
-//        }
-//    }
 
     public void handleHistoryBack(ActionEvent actionEvent) {
         restoreSelectionFromHistory(backwardHistory, forwardHistory);
@@ -354,7 +314,6 @@ public class TimeSeriesController implements Initializable {
             else {
                 stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString()));
             }
-
             return sb.toString();
         }
     }
@@ -363,15 +322,11 @@ public class TimeSeriesController implements Initializable {
      * Created by FTT2 on 07/12/2016.
      */
     public class State {
-
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private final SimpleDoubleProperty startY;
         private final SimpleDoubleProperty endY;
-
         private boolean frozen;
-
-        //   private final SimpleObjectProperty<State> state = new SimpleObjectProperty<>();
 
         public XYChartSelection<ZonedDateTime, Double> asSelection() {
             return new XYChartSelection<>(
@@ -446,6 +401,5 @@ public class TimeSeriesController implements Initializable {
         public String toString() {
             return String.format("State{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
         }
-
     }
 }

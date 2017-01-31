@@ -11,11 +11,18 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by FTT2 on 10/11/2016.
+ * A time series transform that applies the <a href="https://github.com/sveinn-steinarsson/flot-downsample">Largest-Triangle-Three-Buckets algorithm</a>
+ * to reduce the number of disreet data points in a series while keeping a good visual approximation of its appearance when plotted.
+ *
+ * @author Frederic Thevenet
  */
 public class LargestTriangleThreeBucketsTransform<T extends Number> extends TimeSeriesTransform<T> {
     private final int threshold;
 
+    /**
+     * Initializes a new instnace of the {@link LargestTriangleThreeBucketsTransform} class.
+     * @param threshold the maximum number of points to keep following the reduction.
+     */
     public LargestTriangleThreeBucketsTransform(final int threshold) {
         super("LargestTriangleThreeBucketsTransform");
         this.threshold = threshold;
@@ -23,20 +30,27 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
 
     @Override
     public Map<String, TimeSeries<T>> apply(Map<String, TimeSeries<T>> m) {
-        return  m.entrySet()
+        return m.entrySet()
                 .parallelStream()
-                .collect(Collectors.toMap(Map.Entry::getKey, o ->{
+                .collect(Collectors.toMap(Map.Entry::getKey, o -> {
                     o.getValue().setData(applyLTTBReduction(o.getValue().getData(), threshold));
                     return o.getValue();
                 }));
     }
 
 
-
-    private  List<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, T>> data, int threshold) {
+    /**
+     * <p>Method implementing the Largest-Triangle-Three-Buckets algorithm.</p>
+     * <p>Adapted from <a href="https://gist.github.com/DanielWJudge/63300889f27c7f50eeb7">DanielWJudge/LargestTriangleThreeBuckets.cs</a></p>
+     * @param data the list of sample to apply the reduction to.
+     * @param threshold d the maximum number of samples to keep.
+     * @return a reduced list of samples.
+     */
+    private List<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, T>> data, int threshold) {
         int dataLength = data.size();
-        if (threshold >= dataLength || threshold == 0)
+        if (threshold >= dataLength || threshold == 0) {
             return data; // Nothing to do
+        }
 
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
         ZoneId zoneId = data.get(0).getXValue().getZone();

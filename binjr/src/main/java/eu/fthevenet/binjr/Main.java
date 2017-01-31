@@ -12,13 +12,18 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 
+/**
+ * The entry point fo the application.
+ *
+ * @author Frederic Thevenet
+ */
 public class Main extends Application {
 
     private static final Logger logger = LogManager.getLogger(Main.class);
 
     @Override
-    public void start(Stage primaryStage) throws Exception{
-        logger.info(()-> "Starting binjr");
+    public void start(Stage primaryStage) throws Exception {
+        logger.info(() -> "Starting binjr");
         Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
 
         primaryStage.setTitle("binjr");
@@ -29,25 +34,26 @@ public class Main extends Application {
                 new Image(getClass().getResourceAsStream("/icons/binjr_128.png")),
                 new Image(getClass().getResourceAsStream("/icons/binjr_256.png")));
 
-        try(Profiler p= Profiler.start("Set scene", logger::trace)) {
+        try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             primaryStage.setScene(new Scene(root));
         }
-        try(Profiler p= Profiler.start("show", logger::trace)) {
+        try (Profiler p = Profiler.start("show", logger::trace)) {
             primaryStage.show();
         }
 
-        SplashScreen splash=  SplashScreen.getSplashScreen();
-        if (splash !=null){
+        SplashScreen splash = SplashScreen.getSplashScreen();
+        if (splash != null) {
             splash.close();
         }
     }
 
-
-
+    /**
+     * The entry point fo the application.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         launch(args);
     }
-
-
 
 }

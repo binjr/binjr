@@ -26,6 +26,8 @@ import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -33,6 +35,11 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * The controller class for the main view
+ *
+ * @author Frederic Thevenet
+ */
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     public static final String JRDS_HOSTNAME = "ngwps006";
@@ -89,10 +96,9 @@ public class MainViewController implements Initializable {
 
     private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
-    private void buildTreeViewForTarget(String target) {
-        DataAdapter dp = JRDSDataAdapter.createHttp(JRDS_HOSTNAME, JRDS_PORT, JRDS_PATH, DEFAULT_ZONEID, DEFAULT_ENCODING);
-        try {
-            TreeItem<TimeSeriesBinding> root = dp.getTree();
+    private void buildTreeViewForTarget(DataAdapter dp) {
+          try {
+            TreeItem<TimeSeriesBinding> root = dp.getBindingTree();
             root.setExpanded(true);
 
             treeview.setRoot(root);
@@ -165,7 +171,7 @@ public class MainViewController implements Initializable {
                         current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
                         seriesControllers.put(newValue.getText(), current);
                         // add "+" tab
-                        ((Label)newValue.getGraphic()).setText("New series " + nbSeries.getAndIncrement());
+                        ((Label)newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
                         seriesTabPane.getTabs().add(new EditableTab("+"));
 
                     } catch (IOException ex) {
@@ -182,9 +188,13 @@ public class MainViewController implements Initializable {
         });
         // By default, select 1st tab and load its content.
         seriesTabPane.getSelectionModel().selectFirst();
-      //  treeview.setRoot(new TreeItem<>("Hosts"));
-        seriesTabPane.getTabs().add(new EditableTab("memprocPdh"));
-        buildTreeViewForTarget("memprocPdh");
+
+        seriesTabPane.getTabs().add(new EditableTab("New worksheet"));
+        try {
+            buildTreeViewForTarget(JRDSDataAdapter.fromUrl("http://ngwps006:31001/perf-ui/", ZoneId.systemDefault()));
+        } catch (MalformedURLException e) {
+            displayException("Invalid URL", e);
+        }
     }
 
 
@@ -193,54 +203,6 @@ public class MainViewController implements Initializable {
             selectedTabController.invalidate(false, true, true);
         }
 
-    }
-//    private Tab createEditableTab(String text) {
-//        final Label label = new Label(text);
-//        final Tab tab = new Tab();
-//        tab.setGraphic(label);
-//
-//        final TextField textField = new TextField();
-//        label.setOnMouseClicked(new EventHandler<MouseEvent>() {
-//            @Override
-//            public void handle(MouseEvent event) {
-//                if (event.getClickCount()==2) {
-//                    textField.setText(label.getText());
-//                    tab.setGraphic(textField);
-//                    textField.selectAll();
-//                    textField.requestFocus();
-//                }
-//            }
-//        });
-//
-//
-//        textField.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override
-//            public void handle(ActionEvent event) {
-//                label.setText(textField.getText());
-//                tab.setGraphic(label);
-//            }
-//        });
-//
-//
-//        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
-//            @Override
-//            public void changed(ObservableValue<? extends Boolean> observable,
-//                                Boolean oldValue, Boolean newValue) {
-//                if (! newValue) {
-//                    label.setText(textField.getText());
-//                    tab.setGraphic(label);
-//                }
-//            }
-//        });
-//        return tab ;
-//    }
-
-
-    public void handleDumpHistoryAction(ActionEvent actionEvent) {
-        if (selectedTabController != null) {
-            TimeSeriesController.History h = selectedTabController.getBackwardHistory();
-            logger.debug(() -> "Current Tab selection  history (backward):\n" + (h == null ? "null" : h.dump()));
-        }
     }
 
     public  void displayException(String header, Exception e) {

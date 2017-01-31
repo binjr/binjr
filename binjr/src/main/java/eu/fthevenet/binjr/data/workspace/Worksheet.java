@@ -10,7 +10,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
- * Created by FTT2 on 17/01/2017.
+ * Represents a single worksheet
+ *
+ * @author Frederic Thevenet
  */
 public class Worksheet implements Serializable {
     private ObservableList<TimeSeries<Number>> series;

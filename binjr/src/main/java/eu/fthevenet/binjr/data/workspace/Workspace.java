@@ -6,7 +6,9 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * Created by FTT2 on 17/01/2017.
+ * Represents a workspace
+ *
+ * @author Frederic Thevenet
  */
 public class Workspace implements Serializable {
     private List<Worksheet> worksheets;

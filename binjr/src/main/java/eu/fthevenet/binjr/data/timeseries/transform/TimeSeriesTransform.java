@@ -9,7 +9,9 @@ import java.util.Arrays;
 import java.util.Map;
 
 /**
- * Created by FTT2 on 02/12/2016.
+ * The base class for time series transformation functions.
+ *
+ * @author Frederic Thevenet
  */
 public abstract class TimeSeriesTransform<T extends Number> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
@@ -17,12 +19,10 @@ public abstract class TimeSeriesTransform<T extends Number> {
 
     public TimeSeriesTransform(String name) {
         this.name = name;
-
     }
 
     protected abstract Map<String, TimeSeries<T>> apply(Map<String, TimeSeries<T>> series);
 
-    //  public abstract TimeSeries<T> apply(TimeSeries<T> series);
 
     public Map<String, TimeSeries<T>> transform(Map<String, TimeSeries<T>> series, boolean enabled) {
         String names = Arrays.toString(series.keySet().toArray());

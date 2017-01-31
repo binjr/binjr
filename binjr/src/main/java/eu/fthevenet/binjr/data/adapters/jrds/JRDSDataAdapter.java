@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import eu.fthevenet.binjr.commons.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -23,18 +25,24 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.text.ParseException;
 import java.time.Instant;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * Created by FTT2 on 14/10/2016.
+ * This class provides an implementation of {@link DataAdapter} for JRDS.
+ *
+ * @author Frederic Thevenet
  */
 @DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
 public class JRDSDataAdapter implements DataAdapter<Double> {
@@ -42,109 +50,60 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     private final String jrdsHost;
     private final int jrdsPort;
     private final String jrdsPath;
-    private final String jrdsScheme;
+    private final String jrdsProtocol;
     private final ZoneId zoneId;
     private final String encoding;
 
-
-    public static JRDSDataAdapter createHttp(String hostname, int port, String path, ZoneId zoneId, String encoding){
-        return new JRDSDataAdapter(hostname, port, path, zoneId, encoding, "http");
+    /**
+     * Builds a new instance of the {@link JRDSDataAdapter} class from the provided parameters.
+     *
+     * @param url    the URL to the JRDS webapp.
+     * @param zoneId the id of the time zone used to record dates.
+     * @return a new instance of the {@link JRDSDataAdapter} class.
+     */
+    public static JRDSDataAdapter fromUrl(String url, ZoneId zoneId) throws MalformedURLException {
+        URL u = new URL(url.replaceAll("/$", ""));
+        return new JRDSDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8");
     }
 
-    public static JRDSDataAdapter createHttps(String hostname, int port, String path, ZoneId zoneId, String encoding){
-        return new JRDSDataAdapter(hostname, port, path, zoneId, encoding, "https");
-    }
-
-    private JRDSDataAdapter(String hostname, int port, String path, ZoneId zoneId, String encoding, String jrdsScheme) {
+    /**
+     * Initializes a new instance of the {@link JRDSDataAdapter} class.
+     *
+     * @param hostname     the host of the JRDS webapp.
+     * @param port         the port of the JRDS webapp.
+     * @param path         the url path of the JRDS webapp.
+     * @param zoneId       the id of the time zone used to record dates.
+     * @param encoding     the encoding used by the download servlet.
+     * @param jrdsProtocol the URL scheme if the JRDS webapp.
+     */
+    public JRDSDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding) {
         this.jrdsHost = hostname;
         this.jrdsPort = port;
         this.jrdsPath = path;
-        this.jrdsScheme = jrdsScheme;
+        this.jrdsProtocol = jrdsProtocol;
         this.zoneId = zoneId;
         this.encoding = encoding;
     }
 
-    public TreeItem<TimeSeriesBinding<Double>> getTree() throws DataAdapterException {
+    //region [DataAdapter Members]
+    @Override
+    public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         JsonTree t = gson.fromJson(getJsonTree("hoststab"), JsonTree.class);
-        Map<String, JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+        Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
         TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JRDSSeriesBinding("JRDS" + ":" + jrdsHost, "/", this));
-        List<TreeItem<JsonItem>> l = new ArrayList<>();
-        for (JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
+        List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
+        for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
         }
         return tree;
     }
 
-    private  TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonItem> nodes) throws DataAdapterException {
-        JsonItem n = nodes.get(id);
-        String currentPath = normalizeId(n.id);
-        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name,currentPath, this));
-        if (n.children != null){
-            for (JsonTreeRef ref : n.children){
-                attachNode(newBranch, ref._reference, nodes);
-            }
-        } else{
-            try {
-                for (String storeName : getColumnDataStores(currentPath)) {
-                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(storeName, currentPath, this)));
-                }
-            }
-            catch (DataAdapterException e){
-                logger.debug("Ignoring", e);
-            }
-        }
-        tree.getChildren().add(newBranch);
-        return tree;
-    }
-
-    private String normalizeId(String id){
-        if (id ==null || id.trim().length()==0){
-            throw new IllegalArgumentException("Argument id cannot be null or blank");
-        }
-        String[] data = id.split("\\.");
-        return data[data.length-1];
-    }
-
-    private String getJsonTree(String tabname) throws DataAdapterException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsScheme)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/jsontree")
-                .addParameter("tab", tabname);
-        return doHttpGet(requestUrl, response -> {
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                 return EntityUtils.toString(entity);
-                }
-                return null;
-            }
-            else {
-                throw new ClientProtocolException("Unexpected response status: " + status);
-            }
-        });
-    }
-
-    private String[] getColumnDataStores(String id)throws DataAdapterException{
-        Instant now = ZonedDateTime.now().toInstant();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            getData(id, now, now.plusSeconds(60), out);
-            try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
-                Map<String, TimeSeries<Double>> m = getParser().parse(in);
-                return m.keySet().toArray(new String[0]);
-            }
-        } catch (IOException | ParseException e) {
-            throw new DataAdapterException(e);
-        }
-    }
 
     @Override
     public long getData(String path, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsScheme)
+                .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/download")
@@ -170,7 +129,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     }
 
     @Override
-    public String getSourceName(){
+    public String getSourceName() {
         return "JRDS:" + jrdsHost + ":" + jrdsPort;
     }
 
@@ -185,7 +144,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     }
 
     @Override
-    public  DataParser<Double> getParser() {
+    public DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
         return new CsvParser<>(getEncoding(), ",",
                 DoubleTimeSeries::new,
@@ -195,11 +154,91 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 },
                 s -> ZonedDateTime.parse(s, formatter));
     }
+    //endregion
 
-    @Override
-    public long getData(String targetHost, String probe, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
+    private TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
+        JsonTree.JsonItem n = nodes.get(id);
+        String currentPath = normalizeId(n.id);
+        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name, currentPath, this));
+        if (n.children != null) {
+            for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
+                attachNode(newBranch, ref._reference, nodes);
+            }
+        }
+        else {
+            // add a dummy node so that the branch can be expanded
+            newBranch.getChildren().add(new TreeItem<>(null));
+            // add a listener so that bindings for individual datastore are added lazily to avoid
+            // dozens of individual call to getColumnDataStores when the tree is built.
+            newBranch.expandedProperty().addListener(new ChangeListener<Boolean>() {
+                @Override
+                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                    if (newValue) {
+                        try {
+                            //remove dummy node
+                            newBranch.getChildren().remove(0);
+                            for (String storeName : getColumnDataStores(currentPath)) {
+                                newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(storeName, currentPath, JRDSDataAdapter.this)));
+                            }
+                        } catch (DataAdapterException e) {
+                            logger.error("Failed to retrieve data store name", e);
+                        }
+                        // remove the listener so it isn't executed next time node is expanded
+                        newBranch.expandedProperty().removeListener(this);
+                    }
+                }
+            });
+        }
+        tree.getChildren().add(newBranch);
+        return tree;
+    }
+
+    private String normalizeId(String id) {
+        if (id == null || id.trim().length() == 0) {
+            throw new IllegalArgumentException("Argument id cannot be null or blank");
+        }
+        String[] data = id.split("\\.");
+        return data[data.length - 1];
+    }
+
+    private String getJsonTree(String tabname) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsScheme)
+                .setScheme(jrdsProtocol)
+                .setHost(jrdsHost)
+                .setPort(jrdsPort)
+                .setPath(jrdsPath + "/jsontree")
+                .addParameter("tab", tabname);
+        return doHttpGet(requestUrl, response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status >= 200 && status < 300) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity);
+                }
+                return null;
+            }
+            else {
+                throw new ClientProtocolException("Unexpected response status: " + status);
+            }
+        });
+    }
+
+    private String[] getColumnDataStores(String id) throws DataAdapterException {
+        Instant now = ZonedDateTime.now().toInstant();
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            getData(id, now, now.plusSeconds(60), out);
+            try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                Map<String, TimeSeries<Double>> m = getParser().parse(in);
+                return m.keySet().toArray(new String[0]);
+            }
+        } catch (IOException | ParseException e) {
+            throw new DataAdapterException(e);
+        }
+    }
+
+    private long getProbeData(String targetHost, String probe, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/download/probe/" + targetHost + "/" + probe)
@@ -223,17 +262,37 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         });
     }
 
-    private<T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
-        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString()+"]", logger::trace)) {
+    private <T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
+        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString() + "]", logger::trace)) {
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 logger.debug(() -> "requestUrl = " + requestUrl);
                 HttpGet httpget = new HttpGet(requestUrl.build());
-                return httpClient.execute(httpget,responseHandler);
+                return httpClient.execute(httpget, responseHandler);
             }
         } catch (IOException e) {
             throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {
             throw new DataAdapterException("Error building URI for request");
+        }
+    }
+
+    /**
+     * POJO definition used to parse JSON message.
+     */
+    private static class JsonTree {
+        String identifier;
+        String label;
+        JsonItem[] items;
+
+        static class JsonItem {
+            String name;
+            String id;
+            String type;
+            JsonTreeRef[] children;
+
+            static class JsonTreeRef {
+                String _reference;
+            }
         }
     }
 }

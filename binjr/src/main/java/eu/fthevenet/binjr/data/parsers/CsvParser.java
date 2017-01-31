@@ -1,7 +1,6 @@
 package eu.fthevenet.binjr.data.parsers;
 
 import eu.fthevenet.binjr.commons.logging.Profiler;
-import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
 import javafx.scene.chart.XYChart;
@@ -20,7 +19,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
 
 /**
- * Created by FTT2 on 26/01/2017.
+ * This class provides an implementation of a {@link DataParser} that generates {@link TimeSeries} out of a CSV formatted text stream.
+ *
+ * @author Frederic Thevenet
  */
 public class CsvParser<T extends Number> implements DataParser<T> {
     private final String encoding;
@@ -30,7 +31,14 @@ public class CsvParser<T extends Number> implements DataParser<T> {
     private final TimeSeriesFactory<T> timeSeriesFactory;
     private static final Logger logger = LogManager.getLogger(CsvParser.class);
 
-
+    /**
+     * Initializes a new instance of the {@link CsvParser} class.
+     * @param encoding the encoding used in the CSV stream
+     * @param separator the character to separate columns in the CSV stream
+     * @param timeSeriesFactory the factory used to create new {@link TimeSeries} instances.
+     * @param numberParser the function used to parse numbers from the CSV stream
+     * @param dateParser the function used to parse dates from the CSV stream
+     */
     public CsvParser(String encoding, String separator, TimeSeriesFactory<T> timeSeriesFactory, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser){
         this.encoding = encoding;
         this.separator = separator;

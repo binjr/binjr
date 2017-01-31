@@ -1,7 +1,8 @@
 package eu.fthevenet.binjr.data.adapters;
 
 /**
- * Signals that an error happened while while using the DataAdapter.
+ * Signals that an error happened while using a DataAdapter.
+ *
  * @author Frederic Thevenet
  */
 public class DataAdapterException extends Exception {

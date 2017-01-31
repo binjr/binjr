@@ -9,7 +9,9 @@ import java.io.Serializable;
 import java.util.prefs.Preferences;
 
 /**
- * Created by FTT2 on 16/01/2017.
+ * Stores the global user preferences for the application.
+ *
+ * @author Frederic Thevenet
  */
 public class GlobalPreferences {
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
@@ -35,11 +37,18 @@ public class GlobalPreferences {
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
     }
 
-
+    /**
+     * Returns true if the chart animation is enabled, false otherwise.
+     * @returnt rue if the chart animation is enabled, false otherwise.
+     */
     public Boolean getChartAnimationEnabled() {
         return downSamplingEnabled.getValue();
     }
 
+    /**
+     * Returns the
+     * @return
+     */
     public Property<Boolean> chartAnimationEnabledProperty() {
         return chartAnimationEnabled;
     }

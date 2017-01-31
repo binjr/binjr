@@ -5,6 +5,8 @@ import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -25,12 +27,17 @@ public class JrdsSourceTester {
         Instant end = Instant.now();
         Instant begin = end.minus(24*60*7, ChronoUnit.MINUTES);
 
-        JRDSDataAdapter dp = JRDSDataAdapter.createHttp(host,port, path, ZoneId.systemDefault(), "utf-8");
+        JRDSDataAdapter dp = null;
+        try {
+            dp = JRDSDataAdapter.fromUrl("http://ngwps006:31001/perf-ui/", ZoneId.systemDefault());
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
 
         try{
 
        //     System.out.printf(dp.getJsonTree("hoststab"));
-            dp.getTree();
+            dp.getBindingTree();
         }
         catch (DataAdapterException e){
             logger.error(e);
