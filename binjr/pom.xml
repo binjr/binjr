@@ -3,14 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
-    <version>0.2-SNAPSHOT</version>
+    <version>0.3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
-
-    <url>https://github.com/fthevenet/PrettyPerfPlotter</url>
-
+    <url>https://github.com/fthevenet/binjr</url>
     <build>
         <finalName>${project.name}</finalName>
 
@@ -117,8 +114,6 @@
     </build>
 
     <dependencies>
-
-    <!-- log4j -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-api</artifactId>
@@ -129,17 +124,11 @@
             <artifactId>log4j-core</artifactId>
             <version>2.7</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
         </dependency>
-        <!--<dependency>-->
-            <!--<groupId>org.jfxtras</groupId>-->
-            <!--<artifactId>jfxtras-controls</artifactId>-->
-            <!--<version>8.0-r5</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
@@ -150,11 +139,10 @@
             <artifactId>jfxutils</artifactId>
             <version>1.0</version>
         </dependency>
-            <dependency>
-                <groupId>com.google.code.gson</groupId>
-                <artifactId>gson</artifactId>
-                <version>2.8.0</version>
-            </dependency>
-
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+        </dependency>
     </dependencies>
 </project>

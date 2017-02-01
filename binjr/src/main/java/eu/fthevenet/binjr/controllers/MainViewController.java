@@ -15,6 +15,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -41,11 +43,6 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-    public static final String JRDS_HOSTNAME = "ngwps006";
-    public static final int JRDS_PORT = 31001;
-    public static final String JRDS_PATH = "/perf-ui";
-    public static final String DEFAULT_ENCODING = "utf-8";
-    public static final ZoneId DEFAULT_ZONEID = ZoneId.systemDefault();
     @FXML
     public VBox root;
     @FXML
@@ -55,7 +52,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem editRefresh;
     @FXML
-    private TreeView<TimeSeriesBinding> treeview;
+    private TabPane sourcesTabPane;
     @FXML
     private TabPane seriesTabPane;
     @FXML
@@ -95,23 +92,27 @@ public class MainViewController implements Initializable {
 
     private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
 
-    private void buildTreeViewForTarget(DataAdapter dp) {
-          try {
+    private TreeView<TimeSeriesBinding> buildTreeViewForTarget(DataAdapter dp) {
+        TreeView<TimeSeriesBinding> treeView = new TreeView<>();
+        try {
             TreeItem<TimeSeriesBinding> root = dp.getBindingTree();
+
+
             root.setExpanded(true);
 
-            treeview.setRoot(root);
-            treeview.setOnMouseClicked(event -> {
+            treeView.setRoot(root);
+            treeView.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
-                    TreeItem<TimeSeriesBinding> item = treeview.getSelectionModel().getSelectedItem();
+                    TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                     if (selectedTabController != null) {
                         selectedTabController.addBinding(item.getValue());
                     }
                 }
             });
         } catch (DataAdapterException e) {
-            displayException("An error occurred while building the tree from "+ dp!=null ? dp.getSourceName() : "null", e);
+            displayException("An error occurred while building the tree from " + dp != null ? dp.getSourceName() : "null", e);
         }
+        return treeView;
     }
 
     private TimeSeriesController selectedTabController;
@@ -137,8 +138,8 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert viewMenu != null : "fx:id\"editMenu\" was not injected!";
         assert root != null : "fx:id\"root\" was not injected!";
-        assert treeview != null : "fx:id\"treeview\" was not injected!";
         assert seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
+        assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
@@ -146,7 +147,6 @@ public class MainViewController implements Initializable {
         hMarkerToggle.selectedProperty().bindBidirectional(showVerticalMarker);
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
-
 
         seriesTabPane.getSelectionModel().clearSelection();
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
@@ -165,12 +165,13 @@ public class MainViewController implements Initializable {
                         TimeSeriesController current = fXMLLoader.getController();
                         selectedTabController = current;
                         // Init time series controller
+                        // TODO clean-up initialization of timeSeriescontrollers
                         current.setMainViewController(MainViewController.this);
                         current.getCrossHair().horizontalMarkerVisibleProperty().bind(showHorizontalMarker);
                         current.getCrossHair().verticalMarkerVisibleProperty().bind(showVerticalMarker);
                         seriesControllers.put(newValue.getText(), current);
                         // add "+" tab
-                        ((Label)newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
+                        ((Label) newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
                         seriesTabPane.getTabs().add(new EditableTab("+"));
 
                     } catch (IOException ex) {
@@ -178,10 +179,7 @@ public class MainViewController implements Initializable {
                     }
                 }
                 else {
-                    // Content is already loaded. Update it if necessary.
                     Parent root = (Parent) newValue.getContent();
-                    // Optionally get the controller from Map and manipulate the content
-                    // via its controller.
                 }
             }
         });
@@ -189,26 +187,36 @@ public class MainViewController implements Initializable {
         seriesTabPane.getSelectionModel().selectFirst();
 
         seriesTabPane.getTabs().add(new EditableTab("New worksheet"));
-        try {
-            buildTreeViewForTarget(JRDSDataAdapter.fromUrl("http://ngwps006:31001/perf-ui/", ZoneId.systemDefault()));
-        } catch (MalformedURLException e) {
-            displayException("Invalid URL", e);
-        }
-    }
 
+
+        sourcesTabPane.getSelectionModel().clearSelection();
+        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
+            @Override
+            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
+                if (newValue == null) {
+                    return;
+                }
+                if (newValue.getContent() == null) {
+                    TreeView<TimeSeriesBinding> treeView;
+                    DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
+                    treeView = buildTreeViewForTarget(da);
+                    newValue.setContent(treeView);
+                }
+            }
+        });
+    }
 
     public void handleRefreshAction(ActionEvent actionEvent) {
-        if (selectedTabController!= null){
+        if (selectedTabController != null) {
             selectedTabController.invalidate(false, true, true);
         }
-
     }
 
-    public  void displayException(String header, Exception e) {
+    public void displayException(String header, Exception e) {
         displayException(header, e, getStage());
     }
 
-    public  void displayException(String header, Exception e, Window owner) {
+    public void displayException(String header, Exception e, Window owner) {
         logger.error(e);
         ExceptionDialog dlg = new ExceptionDialog(e);
         dlg.initStyle(StageStyle.UTILITY);
@@ -217,9 +225,9 @@ public class MainViewController implements Initializable {
         dlg.showAndWait();
     }
 
-    private Stage getStage(){
-        if (root != null && root.getScene() != null){
-            return (Stage)root.getScene().getWindow();
+    private Stage getStage() {
+        if (root != null && root.getScene() != null) {
+            return (Stage) root.getScene().getWindow();
         }
         return null;
     }
@@ -236,5 +244,27 @@ public class MainViewController implements Initializable {
         } catch (Exception ex) {
             displayException("Failed to display preference dialog", ex);
         }
+    }
+
+    public void handleAddJRDSSource(ActionEvent actionEvent) {
+
+        TextInputDialog dlg = new TextInputDialog("");
+        dlg.setTitle("Add JRDS source");
+        String optionalMasthead = "Please type in your name";
+        dlg.getDialogPane().setContentText("URL:");
+        dlg.getDialogPane().setHeaderText("Add JRDS source");
+        dlg.getDialogPane().setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/icons/binjr_48.png"))));
+        dlg.initStyle(StageStyle.UTILITY);
+        dlg.initOwner(getStage());
+        dlg.showAndWait().ifPresent(url -> {
+            try {
+                DataAdapter<Double> da = JRDSDataAdapter.fromUrl(url, ZoneId.systemDefault());
+                Tab newTab = new Tab(da.getSourceName());
+                newTab.setUserData(da);
+                sourcesTabPane.getTabs().add(newTab);
+            } catch (MalformedURLException e) {
+                displayException("Invalid URL", e);
+            }
+        });
     }
 }

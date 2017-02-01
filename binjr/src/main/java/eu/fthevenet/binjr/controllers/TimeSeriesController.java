@@ -167,6 +167,7 @@ public class TimeSeriesController implements Initializable {
     public void addBinding(TimeSeriesBinding<Double> binding) {
         this.seriesBindings.add(binding);
         invalidate(false, true, true);
+        chart.getYAxis().setAutoRanging(true);
     }
     //endregion
 

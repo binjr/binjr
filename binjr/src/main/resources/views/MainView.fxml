@@ -24,7 +24,7 @@
             <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleNewTabAction" text="New" />
+                        <MenuItem disable="true"  mnemonicParsing="false" onAction="#handleNewTabAction" text="New Workspace"  />
                         <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
                         <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
@@ -38,7 +38,14 @@
                         <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
                     </items>
                 </Menu>
-                <Menu fx:id="viewMenu" mnemonicParsing="false" text="View">
+                <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Source">
+                    <items>
+                        <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="Add source">
+                            <MenuItem mnemonicParsing="false" text="JRDS" onAction="#handleAddJRDSSource" />
+                        </Menu>
+                    </items>
+                </Menu>
+                <Menu fx:id="viewMenu" mnemonicParsing="false" text="Chart">
                     <items>
                         <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Show X axis marker" />
                         <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Show Y axis marker" />
@@ -62,38 +69,28 @@
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
-                  <TabPane prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="UNAVAILABLE" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <TabPane fx:id="sourcesTabPane" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
-                      <Tab text="JRDS:ngwps006">
-                        <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                 <children>
-                                              <TreeView fx:id="treeview" fixedCellSize="24.0" prefHeight="577.0" prefWidth="297.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children>
-                              </AnchorPane>
-                        </content>
-                      </Tab>
-                      <Tab text="+">
-                        <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                        </content>
-                      </Tab>
+                      <!--<Tab text="JRDS:ngwps006">-->
+                        <!--<content>-->
+                          <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">-->
+                                 <!--<children>-->
+                                              <!--<TreeView fx:id="treeview" fixedCellSize="24.0" prefHeight="577.0" prefWidth="297.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />-->
+                                 <!--</children>-->
+                              <!--</AnchorPane>-->
+                        <!--</content>-->
+                      <!--</Tab>-->
+                      <!--<Tab text="+">-->
+                        <!--<content>-->
+                          <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />-->
+                        <!--</content>-->
+                      <!--</Tab>-->
                     </tabs>
                   </TabPane>
                     </children>
                 </AnchorPane>
                 <TabPane fx:id="seriesTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB">
                     <tabs>
-                        <!--<Tab text="Untitled Tab 1">-->
-                        <!--<content>-->
-                        <!--<fx:include  source="TimeSeriesView.fxml" fx:id="seriesTab1" />-->
-                        <!--</content>-->
-                        <!--</Tab>-->
-                        <!--<Tab text="Untitled Tab 2">-->
-                        <!--<content>-->
-                        <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />-->
-                        <!--</content>-->
-                        <!--</Tab>-->
                     </tabs>
                 </TabPane>
             </items>
