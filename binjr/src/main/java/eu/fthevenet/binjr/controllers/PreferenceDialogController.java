@@ -11,7 +11,9 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Created by FTT2 on 16/01/2017.
+ * The controller for the preference view.
+ *
+ * @author Frederic Thevenet
  */
 public class PreferenceDialogController implements Initializable {
     @FXML
@@ -40,7 +42,6 @@ public class PreferenceDialogController implements Initializable {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-
 
         enableChartAnimation.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().chartAnimationEnabledProperty());
         showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());

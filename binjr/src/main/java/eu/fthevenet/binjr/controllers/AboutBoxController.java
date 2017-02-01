@@ -11,7 +11,9 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * Created by ftt2 on 16/11/2016.
+ * The controller for the about dialog
+ *
+ * @author Frederic Thevenet
  */
 public class AboutBoxController implements Initializable {
 
@@ -25,7 +27,6 @@ public class AboutBoxController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-
 
     }
 }

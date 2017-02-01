@@ -25,10 +25,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
-import jfxtras.scene.control.CalendarTextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,18 +46,12 @@ import java.util.stream.Collectors;
  */
 public class TimeSeriesController implements Initializable {
     private static final Logger logger = LogManager.getLogger(TimeSeriesController.class);
-
     @FXML
     public AnchorPane root;
     @FXML
     public AnchorPane chartParent;
     @FXML
-    public CalendarTextField beginDateTime;
-    //    @FXML
-//    public CalendarTextField endDateTime;
-    @FXML
     private AreaChart<ZonedDateTime, Double> chart;
-
     @FXML
     private TextField yMinRange;
     @FXML
@@ -82,20 +74,15 @@ public class TimeSeriesController implements Initializable {
     private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
     // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
-    private State currentState;
+    private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
     private History backwardHistory = new History();
     private History forwardHistory = new History();
     private GlobalPreferences globalPrefs;
     private String name;
 
-    private Stage getStage() {
-        if (chartParent != null && chartParent.getScene() != null) {
-            return (Stage) chartParent.getScene().getWindow();
-        }
-        return null;
-    }
 
+    //region [Properties]
     public String getName() {
         return name;
     }
@@ -104,10 +91,24 @@ public class TimeSeriesController implements Initializable {
         this.name = name;
     }
 
-    public History getBackwardHistory() {
-        return backwardHistory;
+    public MainViewController getMainViewController() {
+        return mainViewController;
     }
 
+    public void setMainViewController(MainViewController mainViewController) {
+        this.mainViewController = mainViewController;
+    }
+
+    public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
+        return crossHair;
+    }
+
+    public AreaChart<ZonedDateTime, Double> getChart() {
+        return chart;
+    }
+    //endregion
+
+    //region [Initializable Members]
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
@@ -133,15 +134,13 @@ public class TimeSeriesController implements Initializable {
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
         ZonedDateTime now = ZonedDateTime.now();
-        this.currentState = new State(now.minus(12, ChronoUnit.HOURS), now, 0, 100);
+        this.currentState = new XYChartViewState(now.minus(12, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
-        // seriesTable.setCellFactory(CheckBoxListCell.forListView(SelectableListItem::selectedProperty));
-        // seriesTable.getColumns()(selectableListItemTableColumn -> selectableListItemTableColumn.setCellFactory(CheckBoxTableCell.forTableColumn(param -> {param})));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
 
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
@@ -169,6 +168,7 @@ public class TimeSeriesController implements Initializable {
         this.seriesBindings.add(binding);
         invalidate(false, true, true);
     }
+    //endregion
 
     public void invalidate(boolean saveToHistory, boolean plotChart) {
         invalidate(saveToHistory, plotChart, false);
@@ -190,24 +190,50 @@ public class TimeSeriesController implements Initializable {
             }
         }
         else {
-            logger.debug(() -> "State hasn't change, no need to redraw the graph");
+            logger.debug(() -> "XYChartViewState hasn't change, no need to redraw the graph");
         }
     }
+    //region [UI event handlers]
+    /**
+     * Handles user interaction with the "back" button.
+     * @param actionEvent the event
+     */
+    public void handleHistoryBack(ActionEvent actionEvent) {
+        restoreSelectionFromHistory(backwardHistory, forwardHistory);
+    }
 
+    /**
+     *  Handles user interaction with the "forward" button.
+     * @param actionEvent the event
+     */
+    public void handleHistoryForward(ActionEvent actionEvent) {
+        restoreSelectionFromHistory(forwardHistory, backwardHistory);
+    }
+
+    /**
+     * Handles user interaction with the "reset" button.
+     * @param actionEvent the event
+     */
+    public void handleResetYRangeButton(ActionEvent actionEvent) {
+        chart.getYAxis().setAutoRanging(true);
+    }
+
+    /**
+     * Handles user interaction with the "refresh" button.
+     * @param actionEvent the event
+     */
+    public void handleRefresh(ActionEvent actionEvent) {
+        this.invalidate(false, true, true);
+    }
+    //endregion
+
+    //region [Private Members]
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
         formatter.valueProperty().bindBidirectional(stateProperty);
         axisBoundProperty.bindBidirectional(stateProperty);
         formatter.valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
         textField.setTextFormatter(formatter);
-    }
-
-    public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
-        return crossHair;
-    }
-
-    public AreaChart<ZonedDateTime, Double> getChart() {
-        return chart;
     }
 
     private void restoreSelectionFromHistory(History history, History toHistory) {
@@ -249,36 +275,20 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
-    public void handleHistoryBack(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(backwardHistory, forwardHistory);
-    }
+    /**
+     * Wraps a stack to record user navigation steps.
+     */
+    private class History {
+        private final Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
+        private final SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
 
-    public void handleHistoryForward(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(forwardHistory, backwardHistory);
-    }
-
-    public void handleResetYRangeButton(ActionEvent actionEvent) {
-        chart.getYAxis().setAutoRanging(true);
-    }
-
-    public void handleRefresh(ActionEvent actionEvent) {
-        this.invalidate(false, true, true);
-    }
-
-    public MainViewController getMainViewController() {
-        return mainViewController;
-    }
-
-    public void setMainViewController(MainViewController mainViewController) {
-        this.mainViewController = mainViewController;
-    }
-
-
-    public class History {
-        private Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
-        public SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
-
-        public XYChartSelection<ZonedDateTime, Double> push(XYChartSelection<ZonedDateTime, Double> state) {
+        /**
+         * Put the provided {@link XYChartSelection} on the top of the stack.
+         *
+         * @param state the provided {@link XYChartSelection}
+         * @return the provided {@link XYChartSelection}
+         */
+        XYChartSelection<ZonedDateTime, Double> push(XYChartSelection<ZonedDateTime, Double> state) {
             if (state == null) {
                 logger.warn(() -> "Trying to push null state into backwardHistory");
                 return null;
@@ -289,23 +299,45 @@ public class TimeSeriesController implements Initializable {
             }
         }
 
-        public void clear() {
+        /**
+         * Clears the history
+         */
+        void clear() {
             this.stack.clear();
             emptyStackProperty.set(true);
         }
 
-        public XYChartSelection<ZonedDateTime, Double> pop() {
+        /**
+         * Gets the topmost {@link XYChartSelection} from the stack.
+         *
+         * @return the topmost {@link XYChartSelection} from the stack.
+         */
+        XYChartSelection<ZonedDateTime, Double> pop() {
             XYChartSelection<ZonedDateTime, Double> r = this.stack.pop();
             emptyStackProperty.set(stack.isEmpty());
             return r;
         }
 
-        public boolean isEmpty() {
+        /**
+         * Returns true if the underlying stack is empty, false otherwise.
+         *
+         * @return true if the underlying stack is empty, false otherwise.
+         */
+        boolean isEmpty() {
             return emptyStackProperty.get();
         }
 
+        @Override
+        public String toString() {
+            return this.dump();
+        }
 
-        public String dump() {
+        /**
+         * Dumps the content of the stack as a string
+         *
+         * @return the content of the stack as a string
+         */
+        private String dump() {
             final StringBuilder sb = new StringBuilder("History:");
             AtomicInteger pos = new AtomicInteger(0);
             if (this.isEmpty()) {
@@ -319,16 +351,21 @@ public class TimeSeriesController implements Initializable {
     }
 
     /**
-     * Created by FTT2 on 07/12/2016.
+     * Represent the state of the time series view
      */
-    public class State {
+    private class XYChartViewState {
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private final SimpleDoubleProperty startY;
         private final SimpleDoubleProperty endY;
         private boolean frozen;
 
-        public XYChartSelection<ZonedDateTime, Double> asSelection() {
+        /**
+         * Returns the current state as a {@link XYChartSelection}
+         *
+         * @return the current state as a {@link XYChartSelection}
+         */
+        XYChartSelection<ZonedDateTime, Double> asSelection() {
             return new XYChartSelection<>(
                     startX.get(),
                     endX.get(),
@@ -337,7 +374,13 @@ public class TimeSeriesController implements Initializable {
             );
         }
 
-        public void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
+        /**
+         * Sets the current state from a {@link XYChartSelection}
+         *
+         * @param selection the {@link XYChartSelection} to set as the current state
+         * @param toHistory true if the change in state should be recoreded in the history
+         */
+        void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
             frozen = true;
             try {
                 ZonedDateTime newStartX = roundDateTime(selection.getStartX());
@@ -353,7 +396,15 @@ public class TimeSeriesController implements Initializable {
             }
         }
 
-        public State(ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+        /**
+         * Initializes a new instance of the {@link XYChartViewState} class.
+         *
+         * @param startX the start of the time interval
+         * @param endX   the end of the time interval
+         * @param startY the lower bound of the Y axis
+         * @param endY   the upper bound of the Y axis
+         */
+        XYChartViewState(ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
@@ -399,7 +450,8 @@ public class TimeSeriesController implements Initializable {
 
         @Override
         public String toString() {
-            return String.format("State{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
+            return String.format("XYChartViewState{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
         }
     }
+    //endregion
 }

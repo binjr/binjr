@@ -4,7 +4,6 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
-import javafx.scene.Cursor;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
@@ -21,8 +20,9 @@ import org.gillius.jfxutils.chart.XYChartInfo;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-
 /**
+ * Draws a crosshair on top of an {@link XYChart} and handles selection of a portion of the chart view.
+ *
  * @author Frederic Thevenet
  */
 public class XYChartCrosshair<X, Y> {
@@ -41,10 +41,18 @@ public class XYChartCrosshair<X, Y> {
     private Point2D selectionStart = new Point2D(-1, -1);
     private Point2D mousePosition = new Point2D(-1, -1);
     private final Rectangle selection = new Rectangle(0, 0, 0, 0);
-    private final SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
-    private final SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private  Consumer<XYChartSelection<X,Y>> selectionDoneEvent;
+    private final SimpleBooleanProperty verticalMarkerVisible = new SimpleBooleanProperty();
+    private final SimpleBooleanProperty horizontalMarkerVisible = new SimpleBooleanProperty();
+    private Consumer<XYChartSelection<X, Y>> selectionDoneEvent;
 
+    /**
+     * Initializes a new instance of the {@link XYChartCrosshair} class.
+     *
+     * @param chart            the {@link XYChart} to attach the crosshair to.
+     * @param parent           the parent node of the chart
+     * @param xValuesFormatter a function used to format the display of X values as strings
+     * @param yValuesFormatter a function used to format the display of Y values as strings
+     */
     public XYChartCrosshair(XYChart<X, Y> chart, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
         this.chart = chart;
         applyStyle(this.verticalMarker);
@@ -69,27 +77,27 @@ public class XYChartCrosshair<X, Y> {
 
         isSelecting.addListener((observable, oldValue, newValue) -> {
             logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
-            if (!oldValue && newValue){
+            if (!oldValue && newValue) {
                 selectionStart = new Point2D(verticalMarker.getStartX(), horizontalMarker.getStartY());
             }
             drawSelection();
             selection.setVisible(newValue);
         });
 
-        showHorizontalMarker.addListener((observable, oldValue, newValue) -> {
+        horizontalMarkerVisible.addListener((observable, oldValue, newValue) -> {
             drawHorizontalMarker();
             horizontalMarker.setVisible(newValue);
             yAxisLabel.setVisible(newValue);
-            if (!newValue && !showVerticalMarker.get()) {
+            if (!newValue && !verticalMarkerVisible.get()) {
                 isSelecting.set(false);
             }
         });
 
-        showVerticalMarker.addListener((observable, oldValue, newValue) -> {
+        verticalMarkerVisible.addListener((observable, oldValue, newValue) -> {
             drawVerticalMarker();
             verticalMarker.setVisible(newValue);
             xAxisLabel.setVisible(newValue);
-            if (!newValue && !showHorizontalMarker.get()) {
+            if (!newValue && !horizontalMarkerVisible.get()) {
                 isSelecting.set(false);
             }
         });
@@ -99,7 +107,66 @@ public class XYChartCrosshair<X, Y> {
         });
     }
 
-    public void onSelectionDone(Consumer<XYChartSelection<X,Y>> action) {
+    /**
+     * Gets the boolean property that tracks the visibility of the vertical marker of the crosshair
+     *
+     * @return the boolean property that tracks the visibility of the vertical marker of the crosshair
+     */
+    public SimpleBooleanProperty verticalMarkerVisibleProperty() {
+        return verticalMarkerVisible;
+    }
+
+    /**
+     * Gets the boolean property that tracks the visibility of the horizontal marker of the crosshair
+     *
+     * @return the boolean property that tracks the visibility of the horizontal marker of the crosshair
+     */
+    public SimpleBooleanProperty horizontalMarkerVisibleProperty() {
+        return horizontalMarkerVisible;
+    }
+
+    /**
+     * Returns true if the vertical marker is visible, false otherwise
+     *
+     * @return true if the vertical marker is visible, false otherwise
+     */
+    public boolean isVerticalMarkerVisible() {
+        return verticalMarkerVisible.get();
+    }
+
+    /**
+     * Returns true if the horizontal marker is visible, false otherwise
+     *
+     * @return true if the horizontal marker is visible, false otherwise
+     */
+    public boolean isHorizontalMarkerVisible() {
+        return horizontalMarkerVisible.get();
+    }
+
+    /**
+     * Sets the visibility of the  vertical marker
+     *
+     * @param verticalMarkerVisible the visibility of the  vertical marker
+     */
+    public void setVerticalMarkerVisible(boolean verticalMarkerVisible) {
+        this.verticalMarkerVisible.set(verticalMarkerVisible);
+    }
+
+    /**
+     * Sets the visibility of the  horizontal marker
+     *
+     * @param horizontalMarkerVisible the visibility of the  horizontal marker
+     */
+    public void setHorizontalMarkerVisible(boolean horizontalMarkerVisible) {
+        this.horizontalMarkerVisible.set(horizontalMarkerVisible);
+    }
+
+    /**
+     * Sets the action to be triggered when selection is complete
+     *
+     * @param action the action to be triggered when selection is complete
+     */
+    public void onSelectionDone(Consumer<XYChartSelection<X, Y>> action) {
         selectionDoneEvent = action;
     }
 
@@ -166,15 +233,13 @@ public class XYChartCrosshair<X, Y> {
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
         mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX())), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY())));
-       // if (event.isShiftDown()) {
-        if (showHorizontalMarker.get()){
+        if (horizontalMarkerVisible.get()) {
             drawHorizontalMarker();
         }
-        //if (event.isControlDown()) {
-        if (showVerticalMarker.get()){
+        if (verticalMarkerVisible.get()) {
             drawVerticalMarker();
         }
-        if (event.isPrimaryButtonDown() && (showVerticalMarker.get() || showHorizontalMarker.get())) {
+        if (event.isPrimaryButtonDown() && (verticalMarkerVisible.get() || horizontalMarkerVisible.get())) {
             isSelecting.set(true);
             drawSelection();
         }
@@ -184,18 +249,18 @@ public class XYChartCrosshair<X, Y> {
         if (selectionStart.getX() < 0 || selectionStart.getY() < 0) {
             return;
         }
-        if (showHorizontalMarker.get()) {
+        if (horizontalMarkerVisible.get()) {
             double height = horizontalMarker.getStartY() - selectionStart.getY();
-            selection.setY(height < 0 ?horizontalMarker.getStartY(): selectionStart.getY());
+            selection.setY(height < 0 ? horizontalMarker.getStartY() : selectionStart.getY());
             selection.setHeight(Math.abs(height));
         }
         else {
             selection.setY(verticalMarker.getStartY());
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
-        if (showVerticalMarker.get()) {
+        if (verticalMarkerVisible.get()) {
             double width = verticalMarker.getStartX() - selectionStart.getX();
-            selection.setX(width < 0 ?verticalMarker.getStartX() :selectionStart.getX());
+            selection.setX(width < 0 ? verticalMarker.getStartX() : selectionStart.getX());
             selection.setWidth(Math.abs(width));
         }
         else {
@@ -228,29 +293,5 @@ public class XYChartCrosshair<X, Y> {
                 fillColor.getGreen(),
                 fillColor.getBlue(),
                 SELECTION_OPACITY));
-    }
-
-    public SimpleBooleanProperty showVerticalMarkerProperty() {
-        return showVerticalMarker;
-    }
-
-    public SimpleBooleanProperty showHorizontalMarkerProperty() {
-        return showHorizontalMarker;
-    }
-
-    public boolean isShowVerticalMarker() {
-        return showVerticalMarker.get();
-    }
-
-    public boolean isShowHorizontalMarker() {
-        return showHorizontalMarker.get();
-    }
-
-    public void setShowVerticalMarker(boolean showVerticalMarker) {
-        this.showVerticalMarker.set(showVerticalMarker);
-    }
-
-    public void setShowHorizontalMarker(boolean showHorizontalMarker) {
-        this.showHorizontalMarker.set(showHorizontalMarker);
     }
 }

@@ -1,13 +1,11 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 
-/**
- * Created by FTT2 on 26/01/2017.
- */
+
+//FIXME  no longer used
 public class TimeSeriesItem<T extends Number> {
     private final Property<Boolean> enabled = new SimpleBooleanProperty(true);
     private final TimeSeries<T> series;

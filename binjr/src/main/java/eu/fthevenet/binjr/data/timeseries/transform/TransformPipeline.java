@@ -5,9 +5,7 @@ import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * Created by FTT2 on 26/01/2017.
- */
+//FIXME not use at the moment
 public class TransformPipeline<T extends Number> {
    private final List<TimeSeriesTransform<T>> transforms = new LinkedList<>();
 

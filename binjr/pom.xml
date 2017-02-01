@@ -135,16 +135,11 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.5.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jfxtras</groupId>
-            <artifactId>jfxtras-controls</artifactId>
-            <version>8.0-r5</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.jfxtras</groupId>-->
+            <!--<artifactId>jfxtras-controls</artifactId>-->
+            <!--<version>8.0-r5</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
@@ -155,13 +150,6 @@
             <artifactId>jfxutils</artifactId>
             <version>1.0</version>
         </dependency>
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20160810</version>
-        </dependency>
-
-            <!--  Gson: Java to Json conversion -->
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>

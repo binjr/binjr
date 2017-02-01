@@ -5,9 +5,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-/**
- * Created by ftt2 selected 15/11/2016.
- */
+//FIXME no longer used
 public class SelectableListItem {
     private  StringProperty name = new SimpleStringProperty();
     private  BooleanProperty selected = new SimpleBooleanProperty();

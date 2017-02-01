@@ -17,13 +17,30 @@ public abstract class TimeSeriesTransform<T extends Number> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
     private final String name;
 
+    /**
+     * Base constructor for {@link TimeSeriesTransform} instances.
+     *
+     * @param name the name of the transform function
+     */
     public TimeSeriesTransform(String name) {
         this.name = name;
     }
 
+    /**
+     * The actual transform implementation
+     *
+     * @param series the time series to apply the transform to.
+     * @return A map of the transformed series.
+     */
     protected abstract Map<String, TimeSeries<T>> apply(Map<String, TimeSeries<T>> series);
 
-
+    /**
+     * Applies the transform function to the provided series
+     *
+     * @param series  the time series to apply the transform to.
+     * @param enabled true if the transform should be applied, false otherwise.
+     * @return A map of the transformed series.
+     */
     public Map<String, TimeSeries<T>> transform(Map<String, TimeSeries<T>> series, boolean enabled) {
         String names = Arrays.toString(series.keySet().toArray());
         if (enabled) {
@@ -37,6 +54,11 @@ public abstract class TimeSeriesTransform<T extends Number> {
         return series;
     }
 
+    /**
+     * Gets the name of the transform function
+     *
+     * @return the name of the transform function
+     */
     public String getName() {
         return name;
     }

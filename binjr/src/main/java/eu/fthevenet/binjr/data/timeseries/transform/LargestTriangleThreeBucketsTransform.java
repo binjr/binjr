@@ -21,6 +21,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
 
     /**
      * Initializes a new instnace of the {@link LargestTriangleThreeBucketsTransform} class.
+     *
      * @param threshold the maximum number of points to keep following the reduction.
      */
     public LargestTriangleThreeBucketsTransform(final int threshold) {
@@ -42,7 +43,8 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
     /**
      * <p>Method implementing the Largest-Triangle-Three-Buckets algorithm.</p>
      * <p>Adapted from <a href="https://gist.github.com/DanielWJudge/63300889f27c7f50eeb7">DanielWJudge/LargestTriangleThreeBuckets.cs</a></p>
-     * @param data the list of sample to apply the reduction to.
+     *
+     * @param data      the list of sample to apply the reduction to.
      * @param threshold d the maximum number of samples to keep.
      * @return a reduced list of samples.
      */

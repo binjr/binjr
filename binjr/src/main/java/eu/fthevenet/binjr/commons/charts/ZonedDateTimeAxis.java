@@ -3,6 +3,7 @@ package eu.fthevenet.binjr.commons.charts;
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt
+ * Copyright (c) 2017, Frederic Thevenet
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,44 +49,20 @@ import java.util.List;
 /**
  * An axis that displays date and time values.
  * <p/>
- * Tick labels are usually automatically set and calculated depending on the range unless you explicitly {@linkplain #setTickLabelFormatter(StringConverter) set an formatter}.
+ * Tick labels are usually automatically set and calculated depending on the range unless you explicitly
+ * {@linkplain #setTickLabelFormatter(StringConverter) set an formatter}.
  * <p/>
+ * <p>
  * You also have the chance to specify fix lower and upper bounds, otherwise they are calculated by your data.
  * <p/>
- * <p/>
- * <h3>Screenshots</h3>
  * <p>
- * Displaying date values, ranging over several months:</p>
- * <img src="doc-files/DateAxisMonths.png" alt="DateAxisMonths" />
- * <p>
- * Displaying date values, ranging only over a few hours:</p>
- * <img src="doc-files/DateAxisHours.png" alt="DateAxisHours" />
- * <p/>
- * <p/>
- * <h3>Sample Usage</h3>
- * <pre>
- * {@code
- * ObservableList<XYChart.Series<Date, Number>> series = FXCollections.observableArrayList();
- *
- * ObservableList<XYChart.Data<Date, Number>> series1Data = FXCollections.observableArrayList();
- * series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2012, 11, 15).getTime(), 2));
- * series1Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2014, 5, 3).getTime(), 4));
- *
- * ObservableList<XYChart.Data<Date, Number>> series2Data = FXCollections.observableArrayList();
- * series2Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2014, 0, 13).getTime(), 8));
- * series2Data.add(new XYChart.Data<Date, Number>(new GregorianCalendar(2014, 7, 27).getTime(), 4));
- *
- * series.add(new XYChart.Series<>("Series1", series1Data));
- * series.add(new XYChart.Series<>("Series2", series2Data));
- *
- * NumberAxis numberAxis = new NumberAxis();
- * TimeAxis dateAxis = new TimeAxis();
- * LineChart<Date, Number> lineChart = new LineChart<>(dateAxis, numberAxis, series);
- * }
- * </pre>
+ * This code is a pretty straight forward adaptation of the original DateTimeAxis by Christian Schudt and Diego Cirujano
+ * to use JAVA 8 {@link java.time.ZonedDateTime} instead of {@link java.util.Date}
+ * </p>
  *
  * @author Christian Schudt
  * @author Diego Cirujano
+ * @author Frederic Thevenet
  */
 public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
@@ -246,34 +223,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         setUpperBound(upper);
 
         if (animating) {
-//            final Timeline timeline = new Timeline();
-//            timeline.setAutoReverse(false);
-//            timeline.setCycleCount(1);
-//            final AnimationTimer timer = new AnimationTimer() {
-//                @Override
-//                public void handle(long l) {
-//                    requestAxisLayout();
-//                }
-//            };
-//            timer.start();
-//
-//            timeline.setOnFinished(new EventHandler<ActionEvent>() {
-//                @Override
-//                public void handle(ActionEvent actionEvent) {
-//                    timer.stop();
-//                    requestAxisLayout();
-//                }
-//            });
-//
-//            KeyValue keyValue = new KeyValue(currentLowerBound, lower.getTime());
-//            KeyValue keyValue2 = new KeyValue(currentUpperBound, upper.getTime());
-//
-//            timeline.getKeyFrames().addAll(new KeyFrame(Duration.ZERO,
-//                    new KeyValue(currentLowerBound, oldLowerBound.getTime()),
-//                    new KeyValue(currentUpperBound, oldUpperBound.getTime())),
-//                    new KeyFrame(Duration.millis(3000), keyValue, keyValue2));
-//            timeline.play();
-
             animator.stop(currentAnimationID);
             currentAnimationID = animator.animate(
                     new KeyFrame(Duration.ZERO,
@@ -378,9 +327,9 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         double averageTicks = v / averageTickGap;
 
         // Starting with the greatest unit, add one of each calendar unit.
-        int i=0;
-        while (i < Interval.values().length && dateList.size() <= averageTicks){
-            Interval interval =  Interval.values()[i];
+        int i = 0;
+        while (i < Interval.values().length && dateList.size() <= averageTicks) {
+            Interval interval = Interval.values()[i];
             ZonedDateTime currentLower = ZonedDateTime.from(lower);
             ZonedDateTime currentUpper = ZonedDateTime.from(upper);
             dateList.clear();
@@ -406,7 +355,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             ZonedDateTime lastDate = evenDateList.get(dateList.size() - 2);
             ZonedDateTime previousLastDate = evenDateList.get(dateList.size() - 3);
 
-           // If the second date is too near by the lower bound, remove it.
+            // If the second date is too near by the lower bound, remove it.
 //            if (secondDate.toInstant().toEpochMilli() - lower.toInstant().toEpochMilli() < (thirdDate.toInstant().toEpochMilli() - secondDate.toInstant().toEpochMilli()) / 2) {
 //                evenDateList.remove(secondDate);
 //            }
@@ -480,23 +429,11 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             // This is because Axis stores each value and won't update the tick labels, if the value is already known.
             // This happens if you display days and then add a date many years in the future the tick label will still be displayed as day.
             for (int i = 0; i < dates.size(); i++) {
-                //  calendar.setTime(dates.get(i));
-
                 ZonedDateTime date = dates.get(i);
                 ZonedDateTime normalizedDate = date;
                 boolean isFirstOrLast = i != 0 && i != dates.size() - 1;
-                //  for(ZonedDateTime date : dates){
                 switch (actualInterval.unit) {
                     case YEARS:
-                        // If its not the first or last date (lower and upper bound), make the year begin with first month and let the months begin with first day.
-//                        if (i != 0 && i != dates.size() - 1) {
-//                            calendar.set(Calendar.MONTH, 0);
-//                            calendar.set(Calendar.DATE, 1);
-//                        }
-//                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//                        calendar.set(Calendar.MINUTE, 0);
-//                        calendar.set(Calendar.SECOND, 0);
-//                        calendar.set(Calendar.MILLISECOND, 6);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 isFirstOrLast ? 1 : date.getMonthValue(),
@@ -504,14 +441,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 0, 0, 0, 6, dates.get(i).getZone());
                         break;
                     case MONTHS:
-                        // If its not the first or last date (lower and upper bound), make the months begin with first day.
-//                        if (i != 0 && i != dates.size() - 1) {
-//                            calendar.set(Calendar.DATE, 1);
-//                        }
-//                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//                        calendar.set(Calendar.MINUTE, 0);
-//                        calendar.set(Calendar.SECOND, 0);
-//                        calendar.set(Calendar.MILLISECOND, 5);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -519,11 +448,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 0, 0, 0, 5, dates.get(i).getZone());
                         break;
                     case WEEKS:
-                        // Make weeks begin with first day of week?
-//                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//                        calendar.set(Calendar.MINUTE, 0);
-//                        calendar.set(Calendar.SECOND, 0);
-//                        calendar.set(Calendar.MILLISECOND, 4);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -531,10 +455,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 0, 0, 0, 4, dates.get(i).getZone());
                         break;
                     case DAYS:
-//                        calendar.set(Calendar.HOUR_OF_DAY, 0);
-//                        calendar.set(Calendar.MINUTE, 0);
-//                        calendar.set(Calendar.SECOND, 0);
-//                        calendar.set(Calendar.MILLISECOND, 3);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -542,11 +462,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 0, 0, 0, 3, dates.get(i).getZone());
                         break;
                     case HOURS:
-//                        if (i != 0 && i != dates.size() - 1) {
-//                            calendar.set(Calendar.MINUTE, 0);
-//                            calendar.set(Calendar.SECOND, 0);
-//                        }
-//                        calendar.set(Calendar.MILLISECOND, 2);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -557,10 +472,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 2, dates.get(i).getZone());
                         break;
                     case MINUTES:
-//                        if (i != 0 && i != dates.size() - 1) {
-//                            calendar.set(Calendar.SECOND, 0);
-//                        }
-//                        calendar.set(Calendar.MILLISECOND, 1);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -571,7 +482,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 1, dates.get(i).getZone());
                         break;
                     case SECONDS:
-//                        calendar.set(Calendar.MILLISECOND, 0);
                         normalizedDate = ZonedDateTime.of(
                                 date.getYear(),
                                 date.getMonthValue(),
@@ -585,7 +495,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                 }
                 evenDates.add(normalizedDate);
             }
-
             return evenDates;
         }
         else {

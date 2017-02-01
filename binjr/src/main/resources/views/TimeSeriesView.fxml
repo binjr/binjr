@@ -2,7 +2,7 @@
 
 <?import eu.fthevenet.binjr.commons.charts.ZonedDateTimeAxis?>
 <?import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker?>
-<?import eu.fthevenet.binjr.commons.fxchart.StableTicksAxis?>
+<?import eu.fthevenet.binjr.commons.charts.StableTicksAxis?>
 <?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
@@ -146,7 +146,11 @@
                             <Insets bottom="2.0" left="4.0" right="10.0" top="2.0" />
                         </VBox.margin>
                         <tooltip>
-                            <Tooltip text="Automatically set the range for the Y axis" />
+                            <Tooltip text="Automatically set the range for the Y axis">
+                                <font>
+                                    <Font size="10.0" />
+                                </font>
+                            </Tooltip>
                         </tooltip>
                     </Button>
                     <Polyline stroke="#b5b5b5" strokeType="INSIDE">

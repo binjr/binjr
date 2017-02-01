@@ -27,7 +27,6 @@ import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.HashMap;
@@ -167,8 +166,8 @@ public class MainViewController implements Initializable {
                         selectedTabController = current;
                         // Init time series controller
                         current.setMainViewController(MainViewController.this);
-                        current.getCrossHair().showHorizontalMarkerProperty().bind(showHorizontalMarker);
-                        current.getCrossHair().showVerticalMarkerProperty().bind(showVerticalMarker);
+                        current.getCrossHair().horizontalMarkerVisibleProperty().bind(showHorizontalMarker);
+                        current.getCrossHair().verticalMarkerVisibleProperty().bind(showVerticalMarker);
                         seriesControllers.put(newValue.getText(), current);
                         // add "+" tab
                         ((Label)newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
@@ -209,7 +208,6 @@ public class MainViewController implements Initializable {
         displayException(header, e, getStage());
     }
 
-
     public  void displayException(String header, Exception e, Window owner) {
         logger.error(e);
         ExceptionDialog dlg = new ExceptionDialog(e);
@@ -218,7 +216,6 @@ public class MainViewController implements Initializable {
         dlg.getDialogPane().setHeaderText(header);
         dlg.showAndWait();
     }
-
 
     private Stage getStage(){
         if (root != null && root.getScene() != null){

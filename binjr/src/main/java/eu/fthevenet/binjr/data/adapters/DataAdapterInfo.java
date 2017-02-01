@@ -5,11 +5,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-/**
- * Created by FTT2 on 23/01/2017.
- */
+//FIXME not needed for the moment
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE) //on class level
+@Target(ElementType.TYPE)
 public @interface DataAdapterInfo {
     String name();
     String description() default "";

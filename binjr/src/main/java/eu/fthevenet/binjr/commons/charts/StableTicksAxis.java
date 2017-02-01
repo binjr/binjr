@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.fthevenet.binjr.commons.fxchart;
+package eu.fthevenet.binjr.commons.charts;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -175,7 +175,6 @@ public class StableTicksAxis extends ValueAxis<Number> {
 		}
 
 		Range ret = getRange( minValue, maxValue );
-//		System.out.printf( " = %s%n", ret );
 		return ret;
 	}
 
@@ -238,24 +237,17 @@ public class StableTicksAxis extends ValueAxis<Number> {
 				numTicks = delta / ( dividers[divider] * Math.pow( 10, factor ) );
 			}
 		}
-
-//		System.out.printf( "calculateTickSpacing( %f, %d ) = %f%n",
-//		                   delta, maxTicks, dividers[divider] * Math.pow( 10, factor ) );
-
 		return dividers[divider] * Math.pow( 10, factor );
 	}
 
 	@Override
 	protected List<Number> calculateMinorTickMarks() {
-//		System.out.println( "StableTicksAxis.calculateMinorTickMarks" );
 		return minorTicks;
 	}
 
 	@Override
 	protected void setRange( Object range, boolean animate ) {
 		Range rangeVal = (Range) range;
-//		System.out.format( "StableTicksAxis.setRange (%s, %s)%n",
-//		                   range, animate );
 		if ( animate ) {
 			animationTimeline.stop();
 			ObservableList<KeyFrame> keyFrames = animationTimeline.getKeyFrames();
@@ -281,15 +273,12 @@ public class StableTicksAxis extends ValueAxis<Number> {
 	@Override
 	protected Range getRange() {
 		Range ret = getRange( getLowerBound(), getUpperBound() );
-//		System.out.println( "StableTicksAxis.getRange = " + ret );
 		return ret;
 	}
 
 	@Override
 	protected List<Number> calculateTickValues( double length, Object range ) {
 		Range rangeVal = (Range) range;
-//		System.out.format( "StableTicksAxis.calculateTickValues (length=%f, range=%s)",
-//		                   length, rangeVal );
 		//Use floor so we start generating ticks before the axis starts -- this is really only relevant
 		//because of the minor ticks before the first visible major tick. We'll generate a first
 		//invisible major tick but the ValueAxis seems to filter it out.
@@ -307,7 +296,6 @@ public class StableTicksAxis extends ValueAxis<Number> {
 				minorTicks.add( majorTick + minorTickSpacing * j );
 			}
 		}
-//		System.out.printf( " = %s%n", ret );
 		return ret;
 	}
 

@@ -18,7 +18,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
 
-<VBox fx:id="root" prefHeight="629.0" prefWidth="988.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
             <menus>

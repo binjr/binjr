@@ -99,7 +99,6 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         return tree;
     }
 
-
     @Override
     public long getData(String path, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
@@ -175,16 +174,16 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                     if (newValue) {
                         try {
-                            //remove dummy node
-                            newBranch.getChildren().remove(0);
                             for (String storeName : getColumnDataStores(currentPath)) {
                                 newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(storeName, currentPath, JRDSDataAdapter.this)));
                             }
+                            //remove dummy node
+                            newBranch.getChildren().remove(0);
+                            // remove the listener so it isn't executed next time node is expanded
+                            newBranch.expandedProperty().removeListener(this);
                         } catch (DataAdapterException e) {
                             logger.error("Failed to retrieve data store name", e);
                         }
-                        // remove the listener so it isn't executed next time node is expanded
-                        newBranch.expandedProperty().removeListener(this);
                     }
                 }
             });

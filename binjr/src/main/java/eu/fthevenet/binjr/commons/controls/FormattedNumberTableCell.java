@@ -16,7 +16,9 @@ import javafx.util.converter.NumberStringConverter;
 
 
 /**
- * Created by FTT2 on 30/01/2017.
+ * Extends a TextFieldTableCell to override the StringConverter and define the conversion format.
+ *
+ * @author Frederic Thevenet
  */
 public class FormattedNumberTableCell<S, T extends Number> extends TextFieldTableCell<S,T> {
 
@@ -30,8 +32,8 @@ public class FormattedNumberTableCell<S, T extends Number> extends TextFieldTabl
         this.format = format;
     }
 
-
-    public FormattedNumberTableCell(){
+    //TODO complete support for specifying the format
+    FormattedNumberTableCell(){
         super((StringConverter<T>)new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
     }
 }

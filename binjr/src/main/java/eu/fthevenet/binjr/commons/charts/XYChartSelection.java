@@ -1,37 +1,72 @@
 package eu.fthevenet.binjr.commons.charts;
 
 /**
- * Created by FTT2 on 08/12/2016.
+ * An immutable representation of the selection of the portion of a chart.
+ *
+ * @author Frederic Thevenet
  */
-public  class XYChartSelection<X, Y> {
+public class XYChartSelection<X, Y> {
     private final X startX;
     private final X endX;
     private final Y startY;
     private final Y endY;
 
+    /**
+     * Returns the lower bound on the X axis of the selection
+     *
+     * @return the lower bound on the X axis of the selection
+     */
     public X getStartX() {
         return startX;
     }
 
+    /**
+     * Returns the upper bound on the X axis of the selection
+     *
+     * @return the upper bound on the X axis of the selection
+     */
     public X getEndX() {
         return endX;
     }
 
+    /**
+     * Returns the lower bound on the Y axis of the selection
+     *
+     * @return the lower bound on the Y axis of the selection
+     */
     public Y getStartY() {
         return startY;
     }
 
+    /**
+     * Returns the upper bound on the Y axis of the selection
+     *
+     * @return the upper bound on the Y axis of the selection
+     */
     public Y getEndY() {
         return endY;
     }
 
-    public XYChartSelection(XYChartSelection<X,Y> selection){
+    /**
+     * Copy constructor for the {@link XYChartSelection} class.
+     *
+     * @param selection the {@link XYChartSelection} to clone.
+     */
+    public XYChartSelection(XYChartSelection<X, Y> selection) {
         this.startX = selection.getStartX();
         this.endX = selection.getEndX();
         this.startY = selection.getStartY();
         this.endY = selection.getEndY();
     }
 
+    /**
+     * Initializes a new instance of the {@link XYChartSelection} class
+     *
+     * @param startX the lower bound on the X axis of the selection
+     * @param endX   the upper bound on the X axis of the selection
+     * @param startY the lower bound on the Y axis of the selection
+     * @param endY   the upper bound on the Y axis of the selection
+     */
     public XYChartSelection(X startX, X endX, Y startY, Y endY) {
         this.startX = startX;
         this.endX = endX;
@@ -52,38 +87,37 @@ public  class XYChartSelection<X, Y> {
 
     @Override
     public boolean equals(Object obj) {
-        //Same ref -> equal
         if (this == obj) {
             return true;
         }
-        // target is null, this instance obviously isn't -> not equal
+
         if (obj == null) {
             return false;
         }
-        // not the same class -> not equal
+
         if (getClass() != obj.getClass()) {
             return false;
         }
-        // Evaluates all public properties' value
+
         XYChartSelection other = (XYChartSelection) obj;
-        if (!evaluatesEquality(this.getEndX(), other.getEndX())){
+        if (!evaluatesEquality(this.getEndX(), other.getEndX())) {
             return false;
         }
-        if (!evaluatesEquality(this.getStartX(), other.getStartX())){
+        if (!evaluatesEquality(this.getStartX(), other.getStartX())) {
             return false;
         }
-        if (!evaluatesEquality(this.getEndY(), other.getEndY())){
+        if (!evaluatesEquality(this.getEndY(), other.getEndY())) {
             return false;
         }
-        if (!evaluatesEquality(this.getStartY(), other.getStartY())){
+        if (!evaluatesEquality(this.getStartY(), other.getStartY())) {
             return false;
         }
-        // All public properties have the same value -> equal
+
         return true;
     }
 
-    private boolean evaluatesEquality(Object o1, Object o2){
-        if (o1 ==  null) {
+    private boolean evaluatesEquality(Object o1, Object o2) {
+        if (o1 == null) {
             if (o2 != null) {
                 return false;
             }
