@@ -1,10 +1,11 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.commons.controls.EditableTab;
+import eu.fthevenet.binjr.controls.EditableTab;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
+import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
+import eu.fthevenet.binjr.dialogs.GetDataAdapterDialog;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -15,8 +16,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -28,9 +27,7 @@ import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -248,23 +245,35 @@ public class MainViewController implements Initializable {
 
     public void handleAddJRDSSource(ActionEvent actionEvent) {
 
-        TextInputDialog dlg = new TextInputDialog("");
-        dlg.setTitle("Add JRDS source");
-        String optionalMasthead = "Please type in your name";
-        dlg.getDialogPane().setContentText("URL:");
-        dlg.getDialogPane().setHeaderText("Add JRDS source");
-        dlg.getDialogPane().setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/icons/binjr_48.png"))));
-        dlg.initStyle(StageStyle.UTILITY);
-        dlg.initOwner(getStage());
-        dlg.showAndWait().ifPresent(url -> {
-            try {
-                DataAdapter<Double> da = JRDSDataAdapter.fromUrl(url, ZoneId.systemDefault());
-                Tab newTab = new Tab(da.getSourceName());
+        GetDataAdapterDialog dlg = new GetDataAdapterDialog(getStage(), "JRDS", JRDSDataAdapter::fromUrl);
+
+
+        dlg.showAndWait().ifPresent( da ->
+        {
+            Tab newTab = new Tab(da.getSourceName());
                 newTab.setUserData(da);
                 sourcesTabPane.getTabs().add(newTab);
-            } catch (MalformedURLException e) {
-                displayException("Invalid URL", e);
-            }
         });
+
+//        TextInputDialog dlg = new TextInputDialog("");
+//        dlg.setTitle("Add JRDS source");
+//        String optionalMasthead = "Please type in your name";
+//        dlg.getDialogPane().setContentText("URL:");
+//        dlg.getDialogPane().setHeaderText("Add JRDS source");
+//        dlg.getDialogPane().setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/icons/binjr_48.png"))));
+//        dlg.initStyle(StageStyle.UTILITY);
+//        dlg.initOwner(getStage());
+//
+//
+//        dlg.showAndWait().ifPresent(url -> {
+//            try {
+//                DataAdapter<Double> da = JRDSDataAdapter.fromUrl(url, ZoneId.systemDefault());
+//                Tab newTab = new Tab(da.getSourceName());
+//                newTab.setUserData(da);
+//                sourcesTabPane.getTabs().add(newTab);
+//            } catch (MalformedURLException e) {
+//                displayException("Invalid URL", e);
+//            }
+//        });
     }
 }

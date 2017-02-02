@@ -1,16 +1,10 @@
-package eu.fthevenet.binjr.commons.controls;
+package eu.fthevenet.binjr.controls;
 
 
 import java.text.Format;
 import java.util.Locale;
 
-import javafx.geometry.Pos;
-import javafx.scene.Node;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.text.TextAlignment;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 

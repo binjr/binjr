@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data.adapters.jrds;
+package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;

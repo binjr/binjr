@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.charts;
+package eu.fthevenet.binjr.charts;
 
 /**
  * An immutable representation of the selection of the portion of a chart.

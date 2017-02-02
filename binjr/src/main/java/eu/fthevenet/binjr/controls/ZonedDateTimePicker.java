@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.controls;
+package eu.fthevenet.binjr.controls;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

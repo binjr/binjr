@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr.data.timeseries.transform;
 
-import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.logging.Profiler;
 import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import eu.fthevenet.binjr.commons.charts.ZonedDateTimeAxis?>
-<?import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker?>
-<?import eu.fthevenet.binjr.commons.charts.StableTicksAxis?>
+<?import eu.fthevenet.binjr.charts.ZonedDateTimeAxis?>
+<?import eu.fthevenet.binjr.controls.ZonedDateTimePicker?>
+<?import eu.fthevenet.binjr.charts.StableTicksAxis?>
 <?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
@@ -26,7 +26,7 @@
 <?import javafx.scene.text.Font?>
 
 <?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import eu.fthevenet.binjr.commons.controls.FormattedNumberTableCellFactory?>
+<?import eu.fthevenet.binjr.controls.FormattedNumberTableCellFactory?>
 <AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">

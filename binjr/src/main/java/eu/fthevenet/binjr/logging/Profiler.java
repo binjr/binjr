@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.logging;
+package eu.fthevenet.binjr.logging;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 

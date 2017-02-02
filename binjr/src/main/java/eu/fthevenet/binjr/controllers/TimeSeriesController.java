@@ -1,9 +1,9 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.commons.charts.XYChartCrosshair;
-import eu.fthevenet.binjr.commons.charts.XYChartSelection;
-import eu.fthevenet.binjr.commons.controls.ZonedDateTimePicker;
-import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.charts.XYChartCrosshair;
+import eu.fthevenet.binjr.charts.XYChartSelection;
+import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
+import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
@@ -134,7 +134,7 @@ public class TimeSeriesController implements Initializable {
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
         ZonedDateTime now = ZonedDateTime.now();
-        this.currentState = new XYChartViewState(now.minus(12, ChronoUnit.HOURS), now, 0, 100);
+        this.currentState = new XYChartViewState(now.minus(24, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);

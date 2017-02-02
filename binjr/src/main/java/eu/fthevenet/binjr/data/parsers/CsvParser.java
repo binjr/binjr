@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr.data.parsers;
 
-import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
 import javafx.scene.chart.XYChart;
@@ -35,7 +35,7 @@ public class CsvParser<T extends Number> implements DataParser<T> {
      * Initializes a new instance of the {@link CsvParser} class.
      * @param encoding the encoding used in the CSV stream
      * @param separator the character to separate columns in the CSV stream
-     * @param timeSeriesFactory the factory used to create new {@link TimeSeries} instances.
+     * @param timeSeriesFactory the factory used to fromUrl new {@link TimeSeries} instances.
      * @param numberParser the function used to parse numbers from the CSV stream
      * @param dateParser the function used to parse dates from the CSV stream
      */

@@ -1,7 +1,7 @@
-package eu.fthevenet.binjr.data.adapters.jrds;
+package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
-import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;

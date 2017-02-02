@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.fthevenet.binjr.commons.charts;
+package eu.fthevenet.binjr.charts;
 
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;

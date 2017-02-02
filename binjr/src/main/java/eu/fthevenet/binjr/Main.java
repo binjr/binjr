@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr;
 
-import eu.fthevenet.binjr.commons.logging.Profiler;
+import eu.fthevenet.binjr.logging.Profiler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;

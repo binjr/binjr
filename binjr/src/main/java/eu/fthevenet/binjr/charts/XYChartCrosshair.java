@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.charts;
+package eu.fthevenet.binjr.charts;
 
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;

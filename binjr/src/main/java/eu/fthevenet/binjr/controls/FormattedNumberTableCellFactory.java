@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.commons.controls;
+package eu.fthevenet.binjr.controls;
 
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;

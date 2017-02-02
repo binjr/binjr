@@ -1,12 +1,12 @@
 package jrds;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.jrds.JRDSDataAdapter;
+import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
