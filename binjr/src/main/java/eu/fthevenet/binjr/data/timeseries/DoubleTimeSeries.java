@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.timeseries;
 
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import javafx.scene.chart.XYChart;
 
 import java.util.OptionalDouble;
@@ -12,11 +13,11 @@ import java.util.OptionalDouble;
 public class DoubleTimeSeries extends TimeSeries<Double> {
 
     /**
-     * Initializes a new instance of the {@link DoubleTimeSeries} class with the provided name.
-     * @param name the name of the {@link DoubleTimeSeries}
+     * Initializes a new instance of the {@link DoubleTimeSeries} class with the provided binding.
+     * @param binding the binding of the {@link DoubleTimeSeries}
      */
-    public DoubleTimeSeries(String name) {
-        super(name);
+    public DoubleTimeSeries(TimeSeriesBinding<Double> binding) {
+        super(binding);
     }
 
     @Override

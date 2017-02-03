@@ -94,14 +94,13 @@ public class MainViewController implements Initializable {
         try {
             TreeItem<TimeSeriesBinding> root = dp.getBindingTree();
 
-
             root.setExpanded(true);
 
             treeView.setRoot(root);
             treeView.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2) {
                     TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
-                    if (selectedTabController != null) {
+                    if (selectedTabController != null && item !=null) {
                         selectedTabController.addBinding(item.getValue());
                     }
                 }
@@ -182,23 +181,19 @@ public class MainViewController implements Initializable {
         });
         // By default, select 1st tab and load its content.
         seriesTabPane.getSelectionModel().selectFirst();
-
         seriesTabPane.getTabs().add(new EditableTab("New worksheet"));
 
-
         sourcesTabPane.getSelectionModel().clearSelection();
-        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Tab>() {
-            @Override
-            public void changed(ObservableValue<? extends Tab> observable, Tab oldValue, Tab newValue) {
-                if (newValue == null) {
-                    return;
-                }
-                if (newValue.getContent() == null) {
-                    TreeView<TimeSeriesBinding> treeView;
-                    DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
-                    treeView = buildTreeViewForTarget(da);
-                    newValue.setContent(treeView);
-                }
+        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+            if (newValue.getContent() == null) {
+                TreeView<TimeSeriesBinding> treeView;
+                @SuppressWarnings("unchecked")
+                DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
+                treeView = buildTreeViewForTarget(da);
+                newValue.setContent(treeView);
             }
         });
     }
@@ -244,36 +239,14 @@ public class MainViewController implements Initializable {
     }
 
     public void handleAddJRDSSource(ActionEvent actionEvent) {
-
-        GetDataAdapterDialog dlg = new GetDataAdapterDialog(getStage(), "JRDS", JRDSDataAdapter::fromUrl);
-
-
+        GetDataAdapterDialog dlg = new GetDataAdapterDialog(getStage(), "Add a JRDS source", JRDSDataAdapter::fromUrl);
         dlg.showAndWait().ifPresent( da ->
         {
             Tab newTab = new Tab(da.getSourceName());
                 newTab.setUserData(da);
                 sourcesTabPane.getTabs().add(newTab);
+                sourcesTabPane.getSelectionModel().select(newTab);
         });
 
-//        TextInputDialog dlg = new TextInputDialog("");
-//        dlg.setTitle("Add JRDS source");
-//        String optionalMasthead = "Please type in your name";
-//        dlg.getDialogPane().setContentText("URL:");
-//        dlg.getDialogPane().setHeaderText("Add JRDS source");
-//        dlg.getDialogPane().setGraphic(new ImageView(new Image(getClass().getResourceAsStream("/icons/binjr_48.png"))));
-//        dlg.initStyle(StageStyle.UTILITY);
-//        dlg.initOwner(getStage());
-//
-//
-//        dlg.showAndWait().ifPresent(url -> {
-//            try {
-//                DataAdapter<Double> da = JRDSDataAdapter.fromUrl(url, ZoneId.systemDefault());
-//                Tab newTab = new Tab(da.getSourceName());
-//                newTab.setUserData(da);
-//                sourcesTabPane.getTabs().add(newTab);
-//            } catch (MalformedURLException e) {
-//                displayException("Invalid URL", e);
-//            }
-//        });
     }
 }

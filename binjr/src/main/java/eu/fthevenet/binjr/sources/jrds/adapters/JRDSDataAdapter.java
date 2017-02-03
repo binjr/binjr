@@ -47,6 +47,7 @@ import java.util.stream.Collectors;
 @DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
 public class JRDSDataAdapter implements DataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(JRDSDataAdapter.class);
+    public static final String SEPARATOR = ",";
     private final String jrdsHost;
     private final int jrdsPort;
     private final String jrdsPath;
@@ -91,7 +92,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         Gson gson = new Gson();
         JsonTree t = gson.fromJson(getJsonTree("hoststab"), JsonTree.class);
         Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JRDSSeriesBinding("JRDS" + ":" + jrdsHost, "/", this));
+        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JRDSSeriesBinding(getSourceName(), "/", this));
         List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
         for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
@@ -122,14 +123,14 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 return 0L;
             }
             else {
-                throw new ClientProtocolException("Unexpected response status: " + status);
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
             }
         });
     }
 
     @Override
     public String getSourceName() {
-        return "JRDS:" + jrdsHost + ":" + jrdsPort;
+        return "[JRDS] " + jrdsHost + ":" + jrdsPort + " (" + zoneId.toString() + ")";
     }
 
     @Override
@@ -145,7 +146,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     @Override
     public DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvParser<>(getEncoding(), ",",
+        return new CsvParser<Double>(getEncoding(), SEPARATOR,
                 DoubleTimeSeries::new,
                 s -> {
                     Double val = Double.parseDouble(s);
@@ -181,7 +182,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                             newBranch.getChildren().remove(0);
                             // remove the listener so it isn't executed next time node is expanded
                             newBranch.expandedProperty().removeListener(this);
-                        } catch (DataAdapterException e) {
+                        } catch (Exception e) {
                             logger.error("Failed to retrieve data store name", e);
                         }
                     }
@@ -217,7 +218,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 return null;
             }
             else {
-                throw new ClientProtocolException("Unexpected response status: " + status);
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
             }
         });
     }
@@ -225,12 +226,21 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     private String[] getColumnDataStores(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            getData(id, now, now.plusSeconds(60), out);
+            getData(id, now.minusSeconds(120), now, out);
             try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
-                Map<String, TimeSeries<Double>> m = getParser().parse(in);
-                return m.keySet().toArray(new String[0]);
+                try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
+                    String header = br.readLine();
+                    if (header == null || header.isEmpty()) {
+                        throw new IOException("CSV File is empty!");
+                    }
+                    String[] headers = header.split(SEPARATOR);
+                    if (headers.length < 1){
+                        throw new DataAdapterException("Could not to retrieve data store names for graph id=" + id + ": header line in csv is blank.");
+                    }
+                    return Arrays.copyOfRange(headers, 1, headers.length);
+                }
             }
-        } catch (IOException | ParseException e) {
+        } catch (IOException e) {
             throw new DataAdapterException(e);
         }
     }
@@ -256,7 +266,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 return 0L;
             }
             else {
-                throw new ClientProtocolException("Unexpected response status: " + status);
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
             }
         });
     }

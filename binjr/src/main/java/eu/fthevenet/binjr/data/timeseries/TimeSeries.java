@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 /**
  * The base class for time series classes, which holds raw data points and provides access to summary properties.
@@ -25,16 +24,27 @@ import static java.util.stream.Collectors.toList;
  */
 public abstract class TimeSeries<T extends Number> implements Serializable {
     protected List<XYChart.Data<ZonedDateTime, T>> data;
+    protected final TimeSeriesBinding<T> binding;
     protected final String name;
 
     /**
-     * Initializes a new instance of the {@link TimeSeries} class with the provided name.
+     * Initializes a new instance of the {@link TimeSeries} class with the provided {@link TimeSeriesBinding}.
      *
-     * @param name the name of the {@link TimeSeries}
+     * @param binding the binding of the {@link TimeSeries}
      */
-    public TimeSeries(String name) {
+    public TimeSeries(TimeSeriesBinding<T> binding) {
+        this.binding = binding;
         this.data = new ArrayList<>();
-        this.name = name;
+        this.name = binding.getLabel();
+    }
+
+    /**
+     * Gets the {@link TimeSeriesBinding} to which the series is bound
+     *
+     * @return the {@link TimeSeriesBinding} to which the series is bound
+     */
+    public TimeSeriesBinding<T> getBinding() {
+        return binding;
     }
 
     /**
@@ -63,7 +73,7 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
     /**
      * Gets the maximum value for the Y coordinates of the {@link TimeSeries}
      *
-     * @return  the maximum value for the Y coordinates of the {@link TimeSeries}
+     * @return the maximum value for the Y coordinates of the {@link TimeSeries}
      */
     public abstract T getMaxValue();
 
@@ -117,11 +127,11 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
             Map<String, List<TimeSeriesBinding<T>>> bindingsByPath = e1.getValue().stream().collect(groupingBy(TimeSeriesBinding::getPath));
             for (Map.Entry<String, List<TimeSeriesBinding<T>>> e2 : bindingsByPath.entrySet()) {
                 String path = e2.getKey();
-                List<String> labels = e2.getValue().stream().map(TimeSeriesBinding::getLabel).collect(toList());
+                // List<String> labels = e2.getValue().stream().map(TimeSeriesBinding::getLabel).collect(toList());
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     adapter.getData(path, startTime.toInstant(), endTime.toInstant(), out);
                     try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
-                        Map<String, TimeSeries<T>> m = adapter.getParser().parse(in, labels.toArray(new String[0]));
+                        Map<TimeSeriesBinding<T>, TimeSeries<T>> m = adapter.getParser().parse(in, e2.getValue());
                         // Applying point reduction
                         m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
                         // Adding the new series to the list

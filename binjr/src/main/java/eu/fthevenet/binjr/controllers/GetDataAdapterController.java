@@ -1,31 +1,38 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.DialogPane;
 import javafx.scene.control.TextField;
-import org.controlsfx.control.textfield.TextFields;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
- * Created by FTT2 on 02/02/2017.
+ * Controller for GetDataAdapterView
+ *
+ * @author Frederic Thevenet
  */
 public class GetDataAdapterController implements Initializable {
     @FXML
     private TextField urlField;
     @FXML
-    private ChoiceBox<String> timezoneField;
+    private TextField timezoneField;
 
+    /**
+     * Gets the Url field
+     *
+     * @return the Url field
+     */
     public TextField getUrlField() {
         return urlField;
     }
 
-    public ChoiceBox<String> getTimezoneField() {
+    /**
+     * Gets the timezone field
+     *
+     * @return the timezone field
+     */
+    public TextField getTimezoneField() {
         return timezoneField;
     }
 
@@ -33,6 +40,5 @@ public class GetDataAdapterController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert urlField != null : "fx:id\"urlField\" was not injected!";
         assert timezoneField != null : "fx:id\"timezoneField\" was not injected!";
-
     }
 }

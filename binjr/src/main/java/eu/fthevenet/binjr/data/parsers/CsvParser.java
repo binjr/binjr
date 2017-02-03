@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.parsers;
 
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesFactory;
@@ -13,7 +14,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Function;
@@ -47,8 +50,9 @@ public class CsvParser<T extends Number> implements DataParser<T> {
         this.dateParser = dateParser;
     }
 
+
     @Override
-    public Map<String, TimeSeries<T>> parse(InputStream in, String... names) throws IOException, ParseException {
+    public Map<TimeSeriesBinding<T>, TimeSeries<T>> parse(InputStream in, List<TimeSeriesBinding<T>> bindings) throws IOException, ParseException {
         try (Profiler profiler = Profiler.start("Building time series from csv data", logger::trace)) {
             try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
                 String header = br.readLine();
@@ -57,7 +61,8 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                 }
                 String[] seriesNames = header.split(separator);
                 final int nbSeries = seriesNames.length - 1;
-                Map<String,TimeSeries<T>> series = new HashMap<>();
+
+                Map<TimeSeriesBinding<T>,TimeSeries<T>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
                 for (String line = br.readLine(); line != null; line = br.readLine()) {
                     nbpoints.incrementAndGet();
@@ -67,11 +72,12 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                     }
                     ZonedDateTime timeStamp = dateParser.apply(data[0]);
                     for (int i = 1; i < data.length; i++) {
-                        String currentName = seriesNames[i];
-                        if (isInNameList(names, currentName)) {
+                        //String currentName = seriesNames[i];
+                        TimeSeriesBinding<T> binding = getBindingFromName(bindings,seriesNames[i] );
+                        if (binding!=null) {
                             T val = numberParser.apply(data[i]);
                             XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
-                            TimeSeries<T> l = series.computeIfAbsent(currentName, k -> timeSeriesFactory.create(currentName));
+                            TimeSeries<T> l = series.computeIfAbsent(binding, k -> timeSeriesFactory.create(binding));
                             l.getData().add(point);
                         }
                     }
@@ -82,15 +88,26 @@ public class CsvParser<T extends Number> implements DataParser<T> {
         }
     }
 
-    private boolean isInNameList(String[] names, String seriesName) {
-        if (names == null || names.length == 0) {
+    private boolean isInNameList(List<TimeSeriesBinding<T>> bindings, String seriesName) {
+        if (bindings == null || bindings.size() == 0) {
             return true;
         }
-        for (String s : names) {
-            if (s.equalsIgnoreCase(seriesName)) {
+        for (TimeSeriesBinding<T> binding : bindings) {
+            if (binding.getLabel().equalsIgnoreCase(seriesName)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private TimeSeriesBinding<T> getBindingFromName(List<TimeSeriesBinding<T>> bindings, String seriesName) {
+        if (bindings != null) {
+            for (TimeSeriesBinding<T> b : bindings) {
+                if (b.getLabel().equalsIgnoreCase(seriesName)) {
+                    return b;
+                }
+            }
+        }
+        return null;
     }
 }

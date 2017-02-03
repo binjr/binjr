@@ -1,10 +1,13 @@
 package eu.fthevenet.binjr.data.parsers;
 
+import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -23,5 +26,8 @@ public interface DataParser<T extends Number> {
      * @throws IOException    in the event of an IO error
      * @throws ParseException in the event of an parsing error
      */
-    Map<String, TimeSeries<T>> parse(InputStream in, String... seriesNames) throws IOException, ParseException;
+  //  Map<TimeSeriesBinding<T>, TimeSeries<T>> parse(InputStream in, TimeSeriesBinding<T>... seriesNames) throws IOException, ParseException;
+
+    Map<TimeSeriesBinding<T>, TimeSeries<T>> parse(InputStream in, List<TimeSeriesBinding<T>> seriesNames) throws IOException, ParseException;
+    //Map<TimeSeriesBinding<T>, TimeSeries<T>> parse(InputStream in) throws IOException, ParseException;
 }

@@ -8,10 +8,8 @@ import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,12 +17,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
-import javafx.scene.control.Button;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TextFormatter;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
@@ -68,6 +64,8 @@ public class TimeSeriesController implements Initializable {
     private ZonedDateTimePicker startDate;
     @FXML
     private ZonedDateTimePicker endDate;
+    @FXML
+    private TableColumn<TimeSeries<Double>, String> sourceColumn;
 
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
@@ -122,6 +120,7 @@ public class TimeSeriesController implements Initializable {
         assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
+        assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
 
@@ -150,15 +149,16 @@ public class TimeSeriesController implements Initializable {
             currentState.setSelection(s, true);
         });
 
+        sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
+
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
                 TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
                 if (current != null) {
-                    //FIXME
                     seriesTable.getItems().remove(current);
-//                  seriesBindings.remove(current);
-//                  invalidate(false, true, true);
+                    seriesBindings.remove(current.getBinding());
+                    invalidate(false, true, true);
                 }
             }
         });
