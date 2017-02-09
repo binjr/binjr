@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
@@ -9,7 +10,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
@@ -24,11 +25,11 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.bind.JAXB;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.text.ParseException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -175,15 +176,17 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                     if (newValue) {
                         try {
-                            for (String storeName : getColumnDataStores(currentPath)) {
-                                newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(storeName, currentPath, JRDSDataAdapter.this)));
+                            for (Graphdesc.SeriesDesc seriesDesc :  getGraphDescriptor(currentPath).seriesDescList) {
+                                if (!"none".equals(seriesDesc.graphType)) {
+                                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(seriesDesc, currentPath, JRDSDataAdapter.this)));
+                                }
                             }
                             //remove dummy node
                             newBranch.getChildren().remove(0);
                             // remove the listener so it isn't executed next time node is expanded
                             newBranch.expandedProperty().removeListener(this);
                         } catch (Exception e) {
-                            logger.error("Failed to retrieve data store name", e);
+                            Dialogs.displayException("Failed to retrieve graph description", e);
                         }
                     }
                 }
@@ -221,6 +224,36 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
             }
         });
+    }
+
+    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException{
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
+                .setHost(jrdsHost)
+                .setPort(jrdsPort)
+                .setPath(jrdsPath + "/graphdesc")
+                .addParameter("id", id);
+
+        return doHttpGet(requestUrl, response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status >= 200 && status < 300) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    try {
+                        return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
+                    }
+                    catch (Exception e) {
+                        throw new IOException("", e);
+                    }
+                }
+                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
+            }
+            else {
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+            }
+        });
+
+   //     return null;
     }
 
     private String[] getColumnDataStores(String id) throws DataAdapterException {

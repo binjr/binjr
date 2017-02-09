@@ -13,6 +13,7 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
+<?import javafx.scene.chart.StackedAreaChart?>
 <AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
@@ -168,7 +169,7 @@
                 </cursor>
                 <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0"
-                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <xAxis>
                             <ZonedDateTimeAxis animated="false" side="BOTTOM"/>
                         </xAxis>
@@ -189,7 +190,15 @@
                     <TableView fx:id="seriesTable" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
-                            <TableColumn prefWidth="26.0"/>
+                            <TableColumn fx:id="visibleColumn" prefWidth="26.0"/>
+                            <TableColumn fx:id="colorColumn" prefWidth="26.0">
+                                <!--<cellFactory>-->
+                                    <!--<ColorTableCellFactory/>-->
+                                <!--</cellFactory>-->
+                                <!--<cellValueFactory>-->
+                                    <!--<PropertyValueFactory property="color"/>-->
+                                <!--</cellValueFactory>-->
+                            </TableColumn>
                             <TableColumn prefWidth="160.0" text="Name">
                                 <cellValueFactory>
                                     <PropertyValueFactory property="name"/>

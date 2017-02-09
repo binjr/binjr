@@ -29,19 +29,13 @@ public class JrdsSourceTester {
 
         JRDSDataAdapter dp = null;
         try {
-            dp = JRDSDataAdapter.fromUrl("http://ngwps006:31001/perf-ui/", ZoneId.systemDefault());
+            dp = JRDSDataAdapter.fromUrl("http://nglps008:11001/perf-ui/", ZoneId.systemDefault());
+            dp.getGraphDescriptor("1010253111");
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
 
-        try{
 
-       //     System.out.printf(dp.getJsonTree("hoststab"));
-            dp.getBindingTree();
-        }
-        catch (DataAdapterException e){
-            logger.error(e);
-        }
 
 //        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 //            if (dp.getData(target, probe, begin, end, out) >0) {

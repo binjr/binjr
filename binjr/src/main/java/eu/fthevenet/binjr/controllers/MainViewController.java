@@ -4,6 +4,7 @@ import eu.fthevenet.binjr.controls.EditableTab;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
 import eu.fthevenet.binjr.dialogs.GetDataAdapterDialog;
 import javafx.application.Platform;
@@ -71,7 +72,7 @@ public class MainViewController implements Initializable {
         dialog.initStyle(StageStyle.UTILITY);
         dialog.setTitle("About binjr");
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
-        dialog.initOwner(getStage());
+        dialog.initOwner(Dialogs.getStage(root));
         dialog.showAndWait();
     }
 
@@ -106,7 +107,7 @@ public class MainViewController implements Initializable {
                 }
             });
         } catch (DataAdapterException e) {
-            displayException("An error occurred while building the tree from " + dp != null ? dp.getSourceName() : "null", e);
+           Dialogs.displayException("An error occurred while building the tree from " + dp != null ? dp.getSourceName() : "null", e, root);
         }
         return treeView;
     }
@@ -204,25 +205,25 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void displayException(String header, Exception e) {
-        displayException(header, e, getStage());
-    }
+//    public void displayException(String header, Exception e) {
+//        displayException(header, e, getStage());
+//    }
+//
+//    public void displayException(String header, Exception e, Window owner) {
+//        logger.error(e);
+//        ExceptionDialog dlg = new ExceptionDialog(e);
+//        dlg.initStyle(StageStyle.UTILITY);
+//        dlg.initOwner(owner);
+//        dlg.getDialogPane().setHeaderText(header);
+//        dlg.showAndWait();
+//    }
 
-    public void displayException(String header, Exception e, Window owner) {
-        logger.error(e);
-        ExceptionDialog dlg = new ExceptionDialog(e);
-        dlg.initStyle(StageStyle.UTILITY);
-        dlg.initOwner(owner);
-        dlg.getDialogPane().setHeaderText(header);
-        dlg.showAndWait();
-    }
-
-    private Stage getStage() {
-        if (root != null && root.getScene() != null) {
-            return (Stage) root.getScene().getWindow();
-        }
-        return null;
-    }
+//    private Stage getStage() {
+//        if (root != null && root.getScene() != null) {
+//            return (Stage) root.getScene().getWindow();
+//        }
+//        return null;
+//    }
 
     @FXML
     public void handlePreferencesAction(ActionEvent actionEvent) {
@@ -231,15 +232,15 @@ public class MainViewController implements Initializable {
             dialog.initStyle(StageStyle.UTILITY);
             dialog.setTitle("Preferences");
             dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
-            dialog.initOwner(getStage());
+            dialog.initOwner(Dialogs.getStage(root));
             dialog.showAndWait();
         } catch (Exception ex) {
-            displayException("Failed to display preference dialog", ex);
+            Dialogs.displayException("Failed to display preference dialog", ex, root);
         }
     }
 
     public void handleAddJRDSSource(ActionEvent actionEvent) {
-        GetDataAdapterDialog dlg = new GetDataAdapterDialog(getStage(), "Add a JRDS source", JRDSDataAdapter::fromUrl);
+        GetDataAdapterDialog dlg = new GetDataAdapterDialog( "Add a JRDS source", JRDSDataAdapter::fromUrl, root);
         dlg.showAndWait().ifPresent( da ->
         {
             Tab newTab = new Tab(da.getSourceName());

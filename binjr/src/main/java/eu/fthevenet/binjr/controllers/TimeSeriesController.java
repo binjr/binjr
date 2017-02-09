@@ -3,6 +3,8 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
+import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
@@ -16,10 +18,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.chart.AreaChart;
+import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -66,6 +72,8 @@ public class TimeSeriesController implements Initializable {
     private ZonedDateTimePicker endDate;
     @FXML
     private TableColumn<TimeSeries<Double>, String> sourceColumn;
+    @FXML
+    private TableColumn<TimeSeries<Double>, String> colorColumn;
 
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
@@ -101,7 +109,7 @@ public class TimeSeriesController implements Initializable {
         return crossHair;
     }
 
-    public AreaChart<ZonedDateTime, Double> getChart() {
+    public XYChart<ZonedDateTime, Double> getChart() {
         return chart;
     }
     //endregion
@@ -121,6 +129,7 @@ public class TimeSeriesController implements Initializable {
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
+        assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
 
@@ -150,6 +159,18 @@ public class TimeSeriesController implements Initializable {
         });
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
+
+//        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, Color>() {
+//
+//            @Override
+//            public void updateItem(Color item, boolean empty) {
+//                super.updateItem(item, empty);
+//                TimeSeries<Double> current = param.getTableView().getSelectionModel().getSelectedItem();
+//     //           if (current != null) {
+//                    setStyle("-fx-background-color:#ff4500");// + current.getBinding().getColor().toString());
+//       //         }
+//            }
+//        });
 
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
@@ -269,10 +290,7 @@ public class TimeSeriesController implements Initializable {
 //                seriesTable.getItems().add(i);
 //            }
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {
-            logger.error(() -> "Error getting data", e);
-            if (getMainViewController() != null) {
-                getMainViewController().displayException("Failed to retrieve data from source", e);
-            }
+            Dialogs.displayException("Failed to retrieve data from source", e ,root);
         }
     }
 
@@ -454,5 +472,7 @@ public class TimeSeriesController implements Initializable {
             return String.format("XYChartViewState{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
         }
     }
+
+
     //endregion
 }

@@ -5,14 +5,11 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.Window;
-import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.Notifications;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
@@ -44,9 +41,9 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
      * @param title          the title for the dialog box
      * @param adapterFactory a factory for {@link DataAdapter}
      */
-    public GetDataAdapterDialog(Window owner, String title, DataAdapterFactory adapterFactory) {
+    public GetDataAdapterDialog(String title, DataAdapterFactory adapterFactory, Node owner) {
         if (owner != null) {
-            this.initOwner(owner);
+            this.initOwner(Dialogs.getStage(owner));
         }
         this.setTitle(title);
         String KNOWN_JRDS_URL = "urls_mru";
@@ -65,10 +62,10 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
                     result = adapterFactory.fromUrl(ctlr.getUrlField().getText(), zoneId);
                     autoCompletionLearnWord(ctlr.getUrlField());
                 } catch (MalformedURLException e) {
-                    notifyException("Invalid URL", e, ctlr.getUrlField());
+                    Dialogs.notifyError("Invalid URL", e.getLocalizedMessage(), ctlr.getUrlField());
                     ae.consume();
                 } catch (DateTimeException de) {
-                    notifyException("Invalid Timezone", de, ctlr.getTimezoneField());
+                    Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), ctlr.getTimezoneField());
                     ae.consume();
                 }
             });
@@ -90,14 +87,7 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
 
     }
 
-    private void notifyException(String title, Exception e, Node owner) {
-        Notifications.create()
-                .title(title)
-                .text(e.getLocalizedMessage())
-                .hideAfter(Duration.seconds(3))
-                .position(Pos.CENTER)
-                .owner(owner).showError();
-    }
+
 
     private void autoCompletionLearnWord(TextField field) {
         suggestedUrls.add(field.getText());

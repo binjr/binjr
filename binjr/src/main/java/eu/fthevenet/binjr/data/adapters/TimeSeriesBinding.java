@@ -1,5 +1,7 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import javafx.scene.paint.Color;
+
 /**
  * Represents a binding between a time series and the {@link DataAdapter} used to produce it.
  *
@@ -26,4 +28,16 @@ public interface TimeSeriesBinding<T extends Number> {
      * @return the {@link DataAdapter} of the binding
      */
     DataAdapter<T> getAdapter();
+
+    Color getColor();
+
+    String getLegend();
+
+    String getGraphType();
+
+//    int getUnitBase();
+
+    //boolean isEnabled();
+
+
 }

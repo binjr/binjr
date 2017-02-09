@@ -35,7 +35,7 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
     public TimeSeries(TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.data = new ArrayList<>();
-        this.name = binding.getLabel();
+        this.name = binding.getLegend();
     }
 
     /**
@@ -121,17 +121,16 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
         // Group all bindings by common adapters
         TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         Map<DataAdapter<T>, List<TimeSeriesBinding<T>>> bindingsByAdapters = bindings.stream().collect(groupingBy(TimeSeriesBinding::getAdapter));
-        for (Map.Entry<DataAdapter<T>, List<TimeSeriesBinding<T>>> e1 : bindingsByAdapters.entrySet()) {
-            DataAdapter<T> adapter = e1.getKey();
+        for (Map.Entry<DataAdapter<T>, List<TimeSeriesBinding<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
+            DataAdapter<T> adapter = byAdapterEntry.getKey();
             // Group all bindings-by-adapters by path
-            Map<String, List<TimeSeriesBinding<T>>> bindingsByPath = e1.getValue().stream().collect(groupingBy(TimeSeriesBinding::getPath));
-            for (Map.Entry<String, List<TimeSeriesBinding<T>>> e2 : bindingsByPath.entrySet()) {
-                String path = e2.getKey();
-                // List<String> labels = e2.getValue().stream().map(TimeSeriesBinding::getLabel).collect(toList());
+            Map<String, List<TimeSeriesBinding<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(TimeSeriesBinding::getPath));
+            for (Map.Entry<String, List<TimeSeriesBinding<T>>> byPathEntry : bindingsByPath.entrySet()) {
+                String path = byPathEntry.getKey();
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     adapter.getData(path, startTime.toInstant(), endTime.toInstant(), out);
                     try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
-                        Map<TimeSeriesBinding<T>, TimeSeries<T>> m = adapter.getParser().parse(in, e2.getValue());
+                        Map<TimeSeriesBinding<T>, TimeSeries<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
                         // Applying point reduction
                         m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
                         // Adding the new series to the list

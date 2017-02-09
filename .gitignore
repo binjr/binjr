@@ -3,14 +3,4 @@
 
 /binjr/target/
 /binjr/target/binjr.jar
-/launcher/Windows/WinJVMHost/WinJVMHost.VC.db
-/launcher/Windows/WinJVMHost/WinJVMHost.VC.VC.opendb
-/launcher/Windows/WinJVMHost/WinJVMHost/WinJVMHost.vcxproj.user
-/launcher/Windows/WinJVMHost/WinJVMHost/WinJVMHost.vcxproj.filters
-/launcher/Windows/WinJVMHost/WinJVMHost/log.log
-/launcher/Windows/WinJVMHost/WinJVMHost/log.txt
-/launcher/Windows/WinJVMHost/WinJVMHost/log.log
-/launcher/Windows/WinJVMHost/WinJVMHost/Debug
-/launcher/Windows/WinJVMHost/Debug
-/launcher/Windows/WinJVMHost/.vs
-/launcher/Windows/WinJVMHost/WinJVMHost/WinJVMHost.aps
+/binjr/dependency-reduced-pom.xml
