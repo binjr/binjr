@@ -7,6 +7,8 @@ import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsT
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.scene.chart.XYChart;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.text.ParseException;
@@ -23,6 +25,7 @@ import static java.util.stream.Collectors.groupingBy;
  * @author Frederic Thevenet
  */
 public abstract class TimeSeries<T extends Number> implements Serializable {
+    private static final Logger logger = LogManager.getLogger(TimeSeries.class);
     protected List<XYChart.Data<ZonedDateTime, T>> data;
     protected final TimeSeriesBinding<T> binding;
     protected final String name;
@@ -103,6 +106,14 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
     public XYChart.Series<ZonedDateTime, T> asSeries() {
         XYChart.Series<ZonedDateTime, T> s = new XYChart.Series<>();
         s.getData().addAll(data);
+        s.nodeProperty().addListener((observable, oldValue, newValue)  -> {
+            if (newValue != null){
+            logger.trace(()->"Changing series color to " + getBinding().getColor());
+            newValue.setStyle(" -fx-fill : " + getBinding().getColor() + ";");
+            newValue.setStyle(" -fx-stroke : " + getBinding().getColor() + ";");
+            }
+        });
+
         return s;
     }
 

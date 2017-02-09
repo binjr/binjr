@@ -29,7 +29,7 @@ public interface TimeSeriesBinding<T extends Number> {
      */
     DataAdapter<T> getAdapter();
 
-    Color getColor();
+    String getColor();
 
     String getLegend();
 

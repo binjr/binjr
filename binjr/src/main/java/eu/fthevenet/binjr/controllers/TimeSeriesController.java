@@ -160,17 +160,21 @@ public class TimeSeriesController implements Initializable {
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
 
-//        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, Color>() {
-//
-//            @Override
-//            public void updateItem(Color item, boolean empty) {
-//                super.updateItem(item, empty);
-//                TimeSeries<Double> current = param.getTableView().getSelectionModel().getSelectedItem();
-//     //           if (current != null) {
-//                    setStyle("-fx-background-color:#ff4500");// + current.getBinding().getColor().toString());
-//       //         }
-//            }
-//        });
+        colorColumn.setCellValueFactory(p-> new SimpleStringProperty(p.getValue().getBinding().getColor().toString().replace("0x", "")));
+
+        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
+
+            @Override
+            public void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item != null) {
+                    setStyle("-fx-background-color:" + item);// + current.getBinding().getColor().toString());
+                }else{
+                    setStyle("-fx-background-color:" + "transparent");
+                }
+
+            }
+        });
 
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
@@ -277,7 +281,13 @@ public class TimeSeriesController implements Initializable {
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
 
+            for (int i = 0; i < seriesData.size(); i++) {
+                chart.setStyle("CHART_COLOR_" + i +": " + seriesData.get(i).getBinding().getColor() + ";");
+            }
+
             chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
+
+
 //            seriesTable.getItems().clear();
 //
 //            for (XYChart.Series s : chart.getData()) {
