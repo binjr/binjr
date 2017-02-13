@@ -17,7 +17,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     private final DataAdapter<Double> adapter;
     private final String label;
     private final String path;
-    private Color color;
+    private final Color color;
     private final String legend;
     private final int unitBase;
     private final String graphType;
@@ -52,14 +52,15 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
                         (isNullOrEmpty(desc.legend) ?
                                 "???" : desc.legend) : desc.dsName) : desc.name;
 
-        this.color = null;
+        Color c = null;
         try {
             if (desc.color != null) {
-                this.color = Color.web(desc.color);
+                c = Color.web(desc.color);
             }
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid color string for binding " + this.label);
         }
+        this.color = c;
 
 
         this.legend = isNullOrEmpty(desc.legend) ?
@@ -96,11 +97,6 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     @Override
     public Color getColor() {
         return this.color;
-    }
-
-    @Override
-    public void setColor(Color value) {
-        this.color = value;
     }
 
     @Override

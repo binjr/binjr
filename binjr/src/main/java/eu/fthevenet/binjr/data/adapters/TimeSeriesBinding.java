@@ -30,7 +30,6 @@ public interface TimeSeriesBinding<T extends Number> {
     DataAdapter<T> getAdapter();
 
     Color getColor();
-    void setColor(Color value);
 
     String getLegend();
 
