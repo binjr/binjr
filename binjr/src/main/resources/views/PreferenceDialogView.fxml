@@ -19,8 +19,9 @@
                   <content>
                     <AnchorPane>
                            <children>
-                              <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="43.0" mnemonicParsing="false" text="Show sample symbols" />
+                              <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="42.0" mnemonicParsing="false" text="Show sample symbols" />
                               <CheckBox fx:id="enableChartAnimation" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Enable animation" />
+                               <CheckBox fx:id="useSourceColors" layoutX="14.0" layoutY="70.0" mnemonicParsing="false" text="Use source colors" />
                            </children>
                         </AnchorPane>
                   </content>

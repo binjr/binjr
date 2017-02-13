@@ -4,6 +4,8 @@ import javax.xml.bind.annotation.*;
 import java.util.List;
 
 /**
+ * A POJO class used to deserialize JRDS graph descriptor XML messages return by {@code /graphdesc?id=""} service.
+ *
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)

@@ -107,7 +107,7 @@ public class MainViewController implements Initializable {
                 }
             });
         } catch (DataAdapterException e) {
-           Dialogs.displayException("An error occurred while building the tree from " + dp != null ? dp.getSourceName() : "null", e, root);
+           Dialogs.displayException("An error occurred while building the tree from " + (dp != null ? dp.getSourceName() : "null"), e, root);
         }
         return treeView;
     }

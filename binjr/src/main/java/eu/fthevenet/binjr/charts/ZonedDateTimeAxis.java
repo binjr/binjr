@@ -3,7 +3,6 @@ package eu.fthevenet.binjr.charts;
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt
- * Copyright (c) 2017, Frederic Thevenet
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal

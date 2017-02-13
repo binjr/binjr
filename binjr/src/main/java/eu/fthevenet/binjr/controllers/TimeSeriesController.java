@@ -2,6 +2,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
+import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
 import eu.fthevenet.binjr.dialogs.Dialogs;
@@ -17,6 +18,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
@@ -25,6 +27,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -160,7 +163,7 @@ public class TimeSeriesController implements Initializable {
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
 
-        colorColumn.setCellValueFactory(p-> new SimpleStringProperty(p.getValue().getBinding().getColor().toString().replace("0x", "")));
+        colorColumn.setCellValueFactory(p-> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
 
         colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
 
@@ -168,11 +171,10 @@ public class TimeSeriesController implements Initializable {
             public void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
                 if (item != null) {
-                    setStyle("-fx-background-color:" + item);// + current.getBinding().getColor().toString());
+                    setStyle("-fx-background-color:" + item);
                 }else{
                     setStyle("-fx-background-color:" + "transparent");
                 }
-
             }
         });
 
@@ -281,11 +283,39 @@ public class TimeSeriesController implements Initializable {
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
 
-            for (int i = 0; i < seriesData.size(); i++) {
-                chart.setStyle("CHART_COLOR_" + i +": " + seriesData.get(i).getBinding().getColor() + ";");
-            }
+
+            // Look up first series fill
+
 
             chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
+
+//            for (int i = 0; i < seriesData.size(); i++) {
+//                Node fillNode = chart.lookup(".default-color" + i + ".chart-series-area-fill");
+//                if (fillNode != null) {
+//                    if (globalPrefs.isUseSourceColors()) {
+//                        fillNode.setStyle("-fx-fill: " + ColorUtils.toHex(seriesData.get(i).getBinding().getColor(), 0.2) + ";");
+//                    }
+//                   else{
+////                        logger.debug(((Shape)fillNode).getFill().toString());
+//                        ((Shape)fillNode).fillProperty().addListener((observable, oldValue, newValue) -> {
+//                            if (newValue != null){
+//
+//                               // seriesData.get(i).getBinding()
+//                            }
+//                        });
+//                    }
+//                }
+//                else {
+//                    logger.warn("cannot find node for css lookup: [.default-color" + i + ".chart-series-area-fill]");
+//                }
+//                Node strokeNode = chart.lookup(".default-color" + i + ".chart-series-area-line");
+//                if (strokeNode != null) {
+//                    strokeNode.setStyle("-fx-stroke: " + ColorUtils.toHex(seriesData.get(i).getBinding().getColor()) + ";");
+//                }
+//                else {
+//                    logger.warn("cannot find node for css lookup: [.default-color" + i + ".chart-series-area-line]");
+//                }
+//            }
 
 
 //            seriesTable.getItems().clear();

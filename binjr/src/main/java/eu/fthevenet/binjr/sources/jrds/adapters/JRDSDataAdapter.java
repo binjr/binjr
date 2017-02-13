@@ -176,9 +176,10 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
                     if (newValue) {
                         try {
-                            for (Graphdesc.SeriesDesc seriesDesc :  getGraphDescriptor(currentPath).seriesDescList) {
-                                if (!"none".equals(seriesDesc.graphType)) {
-                                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(seriesDesc, currentPath, JRDSDataAdapter.this)));
+                            Graphdesc graphdesc =  getGraphDescriptor(currentPath);
+                            for (int i = 0; i <graphdesc.seriesDescList.size() ; i++) {
+                                if (!"none".equals(graphdesc.seriesDescList.get(i).graphType)) {
+                                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(graphdesc, i, currentPath, JRDSDataAdapter.this)));
                                 }
                             }
                             //remove dummy node

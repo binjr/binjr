@@ -29,13 +29,16 @@ public interface TimeSeriesBinding<T extends Number> {
      */
     DataAdapter<T> getAdapter();
 
-    String getColor();
+    Color getColor();
+    void setColor(Color value);
 
     String getLegend();
 
     String getGraphType();
 
-//    int getUnitBase();
+    String getUnitName();
+
+    int getUnitBase();
 
     //boolean isEnabled();
 

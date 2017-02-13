@@ -5,6 +5,7 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.stage.Window;
@@ -62,10 +63,10 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
                     result = adapterFactory.fromUrl(ctlr.getUrlField().getText(), zoneId);
                     autoCompletionLearnWord(ctlr.getUrlField());
                 } catch (MalformedURLException e) {
-                    Dialogs.notifyError("Invalid URL", e.getLocalizedMessage(), ctlr.getUrlField());
+                    Dialogs.notifyError("Invalid URL", e.getLocalizedMessage(), Pos.CENTER, ctlr.getUrlField());
                     ae.consume();
                 } catch (DateTimeException de) {
-                    Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), ctlr.getTimezoneField());
+                    Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), Pos.CENTER, ctlr.getTimezoneField());
                     ae.consume();
                 }
             });

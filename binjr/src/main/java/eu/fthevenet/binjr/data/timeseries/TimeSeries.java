@@ -1,12 +1,18 @@
 package eu.fthevenet.binjr.data.timeseries;
 
+import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.scene.Group;
 import javafx.scene.chart.XYChart;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Shape;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,6 +35,8 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
     protected List<XYChart.Data<ZonedDateTime, T>> data;
     protected final TimeSeriesBinding<T> binding;
     protected final String name;
+    protected Property<Color> displayColor;
+
 
     /**
      * Initializes a new instance of the {@link TimeSeries} class with the provided {@link TimeSeriesBinding}.
@@ -39,6 +47,7 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
         this.binding = binding;
         this.data = new ArrayList<>();
         this.name = binding.getLegend();
+        this.displayColor = new SimpleObjectProperty<>(binding.getColor());
     }
 
     /**
@@ -98,6 +107,19 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
         return data;
     }
 
+
+    public Color getDisplayColor() {
+        return displayColor.getValue();
+    }
+
+    public Property<Color> displayColorProperty() {
+        return displayColor;
+    }
+
+    public void setDisplayColor(Color displayColor) {
+        this.displayColor.setValue(displayColor);
+    }
+
     /**
      * Returns the current TimeSeries' data as an instance of {@link XYChart.Series} so that it can be displayed in a chart.
      *
@@ -106,14 +128,24 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
     public XYChart.Series<ZonedDateTime, T> asSeries() {
         XYChart.Series<ZonedDateTime, T> s = new XYChart.Series<>();
         s.getData().addAll(data);
-        s.nodeProperty().addListener((observable, oldValue, newValue)  -> {
-            if (newValue != null){
-            logger.trace(()->"Changing series color to " + getBinding().getColor());
-            newValue.setStyle(" -fx-fill : " + getBinding().getColor() + ";");
-            newValue.setStyle(" -fx-stroke : " + getBinding().getColor() + ";");
+
+        s.nodeProperty().addListener((node, oldNode, newNode) -> {
+            if (newNode != null) {
+                logger.trace(() -> "Setting color of series " + getBinding().getLabel() + " to " + getBinding().getColor());
+                //FIXME Seriously hackish code ahead!!!
+                if (GlobalPreferences.getInstance().isUseSourceColors()) {
+                    ((Group) newNode).getChildren().get(0).setStyle(" -fx-fill : " + ColorUtils.toHex(getDisplayColor(), 0.2) + ";");
+                    ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : " + ColorUtils.toHex(getDisplayColor()) + ";");
+                }
+                else{
+                    ((Shape) ((Group) newNode).getChildren().get(1)).strokeProperty().addListener((observable, oldValue, newValue) -> {
+                        if (newValue != null) {
+                            setDisplayColor((Color) newValue);
+                        }
+                    });
+                }
             }
         });
-
         return s;
     }
 
@@ -125,7 +157,7 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
      * @param endTime   The end of the time interval for which to produce the series
      * @param <T>       The type for the Y values of the series.
      * @return a list of {@link TimeSeries} instances generated from the provided bindings
-     * @throws DataAdapterException In case an error occures while retreiving the data from the {@link DataAdapter} or parsing it in a {@link eu.fthevenet.binjr.data.parsers.DataParser}
+     * @throws DataAdapterException In case an error occurs while retrieving the data from the {@link DataAdapter} or parsing it in a {@link eu.fthevenet.binjr.data.parsers.DataParser}
      */
     public static <T extends Number> List<TimeSeries<T>> fromBinding(List<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
         List<TimeSeries<T>> series = new ArrayList<>();

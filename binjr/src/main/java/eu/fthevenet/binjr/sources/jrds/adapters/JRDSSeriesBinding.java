@@ -13,13 +13,15 @@ import org.apache.logging.log4j.Logger;
  */
 public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     private static final Logger logger = LogManager.getLogger(JRDSSeriesBinding.class);
+    private static final int DEFAULT_BASE = 10;
     private final DataAdapter<Double> adapter;
     private final String label;
     private final String path;
-    private final String color;
+    private Color color;
     private final String legend;
-  //  private final int unitBase;
+    private final int unitBase;
     private final String graphType;
+    private final String unitName;
 
 
     /**
@@ -36,40 +38,39 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
         color = null;
         legend = label;
         graphType = "none";
-
-
-
-
+        unitBase = 10;
+        unitName = "%";
     }
 
-    public JRDSSeriesBinding(Graphdesc.SeriesDesc graphdesc, String path, DataAdapter<Double> adapter) {
+    public JRDSSeriesBinding(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         this.adapter = adapter;
         this.path = path;
+        Graphdesc.SeriesDesc desc = graphdesc.seriesDescList.get(idx);
 
-        this.label = isNullOrEmpty(graphdesc.name) ?
-                (isNullOrEmpty(graphdesc.dsName) ?
-                        (isNullOrEmpty(graphdesc.legend) ?
-                                "???" : graphdesc.legend) : graphdesc.dsName) : graphdesc.name;
+        this.label = isNullOrEmpty(desc.name) ?
+                (isNullOrEmpty(desc.dsName) ?
+                        (isNullOrEmpty(desc.legend) ?
+                                "???" : desc.legend) : desc.dsName) : desc.name;
 
-
-        String c = null;
+        this.color = null;
         try {
-            if (graphdesc.color!=null) {
-                c = "#" + Color.web(graphdesc.color).toString().replace("0x", "");
+            if (desc.color != null) {
+                this.color = Color.web(desc.color);
             }
         } catch (IllegalArgumentException e) {
             logger.warn("Invalid color string for binding " + this.label);
         }
-        this.color = c;
-
-        this.legend = isNullOrEmpty(graphdesc.legend) ?
-                (isNullOrEmpty(graphdesc.name) ?
-                        (isNullOrEmpty(graphdesc.dsName) ?
-                                "???" : graphdesc.dsName) : graphdesc.name) : graphdesc.legend;
-
-        this.graphType = isNullOrEmpty(graphdesc.graphType) ? "none" : graphdesc.graphType;
 
 
+        this.legend = isNullOrEmpty(desc.legend) ?
+                (isNullOrEmpty(desc.name) ?
+                        (isNullOrEmpty(desc.dsName) ?
+                                "???" : desc.dsName) : desc.name) : desc.legend;
+
+        this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
+
+        this.unitBase = "SI".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
+        this.unitName = graphdesc.verticalLabel;
     }
 
     private boolean isNullOrEmpty(String s) {
@@ -93,8 +94,13 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     }
 
     @Override
-    public String getColor() {
+    public Color getColor() {
         return this.color;
+    }
+
+    @Override
+    public void setColor(Color value) {
+        this.color = value;
     }
 
     @Override
@@ -105,6 +111,16 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     @Override
     public String getGraphType() {
         return graphType;
+    }
+
+    @Override
+    public String getUnitName() {
+        return unitName;
+    }
+
+    @Override
+    public int getUnitBase() {
+        return unitBase;
     }
 
     @Override

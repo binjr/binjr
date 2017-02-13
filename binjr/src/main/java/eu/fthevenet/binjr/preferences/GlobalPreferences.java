@@ -17,11 +17,13 @@ public class GlobalPreferences {
     private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
     private static final String DOWN_SAMPLING_ENABLED = "downSamplingEnabled";
     private static final String BINJR_GLOBAL = "binjr/global";
+    private static final String USE_SOURCE_COLORS = "useSourceColors";
     private Property<Boolean> downSamplingEnabled;
     private SimpleIntegerProperty downSamplingThreshold;
     private Property<Boolean> sampleSymbolsVisible;
     private Property<Boolean> chartAnimationEnabled;
     private Preferences prefs;
+    private Property<Boolean>  useSourceColors;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -37,6 +39,8 @@ public class GlobalPreferences {
         sampleSymbolsVisible.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SAMPLE_SYMBOLS_VISIBLE, newValue));
         chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, false));
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
+        useSourceColors = new SimpleBooleanProperty(prefs.getBoolean(USE_SOURCE_COLORS, true));
+        useSourceColors.addListener((observable, oldValue, newValue) -> prefs.putBoolean(USE_SOURCE_COLORS, newValue));
     }
 
     /**
@@ -155,4 +159,18 @@ public class GlobalPreferences {
     public void setDownSamplingThreshold(int downSamplingThreshold) {
         this.downSamplingThreshold.setValue(downSamplingThreshold);
     }
+
+    public Boolean isUseSourceColors() {
+        return useSourceColors.getValue();
+    }
+
+    public Property<Boolean> useSourceColorsProperty() {
+        return useSourceColors;
+    }
+
+    public void setUseSourceColors(Boolean useSourceColors) {
+        this.useSourceColors.setValue(useSourceColors);
+    }
+
+
 }

@@ -25,6 +25,8 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private CheckBox enableChartAnimation;
     @FXML
+    private CheckBox useSourceColors;
+    @FXML
     private Label maxSampleLabel;
     @FXML
     private Accordion accordionPane;
@@ -37,6 +39,7 @@ public class PreferenceDialogController implements Initializable {
         assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
+        assert useSourceColors != null : "fx:id\"useSourceColors\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -45,6 +48,7 @@ public class PreferenceDialogController implements Initializable {
 
         enableChartAnimation.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().chartAnimationEnabledProperty());
         showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
+        useSourceColors.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().useSourceColorsProperty());
         enableDownSampling.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingEnabledProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
