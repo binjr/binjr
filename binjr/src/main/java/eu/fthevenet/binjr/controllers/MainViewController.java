@@ -88,7 +88,7 @@ public class MainViewController implements Initializable {
         //seriesTabPane.getTabs().add(new Tab("New series (" + nbSeries.incrementAndGet() + ")"));
     }
 
-    private Map<String, TimeSeriesController> seriesControllers = new HashMap<>();
+    private Map<Tab, TimeSeriesController> seriesControllers = new HashMap<>();
 
     private TreeView<TimeSeriesBinding> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding> treeView = new TreeView<>();
@@ -166,7 +166,7 @@ public class MainViewController implements Initializable {
                         current.setMainViewController(MainViewController.this);
                         current.getCrossHair().horizontalMarkerVisibleProperty().bind(showHorizontalMarker);
                         current.getCrossHair().verticalMarkerVisibleProperty().bind(showVerticalMarker);
-                        seriesControllers.put(newValue.getText(), current);
+                        seriesControllers.put(newValue, current);
                         // add "+" tab
                         ((Label) newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
                         seriesTabPane.getTabs().add(new EditableTab("+"));
@@ -183,6 +183,11 @@ public class MainViewController implements Initializable {
         // By default, select 1st tab and load its content.
         seriesTabPane.getSelectionModel().selectFirst();
         seriesTabPane.getTabs().add(new EditableTab("New worksheet"));
+        seriesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null){
+                this.selectedTabController = seriesControllers.get(newValue);
+            }
+        });
 
         sourcesTabPane.getSelectionModel().clearSelection();
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -204,26 +209,6 @@ public class MainViewController implements Initializable {
             selectedTabController.invalidate(false, true, true);
         }
     }
-
-//    public void displayException(String header, Exception e) {
-//        displayException(header, e, getStage());
-//    }
-//
-//    public void displayException(String header, Exception e, Window owner) {
-//        logger.error(e);
-//        ExceptionDialog dlg = new ExceptionDialog(e);
-//        dlg.initStyle(StageStyle.UTILITY);
-//        dlg.initOwner(owner);
-//        dlg.getDialogPane().setHeaderText(header);
-//        dlg.showAndWait();
-//    }
-
-//    private Stage getStage() {
-//        if (root != null && root.getScene() != null) {
-//            return (Stage) root.getScene().getWindow();
-//        }
-//        return null;
-//    }
 
     @FXML
     public void handlePreferencesAction(ActionEvent actionEvent) {

@@ -20,6 +20,7 @@ import java.io.*;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -159,7 +160,7 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
      * @return a list of {@link TimeSeries} instances generated from the provided bindings
      * @throws DataAdapterException In case an error occurs while retrieving the data from the {@link DataAdapter} or parsing it in a {@link eu.fthevenet.binjr.data.parsers.DataParser}
      */
-    public static <T extends Number> List<TimeSeries<T>> fromBinding(List<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
+    public static <T extends Number> List<TimeSeries<T>> fromBinding(Collection<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
         List<TimeSeries<T>> series = new ArrayList<>();
         // Group all bindings by common adapters
         TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());

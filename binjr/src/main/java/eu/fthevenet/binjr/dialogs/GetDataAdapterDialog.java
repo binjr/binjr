@@ -82,6 +82,11 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
             );
             TextFields.bindAutoCompletion(ctlr.getTimezoneField(), ZoneId.getAvailableZoneIds());
             ctlr.getTimezoneField().setText(ZoneId.systemDefault().toString());
+
+//            this.setOnShown( event -> {
+//                ctlr.getUrlField().requestFocus();
+//            });
+
         } catch (IOException e) {
             logger.error("Failed to load /views/GetDataAdapterView.fxml", e);
         }

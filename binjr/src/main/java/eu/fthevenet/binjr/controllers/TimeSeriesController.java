@@ -80,7 +80,7 @@ public class TimeSeriesController implements Initializable {
 
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
-    private List<TimeSeriesBinding<Double>> seriesBindings = new ArrayList<>();
+    private Set<TimeSeriesBinding<Double>> seriesBindings = new HashSet<>();
     // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -192,9 +192,13 @@ public class TimeSeriesController implements Initializable {
     }
 
     public void addBinding(TimeSeriesBinding<Double> binding) {
-        this.seriesBindings.add(binding);
-        invalidate(false, true, true);
-        chart.getYAxis().setAutoRanging(true);
+       if(this.seriesBindings.add(binding)){
+           invalidate(false, true, true);
+           chart.getYAxis().setAutoRanging(true);
+       }
+       else{
+           logger.warn("Binding " + binding.toString() + " is already present in current set");
+       }
     }
     //endregion
 
@@ -277,8 +281,8 @@ public class TimeSeriesController implements Initializable {
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
-            seriesData.clear();
-            seriesData.addAll(TimeSeries.fromBinding(
+
+            seriesData.setAll(TimeSeries.fromBinding(
                     seriesBindings,
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));

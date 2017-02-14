@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
     <version>0.3.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <url>https://github.com/fthevenet/binjr</url>
+    <scm>
+        <connection>scm:git:git@github.com:fthevenet/binjr.git</connection>
+        <url>https://github.com/fthevenet/binjr</url>
+        <developerConnection>scm:git:git@github.com:fthevenet/binjr.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
     <build>
         <finalName>${project.name}</finalName>
 
@@ -51,13 +55,23 @@
                                     <manifestEntries>
                                         <Main-Class>eu.fthevenet.binjr.Main</Main-Class>
                                         <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
-                                        <!--<Build-Number>123</Build-Number>-->
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <!-- Release -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                </configuration>
             </plugin>
 
 
@@ -99,44 +113,6 @@
                     <!--</execution>-->
                 <!--</executions>-->
             <!--</plugin>-->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.4.1</version>
-                <configuration>
-                    <tagNameFormat>R@{project.version}</tagNameFormat>
-                    <autoVersionSubmodules>true</autoVersionSubmodules>
-                    <useReleaseProfile>false</useReleaseProfile>
-                </configuration>
-            </plugin>
-            <!--JAXB-->
-            <!--<plugin>-->
-                <!--<groupId>org.codehaus.mojo</groupId>-->
-                <!--<artifactId>jaxb2-maven-plugin</artifactId>-->
-                <!--<version>2.3</version>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--<id>xjc</id>-->
-                        <!--<phase>generate-sources</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>xjc</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
-                <!--<configuration>-->
-                    <!--<sources>-->
-                        <!--<source>src/main/java/eu/fthevenet/binjr/sources/jrds/xml</source>-->
-                    <!--</sources>-->
-                    <!--&lt;!&ndash; The package in which the source files will be generated. &ndash;&gt;-->
-                    <!--<packageName>eu.fthevenet.binjr.sources.jrds.xml</packageName>-->
-                    <!--<sourceType>dtd</sourceType>-->
-                    <!--&lt;!&ndash; The working directory to create the generated java source files.&ndash;&gt;-->
-                    <!--&lt;!&ndash;<outputDirectory>src/main/java/generated-sources</outputDirectory>&ndash;&gt;-->
-                    <!--<clearOutputDir>true</clearOutputDir>-->
-                <!--</configuration>-->
-            <!--</plugin>-->
-
 
         </plugins>
     </build>

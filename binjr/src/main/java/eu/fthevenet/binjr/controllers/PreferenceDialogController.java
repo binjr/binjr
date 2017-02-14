@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -54,11 +55,13 @@ public class PreferenceDialogController implements Initializable {
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
 
-        if (accordionPane.getPanes() != null
-                && accordionPane.getPanes().size() > 0
-                && accordionPane.getPanes().get(0) != null){
-            accordionPane.getPanes().get(0).setExpanded(true);
-        }
+        Platform.runLater(()-> {
+            if (accordionPane.getPanes() != null
+                    && accordionPane.getPanes().size() > 0
+                    && accordionPane.getPanes().get(0) != null) {
+                accordionPane.getPanes().get(0).setExpanded(true);
+            }
+        });
 
     }
 }
