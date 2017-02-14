@@ -7,9 +7,9 @@
     <packaging>jar</packaging>
     <url>http://www.fthevenet.eu/binjr</url>
     <scm>
-        <connection>scm:git:git@github.com:fthevenet/binjr.git</connection>
+        <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
         <url>https://github.com/fthevenet/binjr</url>
-        <developerConnection>scm:git:git@github.com:fthevenet/binjr.git</developerConnection>
+        <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
     <build>
