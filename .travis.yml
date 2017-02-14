@@ -4,7 +4,8 @@ jdk:
   - oraclejdk8
 
 script:
-  mvn clean package
+  - cd binjr
+  - mvn clean package
 
 
 branches:
