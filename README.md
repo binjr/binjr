@@ -1,1 +1,2 @@
-#![binjr](docs/images/binjr_transparentBG_small.png)
+#binjr
+binjr is not a JRDS rewrite
