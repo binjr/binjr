@@ -1,8 +1,14 @@
 language: java
 
+sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
 jdk:
   - oraclejdk8
-
+  
 script:
   - cd binjr
   - mvn clean package
