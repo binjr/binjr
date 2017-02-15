@@ -33,7 +33,7 @@
                         <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" />
+                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" accelerator="Shortcut+P" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
                     </items>

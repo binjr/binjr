@@ -140,6 +140,7 @@ public class TimeSeriesController implements Initializable {
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
         globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
         globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
+        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
 
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));

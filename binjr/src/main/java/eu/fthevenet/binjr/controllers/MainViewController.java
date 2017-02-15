@@ -19,6 +19,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -121,7 +122,7 @@ public class MainViewController implements Initializable {
                 event.consume();
                 break;
 
-            case CONTROL:
+            case SHORTCUT:
                 showVerticalMarker.set(pressed);
                 event.consume();
                 break;
@@ -214,11 +215,12 @@ public class MainViewController implements Initializable {
     public void handlePreferencesAction(ActionEvent actionEvent) {
         try {
             Dialog<String> dialog = new Dialog<>();
+            dialog.initModality(Modality.NONE);
             dialog.initStyle(StageStyle.UTILITY);
             dialog.setTitle("Preferences");
             dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
             dialog.initOwner(Dialogs.getStage(root));
-            dialog.showAndWait();
+            dialog.show();
         } catch (Exception ex) {
             Dialogs.displayException("Failed to display preference dialog", ex, root);
         }
