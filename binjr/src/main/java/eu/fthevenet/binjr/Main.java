@@ -11,6 +11,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
+import java.io.IOException;
+import java.net.URL;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
 
 /**
  * The entry point fo the application.
@@ -20,6 +24,8 @@ import java.awt.*;
 public class Main extends Application {
 
     private static final Logger logger = LogManager.getLogger(Main.class);
+
+
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -55,5 +61,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
+
+
 
 }

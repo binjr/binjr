@@ -3,7 +3,12 @@ package eu.fthevenet.binjr.preferences;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
 
 /**
@@ -12,6 +17,7 @@ import java.util.prefs.Preferences;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
+    private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
     private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
@@ -23,7 +29,8 @@ public class GlobalPreferences {
     private Property<Boolean> sampleSymbolsVisible;
     private Property<Boolean> chartAnimationEnabled;
     private Preferences prefs;
-    private Property<Boolean>  useSourceColors;
+    private Property<Boolean> useSourceColors;
+    private final Manifest manifest;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -41,6 +48,7 @@ public class GlobalPreferences {
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
         useSourceColors = new SimpleBooleanProperty(prefs.getBoolean(USE_SOURCE_COLORS, true));
         useSourceColors.addListener((observable, oldValue, newValue) -> prefs.putBoolean(USE_SOURCE_COLORS, newValue));
+        this.manifest = getManifest();
     }
 
     /**
@@ -172,5 +180,32 @@ public class GlobalPreferences {
         this.useSourceColors.setValue(useSourceColors);
     }
 
+    public String getManifestVersion() {
+        if (manifest != null) {
+            String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
+            for (String key : keys) {
+                String value = manifest.getMainAttributes().getValue(key);
+                if (value != null) {
+                    return value;
+                }
+            }
+        }
+        return "unknown";
+    }
 
+
+    private Manifest getManifest() {
+        String className = this.getClass().getSimpleName() + ".class";
+        String classPath = this.getClass().getResource(className).toString();
+        if (classPath.startsWith("jar")) {
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+            try {
+                return new Manifest(new URL(manifestPath).openStream());
+            } catch (IOException e) {
+                logger.error("Error extracting manifest from jar", e);
+            }
+        }
+        logger.warn("Could not extract MANIFEST from jar!");
+        return null;
+    }
 }
