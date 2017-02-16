@@ -1,11 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
     <version>0.3.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <url>http://www.fthevenet.eu/binjr</url>
+    <properties>
+        <github.global.server>github</github.global.server>
+    </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
         <url>https://github.com/fthevenet/binjr</url>
@@ -50,6 +54,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <!-- Release -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -59,7 +64,7 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
-
+                    <releaseProfiles>release</releaseProfiles>
                     <checkModificationExcludes>
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
@@ -73,44 +78,73 @@
                 </dependencies>
             </plugin>
 
+            <plugin>
+                <groupId>de.jutzig</groupId>
+                <artifactId>github-release-plugin</artifactId>
+                <version>1.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <description>binjr preview v${project.version}</description>
+                    <releaseName>binjr preview v${project.version}</releaseName>
+                    <tag>${project.version}</tag>
+
+                    <!-- If your project has additional artifacts, such as ones produced by
+                         the maven-assembly-plugin, you can define the following
+                         (requires version 1.1.1 of the plugin or higher): -->
+                    <!--<fileSets>-->
+                        <!--<fileSet>-->
+                            <!--<directory>${project.build.directory}</directory>-->
+                            <!--<includes>-->
+                                <!--<include>${project.artifactId}*.tar.gz</include>-->
+                                <!--<include>${project.artifactId}*.zip</include>-->
+                            <!--</includes>-->
+                        <!--</fileSet>-->
+                    <!--</fileSets>-->
+                </configuration>
+            </plugin>
+
 
             <!--<plugin>-->
-                <!--<groupId>com.zenjava</groupId>-->
-                <!--<artifactId>javafx-maven-plugin</artifactId>-->
-                <!--<version>8.7.0</version>-->
-                <!--<configuration>-->
-                    <!--<mainClass>eu.fthevenet.NOTICE.Main</mainClass>-->
-                    <!--<vendor>Frederic Thevenet</vendor>-->
-                    <!--<bundleType>IMAGE</bundleType>-->
-                    <!--<nativeReleaseVersion>${project.version}</nativeReleaseVersion>-->
-                    <!--<appName>${project.build.finalName}</appName>-->
-                    <!--<icon>${project.build.finalName}.ico</icon>-->
+            <!--<groupId>com.zenjava</groupId>-->
+            <!--<artifactId>javafx-maven-plugin</artifactId>-->
+            <!--<version>8.7.0</version>-->
+            <!--<configuration>-->
+            <!--<mainClass>eu.fthevenet.NOTICE.Main</mainClass>-->
+            <!--<vendor>Frederic Thevenet</vendor>-->
+            <!--<bundleType>IMAGE</bundleType>-->
+            <!--<nativeReleaseVersion>${project.version}</nativeReleaseVersion>-->
+            <!--<appName>${project.build.finalName}</appName>-->
+            <!--<icon>${project.build.finalName}.ico</icon>-->
 
-                    <!--<manifestAttributes>-->
-                        <!--<SplashScreen-Image>images/logo_med.png</SplashScreen-Image>-->
+            <!--<manifestAttributes>-->
+            <!--<SplashScreen-Image>images/logo_med.png</SplashScreen-Image>-->
 
-                    <!--</manifestAttributes>-->
-                    <!--<bundleArguments>-->
-                        <!--<runtime />-->
-                    <!--</bundleArguments>-->
-                <!--</configuration>-->
-                <!--<executions>-->
-                    <!--<execution>-->
-                        <!--&lt;!&ndash; required before build-native &ndash;&gt;-->
-                        <!--<id>fromUrl-jfxjar</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>build-jar</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                    <!--<execution>-->
-                        <!--<id>fromUrl-native</id>-->
-                        <!--<phase>package</phase>-->
-                        <!--<goals>-->
-                            <!--<goal>build-native</goal>-->
-                        <!--</goals>-->
-                    <!--</execution>-->
-                <!--</executions>-->
+            <!--</manifestAttributes>-->
+            <!--<bundleArguments>-->
+            <!--<runtime />-->
+            <!--</bundleArguments>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--&lt;!&ndash; required before build-native &ndash;&gt;-->
+            <!--<id>fromUrl-jfxjar</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>build-jar</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--<execution>-->
+            <!--<id>fromUrl-native</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>build-native</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
             <!--</plugin>-->
 
         </plugins>
@@ -143,4 +177,10 @@
             <version>2.8.0</version>
         </dependency>
     </dependencies>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <url>https://api.bintray.com/maven/{bintray-user}/{bintray-repo}/{package}</url>
+        </repository>
+    </distributionManagement>
 </project>
