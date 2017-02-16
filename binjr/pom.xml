@@ -63,7 +63,6 @@
                     <tagNameFormat>v@{project.version}</tagNameFormat>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
-                    <releaseProfiles>release</releaseProfiles>
                     <checkModificationExcludes>
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
@@ -176,10 +175,4 @@
             <version>2.8.0</version>
         </dependency>
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>github</id>
-            <url>https://api.bintray.com/maven/{bintray-user}/{bintray-repo}/{package}</url>
-        </repository>
-    </distributionManagement>
 </project>
