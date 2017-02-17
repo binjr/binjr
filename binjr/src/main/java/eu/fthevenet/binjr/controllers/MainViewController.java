@@ -121,12 +121,12 @@ public class MainViewController implements Initializable {
                 showHorizontalMarker.set(pressed);
                 event.consume();
                 break;
-
-            case SHORTCUT:
+            case CONTROL:
+            case META:
+            case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
                 showVerticalMarker.set(pressed);
                 event.consume();
                 break;
-
             default:
                 //do nothing
         }

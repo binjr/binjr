@@ -4,32 +4,24 @@ import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
-import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
-import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Shape;
-import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
@@ -67,6 +59,8 @@ public class TimeSeriesController implements Initializable {
     private Button backButton;
     @FXML
     private Button forwardButton;
+    @FXML
+    private Button refreshButton;
     @FXML
     private Button resetYButton;
     @FXML
@@ -133,7 +127,7 @@ public class TimeSeriesController implements Initializable {
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
         assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
-
+        assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         globalPrefs = GlobalPreferences.getInstance();
 
         chart.createSymbolsProperty().bindBidirectional(globalPrefs.sampleSymbolsVisibleProperty());
