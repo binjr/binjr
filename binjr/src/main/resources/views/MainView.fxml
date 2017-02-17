@@ -33,7 +33,7 @@
                         <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" accelerator="Shortcut+P" />
+                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" accelerator="Alt+P" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
                     </items>
@@ -58,11 +58,6 @@
                         <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr" />
                     </items>
                 </Menu>
-                <!--<Menu fx:id="debugMenu" mnemonicParsing="false" text="Debug">-->
-                    <!--<items>-->
-                        <!--<MenuItem mnemonicParsing="false" onAction="#handleDumpHistoryAction" text="Dump History"/>-->
-                    <!--</items>-->
-                <!--</Menu>-->
             </menus>
         </MenuBar>
         <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
@@ -71,20 +66,6 @@
                     <children>
                   <TabPane fx:id="sourcesTabPane" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
-                      <!--<Tab text="JRDS:ngwps006">-->
-                        <!--<content>-->
-                          <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">-->
-                                 <!--<children>-->
-                                              <!--<TreeView fx:id="treeview" fixedCellSize="24.0" prefHeight="577.0" prefWidth="297.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />-->
-                                 <!--</children>-->
-                              <!--</AnchorPane>-->
-                        <!--</content>-->
-                      <!--</Tab>-->
-                      <!--<Tab text="+">-->
-                        <!--<content>-->
-                          <!--<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />-->
-                        <!--</content>-->
-                      <!--</Tab>-->
                     </tabs>
                   </TabPane>
                     </children>
