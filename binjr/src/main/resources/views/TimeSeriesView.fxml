@@ -22,15 +22,18 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
-            <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0">
+            <HBox alignment="CENTER_LEFT">
                 <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="30.0" maxWidth="30.0" minHeight="30.0" minWidth="30.0" mnemonicParsing="false" onAction="#handleHistoryBack" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
                     <HBox.margin>
                         <Insets bottom="10.0" left="10.0" top="10.0" />
@@ -69,7 +72,7 @@
                         </ImageView>
                     </graphic>
                     <font>
-                        <Font size="1.0" />
+                        <Font size="10.0" />
                     </font>
                     <tooltip>
                         <Tooltip text="Refresh">
@@ -84,44 +87,52 @@
                         <Insets left="10.0" />
                     </HBox.margin>
                 </Separator>
-                <VBox alignment="CENTER_LEFT">
-                    <HBox alignment="CENTER_LEFT" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
-                        <VBox.margin>
-                            <Insets bottom="5.0" left="5.0" right="1.0" top="5.0" />
-                        </VBox.margin>
-                        <Label text="From:" />
-                        <ZonedDateTimePicker fx:id="startDate" prefHeight="25.0" prefWidth="150.0">
+            <GridPane hgap="10.0" vgap="10.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                  <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
+                  <ColumnConstraints hgrow="SOMETIMES" />
+                  <ColumnConstraints hgrow="SOMETIMES" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints vgrow="SOMETIMES" />
+                <RowConstraints vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                        <ZonedDateTimePicker fx:id="startDate" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1">
                             <tooltip>
                                 <Tooltip text="Lower bound for the X axis" />
                             </tooltip>
                         </ZonedDateTimePicker>
-                        <Separator orientation="VERTICAL" prefHeight="200.0" />
-                        <Label prefHeight="17.0" prefWidth="26.0" text="Min:" />
-                        <TextField fx:id="yMinRange" editable="true" prefHeight="25.0" prefWidth="130.0">
-                            <tooltip>
-                                <Tooltip text="Lower bound for the Y axis" />
-                            </tooltip>
-                        </TextField>
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" fillHeight="false" spacing="10.0" VBox.vgrow="NEVER">
-                        <VBox.margin>
-                            <Insets bottom="5.0" left="5.0" right="2.0" top="5.0" />
-                        </VBox.margin>
-                        <Label prefHeight="17.0" prefWidth="30.0" text="To:" />
-                        <ZonedDateTimePicker fx:id="endDate" prefHeight="25.0" prefWidth="150.0">
+                        <ZonedDateTimePicker fx:id="endDate" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the X axis" />
                             </tooltip>
                         </ZonedDateTimePicker>
-                        <Separator orientation="VERTICAL" prefHeight="200.0" />
-                        <Label text="Max:" />
-                        <TextField fx:id="yMaxRange" editable="true" prefHeight="25.0" prefWidth="130.0">
+                        <Label text="From:" />
+                        <Label prefHeight="17.0" prefWidth="30.0" text="To:" GridPane.rowIndex="1" />
+                        <TextField fx:id="yMinRange" editable="true" prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4">
+                            <tooltip>
+                                <Tooltip text="Lower bound for the Y axis" />
+                            </tooltip>
+                        </TextField>
+                        <TextField fx:id="yMaxRange" editable="true" prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the Y axis" />
                             </tooltip>
                         </TextField>
-                    </HBox>
-                </VBox>
+                       <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="3">
+                           <Label prefHeight="17.0" prefWidth="26.0" text="Min:" />
+                       </HBox>
+                        <Label text="Max:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="2" />
+                  <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+               </children>
+               <HBox.margin>
+                  <Insets bottom="5.0" left="5.0" top="5.0" />
+               </HBox.margin>
+            </GridPane>
                 <VBox alignment="CENTER_LEFT" HBox.hgrow="NEVER">
                     <Polyline stroke="#b5b5b5" strokeType="INSIDE">
                         <points>
@@ -163,9 +174,14 @@
                             <Double fx:value="0.0" />
                         </points>
                     </Polyline>
+               <HBox.margin>
+                  <Insets left="2.0" />
+               </HBox.margin>
                 </VBox>
                 <Separator orientation="VERTICAL" prefHeight="200.0" />
-                <VBox alignment="CENTER_LEFT" prefHeight="200.0" prefWidth="100.0" spacing="10.0" />
+            <VBox.margin>
+               <Insets />
+            </VBox.margin>
             </HBox>
         </VBox>
         <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
