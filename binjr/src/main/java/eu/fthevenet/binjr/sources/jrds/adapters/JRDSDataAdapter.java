@@ -1,8 +1,6 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
-import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
@@ -10,6 +8,8 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
+import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -147,7 +147,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     @Override
     public DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvParser<Double>(getEncoding(), SEPARATOR,
+        return new CsvParser<>(getEncoding(), SEPARATOR,
                 DoubleTimeSeries::new,
                 s -> {
                     Double val = Double.parseDouble(s);
@@ -227,7 +227,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         });
     }
 
-    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException{
+    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
@@ -237,13 +237,23 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
 
         return doHttpGet(requestUrl, response -> {
             int status = response.getStatusLine().getStatusCode();
+            if (status == 404) {
+                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
+                // so we're falling back to recovering the datastore name from the csv file provided by
+                // the download service.
+                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
+                try {
+                    return getGraphDescriptorLegacy(id);
+                } catch (Exception e) {
+                    throw new IOException("", e);
+                }
+            }
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
                     try {
                         return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw new IOException("", e);
                     }
                 }
@@ -253,11 +263,9 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                 throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
             }
         });
-
-   //     return null;
     }
 
-    private String[] getColumnDataStores(String id) throws DataAdapterException {
+    private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             getData(id, now.minusSeconds(120), now, out);
@@ -271,7 +279,14 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                     if (headers.length < 1){
                         throw new DataAdapterException("Could not to retrieve data store names for graph id=" + id + ": header line in csv is blank.");
                     }
-                    return Arrays.copyOfRange(headers, 1, headers.length);
+                    Graphdesc desc = new Graphdesc();
+                    desc.seriesDescList = new ArrayList<>();
+                    for (int i = 1; i < headers.length; i++) {
+                        Graphdesc.SeriesDesc d = new Graphdesc.SeriesDesc();
+                        d.name = headers[i];
+                        desc.seriesDescList.add(d);
+                    }
+                    return desc;
                 }
             }
         } catch (IOException e) {

@@ -10,7 +10,7 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name="graphdec")
-public class Graphdesc {
+class Graphdesc {
     @XmlElement(name = "name")
     String name;
     @XmlElement(name = "graphName")

@@ -52,7 +52,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
                         (isNullOrEmpty(desc.legend) ?
                                 "???" : desc.legend) : desc.dsName) : desc.name;
 
-        Color c = null;
+        Color c = Color.GRAY;
         try {
             if (desc.color != null) {
                 c = Color.web(desc.color);

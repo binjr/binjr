@@ -4,12 +4,12 @@
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
     <name>binjr</name>
-    <url>http://www.fthevenet.eu/binjr</url>
+    <url>http://www.binjr.eu</url>
     <version>0.3.9-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
-        <url>http://www.fthevenet.eu/binjr</url>
+        <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
         <github.global.server>github</github.global.server>
@@ -177,7 +177,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.2</version>
+            <version>4.5.3</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>
