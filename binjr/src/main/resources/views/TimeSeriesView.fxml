@@ -100,24 +100,24 @@
                 <RowConstraints vgrow="SOMETIMES" />
               </rowConstraints>
                <children>
-                        <ZonedDateTimePicker fx:id="startDate" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1">
+                        <ZonedDateTimePicker fx:id="startDate" GridPane.columnIndex="1">
                             <tooltip>
                                 <Tooltip text="Lower bound for the X axis" />
                             </tooltip>
                         </ZonedDateTimePicker>
-                        <ZonedDateTimePicker fx:id="endDate" prefHeight="25.0" prefWidth="150.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <ZonedDateTimePicker fx:id="endDate" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the X axis" />
                             </tooltip>
                         </ZonedDateTimePicker>
                         <Label text="From:" />
                         <Label text="To:" GridPane.rowIndex="1" />
-                        <TextField fx:id="yMinRange" editable="true" prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4">
+                        <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="4">
                             <tooltip>
                                 <Tooltip text="Lower bound for the Y axis" />
                             </tooltip>
                         </TextField>
-                        <TextField fx:id="yMaxRange" editable="true" prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                        <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the Y axis" />
                             </tooltip>
