@@ -8,31 +8,45 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<DialogPane prefHeight="216.0" prefWidth="297.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+<DialogPane xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
    <content>
-      <AnchorPane prefHeight="205.0" prefWidth="297.0">
+      <AnchorPane>
          <children>
             <Accordion fx:id="accordionPane" layoutX="40.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <panes>
-                <TitledPane fx:id="chartPrefsPane" text="Chart preferences">
+                <TitledPane fx:id="chartPrefsPane" animated="false" text="Chart preferences">
                   <content>
                     <AnchorPane>
                            <children>
-                              <CheckBox fx:id="showChartSymbols" layoutX="14.0" layoutY="42.0" mnemonicParsing="false" text="Show sample symbols" />
-                              <CheckBox fx:id="enableChartAnimation" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" text="Enable animation" />
-                               <CheckBox fx:id="useSourceColors" layoutX="14.0" layoutY="70.0" mnemonicParsing="false" text="Use source colors" />
+                              <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <CheckBox fx:id="enableChartAnimation" mnemonicParsing="false" text="Enable animation" />
+                                    <CheckBox fx:id="showChartSymbols" mnemonicParsing="false" text="Show sample symbols" />
+                                     <CheckBox fx:id="useSourceColors" mnemonicParsing="false" text="Use source colors" />
+                                 </children>
+                              </VBox>
                            </children>
                         </AnchorPane>
                   </content>
                 </TitledPane>
-                <TitledPane fx:id="reductionPrefsPane" text="Sample reduction">
+                <TitledPane fx:id="reductionPrefsPane" animated="false" text="Sample reduction">
                   <content>
                     <AnchorPane>
                            <children>
-                              <TextField fx:id="downSamplingThreshold" layoutX="192.0" layoutY="42.0" prefHeight="25.0" prefWidth="63.0" text="1000" />
-                              <CheckBox fx:id="enableDownSampling" layoutX="14.0" layoutY="14.0" mnemonicParsing="false" selected="true" text="Enable sample reduction" />
-                              <Label fx:id="maxSampleLabel" layoutX="14.0" layoutY="46.0" text="Maximum number of samples:" />
+                              <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                 <children>
+                                    <CheckBox fx:id="enableDownSampling" mnemonicParsing="false" selected="true" text="Enable sample reduction" />
+                                    <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                       <children>
+                                          <Label fx:id="maxSampleLabel" text="Maximum number of samples:" />
+                                          <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="63.0" text="1000" />
+                                       </children>
+                                    </HBox>
+                                 </children>
+                              </VBox>
                            </children>
                         </AnchorPane>
                   </content>

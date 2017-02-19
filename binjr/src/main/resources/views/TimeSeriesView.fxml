@@ -30,7 +30,7 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
@@ -90,7 +90,7 @@
             <GridPane hgap="10.0" vgap="10.0">
               <columnConstraints>
                 <ColumnConstraints hgrow="SOMETIMES" />
-                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" />
                   <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
                   <ColumnConstraints hgrow="SOMETIMES" />
                   <ColumnConstraints hgrow="SOMETIMES" />
@@ -111,7 +111,7 @@
                             </tooltip>
                         </ZonedDateTimePicker>
                         <Label text="From:" />
-                        <Label prefHeight="17.0" prefWidth="30.0" text="To:" GridPane.rowIndex="1" />
+                        <Label text="To:" GridPane.rowIndex="1" />
                         <TextField fx:id="yMinRange" editable="true" prefHeight="25.0" prefWidth="130.0" GridPane.columnIndex="4">
                             <tooltip>
                                 <Tooltip text="Lower bound for the Y axis" />
@@ -122,9 +122,7 @@
                                 <Tooltip text="Upper bound for the Y axis" />
                             </tooltip>
                         </TextField>
-                       <HBox alignment="CENTER_LEFT" spacing="10.0" GridPane.columnIndex="3">
-                           <Label prefHeight="17.0" prefWidth="26.0" text="Min:" />
-                       </HBox>
+                        <Label text="Min:" GridPane.columnIndex="3" />
                         <Label text="Max:" GridPane.columnIndex="3" GridPane.rowIndex="1" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="2" />
                   <Separator orientation="VERTICAL" prefHeight="200.0" GridPane.columnIndex="2" GridPane.rowIndex="1" />

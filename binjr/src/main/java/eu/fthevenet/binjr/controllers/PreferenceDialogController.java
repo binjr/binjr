@@ -55,6 +55,14 @@ public class PreferenceDialogController implements Initializable {
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
 
+        accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
+            Platform.runLater( () -> {
+                p.requestLayout();
+                p.getScene().getWindow().sizeToScene();
+            } );
+        } ));
+
+
         Platform.runLater(()-> {
             if (accordionPane.getPanes() != null
                     && accordionPane.getPanes().size() > 0
