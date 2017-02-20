@@ -5,7 +5,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>0.3.13-SNAPSHOT</version>
+    <version>0.4.0</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -18,7 +18,7 @@
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
         <url>https://github.com/fthevenet/binjr</url>
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.4.0</tag>
     </scm>
     <build>
         <finalName>${project.name}</finalName>
