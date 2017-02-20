@@ -1,20 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.ButtonType?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.control.Hyperlink?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollBar?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.Pane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.TextFlow?>
 
-<DialogPane fx:id="aboutRoot" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.AboutBoxController">
+<DialogPane fx:id="aboutRoot" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.AboutBoxController">
     <header>
       <AnchorPane minWidth="0.0">
          <children>
@@ -23,45 +28,73 @@
                   <Image url="@../images/logo_med.png" />
                </image>
             </ImageView>
-            <Label fx:id="versionLabel" layoutX="448.0" layoutY="202.0" text="version 0.0.0" textFill="WHITE" />
+            <Label layoutX="5.0" layoutY="283.0" text="Copyright © 2017 Frederic Thevenet" textFill="#3a879a" AnchorPane.bottomAnchor="2.0" AnchorPane.leftAnchor="10.0" />
+            <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="202.0">
+               <children>
+                  <Label fx:id="versionLabel" text="version 0.0.0" textFill="WHITE">
+                     <VBox.margin>
+                        <Insets left="4.0" />
+                     </VBox.margin>
+                  </Label>
+                  <Hyperlink fx:id="binjrUrl" graphicTextGap="0.0" onAction="#goTobinjrDotEu" prefHeight="23.0" text="www.binjr.eu" />
+               </children>
+            </VBox>
          </children></AnchorPane>
     </header>
     <buttonTypes>
         <ButtonType fx:constant="CLOSE" />
     </buttonTypes>
-   <expandableContent>
-      <Pane>
-         <children>
-            <TabPane prefHeight="200.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE">
-              <tabs>
-                <Tab text="Untitled Tab 1">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-                <Tab text="Untitled Tab 2">
-                  <content>
-                    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-                  </content>
-                </Tab>
-              </tabs>
-            </TabPane>
-         </children>
-      </Pane>
-   </expandableContent>
    <content>
-      <GridPane>
-        <columnConstraints>
-          <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
-        </columnConstraints>
-        <rowConstraints>
-          <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-        </rowConstraints>
-         <children>
-            <Label text="Copyright © 2017 Frederic Thevenet" textFill="#3a879a" />
-            <Hyperlink fx:id="binjrUrl" graphicTextGap="0.0" onAction="#goTobinjrDotEu" text="www.binjr.eu" GridPane.columnIndex="1" />
-         </children>
-      </GridPane>
+      <Accordion fx:id="detailsPane" prefWidth="600.0">
+        <panes>
+          <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT" text="System Information">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <ListView fx:id="sysInfoListView" prefHeight="200.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                        <TableView fx:id="sysInfoListTable" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                          <columns>
+                            <TableColumn prefWidth="140.0" text="C1">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="key" />
+                                </cellValueFactory>
+                            </TableColumn>
+                            <TableColumn prefWidth="400.0" text="C2">
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="value" />
+                                </cellValueFactory>
+                            </TableColumn>
+                          </columns>
+                        </TableView>
+                     </children>
+                  </AnchorPane>
+            </content>
+               <graphic>
+                  <HBox>
+                     <padding>
+                        <Insets left="10.0" />
+                     </padding>
+                  </HBox>
+               </graphic>
+          </TitledPane>
+          <TitledPane fx:id="licensePane" animated="false" text="License">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <TextFlow fx:id="licenseTextFlow" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                     </children>
+                  </AnchorPane>
+            </content>
+          </TitledPane>
+          <TitledPane fx:id="thirdPartiesPane" animated="false" text="Third party Components">
+            <content>
+              <AnchorPane minHeight="0.0" minWidth="0.0">
+                     <children>
+                        <TextFlow fx:id="thirdPartiesTextFlow" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                     </children></AnchorPane>
+            </content>
+          </TitledPane>
+        </panes>
+      </Accordion>
    </content>
 </DialogPane>

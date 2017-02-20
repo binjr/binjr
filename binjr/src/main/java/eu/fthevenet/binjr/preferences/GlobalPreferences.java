@@ -8,6 +8,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
 
@@ -193,6 +195,23 @@ public class GlobalPreferences {
         return "unknown";
     }
 
+    public List<SysInfoProperty> getSysInfoProperties() {
+        Runtime rt = Runtime.getRuntime();
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
+        double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
+
+        List<SysInfoProperty> sysInfo = new ArrayList<>();
+        sysInfo.add(new SysInfoProperty("binjr version", getManifestVersion()));
+        sysInfo.add(new SysInfoProperty("Java version", System.getProperty("java.version")));
+        sysInfo.add(new SysInfoProperty("Java vendor",System.getProperty("java.vendor") ));
+        sysInfo.add(new SysInfoProperty("Java VM name",  System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
+        sysInfo.add(new SysInfoProperty("Java home", System.getProperty("java.home")));
+        sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
+        sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
+        sysInfo.add(new SysInfoProperty("JVM Heap Max size",  String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
+        sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
+        return sysInfo;
+    }
 
     private Manifest getManifest() {
         String className = this.getClass().getSimpleName() + ".class";
