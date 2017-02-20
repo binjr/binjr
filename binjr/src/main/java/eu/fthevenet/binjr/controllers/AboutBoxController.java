@@ -23,7 +23,6 @@ import java.io.*;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.Charset;
 import java.util.*;
 
 /**
@@ -62,12 +61,12 @@ public class AboutBoxController implements Initializable {
     private TitledPane licensePane;
 
     @FXML
-    private TextFlow thirdPartiesTextFlow;
+    private TextFlow acknowledgementTextFlow;
 
     @FXML private TextFlow licenseTextFlow;
 
     @FXML
-    private TitledPane thirdPartiesPane;
+    private TitledPane acknowledgementPane;
 
     @FXML
     private void handleCloseButtonAction(ActionEvent event) {
@@ -84,15 +83,15 @@ public class AboutBoxController implements Initializable {
         assert sysInfoPane != null : "fx:id\"sysInfoPane\" was not injected!";
         assert sysInfoListTable != null : "fx:id\"sysInfoListTable\" was not injected!";
         assert licensePane != null : "fx:id\"licensePane\" was not injected!";
-        assert thirdPartiesPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
+        assert acknowledgementPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
         assert licenseTextFlow != null : "fx:id\"licenseTextFlow\" was not injected!";
-        assert thirdPartiesTextFlow != null : "fx:id\"thirdPartiesTextFlow\" was not injected!";
+        assert acknowledgementTextFlow != null : "fx:id\"acknowledgementTextFlow\" was not injected!";
 
 
         try {
             BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_license.txt").openStream(), "utf-8"));
             Text binjrTxt = new Text("binjr\n");//
-            binjrTxt.setFont(Font.font("Bauhaus 93", FontWeight.BOLD,  16));
+            binjrTxt.setFont(Font.font("Bauhaus 93", FontWeight.BOLD,  18));
             Text noticeTxt = new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2+"\n")));
 
             licenseTextFlow.getChildren().add(binjrTxt);
@@ -101,11 +100,11 @@ public class AboutBoxController implements Initializable {
             logger.error("Failed to get resource \"/text/about_license.txt\"", e);
         }
         try {
-            BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_thirdParties.txt").openStream(), "utf-8"));
-            thirdPartiesTextFlow.getChildren().add(new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2+"\n"))));
+            BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_Acknowledgement.txt").openStream(), "utf-8"));
+            acknowledgementTextFlow.getChildren().add(new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2+"\n"))));
 
         } catch (IOException e) {
-            logger.error("Failed to get resource \"/text/about_thirdParties.txt\"", e);
+            logger.error("Failed to get resource \"/text/about_Acknowledgement.txt\"", e);
         }
         Platform.runLater( () -> {
                     Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
