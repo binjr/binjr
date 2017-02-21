@@ -3,6 +3,8 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.controls.ColorUtils;
+import eu.fthevenet.binjr.controls.ContextMenuTableViewCell;
+import eu.fthevenet.binjr.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
@@ -72,6 +74,12 @@ public class TimeSeriesController implements Initializable {
     @FXML
     private TableColumn<TimeSeries<Double>, String> colorColumn;
 
+ //   @FXML
+ //   private MenuItem removeSeriesMenuItem;
+
+    @FXML
+    private ContextMenu seriesListMenu;
+
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
     private Set<TimeSeriesBinding<Double>> seriesBindings = new HashSet<>();
@@ -128,6 +136,9 @@ public class TimeSeriesController implements Initializable {
         assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
         assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
+      //  assert removeSeriesMenuItem != null : "fx:id\"removeSeriesMenuItem\" was not injected!";
+//        assert seriesListMenu != null : "fx:id\"seriesListMenu\" was not injected!";
+
         globalPrefs = GlobalPreferences.getInstance();
 
         chart.createSymbolsProperty().bindBidirectional(globalPrefs.sampleSymbolsVisibleProperty());
@@ -142,6 +153,14 @@ public class TimeSeriesController implements Initializable {
         ZonedDateTime now = ZonedDateTime.now();
         this.currentState = new XYChartViewState(now.minus(24, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
+
+        seriesTable.getColumns().forEach(c->{
+            c.setCellFactory(ContextMenuTableViewCell.forTableColumn(new ContextMenu(new MenuItem("Foo"), new MenuItem("bar"))));
+        });
+
+//        seriesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//                removeSeriesMenuItem.setDisable((newValue == null));
+//        });
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
@@ -176,12 +195,7 @@ public class TimeSeriesController implements Initializable {
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
-                TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
-                if (current != null) {
-                    seriesTable.getItems().remove(current);
-                    seriesBindings.remove(current.getBinding());
-                    invalidate(false, true, true);
-                }
+                removeSelectedBinding();
             }
         });
     }
@@ -194,6 +208,15 @@ public class TimeSeriesController implements Initializable {
        else{
            logger.warn("Binding " + binding.toString() + " is already present in current set");
        }
+    }
+
+    public void removeSelectedBinding(){
+        TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
+        if (current != null) {
+            seriesTable.getItems().remove(current);
+            seriesBindings.remove(current.getBinding());
+            invalidate(false, true, true);
+        }
     }
     //endregion
 
@@ -331,6 +354,10 @@ public class TimeSeriesController implements Initializable {
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {
             Dialogs.displayException("Failed to retrieve data from source", e ,root);
         }
+    }
+
+    public void handleRemoveSeries(ActionEvent actionEvent) {
+       removeSelectedBinding();
     }
 
     /**

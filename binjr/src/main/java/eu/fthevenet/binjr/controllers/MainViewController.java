@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.controls.ContextMenuTreeViewCell;
 import eu.fthevenet.binjr.controls.EditableTab;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
@@ -20,13 +21,10 @@ import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
-import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.ToggleSwitch;
-import org.controlsfx.dialog.ExceptionDialog;
 
 import java.io.IOException;
 import java.net.URL;
@@ -66,6 +64,7 @@ public class MainViewController implements Initializable {
     private CheckMenuItem showYmarkerMenuItem;
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
+    private ContextMenu treeContextMenu;
 
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
@@ -93,6 +92,8 @@ public class MainViewController implements Initializable {
 
     private TreeView<TimeSeriesBinding> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding> treeView = new TreeView<>();
+
+        treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu()));
         try {
             TreeItem<TimeSeriesBinding> root = dp.getBindingTree();
 
@@ -199,7 +200,9 @@ public class MainViewController implements Initializable {
                 TreeView<TimeSeriesBinding> treeView;
                 @SuppressWarnings("unchecked")
                 DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
+
                 treeView = buildTreeViewForTarget(da);
+               // treeView.setContextMenu(getTreeViewContextMenu());
                 newValue.setContent(treeView);
             }
         });
@@ -209,6 +212,16 @@ public class MainViewController implements Initializable {
         if (selectedTabController != null) {
             selectedTabController.invalidate(false, true, true);
         }
+    }
+
+    private ContextMenu getTreeViewContextMenu(){
+        if (treeContextMenu == null) {
+            treeContextMenu = new ContextMenu(
+                    new MenuItem("Add to current worksheet"),
+                    new MenuItem("Add to new worksheet")
+            );
+        }
+        return treeContextMenu;
     }
 
     @FXML
