@@ -87,8 +87,6 @@
                         </Label>
                     </children>
                 </Pane>
-                <ToggleSwitch fx:id="hMarkerToggle" contentDisplay="RIGHT" prefHeight="18.0" prefWidth="45.0" text="x" textAlignment="RIGHT" />
-                <ToggleSwitch fx:id="vMarkerToggle" prefHeight="18.0" prefWidth="43.0" text="y" />
             </children>
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />

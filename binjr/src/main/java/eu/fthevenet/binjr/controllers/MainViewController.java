@@ -5,6 +5,7 @@ import eu.fthevenet.binjr.controls.EditableTab;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
 import eu.fthevenet.binjr.dialogs.GetDataAdapterDialog;
@@ -28,9 +29,7 @@ import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -55,16 +54,19 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem newTab;
     @FXML
-    private ToggleSwitch hMarkerToggle;
-    @FXML
-    private ToggleSwitch vMarkerToggle;
-    @FXML
     private CheckMenuItem showXmarkerMenuItem;
     @FXML
     private CheckMenuItem showYmarkerMenuItem;
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private ContextMenu treeContextMenu;
+    //private final ContextMenu treeContextMenu;
+
+    private final Map<TimeSeriesController, Worksheet> worksheetMap;
+
+    public MainViewController(){
+        super();
+        worksheetMap = new HashMap<>();
+    }
 
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
@@ -90,28 +92,42 @@ public class MainViewController implements Initializable {
 
     private Map<Tab, TimeSeriesController> seriesControllers = new HashMap<>();
 
-    private TreeView<TimeSeriesBinding> buildTreeViewForTarget(DataAdapter dp) {
-        TreeView<TimeSeriesBinding> treeView = new TreeView<>();
+    private TreeView<TimeSeriesBinding<Double>> buildTreeViewForTarget(DataAdapter dp) {
+        TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
 
-        treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu()));
+        treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView)));
         try {
-            TreeItem<TimeSeriesBinding> root = dp.getBindingTree();
+            TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
 
             root.setExpanded(true);
 
             treeView.setRoot(root);
-            treeView.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2) {
-                    TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
-                    if (selectedTabController != null && item !=null) {
-                        selectedTabController.addBinding(item.getValue());
-                    }
-                }
-            });
+//            treeView.setOnMouseClicked(event -> {
+//                if (event.getClickCount() == 2) {
+//                    TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+//                    if (selectedTabController != null && item !=null) {
+//                        List<TimeSeriesBinding> bindings = new ArrayList<>();
+//                        getAllBindingsFromBranch(item, bindings);
+//
+//                        selectedTabController.addBinding(item.getValue());
+//                    }
+//                }
+//            });
         } catch (DataAdapterException e) {
            Dialogs.displayException("An error occurred while building the tree from " + (dp != null ? dp.getSourceName() : "null"), e, root);
         }
         return treeView;
+    }
+
+    private<T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings){
+        if(  branch.getChildren().size() > 0) {
+            for (TreeItem<T> t : branch.getChildren()) {
+                getAllBindingsFromBranch(t, bindings);
+            }
+        }
+        else{
+            bindings.add(branch.getValue());
+        }
     }
 
     private TimeSeriesController selectedTabController;
@@ -142,8 +158,6 @@ public class MainViewController implements Initializable {
 
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-        vMarkerToggle.selectedProperty().bindBidirectional(showHorizontalMarker);
-        hMarkerToggle.selectedProperty().bindBidirectional(showVerticalMarker);
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
@@ -163,14 +177,16 @@ public class MainViewController implements Initializable {
                         // Store the controllers
                         TimeSeriesController current = fXMLLoader.getController();
                         selectedTabController = current;
+                        worksheetMap.put(current, new Worksheet("New worksheet(" + nbSeries.getAndIncrement() + ")"));
                         // Init time series controller
                         // TODO clean-up initialization of timeSeriescontrollers
                         current.setMainViewController(MainViewController.this);
-                        current.getCrossHair().horizontalMarkerVisibleProperty().bind(showHorizontalMarker);
-                        current.getCrossHair().verticalMarkerVisibleProperty().bind(showVerticalMarker);
+                        current.getCrossHair().horizontalMarkerVisibleProperty().bindBidirectional(showHorizontalMarker);
+                        current.getCrossHair().verticalMarkerVisibleProperty().bindBidirectional(showVerticalMarker);
                         seriesControllers.put(newValue, current);
                         // add "+" tab
-                        ((Label) newValue.getGraphic()).setText("New worksheet(" + nbSeries.getAndIncrement() + ")");
+                        //((Label) newValue.getGraphic()).setText(worksheetMap.get(current).getName());
+                        ((EditableTab)newValue).nameProperty().bindBidirectional(worksheetMap.get(current).nameProperty());
                         seriesTabPane.getTabs().add(new EditableTab("+"));
 
                     } catch (IOException ex) {
@@ -197,7 +213,7 @@ public class MainViewController implements Initializable {
                 return;
             }
             if (newValue.getContent() == null) {
-                TreeView<TimeSeriesBinding> treeView;
+                TreeView<TimeSeriesBinding<Double>> treeView;
                 @SuppressWarnings("unchecked")
                 DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
 
@@ -214,14 +230,22 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getTreeViewContextMenu(){
-        if (treeContextMenu == null) {
-            treeContextMenu = new ContextMenu(
-                    new MenuItem("Add to current worksheet"),
-                    new MenuItem("Add to new worksheet")
-            );
-        }
-        return treeContextMenu;
+    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView){
+        MenuItem addToCurrent = new MenuItem("Add to current worksheet");
+        addToCurrent.setOnAction(event -> {
+            TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+            if (selectedTabController != null && item !=null) {
+                List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                getAllBindingsFromBranch(item, bindings);
+
+                selectedTabController.addBindings(bindings);
+            }
+        });
+        MenuItem addToNew = new MenuItem("Add to new worksheet");
+        addToNew.setOnAction(event -> {
+
+        });
+        return new ContextMenu(addToCurrent, addToNew);
     }
 
     @FXML
@@ -249,5 +273,9 @@ public class MainViewController implements Initializable {
                 sourcesTabPane.getSelectionModel().select(newTab);
         });
 
+    }
+
+    public Map<TimeSeriesController, Worksheet> getWorksheetMap() {
+        return worksheetMap;
     }
 }

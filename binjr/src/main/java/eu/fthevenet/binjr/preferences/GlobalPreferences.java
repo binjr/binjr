@@ -3,6 +3,7 @@ package eu.fthevenet.binjr.preferences;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,6 +27,7 @@ public class GlobalPreferences {
     private static final String DOWN_SAMPLING_ENABLED = "downSamplingEnabled";
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String USE_SOURCE_COLORS = "useSourceColors";
+    public static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private Property<Boolean> downSamplingEnabled;
     private SimpleIntegerProperty downSamplingThreshold;
     private Property<Boolean> sampleSymbolsVisible;
@@ -33,6 +35,7 @@ public class GlobalPreferences {
     private Preferences prefs;
     private Property<Boolean> useSourceColors;
     private final Manifest manifest;
+    private Property<String> mostRecentSaveFolder;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -40,6 +43,7 @@ public class GlobalPreferences {
 
     private GlobalPreferences() {
         prefs = Preferences.userRoot().node(BINJR_GLOBAL);
+        mostRecentSaveFolder =  new SimpleStringProperty(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
         downSamplingEnabled = new SimpleBooleanProperty(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold = new SimpleIntegerProperty(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 1500));
@@ -180,6 +184,18 @@ public class GlobalPreferences {
 
     public void setUseSourceColors(Boolean useSourceColors) {
         this.useSourceColors.setValue(useSourceColors);
+    }
+
+    public String getMostRecentSaveFolder() {
+        return mostRecentSaveFolder.getValue();
+    }
+
+    public Property<String> mostRecentSaveFolderProperty() {
+        return mostRecentSaveFolder;
+    }
+
+    public void setMostRecentSaveFolder(String mostRecentSaveFolder) {
+        this.mostRecentSaveFolder.setValue(mostRecentSaveFolder);
     }
 
     public String getManifestVersion() {

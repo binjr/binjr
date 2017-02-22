@@ -4,17 +4,18 @@ import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ContextMenuTableViewCell;
-import eu.fthevenet.binjr.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -22,13 +23,18 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -73,9 +79,13 @@ public class TimeSeriesController implements Initializable {
     private TableColumn<TimeSeries<Double>, String> sourceColumn;
     @FXML
     private TableColumn<TimeSeries<Double>, String> colorColumn;
+    @FXML
+    private ToggleButton vCrosshair;
+    @FXML
+    private ToggleButton hCrosshair;
 
- //   @FXML
- //   private MenuItem removeSeriesMenuItem;
+    //   @FXML
+    //   private MenuItem removeSeriesMenuItem;
 
     @FXML
     private ContextMenu seriesListMenu;
@@ -136,8 +146,8 @@ public class TimeSeriesController implements Initializable {
         assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
         assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
-      //  assert removeSeriesMenuItem != null : "fx:id\"removeSeriesMenuItem\" was not injected!";
-//        assert seriesListMenu != null : "fx:id\"seriesListMenu\" was not injected!";
+        assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
+        assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
 
@@ -154,13 +164,9 @@ public class TimeSeriesController implements Initializable {
         this.currentState = new XYChartViewState(now.minus(24, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
 
-        seriesTable.getColumns().forEach(c->{
+        seriesTable.getColumns().forEach(c -> {
             c.setCellFactory(ContextMenuTableViewCell.forTableColumn(new ContextMenu(new MenuItem("Foo"), new MenuItem("bar"))));
         });
-
-//        seriesTable.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//                removeSeriesMenuItem.setDisable((newValue == null));
-//        });
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
@@ -175,10 +181,11 @@ public class TimeSeriesController implements Initializable {
             currentState.setSelection(s, true);
         });
 
+        crossHair.horizontalMarkerVisibleProperty().bindBidirectional(hCrosshair.selectedProperty());
+        crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
+
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
-
-        colorColumn.setCellValueFactory(p-> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
-
+        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
         colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
 
             @Override
@@ -186,7 +193,8 @@ public class TimeSeriesController implements Initializable {
                 super.updateItem(item, empty);
                 if (item != null) {
                     setStyle("-fx-background-color:" + item);
-                }else{
+                }
+                else {
                     setStyle("-fx-background-color:" + "transparent");
                 }
             }
@@ -200,17 +208,23 @@ public class TimeSeriesController implements Initializable {
         });
     }
 
-    public void addBinding(TimeSeriesBinding<Double> binding) {
-       if(this.seriesBindings.add(binding)){
-           invalidate(false, true, true);
-           chart.getYAxis().setAutoRanging(true);
-       }
-       else{
-           logger.warn("Binding " + binding.toString() + " is already present in current set");
-       }
+    public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
+        this.seriesBindings.addAll(bindings);
+        invalidate(false, true, true);
+        chart.getYAxis().setAutoRanging(true);
     }
 
-    public void removeSelectedBinding(){
+    public void addBinding(TimeSeriesBinding<Double> binding) {
+        if (this.seriesBindings.add(binding)) {
+            invalidate(false, true, true);
+            chart.getYAxis().setAutoRanging(true);
+        }
+        else {
+            logger.warn("Binding " + binding.toString() + " is already present in current set");
+        }
+    }
+
+    public void removeSelectedBinding() {
         TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
         if (current != null) {
             seriesTable.getItems().remove(current);
@@ -244,8 +258,10 @@ public class TimeSeriesController implements Initializable {
         }
     }
     //region [UI event handlers]
+
     /**
      * Handles user interaction with the "back" button.
+     *
      * @param actionEvent the event
      */
     public void handleHistoryBack(ActionEvent actionEvent) {
@@ -253,7 +269,8 @@ public class TimeSeriesController implements Initializable {
     }
 
     /**
-     *  Handles user interaction with the "forward" button.
+     * Handles user interaction with the "forward" button.
+     *
      * @param actionEvent the event
      */
     public void handleHistoryForward(ActionEvent actionEvent) {
@@ -262,6 +279,7 @@ public class TimeSeriesController implements Initializable {
 
     /**
      * Handles user interaction with the "reset" button.
+     *
      * @param actionEvent the event
      */
     public void handleResetYRangeButton(ActionEvent actionEvent) {
@@ -270,6 +288,7 @@ public class TimeSeriesController implements Initializable {
 
     /**
      * Handles user interaction with the "refresh" button.
+     *
      * @param actionEvent the event
      */
     public void handleRefresh(ActionEvent actionEvent) {
@@ -352,12 +371,39 @@ public class TimeSeriesController implements Initializable {
 //                seriesTable.getItems().add(i);
 //            }
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {
-            Dialogs.displayException("Failed to retrieve data from source", e ,root);
+            Dialogs.displayException("Failed to retrieve data from source", e, root);
         }
     }
 
     public void handleRemoveSeries(ActionEvent actionEvent) {
-       removeSelectedBinding();
+        removeSelectedBinding();
+    }
+
+    public void handleTakeSnapshot(ActionEvent actionEvent) {
+        WritableImage snapImg = root.snapshot(null, null);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save SnapShot");
+//        fileChooser.getExtensionFilters().addAll(
+//                new ExtensionFilter("Text Files", "*.txt"),
+//                new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
+//                new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"),
+//                new ExtensionFilter("All Files", "*.*"));
+        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
+        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            try {
+                ImageIO.write(
+                        SwingFXUtils.fromFXImage(snapImg, null),
+                        "png",
+                        selectedFile);
+            } catch (IOException e) {
+                Dialogs.displayException("Failed to save snapshot to disk", e, root);
+            }
+        }
+    }
+
+    public Worksheet getWorksheet() {
+        return getMainViewController().getWorksheetMap().get(this);
     }
 
     /**

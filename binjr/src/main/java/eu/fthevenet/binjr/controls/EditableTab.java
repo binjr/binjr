@@ -1,13 +1,16 @@
 package eu.fthevenet.binjr.controls;
 
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ObjectPropertyBase;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 
 /**
  * A Tab control that can be renamed on double-click
@@ -17,6 +20,18 @@ import javafx.scene.input.MouseEvent;
 public class EditableTab extends Tab {
     private final Label label;
 
+    public String getName() {
+        return label.textProperty().getValue();
+    }
+
+    public Property<String> nameProperty() {
+        return label.textProperty();
+    }
+
+    public void setName(String tabName) {
+        label.textProperty().setValue(tabName);
+    }
+
     /**
      * Initializes a new instance of the {@link EditableTab} instance.
      *
@@ -25,41 +40,37 @@ public class EditableTab extends Tab {
     public EditableTab(String text) {
         super();
         label = new Label(text);
+        label.textProperty();
 
         setGraphic(label);
 
         final TextField textField = new TextField();
-        label.setOnMouseClicked(new EventHandler<MouseEvent>() {
-            @Override
-            public void handle(MouseEvent event) {
-                if (event.getClickCount() == 2) {
-                    textField.setText(label.getText());
-                    setGraphic(textField);
-                    textField.selectAll();
-                    textField.requestFocus();
-                }
+        label.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                textField.setText(label.getText());
+                setGraphic(textField);
+                textField.selectAll();
+                textField.requestFocus();
             }
         });
 
-        textField.setOnAction(new EventHandler<ActionEvent>() {
-            @Override
-            public void handle(ActionEvent event) {
+        textField.setOnAction(event -> {
+            label.setText(textField.getText());
+            setGraphic(label);
+        });
+
+        Button b = new Button();
+
+        textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
                 label.setText(textField.getText());
                 setGraphic(label);
             }
         });
 
-        textField.focusedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable,
-                                Boolean oldValue, Boolean newValue) {
-                if (!newValue) {
-                    label.setText(textField.getText());
-                    setGraphic(label);
-                }
-            }
-        });
     }
+
+
 
     /**
      * Renames the tab

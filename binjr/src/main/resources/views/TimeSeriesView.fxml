@@ -17,8 +17,8 @@
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
-                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="30.0" maxWidth="30.0" minHeight="30.0" minWidth="30.0" mnemonicParsing="false"
-                        onAction="#handleHistoryBack" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
+                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        mnemonicParsing="false" onAction="#handleHistoryBack" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
                     <HBox.margin>
                         <Insets bottom="10.0" left="10.0" top="10.0"/>
                     </HBox.margin>
@@ -35,8 +35,8 @@
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="30.0" maxWidth="30.0" minHeight="30.0" minWidth="30.0" mnemonicParsing="false"
-                        onAction="#handleHistoryForward" prefHeight="30.0" prefWidth="30.0" text="forward" textAlignment="CENTER">
+                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        mnemonicParsing="false" onAction="#handleHistoryForward" prefHeight="30.0" prefWidth="30.0" text="forward" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="14" fitWidth="14">
                             <Image url="@/images/forwardArrow.png"/>
@@ -50,8 +50,8 @@
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="30.0" maxWidth="30.0" minHeight="30.0" minWidth="30.0" mnemonicParsing="false"
-                        onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="refresh" textAlignment="CENTER">
+                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="refresh" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="14" fitWidth="14">
                             <Image url="@/images/refresh.png"/>
@@ -164,9 +164,58 @@
                     </HBox.margin>
                 </VBox>
                 <Separator orientation="VERTICAL" prefHeight="200.0"/>
+                <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                        onAction="#handleTakeSnapshot" prefHeight="30.0" prefWidth="30.0" text="Snapshot">
+                    <HBox.margin>
+                        <Insets left="5.0"/>
+                    </HBox.margin>
+                    <graphic>
+                        <ImageView fitHeight="14" fitWidth="14">
+                            <Image url="@/images/snapshot.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Take a snapshot of the worksheet">
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
+                <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                              prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+                    <graphic>
+                        <ImageView fitHeight="14" fitWidth="14">
+                            <Image url="@/images/lockCrosshairHorizontal.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Toggle horizontal crosshair marker">
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </ToggleButton>
+                <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                              prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+                    <graphic>
+                        <ImageView fitHeight="14" fitWidth="14">
+                            <Image url="@/images/lockCrosshairVertical.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Toggle vertical crosshair marker">
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </ToggleButton>
                 <VBox.margin>
                     <Insets/>
                 </VBox.margin>
+
             </HBox>
         </VBox>
         <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
@@ -249,11 +298,11 @@
                             </TableColumn>
                         </columns>
                         <!--<contextMenu>-->
-                            <!--<ContextMenu fx:id="seriesListMenu">-->
-                                <!--<items>-->
-                                    <!--<MenuItem fx:id="removeSeriesMenuItem" mnemonicParsing="false" onAction="#handleRemoveSeries" text="Remove series" disable="true"/>-->
-                                <!--</items>-->
-                            <!--</ContextMenu>-->
+                        <!--<ContextMenu fx:id="seriesListMenu">-->
+                        <!--<items>-->
+                        <!--<MenuItem fx:id="removeSeriesMenuItem" mnemonicParsing="false" onAction="#handleRemoveSeries" text="Remove series" disable="true"/>-->
+                        <!--</items>-->
+                        <!--</ContextMenu>-->
                         <!--</contextMenu>-->
                     </TableView>
                 </children>
