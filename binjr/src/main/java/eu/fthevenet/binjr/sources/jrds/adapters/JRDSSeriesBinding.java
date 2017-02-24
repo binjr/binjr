@@ -22,6 +22,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     private final int unitBase;
     private final String graphType;
     private final String unitName;
+    private Integer order = 0;
 
 
     /**
@@ -123,5 +124,22 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     public String toString() {
         return getLegend();
     }
+
+    @Override
+    public Integer getOrder() {
+        return order;
+    }
+
+    @Override
+    public void setOrder(Integer order) {
+        this.order = order;
+    }
+
+    @Override
+    public int compareTo(TimeSeriesBinding<Double> o) {
+        return this.order.compareTo(o.getOrder());
+    }
+
+
     //endregion
 }

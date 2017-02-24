@@ -1,7 +1,9 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.charts.StableTicksAxis;
 import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
+import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ContextMenuTableViewCell;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
@@ -19,7 +21,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.chart.AreaChart;
+import javafx.geometry.Side;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -36,6 +38,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -49,14 +52,14 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class TimeSeriesController implements Initializable {
+public abstract class TimeSeriesController implements Initializable {
     private static final Logger logger = LogManager.getLogger(TimeSeriesController.class);
     @FXML
     public AnchorPane root;
     @FXML
     public AnchorPane chartParent;
     @FXML
-    private AreaChart<ZonedDateTime, Double> chart;
+    protected XYChart<ZonedDateTime, Double> chart;
     @FXML
     private TextField yMinRange;
     @FXML
@@ -71,6 +74,9 @@ public class TimeSeriesController implements Initializable {
     private Button refreshButton;
     @FXML
     private Button resetYButton;
+    @FXML
+    private Button snapshotButton;
+
     @FXML
     private ZonedDateTimePicker startDate;
     @FXML
@@ -92,7 +98,7 @@ public class TimeSeriesController implements Initializable {
 
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
-    private Set<TimeSeriesBinding<Double>> seriesBindings = new HashSet<>();
+    private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
     // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -101,6 +107,7 @@ public class TimeSeriesController implements Initializable {
     private History forwardHistory = new History();
     private GlobalPreferences globalPrefs;
     private String name;
+    private AtomicInteger seriesOrder = new AtomicInteger(0);
 
 
     //region [Properties]
@@ -112,13 +119,13 @@ public class TimeSeriesController implements Initializable {
         this.name = name;
     }
 
-    public MainViewController getMainViewController() {
-        return mainViewController;
-    }
-
-    public void setMainViewController(MainViewController mainViewController) {
-        this.mainViewController = mainViewController;
-    }
+//    public MainViewController getMainViewController() {
+//        return mainViewController;
+//    }
+//
+//    public void setMainViewController(MainViewController mainViewController) {
+//        this.mainViewController = mainViewController;
+//    }
 
     public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
         return crossHair;
@@ -129,11 +136,16 @@ public class TimeSeriesController implements Initializable {
     }
     //endregion
 
+
+
+    public TimeSeriesController(MainViewController mainViewController){
+        this.mainViewController = mainViewController;
+    }
+
     //region [Initializable Members]
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
-        assert chart != null : "fx:id\"chart\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
         assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
@@ -148,10 +160,36 @@ public class TimeSeriesController implements Initializable {
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
+        assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
+        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(ZoneId.systemDefault());
+        xAxis.setAnimated(false);
+        xAxis.setSide(Side.BOTTOM);
 
-        chart.createSymbolsProperty().bindBidirectional(globalPrefs.sampleSymbolsVisibleProperty());
+        StableTicksAxis yAxis = new StableTicksAxis();
+        yAxis.setSide(Side.LEFT);
+        yAxis.setAutoRanging(true);
+        yAxis.setAnimated(false);
+        yAxis.setTickSpacing(30);
+
+        this.chart = buildChart(xAxis,(ValueAxis) yAxis);
+
+        chart.setFocusTraversable(true);
+        chart.setLegendVisible(false);
+        chartParent.getChildren().add(chart);
+        AnchorPane.setBottomAnchor(chart, 0.0);
+        AnchorPane.setLeftAnchor(chart, 0.0);
+        AnchorPane.setRightAnchor(chart, 0.0);
+        AnchorPane.setTopAnchor(chart, 0.0);
+
+        this.backButton.setOnAction(this::handleHistoryBack);
+        this.forwardButton.setOnAction(this::handleHistoryForward);
+        this.refreshButton.setOnAction(this::handleHistoryForward);
+        this.resetYButton.setOnAction(this::handleResetYRangeButton);
+        this.snapshotButton.setOnAction(this::handleTakeSnapshot);
+        this.forwardButton.setOnAction(this::handleHistoryForward);
+
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
         globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
         globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
@@ -161,7 +199,7 @@ public class TimeSeriesController implements Initializable {
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
         ZonedDateTime now = ZonedDateTime.now();
-        this.currentState = new XYChartViewState(now.minus(24, ChronoUnit.HOURS), now, 0, 100);
+        this.currentState = new XYChartViewState(this, now.minus(24, ChronoUnit.HOURS), now, 0, 100);
         plotChart(currentState.asSelection());
 
         seriesTable.getColumns().forEach(c -> {
@@ -183,6 +221,10 @@ public class TimeSeriesController implements Initializable {
 
         crossHair.horizontalMarkerVisibleProperty().bindBidirectional(hCrosshair.selectedProperty());
         crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
+
+        mainViewController.showHorizontalMarkerProperty().bindBidirectional(crossHair.horizontalMarkerVisibleProperty());
+        mainViewController.showVerticalMarkerProperty().bindBidirectional(crossHair.verticalMarkerVisibleProperty());
+
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
         colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
@@ -208,13 +250,20 @@ public class TimeSeriesController implements Initializable {
         });
     }
 
+    protected abstract XYChart<ZonedDateTime,Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
+
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
+        for(TimeSeriesBinding<Double> b:bindings){
+            b.setOrder(seriesOrder.incrementAndGet());
+          //  seriesBindings.add(b);
+        }
         this.seriesBindings.addAll(bindings);
         invalidate(false, true, true);
         chart.getYAxis().setAutoRanging(true);
     }
 
     public void addBinding(TimeSeriesBinding<Double> binding) {
+        binding.setOrder(seriesOrder.incrementAndGet());
         if (this.seriesBindings.add(binding)) {
             invalidate(false, true, true);
             chart.getYAxis().setAutoRanging(true);
@@ -324,10 +373,6 @@ public class TimeSeriesController implements Initializable {
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
 
-
-            // Look up first series fill
-
-
             chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
 
 //            for (int i = 0; i < seriesData.size(); i++) {
@@ -383,15 +428,13 @@ public class TimeSeriesController implements Initializable {
         WritableImage snapImg = root.snapshot(null, null);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
-//        fileChooser.getExtensionFilters().addAll(
-//                new ExtensionFilter("Text Files", "*.txt"),
-//                new ExtensionFilter("Image Files", "*.png", "*.jpg", "*.gif"),
-//                new ExtensionFilter("Audio Files", "*.wav", "*.mp3", "*.aac"),
-//                new ExtensionFilter("All Files", "*.*"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
+        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
         fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
+                globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
                 ImageIO.write(
                         SwingFXUtils.fromFXImage(snapImg, null),
                         "png",
@@ -403,7 +446,7 @@ public class TimeSeriesController implements Initializable {
     }
 
     public Worksheet getWorksheet() {
-        return getMainViewController().getWorksheetMap().get(this);
+        return mainViewController.getWorksheetMap().get(this);
     }
 
     /**
@@ -481,10 +524,14 @@ public class TimeSeriesController implements Initializable {
         }
     }
 
+
+    //endregion
+
     /**
      * Represent the state of the time series view
      */
-    private class XYChartViewState {
+    private static class XYChartViewState {
+        private TimeSeriesController timeSeriesController;
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private final SimpleDoubleProperty startY;
@@ -521,7 +568,7 @@ public class TimeSeriesController implements Initializable {
                 this.endX.set(newEndX);
                 this.startY.set(roundYValue(selection.getStartY()));
                 this.endY.set(roundYValue(selection.getEndY()));
-                invalidate(toHistory, plotChart);
+                timeSeriesController.invalidate(toHistory, plotChart);
             } finally {
                 frozen = false;
             }
@@ -535,7 +582,8 @@ public class TimeSeriesController implements Initializable {
          * @param startY the lower bound of the Y axis
          * @param endY   the upper bound of the Y axis
          */
-        XYChartViewState(ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+        public XYChartViewState(TimeSeriesController timeSeriesController, ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+            this.timeSeriesController = timeSeriesController;
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
@@ -543,22 +591,22 @@ public class TimeSeriesController implements Initializable {
 
             this.startX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    timeSeriesController.invalidate(true, true);
                 }
             });
             this.endX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    timeSeriesController.invalidate(true, true);
                 }
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    timeSeriesController.invalidate(true, false);
                 }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    timeSeriesController.invalidate(true, false);
                 }
             });
         }
@@ -584,7 +632,4 @@ public class TimeSeriesController implements Initializable {
             return String.format("XYChartViewState{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
         }
     }
-
-
-    //endregion
 }

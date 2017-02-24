@@ -13,12 +13,12 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
-<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.TimeSeriesController">
+<AnchorPane fx:id="root" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" >
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
                 <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" onAction="#handleHistoryBack" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
+                        mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="back" textAlignment="CENTER">
                     <HBox.margin>
                         <Insets bottom="10.0" left="10.0" top="10.0"/>
                     </HBox.margin>
@@ -36,7 +36,7 @@
                     </tooltip>
                 </Button>
                 <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" onAction="#handleHistoryForward" prefHeight="30.0" prefWidth="30.0" text="forward" textAlignment="CENTER">
+                        mnemonicParsing="false"  prefHeight="30.0" prefWidth="30.0" text="forward" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="14" fitWidth="14">
                             <Image url="@/images/forwardArrow.png"/>
@@ -51,7 +51,7 @@
                     </tooltip>
                 </Button>
                 <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" onAction="#handleRefresh" prefHeight="30.0" prefWidth="30.0" text="refresh" textAlignment="CENTER">
+                        mnemonicParsing="false"  prefHeight="30.0" prefWidth="30.0" text="refresh" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="14" fitWidth="14">
                             <Image url="@/images/refresh.png"/>
@@ -129,7 +129,7 @@
                         </points>
                     </Polyline>
                     <Button fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false"
-                            onAction="#handleResetYRangeButton" prefHeight="21.0" prefWidth="21.0" textOverrun="CLIP">
+                           prefHeight="21.0" prefWidth="21.0" textOverrun="CLIP">
                         <graphic>
                             <ImageView fitHeight="15" fitWidth="11">
                                 <Image url="@/images/autoScale.png"/>
@@ -165,7 +165,7 @@
                 </VBox>
                 <Separator orientation="VERTICAL" prefHeight="200.0"/>
                 <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        onAction="#handleTakeSnapshot" prefHeight="30.0" prefWidth="30.0" text="Snapshot">
+                       prefHeight="30.0" prefWidth="30.0" text="Snapshot">
                     <HBox.margin>
                         <Insets left="5.0"/>
                     </HBox.margin>
@@ -227,15 +227,15 @@
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
                 <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0"
-                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <xAxis>
-                            <ZonedDateTimeAxis animated="false" side="BOTTOM"/>
-                        </xAxis>
-                        <yAxis>
-                            <StableTicksAxis animated="false" autoRanging="true" side="LEFT" tickSpacing="30"/>
-                        </yAxis>
-                    </AreaChart>
+                    <!--<AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0"-->
+                               <!--AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
+                        <!--<xAxis>-->
+                            <!--<ZonedDateTimeAxis animated="false" side="BOTTOM"/>-->
+                        <!--</xAxis>-->
+                        <!--<yAxis>-->
+                            <!--<StableTicksAxis animated="false" autoRanging="true" side="LEFT" tickSpacing="30"/>-->
+                        <!--</yAxis>-->
+                    <!--</AreaChart>-->
                 </AnchorPane>
             </AnchorPane>
             <AnchorPane>

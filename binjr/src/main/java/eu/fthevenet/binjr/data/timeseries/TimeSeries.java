@@ -19,10 +19,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.text.ParseException;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -31,7 +28,7 @@ import static java.util.stream.Collectors.groupingBy;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeries<T extends Number> implements Serializable {
+public abstract class TimeSeries<T extends Number> implements Serializable, Comparable<TimeSeries<T>> {
     private static final Logger logger = LogManager.getLogger(TimeSeries.class);
     protected List<XYChart.Data<ZonedDateTime, T>> data;
     protected final TimeSeriesBinding<T> binding;
@@ -121,6 +118,11 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
         this.displayColor.setValue(displayColor);
     }
 
+    @Override
+    public int compareTo(TimeSeries<T> o){
+        return this.getBinding().compareTo(o.getBinding());
+    }
+
     /**
      * Returns the current TimeSeries' data as an instance of {@link XYChart.Series} so that it can be displayed in a chart.
      *
@@ -160,8 +162,8 @@ public abstract class TimeSeries<T extends Number> implements Serializable {
      * @return a list of {@link TimeSeries} instances generated from the provided bindings
      * @throws DataAdapterException In case an error occurs while retrieving the data from the {@link DataAdapter} or parsing it in a {@link eu.fthevenet.binjr.data.parsers.DataParser}
      */
-    public static <T extends Number> List<TimeSeries<T>> fromBinding(Collection<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
-        List<TimeSeries<T>> series = new ArrayList<>();
+    public static <T extends Number> SortedSet<TimeSeries<T>> fromBinding(Collection<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
+        SortedSet<TimeSeries<T>> series = new TreeSet<>();
         // Group all bindings by common adapters
         TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         Map<DataAdapter<T>, List<TimeSeriesBinding<T>>> bindingsByAdapters = bindings.stream().collect(groupingBy(TimeSeriesBinding::getAdapter));

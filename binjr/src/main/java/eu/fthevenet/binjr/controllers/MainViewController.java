@@ -5,6 +5,7 @@ import eu.fthevenet.binjr.controls.EditableTab;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
@@ -25,10 +26,10 @@ import javafx.stage.Modality;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
 import java.net.URL;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -58,6 +59,23 @@ public class MainViewController implements Initializable {
     @FXML
     private CheckMenuItem showYmarkerMenuItem;
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
+
+    public boolean isShowVerticalMarker() {
+        return showVerticalMarker.getValue();
+    }
+
+    public SimpleBooleanProperty showVerticalMarkerProperty() {
+        return showVerticalMarker;
+    }
+
+    public boolean isShowHorizontalMarker() {
+        return showHorizontalMarker.getValue();
+    }
+
+    public SimpleBooleanProperty showHorizontalMarkerProperty() {
+        return showHorizontalMarker;
+    }
+
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
     //private final ContextMenu treeContextMenu;
 
@@ -171,30 +189,24 @@ public class MainViewController implements Initializable {
                 if (newValue.getContent() == null) {
                     try {
                         // Loading content on demand
-                        FXMLLoader fXMLLoader = new FXMLLoader();
-                        Parent p = fXMLLoader.load(getClass().getResource("/views/TimeSeriesView.fxml").openStream());
-                        newValue.setContent(p);
+                        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/TimeSeriesView.fxml"));
+                        TimeSeriesController current = new StackedAreaChartTimeSeriesController(MainViewController.this);
+                        fXMLLoader.setController(current);
+                        Parent p = fXMLLoader.load();
+
                         // Store the controllers
-                        TimeSeriesController current = fXMLLoader.getController();
+
+                        newValue.setContent(p);
                         selectedTabController = current;
-                        worksheetMap.put(current, new Worksheet("New worksheet(" + nbSeries.getAndIncrement() + ")"));
-                        // Init time series controller
-                        // TODO clean-up initialization of timeSeriescontrollers
-                        current.setMainViewController(MainViewController.this);
-                        current.getCrossHair().horizontalMarkerVisibleProperty().bindBidirectional(showHorizontalMarker);
-                        current.getCrossHair().verticalMarkerVisibleProperty().bindBidirectional(showVerticalMarker);
+                        worksheetMap.put(current, new Worksheet("New worksheet(" + nbSeries.getAndIncrement() + ")", ChartType.AREA, ZoneId.systemDefault()));
                         seriesControllers.put(newValue, current);
                         // add "+" tab
-                        //((Label) newValue.getGraphic()).setText(worksheetMap.get(current).getName());
                         ((EditableTab)newValue).nameProperty().bindBidirectional(worksheetMap.get(current).nameProperty());
                         seriesTabPane.getTabs().add(new EditableTab("+"));
 
                     } catch (IOException ex) {
                         logger.error("Error loading time series", ex);
                     }
-                }
-                else {
-                    Parent root = (Parent) newValue.getContent();
                 }
             }
         });
@@ -216,9 +228,7 @@ public class MainViewController implements Initializable {
                 TreeView<TimeSeriesBinding<Double>> treeView;
                 @SuppressWarnings("unchecked")
                 DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
-
                 treeView = buildTreeViewForTarget(da);
-               // treeView.setContextMenu(getTreeViewContextMenu());
                 newValue.setContent(treeView);
             }
         });

@@ -44,6 +44,7 @@ public class GlobalPreferences {
     private GlobalPreferences() {
         prefs = Preferences.userRoot().node(BINJR_GLOBAL);
         mostRecentSaveFolder =  new SimpleStringProperty(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
+        mostRecentSaveFolder.addListener((observable, oldValue, newValue) ->  prefs.put(MOST_RECENT_SAVE_FOLDER, newValue));
         downSamplingEnabled = new SimpleBooleanProperty(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold = new SimpleIntegerProperty(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 1500));
