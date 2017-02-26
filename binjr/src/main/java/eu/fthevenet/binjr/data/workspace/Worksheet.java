@@ -10,12 +10,16 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 
 /**
  * Represents a single worksheet
@@ -23,6 +27,8 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 public class Worksheet<T extends Number> implements Serializable {
+    private static final Logger logger = LogManager.getLogger(Worksheet.class);
+    private static final AtomicInteger globalCounter = new AtomicInteger(0);
     private ObservableSetWrapper<TimeSeriesBinding<T>> series;
     private Property<String> name;
     private Property<ZoneId> timeZone;
@@ -30,7 +36,7 @@ public class Worksheet<T extends Number> implements Serializable {
     private Property<XYChartSelection<ZonedDateTime, T>> selection;
 
     public Worksheet() {
-        this("",
+        this("New Worksheet (" + globalCounter.getAndIncrement() +")",
                 ChartType.AREA,
                 ZoneId.systemDefault(),
                 new HashSet<TimeSeriesBinding<T>>(),
@@ -63,6 +69,45 @@ public class Worksheet<T extends Number> implements Serializable {
         this.name.setValue(name);
     }
 
+    public ObservableSetWrapper<TimeSeriesBinding<T>> getSeries() {
+        return series;
+    }
+
+    public void setSeries(ObservableSetWrapper<TimeSeriesBinding<T>> series) {
+        this.series = series;
+    }
+
+    public ZoneId getTimeZone() {
+        return timeZone.getValue();
+    }
+
+    public Property<ZoneId> timeZoneProperty() {
+        return timeZone;
+    }
+
+    public void setTimeZone(ZoneId timeZone) {
+        this.timeZone.setValue(timeZone);
+    }
+
+    public ChartType getChartType() {
+        return chartType;
+    }
+
+    public void setChartType(ChartType chartType) {
+        this.chartType = chartType;
+    }
+
+    public XYChartSelection<ZonedDateTime, T> getSelection() {
+        return selection.getValue();
+    }
+
+    public Property<XYChartSelection<ZonedDateTime, T>> selectionProperty() {
+        return selection;
+    }
+
+    public void setSelection(XYChartSelection<ZonedDateTime,T> selection) {
+        this.selection.setValue(selection);
+    }
 
 }
 

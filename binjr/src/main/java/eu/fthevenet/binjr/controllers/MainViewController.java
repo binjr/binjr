@@ -8,6 +8,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
 import eu.fthevenet.binjr.dialogs.GetDataAdapterDialog;
 import javafx.application.Platform;
@@ -81,7 +82,7 @@ public class MainViewController implements Initializable {
 
     private final Map<TimeSeriesController, Worksheet> worksheetMap;
 
-    public MainViewController(){
+    public MainViewController() {
         super();
         worksheetMap = new HashMap<>();
     }
@@ -132,18 +133,17 @@ public class MainViewController implements Initializable {
 //                }
 //            });
         } catch (DataAdapterException e) {
-           Dialogs.displayException("An error occurred while building the tree from " + (dp != null ? dp.getSourceName() : "null"), e, root);
+            Dialogs.displayException("An error occurred while building the tree from " + (dp != null ? dp.getSourceName() : "null"), e, root);
         }
         return treeView;
     }
 
-    private<T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings){
-        if(  branch.getChildren().size() > 0) {
+    private <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {
+        if (branch.getChildren().size() > 0) {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        }
-        else{
+        } else {
             bindings.add(branch.getValue());
         }
     }
@@ -187,26 +187,31 @@ public class MainViewController implements Initializable {
                     return;
                 }
                 if (newValue.getContent() == null) {
-                    try {
-                        // Loading content on demand
-                        FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/TimeSeriesView.fxml"));
-                        TimeSeriesController current = new StackedAreaChartTimeSeriesController(MainViewController.this);
-                        fXMLLoader.setController(current);
-                        Parent p = fXMLLoader.load();
 
-                        // Store the controllers
+                        EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(root);
+                        dlg.showAndWait().ifPresent(worksheet -> {
+                            try {
+                                // Loading content on demand
+                                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/TimeSeriesView.fxml"));
+                                TimeSeriesController current = new StackedAreaChartTimeSeriesController(MainViewController.this);
+                                fXMLLoader.setController(current);
+                                Parent p = fXMLLoader.load();
 
-                        newValue.setContent(p);
-                        selectedTabController = current;
-                        worksheetMap.put(current, new Worksheet("New worksheet(" + nbSeries.getAndIncrement() + ")", ChartType.AREA, ZoneId.systemDefault()));
-                        seriesControllers.put(newValue, current);
-                        // add "+" tab
-                        ((EditableTab)newValue).nameProperty().bindBidirectional(worksheetMap.get(current).nameProperty());
-                        seriesTabPane.getTabs().add(new EditableTab("+"));
+                                // Store the controllers
 
-                    } catch (IOException ex) {
-                        logger.error("Error loading time series", ex);
-                    }
+                                newValue.setContent(p);
+                                selectedTabController = current;
+                                worksheetMap.put(current, worksheet);
+                                seriesControllers.put(newValue, current);
+                                ((EditableTab) newValue).nameProperty().bindBidirectional(worksheet.nameProperty());
+                                // add "+" tab
+                                seriesTabPane.getTabs().add(new EditableTab("+"));
+
+                            } catch (IOException ex) {
+                                logger.error("Error loading time series", ex);
+                            }
+                        });
+
                 }
             }
         });
@@ -214,7 +219,7 @@ public class MainViewController implements Initializable {
         seriesTabPane.getSelectionModel().selectFirst();
         seriesTabPane.getTabs().add(new EditableTab("New worksheet"));
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null){
+            if (newValue != null) {
                 this.selectedTabController = seriesControllers.get(newValue);
             }
         });
@@ -227,7 +232,7 @@ public class MainViewController implements Initializable {
             if (newValue.getContent() == null) {
                 TreeView<TimeSeriesBinding<Double>> treeView;
                 @SuppressWarnings("unchecked")
-                DataAdapter<Double> da = (DataAdapter<Double>)newValue.getUserData();
+                DataAdapter<Double> da = (DataAdapter<Double>) newValue.getUserData();
                 treeView = buildTreeViewForTarget(da);
                 newValue.setContent(treeView);
             }
@@ -240,11 +245,11 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView){
+    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
         MenuItem addToCurrent = new MenuItem("Add to current worksheet");
         addToCurrent.setOnAction(event -> {
             TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
-            if (selectedTabController != null && item !=null) {
+            if (selectedTabController != null && item != null) {
                 List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(item, bindings);
 
@@ -274,13 +279,13 @@ public class MainViewController implements Initializable {
     }
 
     public void handleAddJRDSSource(ActionEvent actionEvent) {
-        GetDataAdapterDialog dlg = new GetDataAdapterDialog( "Add a JRDS source", JRDSDataAdapter::fromUrl, root);
-        dlg.showAndWait().ifPresent( da ->
+        GetDataAdapterDialog dlg = new GetDataAdapterDialog("Add a JRDS source", JRDSDataAdapter::fromUrl, root);
+        dlg.showAndWait().ifPresent(da ->
         {
             Tab newTab = new Tab(da.getSourceName());
-                newTab.setUserData(da);
-                sourcesTabPane.getTabs().add(newTab);
-                sourcesTabPane.getSelectionModel().select(newTab);
+            newTab.setUserData(da);
+            sourcesTabPane.getTabs().add(newTab);
+            sourcesTabPane.getSelectionModel().select(newTab);
         });
 
     }

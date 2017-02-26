@@ -8,23 +8,21 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.ToggleSwitch?>
 
-<VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
             <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem disable="true"  mnemonicParsing="false" onAction="#handleNewTabAction" text="New Workspace"  />
+                        <MenuItem disable="true" mnemonicParsing="false" onAction="#handleNewTabAction" text="New Workspace" />
                         <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
                         <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
@@ -33,22 +31,31 @@
                         <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
                         <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" accelerator="Alt+P" />
+                        <MenuItem accelerator="Alt+P" mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
                     </items>
                 </Menu>
-                <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Source">
+                <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Sources">
                     <items>
-                        <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="Add source">
-                            <MenuItem mnemonicParsing="false" text="JRDS" onAction="#handleAddJRDSSource" />
+                        <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
+                            <MenuItem mnemonicParsing="false" onAction="#handleAddJRDSSource" text="JRDS">
+                        <accelerator>
+                           <KeyCodeCombination alt="DOWN" code="J" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                        </accelerator></MenuItem>
                         </Menu>
                     </items>
                 </Menu>
-                <Menu fx:id="viewMenu" mnemonicParsing="false" text="Chart">
+                <Menu fx:id="viewMenu" mnemonicParsing="false" text="Worksheets">
                     <items>
-                        <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Show X axis marker" />
-                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Show Y axis marker" />
+                  <MenuItem mnemonicParsing="false" text="New Worksheet">
+                     <accelerator>
+                        <KeyCodeCombination alt="DOWN" code="N" control="UP" meta="UP" shift="UP" shortcut="UP" />
+                     </accelerator>
+                  </MenuItem>
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                        <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock vertical crosshair marker" />
+                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock horizontal crosshair marker" />
                         <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh" />
                     </items>

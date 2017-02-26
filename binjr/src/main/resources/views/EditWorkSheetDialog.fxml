@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import eu.fthevenet.binjr.controls.ZonedDateTimePicker?>
+<?import javafx.scene.control.ButtonType?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.DialogPane?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" >
+   <content>
+      <GridPane>
+        <columnConstraints>
+          <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="248.0" minWidth="10.0" prefWidth="72.0" />
+          <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="250.0" />
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
+          <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" />
+          <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextField fx:id="nameField" GridPane.columnIndex="1" />
+            <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label text="Name" />
+            <Label text="Timezone:" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="305.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+            <Label text="Chart type:" GridPane.rowIndex="1" />
+            <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <ZonedDateTimePicker fx:id="toDatePicker"  prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label text="From:" GridPane.rowIndex="3" />
+            <Label text="To:" GridPane.rowIndex="4" />
+         </children>
+      </GridPane>
+   </content>
+   <header>
+   </header>
+   <buttonTypes>
+      <ButtonType fx:constant="CANCEL" />
+      <ButtonType fx:constant="OK" />
+   </buttonTypes>
+   <graphic>
+      <ImageView fitHeight="128.0" fitWidth="128.0">
+         <image>
+            <Image url="@/icons/binjr_256.png" />
+         </image>
+      </ImageView>
+   </graphic>
+</DialogPane>
