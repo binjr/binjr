@@ -42,7 +42,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -108,6 +107,7 @@ public abstract class TimeSeriesController implements Initializable {
     private GlobalPreferences globalPrefs;
     private String name;
     private AtomicInteger seriesOrder = new AtomicInteger(0);
+    private final Worksheet worksheet;
 
 
     //region [Properties]
@@ -138,8 +138,9 @@ public abstract class TimeSeriesController implements Initializable {
 
 
 
-    public TimeSeriesController(MainViewController mainViewController){
+    public TimeSeriesController(MainViewController mainViewController, Worksheet worksheet){
         this.mainViewController = mainViewController;
+        this.worksheet = worksheet;
     }
 
     //region [Initializable Members]
@@ -199,7 +200,7 @@ public abstract class TimeSeriesController implements Initializable {
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
         ZonedDateTime now = ZonedDateTime.now();
-        this.currentState = new XYChartViewState(this, now.minus(24, ChronoUnit.HOURS), now, 0, 100);
+        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
         plotChart(currentState.asSelection());
 
         seriesTable.getColumns().forEach(c -> {
@@ -446,7 +447,7 @@ public abstract class TimeSeriesController implements Initializable {
     }
 
     public Worksheet getWorksheet() {
-        return mainViewController.getWorksheetMap().get(this);
+        return this.worksheet;
     }
 
     /**
@@ -530,8 +531,7 @@ public abstract class TimeSeriesController implements Initializable {
     /**
      * Represent the state of the time series view
      */
-    private static class XYChartViewState {
-        private TimeSeriesController timeSeriesController;
+    private  class XYChartViewState {
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private final SimpleDoubleProperty startY;
@@ -568,7 +568,7 @@ public abstract class TimeSeriesController implements Initializable {
                 this.endX.set(newEndX);
                 this.startY.set(roundYValue(selection.getStartY()));
                 this.endY.set(roundYValue(selection.getEndY()));
-                timeSeriesController.invalidate(toHistory, plotChart);
+                invalidate(toHistory, plotChart);
             } finally {
                 frozen = false;
             }
@@ -582,8 +582,7 @@ public abstract class TimeSeriesController implements Initializable {
          * @param startY the lower bound of the Y axis
          * @param endY   the upper bound of the Y axis
          */
-        public XYChartViewState(TimeSeriesController timeSeriesController, ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
-            this.timeSeriesController = timeSeriesController;
+        public XYChartViewState( ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
@@ -591,22 +590,22 @@ public abstract class TimeSeriesController implements Initializable {
 
             this.startX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    timeSeriesController.invalidate(true, true);
+                    invalidate(true, true);
                 }
             });
             this.endX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    timeSeriesController.invalidate(true, true);
+                    invalidate(true, true);
                 }
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    timeSeriesController.invalidate(true, false);
+                    invalidate(true, false);
                 }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    timeSeriesController.invalidate(true, false);
+                    invalidate(true, false);
                 }
             });
         }

@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import javafx.scene.paint.Color;
 
 /**
@@ -48,7 +49,7 @@ public interface TimeSeriesBinding<T extends Number> extends Comparable<TimeSeri
      *
      * @return the type of graph of the bound series as defined in the source.
      */
-    String getGraphType();
+    ChartType getGraphType();
 
     /**
      * Returns the unit name of the bound series as defined in the source.

@@ -2,6 +2,7 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -20,7 +21,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     private final Color color;
     private final String legend;
     private final int unitBase;
-    private final String graphType;
+    private final ChartType graphType;
     private final String unitName;
     private Integer order = 0;
 
@@ -38,7 +39,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
         this.path = path;
         color = null;
         legend = label;
-        graphType = "none";
+        graphType = ChartType.STACKED;
         unitBase = 10;
         unitName = "%";
     }
@@ -69,7 +70,25 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
                         (isNullOrEmpty(desc.dsName) ?
                                 "???" : desc.dsName) : desc.name) : desc.legend;
 
-        this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
+         switch (desc.graphType.toLowerCase()) {
+             case "area":
+                 this.graphType = ChartType.AREA;
+                 break;
+
+             case "stacked":
+                 this.graphType = ChartType.STACKED;
+                 break;
+             case "line":
+                 this.graphType = ChartType.LINE;
+                 break;
+
+             case "none":
+             default:
+                 this.graphType = ChartType.STACKED;
+                 break;
+         }
+
+       // this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
 
         this.unitBase = "SI".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
         this.unitName = graphdesc.verticalLabel;
@@ -106,7 +125,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
     }
 
     @Override
-    public String getGraphType() {
+    public ChartType getGraphType() {
         return graphType;
     }
 

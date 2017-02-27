@@ -1,19 +1,13 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.charts.StableTicksAxis;
 import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
+import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.geometry.Side;
 import javafx.scene.chart.AreaChart;
-import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.layout.AnchorPane;
 
-import java.net.URL;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ResourceBundle;
 
 /**
  * An implementation of {@link TimeSeriesController} that provides a {@link AreaChart} chart.
@@ -24,10 +18,12 @@ public class AreaChartTimeSeriesController extends TimeSeriesController {
 
     /**
      * Initializes a new instance of the {@link AreaChartTimeSeriesController} class
-     * @param mainViewController A reference to the {@link MainViewController} instance.
+     *
+     * @param mainViewController A reference to the {@link MainViewController} instance
+     * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public AreaChartTimeSeriesController(MainViewController mainViewController) {
-        super(mainViewController);
+    public AreaChartTimeSeriesController(MainViewController mainViewController, Worksheet worksheet) {
+        super(mainViewController, worksheet);
     }
 
     @Override

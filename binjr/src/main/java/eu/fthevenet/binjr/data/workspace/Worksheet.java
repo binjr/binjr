@@ -26,35 +26,37 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Frederic Thevenet
  */
-public class Worksheet<T extends Number> implements Serializable {
+public class Worksheet implements Serializable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-    private ObservableSetWrapper<TimeSeriesBinding<T>> series;
+    private ObservableSetWrapper<TimeSeriesBinding<Number>> series;
     private Property<String> name;
     private Property<ZoneId> timeZone;
-    private ChartType chartType;
-    private Property<XYChartSelection<ZonedDateTime, T>> selection;
+    private Property<ChartType> chartType;
+    private Property<ZonedDateTime> fromDateTime;
+    private Property<ZonedDateTime> toDateTime;
 
     public Worksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() +")",
-                ChartType.AREA,
+                ChartType.STACKED,
                 ZoneId.systemDefault(),
-                new HashSet<TimeSeriesBinding<T>>(),
-                new XYChartSelection<ZonedDateTime, T>(ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), (T)(Number)0,  (T)(Number)100));
+                new HashSet<TimeSeriesBinding<Number>>(),
+               ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now());
     }
 
     public Worksheet(String name, ChartType chartType, ZoneId timezone){
         this(name, chartType, timezone,
-                new HashSet<TimeSeriesBinding<T>>(),
-                new XYChartSelection<ZonedDateTime, T>(ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), (T)(Number)0,  (T)(Number)100));
+                new HashSet<TimeSeriesBinding<Number>>(),
+               ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now());
     }
 
-    public Worksheet(String name, ChartType chartType, ZoneId timezone,Set<TimeSeriesBinding<T>> bindings,XYChartSelection<ZonedDateTime, T> selection ) {
+    public Worksheet(String name, ChartType chartType, ZoneId timezone, Set<TimeSeriesBinding<Number>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime) {
         this.name = new SimpleStringProperty(name);
-        this.chartType = chartType;
-        this.series = new ObservableSetWrapper<TimeSeriesBinding<T>>(bindings);
+        this.chartType = new SimpleObjectProperty<>(chartType);
+        this.series = new ObservableSetWrapper<TimeSeriesBinding<Number>>(bindings);
         this.timeZone = new SimpleObjectProperty<>(timezone);
-        this.selection = new SimpleObjectProperty<>(selection);
+        this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
+        this.toDateTime = new SimpleObjectProperty<>(toDateTime);
     }
 
     public String getName() {
@@ -69,11 +71,11 @@ public class Worksheet<T extends Number> implements Serializable {
         this.name.setValue(name);
     }
 
-    public ObservableSetWrapper<TimeSeriesBinding<T>> getSeries() {
+    public ObservableSetWrapper<TimeSeriesBinding<Number>> getSeries() {
         return series;
     }
 
-    public void setSeries(ObservableSetWrapper<TimeSeriesBinding<T>> series) {
+    public void setSeries(ObservableSetWrapper<TimeSeriesBinding<Number>> series) {
         this.series = series;
     }
 
@@ -90,24 +92,50 @@ public class Worksheet<T extends Number> implements Serializable {
     }
 
     public ChartType getChartType() {
+        return chartType.getValue();
+    }
+
+    public Property<ChartType> chartTypeProperty() {
         return chartType;
     }
 
     public void setChartType(ChartType chartType) {
-        this.chartType = chartType;
+        this.chartType.setValue(chartType);
     }
 
-    public XYChartSelection<ZonedDateTime, T> getSelection() {
-        return selection.getValue();
+    public ZonedDateTime getFromDateTime() {
+        return fromDateTime.getValue();
     }
 
-    public Property<XYChartSelection<ZonedDateTime, T>> selectionProperty() {
-        return selection;
+    public Property<ZonedDateTime> fromDateTimeProperty() {
+        return fromDateTime;
     }
 
-    public void setSelection(XYChartSelection<ZonedDateTime,T> selection) {
-        this.selection.setValue(selection);
+    public void setFromDateTime(ZonedDateTime fromDateTime) {
+        this.fromDateTime.setValue(fromDateTime);
     }
 
+    public ZonedDateTime getToDateTime() {
+        return toDateTime.getValue();
+    }
+
+    public Property<ZonedDateTime> toDateTimeProperty() {
+        return toDateTime;
+    }
+
+    public void setToDateTime(ZonedDateTime toDateTime) {
+        this.toDateTime.setValue(toDateTime);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("Name: %s Type: %s Timezone: %s From: %s To: %s",
+                getName(),
+                getChartType().toString(),
+                getTimeZone().toString(),
+                getFromDateTime().toLocalDateTime(),
+                getToDateTime().toLocalDateTime()
+                );
+    }
 }
 

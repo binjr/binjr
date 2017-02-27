@@ -30,7 +30,7 @@ import java.util.prefs.Preferences;
  *
  * @author Frederic Thevenet
  */
-public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet<T>> {
+public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
     private static final Logger logger = LogManager.getLogger(EditWorksheetDialog.class);
     private static final String BINJR_SUGGEST = "binjr/suggest";
    // private Worksheet<T> result = null;
@@ -39,16 +39,16 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet<T>> 
     public static final String SUGGEST_WORSHEET_NAMES = "suggest_worsheet_names";
 
 
-    public EditWorksheetDialog(Node owner){
-        this(new Worksheet<T>(), owner);
-    }
+//    public EditWorksheetDialog(Node owner){
+//        this(new Worksheet<T>(), owner);
+//    }
 
     /**
      * Initializes a new instance of the {@link EditWorksheetDialog} class.
      *
      * @param owner the owner window for the dialog
      */
-    public EditWorksheetDialog(Worksheet<T> worksheet, Node owner) {
+    public EditWorksheetDialog(Worksheet worksheet, Node owner) {
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
@@ -60,12 +60,14 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet<T>> 
             FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/EditWorkSheetDialog.fxml"));
             Parent parent = fXMLLoader.load();
             this.setDialogPane((DialogPane) parent);
+
             TextField nameField = (TextField) parent.lookup("#nameField");
-            nameField.textProperty().bindBidirectional(worksheet.nameProperty());
-
-           // dateTimeValueProperty
-
             TextField timezoneField = (TextField) parent.lookup("#timezoneField");
+            ChoiceBox<ChartType> chartTypeChoice =(ChoiceBox<ChartType>) parent.lookup("#chartTypeChoice");
+            ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker)parent.lookup("#fromDatePicker");
+            ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker)parent.lookup("#toDatePicker");
+
+            nameField.textProperty().bindBidirectional(worksheet.nameProperty());
             TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
                 @Override
                 public String toString(ZoneId object) {
@@ -80,25 +82,20 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet<T>> 
             formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
             timezoneField.setTextFormatter(formatter);
 
-            ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker)parent.lookup("#fromDatePicker");
-            fromDatePicker.setDateTimeValue(worksheet.getSelection().getStartX());
+            fromDatePicker.dateTimeValueProperty().bindBidirectional(worksheet.fromDateTimeProperty());
+            toDatePicker.dateTimeValueProperty().bindBidirectional(worksheet.toDateTimeProperty());
+//            fromDatePicker.setDateTimeValue(worksheet.getSelection().getStartX());
+//            toDatePicker.setDateTimeValue(worksheet.getSelection().getEndX());
+            chartTypeChoice.getItems().setAll(ChartType.values());
 
-            ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker)parent.lookup("#toDatePicker");
-            toDatePicker.setDateTimeValue(worksheet.getSelection().getEndX());
-
+            chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
 
             autoCompletionBinding = TextFields.bindAutoCompletion(nameField, suggestedNames);
             final Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
 
             okButton.addEventFilter(ActionEvent.ACTION, ae -> {
                 try {
-                  //  ZoneId zoneId = ZoneId.of(timezoneField.getText());
-                    worksheet.setSelection(new XYChartSelection<ZonedDateTime, T>(
-                            fromDatePicker.getDateTimeValue(),
-                            toDatePicker.getDateTimeValue(),
-                            (T)(Number)0,
-                            (T)(Number)100));
-
+                    worksheet.setChartType(chartTypeChoice.getValue());
                     autoCompletionLearnWord(nameField);
                 } catch (DateTimeException de) {
                     Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), Pos.CENTER, timezoneField);

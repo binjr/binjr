@@ -16,13 +16,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
             <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem disable="true" mnemonicParsing="false" onAction="#handleNewTabAction" text="New Workspace" />
+                        <MenuItem disable="true" mnemonicParsing="false" text="New Workspace" />
                         <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
                         <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
@@ -40,20 +40,21 @@
                     <items>
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJRDSSource" text="JRDS">
-                        <accelerator>
-                           <KeyCodeCombination alt="DOWN" code="J" control="UP" meta="UP" shift="UP" shortcut="UP" />
-                        </accelerator></MenuItem>
+                                <accelerator>
+                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                                </accelerator>
+                            </MenuItem>
                         </Menu>
                     </items>
                 </Menu>
                 <Menu fx:id="viewMenu" mnemonicParsing="false" text="Worksheets">
                     <items>
-                  <MenuItem mnemonicParsing="false" text="New Worksheet">
-                     <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="N" control="UP" meta="UP" shift="UP" shortcut="UP" />
-                     </accelerator>
-                  </MenuItem>
-                  <SeparatorMenuItem mnemonicParsing="false" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                            </accelerator>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false" />
                         <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock vertical crosshair marker" />
                         <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock horizontal crosshair marker" />
                         <SeparatorMenuItem mnemonicParsing="false" />
@@ -71,23 +72,35 @@
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
-                  <TabPane fx:id="sourcesTabPane" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <tabs>
-                    </tabs>
-                  </TabPane>
+                        <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font name="System Bold Italic" size="24.0" />
+                            </font>
+                        </Label>
+                        <TabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <tabs>
+                            </tabs>
+                        </TabPane>
                     </children>
                 </AnchorPane>
-                <TabPane fx:id="seriesTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB">
-                    <tabs>
-                    </tabs>
-                </TabPane>
+                <AnchorPane SplitPane.resizableWithParent="true">
+                    <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <font>
+                            <Font name="System Bold Italic" size="24.0" />
+                        </font>
+                    </Label>
+                    <TabPane fx:id="seriesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <tabs>
+                        </tabs>
+                    </TabPane>
+                </AnchorPane>
             </items>
         </SplitPane>
         <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
             <children>
-                <Pane HBox.hgrow="ALWAYS">
+                <Pane fx:id="statusBar" HBox.hgrow="ALWAYS">
                     <children>
-                        <Label layoutY="1.0" maxHeight="1.7976931348623157E308" maxWidth="-1.0" prefHeight="18.0" prefWidth="34.0">
+                        <Label fx:id="selectedWorksheet" layoutY="1.0" maxWidth="-1.0">
                             <font>
                                 <Font size="11.0" fx:id="x3" />
                             </font>
