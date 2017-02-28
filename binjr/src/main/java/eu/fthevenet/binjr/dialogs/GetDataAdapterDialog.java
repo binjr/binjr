@@ -8,6 +8,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -46,11 +47,12 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
-        this.setTitle(title);
+     //   this.initStyle(StageStyle.UTILITY);
+        this.setTitle("Source");
+        this.setHeaderText(title);
         String KNOWN_JRDS_URL = "urls_mru";
         Preferences prefs = Preferences.userRoot().node(BINJR_SOURCES);
         suggestedUrls = new HashSet<>(Arrays.asList(prefs.get(KNOWN_JRDS_URL, "").split(" ")));
-
         try {
             FXMLLoader fXMLLoader = new FXMLLoader();
             this.setDialogPane(fXMLLoader.load(getClass().getResource("/views/GetDataAdapterView.fxml").openStream()));
@@ -70,7 +72,6 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
                     ae.consume();
                 }
             });
-
             this.setResultConverter(dialogButton -> {
                         ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                         if (data == ButtonBar.ButtonData.OK_DONE) {
@@ -82,18 +83,10 @@ public class GetDataAdapterDialog extends Dialog<DataAdapter> {
             );
             TextFields.bindAutoCompletion(ctlr.getTimezoneField(), ZoneId.getAvailableZoneIds());
             ctlr.getTimezoneField().setText(ZoneId.systemDefault().toString());
-
-//            this.setOnShown( event -> {
-//                ctlr.getUrlField().requestFocus();
-//            });
-
         } catch (IOException e) {
             logger.error("Failed to load /views/GetDataAdapterView.fxml", e);
         }
-
     }
-
-
 
     private void autoCompletionLearnWord(TextField field) {
         suggestedUrls.add(field.getText());

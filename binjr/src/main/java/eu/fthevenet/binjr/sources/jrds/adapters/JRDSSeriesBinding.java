@@ -90,7 +90,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
 
        // this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
 
-        this.unitBase = "SI".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
+        this.unitBase = "METRIC".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
         this.unitName = graphdesc.verticalLabel;
     }
 

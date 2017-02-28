@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
 
-<DialogPane fx:id="dialogPane" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" >
+<DialogPane fx:id="dialogPane" headerText="Create a new worksheet" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
    <content>
       <GridPane>
         <columnConstraints>
@@ -22,21 +22,27 @@
         <rowConstraints>
             <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
+            <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" />
+            <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" />
           <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" />
           <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
             <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <TextField fx:id="nameField" GridPane.columnIndex="1" />
-            <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="4" />
             <Label text="Name" />
-            <Label text="Timezone:" GridPane.rowIndex="2" />
+            <Label text="Timezone:" GridPane.rowIndex="4" />
             <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="305.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <Label text="Chart type:" GridPane.rowIndex="1" />
-            <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <ZonedDateTimePicker fx:id="toDatePicker"  prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1" GridPane.rowIndex="4" />
-            <Label text="From:" GridPane.rowIndex="3" />
-            <Label text="To:" GridPane.rowIndex="4" />
+            <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+            <ZonedDateTimePicker fx:id="toDatePicker" prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+            <Label text="From:" GridPane.rowIndex="5" />
+            <Label text="To:" GridPane.rowIndex="6" />
+            <Label text="Unit:" GridPane.rowIndex="2" />
+            <Label text="Unit prefixes:" GridPane.rowIndex="3" />
+            <TextField fx:id="unitNameField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ChoiceBox fx:id="unitPrefixesChoice" prefHeight="25.0" prefWidth="374.0" GridPane.columnIndex="1" GridPane.rowIndex="3" />
          </children>
       </GridPane>
    </content>
@@ -47,9 +53,9 @@
       <ButtonType fx:constant="OK" />
    </buttonTypes>
    <graphic>
-      <ImageView fitHeight="128.0" fitWidth="128.0">
+      <ImageView fitHeight="48.0" fitWidth="48.0">
          <image>
-            <Image url="@/icons/binjr_256.png" />
+            <Image url="@/icons/binjr_48.png" />
          </image>
       </ImageView>
    </graphic>

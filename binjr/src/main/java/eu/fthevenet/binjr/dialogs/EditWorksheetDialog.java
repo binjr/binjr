@@ -1,8 +1,8 @@
 package eu.fthevenet.binjr.dialogs;
 
-import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.workspace.ChartType;
+import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -10,6 +10,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
+import javafx.stage.StageStyle;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,7 +20,6 @@ import org.controlsfx.control.textfield.TextFields;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -35,26 +35,25 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
     private static final String BINJR_SUGGEST = "binjr/suggest";
    // private Worksheet<T> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
-    private final Set<String> suggestedNames;
-    public static final String SUGGEST_WORSHEET_NAMES = "suggest_worsheet_names";
+    private final Set<String> suggestedUnits;
+    public static final String SUGGEST_WORKSHEET_UNITS = "suggest_worksheet_units";
 
-
-//    public EditWorksheetDialog(Node owner){
-//        this(new Worksheet<T>(), owner);
-//    }
 
     /**
      * Initializes a new instance of the {@link EditWorksheetDialog} class.
      *
+     * @param worksheet the worksheet to edit
      * @param owner the owner window for the dialog
      */
     public EditWorksheetDialog(Worksheet worksheet, Node owner) {
+        // Clone the worksheet before binding it to the UI (we don't want to mutate the provided instance in case the user cancel the edition)
+        Worksheet resultWorksheet = new Worksheet(worksheet);
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
-        this.setTitle("New Worksheet");
+        this.setTitle("Worksheet");
         Preferences prefs = Preferences.userRoot().node(BINJR_SUGGEST);
-        suggestedNames = new HashSet<>(Arrays.asList(prefs.get(SUGGEST_WORSHEET_NAMES, "").split(" ")));
+        suggestedUnits = new HashSet<>(Arrays.asList(prefs.get(SUGGEST_WORKSHEET_UNITS, "").split(" ")));
 
         try {
             FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/EditWorkSheetDialog.fxml"));
@@ -63,11 +62,14 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
 
             TextField nameField = (TextField) parent.lookup("#nameField");
             TextField timezoneField = (TextField) parent.lookup("#timezoneField");
+            TextField unitNameField = (TextField) parent.lookup("#unitNameField");
             ChoiceBox<ChartType> chartTypeChoice =(ChoiceBox<ChartType>) parent.lookup("#chartTypeChoice");
+            ChoiceBox<UnitPrefixes> unitPrefixesChoice =(ChoiceBox<UnitPrefixes>) parent.lookup("#unitPrefixesChoice");
             ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker)parent.lookup("#fromDatePicker");
             ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker)parent.lookup("#toDatePicker");
 
-            nameField.textProperty().bindBidirectional(worksheet.nameProperty());
+            unitNameField.textProperty().bindBidirectional(resultWorksheet.unitProperty());
+            nameField.textProperty().bindBidirectional(resultWorksheet.nameProperty());
             TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
                 @Override
                 public String toString(ZoneId object) {
@@ -79,24 +81,25 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
                     return ZoneId.of(string);
                 }
             });
-            formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
+            formatter.valueProperty().bindBidirectional(resultWorksheet.timeZoneProperty());
             timezoneField.setTextFormatter(formatter);
 
-            fromDatePicker.dateTimeValueProperty().bindBidirectional(worksheet.fromDateTimeProperty());
-            toDatePicker.dateTimeValueProperty().bindBidirectional(worksheet.toDateTimeProperty());
-//            fromDatePicker.setDateTimeValue(worksheet.getSelection().getStartX());
-//            toDatePicker.setDateTimeValue(worksheet.getSelection().getEndX());
+            fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
+            toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());
             chartTypeChoice.getItems().setAll(ChartType.values());
+            chartTypeChoice.getSelectionModel().select(resultWorksheet.getChartType());
+            resultWorksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
-            chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
+            unitPrefixesChoice.getItems().setAll(UnitPrefixes.values());
+            unitPrefixesChoice.getSelectionModel().select(resultWorksheet.getUnitPrefixes());
+            resultWorksheet.unitPrefixesProperty().bind(unitPrefixesChoice.getSelectionModel().selectedItemProperty());
 
-            autoCompletionBinding = TextFields.bindAutoCompletion(nameField, suggestedNames);
+            autoCompletionBinding = TextFields.bindAutoCompletion(unitNameField, suggestedUnits);
             final Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
 
             okButton.addEventFilter(ActionEvent.ACTION, ae -> {
                 try {
-                    worksheet.setChartType(chartTypeChoice.getValue());
-                    autoCompletionLearnWord(nameField);
+                    autoCompletionLearnWord(unitNameField);
                 } catch (DateTimeException de) {
                     Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), Pos.CENTER, timezoneField);
                     ae.consume();
@@ -106,29 +109,25 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
             this.setResultConverter(dialogButton -> {
                         ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                         if (data == ButtonBar.ButtonData.OK_DONE) {
-                            suggestedNames.stream().reduce((s, s2) -> s + " " + s2).ifPresent(s -> prefs.put(SUGGEST_WORSHEET_NAMES, s));
-                            return worksheet;
+                            suggestedUnits.stream().reduce((s, s2) -> s + " " + s2).ifPresent(s -> prefs.put(SUGGEST_WORKSHEET_UNITS, s));
+                            return resultWorksheet;
                         }
                         return null;
                     }
             );
             TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
             timezoneField.setText(ZoneId.systemDefault().toString());
-
-
         } catch (IOException e) {
             logger.error("Failed to load /views/EditWorkSheetDialog.fxml", e);
         }
-
     }
 
-
     private void autoCompletionLearnWord(TextField field) {
-        suggestedNames.add(field.getText());
+        suggestedUnits.add(field.getText());
         if (autoCompletionBinding != null) {
             autoCompletionBinding.dispose();
         }
-        autoCompletionBinding = TextFields.bindAutoCompletion(field, suggestedNames);
+        autoCompletionBinding = TextFields.bindAutoCompletion(field, suggestedUnits);
     }
 
 }

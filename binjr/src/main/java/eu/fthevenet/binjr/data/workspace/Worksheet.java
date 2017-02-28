@@ -1,15 +1,10 @@
 package eu.fthevenet.binjr.data.workspace;
 
-import com.sun.javafx.collections.ObservableListWrapper;
 import com.sun.javafx.collections.ObservableSetWrapper;
-import eu.fthevenet.binjr.charts.XYChartSelection;
-import eu.fthevenet.binjr.controllers.TimeSeriesController;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,7 +12,8 @@ import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -32,31 +28,51 @@ public class Worksheet implements Serializable {
     private ObservableSetWrapper<TimeSeriesBinding<Number>> series;
     private Property<String> name;
     private Property<ZoneId> timeZone;
+    private Property<String> unit;
+    private Property<UnitPrefixes> unitPrefixes;
     private Property<ChartType> chartType;
     private Property<ZonedDateTime> fromDateTime;
     private Property<ZonedDateTime> toDateTime;
 
     public Worksheet() {
-        this("New Worksheet (" + globalCounter.getAndIncrement() +")",
+        this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 ChartType.STACKED,
                 ZoneId.systemDefault(),
-                new HashSet<TimeSeriesBinding<Number>>(),
-               ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now());
+                new HashSet<>(),
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
-    public Worksheet(String name, ChartType chartType, ZoneId timezone){
+    public Worksheet(String name, ChartType chartType, ZoneId timezone) {
         this(name, chartType, timezone,
-                new HashSet<TimeSeriesBinding<Number>>(),
-               ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now());
+                new HashSet<>(),
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(),"-", UnitPrefixes.METRIC);
     }
 
-    public Worksheet(String name, ChartType chartType, ZoneId timezone, Set<TimeSeriesBinding<Number>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime) {
+    /**
+     * Copy constructor to clone a {@link Worksheet} instance.
+     *
+     * @param initWorksheet the {@link Worksheet} instance to clone.
+     */
+    public Worksheet(Worksheet initWorksheet) {
+        this(initWorksheet.getName(),
+                initWorksheet.getChartType(),
+                initWorksheet.getTimeZone(),
+                initWorksheet.getSeries(),
+                initWorksheet.getFromDateTime(),
+                initWorksheet.getToDateTime(),
+                initWorksheet.getUnit(),
+                initWorksheet.getUnitPrefixes());
+    }
+
+    public Worksheet(String name, ChartType chartType, ZoneId timezone, Set<TimeSeriesBinding<Number>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base) {
         this.name = new SimpleStringProperty(name);
+        this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
-        this.series = new ObservableSetWrapper<TimeSeriesBinding<Number>>(bindings);
+        this.series = new ObservableSetWrapper<>(bindings);
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
+        this.unitPrefixes = new SimpleObjectProperty<>(base);
     }
 
     public String getName() {
@@ -127,15 +143,37 @@ public class Worksheet implements Serializable {
         this.toDateTime.setValue(toDateTime);
     }
 
+    public String getUnit() {
+        return unit.getValue();
+    }
+
+    public Property<String> unitProperty() {
+        return unit;
+    }
+
+    public void setUnit(String unit) {
+        this.unit.setValue(unit);
+    }
+
+    public UnitPrefixes getUnitPrefixes() {
+        return unitPrefixes.getValue();
+    }
+
+    public Property<UnitPrefixes> unitPrefixesProperty() {
+        return unitPrefixes;
+    }
+
+    public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
+        this.unitPrefixes.setValue(unitPrefixes);
+    }
+
     @Override
     public String toString() {
-        return String.format("Name: %s Type: %s Timezone: %s From: %s To: %s",
+        return String.format("%s - %s - %s",
                 getName(),
-                getChartType().toString(),
                 getTimeZone().toString(),
-                getFromDateTime().toLocalDateTime(),
-                getToDateTime().toLocalDateTime()
-                );
+                getChartType().toString()
+        );
     }
 }
 

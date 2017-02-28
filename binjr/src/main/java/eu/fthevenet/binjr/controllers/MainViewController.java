@@ -23,6 +23,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -66,18 +67,34 @@ public class MainViewController implements Initializable {
     private Label addSourceLabel;
     @FXML
     private Label addWorksheetLabel;
+
     @FXML
-    private Label selectedWorksheet;
+    private HBox worksheetStatusBar;
+    @FXML
+    private Label nameLabel;
+    @FXML
+    private Label zoneIdLabel;
+    @FXML
+    private Label chartTypeLabel;
+    @FXML
+    private Label unitLabel;
+    @FXML
+    private Label baseLabel;
+
+    @FXML
+    private HBox sourceStatusBar;
+    @FXML
+    private Label sourceLabel;
+
+
 
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private TimeSeriesController selectedTabController;
+    private DataAdapter<Double> selectedDataAdapter;
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private final Map<TimeSeriesController, Worksheet> worksheetMap;
-
 
     public MainViewController() {
         super();
-        worksheetMap = new HashMap<>();
     }
 
     @Override
@@ -88,7 +105,7 @@ public class MainViewController implements Initializable {
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert addSourceLabel != null : "fx:id\"addSourceLabel\" was not injected!";
         assert addWorksheetLabel != null : "fx:id\"addWorksheetLabel\" was not injected!";
-        assert selectedWorksheet != null : "fx:id\"selectedWorksheet\" was not injected!";
+
 
         addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-text-fill: #7c7c7c;"));
         addSourceLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addSourceLabel.setStyle("-fx-text-fill: #c3c3c3;"));
@@ -104,50 +121,79 @@ public class MainViewController implements Initializable {
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
+        sourcesTabPane.mouseTransparentProperty().bind(Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0));
+        seriesTabPane.mouseTransparentProperty().bind(Bindings.size(seriesTabPane.getTabs()).isEqualTo(0));
+
         Platform.runLater(() -> {
-                    Button newTabButton = new Button();
+                    Button newTabButton = new Button("+");
                     newTabButton.setFocusTraversable(false);
-                    newTabButton.setPrefHeight(20);
+                    newTabButton.setPrefHeight(24);
                     newTabButton.setMaxHeight(newTabButton.getPrefHeight());
                     newTabButton.setMinHeight(newTabButton.getPrefHeight());
-                    newTabButton.setPrefWidth(24);
-                    newTabButton.setMaxWidth(newTabButton.getPrefWidth());
-                    newTabButton.setMinWidth(newTabButton.getPrefWidth());
                     newTabButton.setOnAction(this::handleAddNewWorksheet);
 
                     Pane tabHeaderBg = (Pane) seriesTabPane.lookup(".tab-header-background");
                     tabHeaderBg.getChildren().add(newTabButton);
                     StackPane.setAlignment(newTabButton, Pos.BOTTOM_LEFT);
-                    StackPane.setMargin(newTabButton, new Insets(0, 0, 3, 0));
+                    StackPane.setMargin(newTabButton, new Insets(0, 0, 0, 0));
 
                     Pane headersRegion = (Pane) seriesTabPane.lookup(".headers-region");
-                    System.out.println(headersRegion.getWidth());
                     newTabButton.translateXProperty().bind(
-                            headersRegion.widthProperty().add(6)
+                            headersRegion.widthProperty().add(5)
                     );
+
+
+
+                    Button newSourceButton = new Button("+");
+                    newSourceButton.setFocusTraversable(false);
+                    newSourceButton.setPrefHeight(24);
+                    newSourceButton.setMaxHeight(newSourceButton.getPrefHeight());
+                    newSourceButton.setMinHeight(newSourceButton.getPrefHeight());
+
+                    newSourceButton.setOnAction(this::handleAddJRDSSource);
+
+                    Pane sourceHeaderBg = (Pane) sourcesTabPane.lookup(".tab-header-background");
+                    sourceHeaderBg.getChildren().add(newSourceButton);
+                    StackPane.setAlignment(newSourceButton, Pos.BOTTOM_LEFT);
+                    StackPane.setMargin(newSourceButton, new Insets(0, 0, 0, 0));
+
+                    Pane srcHeadersRegion = (Pane) sourcesTabPane.lookup(".headers-region");
+
+                    newSourceButton.translateXProperty().bind(
+                            sourceHeaderBg.widthProperty()
+                                    .subtract(srcHeadersRegion.widthProperty())
+                                    .subtract(newSourceButton.widthProperty())
+                                    .subtract(5)
+                    );
+
+
                 }
         );
 
-
         seriesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            seriesTabPane.setMouseTransparent((seriesTabPane.getTabs().size() == 0));
             if (newValue != null) {
                 this.selectedTabController = seriesControllers.get(newValue);
-                selectedWorksheet.setText(selectedTabController.getWorksheet().toString());
+                Worksheet worksheet = selectedTabController.getWorksheet();
+                worksheetStatusBar.setVisible(true);
+                nameLabel.textProperty().bind(worksheet.nameProperty());
+                zoneIdLabel.setText(worksheet.getTimeZone().toString());
+                chartTypeLabel.setText(worksheet.getChartType().toString());
+                unitLabel.setText(worksheet.getUnit());
+                baseLabel.setText(worksheet.getUnitPrefixes().toString());
+            }
+            else{
+                worksheetStatusBar.setVisible(false);
             }
         });
 
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            sourcesTabPane.setMouseTransparent((sourcesTabPane.getTabs().size() == 0));
-            if (newValue == null) {
-                return;
+            if (newValue != null) {
+                selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
+                sourceStatusBar.setVisible(true);
+                sourceLabel.setText(selectedDataAdapter.getSourceName());
             }
-            if (newValue.getContent() == null) {
-                TreeView<TimeSeriesBinding<Double>> treeView;
-                @SuppressWarnings("unchecked")
-                DataAdapter<Double> da = (DataAdapter<Double>) newValue.getUserData();
-                treeView = buildTreeViewForTarget(da);
-                newValue.setContent(treeView);
+            else{
+                sourceStatusBar.setVisible(false);
             }
         });
     }
@@ -197,10 +243,13 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddJRDSSource(ActionEvent actionEvent) {
-        GetDataAdapterDialog dlg = new GetDataAdapterDialog("Add a JRDS source", JRDSDataAdapter::fromUrl, root);
+        GetDataAdapterDialog dlg = new GetDataAdapterDialog("Connect to a JRDS source", JRDSDataAdapter::fromUrl, root);
         dlg.showAndWait().ifPresent(da -> {
             Tab newTab = new Tab(da.getSourceName());
             newTab.setUserData(da);
+            TreeView<TimeSeriesBinding<Double>> treeView;
+            treeView = buildTreeViewForTarget(da);
+            newTab.setContent(treeView);
             sourcesTabPane.getTabs().add(newTab);
             sourcesTabPane.getSelectionModel().select(newTab);
         });
@@ -225,9 +274,7 @@ public class MainViewController implements Initializable {
         return showHorizontalMarker;
     }
 
-    public Map<TimeSeriesController, Worksheet> getWorksheetMap() {
-        return worksheetMap;
-    }
+
     //endregion
 
     //region private members
@@ -261,7 +308,7 @@ public class MainViewController implements Initializable {
                     logger.error("Error loading time series", ex);
                 }
                 selectedTabController = current;
-                worksheetMap.put(current, w);
+
                 seriesControllers.put(newTab, current);
                 newTab.nameProperty().bindBidirectional(w.nameProperty());
                 seriesTabPane.getTabs().add(newTab);
@@ -288,7 +335,7 @@ public class MainViewController implements Initializable {
             root.setExpanded(true);
             treeView.setRoot(root);
         } catch (DataAdapterException e) {
-            Dialogs.displayException("An error occurred while building the tree from " + (dp != null ? dp.getSourceName() : "null"), e, root);
+            Dialogs.displayException("An error occurred while building the tree from " + dp.getSourceName(), e, root);
         }
         return treeView;
     }
@@ -344,6 +391,5 @@ public class MainViewController implements Initializable {
         });
         return new ContextMenu(addToCurrent, addToNew);
     }
-
     //endregion
 }

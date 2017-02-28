@@ -12,7 +12,6 @@
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
@@ -98,15 +97,66 @@
         </SplitPane>
         <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
             <children>
-                <Pane fx:id="statusBar" HBox.hgrow="ALWAYS">
-                    <children>
-                        <Label fx:id="selectedWorksheet" layoutY="1.0" maxWidth="-1.0">
-                            <font>
-                                <Font size="11.0" fx:id="x3" />
-                            </font>
+            <AnchorPane HBox.hgrow="ALWAYS">
+               <children>
+                  <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
+                     <children>
+                        <Label fx:id="sourceLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
                         </Label>
-                    </children>
-                </Pane>
+                     </children>
+                  </HBox>
+                  <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
+                     <children>
+                        <Label fx:id="nameLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
+                        </Label>
+                        <Label fx:id="zoneIdLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label fx:id="chartTypeLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label fx:id="unitLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                        </Label>
+                        <Label fx:id="baseLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                           <padding>
+                              <Insets left="4.0" right="4.0" />
+                           </padding>
+                           <HBox.margin>
+                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+                           </HBox.margin>
+                        </Label>
+                     </children>
+                  </HBox>
+               </children>
+            </AnchorPane>
             </children>
             <padding>
                 <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />

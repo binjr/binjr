@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.controls;
 
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.DatePicker;
 import javafx.util.StringConverter;
@@ -21,7 +22,8 @@ import java.time.format.FormatStyle;
  */
 public class ZonedDateTimePicker extends DatePicker {
     private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
-    private final DateTimeFormatter formatter;
+    //private final DateTimeFormatter formatter;
+    private final Property<ZoneId> zoneId;
     private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
 
     /**
@@ -34,15 +36,15 @@ public class ZonedDateTimePicker extends DatePicker {
     /**
      * Initializes a new instance of the {@link ZonedDateTimePicker} class with the provided timezone
      *
-     * @param currentZoneId the timezone id to use in the control
+     * @param zoneId the timezone id to use in the control
      */
-    public ZonedDateTimePicker(ZoneId currentZoneId) {
+    public ZonedDateTimePicker(ZoneId zoneId) {
+        this.zoneId = new SimpleObjectProperty<>(zoneId);
         getStyleClass().add("datetime-picker");
-        this.formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(currentZoneId);
         setConverter(new StringConverter<LocalDate>() {
             public String toString(LocalDate object) {
                 ZonedDateTime value = getDateTimeValue();
-                return (value != null) ? value.format(formatter) : "";
+                return (value != null) ? value.format(getFormatter()) : "";
             }
 
             public LocalDate fromString(String stringValue) {
@@ -52,24 +54,23 @@ public class ZonedDateTimePicker extends DatePicker {
                     return null;
                 }
                 try {
-                    dateTimeValue.set(ZonedDateTime.parse(stringValue, formatter));
+                    dateTimeValue.set(ZonedDateTime.parse(stringValue, getFormatter()));
                 } catch (Exception ex) {
                     logger.debug("Error parsing date", ex);
                     throw ex;
                 }
                 return dateTimeValue.get().toLocalDate();
             }
-
         });
 
         valueProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 if (dateTimeValue.get() == null) {
-                    dateTimeValue.set(ZonedDateTime.of(newValue, LocalTime.now(), currentZoneId));
+                    dateTimeValue.set(ZonedDateTime.of(newValue, LocalTime.now(), getZoneId()));
                 }
                 else {
                     LocalTime time = dateTimeValue.get().toLocalTime();
-                    dateTimeValue.set(ZonedDateTime.of(newValue, time, currentZoneId));
+                    dateTimeValue.set(ZonedDateTime.of(newValue, time, getZoneId()));
                 }
             }
         });
@@ -85,6 +86,10 @@ public class ZonedDateTimePicker extends DatePicker {
                 getEditor().commitValue();
             }
         });
+    }
+
+    private DateTimeFormatter getFormatter(){
+        return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(getZoneId());
     }
 
     //region [Properties]
@@ -115,5 +120,18 @@ public class ZonedDateTimePicker extends DatePicker {
     public ObjectProperty<ZonedDateTime> dateTimeValueProperty() {
         return dateTimeValue;
     }
-//endregion
+
+    public ZoneId getZoneId() {
+        return zoneId.getValue();
+    }
+
+    public Property<ZoneId> zoneIdProperty() {
+        return zoneId;
+    }
+
+    public void setZoneId(ZoneId zoneId) {
+        this.zoneId.setValue(zoneId);
+    }
+
+    //endregion
 }

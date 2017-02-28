@@ -164,7 +164,7 @@ public abstract class TimeSeriesController implements Initializable {
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
-        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(ZoneId.systemDefault());
+        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
 
@@ -183,6 +183,9 @@ public abstract class TimeSeriesController implements Initializable {
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
         AnchorPane.setTopAnchor(chart, 0.0);
+
+        endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
+        startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
 
         this.backButton.setOnAction(this::handleHistoryBack);
         this.forwardButton.setOnAction(this::handleHistoryForward);
@@ -203,9 +206,9 @@ public abstract class TimeSeriesController implements Initializable {
         this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
         plotChart(currentState.asSelection());
 
-        seriesTable.getColumns().forEach(c -> {
-            c.setCellFactory(ContextMenuTableViewCell.forTableColumn(new ContextMenu(new MenuItem("Foo"), new MenuItem("bar"))));
-        });
+//        seriesTable.getColumns().forEach(c -> {
+//            c.setCellFactory(ContextMenuTableViewCell.forTableColumn(new ContextMenu(new MenuItem("Foo"), new MenuItem("bar"))));
+//        });
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
@@ -256,9 +259,9 @@ public abstract class TimeSeriesController implements Initializable {
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for(TimeSeriesBinding<Double> b:bindings){
             b.setOrder(seriesOrder.incrementAndGet());
-          //  seriesBindings.add(b);
+            seriesBindings.add(b);
         }
-        this.seriesBindings.addAll(bindings);
+        //this.seriesBindings.addAll(bindings);
         invalidate(false, true, true);
         chart.getYAxis().setAutoRanging(true);
     }
@@ -425,7 +428,8 @@ public abstract class TimeSeriesController implements Initializable {
         removeSelectedBinding();
     }
 
-    public void handleTakeSnapshot(ActionEvent actionEvent) {
+    @FXML
+    protected void handleTakeSnapshot(ActionEvent actionEvent) {
         WritableImage snapImg = root.snapshot(null, null);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
