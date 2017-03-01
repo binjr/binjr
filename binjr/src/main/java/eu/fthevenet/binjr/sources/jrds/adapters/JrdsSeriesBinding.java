@@ -12,8 +12,8 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Frederic Thevenet
  */
-public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
-    private static final Logger logger = LogManager.getLogger(JRDSSeriesBinding.class);
+public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
+    private static final Logger logger = LogManager.getLogger(JrdsSeriesBinding.class);
     private static final int DEFAULT_BASE = 10;
     private final DataAdapter<Double> adapter;
     private final String label;
@@ -27,13 +27,13 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
 
 
     /**
-     * Initializes a new instance of the {@link JRDSSeriesBinding} class.
+     * Initializes a new instance of the {@link JrdsSeriesBinding} class.
      *
      * @param label   the name of the data store.
      * @param path    the id for the graph/probe
-     * @param adapter the {@link JRDSDataAdapter} for the binding.
+     * @param adapter the {@link JrdsDataAdapter} for the binding.
      */
-    public JRDSSeriesBinding(String label, String path, DataAdapter<Double> adapter) {
+    public JrdsSeriesBinding(String label, String path, DataAdapter<Double> adapter) {
         this.adapter = adapter;
         this.label = label;
         this.path = path;
@@ -44,7 +44,7 @@ public class JRDSSeriesBinding implements TimeSeriesBinding<Double> {
         unitName = "%";
     }
 
-    public JRDSSeriesBinding(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
+    public JrdsSeriesBinding(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         this.adapter = adapter;
         this.path = path;
         Graphdesc.SeriesDesc desc = graphdesc.seriesDescList.get(idx);

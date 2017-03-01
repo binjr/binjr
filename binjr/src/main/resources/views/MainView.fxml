@@ -6,6 +6,7 @@
 <?import javafx.scene.input.KeyCodeCombination?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
+<?import eu.fthevenet.binjr.controls.TabPaneNewButton?>
 <VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
@@ -136,11 +137,11 @@
                                 <Font name="System Bold Italic" size="24.0"/>
                             </font>
                         </Label>
-                        <TabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <tabs>
                             </tabs>
-                        </TabPane>
+                        </TabPaneNewButton>
                     </children>
                 </AnchorPane>
                 <AnchorPane SplitPane.resizableWithParent="true">
@@ -150,11 +151,11 @@
                             <Font name="System Bold Italic" size="24.0"/>
                         </font>
                     </Label>
-                    <TabPane fx:id="seriesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <tabs>
                         </tabs>
-                    </TabPane>
+                    </TabPaneNewButton>
                 </AnchorPane>
             </items>
         </SplitPane>

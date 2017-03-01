@@ -10,19 +10,19 @@ import javafx.scene.chart.XYChart;
 import java.time.ZonedDateTime;
 
 /**
- * An implementation of {@link TimeSeriesController} that provides a {@link StackedAreaChart} chart.
+ * An implementation of {@link WorksheetController} that provides a {@link StackedAreaChart} chart.
  *
  * @author Frederic Thevenet
  */
-public class StackedAreaChartTimeSeriesController extends TimeSeriesController {
+public class StackedAreaChartWorksheetController extends WorksheetController {
 
     /**
-     * Initializes a new instance of the {@link StackedAreaChartTimeSeriesController} class
+     * Initializes a new instance of the {@link StackedAreaChartWorksheetController} class
      *
      * @param mainViewController A reference to the {@link MainViewController} instance.
      * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public StackedAreaChartTimeSeriesController(MainViewController mainViewController, Worksheet worksheet) {
+    public StackedAreaChartWorksheetController(MainViewController mainViewController, Worksheet worksheet) {
         super(mainViewController, worksheet);
     }
 

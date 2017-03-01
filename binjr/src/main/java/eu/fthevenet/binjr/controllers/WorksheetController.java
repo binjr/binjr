@@ -5,7 +5,6 @@ import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.controls.ColorUtils;
-import eu.fthevenet.binjr.controls.ContextMenuTableViewCell;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
@@ -38,7 +37,6 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -51,8 +49,8 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesController implements Initializable {
-    private static final Logger logger = LogManager.getLogger(TimeSeriesController.class);
+public abstract class WorksheetController implements Initializable {
+    private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     @FXML
     public AnchorPane root;
     @FXML
@@ -98,7 +96,6 @@ public abstract class TimeSeriesController implements Initializable {
     private MainViewController mainViewController;
     private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
     private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
-    // private ObservableMap<TimeSeriesBinding<Double>, TimeSeries<Double>> series = FXCollections.observableHashMap();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
@@ -119,14 +116,6 @@ public abstract class TimeSeriesController implements Initializable {
         this.name = name;
     }
 
-//    public MainViewController getMainViewController() {
-//        return mainViewController;
-//    }
-//
-//    public void setMainViewController(MainViewController mainViewController) {
-//        this.mainViewController = mainViewController;
-//    }
-
     public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
         return crossHair;
     }
@@ -137,8 +126,7 @@ public abstract class TimeSeriesController implements Initializable {
     //endregion
 
 
-
-    public TimeSeriesController(MainViewController mainViewController, Worksheet worksheet){
+    public WorksheetController(MainViewController mainViewController, Worksheet worksheet){
         this.mainViewController = mainViewController;
         this.worksheet = worksheet;
     }
@@ -189,7 +177,7 @@ public abstract class TimeSeriesController implements Initializable {
 
         this.backButton.setOnAction(this::handleHistoryBack);
         this.forwardButton.setOnAction(this::handleHistoryForward);
-        this.refreshButton.setOnAction(this::handleHistoryForward);
+        this.refreshButton.setOnAction(this::handleRefresh);
         this.resetYButton.setOnAction(this::handleResetYRangeButton);
         this.snapshotButton.setOnAction(this::handleTakeSnapshot);
         this.forwardButton.setOnAction(this::handleHistoryForward);

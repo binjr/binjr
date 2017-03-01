@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <GridPane fx:id="paramsGridPane">
+            <columnConstraints>
+                <ColumnConstraints  maxWidth="248.0" minWidth="10.0" prefWidth="72.0"/>
+                <ColumnConstraints  maxWidth="500.0" minWidth="10.0" prefWidth="300.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0"/>
+                <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0"/>
+            </rowConstraints>
+            <children>
+                <TextField fx:id="urlField" GridPane.columnIndex="1"/>
+                <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Label text="Address:"/>
+                <Label text="Timezone:" GridPane.rowIndex="1"/>
+            </children>
+        </GridPane>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:constant="CANCEL"/>
+        <ButtonType fx:constant="OK"/>
+    </buttonTypes>
+    <graphic>
+        <ImageView fitHeight="48.0" fitWidth="48.0">
+            <image>
+                <Image url="@/images/plug_96.png"/>
+            </image>
+        </ImageView>
+    </graphic>
+</DialogPane>

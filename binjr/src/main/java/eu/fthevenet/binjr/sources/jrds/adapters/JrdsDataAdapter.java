@@ -46,8 +46,8 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
-public class JRDSDataAdapter implements DataAdapter<Double> {
-    private static final Logger logger = LogManager.getLogger(JRDSDataAdapter.class);
+public class JrdsDataAdapter implements DataAdapter<Double> {
+    private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     public static final String SEPARATOR = ",";
     private final String jrdsHost;
     private final int jrdsPort;
@@ -55,45 +55,48 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     private final String jrdsProtocol;
     private final ZoneId zoneId;
     private final String encoding;
+    private final JrdsTreeFilter treeFilter;
 
     /**
-     * Builds a new instance of the {@link JRDSDataAdapter} class from the provided parameters.
+     * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
      *
      * @param url    the URL to the JRDS webapp.
      * @param zoneId the id of the time zone used to record dates.
-     * @return a new instance of the {@link JRDSDataAdapter} class.
+     * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JRDSDataAdapter fromUrl(String url, ZoneId zoneId) throws MalformedURLException {
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeFilter treeFilter) throws MalformedURLException {
         URL u = new URL(url.replaceAll("/$", ""));
-        return new JRDSDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8");
+        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
     }
 
     /**
-     * Initializes a new instance of the {@link JRDSDataAdapter} class.
+     * Initializes a new instance of the {@link JrdsDataAdapter} class.
      *
+     * @param jrdsProtocol the URL scheme if the JRDS webapp.
      * @param hostname     the host of the JRDS webapp.
      * @param port         the port of the JRDS webapp.
      * @param path         the url path of the JRDS webapp.
      * @param zoneId       the id of the time zone used to record dates.
      * @param encoding     the encoding used by the download servlet.
-     * @param jrdsProtocol the URL scheme if the JRDS webapp.
+     * @param treeFilter
      */
-    public JRDSDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding) {
+    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeFilter treeFilter) {
         this.jrdsHost = hostname;
         this.jrdsPort = port;
         this.jrdsPath = path;
         this.jrdsProtocol = jrdsProtocol;
         this.zoneId = zoneId;
         this.encoding = encoding;
+        this.treeFilter = treeFilter;
     }
 
     //region [DataAdapter Members]
     @Override
     public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
-        JsonTree t = gson.fromJson(getJsonTree("hoststab"), JsonTree.class);
+        JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
         Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JRDSSeriesBinding(getSourceName(), "/", this));
+        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JrdsSeriesBinding(getSourceName(), "/", this));
         List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
         for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
@@ -160,7 +163,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
     private TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
         JsonTree.JsonItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JRDSSeriesBinding(n.name, currentPath, this));
+        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JrdsSeriesBinding(n.name, currentPath, this));
         if (n.children != null) {
             for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
                 attachNode(newBranch, ref._reference, nodes);
@@ -179,7 +182,7 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
                             Graphdesc graphdesc =  getGraphDescriptor(currentPath);
                             for (int i = 0; i <graphdesc.seriesDescList.size() ; i++) {
                                 if (!"none".equals(graphdesc.seriesDescList.get(i).graphType)) {
-                                    newBranch.getChildren().add(new TreeItem<>(new JRDSSeriesBinding(graphdesc, i, currentPath, JRDSDataAdapter.this)));
+                                    newBranch.getChildren().add(new TreeItem<>(new JrdsSeriesBinding(graphdesc, i, currentPath, JrdsDataAdapter.this)));
                                 }
                             }
                             //remove dummy node
@@ -205,13 +208,13 @@ public class JRDSDataAdapter implements DataAdapter<Double> {
         return data[data.length - 1];
     }
 
-    private String getJsonTree(String tabname) throws DataAdapterException {
+    private String getJsonTree(JrdsTreeFilter filter) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/jsontree")
-                .addParameter("tab", tabname);
+                .addParameter("tab", filter.getCommand());
         return doHttpGet(requestUrl, response -> {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {

@@ -1,12 +1,12 @@
 package jrds;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
-import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
+import eu.fthevenet.binjr.sources.jrds.adapters.JrdsDataAdapter;
+import eu.fthevenet.binjr.sources.jrds.adapters.JrdsTreeFilter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -27,9 +27,9 @@ public class JrdsSourceTester {
         Instant end = Instant.now();
         Instant begin = end.minus(24*60*7, ChronoUnit.MINUTES);
 
-        JRDSDataAdapter dp = null;
+        JrdsDataAdapter dp = null;
         try {
-            dp = JRDSDataAdapter.fromUrl("http://nglps008:11001/perf-ui/", ZoneId.systemDefault());
+            dp = JrdsDataAdapter.fromUrl("http://nglps008:11001/perf-ui/", ZoneId.systemDefault(), JrdsTreeFilter.HOSTS_TAB);
             dp.getGraphDescriptor("1010253111");
         } catch (MalformedURLException e) {
             e.printStackTrace();

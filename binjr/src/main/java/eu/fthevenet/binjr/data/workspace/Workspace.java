@@ -12,7 +12,7 @@ import java.util.List;
  */
 public class Workspace implements Serializable {
     private List<Worksheet> worksheets;
-    private List<DataAdapter> sources;
+    private List<DataAdapter> adapters;
     private String name;
 
     public List<Worksheet> getWorksheets() {
@@ -23,12 +23,12 @@ public class Workspace implements Serializable {
         this.worksheets = worksheets;
     }
 
-    public List<DataAdapter> getSources() {
-        return sources;
+    public List<DataAdapter> getAdapters() {
+        return adapters;
     }
 
-    public void setSources(List<DataAdapter> sources) {
-        this.sources = sources;
+    public void setAdapters(List<DataAdapter> adapters) {
+        this.adapters = adapters;
     }
 
     public String getName() {
