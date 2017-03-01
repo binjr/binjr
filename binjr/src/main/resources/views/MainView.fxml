@@ -1,38 +1,48 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.CheckMenuItem?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuBar?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.SeparatorMenuItem?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TabPane?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.input.KeyCodeCombination?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-
 <VBox fx:id="root" prefHeight="725.0" prefWidth="1092.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
             <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem disable="true" mnemonicParsing="false" text="New Workspace" />
-                        <MenuItem disable="true" mnemonicParsing="false" text="Open…" />
-                        <Menu disable="true" mnemonicParsing="false" text="Open Recent" />
+                        <MenuItem disable="true" mnemonicParsing="false" text="New Workspace">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/new.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem disable="true" mnemonicParsing="false" text="Open…">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/open.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+
+                        <Menu disable="true" mnemonicParsing="false" text="Open Recent"/>
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Close" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Save" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem accelerator="Alt+P" mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Quit" />
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem accelerator="Alt+P" mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/settings.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Exit"/>
                     </items>
                 </Menu>
                 <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Sources">
@@ -40,29 +50,78 @@
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJRDSSource" text="JRDS">
                                 <accelerator>
-                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                                    <KeyCodeCombination alt="DOWN" code="J" control="UP" meta="UP" shift="UP" shortcut="UP"/>
                                 </accelerator>
                             </MenuItem>
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/plug.png"/>
+                                </ImageView>
+                            </graphic>
                         </Menu>
                     </items>
                 </Menu>
-                <Menu fx:id="viewMenu" mnemonicParsing="false" text="Worksheets">
+                <Menu fx:id="worksheetsMenu" mnemonicParsing="false" text="Worksheets">
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                                <KeyCodeCombination alt="DOWN" code="N" control="UP" meta="UP" shift="UP" shortcut="UP"/>
                             </accelerator>
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/graph.png"/>
+                                </ImageView>
+                            </graphic>
                         </MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock vertical crosshair marker" />
-                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock horizontal crosshair marker" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem fx:id="editRefresh" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh" />
+                        <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/refresh.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot" text="Take Snapshot">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/snapshot.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock Vertical Marker">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/lockCrosshairVertical.png"/>
+                                </ImageView>
+                            </graphic>
+                        </CheckMenuItem>
+                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock Horizontal Marker">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/lockCrosshairHorizontal.png"/>
+                                </ImageView>
+                            </graphic>
+                        </CheckMenuItem>
                     </items>
                 </Menu>
                 <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
                     <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleHelpAction" text="Help" accelerator="F1">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/help.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction" text="Get Latest Release"/>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/info.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
                     </items>
                 </Menu>
             </menus>
@@ -71,24 +130,28 @@
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
-                        <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <font>
-                                <Font name="System Bold Italic" size="24.0" />
+                                <Font name="System Bold Italic" size="24.0"/>
                             </font>
                         </Label>
-                        <TabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <tabs>
                             </tabs>
                         </TabPane>
                     </children>
                 </AnchorPane>
                 <AnchorPane SplitPane.resizableWithParent="true">
-                    <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <font>
-                            <Font name="System Bold Italic" size="24.0" />
+                            <Font name="System Bold Italic" size="24.0"/>
                         </font>
                     </Label>
-                    <TabPane fx:id="seriesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <TabPane fx:id="seriesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <tabs>
                         </tabs>
                     </TabPane>
@@ -97,69 +160,69 @@
         </SplitPane>
         <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
             <children>
-            <AnchorPane HBox.hgrow="ALWAYS">
-               <children>
-                  <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
-                     <children>
-                        <Label fx:id="sourceLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                        </Label>
-                     </children>
-                  </HBox>
-                  <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
-                     <children>
-                        <Label fx:id="nameLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                        </Label>
-                        <Label fx:id="zoneIdLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Label fx:id="chartTypeLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Label fx:id="unitLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                        </Label>
-                        <Label fx:id="baseLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                           <padding>
-                              <Insets left="4.0" right="4.0" />
-                           </padding>
-                           <HBox.margin>
-                              <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-                           </HBox.margin>
-                        </Label>
-                     </children>
-                  </HBox>
-               </children>
-            </AnchorPane>
+                <AnchorPane HBox.hgrow="ALWAYS">
+                    <children>
+                        <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
+                            <children>
+                                <Label fx:id="sourceLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                </Label>
+                            </children>
+                        </HBox>
+                        <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
+                            <children>
+                                <Label fx:id="nameLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                </Label>
+                                <Label fx:id="zoneIdLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                </Label>
+                                <Label fx:id="chartTypeLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                </Label>
+                                <Label fx:id="unitLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                </Label>
+                                <Label fx:id="baseLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                    <padding>
+                                        <Insets left="4.0" right="4.0"/>
+                                    </padding>
+                                    <HBox.margin>
+                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                    </HBox.margin>
+                                </Label>
+                            </children>
+                        </HBox>
+                    </children>
+                </AnchorPane>
             </children>
             <padding>
-                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
             </padding>
         </HBox>
     </children>

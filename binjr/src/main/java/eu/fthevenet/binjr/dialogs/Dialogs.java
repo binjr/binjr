@@ -11,6 +11,12 @@ import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.dialog.ExceptionDialog;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
  *
@@ -106,5 +112,14 @@ public class Dialogs {
             return (Stage) node.getScene().getWindow();
         }
         return null;
+    }
+
+    public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                desktop.browse(new URI(url));
+            }
+        }
     }
 }

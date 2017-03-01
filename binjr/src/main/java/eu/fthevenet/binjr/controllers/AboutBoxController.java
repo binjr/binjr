@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.controllers;
 
 
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
 import javafx.application.Platform;
@@ -18,9 +19,7 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.awt.Desktop;
 import java.io.*;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
@@ -32,7 +31,6 @@ import java.util.*;
  */
 public class AboutBoxController implements Initializable {
     private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
-    public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     @FXML
     private DialogPane aboutRoot;
 
@@ -129,15 +127,10 @@ public class AboutBoxController implements Initializable {
     }
 
     public void goTobinjrDotEu(ActionEvent actionEvent) {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                try {
-                    desktop.browse(new URI(HTTP_WWW_BINJR_EU));
-                } catch (IOException | URISyntaxException e) {
-                    logger.error(e);
-                }
-            }
+        try {
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
+        } catch (IOException | URISyntaxException e) {
+            logger.error(e);
         }
         binjrUrl.setVisited(false);
     }

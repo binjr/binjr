@@ -20,6 +20,10 @@ import java.util.prefs.Preferences;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
+    public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
+    public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
+
+
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
@@ -27,7 +31,7 @@ public class GlobalPreferences {
     private static final String DOWN_SAMPLING_ENABLED = "downSamplingEnabled";
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String USE_SOURCE_COLORS = "useSourceColors";
-    public static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
+    private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private Property<Boolean> downSamplingEnabled;
     private SimpleIntegerProperty downSamplingThreshold;
     private Property<Boolean> sampleSymbolsVisible;

@@ -9,8 +9,10 @@ import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.GetDataAdapterDialog;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JRDSDataAdapter;
 import javafx.application.Platform;
+import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
@@ -33,6 +35,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZoneId;
 import java.util.*;
@@ -48,17 +51,19 @@ public class MainViewController implements Initializable {
     @FXML
     public VBox root;
     @FXML
-    private Menu viewMenu;
+    private Menu worksheetsMenu;
     @FXML
     private Menu helpMenu;
     @FXML
-    private MenuItem editRefresh;
+    private MenuItem refreshMenuItem;
     @FXML
     private TabPane sourcesTabPane;
     @FXML
     private TabPane seriesTabPane;
+
     @FXML
-    private MenuItem newTab;
+    private MenuItem snapshotMenuItem;
+
     @FXML
     private CheckMenuItem showXmarkerMenuItem;
     @FXML
@@ -99,12 +104,22 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        assert viewMenu != null : "fx:id\"editMenu\" was not injected!";
+        assert worksheetsMenu != null : "fx:id\"editMenu\" was not injected!";
         assert root != null : "fx:id\"root\" was not injected!";
         assert seriesTabPane != null : "fx:id\"seriesTabPane\" was not injected!";
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert addSourceLabel != null : "fx:id\"addSourceLabel\" was not injected!";
         assert addWorksheetLabel != null : "fx:id\"addWorksheetLabel\" was not injected!";
+        assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
+
+        Binding<Boolean> selectWorksheetPresent = Bindings.size(seriesTabPane.getTabs()).isEqualTo(0);
+        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
+        showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
+        showYmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
+        snapshotMenuItem.disableProperty().bind(selectWorksheetPresent);
+        refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
+        sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
+        seriesTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
 
 
         addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-text-fill: #7c7c7c;"));
@@ -121,8 +136,7 @@ public class MainViewController implements Initializable {
         showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
-        sourcesTabPane.mouseTransparentProperty().bind(Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0));
-        seriesTabPane.mouseTransparentProperty().bind(Bindings.size(seriesTabPane.getTabs()).isEqualTo(0));
+
 
         Platform.runLater(() -> {
                     Button newTabButton = new Button("+");
@@ -254,6 +268,13 @@ public class MainViewController implements Initializable {
             sourcesTabPane.getSelectionModel().select(newTab);
         });
 
+    }
+
+    @FXML
+    protected void handleTakeSnapshot(ActionEvent event) {
+        if (selectedTabController !=null){
+            selectedTabController.handleTakeSnapshot(event);
+        }
     }
     //endregion
 
@@ -390,6 +411,22 @@ public class MainViewController implements Initializable {
             }
         });
         return new ContextMenu(addToCurrent, addToNew);
+    }
+
+    public void handleHelpAction(ActionEvent event) {
+        try {
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
+        } catch (IOException | URISyntaxException e) {
+            logger.error(e);
+        }
+    }
+
+    public void handleLatestReleaseAction(ActionEvent event) {
+        try {
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_LATEST_RELEASE);
+        } catch (IOException | URISyntaxException e) {
+            logger.error(e);
+        }
     }
     //endregion
 }
