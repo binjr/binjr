@@ -1,16 +1,15 @@
 package eu.fthevenet.binjr.controls;
 
 import javafx.application.Platform;
-import javafx.beans.property.Property;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.geometry.Side;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 /**
@@ -20,8 +19,7 @@ import java.util.function.Supplier;
  */
 public class TabPaneNewButton extends TabPane {
 
-    private Supplier<Tab> tabFactory = Tab::new;
-
+    private Supplier<Optional<Tab>> newTabFactory = () ->Optional.of(new Tab());
 
     public TabPaneNewButton(){
         this((Tab[])null);
@@ -59,9 +57,10 @@ public class TabPaneNewButton extends TabPane {
         newTabButton.setMaxHeight(newTabButton.getPrefHeight());
         newTabButton.setMinHeight(newTabButton.getPrefHeight());
         newTabButton.setOnAction(event -> {
-            Tab newTab = tabFactory.get();
-            getTabs().add(newTab);
-            this.getSelectionModel().select(newTab);
+            newTabFactory.get().ifPresent(newTab -> {
+                getTabs().add(newTab);
+                this.getSelectionModel().select(newTab);
+            });
         });
 
         tabHeaderBg.getChildren().add(newTabButton);
@@ -98,11 +97,11 @@ public class TabPaneNewButton extends TabPane {
         }
     }
 
-    public Supplier<Tab> getTabFactory() {
-        return tabFactory;
+    public Supplier<Optional<Tab>> getNewTabFactory() {
+        return newTabFactory;
     }
 
-    public void setTabFactory(Supplier<Tab> tabFactory) {
-        this.tabFactory = tabFactory;
+    public void setNewTabFactory(Supplier<Optional<Tab>> newTabFactory) {
+        this.newTabFactory = newTabFactory;
     }
 }

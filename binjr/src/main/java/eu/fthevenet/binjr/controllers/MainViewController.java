@@ -55,7 +55,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
-    private TabPane sourcesTabPane;
+    private TabPaneNewButton sourcesTabPane;
     @FXML
     private TabPaneNewButton worksheetTabPane;
 
@@ -119,16 +119,25 @@ public class MainViewController implements Initializable {
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
 
-       worksheetTabPane.setTabFactory(()->{
-           EditableTab newTab = new EditableTab("New worksheet");
-           editWorksheet(new Worksheet(), newTab);
-           return newTab;
-       });
+        worksheetTabPane.setNewTabFactory(() -> {
+            EditableTab newTab = new EditableTab("New worksheet");
+            if (editWorksheet(new Worksheet(), newTab)) {
+                return Optional.of(newTab);
+            }
+            return Optional.empty();
+        });
 
+        sourcesTabPane.setNewTabFactory(()->{
+            Tab newTab = new Tab();
+            if (getAdapterDlg(newTab)) {
+                return Optional.of(newTab);
+            }
+            return Optional.empty();
+        });
 
         addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-text-fill: #7c7c7c;"));
         addSourceLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addSourceLabel.setStyle("-fx-text-fill: #c3c3c3;"));
-        addSourceLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddJRDSSource(new ActionEvent()));
+        addSourceLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddJrdsSource(new ActionEvent()));
         addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #7c7c7c;"));
         addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #c3c3c3;"));
         addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddNewWorksheet(new ActionEvent()));
@@ -153,8 +162,7 @@ public class MainViewController implements Initializable {
                 chartTypeLabel.setText(worksheet.getChartType().toString());
                 unitLabel.setText(worksheet.getUnit());
                 baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            }
-            else {
+            } else {
                 worksheetStatusBar.setVisible(false);
             }
         });
@@ -164,8 +172,7 @@ public class MainViewController implements Initializable {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
                 sourceStatusBar.setVisible(true);
                 sourceLabel.setText(selectedDataAdapter.getSourceName());
-            }
-            else {
+            } else {
                 sourceStatusBar.setVisible(false);
             }
         });
@@ -215,18 +222,13 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    protected void handleAddJRDSSource(ActionEvent actionEvent) {
+    protected void handleAddJrdsSource(ActionEvent actionEvent) {
         DataAdapterDialog dlg = new JrdsAdapterDialog(root);
-        dlg.showAndWait().ifPresent(da -> {
-            Tab newTab = new Tab(da.getSourceName());
-            newTab.setUserData(da);
-            TreeView<TimeSeriesBinding<Double>> treeView;
-            treeView = buildTreeViewForTarget(da);
-            newTab.setContent(treeView);
+        Tab newTab = new Tab();
+        if (getAdapterDlg(newTab)) {
             sourcesTabPane.getTabs().add(newTab);
             sourcesTabPane.getSelectionModel().select(newTab);
-        });
-
+        }
     }
 
     @FXML
@@ -259,20 +261,35 @@ public class MainViewController implements Initializable {
 
     //region private members
 
-    private boolean editWorksheet(Worksheet worksheet){
-        EditableTab newTab = new EditableTab("New worksheet");
-      boolean res = editWorksheet(worksheet, newTab);
-        worksheetTabPane.getTabs().add(newTab);
-        worksheetTabPane.getSelectionModel().select(newTab);
-        return res;
+    private boolean getAdapterDlg(Tab newTab) {
+        AtomicBoolean res = new AtomicBoolean(false);
+        DataAdapterDialog dlg = new JrdsAdapterDialog(root);
+        dlg.showAndWait().ifPresent(da -> {
+            newTab.setText(da.getSourceName());
+            newTab.setUserData(da);
+            TreeView<TimeSeriesBinding<Double>> treeView;
+            treeView = buildTreeViewForTarget(da);
+            newTab.setContent(treeView);
+            res.set(true);
+        });
+        return res.get();
     }
 
-    private boolean editWorksheet(Worksheet worksheet,  EditableTab newTab ) {
+    private boolean editWorksheet(Worksheet worksheet) {
+        EditableTab newTab = new EditableTab("New worksheet");
+        if (editWorksheet(worksheet, newTab)) {
+            worksheetTabPane.getTabs().add(newTab);
+            worksheetTabPane.getSelectionModel().select(newTab);
+            return true;
+        }
+        return false;
+    }
+
+    private boolean editWorksheet(Worksheet worksheet, EditableTab newTab) {
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, root);
         dlg.showAndWait().ifPresent(w -> {
             try {
-              //  EditableTab newTab = new EditableTab("New worksheet");
                 WorksheetController current;
                 switch (w.getChartType()) {
                     case AREA:
@@ -331,8 +348,7 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        }
-        else {
+        } else {
             bindings.add(branch.getValue());
         }
     }

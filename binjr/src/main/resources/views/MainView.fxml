@@ -49,7 +49,7 @@
                 <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Sources">
                     <items>
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                            <MenuItem mnemonicParsing="false" onAction="#handleAddJRDSSource" text="JRDS">
+                            <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
                                 <accelerator>
                                     <KeyCodeCombination alt="DOWN" code="J" control="UP" meta="UP" shift="UP" shortcut="UP"/>
                                 </accelerator>

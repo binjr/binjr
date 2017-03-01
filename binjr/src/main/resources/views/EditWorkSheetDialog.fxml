@@ -23,19 +23,19 @@
             </rowConstraints>
             <children>
                 <TextField fx:id="nameField" GridPane.columnIndex="1"/>
-                <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                <Label text="Name"/>
-                <Label text="Timezone:" GridPane.rowIndex="4"/>
                 <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="305.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                <Label text="Chart type:" GridPane.rowIndex="1"/>
+                <TextField fx:id="unitNameField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <ChoiceBox fx:id="unitPrefixesChoice" prefHeight="25.0" prefWidth="374.0" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
                 <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
                 <ZonedDateTimePicker fx:id="toDatePicker" prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                <Label text="Name"/>
+                <Label text="Timezone:" GridPane.rowIndex="4"/>
+                <Label text="Chart type:" GridPane.rowIndex="1"/>
                 <Label text="From:" GridPane.rowIndex="5"/>
                 <Label text="To:" GridPane.rowIndex="6"/>
                 <Label text="Unit:" GridPane.rowIndex="2"/>
                 <Label text="Unit prefixes:" GridPane.rowIndex="3"/>
-                <TextField fx:id="unitNameField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <ChoiceBox fx:id="unitPrefixesChoice" prefHeight="25.0" prefWidth="374.0" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
             </children>
         </GridPane>
     </content>
