@@ -194,10 +194,6 @@ public abstract class WorksheetController implements Initializable {
         this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
         plotChart(currentState.asSelection());
 
-//        seriesTable.getColumns().forEach(c -> {
-//            c.setCellFactory(ContextMenuTableViewCell.forTableColumn(new ContextMenu(new MenuItem("Foo"), new MenuItem("bar"))));
-//        });
-
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
@@ -298,41 +294,24 @@ public abstract class WorksheetController implements Initializable {
             logger.debug(() -> "XYChartViewState hasn't change, no need to redraw the graph");
         }
     }
-    //region [UI event handlers]
 
-    /**
-     * Handles user interaction with the "back" button.
-     *
-     * @param actionEvent the event
-     */
-    public void handleHistoryBack(ActionEvent actionEvent) {
+    @FXML
+    protected void handleHistoryBack(ActionEvent actionEvent) {
         restoreSelectionFromHistory(backwardHistory, forwardHistory);
     }
 
-    /**
-     * Handles user interaction with the "forward" button.
-     *
-     * @param actionEvent the event
-     */
-    public void handleHistoryForward(ActionEvent actionEvent) {
+    @FXML
+    protected void handleHistoryForward(ActionEvent actionEvent) {
         restoreSelectionFromHistory(forwardHistory, backwardHistory);
     }
 
-    /**
-     * Handles user interaction with the "reset" button.
-     *
-     * @param actionEvent the event
-     */
-    public void handleResetYRangeButton(ActionEvent actionEvent) {
+    @FXML
+    protected void handleResetYRangeButton(ActionEvent actionEvent) {
         chart.getYAxis().setAutoRanging(true);
     }
 
-    /**
-     * Handles user interaction with the "refresh" button.
-     *
-     * @param actionEvent the event
-     */
-    public void handleRefresh(ActionEvent actionEvent) {
+    @FXML
+    protected void handleRefresh(ActionEvent actionEvent) {
         this.invalidate(false, true, true);
     }
     //endregion

@@ -13,14 +13,14 @@
             <menus>
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
-                        <MenuItem disable="true" mnemonicParsing="false" text="New Workspace">
+                        <MenuItem  mnemonicParsing="false" text="New Workspace" onAction="#handleNewWorkspace">
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/new.png"/>
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem disable="true" mnemonicParsing="false" text="Open…">
+                        <MenuItem  mnemonicParsing="false" text="Open…" onAction="#handleOpenWorkspace">
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/open.png"/>
@@ -31,9 +31,14 @@
                         <Menu disable="true" mnemonicParsing="false" text="Open Recent"/>
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Close" />-->
-                        <!--<MenuItem mnemonicParsing="false" text="Save" />-->
-                        <!--<MenuItem mnemonicParsing="false" text="Save As…" />-->
-                        <!--<MenuItem mnemonicParsing="false" text="Revert" />-->
+                        <MenuItem mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
+                            <graphic>
+                                <ImageView fitHeight="14" fitWidth="14">
+                                    <Image url="@/images/save.png"/>
+                                </ImageView>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" text="Save As…" onAction="#handleSaveAsWorkspace"/>
                         <SeparatorMenuItem mnemonicParsing="false"/>
                         <MenuItem accelerator="Alt+P" mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…">
                             <graphic>

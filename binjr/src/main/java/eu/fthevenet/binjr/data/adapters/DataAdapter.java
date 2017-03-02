@@ -3,6 +3,9 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import javafx.scene.control.TreeItem;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.time.Instant;
@@ -13,6 +16,8 @@ import java.time.ZoneId;
  *
  * @author Frederic Thevenet
  */
+@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlRootElement(name = "DataAdapter")
 public interface DataAdapter<T extends Number> extends Serializable {
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.

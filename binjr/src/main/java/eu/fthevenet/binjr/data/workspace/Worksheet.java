@@ -8,6 +8,10 @@ import javafx.beans.property.SimpleStringProperty;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -22,6 +26,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Frederic Thevenet
  */
+@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlRootElement(name = "Worksheet")
 public class Worksheet implements Serializable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
@@ -45,7 +51,7 @@ public class Worksheet implements Serializable {
     public Worksheet(String name, ChartType chartType, ZoneId timezone) {
         this(name, chartType, timezone,
                 new HashSet<>(),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(),"-", UnitPrefixes.METRIC);
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
     /**
@@ -87,6 +93,7 @@ public class Worksheet implements Serializable {
         this.name.setValue(name);
     }
 
+    @XmlTransient
     public ObservableSetWrapper<TimeSeriesBinding<Number>> getSeries() {
         return series;
     }

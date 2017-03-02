@@ -26,6 +26,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXB;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -46,9 +50,14 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
+@XmlRootElement(name = "JrdsDataAdapter")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class JrdsDataAdapter implements DataAdapter<Double> {
+   @XmlTransient
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
-    public static final String SEPARATOR = ",";
+    @XmlTransient
+    private static final String SEPARATOR = ",";
+
     private final String jrdsHost;
     private final int jrdsPort;
     private final String jrdsPath;
@@ -56,6 +65,8 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     private final ZoneId zoneId;
     private final String encoding;
     private final JrdsTreeFilter treeFilter;
+
+
 
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
@@ -67,6 +78,16 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeFilter treeFilter) throws MalformedURLException {
         URL u = new URL(url.replaceAll("/$", ""));
         return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
+    }
+
+    private JrdsDataAdapter() {
+        jrdsHost = "";
+        jrdsPort = 0;
+        jrdsPath = "";
+        jrdsProtocol = "";
+        zoneId = null;
+        encoding = "";
+        treeFilter = null;
     }
 
     /**

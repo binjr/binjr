@@ -3,11 +3,18 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import javafx.scene.paint.Color;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+
 /**
  * Represents a binding between a time series and the {@link DataAdapter} used to produce it.
  *
  * @author Frederic Thevenet
  */
+@XmlAccessorType(XmlAccessType.PROPERTY)
+@XmlRootElement(name="TimeSeriesBinding")
 public interface TimeSeriesBinding<T extends Number> extends Comparable<TimeSeriesBinding<T>> {
     /**
      * Returns the label of the binding
@@ -28,6 +35,7 @@ public interface TimeSeriesBinding<T extends Number> extends Comparable<TimeSeri
      *
      * @return the {@link DataAdapter} of the binding
      */
+    @XmlTransient
     DataAdapter<T> getAdapter();
 
     /**
