@@ -156,7 +156,7 @@
                             <Font name="System Bold Italic" size="24.0"/>
                         </font>
                     </Label>
-                    <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                    <TabPaneNewButton side="LEFT" fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
                                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <tabs>
                         </tabs>
