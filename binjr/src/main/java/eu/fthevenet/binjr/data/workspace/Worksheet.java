@@ -2,9 +2,13 @@ package eu.fthevenet.binjr.data.workspace;
 
 import com.sun.javafx.collections.ObservableSetWrapper;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +43,8 @@ public class Worksheet implements Serializable {
     private Property<ChartType> chartType;
     private Property<ZonedDateTime> fromDateTime;
     private Property<ZonedDateTime> toDateTime;
+    @XmlTransient
+    private final Property<Boolean> dirty;
 
     public Worksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
@@ -79,6 +85,17 @@ public class Worksheet implements Serializable {
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
+        this.dirty = new SimpleBooleanProperty(false);
+
+        ChangeListener setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
+        this.nameProperty().addListener(setDirty);
+        this.unitProperty().addListener(setDirty);
+        this.chartTypeProperty().addListener(setDirty);
+        this.timeZoneProperty().addListener(setDirty);
+        this.fromDateTimeProperty().addListener(setDirty);
+        this.toDateTimeProperty().addListener(setDirty);
+        this.unitPrefixesProperty().addListener(setDirty);
+      //  this.series.addListener((InvalidationListener) observable -> dirty = true);
     }
 
     public String getName() {
@@ -181,6 +198,15 @@ public class Worksheet implements Serializable {
                 getTimeZone().toString(),
                 getChartType().toString()
         );
+    }
+
+    @XmlTransient
+    public boolean isDirty(){
+        return dirty.getValue();
+    }
+
+    public Property<Boolean> dirtyProperty(){
+        return dirty;
     }
 }
 

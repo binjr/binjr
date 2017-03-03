@@ -6,6 +6,7 @@ import eu.fthevenet.binjr.controls.TabPaneNewButton;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.workspace.Source;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.data.workspace.Workspace;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
@@ -67,6 +68,8 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem snapshotMenuItem;
     @FXML
+    private MenuItem saveMenuItem;
+    @FXML
     private CheckMenuItem showXmarkerMenuItem;
     @FXML
     private CheckMenuItem showYmarkerMenuItem;
@@ -91,6 +94,8 @@ public class MainViewController implements Initializable {
     @FXML
     private Label sourceLabel;
 
+
+    private boolean loadingWorkspace = false;
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private WorksheetController selectedTabController;
     private DataAdapter<Double> selectedDataAdapter;
@@ -113,6 +118,8 @@ public class MainViewController implements Initializable {
         assert addSourceLabel != null : "fx:id\"addSourceLabel\" was not injected!";
         assert addWorksheetLabel != null : "fx:id\"addWorksheetLabel\" was not injected!";
         assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
+        assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
+
 
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
@@ -122,39 +129,45 @@ public class MainViewController implements Initializable {
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
-        // this.workspace.getAdapters().
+        // this.workspace.getSources().
 
         worksheetTabPane.setNewTabFactory(() -> {
-            EditableTab newTab = new EditableTab("New worksheet");
-            if (editWorksheet(new Worksheet(), newTab)) {
-                return Optional.of(newTab);
-            }
-            return Optional.empty();
+            AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
+            EditableTab newTab = new EditableTab("");
+            new EditWorksheetDialog<>(new Worksheet(), root).showAndWait().ifPresent(w -> {
+                loadWorksheet(w, newTab);
+                wasNewTabCreated.set(true);
+            });
+            return wasNewTabCreated.get() ? Optional.of(newTab):Optional.empty();
         });
 
 
         worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    workspace.getWorksheets().addAll(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+           // if (!loadingWorkspace) {
+                while (c.next()) {
+                    if (c.wasAdded()) {
+                        workspace.getWorksheets().addAll(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+                    }
+                    else if (c.wasRemoved()) {
+                        workspace.getWorksheets().removeAll(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+                    }
                 }
-                else if (c.wasRemoved()) {
-                    workspace.getWorksheets().removeAll(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                }
-            }
-            logger.debug("Worksheets in current workspace: " + workspace.getWorksheets().stream().map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+                logger.debug("Worksheets in current workspace: " + workspace.getWorksheets().stream().map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+          //  }
         });
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    workspace.getAdapters().addAll(c.getAddedSubList().stream().map(sourcesAdapters::get).collect(Collectors.toList()));
+         //   if (!loadingWorkspace) {
+                while (c.next()) {
+                    if (c.wasAdded()) {
+                        workspace.getSources().addAll(c.getAddedSubList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+                    }
+                    else if (c.wasRemoved()) {
+                        workspace.getSources().removeAll(c.getRemoved().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+                    }
                 }
-                else if (c.wasRemoved()) {
-                    workspace.getAdapters().removeAll(c.getRemoved().stream().map(sourcesAdapters::get).collect(Collectors.toList()));
-                }
-            }
-            logger.debug("Adapters in current workspace: " + workspace.getAdapters().stream().map(DataAdapter::getSourceName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+                logger.debug("Adapters in current workspace: " + workspace.getSources().stream().map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+          //  }
         });
 
         sourcesTabPane.setNewTabFactory(() -> {
@@ -177,18 +190,20 @@ public class MainViewController implements Initializable {
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                this.selectedTabController = seriesControllers.get(newValue);
-                Worksheet worksheet = selectedTabController.getWorksheet();
-                worksheetStatusBar.setVisible(true);
-                nameLabel.textProperty().bind(worksheet.nameProperty());
-                zoneIdLabel.setText(worksheet.getTimeZone().toString());
-                chartTypeLabel.setText(worksheet.getChartType().toString());
-                unitLabel.setText(worksheet.getUnit());
-                baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            }
-            else {
-                worksheetStatusBar.setVisible(false);
+            if (!loadingWorkspace) {
+                if (newValue != null) {
+                    this.selectedTabController = seriesControllers.get(newValue);
+                    Worksheet worksheet = selectedTabController.getWorksheet();
+                    worksheetStatusBar.setVisible(true);
+                    nameLabel.textProperty().bind(worksheet.nameProperty());
+                    zoneIdLabel.setText(worksheet.getTimeZone().toString());
+                    chartTypeLabel.setText(worksheet.getChartType().toString());
+                    unitLabel.setText(worksheet.getUnit());
+                    baseLabel.setText(worksheet.getUnitPrefixes().toString());
+                }
+                else {
+                    worksheetStatusBar.setVisible(false);
+                }
             }
         });
 
@@ -202,6 +217,8 @@ public class MainViewController implements Initializable {
                 sourceStatusBar.setVisible(false);
             }
         });
+
+        saveMenuItem.disableProperty().bind(workspace.dirtyProperty());
     }
 
     //region UI handlers
@@ -244,7 +261,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddNewWorksheet(ActionEvent event) {
-        loadWorksheet(new Worksheet(), false);
+        editWorksheet(new Worksheet());
     }
 
     @FXML
@@ -281,21 +298,23 @@ public class MainViewController implements Initializable {
         confirmAndClearWorkspace();
     }
 
-    private boolean confirmAndClearWorkspace(){
+    private boolean confirmAndClearWorkspace() {
         AtomicBoolean wasCleared = new AtomicBoolean(false);
-        Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, "Continue?");
-        dlg.setTitle("New Workspace");
-        dlg.getDialogPane().setHeaderText("This will close the current the current workspace.");
-        dlg.showAndWait().ifPresent(buttonType -> {
-            if (buttonType == ButtonType.OK) {
-                clearWorkspace();
-                wasCleared.set(true);
-            }
-        });
-        return wasCleared.get();
+        if (!workspace.isEmpty()) {
+            Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, "Continue?");
+            dlg.setTitle("New Workspace");
+            dlg.getDialogPane().setHeaderText("This will close the current the current workspace.");
+            dlg.showAndWait().ifPresent(buttonType -> {
+                if (buttonType == ButtonType.OK) {
+                    clearWorkspace();
+                    wasCleared.set(true);
+                }
+            });
+        }
+            return wasCleared.get();
     }
 
-    private void clearWorkspace(){
+    private void clearWorkspace() {
         this.worksheetTabPane.getTabs().clear();
         this.sourcesTabPane.getTabs().clear();
         this.workspace = new Workspace();
@@ -313,18 +332,32 @@ public class MainViewController implements Initializable {
             try {
                 Workspace ws = XmlUtils.deSerialize(Workspace.class, selectedFile);
                 logger.debug("Successfully deserialized workspace " + ws.toString());
-               if (confirmAndClearWorkspace()){
-                    for (Worksheet worksheet:ws.getWorksheets()){
-                        loadWorksheet(worksheet, true);
+                if (confirmAndClearWorkspace()) {
+                    loadingWorkspace = true;
+                    try {
+                        for (Source source : ws.getSources()) {
+                            DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
+                            da.setParams(source.getAdapterParams());
+                            loadAdapters(da);
+                        }
+
+                        for (Worksheet worksheet : ws.getWorksheets()) {
+                            loadWorksheet(worksheet);
+                        }
+                    } finally {
+                        loadingWorkspace = false;
                     }
-               }
+                }
             } catch (IOException e) {
                 Dialogs.displayException("Error reading file " + selectedFile.getPath(), e, root);
             } catch (JAXBException e) {
                 Dialogs.displayException("Error while deserializing workspace", e, root);
+            } catch (IllegalAccessException | InstantiationException e) {
+                Dialogs.displayException("Error while instantiating DataAdapter", e, root);
             }
         }
     }
+
 
     @FXML
     protected void handleSaveWorkspace(ActionEvent event) {
@@ -340,6 +373,7 @@ public class MainViewController implements Initializable {
         fileChooser.setInitialFileName(workspace.getName() + ".xml");
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
+            workspace.setSaved();
             try {
                 GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.getParent());
                 XmlUtils.serialize(workspace, selectedFile);
@@ -396,64 +430,74 @@ public class MainViewController implements Initializable {
         return res.get();
     }
 
+    private void loadAdapters(DataAdapter da) {
+        Tab newTab = new Tab();
+        newTab.setText(da.getSourceName());
+        newTab.setUserData(da);
+        TreeView<TimeSeriesBinding<Double>> treeView;
+        treeView = buildTreeViewForTarget(da);
+        newTab.setContent(treeView);
+        sourcesAdapters.put(newTab, da);
+        sourcesTabPane.getTabs().add(newTab);
+        sourcesTabPane.getSelectionModel().select(newTab);
+    }
 
-    private boolean loadWorksheet(Worksheet worksheet, boolean noNeedToEdit) {
+    private boolean loadWorksheet(Worksheet worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
-        if (noNeedToEdit || editWorksheet(worksheet, newTab)) {
-            worksheetTabPane.getTabs().add(newTab);
-            worksheetTabPane.getSelectionModel().select(newTab);
-            return true;
-        }
+        loadWorksheet(worksheet, newTab);
+        worksheetTabPane.getTabs().add(newTab);
+        worksheetTabPane.getSelectionModel().select(newTab);
         return false;
     }
 
-    private boolean editWorksheet(Worksheet worksheet, EditableTab newTab) {
+    private void loadWorksheet(Worksheet worksheet, EditableTab newTab){
+        try {
+            WorksheetController current;
+            switch (worksheet.getChartType()) {
+                case AREA:
+                    current = new AreaChartWorksheetController(MainViewController.this, worksheet);
+                    break;
+                case STACKED:
+                    current = new StackedAreaChartWorksheetController(MainViewController.this, worksheet);
+                    break;
+                case LINE:
+                    current = new LineChartWorksheetController(MainViewController.this,worksheet);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported chart");
+            }
+            try {
+                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
+                fXMLLoader.setController(current);
+                Parent p = fXMLLoader.load();
+                newTab.setContent(p);
+            } catch (IOException ex) {
+                logger.error("Error loading time series", ex);
+            }
+            selectedTabController = current;
+            seriesControllers.put(newTab, current);
+            newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
+        } catch (Exception e) {
+            Dialogs.displayException("Error loading worksheet into new tab", e);
+        }
+    }
+
+    private boolean editWorksheet(Worksheet worksheet) {
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, root);
         dlg.showAndWait().ifPresent(w -> {
-            try {
-                WorksheetController current;
-                switch (w.getChartType()) {
-                    case AREA:
-                        current = new AreaChartWorksheetController(MainViewController.this, w);
-                        break;
-                    case STACKED:
-                        current = new StackedAreaChartWorksheetController(MainViewController.this, w);
-                        break;
-                    case LINE:
-                        current = new LineChartWorksheetController(MainViewController.this, w);
-                        break;
-                    default:
-                        throw new UnsupportedOperationException("Unsupported chart");
-                }
-                try {
-                    FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
-                    fXMLLoader.setController(current);
-                    Parent p = fXMLLoader.load();
-                    newTab.setContent(p);
-                } catch (IOException ex) {
-                    logger.error("Error loading time series", ex);
-                }
-                selectedTabController = current;
-
-                seriesControllers.put(newTab, current);
-                newTab.nameProperty().bindBidirectional(w.nameProperty());
-
-            } catch (Exception e) {
-                Dialogs.displayException("Error creating new worksheet tab", e);
-
-            } finally {
-                wasNewTabCreated.set(true);
-            }
+            EditableTab newTab = new EditableTab("");
+            loadWorksheet(w, newTab);
+            worksheetTabPane.getTabs().add(newTab);
+            worksheetTabPane.getSelectionModel().select(newTab);
+            wasNewTabCreated.set(true);
         });
         return wasNewTabCreated.get();
     }
 
 
-
     private TreeView<TimeSeriesBinding<Double>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
-
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView)));
         try {
             TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
@@ -508,7 +552,7 @@ public class MainViewController implements Initializable {
         addToNew.setOnAction(event -> {
             TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
             Worksheet worksheet = new Worksheet(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
-            if (loadWorksheet(worksheet, false) && selectedTabController != null) {
+            if (editWorksheet(worksheet) && selectedTabController != null) {
                 List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(treeItem, bindings);
                 selectedTabController.addBindings(bindings);

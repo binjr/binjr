@@ -38,10 +38,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -49,24 +46,17 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-@DataAdapterInfo(name = "JRDS", description = "A binjr data adapter for JRDS.")
-@XmlRootElement(name = "JrdsDataAdapter")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class JrdsDataAdapter implements DataAdapter<Double> {
-   @XmlTransient
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
-    @XmlTransient
     private static final String SEPARATOR = ",";
-
-    private final String jrdsHost;
-    private final int jrdsPort;
-    private final String jrdsPath;
-    private final String jrdsProtocol;
-    private final ZoneId zoneId;
-    private final String encoding;
-    private final JrdsTreeFilter treeFilter;
-
-
+    private  String jrdsHost;
+    private  int jrdsPort;
+    private  String jrdsPath;
+    private  String jrdsProtocol;
+    private  ZoneId zoneId;
+    private  String encoding;
+    private  JrdsTreeFilter treeFilter;
 
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
@@ -80,16 +70,9 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
         return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
     }
 
-    private JrdsDataAdapter() {
-        jrdsHost = "";
-        jrdsPort = 0;
-        jrdsPath = "";
-        jrdsProtocol = "";
-        zoneId = null;
-        encoding = "";
-        treeFilter = null;
-    }
+    public JrdsDataAdapter(){
 
+    }
     /**
      * Initializes a new instance of the {@link JrdsDataAdapter} class.
      *
@@ -99,7 +82,7 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
      * @param path         the url path of the JRDS webapp.
      * @param zoneId       the id of the time zone used to record dates.
      * @param encoding     the encoding used by the download servlet.
-     * @param treeFilter
+     * @param treeFilter   the filter to apply to the tree view
      */
     public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeFilter treeFilter) {
         this.jrdsHost = hostname;
@@ -156,6 +139,30 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     @Override
     public String getSourceName() {
         return "[JRDS] " + jrdsHost + ":" + jrdsPort + " (" + zoneId.toString() + ")";
+    }
+
+    @Override
+    public Map<String, String> getParams() {
+        Map<String, String> params = new HashMap<>();
+        params.put("jrdsHost", jrdsHost);
+        params.put("jrdsPort", Integer.toString(jrdsPort));
+        params.put("jrdsProtocol", jrdsProtocol);
+        params.put("jrdsPath", jrdsPath);
+        params.put("zoneId",zoneId.toString());
+        params.put("encoding", encoding);
+        params.put("treeFilter", treeFilter.name());
+        return params;
+    }
+
+    @Override
+    public void setParams(Map<String, String> params) {
+        jrdsProtocol = params.get("jrdsProtocol");
+        jrdsHost = params.get("jrdsHost");
+        jrdsPort = Integer.parseInt(params.get("jrdsPort"));
+        jrdsPath = params.get("jrdsPath");
+        zoneId = ZoneId.of(params.get("zoneId"));
+        encoding = params.get("encoding");
+        treeFilter = JrdsTreeFilter.valueOf(params.get("treeFilter"));
     }
 
     @Override

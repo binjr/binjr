@@ -31,7 +31,7 @@
                         <Menu disable="true" mnemonicParsing="false" text="Open Recent"/>
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Close" />-->
-                        <MenuItem mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
+                        <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/save.png"/>
