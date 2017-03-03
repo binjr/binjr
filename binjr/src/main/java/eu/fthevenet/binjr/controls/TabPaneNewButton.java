@@ -78,20 +78,20 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                                .subtract(5)
+                                .subtract(6)
                 );
                 break;
             case BOTTOM:
-                newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty().add(5)
-                );
-                break;
-            case RIGHT:
                 newTabButton.translateXProperty().bind(
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
                                 .subtract(5)
+                );
+                break;
+            case RIGHT:
+                newTabButton.translateXProperty().bind(
+                        headersRegion.widthProperty().add(5)
                 );
                 break;
         }
