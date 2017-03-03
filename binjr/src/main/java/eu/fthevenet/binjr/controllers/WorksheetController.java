@@ -190,8 +190,12 @@ public abstract class WorksheetController implements Initializable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
-        ZonedDateTime now = ZonedDateTime.now();
         this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
+
+        // bind the worksheet
+        getWorksheet().fromDateTimeProperty().bind(currentState.startX);
+        getWorksheet().toDateTimeProperty().bind(currentState.endX);
+
         plotChart(currentState.asSelection());
 
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
@@ -245,7 +249,6 @@ public abstract class WorksheetController implements Initializable {
             b.setOrder(seriesOrder.incrementAndGet());
             seriesBindings.add(b);
         }
-        //this.seriesBindings.addAll(bindings);
         invalidate(false, true, true);
         chart.getYAxis().setAutoRanging(true);
     }

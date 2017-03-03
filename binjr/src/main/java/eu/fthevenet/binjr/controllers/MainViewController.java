@@ -95,12 +95,11 @@ public class MainViewController implements Initializable {
     private Label sourceLabel;
 
 
-    private boolean loadingWorkspace = false;
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private WorksheetController selectedTabController;
     private DataAdapter<Double> selectedDataAdapter;
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
-    private Workspace workspace;
+    private final Workspace workspace;
     private final Map<Tab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new WeakHashMap<>();
 
@@ -138,36 +137,32 @@ public class MainViewController implements Initializable {
                 loadWorksheet(w, newTab);
                 wasNewTabCreated.set(true);
             });
-            return wasNewTabCreated.get() ? Optional.of(newTab):Optional.empty();
+            return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
         });
 
 
         worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-           // if (!loadingWorkspace) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        workspace.getWorksheets().addAll(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                    }
-                    else if (c.wasRemoved()) {
-                        workspace.getWorksheets().removeAll(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                    }
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+                } else if (c.wasRemoved()) {
+                    workspace.removeWorksheets(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
                 }
-                logger.debug("Worksheets in current workspace: " + workspace.getWorksheets().stream().map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-          //  }
+            }
+            logger.debug("Worksheets in current workspace: " + workspace.getWorksheets().stream().map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+
         });
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-         //   if (!loadingWorkspace) {
-                while (c.next()) {
-                    if (c.wasAdded()) {
-                        workspace.getSources().addAll(c.getAddedSubList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                    }
-                    else if (c.wasRemoved()) {
-                        workspace.getSources().removeAll(c.getRemoved().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                    }
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    workspace.getSources().addAll(c.getAddedSubList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+                } else if (c.wasRemoved()) {
+                    workspace.getSources().removeAll(c.getRemoved().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
                 }
-                logger.debug("Adapters in current workspace: " + workspace.getSources().stream().map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-          //  }
+            }
+            logger.debug("Adapters in current workspace: " + workspace.getSources().stream().map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+
         });
 
         sourcesTabPane.setNewTabFactory(() -> {
@@ -190,20 +185,17 @@ public class MainViewController implements Initializable {
         showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (!loadingWorkspace) {
-                if (newValue != null) {
-                    this.selectedTabController = seriesControllers.get(newValue);
-                    Worksheet worksheet = selectedTabController.getWorksheet();
-                    worksheetStatusBar.setVisible(true);
-                    nameLabel.textProperty().bind(worksheet.nameProperty());
-                    zoneIdLabel.setText(worksheet.getTimeZone().toString());
-                    chartTypeLabel.setText(worksheet.getChartType().toString());
-                    unitLabel.setText(worksheet.getUnit());
-                    baseLabel.setText(worksheet.getUnitPrefixes().toString());
-                }
-                else {
-                    worksheetStatusBar.setVisible(false);
-                }
+            if (newValue != null) {
+                this.selectedTabController = seriesControllers.get(newValue);
+                Worksheet worksheet = selectedTabController.getWorksheet();
+                worksheetStatusBar.setVisible(true);
+                nameLabel.textProperty().bind(worksheet.nameProperty());
+                zoneIdLabel.setText(worksheet.getTimeZone().toString());
+                chartTypeLabel.setText(worksheet.getChartType().toString());
+                unitLabel.setText(worksheet.getUnit());
+                baseLabel.setText(worksheet.getUnitPrefixes().toString());
+            } else {
+                worksheetStatusBar.setVisible(false);
             }
         });
 
@@ -212,13 +204,12 @@ public class MainViewController implements Initializable {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
                 sourceStatusBar.setVisible(true);
                 sourceLabel.setText(selectedDataAdapter.getSourceName());
-            }
-            else {
+            } else {
                 sourceStatusBar.setVisible(false);
             }
         });
 
-        saveMenuItem.disableProperty().bind(workspace.dirtyProperty());
+        saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
     }
 
     //region UI handlers
@@ -300,8 +291,12 @@ public class MainViewController implements Initializable {
 
     private boolean confirmAndClearWorkspace() {
         AtomicBoolean wasCleared = new AtomicBoolean(false);
-        if (!workspace.isEmpty()) {
-            Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, "Continue?");
+        if (!workspace.isDirty()) {
+            clearWorkspace();
+         return true;
+        }
+
+        Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, "Continue?");
             dlg.setTitle("New Workspace");
             dlg.getDialogPane().setHeaderText("This will close the current the current workspace.");
             dlg.showAndWait().ifPresent(buttonType -> {
@@ -310,14 +305,13 @@ public class MainViewController implements Initializable {
                     wasCleared.set(true);
                 }
             });
-        }
-            return wasCleared.get();
+        return wasCleared.get();
     }
 
     private void clearWorkspace() {
         this.worksheetTabPane.getTabs().clear();
         this.sourcesTabPane.getTabs().clear();
-        this.workspace = new Workspace();
+        this.workspace.clear();
     }
 
     @FXML
@@ -333,19 +327,13 @@ public class MainViewController implements Initializable {
                 Workspace ws = XmlUtils.deSerialize(Workspace.class, selectedFile);
                 logger.debug("Successfully deserialized workspace " + ws.toString());
                 if (confirmAndClearWorkspace()) {
-                    loadingWorkspace = true;
-                    try {
-                        for (Source source : ws.getSources()) {
-                            DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
-                            da.setParams(source.getAdapterParams());
-                            loadAdapters(da);
-                        }
-
-                        for (Worksheet worksheet : ws.getWorksheets()) {
-                            loadWorksheet(worksheet);
-                        }
-                    } finally {
-                        loadingWorkspace = false;
+                    for (Source source : ws.getSources()) {
+                        DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
+                        da.setParams(source.getAdapterParams());
+                        loadAdapters(da);
+                    }
+                    for (Worksheet worksheet : ws.getWorksheets()) {
+                        loadWorksheet(worksheet);
                     }
                 }
             } catch (IOException e) {
@@ -361,7 +349,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleSaveWorkspace(ActionEvent event) {
-
+        workspace.setSaved();
     }
 
     @FXML
@@ -450,7 +438,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void loadWorksheet(Worksheet worksheet, EditableTab newTab){
+    private void loadWorksheet(Worksheet worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
             switch (worksheet.getChartType()) {
@@ -461,7 +449,7 @@ public class MainViewController implements Initializable {
                     current = new StackedAreaChartWorksheetController(MainViewController.this, worksheet);
                     break;
                 case LINE:
-                    current = new LineChartWorksheetController(MainViewController.this,worksheet);
+                    current = new LineChartWorksheetController(MainViewController.this, worksheet);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported chart");
@@ -514,8 +502,7 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        }
-        else {
+        } else {
             bindings.add(branch.getValue());
         }
     }

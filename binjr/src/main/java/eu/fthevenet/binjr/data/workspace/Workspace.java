@@ -3,14 +3,17 @@ package eu.fthevenet.binjr.data.workspace;
 import com.sun.javafx.collections.ObservableListWrapper;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsDataAdapter;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,8 +24,8 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Serializable {
-@XmlTransient
-    private final Property<Boolean> dirty;
+    @XmlTransient
+    private BooleanProperty dirty;
 
     @XmlElementWrapper(name = "Sources")
     @XmlElements(@XmlElement(name = "Source"))
@@ -31,9 +34,7 @@ public class Workspace implements Serializable {
 
     @XmlElementWrapper(name = "Worksheets")
     @XmlElements(@XmlElement(name = "Worksheet"))
-    private List<Worksheet> worksheets;// = new ArrayList<>();
-    @XmlTransient
-    private ObservableList<Worksheet> observableWorksheets;
+    private List<Worksheet> worksheets;
 
     public Workspace() {
         this("New Workspace",
@@ -45,20 +46,33 @@ public class Workspace implements Serializable {
         this.dirty = new SimpleBooleanProperty(false);
         this.name = name;
         this.worksheets = worksheets;
-        this.observableWorksheets = new ObservableListWrapper<Worksheet>(worksheets);
         this.sources = sources;
-        observableWorksheets.addListener((ListChangeListener<Worksheet>) c -> {
-            c.next();
-            if (c.wasAdded()) {
-                for (Worksheet w : c.getAddedSubList()) {
-                    w.dirtyProperty().addListener((observable, oldValue, newValue) -> dirty.setValue(dirty.getValue() | newValue));
-                }
-            }
-        });
+    }
+
+    @XmlTransient
+    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
+        if (newValue) {
+            this.dirty.setValue(true);
+        }
+    };
+
+    public void addWorksheets(Collection<Worksheet> worksheets) {
+        for (Worksheet w : worksheets) {
+            dirty.setValue(dirty.getValue() | w.isDirty());
+            w.dirtyProperty().addListener(changeListener);
+        }
+        this.worksheets.addAll(worksheets);
+    }
+
+    public void removeWorksheets(Collection<Worksheet> worksheets) {
+        for (Worksheet w : worksheets) {
+            w.dirtyProperty().removeListener(changeListener);
+        }
+        this.worksheets.removeAll(worksheets);
     }
 
     public List<Worksheet> getWorksheets() {
-        return observableWorksheets;
+        return worksheets;
     }
 
     public List<Source> getSources() {
@@ -83,23 +97,23 @@ public class Workspace implements Serializable {
         return sb.toString();
     }
 
-//    public boolean isDirty() {
-//        return getWorksheets().stream().map(Worksheet::isDirty).reduce(false, Boolean::logicalOr);
-//    }
-
-    public boolean isEmpty() {
-        return getWorksheets().isEmpty() && getSources().isEmpty();
-    }
-
     public Boolean isDirty() {
         return dirty.getValue();
     }
 
-    public Property<Boolean> dirtyProperty() {
+    public BooleanProperty dirtyProperty() {
         return dirty;
     }
 
     public void setSaved() {
+        worksheets.forEach(Worksheet::setSaved);
         this.dirty.setValue(false);
+    }
+
+    public void clear(){
+        this.dirty.setValue(false);
+        this.worksheets.clear();
+        this.sources.clear();
+        this.name= "New Workspace";
     }
 }

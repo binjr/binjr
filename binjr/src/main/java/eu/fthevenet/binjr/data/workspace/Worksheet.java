@@ -4,10 +4,7 @@ import com.sun.javafx.collections.ObservableSetWrapper;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -44,7 +41,7 @@ public class Worksheet implements Serializable {
     private Property<ZonedDateTime> fromDateTime;
     private Property<ZonedDateTime> toDateTime;
     @XmlTransient
-    private final Property<Boolean> dirty;
+    private final BooleanProperty dirty;
 
     public Worksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
@@ -87,7 +84,7 @@ public class Worksheet implements Serializable {
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.dirty = new SimpleBooleanProperty(false);
 
-        ChangeListener setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
+        ChangeListener<Object> setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
         this.nameProperty().addListener(setDirty);
         this.unitProperty().addListener(setDirty);
         this.chartTypeProperty().addListener(setDirty);
@@ -205,8 +202,12 @@ public class Worksheet implements Serializable {
         return dirty.getValue();
     }
 
-    public Property<Boolean> dirtyProperty(){
+    public BooleanProperty dirtyProperty(){
         return dirty;
+    }
+
+    public void setSaved() {
+        dirty.setValue(false);
     }
 }
 
