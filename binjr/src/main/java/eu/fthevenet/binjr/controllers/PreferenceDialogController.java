@@ -31,6 +31,8 @@ public class PreferenceDialogController implements Initializable {
     private Label maxSampleLabel;
     @FXML
     private Accordion accordionPane;
+    @FXML
+    private CheckBox loadAtStartupCheckbox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -41,6 +43,7 @@ public class PreferenceDialogController implements Initializable {
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
         assert useSourceColors != null : "fx:id\"useSourceColors\" was not injected!";
+        assert loadAtStartupCheckbox != null : "fx:id\"loadAtStartupCheckbox\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -51,25 +54,24 @@ public class PreferenceDialogController implements Initializable {
         showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
         useSourceColors.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().useSourceColorsProperty());
         enableDownSampling.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingEnabledProperty());
+        loadAtStartupCheckbox.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
 
-        accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
-            Platform.runLater( () -> {
+        Platform.runLater(()-> {
+            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
                 p.requestLayout();
                 p.getScene().getWindow().sizeToScene();
-            } );
-        } ));
+            } ));
 
-
-        Platform.runLater(()-> {
             if (accordionPane.getPanes() != null
                     && accordionPane.getPanes().size() > 0
                     && accordionPane.getPanes().get(0) != null) {
                 accordionPane.getPanes().get(0).setExpanded(true);
             }
-        });
 
+
+        });
     }
 }

@@ -2,6 +2,8 @@ package eu.fthevenet.binjr.dialogs;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.control.Dialog;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.Window;
@@ -121,5 +123,14 @@ public class Dialogs {
                 desktop.browse(new URI(url));
             }
         }
+    }
+
+    public static ButtonType  confirmSaveDialog(Node node, String fileName){
+        Dialog<ButtonType> dlg = new Dialog<>();
+        dlg.initOwner(Dialogs.getStage(node));
+        dlg.setTitle("Save");
+        dlg.getDialogPane().setHeaderText("Do you want to save changes to " + fileName + "?");
+        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+        return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 }
