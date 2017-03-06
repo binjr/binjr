@@ -14,7 +14,6 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
-import eu.fthevenet.binjr.xml.XmlUtils;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -32,6 +31,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
+import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +45,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * The controller class for the main view
@@ -119,7 +120,6 @@ public class MainViewController implements Initializable {
         assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
 
-
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -128,7 +128,6 @@ public class MainViewController implements Initializable {
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
-        // this.workspace.getSources().
 
         worksheetTabPane.setNewTabFactory(() -> {
             AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
@@ -145,24 +144,18 @@ public class MainViewController implements Initializable {
             while (c.next()) {
                 if (c.wasAdded()) {
                     workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                } else if (c.wasRemoved()) {
+                }
+                else if (c.wasRemoved()) {
                     workspace.removeWorksheets(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
                 }
             }
-            logger.debug("Worksheets in current workspace: " + workspace.getWorksheets().stream().map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-
+            logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    workspace.getSources().addAll(c.getAddedSubList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                } else if (c.wasRemoved()) {
-                    workspace.getSources().removeAll(c.getRemoved().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                }
-            }
-            logger.debug("Adapters in current workspace: " + workspace.getSources().stream().map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-
+            workspace.clearSources();
+            workspace.addSources(c.getList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+            logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
         sourcesTabPane.setNewTabFactory(() -> {
@@ -194,7 +187,8 @@ public class MainViewController implements Initializable {
                 chartTypeLabel.setText(worksheet.getChartType().toString());
                 unitLabel.setText(worksheet.getUnit());
                 baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            } else {
+            }
+            else {
                 worksheetStatusBar.setVisible(false);
             }
         });
@@ -204,12 +198,34 @@ public class MainViewController implements Initializable {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
                 sourceStatusBar.setVisible(true);
                 sourceLabel.setText(selectedDataAdapter.getSourceName());
-            } else {
+            }
+            else {
                 sourceStatusBar.setVisible(false);
             }
         });
 
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
+
+        Platform.runLater(() -> {
+            Stage stage = Dialogs.getStage(root);
+            stage.titleProperty().bind(Bindings.createStringBinding(
+                    () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
+                    workspace.pathProperty(),
+                    workspace.dirtyProperty()));
+
+            stage.setOnCloseRequest(event -> {
+                if (!confirmAndClearWorkspace()) {
+                    event.consume();
+                }
+            });
+
+            if (GlobalPreferences.getInstance().isLoadLastWorkspaceOnStartup()) {
+                File latestWorkspace = GlobalPreferences.getInstance().getMostRecentSavedWorkspace().toFile();
+                if (latestWorkspace.exists()) {
+                    loadWorkspace(latestWorkspace);
+                }
+            }
+        });
     }
 
     //region UI handlers
@@ -225,7 +241,9 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleQuitAction(ActionEvent event) {
-        Platform.exit();
+        if (confirmAndClearWorkspace()) {
+            Platform.exit();
+        }
     }
 
     @FXML
@@ -265,7 +283,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-
     @FXML
     protected void handleHelpAction(ActionEvent event) {
         try {
@@ -289,88 +306,19 @@ public class MainViewController implements Initializable {
         confirmAndClearWorkspace();
     }
 
-    private boolean confirmAndClearWorkspace() {
-        AtomicBoolean wasCleared = new AtomicBoolean(false);
-        if (!workspace.isDirty()) {
-            clearWorkspace();
-         return true;
-        }
-
-        Alert dlg = new Alert(Alert.AlertType.CONFIRMATION, "Continue?");
-            dlg.setTitle("New Workspace");
-            dlg.getDialogPane().setHeaderText("This will close the current the current workspace.");
-            dlg.showAndWait().ifPresent(buttonType -> {
-                if (buttonType == ButtonType.OK) {
-                    clearWorkspace();
-                    wasCleared.set(true);
-                }
-            });
-        return wasCleared.get();
-    }
-
-    private void clearWorkspace() {
-        this.worksheetTabPane.getTabs().clear();
-        this.sourcesTabPane.getTabs().clear();
-        this.workspace.clear();
-    }
-
     @FXML
     protected void handleOpenWorkspace(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Workspace");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Workspace Files", "*.xml"));
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
-        fileChooser.setInitialFileName(workspace.getName() + ".xml");
-        File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
-        if (selectedFile != null) {
-            try {
-                Workspace ws = XmlUtils.deSerialize(Workspace.class, selectedFile);
-                logger.debug("Successfully deserialized workspace " + ws.toString());
-                if (confirmAndClearWorkspace()) {
-                    for (Source source : ws.getSources()) {
-                        DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
-                        da.setParams(source.getAdapterParams());
-                        loadAdapters(da);
-                    }
-                    for (Worksheet worksheet : ws.getWorksheets()) {
-                        loadWorksheet(worksheet);
-                    }
-                }
-            } catch (IOException e) {
-                Dialogs.displayException("Error reading file " + selectedFile.getPath(), e, root);
-            } catch (JAXBException e) {
-                Dialogs.displayException("Error while deserializing workspace", e, root);
-            } catch (IllegalAccessException | InstantiationException e) {
-                Dialogs.displayException("Error while instantiating DataAdapter", e, root);
-            }
-        }
+        openWorkspaceFromFile();
     }
-
 
     @FXML
     protected void handleSaveWorkspace(ActionEvent event) {
-        workspace.setSaved();
+        saveWorkspace();
     }
 
     @FXML
     protected void handleSaveAsWorkspace(ActionEvent event) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save Workspace");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Workspace Files", "*.xml"));
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
-        fileChooser.setInitialFileName(workspace.getName() + ".xml");
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
-        if (selectedFile != null) {
-            workspace.setSaved();
-            try {
-                GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.getParent());
-                XmlUtils.serialize(workspace, selectedFile);
-            } catch (IOException e) {
-                Dialogs.displayException("Failed to save snapshot to disk", e, root);
-            } catch (JAXBException e) {
-                Dialogs.displayException("Error while serializing workspace", e, root);
-            }
-        }
+        saveWorkspaceAs();
     }
 
     @FXML
@@ -398,10 +346,106 @@ public class MainViewController implements Initializable {
         return showHorizontalMarker;
     }
 
-
     //endregion
 
     //region private members
+
+    private boolean confirmAndClearWorkspace() {
+        if (!workspace.isDirty()) {
+            clearWorkspace();
+            return true;
+        }
+        ButtonType res = Dialogs.confirmSaveDialog(root, (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
+        if (res == ButtonType.CANCEL){
+            return false;
+        }
+        if (res == ButtonType.YES){
+           if (!saveWorkspace()){
+               return false;
+           }
+        }
+        clearWorkspace();
+        return true;
+    }
+
+    private void clearWorkspace() {
+        this.worksheetTabPane.getTabs().clear();
+        this.sourcesTabPane.getTabs().clear();
+        this.workspace.clear();
+    }
+
+    private void openWorkspaceFromFile() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Workspace");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", "*.bjr"));
+        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            loadWorkspace(selectedFile);
+        }
+    }
+
+    private void loadWorkspace(File file) {
+        try {
+            if (confirmAndClearWorkspace()) {
+                Workspace wsFromfile = Workspace.from(file);
+                workspace.setPath(file.toPath());
+
+                for (Source source : wsFromfile.getSources()) {
+                    DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
+                    da.setParams(source.getAdapterParams());
+                    loadAdapters(da);
+                }
+
+                for (Worksheet worksheet : wsFromfile.getWorksheets()) {
+                    loadWorksheet(worksheet);
+                }
+            }
+        } catch (IllegalAccessException | InstantiationException e) {
+            Dialogs.displayException("Error while instantiating DataAdapter", e, root);
+        } catch (IOException e) {
+            Dialogs.displayException("Error reading file " + file.getPath(), e, root);
+        } catch (JAXBException e) {
+            Dialogs.displayException("Error while deserializing workspace", e, root);
+        }
+    }
+
+    private boolean saveWorkspace() {
+        try {
+            if (workspace.hasPath()) {
+                workspace.save();
+                return true;
+            }
+            else {
+               return saveWorkspaceAs();
+            }
+        } catch (IOException e) {
+            Dialogs.displayException("Failed to save snapshot to disk", e, root);
+        } catch (JAXBException e) {
+            Dialogs.displayException("Error while serializing workspace", e, root);
+        }
+        return false;
+    }
+
+    private boolean saveWorkspaceAs() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save Workspace");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", "*.bjr"));
+        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        fileChooser.setInitialFileName("*.bjr");
+        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            try {
+                workspace.save(selectedFile);
+                return true;
+            } catch (IOException e) {
+                Dialogs.displayException("Failed to save snapshot to disk", e, root);
+            } catch (JAXBException e) {
+                Dialogs.displayException("Error while serializing workspace", e, root);
+            }
+        }
+        return false;
+    }
 
     private boolean getAdapterDlg(Tab newTab) {
         AtomicBoolean res = new AtomicBoolean(false);
@@ -502,7 +546,8 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        } else {
+        }
+        else {
             bindings.add(branch.getValue());
         }
     }
@@ -547,7 +592,5 @@ public class MainViewController implements Initializable {
         });
         return new ContextMenu(addToCurrent, addToNew);
     }
-
-
     //endregion
 }

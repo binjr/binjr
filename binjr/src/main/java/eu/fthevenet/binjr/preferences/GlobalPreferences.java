@@ -1,14 +1,13 @@
 package eu.fthevenet.binjr.preferences;
 
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.jar.Manifest;
@@ -32,14 +31,19 @@ public class GlobalPreferences {
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String USE_SOURCE_COLORS = "useSourceColors";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
-    private Property<Boolean> downSamplingEnabled;
-    private SimpleIntegerProperty downSamplingThreshold;
-    private Property<Boolean> sampleSymbolsVisible;
-    private Property<Boolean> chartAnimationEnabled;
-    private Preferences prefs;
-    private Property<Boolean> useSourceColors;
+    private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
+    private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
     private final Manifest manifest;
-    private Property<String> mostRecentSaveFolder;
+
+    private BooleanProperty loadLastWorkspaceOnStartup;
+    private BooleanProperty downSamplingEnabled;
+    private IntegerProperty downSamplingThreshold;
+    private BooleanProperty sampleSymbolsVisible;
+    private BooleanProperty chartAnimationEnabled;
+    private Preferences prefs;
+    private BooleanProperty useSourceColors;
+    private StringProperty mostRecentSaveFolder;
+    private Property<Path> mostRecentSavedWorkspace;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -59,6 +63,11 @@ public class GlobalPreferences {
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
         useSourceColors = new SimpleBooleanProperty(prefs.getBoolean(USE_SOURCE_COLORS, true));
         useSourceColors.addListener((observable, oldValue, newValue) -> prefs.putBoolean(USE_SOURCE_COLORS, newValue));
+        mostRecentSavedWorkspace = new SimpleObjectProperty<>(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
+        mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
+        loadLastWorkspaceOnStartup = new SimpleBooleanProperty(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
+        loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
+
         this.manifest = getManifest();
     }
 
@@ -85,7 +94,7 @@ public class GlobalPreferences {
      *
      * @return the chart animation property
      */
-    public Property<Boolean> chartAnimationEnabledProperty() {
+    public BooleanProperty chartAnimationEnabledProperty() {
         return chartAnimationEnabled;
     }
 
@@ -112,7 +121,7 @@ public class GlobalPreferences {
      *
      * @return the chart symbols visibility property
      */
-    public Property<Boolean> sampleSymbolsVisibleProperty() {
+    public BooleanProperty sampleSymbolsVisibleProperty() {
         return sampleSymbolsVisible;
     }
 
@@ -139,7 +148,7 @@ public class GlobalPreferences {
      *
      * @return the down-sampling property
      */
-    public Property<Boolean> downSamplingEnabledProperty() {
+    public BooleanProperty downSamplingEnabledProperty() {
         return downSamplingEnabled;
     }
 
@@ -166,7 +175,7 @@ public class GlobalPreferences {
      *
      * @return the property for the series down-sampling threshold value
      */
-    public Property<Number> downSamplingThresholdProperty() {
+    public IntegerProperty downSamplingThresholdProperty() {
         return downSamplingThreshold;
     }
 
@@ -183,7 +192,7 @@ public class GlobalPreferences {
         return useSourceColors.getValue();
     }
 
-    public Property<Boolean> useSourceColorsProperty() {
+    public BooleanProperty useSourceColorsProperty() {
         return useSourceColors;
     }
 
@@ -195,12 +204,37 @@ public class GlobalPreferences {
         return mostRecentSaveFolder.getValue();
     }
 
-    public Property<String> mostRecentSaveFolderProperty() {
+    public StringProperty mostRecentSaveFolderProperty() {
         return mostRecentSaveFolder;
     }
 
     public void setMostRecentSaveFolder(String mostRecentSaveFolder) {
         this.mostRecentSaveFolder.setValue(mostRecentSaveFolder);
+    }
+
+    public Path getMostRecentSavedWorkspace() {
+        return mostRecentSavedWorkspace.getValue();
+    }
+
+    public Property<Path> mostRecentSavedWorkspaceProperty() {
+        return mostRecentSavedWorkspace;
+    }
+
+    public void setMostRecentSavedWorkspace(Path mostRecentSavedWorkspace) {
+        this.mostRecentSavedWorkspace.setValue(mostRecentSavedWorkspace);
+    }
+
+    public boolean isLoadLastWorkspaceOnStartup() {
+        return loadLastWorkspaceOnStartup.get();
+    }
+
+    public BooleanProperty loadLastWorkspaceOnStartupProperty() {
+        return loadLastWorkspaceOnStartup;
+    }
+
+
+    public void setLoadLastWorkspaceOnStartup(boolean loadLastWorkspaceOnStartup) {
+        this.loadLastWorkspaceOnStartup.set(loadLastWorkspaceOnStartup);
     }
 
     public String getManifestVersion() {

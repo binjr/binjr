@@ -104,4 +104,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 
 https://bitbucket.org/sco0ter/extfx/overview
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
+JAXB adapters for Java 8 Date and Time API types
+Copyright (c) 2015 Mikhail Sokolov
+Licensed under the Apache License, Version 2.0
+
+https://github.com/migesok/jaxb-java-time-adapters
+
+------------------------------------------------------------------------------
 ------------------------------------------------------------------------------

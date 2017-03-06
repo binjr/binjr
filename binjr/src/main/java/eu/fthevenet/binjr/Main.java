@@ -51,6 +51,7 @@ public class Main extends Application {
         if (splash != null) {
             splash.close();
         }
+
     }
 
     /**
@@ -61,7 +62,5 @@ public class Main extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-
 
 }
