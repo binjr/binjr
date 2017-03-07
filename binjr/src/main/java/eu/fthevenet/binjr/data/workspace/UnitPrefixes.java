@@ -1,5 +1,8 @@
 package eu.fthevenet.binjr.data.workspace;
 
+/**
+ * An enumeration of the support unit prefixes
+ */
 public enum UnitPrefixes {
     METRIC("Metric"),
     BINARY("Binary");

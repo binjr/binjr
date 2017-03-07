@@ -21,12 +21,17 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Path;
+import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -105,6 +110,7 @@ public abstract class WorksheetController implements Initializable {
     private String name;
     private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet worksheet;
+    private final double graphOpacity = 0.8;
 
 
     //region [Properties]
@@ -347,7 +353,7 @@ public abstract class WorksheetController implements Initializable {
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
 
-            chart.getData().addAll(seriesData.stream().map(TimeSeries::asSeries).collect(Collectors.toList()));
+            chart.getData().addAll(seriesData.stream().map(t-> makeXYChartSeries(t)).collect(Collectors.toList()));
 
 //            for (int i = 0; i < seriesData.size(); i++) {
 //                Node fillNode = chart.lookup(".default-color" + i + ".chart-series-area-fill");
@@ -392,6 +398,39 @@ public abstract class WorksheetController implements Initializable {
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {
             Dialogs.displayException("Failed to retrieve data from source", e, root);
         }
+    }
+
+    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeries<Double> series){
+        XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
+        s.getData().addAll(series.getData());
+       // XYChart.Series<ZonedDateTime, Double> s = series.asSeries();
+        s.nodeProperty().addListener((node, oldNode, newNode) -> {
+            if (newNode != null) {
+                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getBinding().getColor());
+                //FIXME Seriously hackish code ahead!!!
+
+                ObservableList<Node> children = ((Group) newNode).getChildren();
+                if  (children != null) {
+                    if (children.size() >= 1) {
+                        children.get(1).setVisible(false);
+                    }
+
+                    if (children.size() >= 0 && GlobalPreferences.getInstance().isUseSourceColors()) {
+                        ((Path) children.get(0)).fillProperty().bind(series.displayColorProperty());//  .getDisplayColor());// .setStyle(" -fx-fill : " + ColorUtils.toHex(series.getDisplayColor(), graphOpacity) + ";");
+                        //   ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : " + ColorUtils.toHex(getDisplayColor()) + ";");
+                        // ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : transparent;");
+                    }
+                    else {
+                        ((Shape) ((Group) newNode).getChildren().get(1)).strokeProperty().addListener((observable, oldValue, newValue) -> {
+                            if (newValue != null) {
+                                series.setDisplayColor((Color) newValue);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+        return s;
     }
 
     public void handleRemoveSeries(ActionEvent actionEvent) {

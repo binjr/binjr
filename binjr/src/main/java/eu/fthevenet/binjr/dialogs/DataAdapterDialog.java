@@ -96,9 +96,13 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
 
     }
 
+    /**
+     * Returns an instance of {@link DataAdapter}
+     * @return  an instance of {@link DataAdapter}
+     * @throws MalformedURLException if the provided url is invalid
+     * @throws DateTimeException if the provided {@link ZoneId] is invalid
+     */
     protected abstract DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException;
-
-    //protected
 
     private void autoCompletionLearnWord(TextField field) {
         suggestedUrls.add(field.getText());

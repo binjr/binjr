@@ -62,7 +62,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
 
         int a = 0;
         int nextA = 0;
-        XYChart.Data<ZonedDateTime, T> maxAreaPoint = data.get(a);// = new XYChart.Data<>(ZonedDateTime.ofInstant(Instant.ofEpochSecond(0), zoneId),(T) new Integer(0));
+        XYChart.Data<ZonedDateTime, T> maxAreaPoint = data.get(a);
         sampled.add(data.get(a)); // Always add the first point
         for (int i = 0; i < threshold - 2; i++) {
             // Calculate point average for next bucket (containing c)

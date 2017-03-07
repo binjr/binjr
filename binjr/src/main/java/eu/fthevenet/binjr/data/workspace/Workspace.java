@@ -22,7 +22,8 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Represents a workspace
+ * A class that represents and holds the current state of the application
+ * <p>It provides the means to track changes, persist and reload a state in between usage session of the application</p>
  *
  * @author Frederic Thevenet
  */
@@ -33,23 +34,35 @@ public class Workspace implements Serializable {
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlTransient
     private BooleanProperty dirty;
-
     @XmlElementWrapper(name = "Sources")
     @XmlElements(@XmlElement(name = "Source"))
     private final Collection<Source> sources;
-    //  private String name;
     @XmlTransient
     private final Property<Path> path;
-
     @XmlElementWrapper(name = "Worksheets")
     @XmlElements(@XmlElement(name = "Worksheet"))
     private final Collection<Worksheet> worksheets;
+    @XmlTransient
+    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
+        if (newValue) {
+            forceDirty();
+        }
+    };
 
+    /**
+     * Initializes a new instance of the {@link Workspace} class
+     */
     public Workspace() {
         this(new ArrayList<>(),
                 new ArrayList<>());
     }
 
+    /**
+     * Initializes a new instance of the {@link Workspace} class with the provided list of {@link Worksheet} and {@link Source} instances
+     *
+     * @param worksheets the list of  {@link Worksheet} instances to initialize the workspace with
+     * @param sources    the list of  {@link Source} instances to initialize the workspace with
+     */
     public Workspace(List<Worksheet> worksheets, List<Source> sources) {
         this.dirty = new SimpleBooleanProperty(false);
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
@@ -57,76 +70,146 @@ public class Workspace implements Serializable {
         this.sources = sources;
     }
 
-    @XmlTransient
-    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
-        if (newValue) {
-            dirty.setValue(true);
+    /**
+     * Add all the elements in the provided collection to the list of {@link Worksheet} instances
+     *
+     * @param worksheetsToAdd the list of {@link Worksheet} instances to add
+     */
+    public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
+        if (worksheetsToAdd.size() == 0) {
+            return;
         }
-    };
-
-    public void addWorksheets(Collection<Worksheet> worksheets) {
-        for (Worksheet w : worksheets) {
-            dirty.setValue(dirty.getValue() | w.isDirty());
+        for (Worksheet w : worksheetsToAdd) {
+            evaluateDirty(w.isDirty());
             w.dirtyProperty().addListener(changeListener);
         }
-        this.worksheets.addAll(worksheets);
+        forceDirty();
+        this.worksheets.addAll(worksheetsToAdd);
     }
 
-    public void removeWorksheets(Collection<Worksheet> worksheets) {
-        for (Worksheet w : worksheets) {
+    /**
+     * Remove all the elements in the provided collection from the list of {@link Worksheet} instances
+     *
+     * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
+     */
+    public void removeWorksheets(Collection<Worksheet> worksheetsToRemove) {
+        if (worksheetsToRemove.size() == 0) {
+            return;
+        }
+        for (Worksheet w : worksheetsToRemove) {
             w.dirtyProperty().removeListener(changeListener);
         }
-        this.worksheets.removeAll(worksheets);
+        forceDirty();
+        this.worksheets.removeAll(worksheetsToRemove);
     }
 
+    /**
+     * Clear the {@link Worksheet} list
+     */
     public void clearWorksheets() {
+        if (this.worksheets.size() == 0) {
+            return;
+        }
+
         worksheets.forEach(w -> w.dirtyProperty().removeListener(changeListener));
         worksheets.clear();
     }
 
+    /**
+     * Clear the {@link Source} list
+     */
     public void clearSources() {
         // sources.forEach(s -> s.dirtyProperty().removeListener(changeListener));
-        sources.clear();
+        if (this.sources.size() == 0) {
+            return;
+        }
+        forceDirty();
+        this.sources.clear();
     }
 
-    public void addSources(Collection<Source> sources) {
-//        for (Source s : sources) {
-//            dirty.setValue(dirty.getValue() | w.isDirty());
-//            w.dirtyProperty().addListener(changeListener);
-//        }
-        this.sources.addAll(sources);
+    /**
+     * /**
+     * Add all the elements in the provided collection to the list of {@link Source} instances
+     *
+     * @param sourcesToAdd the list of {@link Source} instances to add
+     */
+    public void addSources(Collection<Source> sourcesToAdd) {
+        if (sourcesToAdd.size() == 0) {
+            return;
+        }
+        forceDirty();
+        this.sources.addAll(sourcesToAdd);
     }
 
-    public void removeSources(Collection<Source> sources) {
-        this.sources.removeAll(sources);
+    /**
+     * Remove all the elements in the provided collection from the list of {@link Source} instances
+     *
+     * @param sourcesToRemove the list of {@link Source} instances to remove
+     */
+    public void removeSources(Collection<Source> sourcesToRemove) {
+        if (sourcesToRemove.size() == 0) {
+            return;
+        }
+        forceDirty();
+        this.sources.removeAll(sourcesToRemove);
     }
 
+    /**
+     * Returns all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     *
+     * @return all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     */
     public Iterable<Worksheet> getWorksheets() {
         return worksheets;
     }
 
+    /**
+     * Returns all {@link Source} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     *
+     * @return all {@link Source} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     */
     public Iterable<Source> getSources() {
         return sources;
     }
 
+    /**
+     * Returns the {@link Path} for the serialized form of the {@link Workspace}
+     *
+     * @return the {@link Path} for the serialized form of the {@link Workspace}
+     */
     public Path getPath() {
         return path.getValue();
     }
 
+    /**
+     * Returns the property that observes the {@link Path} for the serialized form of the {@link Workspace}
+     *
+     * @return the property that observes the {@link Path} for the serialized form of the {@link Workspace}
+     */
     public Property<Path> pathProperty() {
         return path;
     }
 
+    /**
+     * Returns true is the {@link Workspace} has a valid {@link Path}, false otherwise
+     *
+     * @return true is the {@link Workspace} has a valid {@link Path}, false otherwise
+     */
     public boolean hasPath() {
-        if (getPath() == null){
+        if (getPath() == null) {
             return false;
         }
         return getPath().toFile().exists();
     }
 
+    /**
+     * Sets the {@link Path} for the serialized form of the {@link Workspace}
+     *
+     * @param path the {@link Path} for the serialized form of the {@link Workspace}
+     */
     public void setPath(Path path) {
         this.path.setValue(path);
-        if (hasPath()){
+        if (hasPath()) {
             GlobalPreferences.getInstance().setMostRecentSavedWorkspace(path);
         }
     }
@@ -141,14 +224,27 @@ public class Workspace implements Serializable {
         return sb.toString();
     }
 
+    /**
+     * Returns true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
+     *
+     * @return true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
+     */
     public Boolean isDirty() {
         return dirty.getValue();
     }
 
+    /**
+     * Returns the property that observe the persisted state of the {@link Workspace}
+     *
+     * @return the property that observe the persisted state of the {@link Workspace}
+     */
     public BooleanProperty dirtyProperty() {
         return dirty;
     }
 
+    /**
+     * Clear all the properties of the {@link Workspace} instance
+     */
     public void clear() {
         clearWorksheets();
         clearSources();
@@ -156,6 +252,12 @@ public class Workspace implements Serializable {
         this.setPath(Paths.get("Untitled"));
     }
 
+    /**
+     * Commits the current state of the {@link Workspace} instance to its persistence layer
+     *
+     * @throws IOException   if an IO error occurs with the persistence layer
+     * @throws JAXBException if an error occurs while serializing the current state of the {@link Workspace}
+     */
     public void save() throws IOException, JAXBException {
         if (!hasPath()) {
             throw new UnsupportedOperationException("Cannot save workspace: a path has not been specified");
@@ -163,6 +265,13 @@ public class Workspace implements Serializable {
         this.save(getPath().toFile());
     }
 
+    /**
+     * Commits the current state of the {@link Workspace} instance to the provided file
+     *
+     * @param file the file to save the the current state of the {@link Workspace} to
+     * @throws IOException   if an IO error occurs when accessing the file
+     * @throws JAXBException if an error occurs while serializing the current state of the {@link Workspace}
+     */
     public void save(File file) throws IOException, JAXBException {
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
@@ -170,6 +279,14 @@ public class Workspace implements Serializable {
         GlobalPreferences.getInstance().setMostRecentSaveFolder(file.getParent());
     }
 
+    /**
+     * Deserializes the content of the provided file as a new instance of the {@link Workspace} class
+     *
+     * @param file the file to deserialize
+     * @return a new instance of the {@link Workspace} class
+     * @throws IOException   if an IO error occurs when accessing the file
+     * @throws JAXBException if an error occurs while deserializing the file
+     */
     public static Workspace from(File file) throws IOException, JAXBException {
         Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
@@ -178,10 +295,16 @@ public class Workspace implements Serializable {
         return workspace;
     }
 
+    private void forceDirty() {
+        this.dirty.setValue(true);
+    }
+
+    private void evaluateDirty(Boolean isDirty) {
+        this.dirty.setValue(dirty.getValue() | isDirty);
+    }
+
     private void setSaved() {
         worksheets.forEach(Worksheet::setSaved);
         this.dirty.setValue(false);
     }
-
-
 }

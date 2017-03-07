@@ -9,7 +9,9 @@ import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.chart.XYChart;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Shape;
@@ -30,6 +32,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public abstract class TimeSeries<T extends Number> implements Serializable, Comparable<TimeSeries<T>> {
     private static final Logger logger = LogManager.getLogger(TimeSeries.class);
+    public static final double GRAPH_OPACITY = 0.8;
     protected List<XYChart.Data<ZonedDateTime, T>> data;
     protected final TimeSeriesBinding<T> binding;
     protected final String name;
@@ -128,29 +131,11 @@ public abstract class TimeSeries<T extends Number> implements Serializable, Comp
      *
      * @return the current TimeSeries' data as an instance of {@link XYChart.Series}
      */
-    public XYChart.Series<ZonedDateTime, T> asSeries() {
-        XYChart.Series<ZonedDateTime, T> s = new XYChart.Series<>();
-        s.getData().addAll(data);
-
-        s.nodeProperty().addListener((node, oldNode, newNode) -> {
-            if (newNode != null) {
-                logger.trace(() -> "Setting color of series " + getBinding().getLabel() + " to " + getBinding().getColor());
-                //FIXME Seriously hackish code ahead!!!
-                if (GlobalPreferences.getInstance().isUseSourceColors()) {
-                    ((Group) newNode).getChildren().get(0).setStyle(" -fx-fill : " + ColorUtils.toHex(getDisplayColor(), 0.2) + ";");
-                    ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : " + ColorUtils.toHex(getDisplayColor()) + ";");
-                }
-                else{
-                    ((Shape) ((Group) newNode).getChildren().get(1)).strokeProperty().addListener((observable, oldValue, newValue) -> {
-                        if (newValue != null) {
-                            setDisplayColor((Color) newValue);
-                        }
-                    });
-                }
-            }
-        });
-        return s;
-    }
+//    public XYChart.Series<ZonedDateTime, T> asSeries() {
+//        XYChart.Series<ZonedDateTime, T> s = new XYChart.Series<>();
+//        s.getData().addAll(data);
+//        return s;
+//    }
 
     /**
      * A utility method that generates a list of {@link TimeSeries} instances from a corresponding list of a {@link TimeSeriesBinding}, for a given time interval.
