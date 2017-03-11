@@ -4,6 +4,7 @@ import eu.fthevenet.binjr.charts.StableTicksAxis;
 import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
+import eu.fthevenet.binjr.controls.ColorTableCell;
 import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
@@ -86,7 +87,7 @@ public abstract class WorksheetController implements Initializable {
     @FXML
     private TableColumn<TimeSeries<Double>, String> sourceColumn;
     @FXML
-    private TableColumn<TimeSeries<Double>, String> colorColumn;
+    private TableColumn<TimeSeries<Double>, Color> colorColumn;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -225,20 +226,23 @@ public abstract class WorksheetController implements Initializable {
 
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
-        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
-        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
-
-            @Override
-            public void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (item != null) {
-                    setStyle("-fx-background-color:" + item);
-                }
-                else {
-                    setStyle("-fx-background-color:" + "transparent");
-                }
-            }
-        });
+      //  colorColumn.setCellValueFactory();
+//        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
+        colorColumn.setCellFactory(param -> new ColorTableCell<TimeSeries<Double>>(colorColumn));
+        colorColumn.setCellValueFactory(p-> new SimpleObjectProperty<Color>(p.getValue().getDisplayColor()));
+//        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
+//
+//            @Override
+//            public void updateItem(String item, boolean empty) {
+//                super.updateItem(item, empty);
+//                if (item != null) {
+//                    setStyle("-fx-background-color:" + item);
+//                }
+//                else {
+//                    setStyle("-fx-background-color:" + "transparent");
+//                }
+//            }
+//        });
 
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
