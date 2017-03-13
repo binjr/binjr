@@ -39,6 +39,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
+import javax.rmi.CORBA.Tie;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -91,6 +92,9 @@ public abstract class WorksheetController implements Initializable {
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
+    @FXML
+    private Slider graphOpacitySlider;
+
 
     //   @FXML
     //   private MenuItem removeSeriesMenuItem;
@@ -110,7 +114,7 @@ public abstract class WorksheetController implements Initializable {
     private String name;
     private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet worksheet;
-    private final double graphOpacity = 0.8;
+    private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
 
 
     //region [Properties]
@@ -156,6 +160,7 @@ public abstract class WorksheetController implements Initializable {
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
+        assert graphOpacitySlider != null :  "fx:id\"graphOpacitySlider\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -198,6 +203,7 @@ public abstract class WorksheetController implements Initializable {
 
         this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
 
+
         // bind the worksheet
         getWorksheet().fromDateTimeProperty().bind(currentState.startX);
         getWorksheet().toDateTimeProperty().bind(currentState.endX);
@@ -225,7 +231,7 @@ public abstract class WorksheetController implements Initializable {
 
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
-        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
+        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor(), "#FFFFFF" )));
         colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
 
             @Override
@@ -344,6 +350,15 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
+    private void applyOpacityToSeries(Iterable<TimeSeries<Double>> series, Double opacity){
+        for (TimeSeries<Double> s : series) {
+            s.setDisplayColor(Color.color(s.getDisplayColor().getRed(),
+                    s.getDisplayColor().getGreen(),
+                    s.getDisplayColor().getBlue(),
+                    opacity));
+        }
+    }
+
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
@@ -353,37 +368,15 @@ public abstract class WorksheetController implements Initializable {
                     currentSelection.getStartX(),
                     currentSelection.getEndX()));
 
-            chart.getData().addAll(seriesData.stream().map(t-> makeXYChartSeries(t)).collect(Collectors.toList()));
+            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    applyOpacityToSeries(seriesData, newValue.doubleValue());
+                }
+            });
 
-//            for (int i = 0; i < seriesData.size(); i++) {
-//                Node fillNode = chart.lookup(".default-color" + i + ".chart-series-area-fill");
-//                if (fillNode != null) {
-//                    if (globalPrefs.isUseSourceColors()) {
-//                        fillNode.setStyle("-fx-fill: " + ColorUtils.toHex(seriesData.get(i).getBinding().getColor(), 0.2) + ";");
-//                    }
-//                   else{
-////                        logger.debug(((Shape)fillNode).getFill().toString());
-//                        ((Shape)fillNode).fillProperty().addListener((observable, oldValue, newValue) -> {
-//                            if (newValue != null){
-//
-//                               // seriesData.get(i).getBinding()
-//                            }
-//                        });
-//                    }
-//                }
-//                else {
-//                    logger.warn("cannot find node for css lookup: [.default-color" + i + ".chart-series-area-fill]");
-//                }
-//                Node strokeNode = chart.lookup(".default-color" + i + ".chart-series-area-line");
-//                if (strokeNode != null) {
-//                    strokeNode.setStyle("-fx-stroke: " + ColorUtils.toHex(seriesData.get(i).getBinding().getColor()) + ";");
-//                }
-//                else {
-//                    logger.warn("cannot find node for css lookup: [.default-color" + i + ".chart-series-area-line]");
-//                }
-//            }
+            chart.getData().addAll(seriesData.stream().map(this::makeXYChartSeries).collect(Collectors.toList()));
 
-
+            applyOpacityToSeries(seriesData, graphOpacitySlider.getValue());
 //            seriesTable.getItems().clear();
 //
 //            for (XYChart.Series s : chart.getData()) {
@@ -403,29 +396,24 @@ public abstract class WorksheetController implements Initializable {
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeries<Double> series){
         XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
         s.getData().addAll(series.getData());
-       // XYChart.Series<ZonedDateTime, Double> s = series.asSeries();
         s.nodeProperty().addListener((node, oldNode, newNode) -> {
             if (newNode != null) {
-                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getBinding().getColor());
-                //FIXME Seriously hackish code ahead!!!
-
                 ObservableList<Node> children = ((Group) newNode).getChildren();
                 if  (children != null) {
                     if (children.size() >= 1) {
-                        children.get(1).setVisible(false);
-                    }
-
-                    if (children.size() >= 0 && GlobalPreferences.getInstance().isUseSourceColors()) {
-                        ((Path) children.get(0)).fillProperty().bind(series.displayColorProperty());//  .getDisplayColor());// .setStyle(" -fx-fill : " + ColorUtils.toHex(series.getDisplayColor(), graphOpacity) + ";");
-                        //   ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : " + ColorUtils.toHex(getDisplayColor()) + ";");
-                        // ((Group) newNode).getChildren().get(1).setStyle(" -fx-stroke : transparent;");
-                    }
-                    else {
-                        ((Shape) ((Group) newNode).getChildren().get(1)).strokeProperty().addListener((observable, oldValue, newValue) -> {
-                            if (newValue != null) {
-                                series.setDisplayColor((Color) newValue);
-                            }
-                        });
+                        Path stroke = (Path)children.get(1);
+                        Path fill = (Path) children.get(0);
+                        stroke.setVisible(false);
+                        if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
+                            // use default jFX theme colors for series
+                            stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
+                                if (newValue != null) {
+                                    series.setDisplayColor((Color) newValue);
+                                }
+                            });
+                        }
+                        logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                        fill.fillProperty().bind(series.displayColorProperty());
                     }
                 }
             }

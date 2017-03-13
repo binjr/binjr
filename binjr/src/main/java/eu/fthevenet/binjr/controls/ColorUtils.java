@@ -36,11 +36,27 @@ public class ColorUtils {
         return sb.toString();
     }
 
+    public static String toHex(Color color, String defaultHexValue) {
+        if (defaultHexValue == null) {
+            throw new IllegalArgumentException("Default color hex value cannot be null");
+        }
+        if (color == null) {
+            return defaultHexValue;
+        }
+        return toHex(color);
+    }
+
     public static String toHex(Color color){
+        if (color == null){
+            throw  new IllegalArgumentException("Argument color is null");
+        }
         return toHex(color, color.getOpacity());
     }
 
     public static String toHex(Color color, double alpha){
+        if (color == null){
+            throw  new IllegalArgumentException("Argument color is null");
+        }
         return String.format("#%02x%02x%02x%02x",
                 Math.round(color.getRed()*255) ,
                 Math.round(color.getGreen()*255),

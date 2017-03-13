@@ -38,17 +38,17 @@ class Graphdesc {
     @XmlRootElement(name = "add")
     static class SeriesDesc {
         @XmlElement(name = "name")
-        String name;
+        String name ="";
         @XmlElement(name = "dsName")
-        String dsName;
+        String dsName ="";
         @XmlElement(name = "graphType")
-        String graphType;
+        String graphType ="";
         @XmlElement(name = "color")
-        String color;
+        String color ="";
         @XmlElement(name = "legend")
-        String legend;
+        String legend ="";
         @XmlElement(name = "rpn")
-        String rpn;
+        String rpn ="";
     }
 
     @XmlAccessorType(XmlAccessType.FIELD)

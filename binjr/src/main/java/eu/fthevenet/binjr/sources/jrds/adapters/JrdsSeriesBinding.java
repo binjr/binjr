@@ -4,8 +4,11 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import javafx.scene.paint.Color;
+import org.apache.commons.codec.binary.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 /**
  * This class provides an implementation of {@link TimeSeriesBinding} for bindings targeting JRDS.
@@ -54,9 +57,9 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
                         (isNullOrEmpty(desc.legend) ?
                                 "???" : desc.legend) : desc.dsName) : desc.name;
 
-        Color c = Color.GRAY;
+        Color c = null;
         try {
-            if (desc.color != null) {
+            if (!isNullOrEmpty(desc.color)) {
                 c = Color.web(desc.color);
             }
         } catch (IllegalArgumentException e) {
@@ -93,6 +96,7 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
         this.unitBase = "METRIC".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
         this.unitName = graphdesc.verticalLabel;
     }
+
 
     private boolean isNullOrEmpty(String s) {
         return s == null || s.trim().length() == 0;
