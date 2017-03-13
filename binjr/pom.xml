@@ -3,12 +3,12 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
-    <displayName>binjr</displayName>
+    <name>binjr</name>
     <url>http://www.binjr.eu</url>
     <version>0.7.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
-        <displayName>Frederic Thevenet</displayName>
+        <name>Frederic Thevenet</name>
         <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
@@ -21,7 +21,7 @@
         <tag>HEAD</tag>
     </scm>
     <build>
-        <finalName>${project.displayName}</finalName>
+        <finalName>${project.name}</finalName>
         <plugins>
             <!-- Maven compiler -->
             <plugin>
@@ -49,12 +49,12 @@
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
                                         <Main-Class>eu.fthevenet.binjr.Main</Main-Class>
-                                        <Specification-Title>${project.displayName}</Specification-Title>
+                                        <Specification-Title>${project.name}</Specification-Title>
                                         <Specification-Version>${project.version}</Specification-Version>
-                                        <Specification-Vendor>${project.organization.displayName}</Specification-Vendor>
-                                        <Implementation-Title>${project.displayName}</Implementation-Title>
+                                        <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                                        <Implementation-Title>${project.name}</Implementation-Title>
                                         <Implementation-Version>${project.version}</Implementation-Version>
-                                        <Implementation-Vendor>${project.organization.displayName}</Implementation-Vendor>
+                                        <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                                         <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
                                     </manifestEntries>
                                 </transformer>

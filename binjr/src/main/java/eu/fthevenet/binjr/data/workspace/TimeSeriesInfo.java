@@ -140,6 +140,7 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
         this.order.set(order);
     }
 
+    @XmlTransient
     public TimeSeriesBinding<T> getBinding() {
         return binding;
     }

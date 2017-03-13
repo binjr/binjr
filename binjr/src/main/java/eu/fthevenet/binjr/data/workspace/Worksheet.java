@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet  extends Dirtyable implements Serializable {
+public class Worksheet extends Dirtyable implements Serializable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     private Set<TimeSeriesInfo<Number>> series;
@@ -89,6 +89,14 @@ public class Worksheet  extends Dirtyable implements Serializable {
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
 
+        registerProperties(
+                nameProperty(),
+                unitProperty(),
+                chartTypeProperty(),
+                timeZoneProperty(),
+                fromDateTimeProperty(),
+                toDateTimeProperty(),
+                unitPrefixesProperty());
 
 //        ChangeListener<Object> setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
 //        this.nameProperty().addListener(setDirty);
@@ -102,14 +110,7 @@ public class Worksheet  extends Dirtyable implements Serializable {
     }
 
     public void addSeries(Collection<TimeSeriesInfo<Number>> seriesInfos) {
-//        if (seriesInfos.size() == 0) {
-//            return;
-//        }
-//        for (TimeSeriesInfo s : seriesInfos) {
-//            evaluateDirty(s.isDirty());
-//            s.dirtyProperty().addListener(changeListener);
-//        }
-//        forceDirty();
+        addDirtyable(seriesInfos);
         this.series.addAll(seriesInfos);
     }
 
@@ -119,19 +120,17 @@ public class Worksheet  extends Dirtyable implements Serializable {
      * @param seriesInfos the list of {@link Worksheet} instances to remove
      */
     public void removeSeries(Collection<TimeSeriesInfo> seriesInfos) {
-        List<Dirtyable>
-    this.removeDirtyable((Collection<Dirtyable>) seriesInfos);
-        this.series.removeAll(seriesInfos);
+        removeDirtyable(seriesInfos);
+        series.removeAll(seriesInfos);
     }
 
     /**
      * Clear the {@link Worksheet} list
      */
     public void clearSeries() {
-
+        removeDirtyable(series);
         series.clear();
     }
-
 
 
     /**

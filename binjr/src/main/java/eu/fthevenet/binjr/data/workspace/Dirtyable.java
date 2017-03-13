@@ -5,13 +5,15 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
 
 /**
  * Created by FTT2 on 13/03/2017.
  */
-@XmlTransient
+@XmlAccessorType(XmlAccessType.NONE)
 public abstract class Dirtyable {
 
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
@@ -56,7 +58,7 @@ public abstract class Dirtyable {
         }
     }
 
-    public void addDirtyable(Collection<Dirtyable> dirtyables) {
+    public void addDirtyable(Collection<? extends Dirtyable> dirtyables) {
         if (dirtyables.size() == 0) {
             return;
         }
@@ -67,7 +69,7 @@ public abstract class Dirtyable {
         forceDirty();
     }
 
-    public void removeDirtyable(Collection<Dirtyable> dirtyables) {
+    public void removeDirtyable(Collection<? extends Dirtyable> dirtyables) {
         if (dirtyables.size() == 0) {
             return;
         }

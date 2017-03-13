@@ -265,7 +265,7 @@
                             </TableColumn>
                             <TableColumn prefWidth="160.0" text="Name">
                                 <cellValueFactory>
-                                    <PropertyValueFactory property="displayName" />
+                                    <PropertyValueFactory property="name" />
                                 </cellValueFactory>
                             </TableColumn>
                             <TableColumn prefWidth="76.0" text="Min.">
