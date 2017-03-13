@@ -32,7 +32,6 @@ import static java.util.stream.Collectors.groupingBy;
  */
 public abstract class TimeSeries<T extends Number> implements Serializable, Comparable<TimeSeries<T>> {
     private static final Logger logger = LogManager.getLogger(TimeSeries.class);
-    public static final double GRAPH_OPACITY = 0.8;
     protected List<XYChart.Data<ZonedDateTime, T>> data;
     protected final TimeSeriesBinding<T> binding;
     protected final String name;

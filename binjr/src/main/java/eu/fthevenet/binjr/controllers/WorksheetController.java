@@ -232,23 +232,8 @@ public abstract class WorksheetController implements Initializable {
 
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
-      //  colorColumn.setCellValueFactory();
-//        colorColumn.setCellValueFactory(p -> new SimpleStringProperty(ColorUtils.toHex(p.getValue().getDisplayColor())));
         colorColumn.setCellFactory(param -> new ColorTableCell<TimeSeries<Double>>(colorColumn));
-        colorColumn.setCellValueFactory(p-> new SimpleObjectProperty<Color>(p.getValue().getDisplayColor()));
-//        colorColumn.setCellFactory(param -> new TableCell<TimeSeries<Double>, String>() {
-//
-//            @Override
-//            public void updateItem(String item, boolean empty) {
-//                super.updateItem(item, empty);
-//                if (item != null) {
-//                    setStyle("-fx-background-color:" + item);
-//                }
-//                else {
-//                    setStyle("-fx-background-color:" + "transparent");
-//                }
-//            }
-//        });
+        colorColumn.setCellValueFactory(p-> p.getValue().displayColorProperty());
 
         seriesTable.setItems(seriesData);
         seriesTable.setOnKeyReleased(event -> {
@@ -384,12 +369,12 @@ public abstract class WorksheetController implements Initializable {
 //            seriesTable.getItems().clear();
 //
 //            for (XYChart.Series s : chart.getData()) {
-//                SelectableListItem i = new SelectableListItem(s.getName(), true);
+//                SelectableListItem i = new SelectableListItem(s.getDisplayName(), true);
 ////                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-////                   selectedSeriesCache.put(s.getName(), isNowOn);
+////                   selectedSeriesCache.put(s.getDisplayName(), isNowOn);
 ////                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
 ////                });
-////                i.setSelected(selectedSeriesCache.getOrDefault(s.getName(), true));
+////                i.setSelected(selectedSeriesCache.getOrDefault(s.getDisplayName(), true));
 //                seriesTable.getItems().add(i);
 //            }
         } catch (DataAdapterException /*| IOException | ParseException*/ e) {

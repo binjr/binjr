@@ -139,7 +139,7 @@
                         <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <font>
-                                <Font name="System Bold Italic" size="24.0"/>
+                                <Font displayName="System Bold Italic" size="24.0"/>
                             </font>
                         </Label>
                         <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
@@ -153,7 +153,7 @@
                     <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <font>
-                            <Font name="System Bold Italic" size="24.0"/>
+                            <Font displayName="System Bold Italic" size="24.0"/>
                         </font>
                     </Label>
                     <TabPaneNewButton side="TOP" fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"

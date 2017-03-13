@@ -54,7 +54,7 @@ public class XmlUtils {
     }
 
     private static <T> T deSerialize(Class<T> docClass, StreamSource source) throws JAXBException {
-//        String packageName = docClass.getPackage().getName();
+//        String packageName = docClass.getPackage().getDisplayName();
 //        JAXBContext jc = JAXBContext.newInstance(packageName);
 //        Unmarshaller u = jc.createUnmarshaller();
 //        JAXBElement<T> doc = u.unmarshal(source, docClass);

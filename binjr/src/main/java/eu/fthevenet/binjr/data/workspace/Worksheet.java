@@ -15,9 +15,9 @@ import java.io.Serializable;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 /**
@@ -27,10 +27,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet implements Serializable {
+public class Worksheet  extends Dirtyable implements Serializable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-    private ObservableSetWrapper<TimeSeriesBinding<Number>> series;
+    private Set<TimeSeriesInfo<Number>> series;
     private Property<String> name;
     private Property<ZoneId> timeZone;
     private Property<String> unit;
@@ -38,8 +38,6 @@ public class Worksheet implements Serializable {
     private Property<ChartType> chartType;
     private Property<ZonedDateTime> fromDateTime;
     private Property<ZonedDateTime> toDateTime;
-    @XmlTransient
-    private final BooleanProperty dirty;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -48,7 +46,7 @@ public class Worksheet implements Serializable {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 ChartType.STACKED,
                 ZoneId.systemDefault(),
-                new HashSet<>(),
+                new TreeSet<>(),
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
@@ -61,12 +59,12 @@ public class Worksheet implements Serializable {
      */
     public Worksheet(String name, ChartType chartType, ZoneId timezone) {
         this(name, chartType, timezone,
-                new HashSet<>(),
+                new TreeSet<>(),
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
     /**
-     * Copy constructor to clone a {@link Worksheet} instance.
+     * Copy constructor to deep clone a {@link Worksheet} instance.
      *
      * @param initWorksheet the {@link Worksheet} instance to clone.
      */
@@ -74,34 +72,67 @@ public class Worksheet implements Serializable {
         this(initWorksheet.getName(),
                 initWorksheet.getChartType(),
                 initWorksheet.getTimeZone(),
-                initWorksheet.getSeries(),
+                initWorksheet.getSeries().stream().map(TimeSeriesInfo::new).collect(Collectors.toSet()),
                 initWorksheet.getFromDateTime(),
                 initWorksheet.getToDateTime(),
                 initWorksheet.getUnit(),
                 initWorksheet.getUnitPrefixes());
     }
 
-    private Worksheet(String name, ChartType chartType, ZoneId timezone, Set<TimeSeriesBinding<Number>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base) {
+    private Worksheet(String name, ChartType chartType, ZoneId timezone, Set<TimeSeriesInfo<Number>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
-        this.series = new ObservableSetWrapper<>(bindings);
+        this.series = new TreeSet<>(bindings);
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
-        this.dirty = new SimpleBooleanProperty(false);
 
-        ChangeListener<Object> setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
-        this.nameProperty().addListener(setDirty);
-        this.unitProperty().addListener(setDirty);
-        this.chartTypeProperty().addListener(setDirty);
-        this.timeZoneProperty().addListener(setDirty);
-        this.fromDateTimeProperty().addListener(setDirty);
-        this.toDateTimeProperty().addListener(setDirty);
-        this.unitPrefixesProperty().addListener(setDirty);
+
+//        ChangeListener<Object> setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
+//        this.nameProperty().addListener(setDirty);
+//        this.unitProperty().addListener(setDirty);
+//        this.chartTypeProperty().addListener(setDirty);
+//        this.timeZoneProperty().addListener(setDirty);
+//        this.fromDateTimeProperty().addListener(setDirty);
+//        this.toDateTimeProperty().addListener(setDirty);
+//        this.unitPrefixesProperty().addListener(setDirty);
         //  this.series.addListener((InvalidationListener) observable -> dirty = true);
     }
+
+    public void addSeries(Collection<TimeSeriesInfo<Number>> seriesInfos) {
+//        if (seriesInfos.size() == 0) {
+//            return;
+//        }
+//        for (TimeSeriesInfo s : seriesInfos) {
+//            evaluateDirty(s.isDirty());
+//            s.dirtyProperty().addListener(changeListener);
+//        }
+//        forceDirty();
+        this.series.addAll(seriesInfos);
+    }
+
+    /**
+     * Remove all the elements in the provided collection from the list of {@link Worksheet} instances
+     *
+     * @param seriesInfos the list of {@link Worksheet} instances to remove
+     */
+    public void removeSeries(Collection<TimeSeriesInfo> seriesInfos) {
+        List<Dirtyable>
+    this.removeDirtyable((Collection<Dirtyable>) seriesInfos);
+        this.series.removeAll(seriesInfos);
+    }
+
+    /**
+     * Clear the {@link Worksheet} list
+     */
+    public void clearSeries() {
+
+        series.clear();
+    }
+
+
 
     /**
      * The name of the {@link Worksheet}
@@ -136,7 +167,7 @@ public class Worksheet implements Serializable {
      * @return the time series of the {@link Worksheet}
      */
     @XmlTransient
-    public ObservableSetWrapper<TimeSeriesBinding<Number>> getSeries() {
+    public Set<TimeSeriesInfo<Number>> getSeries() {
         return series;
     }
 
@@ -145,7 +176,7 @@ public class Worksheet implements Serializable {
      *
      * @param series the time series of the {@link Worksheet}
      */
-    public void setSeries(ObservableSetWrapper<TimeSeriesBinding<Number>> series) {
+    public void setSeries(Set<TimeSeriesInfo<Number>> series) {
         this.series = series;
     }
 
@@ -320,17 +351,5 @@ public class Worksheet implements Serializable {
         );
     }
 
-    @XmlTransient
-    boolean isDirty() {
-        return dirty.getValue();
-    }
-
-    BooleanProperty dirtyProperty() {
-        return dirty;
-    }
-
-    void setSaved() {
-        dirty.setValue(false);
-    }
 }
 

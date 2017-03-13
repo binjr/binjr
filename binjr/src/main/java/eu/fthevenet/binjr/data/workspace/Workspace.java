@@ -29,11 +29,11 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
-public class Workspace implements Serializable {
+public class Workspace extends Dirtyable implements Serializable {
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
-    @XmlTransient
-    private BooleanProperty dirty;
+//    @XmlTransient
+//    private BooleanProperty dirty;
     @XmlElementWrapper(name = "Sources")
     @XmlElements(@XmlElement(name = "Source"))
     private final Collection<Source> sources;
@@ -42,12 +42,12 @@ public class Workspace implements Serializable {
     @XmlElementWrapper(name = "Worksheets")
     @XmlElements(@XmlElement(name = "Worksheet"))
     private final Collection<Worksheet> worksheets;
-    @XmlTransient
-    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
-        if (newValue) {
-            forceDirty();
-        }
-    };
+//    @XmlTransient
+//    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
+//        if (newValue) {
+//            forceDirty();
+//        }
+//    };
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -64,7 +64,7 @@ public class Workspace implements Serializable {
      * @param sources    the list of  {@link Source} instances to initialize the workspace with
      */
     public Workspace(List<Worksheet> worksheets, List<Source> sources) {
-        this.dirty = new SimpleBooleanProperty(false);
+//        this.dirty = new SimpleBooleanProperty(false);
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
@@ -76,14 +76,7 @@ public class Workspace implements Serializable {
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
      */
     public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
-        if (worksheetsToAdd.size() == 0) {
-            return;
-        }
-        for (Worksheet w : worksheetsToAdd) {
-            evaluateDirty(w.isDirty());
-            w.dirtyProperty().addListener(changeListener);
-        }
-        forceDirty();
+        addDirtyable(worksheetsToAdd);
         this.worksheets.addAll(worksheetsToAdd);
     }
 
@@ -93,13 +86,7 @@ public class Workspace implements Serializable {
      * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
      */
     public void removeWorksheets(Collection<Worksheet> worksheetsToRemove) {
-        if (worksheetsToRemove.size() == 0) {
-            return;
-        }
-        for (Worksheet w : worksheetsToRemove) {
-            w.dirtyProperty().removeListener(changeListener);
-        }
-        forceDirty();
+        removeDirtyable(worksheetsToRemove);
         this.worksheets.removeAll(worksheetsToRemove);
     }
 
@@ -110,8 +97,8 @@ public class Workspace implements Serializable {
         if (this.worksheets.size() == 0) {
             return;
         }
-
-        worksheets.forEach(w -> w.dirtyProperty().removeListener(changeListener));
+        removeDirtyable(worksheets);
+      //  worksheets.forEach(w -> w.dirtyProperty().removeListener(changeListener));
         worksheets.clear();
     }
 
@@ -119,11 +106,11 @@ public class Workspace implements Serializable {
      * Clear the {@link Source} list
      */
     public void clearSources() {
-        // sources.forEach(s -> s.dirtyProperty().removeListener(changeListener));
-        if (this.sources.size() == 0) {
-            return;
-        }
-        forceDirty();
+
+//        if (this.sources.size() == 0) {
+//            return;
+//    }
+    forceDirty();
         this.sources.clear();
     }
 
@@ -134,9 +121,9 @@ public class Workspace implements Serializable {
      * @param sourcesToAdd the list of {@link Source} instances to add
      */
     public void addSources(Collection<Source> sourcesToAdd) {
-        if (sourcesToAdd.size() == 0) {
-            return;
-        }
+//        if (sourcesToAdd.size() == 0) {
+//            return;
+//        }
         forceDirty();
         this.sources.addAll(sourcesToAdd);
     }
@@ -147,9 +134,9 @@ public class Workspace implements Serializable {
      * @param sourcesToRemove the list of {@link Source} instances to remove
      */
     public void removeSources(Collection<Source> sourcesToRemove) {
-        if (sourcesToRemove.size() == 0) {
-            return;
-        }
+//        if (sourcesToRemove.size() == 0) {
+//            return;
+//        }
         forceDirty();
         this.sources.removeAll(sourcesToRemove);
     }
@@ -224,23 +211,23 @@ public class Workspace implements Serializable {
         return sb.toString();
     }
 
-    /**
-     * Returns true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
-     *
-     * @return true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
-     */
-    public Boolean isDirty() {
-        return dirty.getValue();
-    }
-
-    /**
-     * Returns the property that observe the persisted state of the {@link Workspace}
-     *
-     * @return the property that observe the persisted state of the {@link Workspace}
-     */
-    public BooleanProperty dirtyProperty() {
-        return dirty;
-    }
+//    /**
+//     * Returns true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
+//     *
+//     * @return true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
+//     */
+//    public Boolean isDirty() {
+//        return dirty.getValue();
+//    }
+//
+//    /**
+//     * Returns the property that observe the persisted state of the {@link Workspace}
+//     *
+//     * @return the property that observe the persisted state of the {@link Workspace}
+//     */
+//    public BooleanProperty dirtyProperty() {
+//        return dirty;
+//    }
 
     /**
      * Clear all the properties of the {@link Workspace} instance
@@ -248,7 +235,7 @@ public class Workspace implements Serializable {
     public void clear() {
         clearWorksheets();
         clearSources();
-        setSaved();
+        cleanUp();
         this.setPath(Paths.get("Untitled"));
     }
 
@@ -275,7 +262,7 @@ public class Workspace implements Serializable {
     public void save(File file) throws IOException, JAXBException {
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
-        setSaved();
+        cleanUp();
         GlobalPreferences.getInstance().setMostRecentSaveFolder(file.getParent());
     }
 
@@ -291,20 +278,20 @@ public class Workspace implements Serializable {
         Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
-        workspace.setSaved();
+        workspace.cleanUp();
         return workspace;
     }
 
-    private void forceDirty() {
-        this.dirty.setValue(true);
-    }
-
-    private void evaluateDirty(Boolean isDirty) {
-        this.dirty.setValue(dirty.getValue() | isDirty);
-    }
-
-    private void setSaved() {
-        worksheets.forEach(Worksheet::setSaved);
-        this.dirty.setValue(false);
-    }
+//    private void forceDirty() {
+//        this.dirty.setValue(true);
+//    }
+//
+//    private void evaluateDirty(Boolean isDirty) {
+//        this.dirty.setValue(dirty.getValue() | isDirty);
+//    }
+//
+//    private void cleanUp() {
+//        worksheets.forEach(Worksheet::cleanUp);
+//        this.dirty.setValue(false);
+//    }
 }
