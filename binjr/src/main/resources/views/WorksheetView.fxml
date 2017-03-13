@@ -176,48 +176,79 @@
                     </HBox.margin>
                 </VBox>
                 <Separator orientation="VERTICAL" prefHeight="200.0" />
-            <VBox alignment="CENTER" spacing="5.0">
-               <children>
-                  <HBox alignment="CENTER">
-                     <children>
-                            <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Snapshot">
+                <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Snapshot">
+                    <HBox.margin>
+                        <Insets left="5.0" />
+                    </HBox.margin>
                                 <graphic>
                                     <ImageView fitHeight="14" fitWidth="14">
+<<<<<<< .mine
                                         <Image url="@/images/snapshot.png" />
+=======
+                            <Image url="@/images/snapshot.png" />
+>>>>>>> .theirs
                                     </ImageView>
                                 </graphic>
                                 <tooltip>
                                     <Tooltip text="Take a snapshot of the worksheet">
                                         <font>
+<<<<<<< .mine
                                             <Font size="10.0" />
+=======
+                                <Font size="10.0" />
+>>>>>>> .theirs
                                         </font>
                                     </Tooltip>
                                 </tooltip>
                             </Button>
+<<<<<<< .mine
                             <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+=======
+                <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+>>>>>>> .theirs
                                 <graphic>
                                     <ImageView fitHeight="14" fitWidth="14">
+<<<<<<< .mine
                                         <Image url="@/images/lockCrosshairHorizontal.png" />
+=======
+                            <Image url="@/images/lockCrosshairHorizontal.png" />
+>>>>>>> .theirs
                                     </ImageView>
                                 </graphic>
                                 <tooltip>
                                     <Tooltip text="Toggle horizontal crosshair marker">
                                         <font>
+<<<<<<< .mine
                                             <Font size="10.0" />
+=======
+                                <Font size="10.0" />
+>>>>>>> .theirs
                                         </font>
                                     </Tooltip>
                                 </tooltip>
                             </ToggleButton>
+<<<<<<< .mine
                             <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+=======
+                <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="ToggleButton">
+>>>>>>> .theirs
                                 <graphic>
                                     <ImageView fitHeight="14" fitWidth="14">
+<<<<<<< .mine
                                         <Image url="@/images/lockCrosshairVertical.png" />
+=======
+                            <Image url="@/images/lockCrosshairVertical.png" />
+>>>>>>> .theirs
                                     </ImageView>
                                 </graphic>
                                 <tooltip>
                                     <Tooltip text="Toggle vertical crosshair marker">
                                         <font>
+<<<<<<< .mine
                                             <Font size="10.0" />
+=======
+                                <Font size="10.0" />
+>>>>>>> .theirs
                                         </font>
                                     </Tooltip>
                                 </tooltip>
@@ -264,7 +295,7 @@
                     <TableView fx:id="seriesTable" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
                             <TableColumn fx:id="visibleColumn" prefWidth="26.0" />
-                            <TableColumn fx:id="colorColumn" maxWidth="26.0" minWidth="26.0" prefWidth="26.0" resizable="false">
+                            <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false">
                                 <!--<cellFactory>-->
                                 <!--<ColorTableCellFactory/>-->
                                 <!--</cellFactory>-->
