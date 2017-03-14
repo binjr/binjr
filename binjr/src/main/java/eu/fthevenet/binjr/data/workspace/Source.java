@@ -1,6 +1,10 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
+import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
+import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import javafx.beans.property.BooleanProperty;
 
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
@@ -13,14 +17,17 @@ import java.util.Map;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Source")
-public class Source implements Serializable {
+public class Source implements Serializable, Dirtyable {
     @XmlElement(name = "Name")
+    @IsDirtyable
     private String name;
     @XmlElement(name = "Adapter")
     private Class adapterClass;
     @XmlElementWrapper(name = "Parameters")
     @XmlElements(@XmlElement(name = "Parameter"))
     private Map<String, String> AdapterParams;
+    @XmlTransient
+    private final ChangeWatcher<Source> status;
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
@@ -40,6 +47,7 @@ public class Source implements Serializable {
      * Initializes a new instance of the {@link Source} class
      */
     public Source() {
+        this.status = new ChangeWatcher<>(this);
     }
 
     /**
@@ -94,5 +102,20 @@ public class Source implements Serializable {
      */
     public void setAdapterParams(Map<String, String> adapterParams) {
         AdapterParams = adapterParams;
+    }
+
+    @Override
+    public Boolean isDirty() {
+        return this.status.isDirty();
+    }
+
+    @Override
+    public BooleanProperty dirtyProperty() {
+        return this.status.dirtyProperty();
+    }
+
+    @Override
+    public void cleanUp() {
+        this.status.cleanUp();
     }
 }

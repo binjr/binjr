@@ -256,12 +256,6 @@
                         <columns>
                             <TableColumn fx:id="visibleColumn" prefWidth="26.0" />
                             <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false">
-                                <!--<cellFactory>-->
-                                <!--<ColorTableCellFactory/>-->
-                                <!--</cellFactory>-->
-                                <!--<cellValueFactory>-->
-                                <!--<PropertyValueFactory property="color"/>-->
-                                <!--</cellValueFactory>-->
                             </TableColumn>
                             <TableColumn prefWidth="160.0" text="Name">
                                 <cellValueFactory>
@@ -269,26 +263,26 @@
                                 </cellValueFactory>
                             </TableColumn>
                             <TableColumn prefWidth="76.0" text="Min.">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="minValue" />
-                                </cellValueFactory>
+                                <!--<cellValueFactory>-->
+                                    <!--<PropertyValueFactory property="minValue" />-->
+                                <!--</cellValueFactory>-->
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>
                             </TableColumn>
 
                             <TableColumn prefWidth="76.0" text="Avg.">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="averageValue" />
-                                </cellValueFactory>
+                                <!--<cellValueFactory>-->
+                                    <!--<PropertyValueFactory property="averageValue" />-->
+                                <!--</cellValueFactory>-->
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>
                             </TableColumn>
                             <TableColumn text="Max.">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="maxValue" />
-                                </cellValueFactory>
+                                <!--<cellValueFactory>-->
+                                    <!--<PropertyValueFactory property="maxValue" />-->
+                                <!--</cellValueFactory>-->
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>

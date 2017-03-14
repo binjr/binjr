@@ -1,12 +1,15 @@
 package eu.fthevenet.binjr.data.workspace;
 
+import com.sun.javafx.collections.ObservableListWrapper;
+import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
+import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
+import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * A class that represents and holds the current state of the application
@@ -29,32 +31,27 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
-public class Workspace extends Dirtyable implements Serializable {
+public class Workspace implements Serializable, Dirtyable {
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
-//    @XmlTransient
-//    private BooleanProperty dirty;
     @XmlElementWrapper(name = "Sources")
     @XmlElements(@XmlElement(name = "Source"))
-    private final Collection<Source> sources;
+    @IsDirtyable
+    private final ObservableList<Source> sources;
     @XmlTransient
     private final Property<Path> path;
     @XmlElementWrapper(name = "Worksheets")
     @XmlElements(@XmlElement(name = "Worksheet"))
-    private final Collection<Worksheet> worksheets;
-//    @XmlTransient
-//    private ChangeListener<Boolean> changeListener = (observable, oldValue, newValue) -> {
-//        if (newValue) {
-//            forceDirty();
-//        }
-//    };
+    @IsDirtyable
+    private final ObservableList<Worksheet> worksheets;
+    @XmlTransient
+    private final ChangeWatcher<Workspace> status;
 
     /**
      * Initializes a new instance of the {@link Workspace} class
      */
     public Workspace() {
-        this(new ArrayList<>(),
-                new ArrayList<>());
+        this(new ObservableListWrapper<>(new ArrayList<>()) , new ObservableListWrapper<>(new ArrayList<>()));
     }
 
     /**
@@ -63,11 +60,11 @@ public class Workspace extends Dirtyable implements Serializable {
      * @param worksheets the list of  {@link Worksheet} instances to initialize the workspace with
      * @param sources    the list of  {@link Source} instances to initialize the workspace with
      */
-    public Workspace(List<Worksheet> worksheets, List<Source> sources) {
-//        this.dirty = new SimpleBooleanProperty(false);
+    private Workspace(ObservableList<Worksheet> worksheets, ObservableList<Source> sources) {
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
+        status = new ChangeWatcher<>(this);
     }
 
     /**
@@ -76,7 +73,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
      */
     public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
-        addDirtyable(worksheetsToAdd);
         this.worksheets.addAll(worksheetsToAdd);
     }
 
@@ -86,7 +82,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
      */
     public void removeWorksheets(Collection<Worksheet> worksheetsToRemove) {
-        removeDirtyable(worksheetsToRemove);
         this.worksheets.removeAll(worksheetsToRemove);
     }
 
@@ -94,11 +89,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * Clear the {@link Worksheet} list
      */
     public void clearWorksheets() {
-        if (this.worksheets.size() == 0) {
-            return;
-        }
-        removeDirtyable(worksheets);
-      //  worksheets.forEach(w -> w.dirtyProperty().removeListener(changeListener));
         worksheets.clear();
     }
 
@@ -106,11 +96,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * Clear the {@link Source} list
      */
     public void clearSources() {
-
-//        if (this.sources.size() == 0) {
-//            return;
-//    }
-    forceDirty();
         this.sources.clear();
     }
 
@@ -121,10 +106,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * @param sourcesToAdd the list of {@link Source} instances to add
      */
     public void addSources(Collection<Source> sourcesToAdd) {
-//        if (sourcesToAdd.size() == 0) {
-//            return;
-//        }
-        forceDirty();
         this.sources.addAll(sourcesToAdd);
     }
 
@@ -134,10 +115,6 @@ public class Workspace extends Dirtyable implements Serializable {
      * @param sourcesToRemove the list of {@link Source} instances to remove
      */
     public void removeSources(Collection<Source> sourcesToRemove) {
-//        if (sourcesToRemove.size() == 0) {
-//            return;
-//        }
-        forceDirty();
         this.sources.removeAll(sourcesToRemove);
     }
 
@@ -211,24 +188,6 @@ public class Workspace extends Dirtyable implements Serializable {
         return sb.toString();
     }
 
-//    /**
-//     * Returns true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
-//     *
-//     * @return true if the {@link Workspace} properties where modified since the last time is was persisted, false otherwise.
-//     */
-//    public Boolean isDirty() {
-//        return dirty.getValue();
-//    }
-//
-//    /**
-//     * Returns the property that observe the persisted state of the {@link Workspace}
-//     *
-//     * @return the property that observe the persisted state of the {@link Workspace}
-//     */
-//    public BooleanProperty dirtyProperty() {
-//        return dirty;
-//    }
-
     /**
      * Clear all the properties of the {@link Workspace} instance
      */
@@ -262,7 +221,7 @@ public class Workspace extends Dirtyable implements Serializable {
     public void save(File file) throws IOException, JAXBException {
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
-        cleanUp();
+       cleanUp();
         GlobalPreferences.getInstance().setMostRecentSaveFolder(file.getParent());
     }
 
@@ -282,16 +241,18 @@ public class Workspace extends Dirtyable implements Serializable {
         return workspace;
     }
 
-//    private void forceDirty() {
-//        this.dirty.setValue(true);
-//    }
-//
-//    private void evaluateDirty(Boolean isDirty) {
-//        this.dirty.setValue(dirty.getValue() | isDirty);
-//    }
-//
-//    private void cleanUp() {
-//        worksheets.forEach(Worksheet::cleanUp);
-//        this.dirty.setValue(false);
-//    }
+    @Override
+    public Boolean isDirty() {
+        return this.status.isDirty();
+    }
+
+    @Override
+    public BooleanProperty dirtyProperty() {
+        return this.status.dirtyProperty();
+    }
+
+    @Override
+    public void cleanUp() {
+        this.status.cleanUp();
+    }
 }

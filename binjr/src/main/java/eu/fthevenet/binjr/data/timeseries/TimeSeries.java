@@ -146,31 +146,31 @@ public abstract class TimeSeries<T extends Number> implements Serializable, Comp
      * @return a list of {@link TimeSeries} instances generated from the provided bindings
      * @throws DataAdapterException In case an error occurs while retrieving the data from the {@link DataAdapter} or parsing it in a {@link eu.fthevenet.binjr.data.parsers.DataParser}
      */
-    public static <T extends Number> SortedSet<TimeSeries<T>> fromBinding(Collection<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
-        SortedSet<TimeSeries<T>> series = new TreeSet<>();
-        // Group all bindings by common adapters
-        TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
-        Map<DataAdapter<T>, List<TimeSeriesBinding<T>>> bindingsByAdapters = bindings.stream().collect(groupingBy(TimeSeriesBinding::getAdapter));
-        for (Map.Entry<DataAdapter<T>, List<TimeSeriesBinding<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
-            DataAdapter<T> adapter = byAdapterEntry.getKey();
-            // Group all bindings-by-adapters by path
-            Map<String, List<TimeSeriesBinding<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(TimeSeriesBinding::getPath));
-            for (Map.Entry<String, List<TimeSeriesBinding<T>>> byPathEntry : bindingsByPath.entrySet()) {
-                String path = byPathEntry.getKey();
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    adapter.getData(path, startTime.toInstant(), endTime.toInstant(), out);
-                    try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
-                        Map<TimeSeriesBinding<T>, TimeSeries<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
-                        // Applying point reduction
-                        m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                        // Adding the new series to the list
-                        series.addAll(m.values());
-                    }
-                } catch (IOException | ParseException e) {
-                    throw new DataAdapterException("Error recovering data from source", e);
-                }
-            }
-        }
-        return series;
-    }
+//    public static <T extends Number> SortedSet<TimeSeries<T>> fromBinding(Collection<TimeSeriesBinding<T>> bindings, ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
+//        SortedSet<TimeSeries<T>> series = new TreeSet<>();
+//        // Group all bindings by common adapters
+//        TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
+//        Map<DataAdapter<T>, List<TimeSeriesBinding<T>>> bindingsByAdapters = bindings.stream().collect(groupingBy(TimeSeriesBinding::getAdapter));
+//        for (Map.Entry<DataAdapter<T>, List<TimeSeriesBinding<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
+//            DataAdapter<T> adapter = byAdapterEntry.getKey();
+//            // Group all bindings-by-adapters by path
+//            Map<String, List<TimeSeriesBinding<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(TimeSeriesBinding::getPath));
+//            for (Map.Entry<String, List<TimeSeriesBinding<T>>> byPathEntry : bindingsByPath.entrySet()) {
+//                String path = byPathEntry.getKey();
+//                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+//                    adapter.getData(path, startTime.toInstant(), endTime.toInstant(), out);
+//                    try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
+//                        Map<TimeSeriesBinding<T>, TimeSeries<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
+//                        // Applying point reduction
+//                        m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
+//                        // Adding the new series to the list
+//                        series.addAll(m.values());
+//                    }
+//                } catch (IOException | ParseException e) {
+//                    throw new DataAdapterException("Error recovering data from source", e);
+//                }
+//            }
+//        }
+//        return series;
+//    }
 }

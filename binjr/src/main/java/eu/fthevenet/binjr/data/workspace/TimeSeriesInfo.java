@@ -1,9 +1,11 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
+import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
+import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import javafx.beans.property.*;
-import javafx.beans.value.ChangeListener;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -17,15 +19,19 @@ import java.io.Serializable;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "TimeSeries")
-public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comparable<TimeSeriesInfo<T>>, Serializable {
+public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyable {
+    @IsDirtyable
     private final StringProperty displayName;
+    @IsDirtyable
     private final BooleanProperty selected;
+    @IsDirtyable
     private final Property<Color> displayColor;
+    @IsDirtyable
     private final StringProperty path;
     private TimeSeries<T> data;
     private final TimeSeriesBinding<T> binding;
-    private final IntegerProperty order;
-   // private final BooleanProperty dirty;
+
+    private final ChangeWatcher<TimeSeriesInfo> status;
 
 
     public TimeSeriesInfo(TimeSeriesBinding<T> binding) {
@@ -34,8 +40,7 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
                 binding.getColor(),
                 "",
                 null,
-                binding,
-                0);
+                binding);
     }
 
     /**
@@ -53,8 +58,7 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
                 seriesInfo.getDisplayColor(),
                 seriesInfo.getPath(),
                 null,
-                seriesInfo.getBinding(),
-                seriesInfo.getOrder());
+                seriesInfo.getBinding());
     }
 
     public TimeSeriesInfo(String displayName,
@@ -62,22 +66,13 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
                           Color displayColor,
                           String path,
                           TimeSeries<T> data,
-                          TimeSeriesBinding<T> binding,
-                          Integer order) {
+                          TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
         this.path = new SimpleStringProperty(path);
-        this.order = new SimpleIntegerProperty(order);
-
-//
-//        ChangeListener<Object> setDirty = (observable, oldValue, newValue) -> dirty.setValue(true);
-//        this.displayNameProperty().addListener(setDirty);
-//        this.selectedProperty().addListener(setDirty);
-//        this.displayColorProperty().addListener(setDirty);
-//        this.pathProperty().addListener(setDirty);
-//        this.orderProperty().addListener(setDirty);
+        status = new ChangeWatcher<>(this);
     }
 
     public String getDisplayName() {
@@ -128,18 +123,6 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
         this.path.set(path);
     }
 
-    public int getOrder() {
-        return order.get();
-    }
-
-    public IntegerProperty orderProperty() {
-        return order;
-    }
-
-    public void setOrder(int order) {
-        this.order.set(order);
-    }
-
     @XmlTransient
     public TimeSeriesBinding<T> getBinding() {
         return binding;
@@ -154,8 +137,19 @@ public class TimeSeriesInfo<T extends Number>  extends Dirtyable implements Comp
         this.data = data;
     }
 
+    @XmlTransient
     @Override
-    public int compareTo(TimeSeriesInfo<T> o) {
-        return this.order.getValue().compareTo(o.getOrder());
+    public Boolean isDirty() {
+        return status.isDirty();
+    }
+
+    @Override
+    public BooleanProperty dirtyProperty() {
+        return status.dirtyProperty();
+    }
+
+    @Override
+    public void cleanUp() {
+        status.cleanUp();
     }
 }

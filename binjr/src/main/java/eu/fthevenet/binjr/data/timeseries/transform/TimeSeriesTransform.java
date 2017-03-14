@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.data.timeseries.transform;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import org.apache.logging.log4j.LogManager;
@@ -34,7 +35,7 @@ public abstract class TimeSeriesTransform<T extends Number> {
      * @param series the time series to apply the transform to.
      * @return A map of the transformed series.
      */
-    protected abstract Map<TimeSeriesBinding<T>, TimeSeries<T>> apply(Map<TimeSeriesBinding<T>, TimeSeries<T>> series);
+    protected abstract Map<TimeSeriesInfo<T>, TimeSeries<T>> apply(Map<TimeSeriesInfo<T>, TimeSeries<T>> series);
 
     /**
      * Applies the transform function to the provided series
@@ -43,8 +44,8 @@ public abstract class TimeSeriesTransform<T extends Number> {
      * @param enabled true if the transform should be applied, false otherwise.
      * @return A map of the transformed series.
      */
-    public Map<TimeSeriesBinding<T>, TimeSeries<T>> transform(Map<TimeSeriesBinding<T>, TimeSeries<T>> series, boolean enabled) {
-        String names = series.keySet().stream().map(TimeSeriesBinding::getLabel).reduce((s, s2) -> s +" "+s2).orElse("null");
+    public Map<TimeSeriesInfo<T>, TimeSeries<T>> transform(Map<TimeSeriesInfo<T>, TimeSeries<T>> series, boolean enabled) {
+        String names = series.keySet().stream().map(tTimeSeriesInfo -> tTimeSeriesInfo.getBinding().getLabel()).reduce((s, s2) -> s +" "+s2).orElse("null");
         if (enabled) {
             try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + names, logger::trace)) {
                 series = apply(series);

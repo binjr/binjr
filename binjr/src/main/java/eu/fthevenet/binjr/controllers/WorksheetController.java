@@ -5,17 +5,16 @@ import eu.fthevenet.binjr.charts.XYChartCrosshair;
 import eu.fthevenet.binjr.charts.XYChartSelection;
 import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.controls.ColorTableCell;
-import eu.fthevenet.binjr.controls.ColorUtils;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -32,7 +31,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
-import javafx.scene.shape.Shape;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -40,14 +38,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.imageio.ImageIO;
-import javax.rmi.CORBA.Tie;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.*;
+import java.util.Collection;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -69,7 +69,7 @@ public abstract class WorksheetController implements Initializable {
     @FXML
     private TextField yMaxRange;
     @FXML
-    private TableView<TimeSeries<Double>> seriesTable;
+    private TableView<TimeSeriesInfo<Double>> seriesTable;
     @FXML
     private Button backButton;
     @FXML
@@ -86,9 +86,9 @@ public abstract class WorksheetController implements Initializable {
     @FXML
     private ZonedDateTimePicker endDate;
     @FXML
-    private TableColumn<TimeSeries<Double>, String> sourceColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> sourceColumn;
     @FXML
-    private TableColumn<TimeSeries<Double>, Color> colorColumn;
+    private TableColumn<TimeSeriesInfo<Double>, Color> colorColumn;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -104,8 +104,8 @@ public abstract class WorksheetController implements Initializable {
     private ContextMenu seriesListMenu;
 
     private MainViewController mainViewController;
-    private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
-    private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
+    // private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
+    // private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
@@ -114,7 +114,7 @@ public abstract class WorksheetController implements Initializable {
     private GlobalPreferences globalPrefs;
     private String name;
     private AtomicInteger seriesOrder = new AtomicInteger(0);
-    private final Worksheet worksheet;
+    private final Worksheet<Double> worksheet;
     private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
 
 
@@ -137,7 +137,7 @@ public abstract class WorksheetController implements Initializable {
     //endregion
 
 
-    public WorksheetController(MainViewController mainViewController, Worksheet worksheet){
+    public WorksheetController(MainViewController mainViewController, Worksheet<Double> worksheet) {
         this.mainViewController = mainViewController;
         this.worksheet = worksheet;
     }
@@ -161,7 +161,7 @@ public abstract class WorksheetController implements Initializable {
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-        assert graphOpacitySlider != null :  "fx:id\"graphOpacitySlider\" was not injected!";
+        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
 
         globalPrefs = GlobalPreferences.getInstance();
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -174,7 +174,7 @@ public abstract class WorksheetController implements Initializable {
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
 
-        this.chart = buildChart(xAxis,(ValueAxis) yAxis);
+        this.chart = buildChart(xAxis, (ValueAxis) yAxis);
 
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
@@ -202,7 +202,7 @@ public abstract class WorksheetController implements Initializable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
 
-        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0,100 );
+        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
 
 
         // bind the worksheet
@@ -232,10 +232,10 @@ public abstract class WorksheetController implements Initializable {
 
 
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
-        colorColumn.setCellFactory(param -> new ColorTableCell<TimeSeries<Double>>(colorColumn));
-        colorColumn.setCellValueFactory(p-> p.getValue().displayColorProperty());
+        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+        colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
 
-        seriesTable.setItems(seriesData);
+        seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
                 removeSelectedBinding();
@@ -243,33 +243,38 @@ public abstract class WorksheetController implements Initializable {
         });
     }
 
-    protected abstract XYChart<ZonedDateTime,Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
+    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
-        for(TimeSeriesBinding<Double> b:bindings){
-            b.setOrder(seriesOrder.incrementAndGet());
-            seriesBindings.add(b);
+        for (TimeSeriesBinding<Double> b : bindings) {
+//            b.setOrder(seriesOrder.incrementAndGet());
+//            seriesBindings.add(b);
+
+            worksheet.addSeries(new TimeSeriesInfo<>(b));
         }
+
+
         invalidate(false, true, true);
         chart.getYAxis().setAutoRanging(true);
     }
 
-    public void addBinding(TimeSeriesBinding<Double> binding) {
-        binding.setOrder(seriesOrder.incrementAndGet());
-        if (this.seriesBindings.add(binding)) {
-            invalidate(false, true, true);
-            chart.getYAxis().setAutoRanging(true);
-        }
-        else {
-            logger.warn("Binding " + binding.toString() + " is already present in current set");
-        }
-    }
+//    public void addBinding(TimeSeriesBinding<Double> binding) {
+//        binding.setOrder(seriesOrder.incrementAndGet());
+//        if (this.seriesBindings.add(binding)) {
+//            invalidate(false, true, true);
+//            chart.getYAxis().setAutoRanging(true);
+//        }
+//        else {
+//            logger.warn("Binding " + binding.toString() + " is already present in current set");
+//        }
+//    }
 
     public void removeSelectedBinding() {
-        TimeSeries<Double> current = seriesTable.getSelectionModel().getSelectedItem();
+        TimeSeriesInfo<Double> current = seriesTable.getSelectionModel().getSelectedItem();
         if (current != null) {
             seriesTable.getItems().remove(current);
-            seriesBindings.remove(current.getBinding());
+
+            //  seriesBindings.remove(current.getBinding());
             invalidate(false, true, true);
         }
     }
@@ -339,7 +344,7 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
-    private void applyOpacityToSeries(Iterable<TimeSeries<Double>> series, Double opacity){
+    private void applyOpacityToSeries(Iterable<TimeSeries<Double>> series, Double opacity) {
         for (TimeSeries<Double> s : series) {
             s.setDisplayColor(Color.color(s.getDisplayColor().getRed(),
                     s.getDisplayColor().getGreen(),
@@ -347,50 +352,38 @@ public abstract class WorksheetController implements Initializable {
                     opacity));
         }
     }
-
+    //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
 
-            seriesData.setAll(TimeSeries.fromBinding(
-                    seriesBindings,
-                    currentSelection.getStartX(),
-                    currentSelection.getEndX()));
+//            seriesData.setAll(
+            getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
 
-            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue != null) {
-                    applyOpacityToSeries(seriesData, newValue.doubleValue());
-                }
-            });
+//            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+//                if (newValue != null) {
+//                    applyOpacityToSeries(seriesData, newValue.doubleValue());
+//                }
+//            });
 
-            chart.getData().addAll(seriesData.stream().map(this::makeXYChartSeries).collect(Collectors.toList()));
+            chart.getData().addAll(getWorksheet().getSeries().stream().map(this::makeXYChartSeries).collect(Collectors.toList()));
 
-            applyOpacityToSeries(seriesData, graphOpacitySlider.getValue());
-//            seriesTable.getItems().clear();
-//
-//            for (XYChart.Series s : chart.getData()) {
-//                SelectableListItem i = new SelectableListItem(s.getDisplayName(), true);
-////                i.selectedProperty().addListener((obs, wasOn, isNowOn) -> {
-////                   selectedSeriesCache.put(s.getDisplayName(), isNowOn);
-////                    s.getNode().visibleProperty().bindBidirectional(i.selectedProperty());
-////                });
-////                i.setSelected(selectedSeriesCache.getOrDefault(s.getDisplayName(), true));
-//                seriesTable.getItems().add(i);
-//            }
-        } catch (DataAdapterException /*| IOException | ParseException*/ e) {
+            //    applyOpacityToSeries(seriesData, graphOpacitySlider.getValue());
+
+        } catch (DataAdapterException e) {
             Dialogs.displayException("Failed to retrieve data from source", e, root);
         }
     }
 
-    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeries<Double> series){
+    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
         XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
-        s.getData().addAll(series.getData());
+        s.getData().addAll(series.getData().getData());
         s.nodeProperty().addListener((node, oldNode, newNode) -> {
             if (newNode != null) {
                 ObservableList<Node> children = ((Group) newNode).getChildren();
-                if  (children != null) {
+                if (children != null) {
                     if (children.size() >= 1) {
-                        Path stroke = (Path)children.get(1);
+                        Path stroke = (Path) children.get(1);
                         Path fill = (Path) children.get(0);
                         stroke.setVisible(false);
                         if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
@@ -436,7 +429,7 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
-    public Worksheet getWorksheet() {
+    public Worksheet<Double> getWorksheet() {
         return this.worksheet;
     }
 
@@ -521,7 +514,7 @@ public abstract class WorksheetController implements Initializable {
     /**
      * Represent the state of the time series view
      */
-    private  class XYChartViewState {
+    private class XYChartViewState {
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private final SimpleDoubleProperty startY;
@@ -572,7 +565,7 @@ public abstract class WorksheetController implements Initializable {
          * @param startY the lower bound of the Y axis
          * @param endY   the upper bound of the Y axis
          */
-        public XYChartViewState( ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+        public XYChartViewState(ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
