@@ -254,15 +254,19 @@
                     </SplitMenuButton>
                     <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
-                            <TableColumn fx:id="visibleColumn" prefWidth="26.0" />
+                            <TableColumn fx:id="visibleColumn" prefWidth="26.0" >
+                                <cellValueFactory>
+                                    <PropertyValueFactory property="selected" />
+                                </cellValueFactory>
+                            </TableColumn>
                             <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false">
                             </TableColumn>
                             <TableColumn prefWidth="160.0" text="Name">
                                 <cellValueFactory>
-                                    <PropertyValueFactory property="name" />
+                                    <PropertyValueFactory property="displayName" />
                                 </cellValueFactory>
                             </TableColumn>
-                            <TableColumn prefWidth="76.0" text="Min.">
+                            <TableColumn fx:id="minColumn" prefWidth="76.0" text="Min.">
                                 <!--<cellValueFactory>-->
                                     <!--<PropertyValueFactory property="minValue" />-->
                                 <!--</cellValueFactory>-->
@@ -271,7 +275,7 @@
                                 </cellFactory>
                             </TableColumn>
 
-                            <TableColumn prefWidth="76.0" text="Avg.">
+                            <TableColumn fx:id="avgColumn" prefWidth="76.0" text="Avg.">
                                 <!--<cellValueFactory>-->
                                     <!--<PropertyValueFactory property="averageValue" />-->
                                 <!--</cellValueFactory>-->
@@ -279,7 +283,7 @@
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn text="Max.">
+                            <TableColumn fx:id="maxColumn" text="Max.">
                                 <!--<cellValueFactory>-->
                                     <!--<PropertyValueFactory property="maxValue" />-->
                                 <!--</cellValueFactory>-->
@@ -287,7 +291,7 @@
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn prefWidth="75.0" text="Current">
+                            <TableColumn fx:id="currentColumn" prefWidth="75.0" text="Current">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
                                 </cellFactory>

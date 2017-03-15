@@ -1,7 +1,6 @@
 package eu.fthevenet.binjr.data.timeseries.transform;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
@@ -32,7 +31,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
     }
 
     @Override
-    public Map<TimeSeriesInfo<T>, TimeSeries<T>> apply(Map<TimeSeriesInfo<T>, TimeSeries<T>> m) {
+    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> apply(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> m) {
         return m.entrySet()
                 .parallelStream()
                 .collect(Collectors.toMap(Map.Entry::getKey, o -> {

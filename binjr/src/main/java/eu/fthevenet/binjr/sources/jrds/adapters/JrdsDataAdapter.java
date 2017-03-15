@@ -1,13 +1,13 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
+import eu.fthevenet.binjr.data.adapters.SimpleCachingDataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
-import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeries;
+import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.xml.XmlUtils;
@@ -28,8 +28,6 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -47,7 +45,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter implements DataAdapter<Double> {
+public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final String SEPARATOR = ",";
     private  String jrdsHost;
@@ -85,6 +83,7 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
      * @param treeFilter   the filter to apply to the tree view
      */
     public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeFilter treeFilter) {
+        super();
         this.jrdsHost = hostname;
         this.jrdsPort = port;
         this.jrdsPath = path;
@@ -109,7 +108,7 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     }
 
     @Override
-    public long getData(String path, Instant begin, Instant end, OutputStream out) throws DataAdapterException {
+    public InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
@@ -124,11 +123,13 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
             if (status >= 200 && status < 300) {
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    long length = entity.getContentLength();
-                    entity.writeTo(out);
-                    return length;
+                    //OutputStream out = new
+                    //long length = entity.getContentLength();
+                   return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
+                //   return entity.getContent(); //.writeTo(out);
+                 //   return out;
                 }
-                return 0L;
+                return null;
             }
             else {
                 throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
@@ -179,7 +180,7 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     public DataParser<Double> getParser() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
         return new CsvParser<>(getEncoding(), SEPARATOR,
-                DoubleTimeSeries::new,
+                DoubleTimeSeriesProcessor::new,
                 s -> {
                     Double val = Double.parseDouble(s);
                     return val.isNaN() ? 0 : val;
@@ -299,8 +300,8 @@ public class JrdsDataAdapter implements DataAdapter<Double> {
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            getData(id, now.minusSeconds(120), now, out);
-            try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
+            //getData(id, now.minusSeconds(120), now, out);
+            try (InputStream in = getData(id, now.minusSeconds(120), now)) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
                     String header = br.readLine();
                     if (header == null || header.isEmpty()) {

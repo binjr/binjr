@@ -38,7 +38,7 @@ public class JrdsSourceTester {
 
 
 //        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-//            if (dp.getData(target, probe, begin, end, out) >0) {
+//            if (dp.getProcessor(target, probe, begin, end, out) >0) {
 //                InputStream in = new ByteArrayInputStream(out.toByteArray());
 //                final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 //                TimeSeriesTransformer<Double> tb = new TimeSeriesTransformer<>(ZoneId.systemDefault(),

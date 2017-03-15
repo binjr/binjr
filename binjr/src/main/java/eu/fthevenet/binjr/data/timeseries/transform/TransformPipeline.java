@@ -1,7 +1,5 @@
 package eu.fthevenet.binjr.data.timeseries.transform;
 
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
-
 import java.util.LinkedList;
 import java.util.List;
 

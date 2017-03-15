@@ -4,7 +4,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 
@@ -18,7 +18,7 @@ import java.io.Serializable;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlRootElement(name = "TimeSeries")
+@XmlRootElement(name = "TimeSeriesProcessor")
 public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
@@ -28,7 +28,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
     private final Property<Color> displayColor;
     @IsDirtyable
     private final StringProperty path;
-    private TimeSeries<T> data;
+    private TimeSeriesProcessor<T> processor;
     private final TimeSeriesBinding<T> binding;
 
     private final ChangeWatcher<TimeSeriesInfo> status;
@@ -65,7 +65,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
                           Boolean selected,
                           Color displayColor,
                           String path,
-                          TimeSeries<T> data,
+                          TimeSeriesProcessor<T> data,
                           TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
@@ -129,12 +129,12 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
     }
 
     @XmlTransient
-    public TimeSeries<T> getData() {
-        return data;
+    public TimeSeriesProcessor<T> getProcessor() {
+        return processor;
     }
 
-    public void setData(TimeSeries<T> data) {
-        this.data = data;
+    public void setProcessor(TimeSeriesProcessor<T> processor) {
+        this.processor = processor;
     }
 
     @XmlTransient

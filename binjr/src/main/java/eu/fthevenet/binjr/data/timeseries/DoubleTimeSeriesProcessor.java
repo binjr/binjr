@@ -1,23 +1,22 @@
 package eu.fthevenet.binjr.data.timeseries;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import javafx.scene.chart.XYChart;
 
 import java.util.OptionalDouble;
 
 /**
- * This class provides a full implementation of a {@link TimeSeries} of {@link Double} values.
+ * This class provides a full implementation of a {@link TimeSeriesProcessor} of {@link Double} values.
  *
  * @author Frederic Thevenet
  */
-public class DoubleTimeSeries extends TimeSeries<Double> {
+public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor<Double> {
 
     /**
-     * Initializes a new instance of the {@link DoubleTimeSeries} class with the provided binding.
-     * @param binding the binding of the {@link DoubleTimeSeries}
+     * Initializes a new instance of the {@link DoubleTimeSeriesProcessor} class with the provided binding.
+     *
      */
-    public DoubleTimeSeries(TimeSeriesBinding<Double> binding) {
-        super(binding);
+    public DoubleTimeSeriesProcessor() {
+        super();
     }
 
     @Override

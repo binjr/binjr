@@ -3,11 +3,10 @@ package eu.fthevenet.binjr.data.workspace;
 import com.sun.javafx.collections.ObservableListWrapper;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
@@ -128,18 +127,15 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
             for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    // Get data for source
-                    adapter.getData(path, startTime.toInstant(), endTime.toInstant(), out);
-                    try (InputStream in = new ByteArrayInputStream(out.toByteArray())) {
+                    // Get raw data for source
+                    try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant())) {
                         // Parse raw data obtained from adapter
-                        Map<TimeSeriesInfo<T>, TimeSeries<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
-
+                        Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
                         // Applying point reduction
                         m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
-
                         //Update timeSeries data
                         for (TimeSeriesInfo<T> info : m.keySet()){
-                            info.setData(m.get(info));
+                            info.setProcessor(m.get(info));
                         }
                     }
                 } catch (IOException | ParseException e) {

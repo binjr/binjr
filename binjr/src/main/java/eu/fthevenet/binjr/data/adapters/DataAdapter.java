@@ -1,8 +1,10 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.data.parsers.DataParser;
+import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import javafx.scene.control.TreeItem;
 
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.time.Instant;
@@ -14,7 +16,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public interface DataAdapter<T extends Number> extends Serializable {
+public interface DataAdapter<T extends Number> extends Serializable, AutoCloseable {
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -30,11 +32,10 @@ public interface DataAdapter<T extends Number> extends Serializable {
      * @param path  the path of the data in the source
      * @param begin the start of the time interval.
      * @param end   the end of the time interval.
-     * @param out   the output stream in which to return data.
-     * @return the size of the stream (if applicable).
+     * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    long getData(String path, Instant begin, Instant end, OutputStream out) throws DataAdapterException;
+    InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException;
 
     /**
      * Gets the encoding used to decode textual data sent by the source.
@@ -51,9 +52,9 @@ public interface DataAdapter<T extends Number> extends Serializable {
     ZoneId getTimeZoneId();
 
     /**
-     * Gets the {@link DataParser} used to produce {@link eu.fthevenet.binjr.data.timeseries.TimeSeries} from the source.
+     * Gets the {@link DataParser} used to produce {@link TimeSeriesProcessor} from the source.
      *
-     * @return the {@link DataParser} used to produce {@link eu.fthevenet.binjr.data.timeseries.TimeSeries} from the source.
+     * @return the {@link DataParser} used to produce {@link TimeSeriesProcessor} from the source.
      */
     DataParser<T> getParser();
 

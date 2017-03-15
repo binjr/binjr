@@ -8,7 +8,6 @@ import eu.fthevenet.binjr.controls.ColorTableCell;
 import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.timeseries.TimeSeries;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
@@ -26,6 +25,7 @@ import javafx.scene.Node;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
@@ -90,6 +90,18 @@ public abstract class WorksheetController implements Initializable {
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, Color> colorColumn;
     @FXML
+    private TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn;
+
+    @FXML
+    private TableColumn<TimeSeriesInfo<Double>, Double> minColumn;
+    @FXML
+    private TableColumn<TimeSeriesInfo<Double>, Double> maxColumn;
+    @FXML
+    private TableColumn<TimeSeriesInfo<Double>, Double> avgColumn;
+    @FXML
+    private TableColumn<TimeSeriesInfo<Double>, Double> currentColumn;
+
+    @FXML
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
@@ -104,7 +116,7 @@ public abstract class WorksheetController implements Initializable {
     private ContextMenu seriesListMenu;
 
     private MainViewController mainViewController;
-    // private ObservableList<TimeSeries<Double>> seriesData = FXCollections.observableArrayList();
+    // private ObservableList<TimeSeriesProcessor<Double>> seriesData = FXCollections.observableArrayList();
     // private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -116,7 +128,6 @@ public abstract class WorksheetController implements Initializable {
     private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet<Double> worksheet;
     private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
-
 
     //region [Properties]
     public String getName() {
@@ -145,6 +156,7 @@ public abstract class WorksheetController implements Initializable {
     //region [Initializable Members]
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //region *** Nodes injection checks ***
         assert root != null : "fx:id\"root\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
@@ -162,8 +174,14 @@ public abstract class WorksheetController implements Initializable {
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+        assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
+        assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
+        assert minColumn != null : "fx:id\"minColumn\" was not injected!";
+        assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
+        assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
+        //endregion
 
-        globalPrefs = GlobalPreferences.getInstance();
+        //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
@@ -174,66 +192,72 @@ public abstract class WorksheetController implements Initializable {
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
 
-        this.chart = buildChart(xAxis, (ValueAxis) yAxis);
-
+        chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
+
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
         AnchorPane.setTopAnchor(chart, 0.0);
+        //endregion
 
-        endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
-        startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
-
-        this.backButton.setOnAction(this::handleHistoryBack);
-        this.forwardButton.setOnAction(this::handleHistoryForward);
-        this.refreshButton.setOnAction(this::handleRefresh);
-        this.resetYButton.setOnAction(this::handleResetYRangeButton);
-        this.snapshotButton.setOnAction(this::handleTakeSnapshot);
-        this.forwardButton.setOnAction(this::handleHistoryForward);
-
-        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
-        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
-        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
-        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> invalidate(false, true, true));
-
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
-        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
-
-        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
-
-
-        // bind the worksheet
-        getWorksheet().fromDateTimeProperty().bind(currentState.startX);
-        getWorksheet().toDateTimeProperty().bind(currentState.endX);
-
-        plotChart(currentState.asSelection());
-
+        //region *** Buttons ***
+        backButton.setOnAction(this::handleHistoryBack);
+        forwardButton.setOnAction(this::handleHistoryForward);
+        refreshButton.setOnAction(this::handleRefresh);
+        resetYButton.setOnAction(this::handleResetYRangeButton);
+        snapshotButton.setOnAction(this::handleTakeSnapshot);
+        forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
+        //endregion
+
+        //region *** Global preferences ***
+        globalPrefs = GlobalPreferences.getInstance();
+        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
+        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+        //endregion
+
+        //region *** Time pickers ***
+        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
+        getWorksheet().fromDateTimeProperty().bind(currentState.startX);
+        getWorksheet().toDateTimeProperty().bind(currentState.endX);
+        plotChart(currentState.asSelection());
+        endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
+        startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endX);
-        crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
+        //endregion
 
+        //region *** Crosshair ***
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
+        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
+        crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
         });
-
         crossHair.horizontalMarkerVisibleProperty().bindBidirectional(hCrosshair.selectedProperty());
         crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
-
         mainViewController.showHorizontalMarkerProperty().bindBidirectional(crossHair.horizontalMarkerVisibleProperty());
         mainViewController.showVerticalMarkerProperty().bindBidirectional(crossHair.verticalMarkerVisibleProperty());
+        //endregion
 
-
+        //region *** Series TableView ***
+        visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
+        avgColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getAverageValue()).asObject());
+        minColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getMinValue()).asObject());
+        maxColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getMaxValue()).asObject());
+        currentColumn.setCellValueFactory(p -> new SimpleDoubleProperty(Double.NaN).asObject());
 
         seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
@@ -241,20 +265,19 @@ public abstract class WorksheetController implements Initializable {
                 removeSelectedBinding();
             }
         });
+        //endregion
     }
 
     protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
-//            b.setOrder(seriesOrder.incrementAndGet());
-//            seriesBindings.add(b);
-
-            worksheet.addSeries(new TimeSeriesInfo<>(b));
+            TimeSeriesInfo<Double> newSeries = new TimeSeriesInfo<>(b);
+            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+            worksheet.addSeries(newSeries);
         }
 
-
-        invalidate(false, true, true);
+        invalidate(false);
         chart.getYAxis().setAutoRanging(true);
     }
 
@@ -274,33 +297,27 @@ public abstract class WorksheetController implements Initializable {
         if (current != null) {
             seriesTable.getItems().remove(current);
 
-            //  seriesBindings.remove(current.getBinding());
-            invalidate(false, true, true);
+            invalidate(false);
         }
     }
     //endregion
 
-    public void invalidate(boolean saveToHistory, boolean plotChart) {
-        invalidate(saveToHistory, plotChart, false);
+    public void invalidate(boolean saveToHistory) {
+        invalidate(saveToHistory, false);
     }
 
-    public void invalidate(boolean saveToHistory, boolean plotChart, boolean forceRefresh) {
+    public void invalidate(boolean saveToHistory, boolean dontPlotChart) {
         logger.debug(() -> "Refreshing chart");
         XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-        if (!currentSelection.equals(previousState) || forceRefresh) {
-            if (saveToHistory) {
-                this.backwardHistory.push(previousState);
-                this.forwardHistory.clear();
-            }
-            previousState = currentState.asSelection();
-            logger.debug(() -> backwardHistory.dump());
-            if (plotChart) {
-                plotChart(currentSelection);
-            }
+        if (saveToHistory) {
+            this.backwardHistory.push(previousState);
+            this.forwardHistory.clear();
         }
-        else {
-            logger.debug(() -> "XYChartViewState hasn't change, no need to redraw the graph");
+        previousState = currentState.asSelection();
+        logger.debug(() -> backwardHistory.dump());
+        if (!dontPlotChart) {
+            plotChart(currentSelection);
         }
     }
 
@@ -321,7 +338,7 @@ public abstract class WorksheetController implements Initializable {
 
     @FXML
     protected void handleRefresh(ActionEvent actionEvent) {
-        this.invalidate(false, true, true);
+        this.invalidate(false);
     }
     //endregion
 
@@ -344,31 +361,37 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
-    private void applyOpacityToSeries(Iterable<TimeSeries<Double>> series, Double opacity) {
-        for (TimeSeries<Double> s : series) {
-            s.setDisplayColor(Color.color(s.getDisplayColor().getRed(),
-                    s.getDisplayColor().getGreen(),
-                    s.getDisplayColor().getBlue(),
-                    opacity));
+    private void applyOpacityToSeries(Iterable<TimeSeriesInfo<Double>> series, Double opacity) {
+        for (TimeSeriesInfo<Double> s : series) {
+            if (s.getDisplayColor() != null) {
+                s.setDisplayColor(Color.color(s.getDisplayColor().getRed(),
+                        s.getDisplayColor().getGreen(),
+                        s.getDisplayColor().getBlue(),
+                        opacity));
+            }
         }
     }
+
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart")) {
             chart.getData().clear();
 
-//            seriesData.setAll(
             getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
 
-//            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-//                if (newValue != null) {
-//                    applyOpacityToSeries(seriesData, newValue.doubleValue());
-//                }
-//            });
+            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue != null) {
+                    applyOpacityToSeries(worksheet.getSeries(), newValue.doubleValue());
+                }
+            });
 
-            chart.getData().addAll(getWorksheet().getSeries().stream().map(this::makeXYChartSeries).collect(Collectors.toList()));
+            chart.getData().addAll(getWorksheet().getSeries()
+                    .stream()
+                    .filter(series -> series.getProcessor() != null && series.isSelected())
+                    .map(this::makeXYChartSeries)
+                    .collect(Collectors.toList()));
 
-            //    applyOpacityToSeries(seriesData, graphOpacitySlider.getValue());
+            applyOpacityToSeries(worksheet.getSeries(), graphOpacitySlider.getValue());
 
         } catch (DataAdapterException e) {
             Dialogs.displayException("Failed to retrieve data from source", e, root);
@@ -377,7 +400,7 @@ public abstract class WorksheetController implements Initializable {
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
         XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
-        s.getData().addAll(series.getData().getData());
+        s.getData().addAll(series.getProcessor().getData());
         s.nodeProperty().addListener((node, oldNode, newNode) -> {
             if (newNode != null) {
                 ObservableList<Node> children = ((Group) newNode).getChildren();
@@ -539,19 +562,19 @@ public abstract class WorksheetController implements Initializable {
          * Sets the current state from a {@link XYChartSelection}
          *
          * @param selection the {@link XYChartSelection} to set as the current state
-         * @param toHistory true if the change in state should be recoreded in the history
+         * @param toHistory true if the change in state should be recorded in the history
          */
         void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
             frozen = true;
             try {
                 ZonedDateTime newStartX = roundDateTime(selection.getStartX());
                 ZonedDateTime newEndX = roundDateTime(selection.getEndX());
-                boolean plotChart = !(newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get()));
+                boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
                 this.startX.set(newStartX);
                 this.endX.set(newEndX);
                 this.startY.set(roundYValue(selection.getStartY()));
                 this.endY.set(roundYValue(selection.getEndY()));
-                invalidate(toHistory, plotChart);
+                invalidate(toHistory, dontPlotChart);
             } finally {
                 frozen = false;
             }
@@ -573,22 +596,22 @@ public abstract class WorksheetController implements Initializable {
 
             this.startX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    invalidate(true, false);
                 }
             });
             this.endX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    invalidate(true, false);
                 }
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    invalidate(true, true);
                 }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    invalidate(true, true);
                 }
             });
         }
