@@ -356,13 +356,13 @@ public class MainViewController implements Initializable {
             return true;
         }
         ButtonType res = Dialogs.confirmSaveDialog(root, (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
-        if (res == ButtonType.CANCEL){
+        if (res == ButtonType.CANCEL) {
             return false;
         }
-        if (res == ButtonType.YES){
-           if (!saveWorkspace()){
-               return false;
-           }
+        if (res == ButtonType.YES) {
+            if (!saveWorkspace()) {
+                return false;
+            }
         }
         clearWorkspace();
         return true;
@@ -417,7 +417,7 @@ public class MainViewController implements Initializable {
                 return true;
             }
             else {
-               return saveWorkspaceAs();
+                return saveWorkspaceAs();
             }
         } catch (IOException e) {
             Dialogs.displayException("Failed to save snapshot to disk", e, root);
@@ -573,21 +573,29 @@ public class MainViewController implements Initializable {
         MenuItem addToCurrent = new MenuItem("Add to current worksheet");
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
         addToCurrent.setOnAction(event -> {
-            TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
-            if (selectedTabController != null && treeItem != null) {
-                List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
-                getAllBindingsFromBranch(treeItem, bindings);
-                selectedTabController.addBindings(bindings);
+            try {
+                TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
+                if (selectedTabController != null && treeItem != null) {
+                    List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                    getAllBindingsFromBranch(treeItem, bindings);
+                    selectedTabController.addBindings(bindings);
+                }
+            } catch (Exception e) {
+                Dialogs.displayException("Error adding bindings to existing worksheet", e);
             }
         });
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> {
-            TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
-            Worksheet worksheet = new Worksheet(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
-            if (editWorksheet(worksheet) && selectedTabController != null) {
-                List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
-                getAllBindingsFromBranch(treeItem, bindings);
-                selectedTabController.addBindings(bindings);
+            try {
+                TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
+                Worksheet worksheet = new Worksheet(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
+                if (editWorksheet(worksheet) && selectedTabController != null) {
+                    List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                    getAllBindingsFromBranch(treeItem, bindings);
+                    selectedTabController.addBindings(bindings);
+                }
+            } catch (Exception e) {
+                Dialogs.displayException("Error adding bindings to new worksheet", e);
             }
         });
         return new ContextMenu(addToCurrent, addToNew);

@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import eu.fthevenet.binjr.io.IOUtils;
 import eu.fthevenet.binjr.logging.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,8 +25,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public abstract class SimpleCachingDataAdapter<T extends Number> implements DataAdapter<T> {
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
-    private static final int COPY_BUFFER_SIZE = 32 * 1024;
-    public static final int EOF = -1;
+
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
     public SimpleCachingDataAdapter() {
@@ -43,8 +43,8 @@ public abstract class SimpleCachingDataAdapter<T extends Number> implements Data
             try {
                 cached = new ByteArrayOutputStream();
                 AtomicLong copied = new AtomicLong(0);
-                try(Profiler p = Profiler.start("Byte streams copied (" + copied.get() + " bytes)", logger::trace)) {
-                    copied.set(copyStreams(in, cached));
+                try(Profiler p = Profiler.start((e)-> logger.trace(()-> "Copied " + copied.get() + " bytes in " + e.getMicros() + "ms"))) {
+                    copied.set(IOUtils.copyStreams(in, cached));
                 }
                 cache.put(cacheEntryKey, new SoftReference<>(cached));
             } catch (IOException e) {
@@ -71,31 +71,4 @@ public abstract class SimpleCachingDataAdapter<T extends Number> implements Data
         this.cache.clear();
     }
 
-    private long fastCopyStreams(InputStream input, OutputStream output) throws IOException {
-        ReadableByteChannel src = Channels.newChannel(input);
-        WritableByteChannel dest = Channels.newChannel(output);
-        ByteBuffer buffer = ByteBuffer.allocateDirect(COPY_BUFFER_SIZE);
-        long count = 0;
-        while (src.read(buffer) != -1) {
-            buffer.flip();
-            count += dest.write(buffer);
-            buffer.compact();
-        }
-        buffer.flip();
-        while (buffer.hasRemaining()) {
-            count += dest.write(buffer);
-        }
-        return count;
-    }
-
-    private long copyStreams(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[COPY_BUFFER_SIZE];
-        long count = 0;
-        int n;
-        while (EOF != (n = input.read(buffer))) {
-            output.write(buffer, 0, n);
-            count += n;
-        }
-        return count;
-    }
 }

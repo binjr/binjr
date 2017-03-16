@@ -272,7 +272,7 @@ public abstract class WorksheetController implements Initializable {
 
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
-            TimeSeriesInfo<Double> newSeries = new TimeSeriesInfo<>(b);
+            TimeSeriesInfo<Double> newSeries =  TimeSeriesInfo.fromBinding(b);
             newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
             worksheet.addSeries(newSeries);
         }

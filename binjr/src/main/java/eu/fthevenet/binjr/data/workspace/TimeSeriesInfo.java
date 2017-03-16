@@ -34,7 +34,19 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
     private final ChangeWatcher<TimeSeriesInfo> status;
 
 
-    public TimeSeriesInfo(TimeSeriesBinding<T> binding) {
+   public  static <T extends Number> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding){
+       if (binding == null){
+           throw new IllegalArgumentException("binding cannot be null");
+       }
+       return new TimeSeriesInfo<>(binding.getLegend(),
+               true,
+               binding.getColor(),
+               "",
+               null,
+               binding);
+   }
+
+    private TimeSeriesInfo(TimeSeriesBinding<T> binding) {
         this(binding.getLegend(),
                 true,
                 binding.getColor(),
