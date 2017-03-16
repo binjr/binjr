@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * A dialog box to create a new worksheet
@@ -45,9 +46,9 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
      * @param worksheet the worksheet to edit
      * @param owner the owner window for the dialog
      */
-    public EditWorksheetDialog(Worksheet worksheet, Node owner) {
+    public EditWorksheetDialog(Worksheet<T> worksheet, Node owner) {
         // Clone the worksheet before binding it to the UI (we don't want to mutate the provided instance in case the user cancel the edition)
-        Worksheet resultWorksheet = new Worksheet(worksheet);
+        Worksheet<T> resultWorksheet = new Worksheet<>(worksheet);
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
@@ -86,7 +87,8 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
 
             fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
             toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());
-            chartTypeChoice.getItems().setAll(ChartType.values());
+            // TODO: ChartType.LINE is not an option for the time being
+            chartTypeChoice.getItems().setAll(Arrays.stream(ChartType.values()).filter(v-> v != ChartType.LINE).collect(Collectors.toSet()));
             chartTypeChoice.getSelectionModel().select(resultWorksheet.getChartType());
             resultWorksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 

@@ -132,7 +132,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setNewTabFactory(() -> {
             AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
             EditableTab newTab = new EditableTab("");
-            new EditWorksheetDialog<>(new Worksheet(), root).showAndWait().ifPresent(w -> {
+            new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
                 loadWorksheet(w, newTab);
                 wasNewTabCreated.set(true);
             });
@@ -400,6 +400,7 @@ public class MainViewController implements Initializable {
                 for (Worksheet worksheet : wsFromfile.getWorksheets()) {
                     loadWorksheet(worksheet);
                 }
+                workspace.cleanUp();
             }
         } catch (IllegalAccessException | InstantiationException e) {
             Dialogs.displayException("Error while instantiating DataAdapter", e, root);

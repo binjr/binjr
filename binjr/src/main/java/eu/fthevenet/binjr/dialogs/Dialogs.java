@@ -152,8 +152,8 @@ public class Dialogs {
         dlg.setTitle("Save");
         dlg.getDialogPane().setHeaderText("Do you want to save changes to " + fileName + "?");
         ImageView img = new ImageView(new Image(Dialogs.class.getResourceAsStream("/images/save_96.png")));
-        img.setFitHeight(48);
-        img.setFitWidth(48);
+        img.setFitHeight(32);
+        img.setFitWidth(32);
         dlg.getDialogPane().setGraphic(img);
         dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         return dlg.showAndWait().orElse(ButtonType.CANCEL);

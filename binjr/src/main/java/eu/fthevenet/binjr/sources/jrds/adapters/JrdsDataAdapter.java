@@ -186,7 +186,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             // add a dummy node so that the branch can be expanded
             newBranch.getChildren().add(new TreeItem<>(null));
             // add a listener so that bindings for individual datastore are added lazily to avoid
-            // dozens of individual call to getColumnDataStores when the tree is built.
+            // dozens of individual call to "graphdesc" servlet when the tree is built.
             newBranch.expandedProperty().addListener(new ChangeListener<Boolean>() {
                 @Override
                 public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
@@ -194,7 +194,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
-                                if (!"none".equals(graphdesc.seriesDescList.get(i).graphType)) {
+                                String graphType = graphdesc.seriesDescList.get(i).graphType;
+                                if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
                                     newBranch.getChildren().add(new TreeItem<>(new JrdsSeriesBinding(graphdesc, i, currentPath, JrdsDataAdapter.this)));
                                 }
                             }
@@ -277,41 +278,11 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         } catch (URISyntaxException e) {
             throw new DataAdapterException("Error building URI for request");
         }
-
-//        return doHttpGet(requestUrl, response -> {
-//            int status = response.getStatusLine().getStatusCode();
-//            if (status == 404) {
-//                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
-//                // so we're falling back to recovering the datastore name from the csv file provided by
-//                // the download service.
-//                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
-//                try {
-//                    return getGraphDescriptorLegacy(id);
-//                } catch (Exception e) {
-//                    throw new IOException("", e);
-//                }
-//            }
-//            if (status >= 200 && status < 300) {
-//                HttpEntity entity = response.getEntity();
-//                if (entity != null) {
-//                    try {
-//                        return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
-//                    } catch (Exception e) {
-//                        throw new IOException("", e);
-//                    }
-//                }
-//                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
-//            }
-//            else {
-//                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
-//            }
-//        });
     }
 
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            //getData(id, now.minusSeconds(120), now, out);
             try (InputStream in = getData(id, now.minusSeconds(120), now)) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
                     String header = br.readLine();
@@ -336,21 +307,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             throw new DataAdapterException(e);
         }
     }
-
-
-//    private <T> T doHttpGet(URLBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
-//        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString() + "]", logger::trace)) {
-//            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-//                logger.debug(() -> "requestUrl = " + requestUrl);
-//                HttpGet httpget = new HttpGet(requestUrl.build().toURI());
-//                return httpClient.execute(httpget, responseHandler);
-//            }
-//        } catch (IOException e) {
-//            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
-//        } catch (URISyntaxException e) {
-//            throw new DataAdapterException("Error building URI for request");
-//        }
-//    }
 
     /**
      * POJO definition used to parse JSON message.
