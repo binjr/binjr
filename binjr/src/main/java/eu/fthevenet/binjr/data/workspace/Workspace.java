@@ -5,7 +5,7 @@ import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import eu.fthevenet.binjr.xml.XmlUtils;
+import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;

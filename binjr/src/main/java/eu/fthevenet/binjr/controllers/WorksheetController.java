@@ -1,18 +1,21 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.charts.StableTicksAxis;
-import eu.fthevenet.binjr.charts.XYChartCrosshair;
-import eu.fthevenet.binjr.charts.XYChartSelection;
-import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
-import eu.fthevenet.binjr.controls.ColorTableCell;
-import eu.fthevenet.binjr.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.logging.Profiler;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.logging.Profiler;
+import eu.fthevenet.util.text.BinaryPrefixFormat;
+import eu.fthevenet.util.text.MetricPrefixFormat;
+import eu.fthevenet.util.text.PrefixFormat;
+import eu.fthevenet.util.ui.charts.StableTicksAxis;
+import eu.fthevenet.util.ui.charts.XYChartCrosshair;
+import eu.fthevenet.util.ui.charts.XYChartSelection;
+import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
+import eu.fthevenet.util.ui.controls.ColorTableCell;
+import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
+import eu.fthevenet.util.ui.dialogs.Dialogs;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -93,13 +96,13 @@ public abstract class WorksheetController implements Initializable {
     private TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn;
 
     @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Double> minColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> minColumn;
     @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Double> maxColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> maxColumn;
     @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Double> avgColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> avgColumn;
     @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Double> currentColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> currentColumn;
 
     @FXML
     private ToggleButton vCrosshair;
@@ -128,6 +131,7 @@ public abstract class WorksheetController implements Initializable {
     private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet<Double> worksheet;
     private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
+    private final PrefixFormat prefixFormat;
 
     //region [Properties]
     public String getName() {
@@ -151,6 +155,17 @@ public abstract class WorksheetController implements Initializable {
     public WorksheetController(MainViewController mainViewController, Worksheet<Double> worksheet) {
         this.mainViewController = mainViewController;
         this.worksheet = worksheet;
+        switch (this.worksheet.getUnitPrefixes()) {
+            case BINARY:
+                this.prefixFormat = new BinaryPrefixFormat();
+                break;
+            case METRIC:
+                this.prefixFormat = new MetricPrefixFormat();
+                break;
+
+            default:
+                throw new IllegalArgumentException("Unknown unit prefix");
+        }
     }
 
     //region [Initializable Members]
@@ -249,15 +264,21 @@ public abstract class WorksheetController implements Initializable {
         mainViewController.showVerticalMarkerProperty().bindBidirectional(crossHair.verticalMarkerVisibleProperty());
         //endregion
 
+
         //region *** Series TableView ***
         visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-        avgColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getAverageValue()).asObject());
-        minColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getMinValue()).asObject());
-        maxColumn.setCellValueFactory(p -> new SimpleDoubleProperty(p.getValue().getProcessor() == null ? Double.NaN : p.getValue().getProcessor().getMaxValue()).asObject());
-        currentColumn.setCellValueFactory(p -> new SimpleDoubleProperty(Double.NaN).asObject());
+        avgColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getAverageValue())));
+
+
+        minColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getMinValue())));
+        maxColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getMaxValue())));
+
+        // maxColumn.setCellFactory(p-> new TableCell<TimeSeriesInfo<Double>, Double>());
+
+        currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormat.format(Double.NaN)));
 
         seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
@@ -272,7 +293,7 @@ public abstract class WorksheetController implements Initializable {
 
     public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
-            TimeSeriesInfo<Double> newSeries =  TimeSeriesInfo.fromBinding(b);
+            TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
             worksheet.addSeries(newSeries);
         }
@@ -281,16 +302,6 @@ public abstract class WorksheetController implements Initializable {
         chart.getYAxis().setAutoRanging(true);
     }
 
-//    public void addBinding(TimeSeriesBinding<Double> binding) {
-//        binding.setOrder(seriesOrder.incrementAndGet());
-//        if (this.seriesBindings.add(binding)) {
-//            invalidate(false, true, true);
-//            chart.getYAxis().setAutoRanging(true);
-//        }
-//        else {
-//            logger.warn("Binding " + binding.toString() + " is already present in current set");
-//        }
-//    }
 
     public void removeSelectedBinding() {
         TimeSeriesInfo<Double> current = seriesTable.getSelectionModel().getSelectedItem();

@@ -3,7 +3,7 @@ package eu.fthevenet.binjr.data.parsers;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.logging.Profiler;
+import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessorFactory;
 import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;

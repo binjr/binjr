@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.charts.ZonedDateTimeAxis;
+import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.scene.chart.AreaChart;

@@ -1,6 +1,6 @@
 package eu.fthevenet.binjr;
 
-import eu.fthevenet.binjr.logging.Profiler;
+import eu.fthevenet.util.logging.Profiler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -11,10 +11,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
-import java.io.IOException;
-import java.net.URL;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
 
 /**
  * The entry point fo the application.

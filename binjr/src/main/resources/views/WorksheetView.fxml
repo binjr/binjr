@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import eu.fthevenet.binjr.controls.DecimalFormatTableCellFactory?>
-<?import eu.fthevenet.binjr.controls.ZonedDateTimePicker?>
+<?import eu.fthevenet.util.ui.controls.DecimalFormatTableCellFactory?>
+<?import eu.fthevenet.util.ui.controls.ZonedDateTimePicker?>
 <?import java.lang.Double?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.Cursor?>
@@ -271,7 +271,7 @@
                                     <!--<PropertyValueFactory property="minValue" />-->
                                 <!--</cellValueFactory>-->
                                 <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
+                                    <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
 
@@ -280,7 +280,7 @@
                                     <!--<PropertyValueFactory property="averageValue" />-->
                                 <!--</cellValueFactory>-->
                                 <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
+                                    <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
                             <TableColumn fx:id="maxColumn" text="Max.">
@@ -288,12 +288,12 @@
                                     <!--<PropertyValueFactory property="maxValue" />-->
                                 <!--</cellValueFactory>-->
                                 <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
+                                    <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
                             <TableColumn fx:id="currentColumn" prefWidth="75.0" text="Current">
                                 <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT" pattern="###,###.##" />
+                                    <DecimalFormatTableCellFactory alignment="RIGHT"  />
                                 </cellFactory>
                             </TableColumn>
 

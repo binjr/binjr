@@ -2,7 +2,7 @@ package eu.fthevenet.binjr.data.timeseries.transform;
 
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.logging.Profiler;
+import eu.fthevenet.util.logging.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

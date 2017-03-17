@@ -1,20 +1,15 @@
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.io.IOUtils;
-import eu.fthevenet.binjr.logging.Profiler;
+import eu.fthevenet.util.io.IOUtils;
+import eu.fthevenet.util.logging.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.lang.ref.SoftReference;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.WritableByteChannel;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**

@@ -1,17 +1,17 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.controls.ContextMenuTreeViewCell;
-import eu.fthevenet.binjr.controls.EditableTab;
-import eu.fthevenet.binjr.controls.TabPaneNewButton;
+import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
+import eu.fthevenet.util.ui.controls.EditableTab;
+import eu.fthevenet.util.ui.controls.TabPaneNewButton;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.Source;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.data.workspace.Workspace;
-import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
-import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
+import eu.fthevenet.util.ui.dialogs.DataAdapterDialog;
+import eu.fthevenet.util.ui.dialogs.Dialogs;
+import eu.fthevenet.util.ui.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
 import javafx.application.Platform;
@@ -132,7 +132,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setNewTabFactory(() -> {
             AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
             EditableTab newTab = new EditableTab("");
-            new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
+            new EditWorksheetDialog<Double>(new Worksheet<Double>(), root).showAndWait().ifPresent(w -> {
                 loadWorksheet(w, newTab);
                 wasNewTabCreated.set(true);
             });
@@ -180,7 +180,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 this.selectedTabController = seriesControllers.get(newValue);
-                Worksheet worksheet = selectedTabController.getWorksheet();
+                Worksheet<Double> worksheet = selectedTabController.getWorksheet();
                 worksheetStatusBar.setVisible(true);
                 nameLabel.textProperty().bind(worksheet.nameProperty());
                 zoneIdLabel.setText(worksheet.getTimeZone().toString());
@@ -475,7 +475,7 @@ public class MainViewController implements Initializable {
         sourcesTabPane.getSelectionModel().select(newTab);
     }
 
-    private boolean loadWorksheet(Worksheet worksheet) {
+    private boolean loadWorksheet(Worksheet<Double> worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
         loadWorksheet(worksheet, newTab);
         worksheetTabPane.getTabs().add(newTab);
@@ -483,7 +483,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void loadWorksheet(Worksheet worksheet, EditableTab newTab) {
+    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
             switch (worksheet.getChartType()) {
@@ -515,7 +515,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private boolean editWorksheet(Worksheet worksheet) {
+    private boolean editWorksheet(Worksheet<Double> worksheet) {
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, root);
         dlg.showAndWait().ifPresent(w -> {
@@ -589,7 +589,7 @@ public class MainViewController implements Initializable {
         addToNew.setOnAction(event -> {
             try {
                 TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
-                Worksheet worksheet = new Worksheet(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
+                Worksheet<Double> worksheet = new Worksheet<>(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
                 if (editWorksheet(worksheet) && selectedTabController != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);
