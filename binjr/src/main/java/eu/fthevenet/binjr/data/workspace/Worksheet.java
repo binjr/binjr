@@ -72,6 +72,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
+//    public Worksheet(String name, ChartType chartType, ZoneId timezone) {
+//        this(name, chartType, timezone, ZonedDateTime.now(), UnitPrefixes.METRIC);
+//    }
     /**
      * Initializes a new instance of the {@link Worksheet} class with the provided name, chart type and zoneid
      *
@@ -79,10 +82,10 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
      * @param timezone  the {@link ZoneId} for the new {@link Worksheet} instance
      */
-    public Worksheet(String name, ChartType chartType, ZoneId timezone) {
+    public Worksheet(String name, ChartType chartType, ZoneId timezone, String unitName, UnitPrefixes prefix) {
         this(name, chartType, timezone,
                 new ObservableListWrapper<>(new LinkedList<>()),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), unitName, prefix);
     }
 
     /**

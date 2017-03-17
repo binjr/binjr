@@ -1,5 +1,8 @@
 package eu.fthevenet.util.http;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -12,6 +15,7 @@ import java.net.URL;
  * @author Frederic Thevenet
  */
 public class MicroHttpClient {
+    private static final Logger logger = LogManager.getLogger(MicroHttpClient.class);
 
     public static HttpResponse doHttpGet(URL requestUrl) throws IOException, URISyntaxException {
        return doHttpGet(requestUrl, true);
@@ -21,6 +25,7 @@ public class MicroHttpClient {
         HttpURLConnection connection = (HttpURLConnection) requestUrl.openConnection();
         connection.setRequestProperty("Accept-Charset", "utf-8");
         int status = connection.getResponseCode();
+        logger.trace("HTTP GET on URL: " + requestUrl.toString());
 
         try {
             if (status >= 200 && status < 300) {

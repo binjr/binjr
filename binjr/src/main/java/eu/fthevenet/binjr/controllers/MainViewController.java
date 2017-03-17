@@ -589,7 +589,8 @@ public class MainViewController implements Initializable {
         addToNew.setOnAction(event -> {
             try {
                 TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
-                Worksheet<Double> worksheet = new Worksheet<>(treeItem.getValue().getLegend(), treeItem.getValue().getGraphType(), ZoneId.systemDefault());
+                TimeSeriesBinding<Double> binding = treeItem.getValue();
+                Worksheet<Double> worksheet = new Worksheet<Double>(binding.getLegend(), binding.getGraphType(), ZoneId.systemDefault(),  binding.getUnitName(), binding.getUnitPrefix());
                 if (editWorksheet(worksheet) && selectedTabController != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);

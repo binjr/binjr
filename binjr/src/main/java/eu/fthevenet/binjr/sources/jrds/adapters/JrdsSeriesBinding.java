@@ -3,11 +3,10 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.ChartType;
+import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.util.Objects;
 
 /**
  * This class provides an implementation of {@link TimeSeriesBinding} for bindings targeting JRDS.
@@ -16,17 +15,15 @@ import java.util.Objects;
  */
 public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
     private static final Logger logger = LogManager.getLogger(JrdsSeriesBinding.class);
-    private static final int DEFAULT_BASE = 10;
+    private static final UnitPrefixes DEFAULT_BASE = UnitPrefixes.METRIC;
     private final DataAdapter<Double> adapter;
     private final String label;
     private final String path;
     private final Color color;
     private final String legend;
-    private final int unitBase;
+    private final UnitPrefixes prefix;
     private final ChartType graphType;
     private final String unitName;
-    private Integer order = 0;
-
 
     /**
      * Initializes a new instance of the {@link JrdsSeriesBinding} class.
@@ -42,8 +39,8 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
         color = null;
         legend = label;
         graphType = ChartType.STACKED;
-        unitBase = 10;
-        unitName = "%";
+        prefix = DEFAULT_BASE;
+        unitName = "-";
     }
 
     public JrdsSeriesBinding(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
@@ -92,7 +89,7 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
 
        // this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
 
-        this.unitBase = "METRIC".equals(graphdesc.unit) ? 10 : ("binary".equals(graphdesc.unit) ? 2 : DEFAULT_BASE);
+        this.prefix = "SI".equalsIgnoreCase(graphdesc.unit) ? UnitPrefixes.METRIC : ("binary".equalsIgnoreCase(graphdesc.unit) ? UnitPrefixes.BINARY : DEFAULT_BASE);
         this.unitName = graphdesc.verticalLabel;
     }
 
@@ -138,8 +135,8 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
     }
 
     @Override
-    public int getUnitBase() {
-        return unitBase;
+    public UnitPrefixes getUnitPrefix() {
+        return prefix;
     }
 
     @Override
@@ -147,20 +144,7 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
         return getLegend();
     }
 
-    @Override
-    public Integer getOrder() {
-        return order;
-    }
 
-    @Override
-    public void setOrder(Integer order) {
-        this.order = order;
-    }
-
-    @Override
-    public int compareTo(TimeSeriesBinding<Double> o) {
-        return this.order.compareTo(o.getOrder());
-    }
 
 
     //endregion

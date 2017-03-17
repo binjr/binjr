@@ -193,6 +193,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     if (newValue) {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
+                            //new JrdsSeriesBinding(graphdesc, 0, currentPath, JrdsDataAdapter.this);
+
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                                 String graphType = graphdesc.seriesDescList.get(i).graphType;
                                 if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {

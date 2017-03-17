@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.data.workspace.ChartType;
+import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +16,7 @@ import javax.xml.bind.annotation.XmlTransient;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name="TimeSeriesBinding")
-public interface TimeSeriesBinding<T extends Number> extends Comparable<TimeSeriesBinding<T>> {
+public interface TimeSeriesBinding<T extends Number> {
     /**
      * Returns the label of the binding
      *
@@ -71,9 +72,7 @@ public interface TimeSeriesBinding<T extends Number> extends Comparable<TimeSeri
      *
      * @return the  unit numerical base of the bound series as defined in the source.
      */
-    int getUnitBase();
+    UnitPrefixes getUnitPrefix();
 
-    void setOrder(Integer value);
-    Integer getOrder();
 
 }
