@@ -43,9 +43,30 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
         unitName = "-";
     }
 
+    public JrdsSeriesBinding(String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
+        this.path = path;
+        this.adapter = adapter;
+        this.color = null;
+        this.label = isNullOrEmpty(graphdesc.name) ?
+                (isNullOrEmpty(graphdesc.graphName) ?
+                        "???" : graphdesc.graphName) : graphdesc.name;
+        this.legend = legend;
+        this.graphType = ChartType.STACKED;
+        if (graphdesc.unit != null &&
+                graphdesc.unit.size() > 0 &&
+                graphdesc.unit.get(0) instanceof Graphdesc.JrdsMetricUnitType) {
+            this.prefix = UnitPrefixes.METRIC;
+        }
+        else{
+            this.prefix = UnitPrefixes.BINARY;
+        }
+        this.unitName = graphdesc.verticalLabel;
+    }
+
     public JrdsSeriesBinding(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         this.adapter = adapter;
         this.path = path;
+
         Graphdesc.SeriesDesc desc = graphdesc.seriesDescList.get(idx);
 
         this.label = isNullOrEmpty(desc.name) ?
@@ -69,27 +90,31 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
                         (isNullOrEmpty(desc.dsName) ?
                                 "???" : desc.dsName) : desc.name) : desc.legend;
 
-         switch (desc.graphType.toLowerCase()) {
-             case "area":
-                 this.graphType = ChartType.AREA;
-                 break;
+        switch (desc.graphType.toLowerCase()) {
+            case "area":
+                this.graphType = ChartType.AREA;
+                break;
 
-             case "stacked":
-                 this.graphType = ChartType.STACKED;
-                 break;
-             case "line":
-                 this.graphType = ChartType.LINE;
-                 break;
+            case "stacked":
+                this.graphType = ChartType.STACKED;
+                break;
+            case "line":
+                this.graphType = ChartType.LINE;
+                break;
 
-             case "none":
-             default:
-                 this.graphType = ChartType.STACKED;
-                 break;
-         }
-
-       // this.graphType = isNullOrEmpty(desc.graphType) ? "none" : desc.graphType;
-
-        this.prefix = "SI".equalsIgnoreCase(graphdesc.unit) ? UnitPrefixes.METRIC : ("binary".equalsIgnoreCase(graphdesc.unit) ? UnitPrefixes.BINARY : DEFAULT_BASE);
+            case "none":
+            default:
+                this.graphType = ChartType.STACKED;
+                break;
+        }
+        if (graphdesc.unit != null &&
+                graphdesc.unit.size() > 0 &&
+                graphdesc.unit.get(0) instanceof Graphdesc.JrdsBinaryUnitType) {
+            this.prefix = UnitPrefixes.BINARY;
+        }
+        else{
+            this.prefix = UnitPrefixes.METRIC;
+        }
         this.unitName = graphdesc.verticalLabel;
     }
 
@@ -143,8 +168,6 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
     public String toString() {
         return getLegend();
     }
-
-
 
 
     //endregion

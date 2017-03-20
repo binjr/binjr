@@ -193,8 +193,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     if (newValue) {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
-                            //new JrdsSeriesBinding(graphdesc, 0, currentPath, JrdsDataAdapter.this);
-
+                            newBranch.setValue(new JrdsSeriesBinding(newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                                 String graphType = graphdesc.seriesDescList.get(i).graphType;
                                 if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
@@ -242,8 +241,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         }
     }
 
-
-
     public Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
         URLBuilder requestUrl = new URLBuilder()
                 .setProtocol(jrdsProtocol)
@@ -266,7 +263,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             }
             else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 try {
-                    return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
+                    Graphdesc g = JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
+                    logger.trace(()-> "Retrieved graphdesc for probe ["+id+"]: " +g.toString());
+                    return g;
                 } catch (Exception e) {
                     throw new HttpRequestException(e.getMessage(), response, e);
                 }

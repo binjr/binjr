@@ -2,6 +2,7 @@ package eu.fthevenet.util.io;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 
@@ -35,6 +36,7 @@ public class IOUtils {
 
     public static long copyStreams(InputStream input, OutputStream output) throws IOException {
         return copyStreams(input, output, DEFAULT_COPY_BUFFER_SIZE);
+
     }
 
     public static long copyStreams(InputStream input, OutputStream output, int bufferSize) throws IOException {

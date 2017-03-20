@@ -93,6 +93,4 @@ public class XmlUtils {
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(object, out);
     }
-
-
 }

@@ -318,17 +318,18 @@ public abstract class WorksheetController implements Initializable {
     }
 
     public void invalidate(boolean saveToHistory, boolean dontPlotChart) {
-        logger.debug(() -> "Refreshing chart");
-        XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
-        logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-        if (saveToHistory) {
-            this.backwardHistory.push(previousState);
-            this.forwardHistory.clear();
-        }
-        previousState = currentState.asSelection();
-        logger.debug(() -> backwardHistory.dump());
-        if (!dontPlotChart) {
-            plotChart(currentSelection);
+        try (Profiler p = Profiler.start("Refreshing chart", logger::trace)) {
+            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
+            logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
+            if (saveToHistory) {
+                this.backwardHistory.push(previousState);
+                this.forwardHistory.clear();
+            }
+            previousState = currentState.asSelection();
+            logger.debug(() -> backwardHistory.dump());
+            if (!dontPlotChart) {
+                plotChart(currentSelection);
+            }
         }
     }
 
@@ -385,7 +386,7 @@ public abstract class WorksheetController implements Initializable {
 
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
-        try (Profiler p = Profiler.start("Plotting chart")) {
+        try (Profiler p = Profiler.start("Plotting chart", logger::trace)) {
             chart.getData().clear();
 
             getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());

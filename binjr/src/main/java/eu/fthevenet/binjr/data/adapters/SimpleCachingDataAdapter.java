@@ -5,7 +5,10 @@ import eu.fthevenet.util.logging.Profiler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.time.Instant;
 import java.util.HashMap;
@@ -38,7 +41,7 @@ public abstract class SimpleCachingDataAdapter<T extends Number> implements Data
             try {
                 cached = new ByteArrayOutputStream();
                 AtomicLong copied = new AtomicLong(0);
-                try(Profiler p = Profiler.start((e)-> logger.trace(()-> "Copied " + copied.get() + " bytes in " + e.getMicros() + "ms"))) {
+                try (Profiler p = Profiler.start((e) -> logger.trace(() -> "Copied " + copied.get() + " bytes in " + e.getMicros() + "µs"))) {
                     copied.set(IOUtils.copyStreams(in, cached));
                 }
                 cache.put(cacheEntryKey, new SoftReference<>(cached));
