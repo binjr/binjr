@@ -6,9 +6,9 @@ import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.logging.Profiler;
-import eu.fthevenet.util.text.BinaryPrefixFormat;
-import eu.fthevenet.util.text.MetricPrefixFormat;
-import eu.fthevenet.util.text.PrefixFormat;
+import eu.fthevenet.util.text.BinaryPrefixFormatter;
+import eu.fthevenet.util.text.MetricPrefixFormatter;
+import eu.fthevenet.util.text.PrefixFormatter;
 import eu.fthevenet.util.ui.charts.StableTicksAxis;
 import eu.fthevenet.util.ui.charts.XYChartCrosshair;
 import eu.fthevenet.util.ui.charts.XYChartSelection;
@@ -83,7 +83,6 @@ public abstract class WorksheetController implements Initializable {
     private Button resetYButton;
     @FXML
     private Button snapshotButton;
-
     @FXML
     private ZonedDateTimePicker startDate;
     @FXML
@@ -94,7 +93,6 @@ public abstract class WorksheetController implements Initializable {
     private TableColumn<TimeSeriesInfo<Double>, Color> colorColumn;
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn;
-
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, String> minColumn;
     @FXML
@@ -103,24 +101,16 @@ public abstract class WorksheetController implements Initializable {
     private TableColumn<TimeSeriesInfo<Double>, String> avgColumn;
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, String> currentColumn;
-
     @FXML
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
     @FXML
     private Slider graphOpacitySlider;
-
-
-    //   @FXML
-    //   private MenuItem removeSeriesMenuItem;
-
     @FXML
     private ContextMenu seriesListMenu;
 
     private MainViewController mainViewController;
-    // private ObservableList<TimeSeriesProcessor<Double>> seriesData = FXCollections.observableArrayList();
-    // private SortedSet<TimeSeriesBinding<Double>> seriesBindings = new TreeSet<>();
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
@@ -131,7 +121,7 @@ public abstract class WorksheetController implements Initializable {
     private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet<Double> worksheet;
     private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
-    private final PrefixFormat prefixFormat;
+    private final PrefixFormatter prefixFormatter;
 
     //region [Properties]
     public String getName() {
@@ -149,6 +139,15 @@ public abstract class WorksheetController implements Initializable {
     public XYChart<ZonedDateTime, Double> getChart() {
         return chart;
     }
+
+    /**
+     * Returns the {@link Worksheet} instance associated with this controller
+     * @return the {@link Worksheet} instance associated with this controller
+     */
+    public Worksheet<Double> getWorksheet() {
+        return this.worksheet;
+    }
+
     //endregion
 
 
@@ -157,10 +156,10 @@ public abstract class WorksheetController implements Initializable {
         this.worksheet = worksheet;
         switch (this.worksheet.getUnitPrefixes()) {
             case BINARY:
-                this.prefixFormat = new BinaryPrefixFormat();
+                this.prefixFormatter = new BinaryPrefixFormatter();
                 break;
             case METRIC:
-                this.prefixFormat = new MetricPrefixFormat();
+                this.prefixFormatter = new MetricPrefixFormatter();
                 break;
 
             default:
@@ -232,9 +231,9 @@ public abstract class WorksheetController implements Initializable {
         //region *** Global preferences ***
         globalPrefs = GlobalPreferences.getInstance();
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
-        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
-        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
-        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> refresh());
+        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> refresh());
+        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> refresh());
         //endregion
 
         //region *** Time pickers ***
@@ -266,19 +265,18 @@ public abstract class WorksheetController implements Initializable {
 
 
         //region *** Series TableView ***
+        seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-        avgColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getAverageValue())));
+        avgColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue())));
 
 
-        minColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getMinValue())));
-        maxColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormat.format(p.getValue().getProcessor().getMaxValue())));
+        minColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue())));
+        maxColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue())));
 
-        // maxColumn.setCellFactory(p-> new TableCell<TimeSeriesInfo<Double>, Double>());
-
-        currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormat.format(Double.NaN)));
+        currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormatter.format(Double.NaN)));
 
         seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
@@ -288,49 +286,34 @@ public abstract class WorksheetController implements Initializable {
         });
         //endregion
     }
+    //endregion
+
+    //region *** protected members ***
 
     protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
-    public void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
+    protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
-            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false));
+            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> refresh());
             worksheet.addSeries(newSeries);
         }
 
-        invalidate(false);
+        refresh();
         chart.getYAxis().setAutoRanging(true);
     }
 
+    protected void removeSelectedBinding() {
+       ObservableList<TimeSeriesInfo<Double>> selected = seriesTable.getSelectionModel().getSelectedItems();
+        if (selected != null) {
+            seriesTable.getItems().removeAll(selected);
 
-    public void removeSelectedBinding() {
-        TimeSeriesInfo<Double> current = seriesTable.getSelectionModel().getSelectedItem();
-        if (current != null) {
-            seriesTable.getItems().remove(current);
-
-            invalidate(false);
+            refresh();
         }
     }
-    //endregion
 
-    public void invalidate(boolean saveToHistory) {
-        invalidate(saveToHistory, false);
-    }
-
-    public void invalidate(boolean saveToHistory, boolean dontPlotChart) {
-        try (Profiler p = Profiler.start("Refreshing chart", logger::trace)) {
-            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
-            logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-            if (saveToHistory) {
-                this.backwardHistory.push(previousState);
-                this.forwardHistory.clear();
-            }
-            previousState = currentState.asSelection();
-            logger.debug(() -> backwardHistory.dump());
-            if (!dontPlotChart) {
-                plotChart(currentSelection);
-            }
-        }
+    protected void refresh() {
+        invalidate(false, false);
     }
 
     @FXML
@@ -350,11 +333,60 @@ public abstract class WorksheetController implements Initializable {
 
     @FXML
     protected void handleRefresh(ActionEvent actionEvent) {
-        this.invalidate(false);
+        this.refresh();
     }
+
+    @FXML
+    protected void handleRemoveSeries(ActionEvent actionEvent) {
+        removeSelectedBinding();
+    }
+
+    @FXML
+    protected void handleTakeSnapshot(ActionEvent actionEvent) {
+        saveSnapshot();
+    }
+
     //endregion
 
     //region [Private Members]
+
+    private void invalidate(boolean saveToHistory, boolean dontPlotChart) {
+        try (Profiler p = Profiler.start("Refreshing chart", logger::trace)) {
+            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
+            logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
+            if (saveToHistory) {
+                this.backwardHistory.push(previousState);
+                this.forwardHistory.clear();
+            }
+            previousState = currentState.asSelection();
+            logger.debug(() -> backwardHistory.dump());
+            if (!dontPlotChart) {
+                plotChart(currentSelection);
+            }
+        }
+    }
+
+    private void saveSnapshot(){
+        WritableImage snapImg = root.snapshot(null, null);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save SnapShot");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
+        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
+        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
+        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            try {
+                globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
+                ImageIO.write(
+                        SwingFXUtils.fromFXImage(snapImg, null),
+                        "png",
+                        selectedFile);
+            } catch (IOException e) {
+                Dialogs.displayException("Failed to save snapshot to disk", e, root);
+            }
+        }
+    }
+
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
         formatter.valueProperty().bindBidirectional(stateProperty);
@@ -436,36 +468,6 @@ public abstract class WorksheetController implements Initializable {
             }
         });
         return s;
-    }
-
-    public void handleRemoveSeries(ActionEvent actionEvent) {
-        removeSelectedBinding();
-    }
-
-    @FXML
-    protected void handleTakeSnapshot(ActionEvent actionEvent) {
-        WritableImage snapImg = root.snapshot(null, null);
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save SnapShot");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
-        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
-        if (selectedFile != null) {
-            try {
-                globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
-                ImageIO.write(
-                        SwingFXUtils.fromFXImage(snapImg, null),
-                        "png",
-                        selectedFile);
-            } catch (IOException e) {
-                Dialogs.displayException("Failed to save snapshot to disk", e, root);
-            }
-        }
-    }
-
-    public Worksheet<Double> getWorksheet() {
-        return this.worksheet;
     }
 
     /**

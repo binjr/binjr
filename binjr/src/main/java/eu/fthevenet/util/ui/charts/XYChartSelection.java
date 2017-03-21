@@ -109,11 +109,7 @@ public class XYChartSelection<X, Y> {
         if (!evaluatesEquality(this.getEndY(), other.getEndY())) {
             return false;
         }
-        if (!evaluatesEquality(this.getStartY(), other.getStartY())) {
-            return false;
-        }
-
-        return true;
+        return evaluatesEquality(this.getStartY(), other.getStartY());
     }
 
     private boolean evaluatesEquality(Object o1, Object o2) {

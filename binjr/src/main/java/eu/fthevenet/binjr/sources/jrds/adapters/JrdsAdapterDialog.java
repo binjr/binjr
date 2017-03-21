@@ -15,7 +15,9 @@ import java.time.ZoneId;
 
 
 /**
- * Created by FTT2 on 01/03/2017.
+ * An implementation of the {@link DataAdapterDialog} class that presents a dialog box to retrieve the parameters specific {@link JrdsDataAdapter}
+ *
+ * @author Frederic Thevenet
  */
 public class JrdsAdapterDialog extends DataAdapterDialog {
 

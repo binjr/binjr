@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Represents an HTTP response
+ * A minimal representation of an HTTP response
+ *
  * @author Frederic Thevenet
  */
 public class HttpResponse {

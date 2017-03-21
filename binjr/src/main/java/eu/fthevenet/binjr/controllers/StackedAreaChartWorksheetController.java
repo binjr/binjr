@@ -33,6 +33,4 @@ public class StackedAreaChartWorksheetController extends WorksheetController {
         newChart.createSymbolsProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
         return newChart;
     }
-
-
 }

@@ -72,7 +72,7 @@ public class Workspace implements Serializable, Dirtyable {
      *
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
      */
-    public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
+    public void addWorksheets(Collection<Worksheet<?>> worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 

@@ -617,7 +617,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
         private final ChronoUnit unit;
 
-        private Interval(ChronoUnit interval, int amount) {
+        Interval(ChronoUnit interval, int amount) {
             this.unit = interval;
             this.amount = amount;
         }

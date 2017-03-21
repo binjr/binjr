@@ -35,6 +35,7 @@ public class Source implements Serializable, Dirtyable {
      * @param adapter the {@link DataAdapter} to create the {@link Source}  instance from
      * @return an instance of the {@link Source} class from the provided  {@link DataAdapter}
      */
+ //   @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
         Source newSource = new Source();
         newSource.setName(adapter.getSourceName());
@@ -77,12 +78,7 @@ public class Source implements Serializable, Dirtyable {
         return adapterClass;
     }
 
-    /**
-     * The name of the class that implements the {@link DataAdapter} for the {@link Source}
-     *
-     * @param adapterClass the name of the class that implements the {@link DataAdapter} for the {@link Source}
-     */
-    public void setAdapterClass(Class adapterClass) {
+    private void setAdapterClass(Class adapterClass) {
         this.adapterClass = adapterClass;
     }
 
@@ -95,12 +91,7 @@ public class Source implements Serializable, Dirtyable {
         return AdapterParams;
     }
 
-    /**
-     * Sets the parameters required to establish a connection to the data source
-     *
-     * @param adapterParams a map of the parameters required to establish a connection to the data source
-     */
-    public void setAdapterParams(Map<String, String> adapterParams) {
+    private void setAdapterParams(Map<String, String> adapterParams) {
         AdapterParams = adapterParams;
     }
 
@@ -118,4 +109,5 @@ public class Source implements Serializable, Dirtyable {
     public void cleanUp() {
         this.status.cleanUp();
     }
+
 }

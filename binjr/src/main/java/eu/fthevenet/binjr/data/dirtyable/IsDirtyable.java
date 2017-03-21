@@ -6,6 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
+ * An annotation that indicated members of classes implementing {@link Dirtyable} are tracked for changes.
+ *
  * @author Frederic Thevenet
  */
 @Target(ElementType.FIELD)

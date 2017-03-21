@@ -18,9 +18,7 @@ import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.io.*;
 import java.text.ParseException;
 import java.time.ZoneId;
@@ -43,7 +41,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-  //  @IsDirtyable
+    @IsDirtyable
     private ObservableList<TimeSeriesInfo<T>> series;
     @IsDirtyable
     private Property<String> name;
@@ -59,6 +57,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
+
     private final ChangeWatcher<Worksheet> status;
 
     /**
@@ -72,9 +71,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
     }
 
-//    public Worksheet(String name, ChartType chartType, ZoneId timezone) {
-//        this(name, chartType, timezone, ZonedDateTime.now(), UnitPrefixes.METRIC);
-//    }
     /**
      * Initializes a new instance of the {@link Worksheet} class with the provided name, chart type and zoneid
      *
@@ -82,10 +78,10 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
      * @param timezone  the {@link ZoneId} for the new {@link Worksheet} instance
      */
-    public Worksheet(String name, ChartType chartType, ZoneId timezone, String unitName, UnitPrefixes prefix) {
+    public Worksheet(String name, ChartType chartType, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone, String unitName, UnitPrefixes prefix) {
         this(name, chartType, timezone,
                 new ObservableListWrapper<>(new LinkedList<>()),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), unitName, prefix);
+                fromDateTime, toDateTime, unitName, prefix);
     }
 
     /**
@@ -206,6 +202,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @return the time series of the {@link Worksheet}
      */
 
+    @XmlTransient
+//    @XmlElementWrapper(name = "SeriesList")
+//    @XmlElements(@XmlElement(name = "Timeseries"))
     public ObservableList<TimeSeriesInfo<T>> getSeries() {
         return series;
     }
@@ -381,6 +380,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         );
     }
 
+    @XmlTransient
     @Override
     public Boolean isDirty() {
         return status.isDirty();

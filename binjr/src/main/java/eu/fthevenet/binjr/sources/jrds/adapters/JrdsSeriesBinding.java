@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
     private static final Logger logger = LogManager.getLogger(JrdsSeriesBinding.class);
-    private static final UnitPrefixes DEFAULT_BASE = UnitPrefixes.METRIC;
+    private static final UnitPrefixes DEFAULT_PREFIX = UnitPrefixes.METRIC;
     private final DataAdapter<Double> adapter;
     private final String label;
     private final String path;
@@ -39,7 +39,7 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
         color = null;
         legend = label;
         graphType = ChartType.STACKED;
-        prefix = DEFAULT_BASE;
+        prefix = DEFAULT_PREFIX;
         unitName = "-";
     }
 
@@ -52,14 +52,7 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
                         "???" : graphdesc.graphName) : graphdesc.name;
         this.legend = legend;
         this.graphType = ChartType.STACKED;
-        if (graphdesc.unit != null &&
-                graphdesc.unit.size() > 0 &&
-                graphdesc.unit.get(0) instanceof Graphdesc.JrdsMetricUnitType) {
-            this.prefix = UnitPrefixes.METRIC;
-        }
-        else{
-            this.prefix = UnitPrefixes.BINARY;
-        }
+        this.prefix = findPrefix(graphdesc);
         this.unitName = graphdesc.verticalLabel;
     }
 
@@ -107,17 +100,21 @@ public class JrdsSeriesBinding implements TimeSeriesBinding<Double> {
                 this.graphType = ChartType.STACKED;
                 break;
         }
-        if (graphdesc.unit != null &&
-                graphdesc.unit.size() > 0 &&
-                graphdesc.unit.get(0) instanceof Graphdesc.JrdsBinaryUnitType) {
-            this.prefix = UnitPrefixes.BINARY;
-        }
-        else{
-            this.prefix = UnitPrefixes.METRIC;
-        }
+        this.prefix = findPrefix(graphdesc);
         this.unitName = graphdesc.verticalLabel;
     }
 
+    private UnitPrefixes findPrefix(Graphdesc graphdesc) {
+        if (graphdesc.unit != null && graphdesc.unit.size() > 0) {
+            if (graphdesc.unit.get(0) instanceof Graphdesc.JrdsMetricUnitType) {
+                return UnitPrefixes.METRIC;
+            }
+            if (graphdesc.unit.get(0) instanceof Graphdesc.JrdsBinaryUnitType) {
+                return UnitPrefixes.BINARY;
+            }
+        }
+        return DEFAULT_PREFIX;
+    }
 
     private boolean isNullOrEmpty(String s) {
         return s == null || s.trim().length() == 0;

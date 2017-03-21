@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A POJO class used to deserialize JRDS graph descriptor XML messages return by {@code /graphdesc?id=""} service.
+ * A annotated POJO class used to deserialize JRDS graph descriptor XML messages return by {@code /graphdesc?id=""} service.
  *
  * @author Frederic Thevenet
  */
@@ -24,7 +24,7 @@ class Graphdesc {
     @XmlElementWrapper(name = "unit")
     @XmlElements({
             @XmlElement(name="SI", type=JrdsMetricUnitType.class),
-            @XmlElement(name="manager", type=JrdsBinaryUnitType.class)
+            @XmlElement(name="binary", type=JrdsBinaryUnitType.class)
     })
     List<JrdsUnitType> unit;
     @XmlElement(name = "verticalLabel")
@@ -70,7 +70,6 @@ class Graphdesc {
         }
     }
 
-
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlRootElement(name = "tree")
     static class Tree {
@@ -108,34 +107,6 @@ class Graphdesc {
         }
 
     }
-
-//    @XmlType(name = "unit")
-//    @XmlEnum
-//    public enum JrdsUnitType {
-//        @XmlEnumValue("SI")
-//        METRIC("SI"),
-//        @XmlEnumValue("binary")
-//        BINARY("binary");
-//
-//        private final String value;
-//
-//        JrdsUnitType(String value){
-//            this.value = value;
-//        }
-//
-//        public String value() {
-//            return name();
-//        }
-//
-//        public static JrdsUnitType fromValue(String v) {
-//            for (JrdsUnitType c: JrdsUnitType.values()) {
-//                if (c.value.equals(v)) {
-//                    return c;
-//                }
-//            }
-//            throw new IllegalArgumentException(v);
-//        }
-//    }
 
     @Override
     public String toString() {

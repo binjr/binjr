@@ -19,7 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author Frederic Thevenet
+ * A class that embeds the logic required to discover and track modification on object implementing {@link Dirtyable}
+ *
+ *  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public class ChangeWatcher<T> {
@@ -78,6 +80,9 @@ public class ChangeWatcher<T> {
                     Type[] types = pType.getActualTypeArguments();
                     if (types != null) {
                         for (Type type : types) {
+                            if (type instanceof ParameterizedType){
+                                type = ((ParameterizedType)type).getRawType();
+                            }
                             if (Dirtyable.class.isAssignableFrom((Class<?>) type)) {
                                 @SuppressWarnings("unchecked")
                                 ObservableList<? extends Dirtyable> ol = (ObservableList<? extends Dirtyable>) fieldValue;
@@ -89,7 +94,7 @@ public class ChangeWatcher<T> {
                         }
                     }
                 }
-            } catch (IllegalAccessException e) {
+            } catch (IllegalAccessException | ClassCastException e) {
                 logger.error("Error reflecting dirtyable properties", e);
             }
         }

@@ -1,8 +1,8 @@
 package jrds;
 
-import eu.fthevenet.util.text.BinaryPrefixFormat;
-import eu.fthevenet.util.text.MetricPrefixFormat;
-import eu.fthevenet.util.text.PrefixFormat;
+import eu.fthevenet.util.text.BinaryPrefixFormatter;
+import eu.fthevenet.util.text.MetricPrefixFormatter;
+import eu.fthevenet.util.text.PrefixFormatter;
 
 import java.text.DecimalFormat;
 
@@ -14,21 +14,21 @@ public class SuffixFormatTests {
         long[] numbers = new long[50];
         for (int i = 0; i < numbers.length; i++)
             numbers[i] = Math.random() < 0.5 ? (long) (Math.random() * Short.MAX_VALUE) : (long) (Math.random() * Short.MIN_VALUE);
-        System.out.println(convert(new MetricPrefixFormat(), numbers) );
-        System.out.println(convert(new BinaryPrefixFormat(), numbers) );
+        System.out.println(convert(new MetricPrefixFormatter(), numbers) );
+        System.out.println(convert(new BinaryPrefixFormatter(), numbers) );
 
 
 
         double[] doubles = new double[50];
         for (int i = 0; i < numbers.length; i++)
-            doubles[i] = Math.random() < 0.5 ? (double) (Math.random() * Short.MAX_VALUE) : (double) (Math.random() * Short.MIN_VALUE);
+            doubles[i] = Math.random() < 0.5 ? Math.random() * Short.MAX_VALUE : Math.random() * Short.MIN_VALUE;
 
-        System.out.println(convert(new MetricPrefixFormat(), doubles) );
-        System.out.println(convert(new BinaryPrefixFormat(), doubles) );
+        System.out.println(convert(new MetricPrefixFormatter(), doubles) );
+        System.out.println(convert(new BinaryPrefixFormatter(), doubles) );
     }
 
 
-    private static long convert(PrefixFormat format, double[] numbers) {
+    private static long convert(PrefixFormatter format, double[] numbers) {
         DecimalFormat formatter = new DecimalFormat("###,###.##");
         long l = System.currentTimeMillis();
         for (int i = 0; i < numbers.length; i++) {
@@ -37,7 +37,7 @@ public class SuffixFormatTests {
         return System.currentTimeMillis() - l;
     }
 
-    private static long convert(PrefixFormat format, long[] numbers) {
+    private static long convert(PrefixFormatter format, long[] numbers) {
         long l = System.currentTimeMillis();
         for (int i = 0; i < numbers.length; i++) {
             System.out.println("original = " + numbers[i] + " formatted = " + format.format(numbers[i]));

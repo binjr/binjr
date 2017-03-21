@@ -42,6 +42,9 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -132,7 +135,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setNewTabFactory(() -> {
             AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
             EditableTab newTab = new EditableTab("");
-            new EditWorksheetDialog<Double>(new Worksheet<Double>(), root).showAndWait().ifPresent(w -> {
+            new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
                 loadWorksheet(w, newTab);
                 wasNewTabCreated.set(true);
             });
@@ -249,7 +252,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleRefreshAction(ActionEvent actionEvent) {
         if (selectedTabController != null) {
-            selectedTabController.invalidate(false);
+            selectedTabController.refresh();
         }
     }
 
@@ -270,7 +273,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddNewWorksheet(ActionEvent event) {
-        editWorksheet(new Worksheet());
+        editWorksheet(new Worksheet<>());
     }
 
     @FXML
@@ -397,7 +400,7 @@ public class MainViewController implements Initializable {
                     loadAdapters(da);
                 }
 
-                for (Worksheet worksheet : wsFromfile.getWorksheets()) {
+                for (Worksheet<?> worksheet : wsFromfile.getWorksheets()) {
                     loadWorksheet(worksheet);
                 }
                 workspace.cleanUp();
@@ -475,7 +478,7 @@ public class MainViewController implements Initializable {
         sourcesTabPane.getSelectionModel().select(newTab);
     }
 
-    private boolean loadWorksheet(Worksheet<Double> worksheet) {
+    private boolean loadWorksheet(Worksheet<?> worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
         loadWorksheet(worksheet, newTab);
         worksheetTabPane.getTabs().add(newTab);
@@ -483,7 +486,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
+    private void loadWorksheet(Worksheet<?> worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
             switch (worksheet.getChartType()) {
@@ -590,7 +593,23 @@ public class MainViewController implements Initializable {
             try {
                 TreeItem<TimeSeriesBinding<Double>> treeItem = treeView.getSelectionModel().getSelectedItem();
                 TimeSeriesBinding<Double> binding = treeItem.getValue();
-                Worksheet<Double> worksheet = new Worksheet<Double>(binding.getLegend(), binding.getGraphType(), ZoneId.systemDefault(),  binding.getUnitName(), binding.getUnitPrefix());
+                ZonedDateTime toDateTime;
+                ZonedDateTime fromDateTime;
+                if (selectedTabController != null && selectedTabController.getWorksheet() != null) {
+                    toDateTime = selectedTabController.getWorksheet().getToDateTime();
+                    fromDateTime = selectedTabController.getWorksheet().getFromDateTime();
+                }
+                else {
+                    toDateTime = ZonedDateTime.now();
+                    fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
+                }
+                Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
+                        binding.getGraphType(),
+                        fromDateTime,
+                        toDateTime,
+                        ZoneId.systemDefault(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix());
                 if (editWorksheet(worksheet) && selectedTabController != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);

@@ -8,13 +8,12 @@ import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
 /**
+ * A class that represents and holds the current state of a single time series
+ *
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
@@ -44,6 +43,15 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
                "",
                null,
                binding);
+   }
+
+   private TimeSeriesInfo(){
+       this("",
+               true,
+               null,
+               "",
+               null,
+               null);
    }
 
     private TimeSeriesInfo(TimeSeriesBinding<T> binding) {
@@ -111,6 +119,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
         this.selected.set(selected);
     }
 
+    @XmlTransient
     public Color getDisplayColor() {
         return displayColor.getValue();
     }
