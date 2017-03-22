@@ -16,6 +16,8 @@ import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import eu.fthevenet.util.ui.controls.ColorTableCell;
 import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.ui.dialogs.Dialogs;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -109,6 +111,8 @@ public abstract class WorksheetController implements Initializable {
     private Slider graphOpacitySlider;
     @FXML
     private ContextMenu seriesListMenu;
+    @FXML
+    private MenuItem opacityMenuItem;
 
     private MainViewController mainViewController;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
@@ -193,6 +197,7 @@ public abstract class WorksheetController implements Initializable {
         assert minColumn != null : "fx:id\"minColumn\" was not injected!";
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
+        assert opacityMenuItem != null : "fx:id\"opacityMenuItem\" was not injected!";
         //endregion
 
         //region *** XYChart ***
@@ -205,6 +210,7 @@ public abstract class WorksheetController implements Initializable {
         yAxis.setAutoRanging(true);
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
+        yAxis.labelProperty().bind(worksheet.unitProperty());
 
         chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setFocusTraversable(true);
@@ -226,6 +232,9 @@ public abstract class WorksheetController implements Initializable {
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
+//        final NumberBinding<Double> formatter = new TextFormatter<>(new NumberStringConverter());
+//        formatter.valueProperty().bindBidirectional(graphOpacitySlider.valueProperty().asObject());
+        opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%",graphOpacitySlider.valueProperty().multiply(100)));
         //endregion
 
         //region *** Global preferences ***
