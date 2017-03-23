@@ -29,7 +29,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
@@ -59,6 +59,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public abstract class WorksheetController implements Initializable {
+    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     @FXML
     public AnchorPane root;
@@ -284,12 +285,57 @@ public abstract class WorksheetController implements Initializable {
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
         avgColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue())));
-
-
         minColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue())));
         maxColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue())));
 
         currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormatter.format(Double.NaN)));
+
+        seriesTable.setRowFactory(tv -> {
+            TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
+
+            row.setOnDragDetected(event -> {
+                if (! row.isEmpty()) {
+                    Integer index = row.getIndex();
+                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                    db.setDragView(row.snapshot(null, null));
+                    ClipboardContent cc = new ClipboardContent();
+                    cc.put(SERIALIZED_MIME_TYPE, index);
+                    db.setContent(cc);
+                    event.consume();
+                }
+            });
+
+            row.setOnDragOver(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    if (row.getIndex() != ((Integer)db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
+                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                        event.consume();
+                    }
+                }
+            });
+
+            row.setOnDragDropped(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                    int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                    TimeSeriesInfo<Double> draggedseries = seriesTable.getItems().remove(draggedIndex);
+                    int dropIndex ;
+                    if (row.isEmpty()) {
+                        dropIndex = seriesTable.getItems().size() ;
+                    } else {
+                        dropIndex = row.getIndex();
+                    }
+                    seriesTable.getItems().add(dropIndex, draggedseries);
+                    event.setDropCompleted(true);
+                    seriesTable.getSelectionModel().clearAndSelect(dropIndex);
+                    refresh();
+                    event.consume();
+                }
+            });
+
+            return row ;
+        });
 
         seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
