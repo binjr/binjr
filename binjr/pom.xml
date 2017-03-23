@@ -110,7 +110,6 @@
                     <description>binjr preview v${project.version}</description>
                     <releaseName>binjr preview v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
-
                     <!-- If your project has additional artifacts, such as ones produced by
                          the maven-assembly-plugin, you can define the following
                          (requires version 1.1.1 of the plugin or higher): -->
@@ -124,47 +123,6 @@
                     </fileSets>
                 </configuration>
             </plugin>
-
-
-            <!--<plugin>-->
-            <!--<groupId>com.zenjava</groupId>-->
-            <!--<artifactId>javafx-maven-plugin</artifactId>-->
-            <!--<version>8.7.0</version>-->
-            <!--<configuration>-->
-            <!--<mainClass>eu.fthevenet.NOTICE.Main</mainClass>-->
-            <!--<vendor>Frederic Thevenet</vendor>-->
-            <!--<bundleType>IMAGE</bundleType>-->
-            <!--<nativeReleaseVersion>${project.version}</nativeReleaseVersion>-->
-            <!--<appName>${project.build.finalName}</appName>-->
-            <!--<icon>${project.build.finalName}.ico</icon>-->
-
-            <!--<manifestAttributes>-->
-            <!--<SplashScreen-Image>images/logo_med.png</SplashScreen-Image>-->
-
-            <!--</manifestAttributes>-->
-            <!--<bundleArguments>-->
-            <!--<runtime />-->
-            <!--</bundleArguments>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--&lt;!&ndash; required before build-native &ndash;&gt;-->
-            <!--<id>fromUrl-jfxjar</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>build-jar</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--<execution>-->
-            <!--<id>fromUrl-native</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>build-native</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
         </plugins>
     </build>
 

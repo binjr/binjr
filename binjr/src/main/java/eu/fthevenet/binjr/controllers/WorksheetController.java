@@ -3,21 +3,18 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
+import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
-import eu.fthevenet.util.ui.charts.StableTicksAxis;
-import eu.fthevenet.util.ui.charts.XYChartCrosshair;
-import eu.fthevenet.util.ui.charts.XYChartSelection;
-import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
+import eu.fthevenet.util.ui.charts.*;
 import eu.fthevenet.util.ui.controls.ColorTableCell;
 import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.ui.dialogs.Dialogs;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.NumberBinding;
 import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -146,6 +143,7 @@ public abstract class WorksheetController implements Initializable {
 
     /**
      * Returns the {@link Worksheet} instance associated with this controller
+     *
      * @return the {@link Worksheet} instance associated with this controller
      */
     public Worksheet<Double> getWorksheet() {
@@ -204,13 +202,19 @@ public abstract class WorksheetController implements Initializable {
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
-
-        StableTicksAxis yAxis = new StableTicksAxis();
+        StableTicksAxis yAxis;
+        if (worksheet.getUnitPrefixes() == UnitPrefixes.BINARY) {
+            yAxis = new BinaryStableTicksAxis();
+        }
+        else {
+            yAxis = new MetricStableTicksAxis();
+        }
         yAxis.setSide(Side.LEFT);
         yAxis.setAutoRanging(true);
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
+
 
         chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setFocusTraversable(true);
@@ -234,7 +238,7 @@ public abstract class WorksheetController implements Initializable {
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
 //        final NumberBinding<Double> formatter = new TextFormatter<>(new NumberStringConverter());
 //        formatter.valueProperty().bindBidirectional(graphOpacitySlider.valueProperty().asObject());
-        opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%",graphOpacitySlider.valueProperty().multiply(100)));
+        opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         //endregion
 
         //region *** Global preferences ***
@@ -313,7 +317,7 @@ public abstract class WorksheetController implements Initializable {
     }
 
     protected void removeSelectedBinding() {
-       ObservableList<TimeSeriesInfo<Double>> selected = seriesTable.getSelectionModel().getSelectedItems();
+        ObservableList<TimeSeriesInfo<Double>> selected = seriesTable.getSelectionModel().getSelectedItems();
         if (selected != null) {
             seriesTable.getItems().removeAll(selected);
 
@@ -375,7 +379,7 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
-    private void saveSnapshot(){
+    private void saveSnapshot() {
         WritableImage snapImg = root.snapshot(null, null);
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");

@@ -256,15 +256,6 @@
                     <Cursor fx:constant="DEFAULT" />
                 </cursor>
                 <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <!--<AreaChart fx:id="chart" animated="false" createSymbols="false" focusTraversable="true" legendVisible="false" prefHeight="431.0" prefWidth="675.0" AnchorPane.bottomAnchor="0.0"-->
-                    <!--AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">-->
-                    <!--<xAxis>-->
-                    <!--<ZonedDateTimeAxis animated="false" side="BOTTOM"/>-->
-                    <!--</xAxis>-->
-                    <!--<yAxis>-->
-                    <!--<StableTicksAxis animated="false" autoRanging="true" side="LEFT" tickSpacing="30"/>-->
-                    <!--</yAxis>-->
-                    <!--</AreaChart>-->
                 </AnchorPane>
             </AnchorPane>
             <AnchorPane>
@@ -276,54 +267,42 @@
                         </items>
                     </SplitMenuButton>
                     <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <!--<selectionModel>-->
-                            <!--<SelectionMode fx:constant="MULTIPLE"/>-->
-                        <!--</selectionModel>-->
                         <columns>
-                            <TableColumn fx:id="visibleColumn" prefWidth="26.0">
+                            <TableColumn fx:id="visibleColumn" prefWidth="26.0" sortable="false">
                                 <cellValueFactory>
                                     <PropertyValueFactory property="selected" />
                                 </cellValueFactory>
                             </TableColumn>
-                            <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false">
+                            <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">
                             </TableColumn>
-                            <TableColumn prefWidth="160.0" text="Name">
+                            <TableColumn prefWidth="160.0" sortable="false" text="Name">
                                 <cellValueFactory>
                                     <PropertyValueFactory property="displayName" />
                                 </cellValueFactory>
                             </TableColumn>
-                            <TableColumn fx:id="minColumn" prefWidth="76.0" text="Min.">
-                                <!--<cellValueFactory>-->
-                                <!--<PropertyValueFactory property="minValue" />-->
-                                <!--</cellValueFactory>-->
+                            <TableColumn fx:id="minColumn" prefWidth="76.0" sortable="false" text="Min.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
 
-                            <TableColumn fx:id="avgColumn" prefWidth="76.0" text="Avg.">
-                                <!--<cellValueFactory>-->
-                                <!--<PropertyValueFactory property="averageValue" />-->
-                                <!--</cellValueFactory>-->
+                            <TableColumn fx:id="avgColumn" prefWidth="76.0" sortable="false" text="Avg.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="maxColumn" text="Max.">
-                                <!--<cellValueFactory>-->
-                                <!--<PropertyValueFactory property="maxValue" />-->
-                                <!--</cellValueFactory>-->
+                            <TableColumn fx:id="maxColumn" sortable="false" text="Max.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="currentColumn" prefWidth="75.0" text="Current">
+                            <TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" text="Current">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT" />
                                 </cellFactory>
                             </TableColumn>
 
-                            <TableColumn fx:id="sourceColumn" prefWidth="200.0" text="Source">
+                            <TableColumn fx:id="sourceColumn" prefWidth="200.0" sortable="false" text="Source">
                             </TableColumn>
                         </columns>
                         <!--<contextMenu>-->

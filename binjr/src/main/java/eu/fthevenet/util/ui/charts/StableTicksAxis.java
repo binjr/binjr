@@ -16,6 +16,7 @@
 
 package eu.fthevenet.util.ui.charts;
 
+import eu.fthevenet.util.text.PrefixFormatter;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
@@ -29,7 +30,6 @@ import javafx.geometry.Dimension2D;
 import javafx.scene.chart.ValueAxis;
 import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
-import org.gillius.jfxutils.chart.DefaultAxisTickFormatter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,13 +39,11 @@ import java.util.List;
  *
  * @author Jason Winnebeck
  */
-public class StableTicksAxis extends ValueAxis<Number> {
+public abstract class StableTicksAxis extends ValueAxis<Number> {
 
-	/**
+    /**
 	 * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
 	 */
-	private static final double[] dividers = new double[] { 1.0, 2.5, 5.0 };
-
 	private static final int numMinorTicks = 3;
 
 	private final Timeline animationTimeline = new Timeline();
@@ -61,7 +59,7 @@ public class StableTicksAxis extends ValueAxis<Number> {
 		}
 	};
 
-	private AxisTickFormatter axisTickFormatter = new DefaultAxisTickFormatter();
+	private AxisTickFormatter axisTickFormatter;// = new DefaultAxisTickFormatter();
 	private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
 
 	private List<Number> minorTicks;
@@ -76,11 +74,17 @@ public class StableTicksAxis extends ValueAxis<Number> {
 	 */
 	private BooleanProperty forceZeroInRange = new SimpleBooleanProperty( true );
 
-	public StableTicksAxis() {
-	}
+	public StableTicksAxis(PrefixFormatter prefixFormatter ) {
+        this.axisTickFormatter = new AxisTickFormatter( ) {
+            @Override
+            public void setRange(double v, double v1, double v2) {
+            }
 
-	public StableTicksAxis( double lowerBound, double upperBound ) {
-		super( lowerBound, upperBound );
+            @Override
+            public String format(Number number) {
+                return prefixFormatter.format(number.doubleValue());
+            }
+        };
 	}
 
 	public AxisTickFormatter getAxisTickFormatter() {
@@ -190,55 +194,8 @@ public class StableTicksAxis extends ValueAxis<Number> {
 		return ret;
 	}
 
-	public static double calculateTickSpacing( double delta, int maxTicks ) {
-		if ( delta == 0.0 )
-			return 0.0;
-		if ( delta <= 0.0 )
-			throw new IllegalArgumentException( "delta must be positive" );
-		if ( maxTicks < 1 )
-			throw new IllegalArgumentException( "must be at least one tick" );
+	public abstract double calculateTickSpacing( double delta, int maxTicks );
 
-		//The factor will be close to the log10, this just optimizes the search
-		int factor = (int) Math.log10( delta );
-		int divider = 0;
-		double numTicks = delta / ( dividers[divider] * Math.pow( 10, factor ) );
-
-		//We don't have enough ticks, so increase ticks until we're over the limit, then back off once.
-		if ( numTicks < maxTicks ) {
-			while ( numTicks < maxTicks ) {
-				//Move up
-				--divider;
-				if ( divider < 0 ) {
-					--factor;
-					divider = dividers.length - 1;
-				}
-
-				numTicks = delta / ( dividers[divider] * Math.pow( 10, factor ) );
-			}
-
-			//Now back off once unless we hit exactly
-			//noinspection FloatingPointEquality
-			if ( numTicks != maxTicks ) {
-				++divider;
-				if ( divider >= dividers.length ) {
-					++factor;
-					divider = 0;
-				}
-			}
-		} else {
-			//We have too many ticks or exactly max, so decrease until we're just under (or at) the limit.
-			while ( numTicks > maxTicks ) {
-				++divider;
-				if ( divider >= dividers.length ) {
-					++factor;
-					divider = 0;
-				}
-
-				numTicks = delta / ( dividers[divider] * Math.pow( 10, factor ) );
-			}
-		}
-		return dividers[divider] * Math.pow( 10, factor );
-	}
 
 	@Override
 	protected List<Number> calculateMinorTickMarks() {
