@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlRootElement(name = "TimeSeriesProcessor")
+@XmlRootElement(name = "TimeSeriesInfo")
 public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
@@ -144,7 +144,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
         this.path.set(path);
     }
 
-    @XmlTransient
+    @XmlElement
     public TimeSeriesBinding<T> getBinding() {
         return binding;
     }

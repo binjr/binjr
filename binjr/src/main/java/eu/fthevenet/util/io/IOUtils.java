@@ -57,16 +57,6 @@ public class IOUtils {
         }
     }
 
-//    public static String readToString(InputStream in) throws IOException{
-//        BufferedReader reader = new BufferedReader( new InputStreamReader(in));
-//        String inputLine;
-//        StringBuilder response = new StringBuilder();
-//        while ((inputLine = reader.readLine()) != null) {
-//            response.append(inputLine);
-//        }
-//        return response.toString();
-//    }
-
     public static long consumeStream(InputStream input) throws IOException{
         byte[] buffer = new byte[DEFAULT_COPY_BUFFER_SIZE];
         long count = 0;
@@ -76,8 +66,6 @@ public class IOUtils {
         }
         return count;
     }
-
-
 
     public static String readToString(InputStream in) throws IOException {
         return new String(readToBuffer(in));

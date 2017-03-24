@@ -202,9 +202,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @return the time series of the {@link Worksheet}
      */
 
-    @XmlTransient
-//    @XmlElementWrapper(name = "SeriesList")
-//    @XmlElements(@XmlElement(name = "Timeseries"))
+ //   @XmlTransient
+    @XmlElementWrapper(name = "SeriesList")
+    @XmlElements(@XmlElement(name = "Timeseries"))
     public ObservableList<TimeSeriesInfo<T>> getSeries() {
         return series;
     }

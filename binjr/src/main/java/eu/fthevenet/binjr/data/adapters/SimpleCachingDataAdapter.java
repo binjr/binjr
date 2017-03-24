@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Frederic Thevenet
  */
-public abstract class SimpleCachingDataAdapter<T extends Number> implements DataAdapter<T> {
+public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
 
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;

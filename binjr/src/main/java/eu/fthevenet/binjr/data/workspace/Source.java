@@ -9,6 +9,7 @@ import javafx.beans.property.BooleanProperty;
 import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * A class that represents and holds the current state of a single data source
@@ -18,6 +19,7 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Source")
 public class Source implements Serializable, Dirtyable {
+    private UUID adapterId;
     @XmlElement(name = "Name")
     @IsDirtyable
     private String name;
@@ -35,12 +37,13 @@ public class Source implements Serializable, Dirtyable {
      * @param adapter the {@link DataAdapter} to create the {@link Source}  instance from
      * @return an instance of the {@link Source} class from the provided  {@link DataAdapter}
      */
- //   @SuppressWarnings("unchecked")
+     //  @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
         Source newSource = new Source();
         newSource.setName(adapter.getSourceName());
         newSource.setAdapterClass(adapter.getClass());
         newSource.setAdapterParams(adapter.getParams());
+        newSource.setAdapterId(adapter.getId());
         return newSource;
     }
 
@@ -49,6 +52,7 @@ public class Source implements Serializable, Dirtyable {
      */
     public Source() {
         this.status = new ChangeWatcher<>(this);
+
     }
 
     /**
@@ -95,6 +99,10 @@ public class Source implements Serializable, Dirtyable {
         AdapterParams = adapterParams;
     }
 
+    public UUID getAdapterId() {
+        return adapterId;
+    }
+
     @Override
     public Boolean isDirty() {
         return this.status.isDirty();
@@ -110,4 +118,7 @@ public class Source implements Serializable, Dirtyable {
         this.status.cleanUp();
     }
 
+    public void setAdapterId(UUID adapterId) {
+        this.adapterId = adapterId;
+    }
 }

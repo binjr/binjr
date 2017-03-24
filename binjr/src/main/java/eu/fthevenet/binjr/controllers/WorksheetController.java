@@ -237,8 +237,6 @@ public abstract class WorksheetController implements Initializable {
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
-//        final NumberBinding<Double> formatter = new TextFormatter<>(new NumberStringConverter());
-//        formatter.valueProperty().bindBidirectional(graphOpacitySlider.valueProperty().asObject());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         //endregion
 

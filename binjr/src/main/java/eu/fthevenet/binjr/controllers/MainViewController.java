@@ -44,7 +44,6 @@ import java.net.URL;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -397,6 +396,7 @@ public class MainViewController implements Initializable {
                 for (Source source : wsFromfile.getSources()) {
                     DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
                     da.setParams(source.getAdapterParams());
+                    da.setId(source.getAdapterId());
                     loadAdapters(da);
                 }
 

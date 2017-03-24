@@ -48,6 +48,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private ZoneId zoneId;
     private String encoding;
     private JrdsTreeFilter treeFilter;
+    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
 
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
@@ -61,8 +62,10 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
     }
 
+    /**
+     * Default constructor
+     */
     public JrdsDataAdapter() {
-
     }
 
     /**
@@ -93,7 +96,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         Gson gson = new Gson();
         JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
         Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(new JrdsSeriesBinding(getSourceName(), "/", this));
+        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>( bindingFactory.of(getSourceName(), "/", this));
         List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
         for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
@@ -176,7 +179,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
         JsonTree.JsonItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(new JrdsSeriesBinding(n.name, currentPath, this));
+        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(n.name, currentPath, this));
         if (n.children != null) {
             for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
                 attachNode(newBranch, ref._reference, nodes);
@@ -193,11 +196,11 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     if (newValue) {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
-                            newBranch.setValue(new JrdsSeriesBinding(newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
+                            newBranch.setValue( bindingFactory.of(newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                                 String graphType = graphdesc.seriesDescList.get(i).graphType;
                                 if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                                    newBranch.getChildren().add(new TreeItem<>(new JrdsSeriesBinding(graphdesc, i, currentPath, JrdsDataAdapter.this)));
+                                    newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(graphdesc, i, currentPath, JrdsDataAdapter.this)));
                                 }
                             }
                             //remove dummy node
