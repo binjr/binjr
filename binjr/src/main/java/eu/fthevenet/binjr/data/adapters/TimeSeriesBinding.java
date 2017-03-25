@@ -19,7 +19,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="TimeSeriesBinding")
+@XmlRootElement(name="Binding")
 public class TimeSeriesBinding<T extends Number> {
     private static final Logger logger = LogManager.getLogger(JrdsSeriesBindingFactory.class);
     private final UUID adapterId;
@@ -31,7 +31,7 @@ public class TimeSeriesBinding<T extends Number> {
     private final ChartType graphType;
     private final String unitName;
     @XmlTransient
-    private final DataAdapter<T> adapter;
+    private DataAdapter<T> adapter;
 
     private TimeSeriesBinding(){
         this.label = "";
@@ -80,8 +80,13 @@ public class TimeSeriesBinding<T extends Number> {
      *
      * @return the {@link DataAdapter} of the binding
      */
+    @XmlTransient
     public DataAdapter<T> getAdapter() {
         return this.adapter;
+    }
+
+    public void setAdapter(DataAdapter adapter) {
+        this.adapter =  adapter;
     }
 
     /**
@@ -137,6 +142,5 @@ public class TimeSeriesBinding<T extends Number> {
     public String toString() {
         return getLegend();
     }
-
 
 }

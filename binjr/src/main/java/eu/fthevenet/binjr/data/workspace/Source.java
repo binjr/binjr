@@ -121,4 +121,6 @@ public class Source implements Serializable, Dirtyable {
     public void setAdapterId(UUID adapterId) {
         this.adapterId = adapterId;
     }
+
+
 }

@@ -10,7 +10,7 @@
         @XmlJavaTypeAdapter(type = Color.class,
                 value = ColorXmlAdapter.class)
 })
-package eu.fthevenet.binjr.data.workspace;
+package eu.fthevenet.binjr.data.adapters;
 
 import com.migesok.jaxb.adapter.javatime.InstantXmlAdapter;
 import com.migesok.jaxb.adapter.javatime.LocalDateTimeXmlAdapter;

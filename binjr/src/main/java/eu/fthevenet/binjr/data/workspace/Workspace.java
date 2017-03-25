@@ -1,6 +1,7 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import com.sun.javafx.collections.ObservableListWrapper;
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
@@ -22,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.UUID;
 
 /**
  * A class that represents and holds the current state of the application

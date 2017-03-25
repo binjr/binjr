@@ -17,7 +17,7 @@ import java.io.Serializable;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlRootElement(name = "TimeSeriesInfo")
+@XmlRootElement(name = "Timeseries")
 public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
@@ -28,6 +28,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
     @IsDirtyable
     private final StringProperty path;
     private TimeSeriesProcessor<T> processor;
+     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
 
     private final ChangeWatcher<TimeSeriesInfo> status;
@@ -119,7 +120,6 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
         this.selected.set(selected);
     }
 
-    @XmlTransient
     public Color getDisplayColor() {
         return displayColor.getValue();
     }
@@ -144,7 +144,7 @@ public class TimeSeriesInfo<T extends Number>  implements Serializable, Dirtyabl
         this.path.set(path);
     }
 
-    @XmlElement
+
     public TimeSeriesBinding<T> getBinding() {
         return binding;
     }

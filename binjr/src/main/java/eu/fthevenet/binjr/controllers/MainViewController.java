@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
 import eu.fthevenet.util.ui.controls.EditableTab;
 import eu.fthevenet.util.ui.controls.TabPaneNewButton;
@@ -146,8 +147,7 @@ public class MainViewController implements Initializable {
             while (c.next()) {
                 if (c.wasAdded()) {
                     workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                }
-                else if (c.wasRemoved()) {
+                } else if (c.wasRemoved()) {
                     workspace.removeWorksheets(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
                 }
             }
@@ -189,8 +189,7 @@ public class MainViewController implements Initializable {
                 chartTypeLabel.setText(worksheet.getChartType().toString());
                 unitLabel.setText(worksheet.getUnit());
                 baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            }
-            else {
+            } else {
                 worksheetStatusBar.setVisible(false);
             }
         });
@@ -200,8 +199,7 @@ public class MainViewController implements Initializable {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
                 sourceStatusBar.setVisible(true);
                 sourceLabel.setText(selectedDataAdapter.getSourceName());
-            }
-            else {
+            } else {
                 sourceStatusBar.setVisible(false);
             }
         });
@@ -399,18 +397,28 @@ public class MainViewController implements Initializable {
                     da.setId(source.getAdapterId());
                     loadAdapters(da);
                 }
-
                 for (Worksheet<?> worksheet : wsFromfile.getWorksheets()) {
+                    for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
+                        UUID id = s.getBinding().getAdapterId();
+                        DataAdapter<?> da = sourcesAdapters.values()
+                                .stream()
+                                .filter(a -> a.getId().equals(id))
+                                .findAny()
+                                .orElseThrow(() -> new DataAdapterException("Failed to find a valid adapter with id " + id.toString()));
+                        s.getBinding().setAdapter(da);
+                    }
                     loadWorksheet(worksheet);
                 }
                 workspace.cleanUp();
             }
-        } catch (IllegalAccessException | InstantiationException e) {
+        } catch (IllegalAccessException | InstantiationException | DataAdapterException e) {
             Dialogs.displayException("Error while instantiating DataAdapter", e, root);
         } catch (IOException e) {
             Dialogs.displayException("Error reading file " + file.getPath(), e, root);
         } catch (JAXBException e) {
             Dialogs.displayException("Error while deserializing workspace", e, root);
+        } catch (Exception e) {
+            Dialogs.displayException("Error loading workspace", e, root);
         }
     }
 
@@ -419,8 +427,7 @@ public class MainViewController implements Initializable {
             if (workspace.hasPath()) {
                 workspace.save();
                 return true;
-            }
-            else {
+            } else {
                 return saveWorkspaceAs();
             }
         } catch (IOException e) {
@@ -550,8 +557,7 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        }
-        else {
+        } else {
             bindings.add(branch.getValue());
         }
     }
@@ -598,8 +604,7 @@ public class MainViewController implements Initializable {
                 if (selectedTabController != null && selectedTabController.getWorksheet() != null) {
                     toDateTime = selectedTabController.getWorksheet().getToDateTime();
                     fromDateTime = selectedTabController.getWorksheet().getFromDateTime();
-                }
-                else {
+                } else {
                     toDateTime = ZonedDateTime.now();
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                 }
