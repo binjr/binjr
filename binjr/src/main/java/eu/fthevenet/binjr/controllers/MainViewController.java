@@ -399,6 +399,7 @@ public class MainViewController implements Initializable {
                 }
                 for (Worksheet<?> worksheet : wsFromfile.getWorksheets()) {
                     for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
+                        s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedTabController.refresh());
                         UUID id = s.getBinding().getAdapterId();
                         DataAdapter<?> da = sourcesAdapters.values()
                                 .stream()
