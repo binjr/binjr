@@ -282,9 +282,22 @@ public abstract class WorksheetController implements Initializable {
         sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-        avgColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue())));
-        minColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue())));
-        maxColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue())));
+        avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
+                worksheet.toDateTimeProperty(),
+                worksheet.fromDateTimeProperty()
+        ));
+        minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
+                worksheet.toDateTimeProperty(),
+                worksheet.fromDateTimeProperty()
+        ));
+
+        maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
+                worksheet.toDateTimeProperty(),
+                worksheet.fromDateTimeProperty()
+        ));
 
         currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormatter.format(Double.NaN)));
 
