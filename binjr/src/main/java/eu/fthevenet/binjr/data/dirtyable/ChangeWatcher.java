@@ -21,7 +21,7 @@ import java.util.List;
 /**
  * A class that embeds the logic required to discover and track modification on object implementing {@link Dirtyable}
  *
- *  * @author Frederic Thevenet
+ * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public class ChangeWatcher<T> {
@@ -73,7 +73,6 @@ public class ChangeWatcher<T> {
                 if (fieldValue instanceof Property) {
                     watchedProperties.add((Property<?>) fieldValue);
                     ((Property<?>) fieldValue).addListener(propertyChangeListener);
-                    logger.debug(() -> "Watched property: " + field.getName());
                 }
                 if (fieldValue instanceof ObservableList) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
@@ -88,7 +87,6 @@ public class ChangeWatcher<T> {
                                 ObservableList<? extends Dirtyable> ol = (ObservableList<? extends Dirtyable>) fieldValue;
                                 watchedLists.add(ol);
                                 ol.addListener(listChangeListener);
-                                logger.debug(() -> "Watched list: " + field.getName());
                                 break;
                             }
                         }

@@ -33,6 +33,8 @@ import javafx.beans.property.SimpleLongProperty;
 import javafx.scene.chart.Axis;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -64,7 +66,7 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
-
+    private static final Logger logger = LogManager.getLogger(ZonedDateTimeAxis.class);
     /**
      * These property are used for animation.
      */

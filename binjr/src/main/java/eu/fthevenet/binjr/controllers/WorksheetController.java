@@ -265,8 +265,7 @@ public abstract class WorksheetController implements Initializable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
-        setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
-        setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
@@ -275,6 +274,9 @@ public abstract class WorksheetController implements Initializable {
         crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
         mainViewController.showHorizontalMarkerProperty().bindBidirectional(crossHair.horizontalMarkerVisibleProperty());
         mainViewController.showVerticalMarkerProperty().bindBidirectional(crossHair.verticalMarkerVisibleProperty());
+        setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
+        setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+
         //endregion
 
 
@@ -307,7 +309,7 @@ public abstract class WorksheetController implements Initializable {
             TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
 
             row.setOnDragDetected(event -> {
-                if (! row.isEmpty()) {
+                if (!row.isEmpty()) {
                     Integer index = row.getIndex();
                     Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
                     db.setDragView(row.snapshot(null, null));
@@ -321,7 +323,7 @@ public abstract class WorksheetController implements Initializable {
             row.setOnDragOver(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    if (row.getIndex() != ((Integer)db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
+                    if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
                         event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                         event.consume();
                     }
@@ -333,10 +335,11 @@ public abstract class WorksheetController implements Initializable {
                 if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                     int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
                     TimeSeriesInfo<Double> draggedseries = seriesTable.getItems().remove(draggedIndex);
-                    int dropIndex ;
+                    int dropIndex;
                     if (row.isEmpty()) {
-                        dropIndex = seriesTable.getItems().size() ;
-                    } else {
+                        dropIndex = seriesTable.getItems().size();
+                    }
+                    else {
                         dropIndex = row.getIndex();
                     }
                     seriesTable.getItems().add(dropIndex, draggedseries);
@@ -347,15 +350,15 @@ public abstract class WorksheetController implements Initializable {
                 }
             });
 
-            return row ;
+            return row;
         });
 
-        seriesTable.setItems(worksheet.getSeries());
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
                 removeSelectedBinding();
             }
         });
+        seriesTable.setItems(worksheet.getSeries());
         //endregion
     }
     //endregion
@@ -512,7 +515,7 @@ public abstract class WorksheetController implements Initializable {
                         }
                         logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                         fill.fillProperty().bind(Bindings.createObjectBinding(
-                                () -> series.getDisplayColor().deriveColor(0.0,1.0,1.0,graphOpacitySlider.getValue()),
+                                () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, graphOpacitySlider.getValue()),
                                 series.displayColorProperty(),
                                 graphOpacitySlider.valueProperty()));
                     }
@@ -672,12 +675,12 @@ public abstract class WorksheetController implements Initializable {
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    invalidate(false, true);
                 }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, true);
+                    invalidate(false, true);
                 }
             });
         }

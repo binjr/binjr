@@ -1,8 +1,9 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.ui.charts.ProfiledStackedAreaChart;
+import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -28,7 +29,7 @@ public class StackedAreaChartWorksheetController extends WorksheetController {
 
     @Override
     protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis) {
-        StackedAreaChart<ZonedDateTime, Double> newChart = new StackedAreaChart<>(xAxis, yAxis);
+        StackedAreaChart<ZonedDateTime, Double> newChart = new ProfiledStackedAreaChart<>(xAxis, yAxis);
         newChart.setCreateSymbols(false);
         newChart.createSymbolsProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
         return newChart;
