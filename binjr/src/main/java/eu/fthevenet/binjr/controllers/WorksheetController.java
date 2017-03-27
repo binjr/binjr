@@ -462,37 +462,16 @@ public abstract class WorksheetController implements Initializable {
         }
     }
 
-    private void applyOpacityToSeries(Iterable<TimeSeriesInfo<Double>> series, Double opacity) {
-        for (TimeSeriesInfo<Double> s : series) {
-            if (s.getDisplayColor() != null) {
-                s.setDisplayColor(Color.color(s.getDisplayColor().getRed(),
-                        s.getDisplayColor().getGreen(),
-                        s.getDisplayColor().getBlue(),
-                        opacity));
-            }
-        }
-    }
-
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Plotting chart", logger::trace)) {
             chart.getData().clear();
-
             getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
-
-            graphOpacitySlider.valueProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue != null) {
-                    applyOpacityToSeries(worksheet.getSeries(), newValue.doubleValue());
-                }
-            });
-
             chart.getData().addAll(getWorksheet().getSeries()
                     .stream()
                     .filter(series -> series.getProcessor() != null && series.isSelected())
                     .map(this::makeXYChartSeries)
                     .collect(Collectors.toList()));
-
-            applyOpacityToSeries(worksheet.getSeries(), graphOpacitySlider.getValue());
 
         } catch (DataAdapterException e) {
             Dialogs.displayException("Failed to retrieve data from source", e, root);
@@ -519,7 +498,10 @@ public abstract class WorksheetController implements Initializable {
                             });
                         }
                         logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                        fill.fillProperty().bind(series.displayColorProperty());
+                        fill.fillProperty().bind(Bindings.createObjectBinding(
+                                () -> series.getDisplayColor().deriveColor(0.0,1.0,1.0,graphOpacitySlider.getValue()),
+                                series.displayColorProperty(),
+                                graphOpacitySlider.valueProperty()));
                     }
                 }
             }
