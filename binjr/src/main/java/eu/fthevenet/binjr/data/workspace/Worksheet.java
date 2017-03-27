@@ -10,21 +10,24 @@ import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -57,6 +60,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
+    @IsDirtyable
+    private DoubleProperty graphOpacity;
 
     private final ChangeWatcher<Worksheet> status;
 
@@ -68,7 +73,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
                 ChartType.STACKED,
                 ZoneId.systemDefault(),
                 new ObservableListWrapper<>(new LinkedList<>()),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-", UnitPrefixes.METRIC);
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
+                UnitPrefixes.METRIC,
+                0.8);
     }
 
     /**
@@ -79,9 +86,15 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @param timezone  the {@link ZoneId} for the new {@link Worksheet} instance
      */
     public Worksheet(String name, ChartType chartType, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone, String unitName, UnitPrefixes prefix) {
-        this(name, chartType, timezone,
+        this(name,
+                chartType,
+                timezone,
                 new ObservableListWrapper<>(new LinkedList<>()),
-                fromDateTime, toDateTime, unitName, prefix);
+                fromDateTime,
+                toDateTime,
+                unitName,
+                prefix,
+                0.8);
     }
 
     /**
@@ -99,10 +112,11 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
                 initWorksheet.getFromDateTime(),
                 initWorksheet.getToDateTime(),
                 initWorksheet.getUnit(),
-                initWorksheet.getUnitPrefixes());
+                initWorksheet.getUnitPrefixes(),
+                initWorksheet.getGraphOpacity());
     }
 
-    private Worksheet(String name, ChartType chartType, ZoneId timezone, List<TimeSeriesInfo<T>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base) {
+    private Worksheet(String name, ChartType chartType, ZoneId timezone, List<TimeSeriesInfo<T>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base, double graphOpacity) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -111,7 +125,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
-
+        this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.status = new ChangeWatcher<>(this);
     }
 
@@ -371,6 +385,18 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         this.unitPrefixes.setValue(unitPrefixes);
     }
 
+    public double getGraphOpacity() {
+        return graphOpacity.get();
+    }
+
+    public DoubleProperty graphOpacityProperty() {
+        return graphOpacity;
+    }
+
+    public void setGraphOpacity(double graphOpacity) {
+        this.graphOpacity.set(graphOpacity);
+    }
+
     @Override
     public String toString() {
         return String.format("%s - %s - %s",
@@ -395,5 +421,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     public void cleanUp() {
         status.cleanUp();
     }
+
+
 }
 

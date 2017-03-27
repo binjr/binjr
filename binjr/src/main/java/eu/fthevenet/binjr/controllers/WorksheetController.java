@@ -237,7 +237,9 @@ public abstract class WorksheetController implements Initializable {
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
+        graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+
         //endregion
 
         //region *** Global preferences ***
@@ -368,7 +370,6 @@ public abstract class WorksheetController implements Initializable {
             newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> refresh());
             worksheet.addSeries(newSeries);
         }
-
         refresh();
         chart.getYAxis().setAutoRanging(true);
     }
@@ -377,7 +378,6 @@ public abstract class WorksheetController implements Initializable {
         ObservableList<TimeSeriesInfo<Double>> selected = seriesTable.getSelectionModel().getSelectedItems();
         if (selected != null) {
             seriesTable.getItems().removeAll(selected);
-
             refresh();
         }
     }
