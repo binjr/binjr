@@ -4,20 +4,14 @@
     -fx-background-radius: 0;
     -fx-background-insets: 0;
     -fx-border-color: red;
-    /*-fx-border-style: round;*/
     -fx-border-width:0;
     -fx-border-radius:0;
-   /* -fx-border-insets:0; */
     -fx-alignment: center;
 }
 
 .color-picker .label {
     -fx-padding: 0;
 }
-
-/*.color-picker .arrow-button {
-    visibility: hidden;
-}*/
 
 .color-picker .label .rectangle {
     -fx-padding: 0;

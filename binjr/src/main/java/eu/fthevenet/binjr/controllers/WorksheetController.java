@@ -111,6 +111,8 @@ public abstract class WorksheetController implements Initializable {
     private ContextMenu seriesListMenu;
     @FXML
     private MenuItem opacityMenuItem;
+    @FXML
+    private MenuButton opacityMenuButton;
 
     private MainViewController mainViewController;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
@@ -197,6 +199,8 @@ public abstract class WorksheetController implements Initializable {
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
         assert opacityMenuItem != null : "fx:id\"opacityMenuItem\" was not injected!";
+        assert opacityMenuButton != null : "fx:id\"opacityMenuButton\" was not injected!";
+
         //endregion
 
         //region *** XYChart ***
@@ -221,6 +225,7 @@ public abstract class WorksheetController implements Initializable {
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
+        //  chart.titleProperty().bind(getWorksheet().nameProperty());
 
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
@@ -239,6 +244,7 @@ public abstract class WorksheetController implements Initializable {
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+        opacityMenuButton.getStylesheets().add(getClass().getResource("/css/MenuButton.css").toExternalForm());
 
         //endregion
 
@@ -424,7 +430,7 @@ public abstract class WorksheetController implements Initializable {
     //region [Private Members]
 
     private void invalidate(boolean saveToHistory, boolean dontPlotChart) {
-        try (Profiler p = Profiler.start("Refreshing chart", logger::trace)) {
+        try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName(), logger::trace)) {
             XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
             logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
             if (saveToHistory) {
@@ -480,7 +486,7 @@ public abstract class WorksheetController implements Initializable {
 
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
-        try (Profiler p = Profiler.start("Plotting chart", logger::trace)) {
+        try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
             chart.getData().clear();
             getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
             chart.getData().addAll(getWorksheet().getSeries()
@@ -495,34 +501,36 @@ public abstract class WorksheetController implements Initializable {
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
-        XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
-        s.getData().addAll(series.getProcessor().getData());
-        s.nodeProperty().addListener((node, oldNode, newNode) -> {
-            if (newNode != null) {
-                ObservableList<Node> children = ((Group) newNode).getChildren();
-                if (children != null) {
-                    if (children.size() >= 1) {
-                        Path stroke = (Path) children.get(1);
-                        Path fill = (Path) children.get(0);
-                        stroke.setVisible(false);
-                        if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
-                            // use default jFX theme colors for series
-                            stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
-                                if (newValue != null) {
-                                    series.setDisplayColor((Color) newValue);
-                                }
-                            });
+        try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
+            XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
+            s.getData().addAll(series.getProcessor().getData());
+            s.nodeProperty().addListener((node, oldNode, newNode) -> {
+                if (newNode != null) {
+                    ObservableList<Node> children = ((Group) newNode).getChildren();
+                    if (children != null) {
+                        if (children.size() >= 1) {
+                            Path stroke = (Path) children.get(1);
+                            Path fill = (Path) children.get(0);
+                            stroke.setVisible(false);
+                            if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
+                                // use default jFX theme colors for series
+                                stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
+                                    if (newValue != null) {
+                                        series.setDisplayColor((Color) newValue);
+                                    }
+                                });
+                            }
+                            logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                            fill.fillProperty().bind(Bindings.createObjectBinding(
+                                    () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, graphOpacitySlider.getValue()),
+                                    series.displayColorProperty(),
+                                    graphOpacitySlider.valueProperty()));
                         }
-                        logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                        fill.fillProperty().bind(Bindings.createObjectBinding(
-                                () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, graphOpacitySlider.getValue()),
-                                series.displayColorProperty(),
-                                graphOpacitySlider.valueProperty()));
                     }
                 }
-            }
-        });
-        return s;
+            });
+            return s;
+        }
     }
 
     /**

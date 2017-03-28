@@ -1,35 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import eu.fthevenet.util.ui.controls.DecimalFormatTableCellFactory?>
-<?import eu.fthevenet.util.ui.controls.ZonedDateTimePicker?>
-<?import java.lang.Double?>
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.Cursor?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.SplitMenuButton?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.Tooltip?>
+<?import eu.fthevenet.util.ui.controls.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Cursor?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Polyline?>
-<?import javafx.scene.text.Font?>
-
+<?import javafx.scene.text.*?>
+<?import java.lang.*?>
 <AnchorPane fx:id="root" prefHeight="537.0" prefWidth="752.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
@@ -222,7 +202,8 @@
                         </Tooltip>
                     </tooltip>
                 </ToggleButton>
-            <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0">
+                <MenuButton fx:id="opacityMenuButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            prefWidth="30.0" prefHeight="30.0">
               <items>
                 <MenuItem fx:id="opacityMenuItem" mnemonicParsing="false" text="Action 1">
                      <graphic>
