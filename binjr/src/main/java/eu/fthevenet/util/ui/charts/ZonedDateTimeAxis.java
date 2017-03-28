@@ -227,19 +227,19 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             animator.stop(currentAnimationID);
             currentAnimationID = animator.animate(
                     new KeyFrame(Duration.ZERO,
-                            new KeyValue(currentLowerBound, oldLowerBound.toInstant().toEpochMilli()),
-                            new KeyValue(currentUpperBound, oldUpperBound.toInstant().toEpochMilli())
+                            new KeyValue(currentLowerBound, oldLowerBound.toEpochSecond()),
+                            new KeyValue(currentUpperBound, oldUpperBound.toEpochSecond())
                     ),
                     new KeyFrame(Duration.millis(700),
-                            new KeyValue(currentLowerBound, lower.toInstant().toEpochMilli()),
-                            new KeyValue(currentUpperBound, upper.toInstant().toEpochMilli())
+                            new KeyValue(currentLowerBound, lower.toEpochSecond()),
+                            new KeyValue(currentUpperBound, upper.toEpochSecond())
                     )
             );
 
         }
         else {
-            currentLowerBound.set(getLowerBound().toInstant().toEpochMilli());
-            currentUpperBound.set(getUpperBound().toInstant().toEpochMilli());
+            currentLowerBound.set(getLowerBound().toEpochSecond());
+            currentUpperBound.set(getUpperBound().toEpochSecond());
         }
     }
 
@@ -266,7 +266,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
         // Then get the difference from the actual date to the min date and divide it by the total difference.
         // We get a value between 0 and 1, if the date is within the min and max date.
-        double d = (date.toInstant().toEpochMilli() - currentLowerBound.get()) / diff;
+        double d = (date.toEpochSecond() - currentLowerBound.get()) / diff;
 
         // Multiply this percent value with the range and add the zero offset.
         if (getSide().isVertical()) {
@@ -292,29 +292,29 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             // displayPosition = getHeight() - ((date - lowerBound) / diff) * range + getZero
             // date = displayPosition - getZero - getHeight())/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition() - getHeight()) / -range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(v), zoneId);
+            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId);
         }
         else {
             // displayPosition = ((date - lowerBound) / diff) * range + getZero
             // date = displayPosition - getZero)/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition()) / range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(v), zoneId);
+            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId);
         }
     }
 
     @Override
     public boolean isValueOnAxis(ZonedDateTime date) {
-        return date.toInstant().toEpochMilli() > currentLowerBound.get() && date.toInstant().toEpochMilli() < currentUpperBound.get();
+        return date.toEpochSecond() > currentLowerBound.get() && date.toEpochSecond() < currentUpperBound.get();
     }
 
     @Override
     public double toNumericValue(ZonedDateTime date) {
-        return date.toInstant().toEpochMilli();
+        return date.toEpochSecond();
     }
 
     @Override
     public ZonedDateTime toRealValue(double v) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(v)), zoneId);
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(Math.round(v)), zoneId);
     }
 
     @Override
@@ -336,7 +336,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             dateList.clear();
             actualInterval = interval;
             // Loop as long we exceeded the upper bound.
-            while (currentLower.toInstant().toEpochMilli() <= currentUpper.toInstant().toEpochMilli()) {
+            while (currentLower.toEpochSecond() <= currentUpper.toEpochSecond()) {
                 dateList.add(currentLower);
                 currentLower = currentLower.plus(interval.amount, interval.unit);
             }
@@ -357,13 +357,13 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             ZonedDateTime previousLastDate = evenDateList.get(dateList.size() - 3);
 
             // If the second date is too near by the lower bound, remove it.
-//            if (secondDate.toInstant().toEpochMilli() - lower.toInstant().toEpochMilli() < (thirdDate.toInstant().toEpochMilli() - secondDate.toInstant().toEpochMilli()) / 2) {
+//            if (secondDate.toEpochSecond() - lower.toEpochSecond() < (thirdDate.toEpochSecond() - secondDate.toEpochSecond()) / 2) {
 //                evenDateList.remove(secondDate);
 //            }
 
             // If difference from the upper bound to the last date is less than the half of the difference of the previous two dates,
             // we better remove the last date, as it comes to close to the upper bound.
-            if (upper.toInstant().toEpochMilli() - lastDate.toInstant().toEpochMilli() < (lastDate.toInstant().toEpochMilli() - previousLastDate.toInstant().toEpochMilli()) / 2) {
+            if (upper.toEpochSecond() - lastDate.toEpochSecond() < (lastDate.toEpochSecond() - previousLastDate.toEpochSecond()) / 2) {
                 evenDateList.remove(lastDate);
             }
         }
@@ -374,8 +374,8 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
     @Override
     protected void layoutChildren() {
         if (!isAutoRanging()) {
-            currentLowerBound.set(getLowerBound().toInstant().toEpochMilli());
-            currentUpperBound.set(getUpperBound().toInstant().toEpochMilli());
+            currentLowerBound.set(getLowerBound().toEpochSecond());
+            currentUpperBound.set(getUpperBound().toEpochSecond());
         }
         super.layoutChildren();
     }

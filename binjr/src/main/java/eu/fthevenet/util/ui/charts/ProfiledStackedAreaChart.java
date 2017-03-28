@@ -23,8 +23,9 @@ public class ProfiledStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
 
     @Override
     protected void layoutPlotChildren() {
-        try (Profiler p = Profiler.start("Plotting StackedAreaChart " + this.getTitle(), logger::trace)) {
+        try (Profiler p = Profiler.start("Plotting MyStackedAreaChart " + this.getTitle(), logger::trace)) {
             super.layoutPlotChildren();
         }
     }
+
 }

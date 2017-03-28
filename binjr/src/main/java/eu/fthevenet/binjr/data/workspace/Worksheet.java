@@ -7,7 +7,7 @@ import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
-import eu.fthevenet.binjr.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.fthevenet.binjr.data.timeseries.transform.DecimationTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
@@ -131,7 +131,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
 
     public void fillData(ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException{
         // Group all bindings by common adapters
-        TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
+        //   TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
+        TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
+
         Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (Map.Entry<DataAdapter<T>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
             DataAdapter<T> adapter = byAdapterEntry.getKey();
