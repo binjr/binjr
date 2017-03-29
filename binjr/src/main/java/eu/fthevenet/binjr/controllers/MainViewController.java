@@ -1,20 +1,20 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
-import eu.fthevenet.util.ui.controls.EditableTab;
-import eu.fthevenet.util.ui.controls.TabPaneNewButton;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.workspace.Source;
+import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.data.workspace.Workspace;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
+import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
+import eu.fthevenet.util.ui.controls.EditableTab;
+import eu.fthevenet.util.ui.controls.TabPaneNewButton;
 import eu.fthevenet.util.ui.dialogs.DataAdapterDialog;
 import eu.fthevenet.util.ui.dialogs.Dialogs;
 import eu.fthevenet.util.ui.dialogs.EditWorksheetDialog;
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -123,6 +123,7 @@ public class MainViewController implements Initializable {
         assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
 
+
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -216,6 +217,14 @@ public class MainViewController implements Initializable {
             stage.setOnCloseRequest(event -> {
                 if (!confirmAndClearWorkspace()) {
                     event.consume();
+                }
+            });
+
+            stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue && oldValue) {
+                    //main stage lost focus -> invalidates crosshair
+                    showHorizontalMarker.set(false);
+                    showVerticalMarker.set(false);
                 }
             });
 
@@ -411,6 +420,8 @@ public class MainViewController implements Initializable {
                     loadWorksheet(worksheet);
                 }
                 workspace.cleanUp();
+                GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
+                logger.debug(() -> "Recently loaded workspaces: " + GlobalPreferences.getInstance().getRecentFiles().stream().collect(Collectors.joining(" ")));
             }
         } catch (IllegalAccessException | InstantiationException | DataAdapterException e) {
             Dialogs.displayException("Error while instantiating DataAdapter", e, root);
@@ -449,6 +460,7 @@ public class MainViewController implements Initializable {
         if (selectedFile != null) {
             try {
                 workspace.save(selectedFile);
+                GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
                 return true;
             } catch (IOException e) {
                 Dialogs.displayException("Failed to save snapshot to disk", e, root);

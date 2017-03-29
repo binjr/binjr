@@ -130,10 +130,11 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     }
 
     public void fillData(ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException{
-        // Group all bindings by common adapters
+
+        // Define the reduction transform to apply
         //   TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
-
+        // Group all bindings by common adapters
         Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (Map.Entry<DataAdapter<T>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
             DataAdapter<T> adapter = byAdapterEntry.getKey();
@@ -145,12 +146,12 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
                     // Get raw data for source
                     try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant())) {
                         // Parse raw data obtained from adapter
-                        Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> m = adapter.getParser().parse(in, byPathEntry.getValue());
+                        Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> rawDataMap = adapter.getParser().parse(in, byPathEntry.getValue());
                         // Applying point reduction
-                        m = reducer.transform(m, GlobalPreferences.getInstance().getDownSamplingEnabled());
+                        rawDataMap = reducer.transform(rawDataMap, GlobalPreferences.getInstance().getDownSamplingEnabled());
                         //Update timeSeries data
-                        for (TimeSeriesInfo<T> info : m.keySet()){
-                            info.setProcessor(m.get(info));
+                        for (TimeSeriesInfo<T> seriesInfo : rawDataMap.keySet()) {
+                            seriesInfo.setProcessor(rawDataMap.get(seriesInfo));
                         }
                     }
                 } catch (IOException | ParseException e) {

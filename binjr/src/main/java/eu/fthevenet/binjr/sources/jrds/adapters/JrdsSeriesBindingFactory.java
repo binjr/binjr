@@ -88,6 +88,7 @@ public class JrdsSeriesBindingFactory {
             case "stacked":
                 graphType = ChartType.STACKED;
                 break;
+
             case "line":
                 graphType = ChartType.LINE;
                 break;
