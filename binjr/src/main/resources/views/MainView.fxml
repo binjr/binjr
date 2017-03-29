@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import eu.fthevenet.util.ui.controls.TabPaneNewButton?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
-<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import eu.fthevenet.util.ui.controls.TabPaneNewButton?>
 <VBox fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
         <MenuBar VBox.vgrow="NEVER">
@@ -14,6 +14,9 @@
                 <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
                     <items>
                         <MenuItem  mnemonicParsing="false" text="New Workspace" onAction="#handleNewWorkspace">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/new.png"/>
@@ -21,6 +24,9 @@
                             </graphic>
                         </MenuItem>
                         <MenuItem  mnemonicParsing="false" text="Open…" onAction="#handleOpenWorkspace">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/open.png"/>
@@ -32,15 +38,25 @@
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Close" />-->
                         <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/save.png"/>
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem mnemonicParsing="false" text="Save As…" onAction="#handleSaveAsWorkspace"/>
+                        <MenuItem mnemonicParsing="false" text="Save As…" onAction="#handleSaveAsWorkspace">
+                            <accelerator>
+                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
+                        </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem accelerator="Alt+P" mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…">
+                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/settings.png"/>
@@ -56,7 +72,7 @@
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
                                 <accelerator>
-                                    <KeyCodeCombination alt="DOWN" code="J" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                                 </accelerator>
                             </MenuItem>
                             <graphic>
@@ -71,7 +87,7 @@
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
-                                <KeyCodeCombination alt="DOWN" code="N" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                             </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
@@ -88,6 +104,9 @@
                         </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false"/>
                         <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot" text="Take Snapshot">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                            </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/snapshot.png"/>

@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import eu.fthevenet.util.cache.LRUMap;
 import eu.fthevenet.util.io.IOUtils;
 import eu.fthevenet.util.logging.Profiler;
 import org.apache.logging.log4j.LogManager;
@@ -11,23 +12,25 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An abstract implementation of {@link DataAdapter} that manages a cache in between the adapter and the data source.
- * <p>This is a naive, by-value, on-heap memory cache based on a map of {@link java.lang.ref.SoftReference} </p>
+ * <p>This is a on-heap memory cache  with a finite capacity and an LRU eviction policy</p>
+ * <p>Furthermore, values uses {@link java.lang.ref.SoftReference} to give the JVM a change to collect the cached elements,
+ * should the memory pressure become to high.</p>
  *
  * @author Frederic Thevenet
  */
 public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
+    public static final int CACHE_SIZE = 32;
 
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
     public SimpleCachingDataAdapter() {
-        cache = new HashMap<>();
+        cache = new LRUMap<>(CACHE_SIZE);
     }
 
     @Override
