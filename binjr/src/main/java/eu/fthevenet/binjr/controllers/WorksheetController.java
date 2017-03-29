@@ -487,11 +487,20 @@ public abstract class WorksheetController implements Initializable {
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
-            chart.getData().clear();
             getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
-            chart.getData().addAll(getWorksheet().getSeries()
+            chart.getData().setAll(getWorksheet().getSeries()
                     .stream()
-                    .filter(series -> series.getProcessor() != null && series.isSelected())
+                    .filter(series -> {
+                        if (series.getProcessor() == null) {
+                            logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
+                            return false;
+                        }
+                        if (!series.isSelected()) {
+                            logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
+                            return false;
+                        }
+                        return true;
+                    })
                     .map(this::makeXYChartSeries)
                     .collect(Collectors.toList()));
 
@@ -502,9 +511,9 @@ public abstract class WorksheetController implements Initializable {
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
-            XYChart.Series<ZonedDateTime, Double> s = new XYChart.Series<>();
-            s.getData().addAll(series.getProcessor().getData());
-            s.nodeProperty().addListener((node, oldNode, newNode) -> {
+            XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
+            newSeries.getData().addAll(series.getProcessor().getData());
+            newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
                     ObservableList<Node> children = ((Group) newNode).getChildren();
                     if (children != null) {
@@ -513,7 +522,7 @@ public abstract class WorksheetController implements Initializable {
                             Path fill = (Path) children.get(0);
                             stroke.setVisible(false);
                             if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
-                                // use default jFX theme colors for series
+                                // use default javaFX theme colors for series
                                 stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
                                     if (newValue != null) {
                                         series.setDisplayColor((Color) newValue);
@@ -529,7 +538,7 @@ public abstract class WorksheetController implements Initializable {
                     }
                 }
             });
-            return s;
+            return newSeries;
         }
     }
 
