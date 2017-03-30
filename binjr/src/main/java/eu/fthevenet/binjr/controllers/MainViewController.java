@@ -21,6 +21,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -97,7 +98,8 @@ public class MainViewController implements Initializable {
     private HBox sourceStatusBar;
     @FXML
     private Label sourceLabel;
-
+    @FXML
+    private Menu openRecentMenu;
 
     private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private WorksheetController selectedTabController;
@@ -122,7 +124,7 @@ public class MainViewController implements Initializable {
         assert addWorksheetLabel != null : "fx:id\"addWorksheetLabel\" was not injected!";
         assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
-
+        assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
 
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
@@ -148,7 +150,8 @@ public class MainViewController implements Initializable {
             while (c.next()) {
                 if (c.wasAdded()) {
                     workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                } else if (c.wasRemoved()) {
+                }
+                else if (c.wasRemoved()) {
                     workspace.removeWorksheets(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
                 }
             }
@@ -190,7 +193,8 @@ public class MainViewController implements Initializable {
                 chartTypeLabel.setText(worksheet.getChartType().toString());
                 unitLabel.setText(worksheet.getUnit());
                 baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            } else {
+            }
+            else {
                 worksheetStatusBar.setVisible(false);
             }
         });
@@ -200,7 +204,8 @@ public class MainViewController implements Initializable {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
                 sourceStatusBar.setVisible(true);
                 sourceLabel.setText(selectedDataAdapter.getSourceName());
-            } else {
+            }
+            else {
                 sourceStatusBar.setVisible(false);
             }
         });
@@ -394,6 +399,7 @@ public class MainViewController implements Initializable {
         }
     }
 
+
     private void loadWorkspace(File file) {
         try {
             if (confirmAndClearWorkspace()) {
@@ -426,8 +432,10 @@ public class MainViewController implements Initializable {
         } catch (IllegalAccessException | InstantiationException | DataAdapterException e) {
             Dialogs.displayException("Error while instantiating DataAdapter", e, root);
         } catch (IOException e) {
+            GlobalPreferences.getInstance().removeFromRecentFiles(file.getPath());
             Dialogs.displayException("Error reading file " + file.getPath(), e, root);
         } catch (JAXBException e) {
+            GlobalPreferences.getInstance().removeFromRecentFiles(file.getPath());
             Dialogs.displayException("Error while deserializing workspace", e, root);
         } catch (Exception e) {
             Dialogs.displayException("Error loading workspace", e, root);
@@ -439,7 +447,8 @@ public class MainViewController implements Initializable {
             if (workspace.hasPath()) {
                 workspace.save();
                 return true;
-            } else {
+            }
+            else {
                 return saveWorkspaceAs();
             }
         } catch (IOException e) {
@@ -570,7 +579,8 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        } else {
+        }
+        else {
             bindings.add(branch.getValue());
         }
     }
@@ -617,7 +627,8 @@ public class MainViewController implements Initializable {
                 if (selectedTabController != null && selectedTabController.getWorksheet() != null) {
                     toDateTime = selectedTabController.getWorksheet().getToDateTime();
                     fromDateTime = selectedTabController.getWorksheet().getFromDateTime();
-                } else {
+                }
+                else {
                     toDateTime = ZonedDateTime.now();
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                 }
@@ -638,6 +649,25 @@ public class MainViewController implements Initializable {
             }
         });
         return new ContextMenu(addToCurrent, addToNew);
+    }
+
+    public void populateOpenRecentMenu(Event event) {
+        Menu openRecentMenu = (Menu) event.getSource();
+        Collection<String> recentPath = GlobalPreferences.getInstance().getRecentFiles();
+        if (recentPath.size() > 0) {
+            openRecentMenu.getItems().setAll(recentPath.stream().map(s -> {
+                MenuItem m = new MenuItem(s);
+                m.setOnAction(e -> {
+                    loadWorkspace(new File(((MenuItem) e.getSource()).getText()));
+                });
+                return m;
+            }).collect(Collectors.toList()));
+        }
+        else {
+            MenuItem none = new MenuItem("none");
+            none.setDisable(true);
+            openRecentMenu.getItems().setAll(none);
+        }
     }
     //endregion
 }

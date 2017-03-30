@@ -1,9 +1,6 @@
 package eu.fthevenet.binjr.preferences;
 
-import com.sun.javafx.collections.ObservableSetWrapper;
 import javafx.beans.property.*;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,6 +11,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * Stores the global user preferences for the application.
@@ -36,6 +34,7 @@ public class GlobalPreferences {
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
     private static final String RECENT_FILES = "recentFiles";
+    public static final int MAX_RECENT_FILES = 20;
     private final Manifest manifest;
 
     private BooleanProperty loadLastWorkspaceOnStartup;
@@ -47,7 +46,7 @@ public class GlobalPreferences {
     private BooleanProperty useSourceColors;
     private StringProperty mostRecentSaveFolder;
     private Property<Path> mostRecentSavedWorkspace;
-    private ObservableSet<String> recentFiles;
+    private Deque<String> recentFiles;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -72,13 +71,8 @@ public class GlobalPreferences {
         loadLastWorkspaceOnStartup = new SimpleBooleanProperty(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
 
-        Set<String> lruRecentFiles = new LinkedHashSet<>();
-        String[] recentPath = prefs.get(RECENT_FILES, "").split("|");
-        lruRecentFiles.addAll(Arrays.asList(recentPath));
-        recentFiles = new ObservableSetWrapper<>(lruRecentFiles);
-        recentFiles.addListener((SetChangeListener<String>) change -> {
-            // prefs.put(RECENT_FILES, change.getMap().values().stream().collect(Collectors.joining("|")));
-        });
+        recentFiles = new ArrayDeque<>(Arrays.asList(prefs.get(RECENT_FILES, "").split("\\|")));
+
 
         this.manifest = getManifest();
     }
@@ -244,16 +238,25 @@ public class GlobalPreferences {
         return loadLastWorkspaceOnStartup;
     }
 
-    public boolean putToRecentFiles(String value) {
-        //Explicitly remove the element if present to enforce strict FIFO order
+    public void removeFromRecentFiles(String value) {
+        if (recentFiles.contains(value)) {
+            recentFiles.remove(value);
+            prefs.put(RECENT_FILES, recentFiles.stream().collect(Collectors.joining("|")));
+        }
+    }
+
+    public void putToRecentFiles(String value) {
         if (recentFiles.contains(value)) {
             recentFiles.remove(value);
         }
-        return recentFiles.add(value);
+        recentFiles.addFirst(value);
+        if (recentFiles.size() > MAX_RECENT_FILES) {
+            recentFiles.removeLast();
+        }
+        prefs.put(RECENT_FILES, recentFiles.stream().collect(Collectors.joining("|")));
     }
 
     public Collection<String> getRecentFiles() {
-        //TODO reverse order of set
         return recentFiles;
     }
 

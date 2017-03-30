@@ -34,7 +34,10 @@
                             </graphic>
                         </MenuItem>
 
-                        <Menu disable="true" mnemonicParsing="false" text="Open Recent"/>
+                        <Menu fx:id="openRecentMenu" mnemonicParsing="false" text="Open Recent" onShowing="#populateOpenRecentMenu">
+                            <MenuItem mnemonicParsing="false" text="none" disable="true"/>
+                        </Menu>
+
                         <!--<SeparatorMenuItem mnemonicParsing="false" />-->
                         <!--<MenuItem mnemonicParsing="false" text="Close" />-->
                         <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
