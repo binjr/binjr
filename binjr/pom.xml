@@ -107,8 +107,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>binjr preview v${project.version}</description>
-                    <releaseName>binjr preview v${project.version}</releaseName>
+                    <description>binjr beta v${project.version}</description>
+                    <releaseName>binjr beta v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
                     <!-- If your project has additional artifacts, such as ones produced by
                          the maven-assembly-plugin, you can define the following
