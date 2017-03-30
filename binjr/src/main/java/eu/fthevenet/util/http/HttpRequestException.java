@@ -3,6 +3,7 @@ package eu.fthevenet.util.http;
 import eu.fthevenet.util.io.IOUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 /**
  * Thrown when an error occurs while sending an HTTP request
@@ -31,12 +32,13 @@ public class HttpRequestException extends IOException {
         this.errorBody = safeReadBody(response);
     }
 
-    private static String safeReadBody(HttpResponse response){
-        if (response == null){
+    private static String safeReadBody(HttpResponse response) {
+        if (response == null) {
             return "";
         }
         try {
-            return IOUtils.readToString(response.getContent());
+            InputStream in = response.getContent();
+            return in != null ? IOUtils.readToString(response.getContent()) : "";
         } catch (IOException e) {
             // swallow exception
             return "";
