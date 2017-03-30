@@ -145,7 +145,6 @@ public class MainViewController implements Initializable {
             return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
         });
 
-
         worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -364,6 +363,18 @@ public class MainViewController implements Initializable {
 
     //region private members
 
+    private void expandBranch(TreeItem<TimeSeriesBinding<Double>> branch) {
+        if (branch == null) {
+            return;
+        }
+        branch.setExpanded(true);
+        if (branch.getChildren() != null) {
+            for (TreeItem<TimeSeriesBinding<Double>> item : branch.getChildren()) {
+                expandBranch(item);
+            }
+        }
+    }
+
     private boolean confirmAndClearWorkspace() {
         if (!workspace.isDirty()) {
             clearWorkspace();
@@ -399,13 +410,11 @@ public class MainViewController implements Initializable {
         }
     }
 
-
     private void loadWorkspace(File file) {
         try {
             if (confirmAndClearWorkspace()) {
                 Workspace wsFromfile = Workspace.from(file);
                 workspace.setPath(file.toPath());
-
                 for (Source source : wsFromfile.getSources()) {
                     DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
                     da.setParams(source.getAdapterParams());
@@ -418,9 +427,9 @@ public class MainViewController implements Initializable {
                         UUID id = s.getBinding().getAdapterId();
                         DataAdapter<?> da = sourcesAdapters.values()
                                 .stream()
-                                .filter(a -> a.getId().equals(id))
+                                .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                                 .findAny()
-                                .orElseThrow(() -> new DataAdapterException("Failed to find a valid adapter with id " + id.toString()));
+                                .orElseThrow(() -> new DataAdapterException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
                         s.getBinding().setAdapter(da);
                     }
                     loadWorksheet(worksheet);
@@ -648,7 +657,11 @@ public class MainViewController implements Initializable {
                 Dialogs.displayException("Error adding bindings to new worksheet", e);
             }
         });
-        return new ContextMenu(addToCurrent, addToNew);
+        ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
+        contextMenu.setOnShowing(event -> {
+            expandBranch(treeView.getSelectionModel().getSelectedItem());
+        });
+        return contextMenu;
     }
 
     public void populateOpenRecentMenu(Event event) {

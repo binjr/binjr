@@ -8,11 +8,11 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
-import eu.fthevenet.util.ui.dialogs.Dialogs;
 import eu.fthevenet.util.http.HttpRequestException;
 import eu.fthevenet.util.http.HttpResponse;
 import eu.fthevenet.util.http.MicroHttpClient;
 import eu.fthevenet.util.http.URLBuilder;
+import eu.fthevenet.util.ui.dialogs.Dialogs;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -24,7 +24,10 @@ import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.*;
-import java.net.*;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -96,7 +99,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         Gson gson = new Gson();
         JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
         Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>( bindingFactory.of(getSourceName(), "/", this));
+        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of(getSourceName(), "/", this));
         List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
         for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
             attachNode(tree, branch.id, m);
@@ -196,7 +199,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     if (newValue) {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
-                            newBranch.setValue( bindingFactory.of(newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
+                            newBranch.setValue(bindingFactory.of(newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                                 String graphType = graphdesc.seriesDescList.get(i).graphType;
                                 if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
@@ -253,7 +256,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .addParameter("id", id);
         try {
             HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build(), false);
-            if (response.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND){
+            if (response.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,
                 // so we're falling back to recovering the datastore name from the csv file provided by
                 // the download service.
@@ -267,13 +270,13 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 try {
                     Graphdesc g = JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
-                    logger.trace(()-> "Retrieved graphdesc for probe ["+id+"]: " +g.toString());
+                    logger.trace(() -> "Retrieved graphdesc for probe [" + id + "]: " + g.toString());
                     return g;
                 } catch (Exception e) {
                     throw new HttpRequestException(e.getMessage(), response, e);
                 }
             }
-            else{
+            else {
                 throw new HttpRequestException(response);
             }
 
