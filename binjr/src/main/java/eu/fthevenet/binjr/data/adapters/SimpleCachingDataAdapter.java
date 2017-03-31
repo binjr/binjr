@@ -29,6 +29,9 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
 
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
+    /**
+     * Initializes a new instance of the {@link SimpleCachingDataAdapter} class
+     */
     public SimpleCachingDataAdapter() {
         cache = new LRUMap<>(CACHE_SIZE);
     }
@@ -65,6 +68,15 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
         return new ByteArrayInputStream(cached.toByteArray());
     }
 
+    /**
+     * Gets raw data from the source as an output stream, for the time interval specified.
+     *
+     * @param path  the path of the data in the source
+     * @param begin the start of the time interval.
+     * @param end   the end of the time interval.
+     * @return the output stream in which to return data.
+     * @throws DataAdapterException if an error occurs while retrieving data from the source.
+     */
     public abstract InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
 
     @Override

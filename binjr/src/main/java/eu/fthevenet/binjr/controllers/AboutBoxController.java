@@ -1,15 +1,14 @@
 package eu.fthevenet.binjr.controllers;
 
 
-import eu.fthevenet.util.ui.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
+import eu.fthevenet.util.ui.dialogs.Dialogs;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
-import javafx.scene.control.Label;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
@@ -19,10 +18,12 @@ import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.*;
+import java.util.ResourceBundle;
 
 /**
  * The controller for the about dialog
@@ -85,7 +86,6 @@ public class AboutBoxController implements Initializable {
         assert licenseTextFlow != null : "fx:id\"licenseTextFlow\" was not injected!";
         assert acknowledgementTextFlow != null : "fx:id\"acknowledgementTextFlow\" was not injected!";
 
-
         try {
             BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_license.txt").openStream(), "utf-8"));
             Text binjrTxt = new Text("binjr\n");//
@@ -114,9 +114,6 @@ public class AboutBoxController implements Initializable {
                     }
                 });
         sysInfoListTable.getItems().addAll( GlobalPreferences.getInstance().getSysInfoProperties());
-
-
-
         versionLabel.setText("version " + GlobalPreferences.getInstance().getManifestVersion());
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
             Platform.runLater( () -> {

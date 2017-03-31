@@ -1,14 +1,14 @@
 package eu.fthevenet.util.ui.controls;
 
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ContentDisplay;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 
-
+/**
+ * A {@link TableCell} implementation that shows a {@link ColorPicker}
+ *
+ * @param <T> The type of the TableView generic type
+ * @author Frederic Thevenet
+ */
 public class ColorTableCell<T> extends TableCell<T, Color> {
     private final ColorPicker colorPicker;
 
@@ -24,7 +24,7 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
             tableView.edit(tableView.getSelectionModel().getSelectedIndex(), column);
         });
         colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
-            if(isEditing()) {
+            if (isEditing()) {
                 commitEdit(newValue);
             }
         });
@@ -36,9 +36,10 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
         super.updateItem(item, empty);
 
         setText(null);
-        if(empty) {
+        if (empty) {
             setGraphic(null);
-        } else {
+        }
+        else {
             colorPicker.setValue(item);
             setGraphic(this.colorPicker);
         }

@@ -9,13 +9,13 @@ import javafx.util.Callback;
 
 import java.text.DecimalFormat;
 
-///**
-// * A table cell factory aiming to format cells containing decimal numbers.
-// *
-// * @author Frederic Thevenet
-// * @param <S> The type of the TableView generic type
-// * @param <T> The type of the item contained within the Cell
-// */
+/**
+ * A table cell factory aiming to format cells containing decimal numbers.
+ *
+ * @param <S> The type of the TableView generic type
+ * @param <T> The type of the item contained within the Cell
+ * @author Frederic Thevenet
+ */
 public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn<S, T>, TableCell<S, T>> {
 
     private TextAlignment alignment;

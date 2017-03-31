@@ -37,7 +37,7 @@ public class Source implements Serializable, Dirtyable {
      * @param adapter the {@link DataAdapter} to create the {@link Source}  instance from
      * @return an instance of the {@link Source} class from the provided  {@link DataAdapter}
      */
-     //  @SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
         Source newSource = new Source();
         newSource.setName(adapter.getSourceName());
@@ -52,7 +52,6 @@ public class Source implements Serializable, Dirtyable {
      */
     public Source() {
         this.status = new ChangeWatcher<>(this);
-
     }
 
     /**
@@ -82,10 +81,6 @@ public class Source implements Serializable, Dirtyable {
         return adapterClass;
     }
 
-    private void setAdapterClass(Class adapterClass) {
-        this.adapterClass = adapterClass;
-    }
-
     /**
      * Returns a map of the parameters required to establish a connection to the data source
      *
@@ -95,12 +90,22 @@ public class Source implements Serializable, Dirtyable {
         return AdapterParams;
     }
 
-    private void setAdapterParams(Map<String, String> adapterParams) {
-        AdapterParams = adapterParams;
-    }
-
+    /**
+     * Gets the id of the {@link DataAdapter} attached to the source
+     *
+     * @return the id of the {@link DataAdapter} attached to the source
+     */
     public UUID getAdapterId() {
         return adapterId;
+    }
+
+    /**
+     * Sets the id of the {@link DataAdapter} attached to the source
+     *
+     * @param adapterId the id of the {@link DataAdapter} attached to the source
+     */
+    public void setAdapterId(UUID adapterId) {
+        this.adapterId = adapterId;
     }
 
     @Override
@@ -118,9 +123,12 @@ public class Source implements Serializable, Dirtyable {
         this.status.cleanUp();
     }
 
-    public void setAdapterId(UUID adapterId) {
-        this.adapterId = adapterId;
+
+    private void setAdapterClass(Class adapterClass) {
+        this.adapterClass = adapterClass;
     }
 
-
+    private void setAdapterParams(Map<String, String> adapterParams) {
+        AdapterParams = adapterParams;
+    }
 }

@@ -15,6 +15,7 @@ public enum JrdsTreeFilter {
     private String label;
     private String command;
 
+
     JrdsTreeFilter(String label, String command) {
         this.label = label;
         this.command = command;
@@ -25,8 +26,12 @@ public enum JrdsTreeFilter {
         return label;
     }
 
-    public String getCommand()
-    {
+    /**
+     * Gets the command keyword associated with the enum entry
+     *
+     * @return the command keyword associated with the enum entry
+     */
+    public String getCommand() {
         return command;
     }
 }

@@ -1,8 +1,5 @@
 package eu.fthevenet.binjr.data.adapters;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.time.ZoneId;
 import java.util.Map;
 
 /**
@@ -12,7 +9,7 @@ import java.util.Map;
 public interface DataAdapterFactory<T extends Number> {
     /**
      * Initializes a new instance of the {@link DataAdapter} class from the provided URL and timezone
-     * @param params a map of parameters required to estacblish a connection to the source
+     * @param params a map of parameters required to establish a connection to the source
      *
      * @return a new instance of the {@link DataAdapter} class from the provided url and timezone
      */

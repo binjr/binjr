@@ -177,7 +177,57 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 },
                 s -> ZonedDateTime.parse(s, formatter));
     }
+
+
     //endregion
+
+
+    /**
+     * Returns a representation of the JRDS graph descriptor fot he provided id
+     *
+     * @param id the id ot the graph
+     * @return a representation of the JRDS graph descriptor fot he provided id
+     * @throws DataAdapterException if an error occurs while retrieving the graphdesc
+     */
+    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
+        URLBuilder requestUrl = new URLBuilder()
+                .setProtocol(jrdsProtocol)
+                .setHost(jrdsHost)
+                .setPort(jrdsPort)
+                .setPath(jrdsPath + "/graphdesc")
+                .addParameter("id", id);
+        try {
+            HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build(), false);
+            if (response.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
+                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
+                // so we're falling back to recovering the datastore name from the csv file provided by
+                // the download service.
+                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
+                try {
+                    return getGraphDescriptorLegacy(id);
+                } catch (Exception e) {
+                    throw new HttpRequestException(e.getMessage(), response, e);
+                }
+            }
+            else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                try {
+                    Graphdesc g = JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
+                    logger.trace(() -> "Retrieved graphdesc for probe [" + id + "]: " + g.toString());
+                    return g;
+                } catch (Exception e) {
+                    throw new HttpRequestException(e.getMessage(), response, e);
+                }
+            }
+            else {
+                throw new HttpRequestException(response);
+            }
+
+        } catch (IOException e) {
+            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
+        } catch (URISyntaxException e) {
+            throw new DataAdapterException("Error building URI for request");
+        }
+    }
 
     private TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
         JsonTree.JsonItem n = nodes.get(id);
@@ -240,46 +290,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         try {
             HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build());
             return response.getResponseAsString();
-        } catch (IOException e) {
-            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
-        } catch (URISyntaxException e) {
-            throw new DataAdapterException("Error building URI for request");
-        }
-    }
-
-    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URLBuilder requestUrl = new URLBuilder()
-                .setProtocol(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/graphdesc")
-                .addParameter("id", id);
-        try {
-            HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build(), false);
-            if (response.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
-                // so we're falling back to recovering the datastore name from the csv file provided by
-                // the download service.
-                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
-                try {
-                    return getGraphDescriptorLegacy(id);
-                } catch (Exception e) {
-                    throw new HttpRequestException(e.getMessage(), response, e);
-                }
-            }
-            else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                try {
-                    Graphdesc g = JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
-                    logger.trace(() -> "Retrieved graphdesc for probe [" + id + "]: " + g.toString());
-                    return g;
-                } catch (Exception e) {
-                    throw new HttpRequestException(e.getMessage(), response, e);
-                }
-            }
-            else {
-                throw new HttpRequestException(response);
-            }
-
         } catch (IOException e) {
             throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {

@@ -4,7 +4,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import javax.xml.bind.*;
+import javax.xml.bind.JAXB;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.transform.Source;
@@ -53,12 +56,7 @@ public class XmlUtils {
     }
 
     private static <T> T deSerialize(Class<T> docClass, StreamSource source) throws JAXBException {
-//        String packageName = docClass.getPackage().getDisplayName();
-//        JAXBContext jc = JAXBContext.newInstance(packageName);
-//        Unmarshaller u = jc.createUnmarshaller();
-//        JAXBElement<T> doc = u.unmarshal(source, docClass);
        return JAXB.unmarshal( source, docClass);
-        //return doc.getValue();
     }
 
     /**

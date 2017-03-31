@@ -19,7 +19,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="Binding")
+@XmlRootElement(name = "Binding")
 public class TimeSeriesBinding<T extends Number> {
     private static final Logger logger = LogManager.getLogger(JrdsSeriesBindingFactory.class);
     private final UUID adapterId;
@@ -33,7 +33,7 @@ public class TimeSeriesBinding<T extends Number> {
     @XmlTransient
     private DataAdapter<T> adapter;
 
-    private TimeSeriesBinding(){
+    private TimeSeriesBinding() {
         this.label = "";
         this.path = "";
         this.color = null;
@@ -86,7 +86,7 @@ public class TimeSeriesBinding<T extends Number> {
     }
 
     public void setAdapter(DataAdapter adapter) {
-        this.adapter =  adapter;
+        this.adapter = adapter;
     }
 
     /**
@@ -134,6 +134,11 @@ public class TimeSeriesBinding<T extends Number> {
         return prefix;
     }
 
+    /**
+     * Gets the {@link DataAdapter}'s id
+     *
+     * @return the {@link DataAdapter}'s id
+     */
     public UUID getAdapterId() {
         return adapterId;
     }

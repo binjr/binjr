@@ -7,7 +7,9 @@ import eu.fthevenet.util.text.PrefixFormatter;
 import java.text.DecimalFormat;
 
 /**
- * Created by FTT2 on 17/03/2017.
+ * Suffix formatter tests
+ *
+ * @author Frederic Thevenet
  */
 public class SuffixFormatTests {
     public static void main(String[] args) {

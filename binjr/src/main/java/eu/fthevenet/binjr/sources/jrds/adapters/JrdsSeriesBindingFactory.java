@@ -17,16 +17,19 @@ public class JrdsSeriesBindingFactory {
     private static final Logger logger = LogManager.getLogger(JrdsSeriesBindingFactory.class);
     private static final UnitPrefixes DEFAULT_PREFIX = UnitPrefixes.BINARY;
 
+    /**
+     * Initializes a new instance of the {@link JrdsSeriesBindingFactory} class
+     */
     public JrdsSeriesBindingFactory() {
-
     }
 
     /**
-     * Initializes a new instance of the {@link JrdsSeriesBindingFactory} class.
+     * Creates a new instance of the {@link TimeSeriesBinding} class.
      *
      * @param label   the name of the data store.
      * @param path    the id for the graph/probe
      * @param adapter the {@link JrdsDataAdapter} for the binding.
+     * @return a JRDS series binding
      */
     public TimeSeriesBinding<Double> of(String label, String path, DataAdapter<Double> adapter) {
         return new TimeSeriesBinding<>(
@@ -39,6 +42,15 @@ public class JrdsSeriesBindingFactory {
                 adapter);
     }
 
+    /**
+     * Creates a new instance of the {@link TimeSeriesBinding} class with the following parameters
+     *
+     * @param legend    the legend for the timeseries
+     * @param graphdesc the graph description from JRDS
+     * @param path      the id of the JRDS graph
+     * @param adapter   the {@link JrdsDataAdapter} for the binding.
+     * @return a JRDS series binding
+     */
     public TimeSeriesBinding<Double> of(String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
         final String label;
         final UnitPrefixes prefix;
@@ -54,6 +66,14 @@ public class JrdsSeriesBindingFactory {
         return new TimeSeriesBinding<>(label, path, null, legend, prefix, graphType, unitName, adapter);
     }
 
+    /**
+     * Creates a new instance of the {@link TimeSeriesBinding} class with the following parameters
+     * @param graphdesc the graph description from JRDS
+     * @param idx the index of the series in the graphdesc
+     * @param path the id of the JRDS graph
+     * @param adapter the {@link JrdsDataAdapter} for the binding.
+     * @return a JRDS series binding
+     */
     public TimeSeriesBinding<Double> of(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         final String label;
         final Color color;

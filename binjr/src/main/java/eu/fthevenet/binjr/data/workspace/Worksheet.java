@@ -62,7 +62,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     private Property<ZonedDateTime> toDateTime;
     @IsDirtyable
     private DoubleProperty graphOpacity;
-
     private final ChangeWatcher<Worksheet> status;
 
     /**
@@ -129,8 +128,14 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         this.status = new ChangeWatcher<>(this);
     }
 
-    public void fillData(ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException{
-
+    /**
+     * Fills up the backend for all {@link TimeSeriesInfo} in the worksheet with data from the adapter on the specified time interval
+     *
+     * @param startTime the start of the time interval
+     * @param endTime   the end of the time interval
+     * @throws DataAdapterException if an error occurs while retrieving data from the adapter
+     */
+    public void fillData(ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
         // Define the reduction transform to apply
         //   TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
@@ -161,10 +166,20 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         }
     }
 
+    /**
+     * Adds a {@link TimeSeriesInfo} to the worksheet
+     *
+     * @param seriesInfo the {@link TimeSeriesInfo} to add
+     */
     public void addSeries(TimeSeriesInfo<T> seriesInfo) {
         series.add(seriesInfo);
     }
 
+    /**
+     * Adds a collection of  {@link TimeSeriesInfo} to the worksheet
+     *
+     * @param seriesInfo the collection {@link TimeSeriesInfo} to add
+     */
     public void addSeries(Collection<TimeSeriesInfo<T>> seriesInfo) {
         this.series.addAll(seriesInfo);
     }
@@ -219,7 +234,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
      * @return the time series of the {@link Worksheet}
      */
 
- //   @XmlTransient
+    //   @XmlTransient
     @XmlElementWrapper(name = "SeriesList")
     @XmlElements(@XmlElement(name = "Timeseries"))
     public ObservableList<TimeSeriesInfo<T>> getSeries() {
@@ -388,14 +403,29 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
         this.unitPrefixes.setValue(unitPrefixes);
     }
 
+    /**
+     * Gets the opacity factor to apply the the graph
+     *
+     * @return the opacity factor to apply the the graph
+     */
     public double getGraphOpacity() {
         return graphOpacity.get();
     }
 
+    /**
+     * The graphOpacity property
+     *
+     * @return the graphOpacity property
+     */
     public DoubleProperty graphOpacityProperty() {
         return graphOpacity;
     }
 
+    /**
+     * Sets the opacity factor to apply the the graph
+     *
+     * @param graphOpacity the opacity factor to apply the the graph
+     */
     public void setGraphOpacity(double graphOpacity) {
         this.graphOpacity.set(graphOpacity);
     }

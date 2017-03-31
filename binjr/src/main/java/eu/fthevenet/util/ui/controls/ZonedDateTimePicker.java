@@ -88,7 +88,7 @@ public class ZonedDateTimePicker extends DatePicker {
         });
     }
 
-    private DateTimeFormatter getFormatter(){
+    private DateTimeFormatter getFormatter() {
         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(getZoneId());
     }
 
@@ -121,14 +121,29 @@ public class ZonedDateTimePicker extends DatePicker {
         return dateTimeValue;
     }
 
+    /**
+     * Gets the {@link ZoneId} of the date picker
+     *
+     * @return the {@link ZoneId} of the date picker
+     */
     public ZoneId getZoneId() {
         return zoneId.getValue();
     }
 
+    /**
+     * The zoneId property
+     *
+     * @return the  zoneId property
+     */
     public Property<ZoneId> zoneIdProperty() {
         return zoneId;
     }
 
+    /**
+     * Sets  the {@link ZoneId} of the date picker
+     *
+     * @param zoneId the {@link ZoneId} of the date picker
+     */
     public void setZoneId(ZoneId zoneId) {
         this.zoneId.setValue(zoneId);
     }

@@ -9,9 +9,22 @@ import javafx.beans.property.BooleanProperty;
  * @author Frederic Thevenet
  */
 public interface Dirtyable {
+    /**
+     * Returns true if the {@link Dirtyable} instance needs to be persisted, false otherwise
+     *
+     * @return true if the {@link Dirtyable} instance needs to be persisted, false otherwise
+     */
     Boolean isDirty();
 
+    /**
+     * A {@link BooleanProperty} that observes the changes made to the {@link Dirtyable} instance
+     *
+     * @return a {@link BooleanProperty} that observes the changes made to the {@link Dirtyable} instance
+     */
     BooleanProperty dirtyProperty();
 
+    /**
+     * Clear the dirty status of the {@link Dirtyable} instance
+     */
     void cleanUp();
 }

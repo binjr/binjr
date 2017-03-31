@@ -1,11 +1,13 @@
 package eu.fthevenet.util.ui.controls;
 
 
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.TreeCell;
+import javafx.scene.control.TreeView;
 import javafx.util.Callback;
 
 /**
- * A fully fleshed out class that allows for context menus to be shown on right click.
+ * An implementation of {@link TreeCell} with a context menu attached
  */
 public class ContextMenuTreeViewCell<T> extends TreeCell<T> {
 

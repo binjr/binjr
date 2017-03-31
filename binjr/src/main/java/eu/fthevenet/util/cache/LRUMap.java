@@ -13,13 +13,24 @@ import java.util.Map;
 public class LRUMap<K, V> extends LinkedHashMap<K, V> {
     private int cacheSize;
 
-    public LRUMap(int cacheSize) {
+    /**
+     * Initializes a new instance of the {@link LRUMap} class with the specified capacity
+     *
+     * @param capacity the maximum capacity for the {@link LRUMap}
+     */
+    public LRUMap(int capacity) {
         super(16, 0.75f, true);
-        this.cacheSize = cacheSize;
+        this.cacheSize = capacity;
     }
 
-    public LRUMap(int cacheSize, Map<? extends K, ? extends V> values) {
-        this(cacheSize);
+    /**
+     * Initializes a new instance of the {@link LRUMap} class with the specified capacity and initial values
+     *
+     * @param capacity the maximum capacity for the {@link LRUMap}
+     * @param values   initial values to populate the {@link LRUMap}
+     */
+    public LRUMap(int capacity, Map<? extends K, ? extends V> values) {
+        this(capacity);
         putAll(values);
     }
 

@@ -16,7 +16,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class DataAdapter<T extends Number> implements  Serializable, AutoCloseable {
+public abstract class DataAdapter<T extends Number> implements Serializable, AutoCloseable {
 
     private UUID id = UUID.randomUUID();
 
@@ -65,7 +65,7 @@ public abstract class DataAdapter<T extends Number> implements  Serializable, Au
      *
      * @return the name of the source.
      */
-    public abstract  String getSourceName();
+    public abstract String getSourceName();
 
     /**
      * Returns a map of all parameters required to establish a connection to the underlying data source
@@ -81,11 +81,21 @@ public abstract class DataAdapter<T extends Number> implements  Serializable, Au
      */
     public abstract void setParams(Map<String, String> params);
 
+    /**
+     * Sets the unique id for the adapter
+     *
+     * @param id the unique id for the adapter
+     */
     public void setId(UUID id) {
         this.id = id;
     }
 
-    public UUID getId(){
+    /**
+     * Gets the unique id for the adapter
+     *
+     * @return the unique id for the adapter
+     */
+    public UUID getId() {
         return id;
     }
 }

@@ -2,6 +2,8 @@ package eu.fthevenet.binjr.data.workspace;
 
 /**
  * An enumeration of the support unit prefixes
+ *
+ * @author Frederic Thevenet
  */
 public enum UnitPrefixes {
     METRIC("Metric"),

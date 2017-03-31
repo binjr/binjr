@@ -8,9 +8,11 @@ import javafx.scene.control.TreeCell;
 import javafx.util.Callback;
 
 /**
- * A fully fleshed out class that allows for context menus to be shown on right click.
+ * An implementation of {@link TreeCell} with a context menu attached
+ *
+ * @author Frederic Thevenet
  */
-public class ContextMenuTableViewCell<T> extends TreeCell<T> {
+public class ContextMenuTableViewCell<S, T> extends TableCell<S, T> {
 
     public static <S, T> Callback<TableColumn<S, T>, TableCell<S, T>> forTableColumn(ContextMenu contextMenu) {
         return forTableColumn(contextMenu, null);

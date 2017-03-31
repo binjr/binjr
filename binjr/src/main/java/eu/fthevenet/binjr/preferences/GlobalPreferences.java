@@ -19,11 +19,9 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
+    private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
-
-
-    private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
     private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
@@ -36,7 +34,6 @@ public class GlobalPreferences {
     private static final String RECENT_FILES = "recentFiles";
     public static final int MAX_RECENT_FILES = 20;
     private final Manifest manifest;
-
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
     private IntegerProperty downSamplingThreshold;
@@ -192,50 +189,119 @@ public class GlobalPreferences {
         this.downSamplingThreshold.setValue(downSamplingThreshold);
     }
 
+    /**
+     * Returns true if the series graph should use the colors defined in the source, false otherwise
+     *
+     * @return true if the series graph should use the colors defined in the source, false otherwise
+     */
     public Boolean isUseSourceColors() {
         return useSourceColors.getValue();
     }
 
+    /**
+     * The useSourceColors property
+     *
+     * @return the useSourceColors property
+     */
     public BooleanProperty useSourceColorsProperty() {
         return useSourceColors;
     }
 
+    /**
+     * Set to true to have the series graph use the colors defined in the source, false otherwise
+     *
+     * @param useSourceColors Set to true to have the series graph use the colors defined in the source, false otherwise
+     */
     public void setUseSourceColors(Boolean useSourceColors) {
         this.useSourceColors.setValue(useSourceColors);
     }
 
+    /**
+     * Gets the path of the folder of the most recently saved item
+     *
+     * @return the path of the folder of the most recently saved item
+     */
     public String getMostRecentSaveFolder() {
         return mostRecentSaveFolder.getValue();
     }
 
+    /**
+     * The mostRecentSaveFolder property
+     *
+     * @return the mostRecentSaveFolder property
+     */
     public StringProperty mostRecentSaveFolderProperty() {
         return mostRecentSaveFolder;
     }
 
+    /**
+     * Sets the path of the folder of the most recently saved item
+     *
+     * @param mostRecentSaveFolder the path of the folder of the most recently saved item
+     */
     public void setMostRecentSaveFolder(String mostRecentSaveFolder) {
         this.mostRecentSaveFolder.setValue(mostRecentSaveFolder);
     }
 
+    /**
+     * Gets the path from the most recently saved workspace
+     *
+     * @return the path from the most recently saved workspace
+     */
     public Path getMostRecentSavedWorkspace() {
         return mostRecentSavedWorkspace.getValue();
     }
 
+    /**
+     * The mostRecentSavedWorkspace property
+     *
+     * @return the  mostRecentSavedWorkspace property
+     */
     public Property<Path> mostRecentSavedWorkspaceProperty() {
         return mostRecentSavedWorkspace;
     }
 
+    /**
+     * Sets  the path from the most recently saved workspace
+     *
+     * @param mostRecentSavedWorkspace the path from the most recently saved workspace
+     */
     public void setMostRecentSavedWorkspace(Path mostRecentSavedWorkspace) {
         this.mostRecentSavedWorkspace.setValue(mostRecentSavedWorkspace);
     }
 
+    /**
+     * Returns true if  the most recently saved workspace should be re-opned on startup, false otherwise
+     *
+     * @return true if  the most recently saved workspace should be re-opned on startup, false otherwise
+     */
     public boolean isLoadLastWorkspaceOnStartup() {
         return loadLastWorkspaceOnStartup.get();
     }
 
+    /**
+     * The loadLastWorkspaceOnStartup property
+     *
+     * @return the loadLastWorkspaceOnStartup property
+     */
     public BooleanProperty loadLastWorkspaceOnStartupProperty() {
         return loadLastWorkspaceOnStartup;
     }
 
+    /**
+     * Sets to true if  the most recently saved workspace should be re-opned on startup, false otherwise
+     *
+     * @param loadLastWorkspaceOnStartup true if  the most recently saved workspace should be re-opned on startup, false otherwise
+     */
+    public void setLoadLastWorkspaceOnStartup(boolean loadLastWorkspaceOnStartup) {
+        this.loadLastWorkspaceOnStartup.set(loadLastWorkspaceOnStartup);
+    }
+
+    /**
+     * Remove a path from the list of recently opened files
+     *
+     * @param value a path to remove from the list of recently opened files
+     */
     public void removeFromRecentFiles(String value) {
         if (recentFiles.contains(value)) {
             recentFiles.remove(value);
@@ -243,6 +309,11 @@ public class GlobalPreferences {
         }
     }
 
+    /**
+     * Puts a path into the list of recently opened files
+     *
+     * @param value a path to put into the list of recently opened files
+     */
     public void putToRecentFiles(String value) {
         if (recentFiles.contains(value)) {
             recentFiles.remove(value);
@@ -254,15 +325,20 @@ public class GlobalPreferences {
         prefs.put(RECENT_FILES, recentFiles.stream().collect(Collectors.joining("|")));
     }
 
+    /**
+     * Gets the list of recently opened files
+     *
+     * @return the list of recently opened files
+     */
     public Collection<String> getRecentFiles() {
         return recentFiles;
     }
 
-
-    public void setLoadLastWorkspaceOnStartup(boolean loadLastWorkspaceOnStartup) {
-        this.loadLastWorkspaceOnStartup.set(loadLastWorkspaceOnStartup);
-    }
-
+    /**
+     * Returns the version information held in the containing jar's manifest
+     *
+     * @return the version information held in the containing jar's manifest
+     */
     public String getManifestVersion() {
         if (manifest != null) {
             String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
@@ -276,6 +352,11 @@ public class GlobalPreferences {
         return "unknown";
     }
 
+    /**
+     * Returns a list of system properties
+     *
+     * @return a list of system properties
+     */
     public List<SysInfoProperty> getSysInfoProperties() {
         Runtime rt = Runtime.getRuntime();
         double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
@@ -284,12 +365,12 @@ public class GlobalPreferences {
         List<SysInfoProperty> sysInfo = new ArrayList<>();
         sysInfo.add(new SysInfoProperty("binjr version", getManifestVersion()));
         sysInfo.add(new SysInfoProperty("Java version", System.getProperty("java.version")));
-        sysInfo.add(new SysInfoProperty("Java vendor",System.getProperty("java.vendor") ));
-        sysInfo.add(new SysInfoProperty("Java VM name",  System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
+        sysInfo.add(new SysInfoProperty("Java vendor", System.getProperty("java.vendor")));
+        sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
         sysInfo.add(new SysInfoProperty("Java home", System.getProperty("java.home")));
         sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
-        sysInfo.add(new SysInfoProperty("JVM Heap Max size",  String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
+        sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
         sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
         return sysInfo;
     }

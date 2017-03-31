@@ -25,8 +25,5 @@ public interface DataParser<T extends Number> {
      * @throws IOException    in the event of an IO error
      * @throws ParseException in the event of an parsing error
      */
-  //  Map<TimeSeriesBinding<T>, TimeSeriesProcessor<T>> parse(InputStream in, TimeSeriesBinding<T>... seriesNames) throws IOException, ParseException;
-
     Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> parse(InputStream in, List<TimeSeriesInfo<T>> seriesNames) throws IOException, ParseException;
-    //Map<TimeSeriesBinding<T>, TimeSeriesProcessor<T>> parse(InputStream in) throws IOException, ParseException;
 }
