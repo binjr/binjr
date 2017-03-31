@@ -131,10 +131,26 @@ public class Dialogs {
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
     public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
-        if (Desktop.isDesktopSupported()) {
-            Desktop desktop = Desktop.getDesktop();
-            if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                desktop.browse(new URI(url));
+        if (!isUnix()) {
+            if (Desktop.isDesktopSupported()) {
+                Desktop desktop = Desktop.getDesktop();
+                if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                    desktop.browse(new URI(url));
+                }
+                else {
+                    logger.warn("Action Desktop.Action.BROWSE is not supported on this platform");
+                }
+            }
+            else {
+                logger.warn("java.awt.Desktop is not supported on this platform");
+            }
+        }
+        else {
+            // Using Desktop.browse on linux appears to hang the calling thread even though it reports as
+            // being supported, so we're forced to revert to some nasty platform specific trickery, so
+            // that at least it doesn't hang everything up.
+            if (Runtime.getRuntime().exec(new String[]{"which", "xdg-open"}).getInputStream().read() != -1) {
+                Runtime.getRuntime().exec(new String[]{"xdg-open", url});
             }
         }
     }
@@ -157,5 +173,10 @@ public class Dialogs {
         dlg.getDialogPane().setGraphic(img);
         dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
+    }
+
+    private static boolean isUnix() {
+        String osName = System.getProperty("os.name").toLowerCase();
+        return (osName.contains("nix") || osName.contains("nux") || osName.contains("aix"));
     }
 }
