@@ -24,7 +24,7 @@ You can either build it from source using Maven, or use the provided runnable JA
 
 *binjr* is very much **a work in progress** and the project is still in its early days.
 
-For the moment, its feature set is far from complete, and absolutely no guarantee is made that the features actually in there right now will actually works, or are not going to evolve significantly in the near future.
+For the moment, its feature set is far from complete, and absolutely no guarantee is made that the features currently in there right now will actually works, or are not going to evolve significantly in the near future.
 
 Still, because binjr only consumes data, in a read-only fashion, the only risk you’re taking in trying it out is that it might not work quite as you like (or work at all…).
 
