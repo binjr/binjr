@@ -52,7 +52,11 @@ public class GlobalPreferences {
     private GlobalPreferences() {
         prefs = Preferences.userRoot().node(BINJR_GLOBAL);
         mostRecentSaveFolder = new SimpleStringProperty(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
-        mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVE_FOLDER, newValue));
+        mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                prefs.put(MOST_RECENT_SAVE_FOLDER, newValue);
+            }
+        });
         downSamplingEnabled = new SimpleBooleanProperty(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold = new SimpleIntegerProperty(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
@@ -67,9 +71,21 @@ public class GlobalPreferences {
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
         loadLastWorkspaceOnStartup = new SimpleBooleanProperty(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
-        recentFiles = new ArrayDeque<>(Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
-
+        String recentFileString = prefs.get(RECENT_FILES, "");
+        recentFiles = new ArrayDeque<>(Arrays.stream(recentFileString.split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
         this.manifest = getManifest();
+        if (logger.isDebugEnabled()) {
+            logger.debug("Global preferences initial values");
+            logger.debug("  downSamplingThreshold = " + downSamplingThreshold.getValue());
+            logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
+            logger.debug("  downSamplingEnabled = " + downSamplingEnabled.getValue());
+            logger.debug("  mostRecentSaveFolder = " + mostRecentSaveFolder.getValue());
+            logger.debug("  useSourceColors = " + useSourceColors.getValue());
+            logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
+            logger.debug("  mostRecentSavedWorkspace = " + mostRecentSavedWorkspace.getValue());
+            logger.debug("  loadLastWorkspaceOnStartup = " + loadLastWorkspaceOnStartup.getValue());
+            logger.debug("  recentFileString = " + recentFileString);
+        }
     }
 
     /**
@@ -104,7 +120,7 @@ public class GlobalPreferences {
      *
      * @param chartAnimationEnabled true to enable the chart animation, false otherwise.
      */
-    public void setChartAnimationEnabled(Boolean chartAnimationEnabled) {
+    public void setChartAnimationEnabled(boolean chartAnimationEnabled) {
         this.chartAnimationEnabled.setValue(chartAnimationEnabled);
     }
 
@@ -131,7 +147,7 @@ public class GlobalPreferences {
      *
      * @param sampleSymbolsVisible the visibility of chart symbols
      */
-    public void setSampleSymbolsVisible(Boolean sampleSymbolsVisible) {
+    public void setSampleSymbolsVisible(boolean sampleSymbolsVisible) {
         this.sampleSymbolsVisible.setValue(sampleSymbolsVisible);
     }
 
@@ -158,7 +174,7 @@ public class GlobalPreferences {
      *
      * @param downSamplingEnabled true to enable series down-sampling, false otherwise.
      */
-    public void setDownSamplingEnabled(Boolean downSamplingEnabled) {
+    public void setDownSamplingEnabled(boolean downSamplingEnabled) {
         this.downSamplingEnabled.setValue(downSamplingEnabled);
     }
 
@@ -240,6 +256,9 @@ public class GlobalPreferences {
      * @param mostRecentSaveFolder the path of the folder of the most recently saved item
      */
     public void setMostRecentSaveFolder(String mostRecentSaveFolder) {
+        if (mostRecentSaveFolder == null) {
+            throw new IllegalArgumentException("mostRecentSaveFolder parameter cannot be null");
+        }
         this.mostRecentSaveFolder.setValue(mostRecentSaveFolder);
     }
 
@@ -267,6 +286,9 @@ public class GlobalPreferences {
      * @param mostRecentSavedWorkspace the path from the most recently saved workspace
      */
     public void setMostRecentSavedWorkspace(Path mostRecentSavedWorkspace) {
+        if (mostRecentSavedWorkspace == null) {
+            throw new IllegalArgumentException("mostRecentSavedWorkspace parameter cannot be null");
+        }
         this.mostRecentSavedWorkspace.setValue(mostRecentSavedWorkspace);
     }
 
@@ -303,6 +325,9 @@ public class GlobalPreferences {
      * @param value a path to remove from the list of recently opened files
      */
     public void removeFromRecentFiles(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("value parameter cannot be null");
+        }
         if (recentFiles.contains(value)) {
             recentFiles.remove(value);
             prefs.put(RECENT_FILES, recentFiles.stream().collect(Collectors.joining("|")));
@@ -315,6 +340,9 @@ public class GlobalPreferences {
      * @param value a path to put into the list of recently opened files
      */
     public void putToRecentFiles(String value) {
+        if (value == null) {
+            throw new IllegalArgumentException("value parameter cannot be null");
+        }
         if (recentFiles.contains(value)) {
             recentFiles.remove(value);
         }

@@ -455,7 +455,9 @@ public abstract class WorksheetController implements Initializable {
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
-                globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
+                if (selectedFile.getParent() != null) {
+                    globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
+                }
                 ImageIO.write(
                         SwingFXUtils.fromFXImage(snapImg, null),
                         "png",

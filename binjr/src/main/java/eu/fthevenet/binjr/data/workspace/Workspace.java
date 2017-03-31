@@ -1,7 +1,6 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import com.sun.javafx.collections.ObservableListWrapper;
-import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
@@ -23,7 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.UUID;
 
 /**
  * A class that represents and holds the current state of the application
@@ -53,7 +51,7 @@ public class Workspace implements Serializable, Dirtyable {
      * Initializes a new instance of the {@link Workspace} class
      */
     public Workspace() {
-        this(new ObservableListWrapper<>(new ArrayList<>()) , new ObservableListWrapper<>(new ArrayList<>()));
+        this(new ObservableListWrapper<>(new ArrayList<>()), new ObservableListWrapper<>(new ArrayList<>()));
     }
 
     /**
@@ -174,6 +172,9 @@ public class Workspace implements Serializable, Dirtyable {
      * @param path the {@link Path} for the serialized form of the {@link Workspace}
      */
     public void setPath(Path path) {
+        if (path == null) {
+            throw new IllegalArgumentException("Path cannot be null");
+        }
         this.path.setValue(path);
         if (hasPath()) {
             GlobalPreferences.getInstance().setMostRecentSavedWorkspace(path);
@@ -221,9 +222,12 @@ public class Workspace implements Serializable, Dirtyable {
      * @throws JAXBException if an error occurs while serializing the current state of the {@link Workspace}
      */
     public void save(File file) throws IOException, JAXBException {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
-       cleanUp();
+        cleanUp();
         GlobalPreferences.getInstance().setMostRecentSaveFolder(file.getParent());
     }
 
@@ -236,6 +240,9 @@ public class Workspace implements Serializable, Dirtyable {
      * @throws JAXBException if an error occurs while deserializing the file
      */
     public static Workspace from(File file) throws IOException, JAXBException {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
         Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
