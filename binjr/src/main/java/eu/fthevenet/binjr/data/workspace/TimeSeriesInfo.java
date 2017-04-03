@@ -25,8 +25,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private final BooleanProperty selected;
     @IsDirtyable
     private final Property<Color> displayColor;
-    @IsDirtyable
-    private final StringProperty path;
     private TimeSeriesProcessor<T> processor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
@@ -47,7 +45,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         return new TimeSeriesInfo<>(binding.getLegend(),
                 true,
                 binding.getColor(),
-                "",
                 null,
                 binding);
     }
@@ -59,7 +56,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this("",
                 true,
                 null,
-                "",
                 null,
                 null);
     }
@@ -77,7 +73,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
-                seriesInfo.getPath(),
                 null,
                 seriesInfo.getBinding());
     }
@@ -88,21 +83,18 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      * @param displayName  the name for the series
      * @param selected     true if the series is selected, false otherwise
      * @param displayColor the color of the series
-     * @param path         the path for the series data in the source
      * @param data         the data processor for the series
      * @param binding      the {@link TimeSeriesBinding}  for the series
      */
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           String path,
                            TimeSeriesProcessor<T> data,
                            TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
-        this.path = new SimpleStringProperty(path);
         status = new ChangeWatcher<>(this);
     }
 
@@ -185,33 +177,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      */
     public void setDisplayColor(Color displayColor) {
         this.displayColor.setValue(displayColor);
-    }
-
-    /**
-     * Gets the path in the tree for the series
-     *
-     * @return the path in the tree for the series
-     */
-    public String getPath() {
-        return path.get();
-    }
-
-    /**
-     * The path property
-     *
-     * @return the path property
-     */
-    public StringProperty pathProperty() {
-        return path;
-    }
-
-    /**
-     * Sets the path in the tree for the series
-     *
-     * @param path the path in the tree for the series
-     */
-    public void setPath(String path) {
-        this.path.set(path);
     }
 
     /**

@@ -88,7 +88,7 @@ public abstract class WorksheetController implements Initializable {
     @FXML
     private ZonedDateTimePicker endDate;
     @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> sourceColumn;
+    private TableColumn<TimeSeriesInfo<Double>, String> pathColumn;
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, Color> colorColumn;
     @FXML
@@ -186,7 +186,7 @@ public abstract class WorksheetController implements Initializable {
         assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
-        assert sourceColumn != null : "fx:id\"sourceColumn\" was not injected!";
+        assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
         assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
@@ -289,7 +289,7 @@ public abstract class WorksheetController implements Initializable {
         //region *** Series TableView ***
         seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
-        sourceColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getAdapter().getSourceName()));
+        pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
         avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(

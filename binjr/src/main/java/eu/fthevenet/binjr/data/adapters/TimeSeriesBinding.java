@@ -30,6 +30,7 @@ public class TimeSeriesBinding<T extends Number> {
     private final UnitPrefixes prefix;
     private final ChartType graphType;
     private final String unitName;
+    private final String treeHierarchy;
     @XmlTransient
     private DataAdapter<T> adapter;
 
@@ -42,10 +43,11 @@ public class TimeSeriesBinding<T extends Number> {
         this.graphType = ChartType.STACKED;
         this.unitName = "";
         this.adapter = null;
+        this.treeHierarchy = "";
         adapterId = null;
     }
 
-    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, DataAdapter<T> adapter) {
+    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
         this.label = label;
         this.path = path;
         this.color = color;
@@ -53,6 +55,7 @@ public class TimeSeriesBinding<T extends Number> {
         this.prefix = prefix;
         this.graphType = graphType;
         this.unitName = unitName;
+        this.treeHierarchy = treeHierarchy;
         this.adapter = adapter;
         this.adapterId = adapter.getId();
     }
@@ -148,4 +151,7 @@ public class TimeSeriesBinding<T extends Number> {
         return getLegend();
     }
 
+    public String getTreeHierarchy() {
+        return treeHierarchy;
+    }
 }

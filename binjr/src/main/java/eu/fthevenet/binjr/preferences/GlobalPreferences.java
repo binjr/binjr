@@ -238,7 +238,11 @@ public class GlobalPreferences {
      * @return the path of the folder of the most recently saved item
      */
     public String getMostRecentSaveFolder() {
-        return mostRecentSaveFolder.getValue();
+        String recentPath = mostRecentSaveFolder.getValue();
+        if (recentPath == null && recentPath.trim().length() == 0) {
+            recentPath = System.getProperty("user.home");
+        }
+        return recentPath;
     }
 
     /**
@@ -268,7 +272,7 @@ public class GlobalPreferences {
      * @return the path from the most recently saved workspace
      */
     public Path getMostRecentSavedWorkspace() {
-        return mostRecentSavedWorkspace.getValue();
+        return mostRecentSavedWorkspace.getValue() == null ? Paths.get("untitled") : mostRecentSavedWorkspace.getValue();
     }
 
     /**

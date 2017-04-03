@@ -237,6 +237,9 @@ public class MainViewController implements Initializable {
                 if (latestWorkspace.exists()) {
                     loadWorkspace(latestWorkspace);
                 }
+                else {
+                    logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
+                }
             }
         });
     }

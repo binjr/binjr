@@ -210,7 +210,7 @@
                     </tooltip>
                 </ToggleButton>
                 <MenuButton fx:id="opacityMenuButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefWidth="30.0" prefHeight="30.0">
+                            prefHeight="30.0" prefWidth="30.0">
                     <items>
                         <MenuItem fx:id="opacityMenuItem" mnemonicParsing="false" text="Action 1">
                             <graphic>
@@ -289,7 +289,7 @@
                                     <DecimalFormatTableCellFactory alignment="RIGHT"/>
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="sourceColumn" prefWidth="200.0" sortable="false" text="Source">
+                            <TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">
                             </TableColumn>
                         </columns>
                         <!--<contextMenu>-->

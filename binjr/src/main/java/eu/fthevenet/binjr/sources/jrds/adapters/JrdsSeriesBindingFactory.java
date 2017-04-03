@@ -26,12 +26,13 @@ public class JrdsSeriesBindingFactory {
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class.
      *
+     * @param parentName
      * @param label   the name of the data store.
      * @param path    the id for the graph/probe
      * @param adapter the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String label, String path, DataAdapter<Double> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, String label, String path, DataAdapter<Double> adapter) {
         return new TimeSeriesBinding<>(
                 label,
                 path,
@@ -39,19 +40,21 @@ public class JrdsSeriesBindingFactory {
                 label, DEFAULT_PREFIX,
                 ChartType.STACKED,
                 "-",
-                adapter);
+                parentName + "/" + label, adapter);
     }
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class with the following parameters
      *
+     *
+     * @param parentName
      * @param legend    the legend for the timeseries
      * @param graphdesc the graph description from JRDS
      * @param path      the id of the JRDS graph
      * @param adapter   the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
         final String label;
         final UnitPrefixes prefix;
         final ChartType graphType;
@@ -63,18 +66,20 @@ public class JrdsSeriesBindingFactory {
         graphType = ChartType.STACKED;
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
-        return new TimeSeriesBinding<>(label, path, null, legend, prefix, graphType, unitName, adapter);
+        return new TimeSeriesBinding<>(label, path, null, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
     }
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class with the following parameters
+     *
+     * @param parentName
      * @param graphdesc the graph description from JRDS
      * @param idx the index of the series in the graphdesc
      * @param path the id of the JRDS graph
      * @param adapter the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         final String label;
         final Color color;
         final String legend;
@@ -120,7 +125,7 @@ public class JrdsSeriesBindingFactory {
         }
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
-        return new TimeSeriesBinding<>(label, path, color, legend, prefix, graphType, unitName, adapter);
+        return new TimeSeriesBinding<>(label, path, color, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
     }
 
     private UnitPrefixes findPrefix(Graphdesc graphdesc) {
