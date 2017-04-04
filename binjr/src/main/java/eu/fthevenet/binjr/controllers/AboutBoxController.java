@@ -1,9 +1,9 @@
 package eu.fthevenet.binjr.controllers;
 
 
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
-import eu.fthevenet.util.ui.dialogs.Dialogs;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;

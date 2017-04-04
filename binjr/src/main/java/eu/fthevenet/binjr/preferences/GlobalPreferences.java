@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
  */
 public class GlobalPreferences {
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
+    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
@@ -405,6 +406,21 @@ public class GlobalPreferences {
         sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
         sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
         return sysInfo;
+    }
+
+    public OsFamilly getOsFamilly() {
+        if (OS_NAME.startsWith("windows")) {
+            return OsFamilly.WINDOWS;
+        }
+        if (OS_NAME.startsWith("mac")) {
+            return OsFamilly.OSX;
+        }
+        if (OS_NAME.startsWith("linux")) {
+            return OsFamilly.LINUX;
+        }
+        else {
+            return OsFamilly.UNKOWN;
+        }
     }
 
     private Manifest getManifest() {

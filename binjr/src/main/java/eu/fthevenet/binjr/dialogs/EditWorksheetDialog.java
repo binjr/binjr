@@ -1,9 +1,9 @@
-package eu.fthevenet.util.ui.dialogs;
+package eu.fthevenet.binjr.dialogs;
 
-import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
+import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;

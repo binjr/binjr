@@ -1,5 +1,6 @@
-package eu.fthevenet.util.ui.dialogs;
+package eu.fthevenet.binjr.dialogs;
 
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -26,7 +27,6 @@ import java.net.URISyntaxException;
  */
 public class Dialogs {
     private static final Logger logger = LogManager.getLogger(Dialogs.class);
-
     /**
      * Displays a modal dialog box to shows details about an {@link Exception}.
      *
@@ -131,27 +131,41 @@ public class Dialogs {
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
     public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
-        if (!isUnix()) {
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                    desktop.browse(new URI(url));
+        switch (GlobalPreferences.getInstance().getOsFamilly()) {
+            case WINDOWS:
+                if (Desktop.isDesktopSupported()) {
+                    Desktop desktop = Desktop.getDesktop();
+                    if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                        desktop.browse(new URI(url));
+                    }
+                    else {
+                        logger.warn("Action Desktop.Action.BROWSE is not supported on this platform");
+                    }
                 }
                 else {
-                    logger.warn("Action Desktop.Action.BROWSE is not supported on this platform");
+                    logger.warn("java.awt.Desktop is not supported on this platform");
                 }
-            }
-            else {
-                logger.warn("java.awt.Desktop is not supported on this platform");
-            }
-        }
-        else {
-            // Using Desktop.browse on linux appears to hang the calling thread even though it reports as
-            // being supported, so we're forced to revert to some nasty platform specific trickery, so
-            // that at least it doesn't hang everything up.
-            if (Runtime.getRuntime().exec(new String[]{"which", "xdg-open"}).getInputStream().read() != -1) {
-                Runtime.getRuntime().exec(new String[]{"xdg-open", url});
-            }
+                break;
+            case LINUX:
+                if (Runtime.getRuntime().exec(new String[]{"which", "xdg-open"}).getInputStream().read() != -1) {
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                }
+                else {
+                    logger.warn("Failed to find location for xdg-open");
+                }
+                break;
+            case OSX:
+                if (Runtime.getRuntime().exec(new String[]{"which", "open"}).getInputStream().read() != -1) {
+                    Runtime.getRuntime().exec(new String[]{"open", url});
+                }
+                else {
+                    logger.warn("Failed to find location for open");
+                }
+                break;
+
+            case UNKOWN:
+            default:
+                logger.error("Cannot launch a url in a browser on this system");
         }
     }
 
@@ -175,8 +189,4 @@ public class Dialogs {
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 
-    private static boolean isUnix() {
-        String osName = System.getProperty("os.name").toLowerCase();
-        return (osName.contains("nix") || osName.contains("nux") || osName.contains("aix"));
-    }
 }

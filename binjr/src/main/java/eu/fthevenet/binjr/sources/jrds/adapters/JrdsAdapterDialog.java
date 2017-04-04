@@ -1,8 +1,10 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.util.ui.dialogs.DataAdapterDialog;
-import javafx.geometry.*;
+import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
+import javafx.geometry.HPos;
+import javafx.geometry.Insets;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;

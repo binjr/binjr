@@ -1,4 +1,4 @@
-package eu.fthevenet.util.ui.dialogs;
+package eu.fthevenet.binjr.dialogs;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import javafx.application.Platform;
