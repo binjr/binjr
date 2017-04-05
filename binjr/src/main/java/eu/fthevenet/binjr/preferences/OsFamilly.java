@@ -6,7 +6,7 @@ package eu.fthevenet.binjr.preferences;
 public enum OsFamilly {
     LINUX,
     OSX,
-    UNKOWN,
+    UNSUPPORTED,
     WINDOWS
 }
 

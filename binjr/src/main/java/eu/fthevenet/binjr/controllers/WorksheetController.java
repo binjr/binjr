@@ -16,6 +16,7 @@ import eu.fthevenet.util.ui.controls.ColorTableCell;
 import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -58,7 +59,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public abstract class WorksheetController implements Initializable {
+public abstract class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     @FXML
@@ -120,12 +121,11 @@ public abstract class WorksheetController implements Initializable {
     private XYChartSelection<ZonedDateTime, Double> previousState;
     private History backwardHistory = new History();
     private History forwardHistory = new History();
-    private GlobalPreferences globalPrefs;
+    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private String name;
-    private AtomicInteger seriesOrder = new AtomicInteger(0);
     private final Worksheet<Double> worksheet;
-    private final DoubleProperty graphOpacity = new SimpleDoubleProperty(0.8);
     private final PrefixFormatter prefixFormatter;
+    private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
 
     //region [Properties]
     public String getName() {
@@ -248,12 +248,12 @@ public abstract class WorksheetController implements Initializable {
 
         //endregion
 
+
         //region *** Global preferences ***
-        globalPrefs = GlobalPreferences.getInstance();
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
-        globalPrefs.downSamplingEnabledProperty().addListener((observable, oldValue, newValue) -> refresh());
-        globalPrefs.downSamplingThresholdProperty().addListener((observable, oldValue, newValue) -> refresh());
-        globalPrefs.useSourceColorsProperty().addListener((observable, oldValue, newValue) -> refresh());
+        globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
+        globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
+        globalPrefs.useSourceColorsProperty().addListener(refreshOnPreferenceListener);
         //endregion
 
         //region *** Time pickers ***
@@ -368,6 +368,16 @@ public abstract class WorksheetController implements Initializable {
         //endregion
     }
     //endregion
+
+    @Override
+    public void close() {
+        if (refreshOnPreferenceListener != null) {
+            logger.debug(() -> "Unregistering listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
+            globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
+            globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
+            globalPrefs.useSourceColorsProperty().removeListener(refreshOnPreferenceListener);
+        }
+    }
 
     //region *** protected members ***
 

@@ -81,7 +81,7 @@ public class Workspace implements Serializable, Dirtyable {
      *
      * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
      */
-    public void removeWorksheets(Collection<Worksheet> worksheetsToRemove) {
+    public void removeWorksheets(Worksheet... worksheetsToRemove) {
         this.worksheets.removeAll(worksheetsToRemove);
     }
 

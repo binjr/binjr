@@ -419,7 +419,7 @@ public class GlobalPreferences {
             return OsFamilly.LINUX;
         }
         else {
-            return OsFamilly.UNKOWN;
+            return OsFamilly.UNSUPPORTED;
         }
     }
 

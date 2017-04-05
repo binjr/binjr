@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet<T extends Number> implements Serializable, Dirtyable {
+public class Worksheet<T extends Number> implements Serializable, Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
@@ -456,5 +456,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable {
     }
 
 
+    @Override
+    public void close() throws Exception {
+        series.clear();
+    }
 }
 

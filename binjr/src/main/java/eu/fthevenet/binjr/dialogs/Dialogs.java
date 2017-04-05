@@ -163,7 +163,7 @@ public class Dialogs {
                 }
                 break;
 
-            case UNKOWN:
+            case UNSUPPORTED:
             default:
                 logger.error("Cannot launch a url in a browser on this system");
         }

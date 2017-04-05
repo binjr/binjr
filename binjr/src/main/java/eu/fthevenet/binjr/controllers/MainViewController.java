@@ -106,8 +106,8 @@ public class MainViewController implements Initializable {
     private DataAdapter<Double> selectedDataAdapter;
     private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
     private final Workspace workspace;
-    private final Map<Tab, WorksheetController> seriesControllers = new WeakHashMap<>();
-    private final Map<Tab, DataAdapter> sourcesAdapters = new WeakHashMap<>();
+    private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
+    private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
 
     public MainViewController() {
         super();
@@ -150,16 +150,32 @@ public class MainViewController implements Initializable {
                 if (c.wasAdded()) {
                     workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
                 }
-                else if (c.wasRemoved()) {
-                    workspace.removeWorksheets(c.getRemoved().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach((t -> {
+                        WorksheetController ctlr = seriesControllers.get(t);
+                        if (ctlr != null) {
+                            workspace.removeWorksheets(ctlr.getWorksheet());
+                            seriesControllers.remove(t);
+                            ctlr.close();
+                        }
+                        else {
+                            logger.warn("Could not find a controller assigned to tab " + t.getText());
+                        }
+                    }));
                 }
             }
             logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            workspace.clearSources();
-            workspace.addSources(c.getList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    workspace.addSources(c.getAddedSubList().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+                }
+                if (c.wasRemoved()) {
+                    workspace.removeSources(c.getRemoved().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+                }
+            }
             logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
@@ -397,9 +413,9 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
-        this.worksheetTabPane.getTabs().clear();
-        this.sourcesTabPane.getTabs().clear();
-        this.workspace.clear();
+        worksheetTabPane.getTabs().clear();
+        sourcesTabPane.getTabs().clear();
+        workspace.clear();
     }
 
     private void openWorkspaceFromFile() {
