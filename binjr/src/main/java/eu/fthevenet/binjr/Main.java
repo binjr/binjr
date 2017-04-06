@@ -38,8 +38,12 @@ public class Main extends Application {
 
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             primaryStage.setScene(new Scene(root));
+
+            //  Application.setUserAgentStylesheet(STYLESHEET_CASPIAN);
+
         }
         try (Profiler p = Profiler.start("show", logger::trace)) {
+
             primaryStage.show();
         }
 

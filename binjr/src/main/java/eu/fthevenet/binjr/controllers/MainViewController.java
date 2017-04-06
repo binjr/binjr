@@ -168,15 +168,19 @@ public class MainViewController implements Initializable {
         });
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    workspace.addSources(c.getAddedSubList().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                }
-                if (c.wasRemoved()) {
-                    workspace.removeSources(c.getRemoved().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-                }
-            }
+            workspace.clearSources();
+            workspace.addSources(c.getList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
             logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+
+//            while (c.next()) {
+//                if (c.wasAdded()) {
+//                    workspace.addSources(c.getAddedSubList().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+//                }
+//                if (c.wasRemoved()) {
+//                    workspace.removeSources(c.getRemoved().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+//                }
+//            }
+//            logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
         sourcesTabPane.setNewTabFactory(() -> {
