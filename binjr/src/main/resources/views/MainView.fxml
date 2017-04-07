@@ -11,7 +11,13 @@
     <children>
         <MenuBar VBox.vgrow="NEVER">
             <menus>
-                <Menu fx:id="fileMenu" mnemonicParsing="false" text="File">
+                <Menu fx:id="fileMenu" mnemonicParsing="false">
+                    <graphic>
+                        <ImageView fitHeight="48" fitWidth="48">
+                            <Image url="@/images/new.png"/>
+
+                        </ImageView>
+                    </graphic>
                     <items>
                         <MenuItem  mnemonicParsing="false" text="New Workspace" onAction="#handleNewWorkspace">
                             <accelerator>
@@ -70,7 +76,12 @@
                         <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Exit"/>
                     </items>
                 </Menu>
-                <Menu fx:id="sourceMenu" mnemonicParsing="false" text="Sources">
+                <Menu fx:id="sourceMenu" mnemonicParsing="false">
+                    <graphic>
+                        <ImageView fitHeight="48" fitWidth="48">
+                            <Image url="@/images/plug_96.png"/>
+                        </ImageView>
+                    </graphic>
                     <items>
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
@@ -86,7 +97,12 @@
                         </Menu>
                     </items>
                 </Menu>
-                <Menu fx:id="worksheetsMenu" mnemonicParsing="false" text="Worksheets">
+                <Menu fx:id="worksheetsMenu" mnemonicParsing="false">
+                    <graphic>
+                        <ImageView fitHeight="48" fitWidth="48">
+                            <Image url="@/images/chart_96.png"/>
+                        </ImageView>
+                    </graphic>
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
@@ -132,7 +148,12 @@
                         </CheckMenuItem>
                     </items>
                 </Menu>
-                <Menu fx:id="helpMenu" mnemonicParsing="false" text="Help">
+                <Menu fx:id="helpMenu" mnemonicParsing="false">
+                    <graphic>
+                        <ImageView fitHeight="48" fitWidth="48">
+                            <Image url="@/images/help.png"/>
+                        </ImageView>
+                    </graphic>
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleHelpAction" text="Help" accelerator="F1">
                             <graphic>
