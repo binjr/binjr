@@ -1,0 +1,92 @@
+
+.command-bar {
+   -fx-background-color: #204C56;
+   -fx-pref-width: 40;
+}
+/*
+.command-bar:expanded {
+   -fx-pref-width: 200;
+   -fx-min-width: 200;
+   -fx-max-width: 200;
+}*/
+.button SVGPath,
+.menu-button SVGPath{
+    -fx-fill:  white;
+    -fx-scale-x: 3;
+    -fx-scale-y: 3;
+}
+
+ .command-bar:expanded .menu-button .arrow-button {
+    -fx-padding:10;
+    -fx-fill: white;
+     visibility: visible;
+ }
+ .command-bar:expanded .menu-button .arrow-button .arrow {
+    -fx-background-color:white;
+ }
+
+ .command-bar:expanded  .menu-button .label,
+ .command-bar:expanded .button {
+    -fx-margins:5;
+    -fx-content-display:left;
+ }
+
+  .command-bar .menu-button .label,
+  .command-bar .button {
+    -fx-alignment: center_left;
+    -fx-graphic-text-gap:20;
+    -fx-text-fill:white;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 11pt;
+
+    -fx-padding: 0 0 0 17;
+  }
+
+    .command-bar .menu-button .label,
+  .command-bar .button {
+    /*  -fx-content-display:graphic_only;*/
+  }
+
+ /*******************************************************************************
+  *                                                                             *
+  * Context Menu                                                                *
+  *                                                                             *
+  ******************************************************************************/
+
+ .context-menu {
+     -fx-background-color: #204C56;
+     -fx-text-fill:white;
+     -fx-border-color: white;
+     -fx-border-style: solid;
+       -fx-content-display:left;
+ }
+/*
+ .context-menu .separator {
+     -fx-padding: 0.58333275em 1.333332em 0.58333275em 1.333332em;
+ }
+*/
+
+ .menu-item {
+
+     -fx-padding: 10 10 10 17 ;
+ }
+
+
+
+ .menu-item:focused {
+   -fx-content-display:left;
+      -fx-background: -fx-accent;
+      -fx-background-color: #4BACC6;
+ }
+
+ .menu-item:pressed
+ {
+     -fx-background-color: #212121;
+     /*-fx-text-fill: white;*/
+ }
+/*
+ .menu-item:pressed .label {
+     -fx-text-fill: white;
+ }
+
+*/

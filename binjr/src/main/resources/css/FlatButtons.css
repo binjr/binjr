@@ -1,7 +1,7 @@
 .button,
 .toggle-button,
 .menu-button{
-    -fx-color-label-visible: false;
+   /* -fx-color-label-visible: false;*/
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
@@ -9,7 +9,9 @@
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center;
+
 }
+
 .button:hover,
 .toggle-button:hover,
 .menu-button:hover {
@@ -34,7 +36,6 @@
 .toggle-button:selected,
 .menu-button:selected {
     -fx-background-color: #C2C2C2;
-
     -fx-text-fill: white;
 }
 
@@ -47,6 +48,7 @@
 }
 
  .menu-button .arrow-button {
+    -fx-padding:-2;
      visibility: hidden;
  }
 
@@ -59,7 +61,7 @@
 
      -fx-prompt-text-fill: #9f9f9f;
 
-     -fx-highlight-fill: #008287; /* TODO: this probably is the "active" color" */
+     /* -fx-highlight-fill: #008287; TODO: this probably is the "active" color" */
      -fx-highlight-text-fill: white;
  }
 
@@ -70,7 +72,7 @@
  .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
    /*     -fx-background-color: #5c5c5c, transparent;*/
      -fx-border-color:#737373;
-     -fx-text-fill: black;
+   /*  -fx-text-fill: black;*/
  }
 
  /*******************************************************************************

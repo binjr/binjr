@@ -12,6 +12,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
+import eu.fthevenet.util.ui.controls.CommandBarPane;
 import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
 import eu.fthevenet.util.ui.controls.EditableTab;
 import eu.fthevenet.util.ui.controls.TabPaneNewButton;
@@ -59,11 +60,9 @@ import java.util.stream.StreamSupport;
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     @FXML
+    public CommandBarPane commandBar;
+    @FXML
     public VBox root;
-    @FXML
-    private Menu worksheetsMenu;
-    @FXML
-    private Menu helpMenu;
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -116,7 +115,6 @@ public class MainViewController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        assert worksheetsMenu != null : "fx:id\"editMenu\" was not injected!";
         assert root != null : "fx:id\"root\" was not injected!";
         assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
@@ -704,6 +702,10 @@ public class MainViewController implements Initializable {
             none.setDisable(true);
             openRecentMenu.getItems().setAll(none);
         }
+    }
+
+    public void handleExpandCommandBar(ActionEvent actionEvent) {
+        commandBar.setExpanded(!commandBar.isExpanded());
     }
     //endregion
 }
