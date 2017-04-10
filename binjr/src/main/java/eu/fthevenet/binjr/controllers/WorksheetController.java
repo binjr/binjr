@@ -244,7 +244,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-        opacityMenuButton.getStylesheets().add(getClass().getResource("/css/MenuButton.css").toExternalForm());
+       // opacityMenuButton.getStylesheets().add(getClass().getResource("/css/MenuButton.css").toExternalForm());
 
         //endregion
 

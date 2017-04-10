@@ -1,278 +1,349 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import eu.fthevenet.util.ui.controls.TabPaneNewButton?>
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
-<VBox fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+
+
+<?import javafx.scene.control.Tooltip?>
+<HBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
-        <MenuBar VBox.vgrow="NEVER">
-            <menus>
-                <Menu fx:id="fileMenu" mnemonicParsing="false">
-                    <graphic>
-                        <ImageView fitHeight="48" fitWidth="48">
-                            <Image url="@/images/new.png"/>
+        <AnchorPane>
+            <children>
+                <VBox AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                stylesheets="@../css/FlatButtons.css"/>
 
-                        </ImageView>
-                    </graphic>
-                    <items>
-                        <MenuItem  mnemonicParsing="false" text="New Workspace" onAction="#handleNewWorkspace">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
+                        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
+                                    prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css">
                             <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/new.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
-                        <MenuItem  mnemonicParsing="false" text="Open…" onAction="#handleOpenWorkspace">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/open.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
 
-                        <Menu fx:id="openRecentMenu" mnemonicParsing="false" text="Open Recent" onShowing="#populateOpenRecentMenu">
-                            <MenuItem mnemonicParsing="false" text="none" disable="true"/>
-                        </Menu>
+                                </ImageView>
+                            </graphic>
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/new.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/open.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
 
-                        <!--<SeparatorMenuItem mnemonicParsing="false" />-->
-                        <!--<MenuItem mnemonicParsing="false" text="Close" />-->
-                        <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" text="Save" onAction="#handleSaveWorkspace">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
+                                <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu"
+                                      text="Open Recent">
+                                    <MenuItem disable="true" mnemonicParsing="false" text="none"/>
+                                </Menu>
+
+                                <!--<SeparatorMenuItem mnemonicParsing="false" />-->
+                                <!--<MenuItem mnemonicParsing="false" text="Close" />-->
+                                <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace"
+                                          text="Save">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/save.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleSaveAsWorkspace" text="Save As…">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                </MenuItem>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction"
+                                          text="Preferences…">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/settings.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Exit"/>
+                            </items>
+                        </MenuButton>
+                        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"  mnemonicParsing="false" popupSide="RIGHT"
+                                    prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css">
                             <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/save.png"/>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/plug_96.png"/>
                                 </ImageView>
                             </graphic>
-                        </MenuItem>
-                        <MenuItem mnemonicParsing="false" text="Save As…" onAction="#handleSaveAsWorkspace">
-                            <accelerator>
-                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
-                        </MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handlePreferencesAction" text="Preferences…">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
+                            <items>
+                                <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
+                                    <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
+                                        <accelerator>
+                                            <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP"
+                                                                shortcut="DOWN"/>
+                                        </accelerator>
+                                    </MenuItem>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/plug.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </Menu>
+                            </items>
+                        </MenuButton>
+                        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"  mnemonicParsing="false" popupSide="RIGHT"
+                                    prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css">
                             <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/settings.png"/>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/chart_96.png"/>
                                 </ImageView>
                             </graphic>
-                        </MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleQuitAction" text="Exit"/>
-                    </items>
-                </Menu>
-                <Menu fx:id="sourceMenu" mnemonicParsing="false">
-                    <graphic>
-                        <ImageView fitHeight="48" fitWidth="48">
-                            <Image url="@/images/plug_96.png"/>
-                        </ImageView>
-                    </graphic>
-                    <items>
-                        <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                            <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
-                                <accelerator>
-                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                                </accelerator>
-                            </MenuItem>
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet"
+                                          text="New Worksheet">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP"
+                                                            shortcut="DOWN"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/graph.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false"
+                                          onAction="#handleRefreshAction" text="Refresh">
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/refresh.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false"
+                                          onAction="#handleTakeSnapshot" text="Take Snapshot">
+                                    <accelerator>
+                                        <KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP"
+                                                            shift="UP" shortcut="UP"/>
+                                    </accelerator>
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/snapshot.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false"
+                                               text="Lock Vertical Marker">
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/lockCrosshairVertical.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </CheckMenuItem>
+                                <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false"
+                                               text="Lock Horizontal Marker">
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/lockCrosshairHorizontal.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </CheckMenuItem>
+                            </items>
+                        </MenuButton>
+                        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0"
+                                    stylesheets="@../css/FlatButtons.css">
                             <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/plug.png"/>
-                                </ImageView>
-                            </graphic>
-                        </Menu>
-                    </items>
-                </Menu>
-                <Menu fx:id="worksheetsMenu" mnemonicParsing="false">
-                    <graphic>
-                        <ImageView fitHeight="48" fitWidth="48">
-                            <Image url="@/images/chart_96.png"/>
-                        </ImageView>
-                    </graphic>
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                            </accelerator>
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/graph.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
-                        <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/refresh.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot" text="Take Snapshot">
-                            <accelerator>
-                                <KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP" shift="UP" shortcut="UP"/>
-                            </accelerator>
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/snapshot.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
-                        <CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock Vertical Marker">
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/lockCrosshairVertical.png"/>
-                                </ImageView>
-                            </graphic>
-                        </CheckMenuItem>
-                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock Horizontal Marker">
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/lockCrosshairHorizontal.png"/>
-                                </ImageView>
-                            </graphic>
-                        </CheckMenuItem>
-                    </items>
-                </Menu>
-                <Menu fx:id="helpMenu" mnemonicParsing="false">
-                    <graphic>
-                        <ImageView fitHeight="48" fitWidth="48">
-                            <Image url="@/images/help.png"/>
-                        </ImageView>
-                    </graphic>
-                    <items>
-                        <MenuItem mnemonicParsing="false" onAction="#handleHelpAction" text="Help" accelerator="F1">
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/help.png"/>
                                 </ImageView>
                             </graphic>
-                        </MenuItem>
-                        <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction" text="Get Latest Release"/>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
-                            <graphic>
-                                <ImageView fitHeight="14" fitWidth="14">
-                                    <Image url="@/images/info.png"/>
-                                </ImageView>
-                            </graphic>
-                        </MenuItem>
-                    </items>
-                </Menu>
-            </menus>
-        </MenuBar>
-        <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
-            <items>
-                <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
-                    <children>
-                        <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <font>
-                                <Font name="System Bold Italic" size="24.0"/>
-                            </font>
-                        </Label>
-                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <tabs>
-                            </tabs>
-                        </TabPaneNewButton>
+                            <items>
+                                <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction"
+                                          text="Help">
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/help.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction"
+                                          text="Get Latest Release"/>
+                                <SeparatorMenuItem mnemonicParsing="false"/>
+                                <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
+                                    <graphic>
+                                        <ImageView fitHeight="14" fitWidth="14">
+                                            <Image url="@/images/info.png"/>
+                                        </ImageView>
+                                    </graphic>
+                                </MenuItem>
+                            </items>
+                        </MenuButton>
                     </children>
-                </AnchorPane>
-                <AnchorPane SplitPane.resizableWithParent="true">
-                    <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <font>
-                            <Font name="System Bold Italic" size="24.0"/>
-                        </font>
-                    </Label>
-                    <TabPaneNewButton side="TOP" fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <tabs>
-                        </tabs>
-                    </TabPaneNewButton>
-                </AnchorPane>
-            </items>
-        </SplitPane>
-        <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
-            <children>
-                <AnchorPane HBox.hgrow="ALWAYS">
+                </VBox>
+                <VBox layoutX="35.0" layoutY="388.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.rightAnchor="0.0">
                     <children>
-                        <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
-                            <children>
-                                <Label fx:id="sourceLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                </Label>
-                            </children>
-                        </HBox>
-                        <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
-                            <children>
-                                <Label fx:id="nameLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                </Label>
-                                <Label fx:id="zoneIdLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                </Label>
-                                <Label fx:id="chartTypeLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                </Label>
-                                <Label fx:id="unitLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                </Label>
-                                <Label fx:id="baseLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                    <padding>
-                                        <Insets left="4.0" right="4.0"/>
-                                    </padding>
-                                    <HBox.margin>
-                                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                    </HBox.margin>
-                                </Label>
-                            </children>
-                        </HBox>
+                        <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                stylesheets="@../css/FlatButtons.css" text="Button"/>
+                        <Button mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                stylesheets="@../css/FlatButtons.css" text="Button"/>
                     </children>
-                </AnchorPane>
+                </VBox>
             </children>
-            <padding>
-                <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
-            </padding>
-        </HBox>
+        </AnchorPane>
+        <VBox fx:id="root" prefHeight="800.0" prefWidth="1200.0">
+            <children>
+                <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT"
+                           prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
+                    <items>
+                        <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
+                            <children>
+                                <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source"
+                                       textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
+                                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                       AnchorPane.topAnchor="0.0">
+                                    <font>
+                                        <Font name="System Bold Italic" size="24.0"/>
+                                    </font>
+                                </Label>
+                                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0"
+                                                  prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB"
+                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                                  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <tabs>
+                                    </tabs>
+                                </TabPaneNewButton>
+                            </children>
+                        </AnchorPane>
+                        <AnchorPane SplitPane.resizableWithParent="true">
+                            <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet"
+                                   textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
+                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <font>
+                                    <Font name="System Bold Italic" size="24.0"/>
+                                </font>
+                            </Label>
+                            <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0"
+                                              prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB"
+                                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <tabs>
+                                </tabs>
+                            </TabPaneNewButton>
+                        </AnchorPane>
+                    </items>
+                </SplitPane>
+                <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
+                    <children>
+                        <AnchorPane HBox.hgrow="ALWAYS">
+                            <children>
+                                <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
+                                    <children>
+                                        <Label fx:id="sourceLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                                <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
+                                    <children>
+                                        <Label fx:id="nameLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                        </Label>
+                                        <Label fx:id="zoneIdLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <Label fx:id="chartTypeLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <Label fx:id="unitLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                        <Label fx:id="baseLabel"
+                                               style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
+                                            <padding>
+                                                <Insets left="4.0" right="4.0"/>
+                                            </padding>
+                                            <HBox.margin>
+                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                                            </HBox.margin>
+                                        </Label>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </AnchorPane>
+                    </children>
+                    <padding>
+                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
+                    </padding>
+                </HBox>
+            </children>
+        </VBox>
     </children>
-</VBox>
+</HBox>
