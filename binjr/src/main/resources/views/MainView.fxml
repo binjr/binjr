@@ -10,7 +10,8 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.Font?>
 <?import java.lang.*?>
-<HBox xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<HBox fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111"
+      xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <fx:define>
         <String fx:id="menuSvgPath"
                 fx:value="m 99.691219,63.410712 c 0,-0.137804 -0.11418,-0.251984 -0.251984,-0.251984 h -5.54365 c -0.137804,0 -0.251985,0.11418 -0.251985,0.251984 v 0.503968 c 0,0.137804 0.114181,0.251984 0.251985,0.251984 h 5.54365 c 0.137804,0 0.251984,-0.11418 0.251984,-0.251984 z m 0,-2.015873 c 0,-0.137804 -0.11418,-0.251984 -0.251984,-0.251984 h -5.54365 c -0.137804,0 -0.251985,0.11418 -0.251985,0.251984 v 0.503968 c 0,0.137804 0.114181,0.251984 0.251985,0.251984 h 5.54365 c 0.137804,0 0.251984,-0.11418 0.251984,-0.251984 z m 0,-2.015873 c 0,-0.137804 -0.11418,-0.251984 -0.251984,-0.251984 h -5.54365 c -0.137804,0 -0.251985,0.11418 -0.251985,0.251984 v 0.503968 c 0,0.137804 0.114181,0.251984 0.251985,0.251984 h 5.54365 c 0.137804,0 0.251984,-0.11418 0.251984,-0.251984 z"/>
@@ -29,18 +30,22 @@
     </fx:define>
 
     <children>
-        <CommandBarPane fx:id="commandBar" prefWidth="40.0" styleClass="command-bar" stylesheets="@../css/CommandBar.css">
+        <CommandBarPane fx:id="commandBar" prefWidth="40.0" styleClass="command-bar"
+                        stylesheets="@../css/CommandBar.css">
             <children>
-                <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
-                        stylesheets="@../css/FlatButtons.css"
-                        AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" onAction="#handleExpandCommandBar">
+                <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                        AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                        onAction="#handleExpandCommandBar">
                     <graphic>
                         <SVGPath content="$menuSvgPath"></SVGPath>
                     </graphic>
                 </Button>
 
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            popupSide="RIGHT" prefHeight="40.0" prefWidth="-1" stylesheets="@../css/FlatButtons.css" text="Workspaces" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0" prefWidth="-1"
+                            text="Workspaces" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="45.0">
                     <graphic>
                         <SVGPath content="$fileSvgPath"/>
@@ -48,7 +53,8 @@
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
                             </accelerator>
                             <graphic>
                                 <SVGPath content="$fileSvgPath"/>
@@ -56,7 +62,8 @@
                         </MenuItem>
                         <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
                             </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
@@ -65,12 +72,15 @@
                             </graphic>
                         </MenuItem>
 
-                        <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu" text="Open Recent">
+                        <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu"
+                              text="Open Recent">
                             <MenuItem disable="true" mnemonicParsing="false" text="none"/>
                         </Menu>
-                        <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace" text="Save">
+                        <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace"
+                                  text="Save">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
                             </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
@@ -80,13 +90,16 @@
                         </MenuItem>
                         <MenuItem mnemonicParsing="false" onAction="#handleSaveAsWorkspace" text="Save As…">
                             <accelerator>
-                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
                             </accelerator>
                         </MenuItem>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            popupSide="RIGHT" prefHeight="40.0" prefWidth="40" stylesheets="@../css/FlatButtons.css" text="Sources" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0" prefWidth="40"
+                            text="Sources" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="90.0">
                     <graphic>
                         <SVGPath content="$sourceSvgPath"/>
@@ -95,7 +108,8 @@
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
                                 <accelerator>
-                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP"
+                                                        shortcut="DOWN"/>
                                 </accelerator>
                             </MenuItem>
                             <graphic>
@@ -104,8 +118,10 @@
                         </Menu>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
+                            prefHeight="40.0" prefWidth="40.0"  text="Worksheets"
+                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="140.0">
                     <graphic>
                         <SVGPath content="$chartSvgPath"/>
@@ -113,13 +129,15 @@
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
                             </accelerator>
                             <graphic>
                                 <SVGPath content="$chartSvgPath"/>
                             </graphic>
                         </MenuItem>
-                        <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
+                        <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false"
+                                  onAction="#handleRefreshAction" text="Refresh">
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/refresh.png"/>
@@ -127,9 +145,11 @@
                             </graphic>
                         </MenuItem>
                         <SeparatorMenuItem mnemonicParsing="false"/>
-                        <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot" text="Take Snapshot">
+                        <MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot"
+                                  text="Take Snapshot">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP" shift="UP" shortcut="UP"/>
+                                <KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP" shift="UP"
+                                                    shortcut="UP"/>
                             </accelerator>
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
@@ -144,7 +164,8 @@
                                 </ImageView>
                             </graphic>
                         </CheckMenuItem>
-                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false" text="Lock Horizontal Marker">
+                        <CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false"
+                                       text="Lock Horizontal Marker">
                             <graphic>
                                 <ImageView fitHeight="14" fitWidth="14">
                                     <Image url="@/images/lockCrosshairHorizontal.png"/>
@@ -153,8 +174,10 @@
                         </CheckMenuItem>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            popupSide="RIGHT" prefHeight="40.0" stylesheets="@../css/FlatButtons.css" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="185.0">
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0"  text="Help"
+                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="185.0">
                     <graphic>
                         <SVGPath content="$helpSvgPath"/>
                     </graphic>
@@ -166,7 +189,8 @@
                                 </ImageView>
                             </graphic>
                         </MenuItem>
-                        <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction" text="Get Latest Release"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction"
+                                  text="Get Latest Release"/>
                         <SeparatorMenuItem mnemonicParsing="false"/>
                         <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
                             <graphic>
@@ -177,14 +201,16 @@
                         </MenuItem>
                     </items>
                 </MenuButton>
-                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" stylesheets="@../css/FlatButtons.css" text="Settings"
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction"
+                        prefHeight="40.0"  text="Settings"
                         AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                     <graphic>
                         <SVGPath
                                 content="$settingSvgPath"/>
                     </graphic>
                 </Button>
-                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" stylesheets="@../css/FlatButtons.css" text="Exit"
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction"
+                        prefHeight="40.0"  text="Exit"
                         AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                     <graphic>
                         <SVGPath content="$quitSvgPath"/>
@@ -195,108 +221,44 @@
                 <Insets/>
             </HBox.margin>
         </CommandBarPane>
-        <VBox fx:id="root" prefHeight="800.0" prefWidth="1200.0">
-            <children>
-                <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
-                    <items>
-                        <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
-                            <children>
-                                <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
-                                       AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                    <font>
-                                        <Font name="System Bold Italic" size="24.0"/>
-                                    </font>
-                                </Label>
-                                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB"
-                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                    <tabs>
-                                    </tabs>
-                                </TabPaneNewButton>
-                            </children>
-                        </AnchorPane>
-                        <AnchorPane SplitPane.resizableWithParent="true">
-                            <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet" textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
-                                   AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <font>
-                                    <Font name="System Bold Italic" size="24.0"/>
-                                </font>
-                            </Label>
-                            <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB"
-                                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                <tabs>
-                                </tabs>
-                            </TabPaneNewButton>
-                        </AnchorPane>
-                    </items>
-                </SplitPane>
-                <HBox id="HBox" alignment="CENTER_LEFT" prefWidth="900.0" spacing="5.0" VBox.vgrow="NEVER">
+        <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
+                   prefWidth="-1.0" HBox.hgrow="ALWAYS">
+            <items>
+                <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
-                        <AnchorPane HBox.hgrow="ALWAYS">
-                            <children>
-                                <HBox fx:id="sourceStatusBar" visible="false" AnchorPane.leftAnchor="0.0">
-                                    <children>
-                                        <Label fx:id="sourceLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                        </Label>
-                                    </children>
-                                </HBox>
-                                <HBox fx:id="worksheetStatusBar" visible="false" AnchorPane.rightAnchor="0.0">
-                                    <children>
-                                        <Label fx:id="nameLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                        </Label>
-                                        <Label fx:id="zoneIdLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                        </Label>
-                                        <Label fx:id="chartTypeLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                        </Label>
-                                        <Label fx:id="unitLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                        </Label>
-                                        <Label fx:id="baseLabel" style="-fx-border-color: gray; -fx-background-color: transparent; -fx-border-radius: 2;">
-                                            <padding>
-                                                <Insets left="4.0" right="4.0"/>
-                                            </padding>
-                                            <HBox.margin>
-                                                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
-                                            </HBox.margin>
-                                        </Label>
-                                    </children>
-                                </HBox>
-                            </children>
-                        </AnchorPane>
+                        <Label fx:id="addSourceLabel" alignment="CENTER" text="Click to add a new source"
+                               textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
+                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font name="System Bold Italic" size="24.0"/>
+                            </font>
+                        </Label>
+                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0"
+                                          prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB"
+                                          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <tabs>
+                            </tabs>
+                        </TabPaneNewButton>
                     </children>
-                    <padding>
-                        <Insets bottom="3.0" left="3.0" right="3.0" top="3.0"/>
-                    </padding>
-                </HBox>
-            </children>
-        </VBox>
+                </AnchorPane>
+                <AnchorPane SplitPane.resizableWithParent="true">
+                    <Label fx:id="addWorksheetLabel" alignment="CENTER" text="Click to add a new worksheet"
+                           textFill="#c3c3c3" wrapText="true" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <font>
+                            <Font name="System Bold Italic" size="24.0"/>
+                        </font>
+                    </Label>
+                    <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0"
+                                      prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB"
+                                      AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                      AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <tabs>
+                        </tabs>
+                    </TabPaneNewButton>
+                </AnchorPane>
+            </items>
+        </SplitPane>
     </children>
 </HBox>

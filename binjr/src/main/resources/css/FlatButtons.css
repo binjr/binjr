@@ -15,7 +15,7 @@
 .button:hover,
 .toggle-button:hover,
 .menu-button:hover {
-    -fx-background-color: #DADADA;
+    -fx-background-color:#DADADA;
 }
 
 .button:pressed,

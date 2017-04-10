@@ -1,14 +1,72 @@
 
 .command-bar {
    -fx-background-color: #204C56;
-   -fx-pref-width: 40;
+   -fx-pref-width: 48;
+   -fx-min-width: 48;
 }
-/*
+
 .command-bar:expanded {
-   -fx-pref-width: 200;
-   -fx-min-width: 200;
-   -fx-max-width: 200;
-}*/
+  -fx-min-width: 200;
+ /*  -fx-pref-width: 200;
+   -fx-max-width: 200;*/
+}
+
+.button,
+.toggle-button,
+.menu-button{
+   /* -fx-color-label-visible: false;*/
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: #737373;
+    -fx-border-width:0;
+    -fx-border-radius:0;
+    -fx-alignment: center;
+
+}
+
+.button:hover,
+.toggle-button:hover,
+.menu-button:hover {
+    -fx-background-color:#4BACC6;
+}
+
+.button:pressed,
+.button:default:hover:pressed,
+.menu-button:pressed,
+.menu-button:default:hover:pressed {
+  -fx-background-color:#C2C2C2 ;
+  -fx-text-fill: white;
+}
+
+.toggle-button:pressed,
+.toggle-button:default:hover:pressed,
+ .toggle-button:selected:hover:pressed {
+  -fx-background-color:#969696 ;
+  -fx-text-fill: white;
+}
+
+.toggle-button:selected,
+.menu-button:selected {
+    -fx-background-color: #C2C2C2;
+    -fx-text-fill: white;
+}
+
+.toggle-button:selected:hover,
+.menu-button:selected:hover {
+    -fx-background-color: #C2C2C2;
+    -fx-border-color:#737373;
+    -fx-border-width:1;
+    -fx-text-fill: white;
+}
+
+ .menu-button .arrow-button {
+    -fx-padding:-2;
+     visibility: hidden;
+ }
+
+
+
 .button SVGPath,
 .menu-button SVGPath{
     -fx-fill:  white;
@@ -39,7 +97,7 @@
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
 
-    -fx-padding: 0 0 0 17;
+    -fx-padding: 0 0 0 21;
   }
 
     .command-bar .menu-button .label,

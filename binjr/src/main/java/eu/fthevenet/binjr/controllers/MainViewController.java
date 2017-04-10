@@ -62,7 +62,7 @@ public class MainViewController implements Initializable {
     @FXML
     public CommandBarPane commandBar;
     @FXML
-    public VBox root;
+    public HBox root;
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -81,22 +81,22 @@ public class MainViewController implements Initializable {
     private Label addSourceLabel;
     @FXML
     private Label addWorksheetLabel;
-    @FXML
-    private HBox worksheetStatusBar;
-    @FXML
-    private Label nameLabel;
-    @FXML
-    private Label zoneIdLabel;
-    @FXML
-    private Label chartTypeLabel;
-    @FXML
-    private Label unitLabel;
-    @FXML
-    private Label baseLabel;
-    @FXML
-    private HBox sourceStatusBar;
-    @FXML
-    private Label sourceLabel;
+//    @FXML
+//    private HBox worksheetStatusBar;
+//    @FXML
+//    private Label nameLabel;
+//    @FXML
+//    private Label zoneIdLabel;
+//    @FXML
+//    private Label chartTypeLabel;
+//    @FXML
+//    private Label unitLabel;
+//    @FXML
+//    private Label baseLabel;
+//    @FXML
+//    private HBox sourceStatusBar;
+//    @FXML
+//    private Label sourceLabel;
     @FXML
     private Menu openRecentMenu;
 
@@ -204,26 +204,12 @@ public class MainViewController implements Initializable {
             if (newValue != null) {
                 this.selectedTabController = seriesControllers.get(newValue);
                 Worksheet<Double> worksheet = selectedTabController.getWorksheet();
-                worksheetStatusBar.setVisible(true);
-                nameLabel.textProperty().bind(worksheet.nameProperty());
-                zoneIdLabel.setText(worksheet.getTimeZone().toString());
-                chartTypeLabel.setText(worksheet.getChartType().toString());
-                unitLabel.setText(worksheet.getUnit());
-                baseLabel.setText(worksheet.getUnitPrefixes().toString());
-            }
-            else {
-                worksheetStatusBar.setVisible(false);
             }
         });
 
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 selectedDataAdapter = (DataAdapter<Double>) newValue.getUserData();
-                sourceStatusBar.setVisible(true);
-                sourceLabel.setText(selectedDataAdapter.getSourceName());
-            }
-            else {
-                sourceStatusBar.setVisible(false);
             }
         });
 
