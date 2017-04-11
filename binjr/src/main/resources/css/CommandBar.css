@@ -1,6 +1,6 @@
 
 .command-bar {
-   -fx-background-color: #204C56;
+   -fx-background-color: #204056;
    -fx-pref-width: 48;
    -fx-min-width: 48;
 }
@@ -112,7 +112,7 @@
   ******************************************************************************/
 
  .context-menu {
-     -fx-background-color: #204C56;
+     -fx-background-color: #204056;
      -fx-text-fill:white;
      -fx-border-color: white;
      -fx-border-style: solid;
