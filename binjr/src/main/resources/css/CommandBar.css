@@ -73,6 +73,11 @@
     -fx-scale-y: 3;
 }
 
+.command-bar-menu-button {
+    -fx-scale-y: 4;
+    -fx-smooth: false;
+}
+
  .command-bar:expanded .menu-button .arrow-button {
     -fx-padding:10;
     -fx-fill: white;

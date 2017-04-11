@@ -57,7 +57,7 @@
                         AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                         onAction="#handleExpandCommandBar">
                     <graphic>
-                        <SVGPath content="$menuSvgPath" smooth="false"></SVGPath>
+                        <SVGPath content="$menuSvgPath" smooth="false" styleClass="command-bar-menu-button"></SVGPath>
                     </graphic>
                 </Button>
 

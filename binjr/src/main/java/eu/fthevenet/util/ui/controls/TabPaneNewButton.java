@@ -46,7 +46,7 @@ public class TabPaneNewButton extends TabPane {
             return;
         }
         Button newTabButton  = (Button)tabHeaderBg.lookup("#newTabButton");
-        newTabButton.getStyleClass().add("new-tab-button");
+//        newTabButton.getStyleClass().add("new-tab-button");
         // Remove the button if it was already present
         if (newTabButton != null){
             tabHeaderBg.getChildren().remove(newTabButton);
