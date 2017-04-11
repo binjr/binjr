@@ -1,6 +1,6 @@
 
 .command-bar {
-   -fx-background-color: #204056;
+   -fx-background-color: #204656;
    -fx-pref-width: 48;
    -fx-min-width: 48;
 }
@@ -14,7 +14,6 @@
 .button,
 .toggle-button,
 .menu-button{
-   /* -fx-color-label-visible: false;*/
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
@@ -28,14 +27,14 @@
 .button:hover,
 .toggle-button:hover,
 .menu-button:hover {
-    -fx-background-color:#4BACC6;
+    -fx-background-color:#336F87;
 }
 
 .button:pressed,
 .button:default:hover:pressed,
 .menu-button:pressed,
 .menu-button:default:hover:pressed {
-  -fx-background-color:#C2C2C2 ;
+  -fx-background-color:#4BACC6; ;
   -fx-text-fill: white;
 }
 
@@ -48,13 +47,13 @@
 
 .toggle-button:selected,
 .menu-button:selected {
-    -fx-background-color: #C2C2C2;
+    -fx-background-color: #336F87;
     -fx-text-fill: white;
 }
 
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
-    -fx-background-color: #C2C2C2;
+    -fx-background-color: #336F87;
     -fx-border-color:#737373;
     -fx-border-width:1;
     -fx-text-fill: white;
@@ -112,7 +111,7 @@
   ******************************************************************************/
 
  .context-menu {
-     -fx-background-color: #204056;
+     -fx-background-color: #204656;
      -fx-text-fill:white;
      -fx-border-color: white;
      -fx-border-style: solid;
@@ -134,12 +133,12 @@
  .menu-item:focused {
    -fx-content-display:left;
       -fx-background: -fx-accent;
-      -fx-background-color: #4BACC6;
+      -fx-background-color: #336F87;
  }
 
  .menu-item:pressed
  {
-     -fx-background-color: #212121;
+     -fx-background-color: #4BACC6;
      /*-fx-text-fill: white;*/
  }
 /*

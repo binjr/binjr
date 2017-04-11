@@ -29,9 +29,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -69,18 +67,18 @@ public class MainViewController implements Initializable {
     private TabPaneNewButton sourcesTabPane;
     @FXML
     private TabPaneNewButton worksheetTabPane;
-    @FXML
-    private MenuItem snapshotMenuItem;
+    //    @FXML
+//    private MenuItem snapshotMenuItem;
     @FXML
     private MenuItem saveMenuItem;
-    @FXML
-    private CheckMenuItem showXmarkerMenuItem;
-    @FXML
-    private CheckMenuItem showYmarkerMenuItem;
-    @FXML
-    private Label addSourceLabel;
-    @FXML
-    private Label addWorksheetLabel;
+    //    @FXML
+//    private CheckMenuItem showXmarkerMenuItem;
+//    @FXML
+//    private CheckMenuItem showYmarkerMenuItem;
+//    @FXML
+//    private Label addSourceLabel;
+//    @FXML
+//    private Label addWorksheetLabel;
 //    @FXML
 //    private HBox worksheetStatusBar;
 //    @FXML
@@ -118,17 +116,15 @@ public class MainViewController implements Initializable {
         assert root != null : "fx:id\"root\" was not injected!";
         assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
-        assert addSourceLabel != null : "fx:id\"addSourceLabel\" was not injected!";
-        assert addWorksheetLabel != null : "fx:id\"addWorksheetLabel\" was not injected!";
-        assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
+        //   assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
 
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
-        showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
-        showYmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
-        snapshotMenuItem.disableProperty().bind(selectWorksheetPresent);
+//        showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
+//        showYmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
+        //snapshotMenuItem.disableProperty().bind(selectWorksheetPresent);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
@@ -189,16 +185,16 @@ public class MainViewController implements Initializable {
             return Optional.empty();
         });
 
-        addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-text-fill: #7c7c7c;"));
-        addSourceLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addSourceLabel.setStyle("-fx-text-fill: #c3c3c3;"));
-        addSourceLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddJrdsSource(new ActionEvent()));
-        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #7c7c7c;"));
-        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #c3c3c3;"));
-        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddNewWorksheet(new ActionEvent()));
+//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-fill: #7c7c7c;"));
+//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addSourceLabel.setStyle("-fx-fill: #c3c3c3;"));
+//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddJrdsSource(new ActionEvent()));
+//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #7c7c7c;"));
+//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #c3c3c3;"));
+//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddNewWorksheet(new ActionEvent()));
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-        showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
-        showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
+//        showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
+//        showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -289,12 +285,12 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    protected void handleAddNewWorksheet(ActionEvent event) {
+    protected void handleAddNewWorksheet(Event event) {
         editWorksheet(new Worksheet<>());
     }
 
     @FXML
-    protected void handleAddJrdsSource(ActionEvent actionEvent) {
+    protected void handleAddJrdsSource(Event actionEvent) {
         DataAdapterDialog dlg = new JrdsAdapterDialog(root);
         Tab newTab = new Tab();
         if (getAdapterDlg(newTab)) {

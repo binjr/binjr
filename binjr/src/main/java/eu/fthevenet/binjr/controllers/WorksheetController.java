@@ -222,6 +222,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
 
         chart = buildChart(xAxis, (ValueAxis) yAxis);
+        //  chart.getStylesheets().add(getClass().getResource("/css/FlatButtons.css").toExternalForm());
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);

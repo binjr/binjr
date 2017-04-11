@@ -10,7 +10,9 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
-<AnchorPane fx:id="root" prefHeight="537.0" prefWidth="752.0" xmlns="http://javafx.com/javafx/8.0.112" xmlns:fx="http://javafx.com/fxml/1"  AnchorPane.rightAnchor="0.0">
+<AnchorPane fx:id="root" prefHeight="537.0" prefWidth="752.0" style="-fx-border-color: red;" styleClass="skinnable-pane-border" stylesheets="@../css/FlatButtons.css" AnchorPane.rightAnchor="0.0"
+            xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
@@ -231,25 +233,20 @@
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
-            <AnchorPane minHeight="0.0" minWidth="0.0">
+            <AnchorPane minHeight="0.0" minWidth="0.0" styleClass="skinnable-pane-border">
                 <cursor>
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
-                <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <AnchorPane fx:id="chartParent" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 </AnchorPane>
             </AnchorPane>
-            <AnchorPane>
+            <AnchorPane styleClass="skinnable-pane-border">
                 <children>
-                    <SplitMenuButton mnemonicParsing="false" text="SplitMenuButton">
-                        <items>
-                            <MenuItem mnemonicParsing="false" text="Action 1"/>
-                            <MenuItem mnemonicParsing="false" text="Action 2"/>
-                        </items>
-                    </SplitMenuButton>
-                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: red;"
+                               styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
-                            <TableColumn fx:id="visibleColumn" prefWidth="26.0" sortable="false">
+                            <TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">
                                 <cellValueFactory>
                                     <PropertyValueFactory property="selected"/>
                                 </cellValueFactory>

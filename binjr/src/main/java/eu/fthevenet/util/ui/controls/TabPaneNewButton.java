@@ -46,6 +46,7 @@ public class TabPaneNewButton extends TabPane {
             return;
         }
         Button newTabButton  = (Button)tabHeaderBg.lookup("#newTabButton");
+        newTabButton.getStyleClass().add("new-tab-button");
         // Remove the button if it was already present
         if (newTabButton != null){
             tabHeaderBg.getChildren().remove(newTabButton);
@@ -53,9 +54,12 @@ public class TabPaneNewButton extends TabPane {
         newTabButton = new Button("+");
         newTabButton.setId("newTabButton");
         newTabButton.setFocusTraversable(false);
-        newTabButton.setPrefHeight(24);
-        newTabButton.setMaxHeight(newTabButton.getPrefHeight());
-        newTabButton.setMinHeight(newTabButton.getPrefHeight());
+        Pane headersRegion = (Pane) this.lookup(".headers-region");
+//        newTabButton.setPrefHeight(headersRegion.getHeight());
+//        newTabButton.setPrefWidth(headersRegion.getHeight());
+//        newTabButton.setMaxHeight(newTabButton.getPrefHeight());
+//        newTabButton.setMinHeight(newTabButton.getPrefHeight());
+        newTabButton.setAlignment(Pos.CENTER);
         newTabButton.setOnAction(event -> {
             newTabFactory.get().ifPresent(newTab -> {
                 getTabs().add(newTab);
@@ -64,13 +68,13 @@ public class TabPaneNewButton extends TabPane {
         });
 
         tabHeaderBg.getChildren().add(newTabButton);
-        StackPane.setAlignment(newTabButton, Pos.BOTTOM_LEFT);
-        StackPane.setMargin(newTabButton, new Insets(0, 0, 0, 0));
-        Pane headersRegion = (Pane) this.lookup(".headers-region");
+        StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
+        StackPane.setMargin(newTabButton, new Insets(2));
+
         switch (getSide()) {
             case TOP:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty().add(5)
+                        headersRegion.widthProperty()//.add(5)
                 );
                 break;
             case LEFT:
@@ -78,7 +82,7 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                                .subtract(6)
+                        //  .subtract(6)
                 );
                 break;
             case BOTTOM:
@@ -86,12 +90,12 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                                .subtract(5)
+                        // .subtract(5)
                 );
                 break;
             case RIGHT:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty().add(5)
+                        headersRegion.widthProperty()//.add(5)
                 );
                 break;
         }

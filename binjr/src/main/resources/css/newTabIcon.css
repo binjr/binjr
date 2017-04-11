@@ -1,0 +1,15 @@
+.label SVGPath{
+    -fx-fill:  #DADADA;
+}
+
+.label:hover SVGPath{
+    -fx-fill:  #969696;
+}
+
+.label {
+    -fx-text-fill:  #DADADA;
+}
+
+.label:hover {
+    -fx-text-fill:  #C2C2C2;
+}
