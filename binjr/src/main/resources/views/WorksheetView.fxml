@@ -10,14 +10,14 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
-<AnchorPane fx:id="root" prefHeight="537.0" prefWidth="752.0" style="-fx-border-color: red;" styleClass="skinnable-pane-border" stylesheets="@../css/FlatButtons.css" AnchorPane.rightAnchor="0.0"
+<AnchorPane fx:id="root" prefHeight="537.0" prefWidth="752.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0"
             xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
 
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
                 <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="back" textAlignment="CENTER">
+                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
                     <HBox.margin>
                         <Insets left="5.0"/>
                     </HBox.margin>
@@ -35,7 +35,7 @@
                     </tooltip>
                 </Button>
                 <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="forward" textAlignment="CENTER">
+                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="forward" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                             <Image url="@/images/forwardArrow_40.png"/>
@@ -50,7 +50,7 @@
                     </tooltip>
                 </Button>
                 <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="refresh" textAlignment="CENTER">
+                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="refresh" textAlignment="CENTER">
                     <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                             <Image url="@/images/refresh_40.png"/>
@@ -80,24 +80,24 @@
                         <RowConstraints vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <children>
-                        <ZonedDateTimePicker fx:id="startDate" stylesheets="@../css/FlatButtons.css" GridPane.columnIndex="1">
+                        <ZonedDateTimePicker fx:id="startDate" GridPane.columnIndex="1">
                             <tooltip>
                                 <Tooltip text="Lower bound for the X axis"/>
                             </tooltip>
                         </ZonedDateTimePicker>
-                        <ZonedDateTimePicker fx:id="endDate" stylesheets="@../css/FlatButtons.css" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                        <ZonedDateTimePicker fx:id="endDate" GridPane.columnIndex="1" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the X axis"/>
                             </tooltip>
                         </ZonedDateTimePicker>
                         <Label text="From:"/>
                         <Label text="To:" GridPane.rowIndex="1"/>
-                        <TextField fx:id="yMinRange" editable="true" stylesheets="@../css/FlatButtons.css" GridPane.columnIndex="4">
+                        <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="4">
                             <tooltip>
                                 <Tooltip text="Lower bound for the Y axis"/>
                             </tooltip>
                         </TextField>
-                        <TextField fx:id="yMaxRange" editable="true" stylesheets="@../css/FlatButtons.css" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                        <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
                             <tooltip>
                                 <Tooltip text="Upper bound for the Y axis"/>
                             </tooltip>
@@ -121,7 +121,7 @@
                         </points>
                     </Polyline>
                     <Button fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
-                            prefWidth="21.0" stylesheets="@../css/FlatButtons.css" textOverrun="CLIP">
+                            prefWidth="21.0" textOverrun="CLIP">
                         <graphic>
                             <ImageView fitHeight="15" fitWidth="11">
                                 <Image url="@/images/autoScale.png"/>
@@ -156,7 +156,7 @@
                     </HBox.margin>
                 </VBox>
                 <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="Snapshot">
+                        prefHeight="40.0" prefWidth="40.0" text="Snapshot">
                     <HBox.margin>
                         <Insets/>
                     </HBox.margin>
@@ -174,7 +174,7 @@
                     </tooltip>
                 </Button>
                 <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                              prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="ToggleButton">
+                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                     <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                             <Image url="@/images/lockCrosshairHorizontal_40.png"/>
@@ -189,7 +189,7 @@
                     </tooltip>
                 </ToggleButton>
                 <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                              prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css" text="ToggleButton">
+                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                     <graphic>
                         <ImageView fitHeight="20.0" fitWidth="20.0">
                             <Image url="@/images/lockCrosshairVertical_40.png"/>
@@ -204,7 +204,7 @@
                     </tooltip>
                 </ToggleButton>
                 <MenuButton fx:id="opacityMenuButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0" stylesheets="@../css/FlatButtons.css">
+                            prefHeight="40.0" prefWidth="40.0">
                     <items>
                         <MenuItem fx:id="opacityMenuItem" mnemonicParsing="false" text="Action 1">
                             <graphic>
@@ -243,7 +243,7 @@
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
                 <children>
-                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: red;"
+                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0"
                                styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <columns>
                             <TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">
@@ -281,13 +281,6 @@
                             <TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">
                             </TableColumn>
                         </columns>
-                        <!--<contextMenu>-->
-                        <!--<ContextMenu fx:id="seriesListMenu">-->
-                        <!--<items>-->
-                        <!--<MenuItem fx:id="removeSeriesMenuItem" mnemonicParsing="false" text="Remove series" disable="true"/>-->
-                        <!--</items>-->
-                        <!--</ContextMenu>-->
-                        <!--</contextMenu>-->
                     </TableView>
                 </children>
             </AnchorPane>

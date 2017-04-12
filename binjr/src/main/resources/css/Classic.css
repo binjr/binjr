@@ -1,0 +1,120 @@
+
+ .menu-button .arrow-button {
+    -fx-padding:-2;
+     visibility: hidden;
+ }
+.add-tab-button {
+    -size:20;
+    -fx-min-height: -size;
+    -fx-min-width: -size;
+    -fx-max-height: -size;
+    -fx-max-width: -size;
+    -fx-content-display: graphic-only;
+    -fx-padding:5;
+}
+
+.add-source-background-icon,
+.add-worksheet-background-icon{
+   -fx-text-fill:  #DADADA;
+}
+
+.add-source-background-icon SVGPath,
+.add-worksheet-background-icon SVGPath{
+   -fx-fill:  #DADADA;
+}
+
+.add-source-background-icon:hover,
+.add-worksheet-background-icon:hover{
+   -fx-text-fill:  #C2C2C2;
+}
+
+.add-source-background-icon:hover SVGPath,
+.add-worksheet-background-icon:hover SVGPath {
+   -fx-fill:  #969696;
+}
+
+  /*******************
+    Command bar
+ *******************/
+
+.command-bar {
+   -fx-pref-width: 48;
+   -fx-min-width: 48;
+    -fx-padding:5;
+}
+
+.command-bar:expanded {
+  -fx-min-width: 160;
+ /*  -fx-pref-width: 200;
+   -fx-max-width: 200;*/
+}
+
+ .command-bar .menu-button .arrow-button {
+    -fx-padding:-2;
+     visibility: hidden;
+ }
+
+ .command-bar .button SVGPath,
+ .command-bar .menu-button SVGPath{
+    -fx-fill:  black;
+    -fx-scale-x: 2.5;
+    -fx-scale-y: 2.5;
+ }
+
+
+ .command-bar-menu-button {
+    -fx-smooth: false;
+    -fx-scale-x: 2;
+    -fx-scale-y: 2;
+ }
+
+ .command-bar:expanded .menu-button .arrow-button {
+    -fx-padding:10;
+    -fx-fill: white;
+     visibility: visible;
+ }
+
+ .command-bar:expanded .menu-button .arrow-button .arrow {
+    -fx-background-color:black;
+ }
+
+ .command-bar:expanded  .menu-button .label,
+ .command-bar:expanded .button {
+    -fx-margins:5;
+    -fx-content-display:left;
+ }
+
+ .command-bar .menu-button .label,
+ .command-bar .button {
+    -fx-alignment: center_left;
+    -fx-graphic-text-gap:15;
+    -fx-text-fill:black;
+    -fx-padding: 0 0 0 16;
+ }
+
+ .command-bar  .menu-item {
+      -fx-padding: 10 10 10 17 ;
+  }
+
+/*** Color picker ***/
+
+.borderless-color-picker {
+    -fx-color-label-visible: false;
+    -fx-background-color: transparent;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: red;
+    -fx-border-width:0;
+    -fx-border-radius:0;
+    -fx-alignment: center;
+}
+
+.borderless-color-picker .label {
+    -fx-padding: 0;
+}
+
+.borderless-color-picker .label .rectangle {
+    -fx-padding: 0;
+    -fx-border-insets: 0;
+    -fx-alignment: center;
+}

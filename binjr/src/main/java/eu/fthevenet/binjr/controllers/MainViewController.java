@@ -10,12 +10,14 @@ import eu.fthevenet.binjr.data.workspace.Workspace;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
+import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
 import eu.fthevenet.util.ui.controls.CommandBarPane;
 import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
 import eu.fthevenet.util.ui.controls.EditableTab;
 import eu.fthevenet.util.ui.controls.TabPaneNewButton;
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -67,34 +69,8 @@ public class MainViewController implements Initializable {
     private TabPaneNewButton sourcesTabPane;
     @FXML
     private TabPaneNewButton worksheetTabPane;
-    //    @FXML
-//    private MenuItem snapshotMenuItem;
     @FXML
     private MenuItem saveMenuItem;
-    //    @FXML
-//    private CheckMenuItem showXmarkerMenuItem;
-//    @FXML
-//    private CheckMenuItem showYmarkerMenuItem;
-//    @FXML
-//    private Label addSourceLabel;
-//    @FXML
-//    private Label addWorksheetLabel;
-//    @FXML
-//    private HBox worksheetStatusBar;
-//    @FXML
-//    private Label nameLabel;
-//    @FXML
-//    private Label zoneIdLabel;
-//    @FXML
-//    private Label chartTypeLabel;
-//    @FXML
-//    private Label unitLabel;
-//    @FXML
-//    private Label baseLabel;
-//    @FXML
-//    private HBox sourceStatusBar;
-//    @FXML
-//    private Label sourceLabel;
     @FXML
     private Menu openRecentMenu;
 
@@ -116,15 +92,18 @@ public class MainViewController implements Initializable {
         assert root != null : "fx:id\"root\" was not injected!";
         assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
-        //   assert snapshotMenuItem != null : "fx:id\"snapshotMenuItem\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
 
+        GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                setUiTheme(newValue);
+            }
+        });
+        setUiTheme(GlobalPreferences.getInstance().getUserInterfaceTheme());
+
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
-//        showXmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
-//        showYmarkerMenuItem.disableProperty().bind(selectWorksheetPresent);
-        //snapshotMenuItem.disableProperty().bind(selectWorksheetPresent);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
@@ -666,6 +645,13 @@ public class MainViewController implements Initializable {
         });
         return contextMenu;
     }
+
+    private void setUiTheme(UserInterfaceThemes theme) {
+        root.getStylesheets().clear();
+        Application.setUserAgentStylesheet(null);
+        root.getStylesheets().add(getClass().getResource(theme.getCssPath()).toExternalForm());
+    }
+
 
     public void populateOpenRecentMenu(Event event) {
         Menu openRecentMenu = (Menu) event.getSource();

@@ -49,8 +49,7 @@
     </fx:define>
 
     <children>
-        <CommandBarPane fx:id="commandBar" prefWidth="40.0" styleClass="command-bar"
-                        stylesheets="@../css/CommandBar.css">
+        <CommandBarPane fx:id="commandBar" prefWidth="40.0" styleClass="command-bar">
             <children>
                 <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                         minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
@@ -143,7 +142,7 @@
                             minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
                             prefHeight="40.0" prefWidth="40.0" text="Worksheets"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                            AnchorPane.topAnchor="140.0">
+                            AnchorPane.topAnchor="135.0">
                     <graphic>
                         <SVGPath content="$chartSvgPath"/>
                     </graphic>
@@ -163,40 +162,12 @@
                                 <SVGPath content="$refreshSvgPath"/>
                             </graphic>
                         </MenuItem>
-                        <!--<SeparatorMenuItem mnemonicParsing="false"/>-->
-                        <!--<MenuItem fx:id="snapshotMenuItem" mnemonicParsing="false" onAction="#handleTakeSnapshot"-->
-                        <!--text="Take Snapshot">-->
-                        <!--<accelerator>-->
-                        <!--<KeyCodeCombination alt="UP" code="PRINTSCREEN" control="UP" meta="UP" shift="UP"-->
-                        <!--shortcut="UP"/>-->
-                        <!--</accelerator>-->
-                        <!--<graphic>-->
-                        <!--<ImageView fitHeight="14" fitWidth="14">-->
-                        <!--<Image url="@/images/snapshot.png"/>-->
-                        <!--</ImageView>-->
-                        <!--</graphic>-->
-                        <!--</MenuItem>-->
-                        <!--<CheckMenuItem fx:id="showXmarkerMenuItem" mnemonicParsing="false" text="Lock Vertical Marker">-->
-                        <!--<graphic>-->
-                        <!--<ImageView fitHeight="14" fitWidth="14">-->
-                        <!--<Image url="@/images/lockCrosshairVertical.png"/>-->
-                        <!--</ImageView>-->
-                        <!--</graphic>-->
-                        <!--</CheckMenuItem>-->
-                        <!--<CheckMenuItem fx:id="showYmarkerMenuItem" mnemonicParsing="false"-->
-                        <!--text="Lock Horizontal Marker">-->
-                        <!--<graphic>-->
-                        <!--<ImageView fitHeight="14" fitWidth="14">-->
-                        <!--<Image url="@/images/lockCrosshairHorizontal.png"/>-->
-                        <!--</ImageView>-->
-                        <!--</graphic>-->
-                        <!--</CheckMenuItem>-->
                     </items>
                 </MenuButton>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
                             minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
                             popupSide="RIGHT" prefHeight="40.0" text="Help"
-                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="185.0">
+                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
                     <graphic>
                         <SVGPath content="$helpSvgPath"/>
                     </graphic>
@@ -241,7 +212,7 @@
             </HBox.margin>
         </CommandBarPane>
         <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
-                   prefWidth="-1.0" HBox.hgrow="ALWAYS" stylesheets="@../css/FlatButtons.css">
+                   prefWidth="-1.0" HBox.hgrow="ALWAYS">
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
@@ -249,7 +220,7 @@
                         <Label fx:id="addSourceLabel" alignment="CENTER"
                                wrapText="true" AnchorPane.bottomAnchor="0.0"
                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                               stylesheets="@../css/newTabIcon.css"
+                               styleClass="add-source-background-icon"
                                onMouseClicked="#handleAddJrdsSource">
                             <graphic>
                                 <SVGPath scaleX="20" scaleY="20" content="$addSourceSvgPath"/>
@@ -275,7 +246,7 @@
                     <Label fx:id="addWorksheetLabel" alignment="CENTER"
                            wrapText="true" AnchorPane.bottomAnchor="0.0"
                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                           stylesheets="@../css/newTabIcon.css"
+                           styleClass="add-worksheet-background-icon"
                            onMouseClicked="#handleAddNewWorksheet">
                         <graphic>
                             <SVGPath scaleX="20" scaleY="20" content="$addWorksheetSvgPath"/>

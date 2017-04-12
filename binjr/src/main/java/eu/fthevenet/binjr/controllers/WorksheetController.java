@@ -222,7 +222,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
 
         chart = buildChart(xAxis, (ValueAxis) yAxis);
-        //  chart.getStylesheets().add(getClass().getResource("/css/FlatButtons.css").toExternalForm());
+        //  chart.getStylesheets().add(getClass().getResource("/css/Classic.css").toExternalForm());
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
@@ -245,7 +245,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-       // opacityMenuButton.getStylesheets().add(getClass().getResource("/css/MenuButton.css").toExternalForm());
 
         //endregion
 

@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -33,6 +34,8 @@ public class PreferenceDialogController implements Initializable {
     private Accordion accordionPane;
     @FXML
     private CheckBox loadAtStartupCheckbox;
+    @FXML
+    private ChoiceBox<UserInterfaceThemes> uiThemeChoiceBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -44,6 +47,7 @@ public class PreferenceDialogController implements Initializable {
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
         assert useSourceColors != null : "fx:id\"useSourceColors\" was not injected!";
         assert loadAtStartupCheckbox != null : "fx:id\"loadAtStartupCheckbox\" was not injected!";
+        assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -58,6 +62,10 @@ public class PreferenceDialogController implements Initializable {
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
+
+        uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
+        uiThemeChoiceBox.getSelectionModel().select(GlobalPreferences.getInstance().getUserInterfaceTheme());
+        GlobalPreferences.getInstance().userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
 
         Platform.runLater(()-> {
             accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {

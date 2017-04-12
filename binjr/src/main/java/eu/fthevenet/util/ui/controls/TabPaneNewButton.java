@@ -1,13 +1,15 @@
 package eu.fthevenet.util.ui.controls;
 
 import javafx.application.Platform;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.SVGPath;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -18,11 +20,11 @@ import java.util.function.Supplier;
  * @author Frederic Thevenet
  */
 public class TabPaneNewButton extends TabPane {
+    private static final Logger logger = LogManager.getLogger(TabPaneNewButton.class);
+    private Supplier<Optional<Tab>> newTabFactory = () -> Optional.of(new Tab());
 
-    private Supplier<Optional<Tab>> newTabFactory = () ->Optional.of(new Tab());
-
-    public TabPaneNewButton(){
-        this((Tab[])null);
+    public TabPaneNewButton() {
+        this((Tab[]) null);
     }
 
     public TabPaneNewButton(Tab... tabs) {
@@ -32,29 +34,41 @@ public class TabPaneNewButton extends TabPane {
 
         // Prepare to change the button on screen position if the tabs side changes
         sideProperty().addListener((observable, oldValue, newValue) -> {
-           if (newValue != null) {
-               positionNewTabButton();
-           }
+            if (newValue != null) {
+                positionNewTabButton();
+            }
         });
     }
 
 
-    private void positionNewTabButton(){
+    private void positionNewTabButton() {
         Pane tabHeaderBg = (Pane) this.lookup(".tab-header-background");
-        if (tabHeaderBg == null){
+        if (tabHeaderBg == null) {
             // TabPane is not ready
             return;
         }
-        Button newTabButton  = (Button)tabHeaderBg.lookup("#newTabButton");
+        Pane tabHeaderArea = (Pane) this.lookup(".tab-header-area");
+        logger.debug("tabHeaderArea.getHeight() = " + tabHeaderArea.getHeight());
+
+        Button newTabButton = (Button) tabHeaderBg.lookup("#newTabButton");
 //        newTabButton.getStyleClass().add("new-tab-button");
         // Remove the button if it was already present
-        if (newTabButton != null){
+        if (newTabButton != null) {
             tabHeaderBg.getChildren().remove(newTabButton);
         }
-        newTabButton = new Button("+");
+        newTabButton = new Button();
         newTabButton.setId("newTabButton");
         newTabButton.setFocusTraversable(false);
         Pane headersRegion = (Pane) this.lookup(".headers-region");
+        logger.debug("headersRegion.getHeight() = " + headersRegion.getHeight());
+        logger.debug("headersRegion.getPrefHeight = " + headersRegion.getPrefHeight());
+        newTabButton.getStyleClass().add("add-tab-button");
+        SVGPath icon = new SVGPath();
+        icon.setContent("m 31.25,54.09375 0,2.4375 -2.46875,0 0,0.375 2.46875,0 0,2.46875 0.375,0 0,-2.46875 2.46875,0 0,-0.375 -2.46875,0 0,-2.4375 -0.375,0 z");
+        icon.getStyleClass().add("add-tab-button-icon");
+        newTabButton.setGraphic(icon);
+        //     newTabButton.setGraphic(new SVGPath());
+
 //        newTabButton.setPrefHeight(headersRegion.getHeight());
 //        newTabButton.setPrefWidth(headersRegion.getHeight());
 //        newTabButton.setMaxHeight(newTabButton.getPrefHeight());
@@ -67,9 +81,10 @@ public class TabPaneNewButton extends TabPane {
             });
         });
 
+
         tabHeaderBg.getChildren().add(newTabButton);
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
-        StackPane.setMargin(newTabButton, new Insets(2));
+        //  StackPane.setMargin(newTabButton, new Insets(2));
 
         switch (getSide()) {
             case TOP:
@@ -82,7 +97,7 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                        //  .subtract(6)
+                        // .subtract(1)
                 );
                 break;
             case BOTTOM:

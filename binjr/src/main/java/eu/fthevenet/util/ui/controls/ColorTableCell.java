@@ -15,7 +15,8 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
     public ColorTableCell(TableColumn<T, Color> column) {
         colorPicker = new ColorPicker();
         colorPicker.getStyleClass().add("button");
-        colorPicker.getStylesheets().add(getClass().getResource("/css/ColorPickerCell.css").toExternalForm());
+        colorPicker.getStyleClass().add("borderless-color-picker");
+        //   colorPicker.getStylesheets().add(getClass().getResource("/css/common/ColorPickerCell.css").toExternalForm());
         colorPicker.editableProperty().bind(column.editableProperty());
         colorPicker.disableProperty().bind(column.editableProperty().not());
         colorPicker.setOnShowing(event -> {
