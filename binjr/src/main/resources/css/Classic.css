@@ -59,13 +59,12 @@
     -fx-fill:  black;
     -fx-scale-x: 2.5;
     -fx-scale-y: 2.5;
-    -fx-smooth: false;
  }
 
 
  .command-bar .command-bar-menu-button SVGPath{
     -fx-fill:black;
-    -fx-smooth: false;
+   /* -fx-smooth: false;*/
     -fx-scale-x: 3;
     -fx-scale-y: 3.5;
  }

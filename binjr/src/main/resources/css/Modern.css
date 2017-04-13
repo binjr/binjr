@@ -293,7 +293,7 @@
 .add-tab-button-icon {
     -fx-background-color:black;
     -fx-shape: "m 31.25,54.09375 0,2.4375 -2.46875,0 0,0.375 2.46875,0 0,2.46875 0.375,0 0,-2.46875 2.46875,0 0,-0.375 -2.46875,0 0,-2.4375 -0.375,0 z";
-    -fx-smooth: false;
+  /*  -fx-smooth: false;*/
     -fx-fill: black;
     -fx-scale-x: 2;
     -fx-scale-y: 2;
@@ -494,7 +494,7 @@
 
  .command-bar .command-bar-menu-button SVGPath {
      -fx-scale-y: 3.5;
-     -fx-smooth: false;
+    /* -fx-smooth: false;*/
   }
 
   .command-bar:expanded .menu-button .arrow-button {

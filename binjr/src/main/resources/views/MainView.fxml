@@ -272,7 +272,7 @@
                                styleClass="add-source-background-icon"
                                onMouseClicked="#handleAddJrdsSource">
                             <graphic>
-                                <SVGPath scaleX="20" scaleY="20" styleClass="addSourceSvgPath"/>
+                                <SVGPath scaleX="20" scaleY="20" content="$addSourceSvgPath"/>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Click to add a new source">

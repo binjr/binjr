@@ -631,7 +631,6 @@ public class MainViewController implements Initializable {
     private void setUiTheme(UserInterfaceThemes theme) {
         root.getStylesheets().clear();
         Application.setUserAgentStylesheet(null);
-        root.getStylesheets().add(getClass().getResource("/css/Graphics.css").toExternalForm());
         root.getStylesheets().add(getClass().getResource(theme.getCssPath()).toExternalForm());
     }
 
