@@ -492,8 +492,8 @@
      -fx-scale-y: 3;
   }
 
-  .command-bar-menu-button {
-     -fx-scale-y: 4;
+ .command-bar .command-bar-menu-button SVGPath {
+     -fx-scale-y: 3.5;
      -fx-smooth: false;
   }
 

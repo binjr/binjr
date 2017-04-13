@@ -62,10 +62,11 @@
  }
 
 
- .command-bar-menu-button {
+ .command-bar .command-bar-menu-button SVGPath{
+    -fx-fill:black;
     -fx-smooth: false;
-    -fx-scale-x: 2;
-    -fx-scale-y: 2;
+    -fx-scale-x: 3;
+    -fx-scale-y: 3.5;
  }
 
  .command-bar:expanded .menu-button .arrow-button {

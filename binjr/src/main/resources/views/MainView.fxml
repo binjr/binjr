@@ -54,17 +54,31 @@
                 <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                         minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
                         AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                        styleClass="command-bar-menu-button"
                         onAction="#handleExpandCommandBar">
                     <graphic>
-                        <SVGPath content="$menuSvgPath" smooth="false" styleClass="command-bar-menu-button"></SVGPath>
+                        <SVGPath content="$menuSvgPath"></SVGPath>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Expand">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                 </Button>
-
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
                             minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
                             popupSide="RIGHT" prefHeight="40.0" prefWidth="-1"
                             text="Workspaces" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="45.0">
+                    <tooltip>
+                        <Tooltip text="Workspaces">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                     <graphic>
                         <SVGPath content="$fileNewSvgPath"/>
                     </graphic>
@@ -124,6 +138,13 @@
                     <graphic>
                         <SVGPath content="$sourceSvgPath"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Sources">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                     <items>
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
@@ -146,6 +167,13 @@
                     <graphic>
                         <SVGPath content="$chartSvgPath"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Worksheets">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
@@ -171,6 +199,13 @@
                     <graphic>
                         <SVGPath content="$helpSvgPath"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Help">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                     <items>
                         <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
                             <graphic>
@@ -198,6 +233,13 @@
                         <SVGPath
                                 content="$settingSvgPath"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Settings">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                 </Button>
                 <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction"
                         prefHeight="40.0" text="Exit"
@@ -205,6 +247,13 @@
                     <graphic>
                         <SVGPath content="$quitSvgPath"/>
                     </graphic>
+                    <tooltip>
+                        <Tooltip text="Exit">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
                 </Button>
             </children>
             <HBox.margin>
