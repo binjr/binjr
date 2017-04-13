@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.preferences;
 
+import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import javafx.beans.property.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,7 @@ public class GlobalPreferences {
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
+    private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
     public static final int MAX_RECENT_FILES = 20;
     private final Manifest manifest;
@@ -44,6 +46,8 @@ public class GlobalPreferences {
     private BooleanProperty useSourceColors;
     private StringProperty mostRecentSaveFolder;
     private Property<Path> mostRecentSavedWorkspace;
+
+    private Property<UserInterfaceThemes> userInterfaceTheme;
     private Deque<String> recentFiles;
 
     private static class GlobalPreferencesHolder {
@@ -74,6 +78,10 @@ public class GlobalPreferences {
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
         String recentFileString = prefs.get(RECENT_FILES, "");
         recentFiles = new ArrayDeque<>(Arrays.stream(recentFileString.split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
+
+        userInterfaceTheme = new SimpleObjectProperty<>(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
+        userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
+
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
             logger.debug("Global preferences initial values");
@@ -322,6 +330,18 @@ public class GlobalPreferences {
      */
     public void setLoadLastWorkspaceOnStartup(boolean loadLastWorkspaceOnStartup) {
         this.loadLastWorkspaceOnStartup.set(loadLastWorkspaceOnStartup);
+    }
+
+    public UserInterfaceThemes getUserInterfaceTheme() {
+        return userInterfaceTheme.getValue();
+    }
+
+    public Property<UserInterfaceThemes> userInterfaceThemeProperty() {
+        return userInterfaceTheme;
+    }
+
+    public void setUserInterfaceTheme(UserInterfaceThemes userInterfaceTheme) {
+        this.userInterfaceTheme.setValue(userInterfaceTheme);
     }
 
     /**

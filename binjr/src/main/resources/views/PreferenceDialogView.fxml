@@ -1,16 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.ButtonType?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.DialogPane?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
-
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <DialogPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
    <content>
       <AnchorPane>
@@ -61,9 +52,27 @@
                                  </children>
                               </VBox>
                            </children>
-                        </AnchorPane>
+                    </AnchorPane>
                   </content>
                 </TitledPane>
+                  <TitledPane animated="false" text="Appearance">
+                      <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0">
+                              <children>
+                                  <VBox layoutX="53.0" layoutY="-10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <children>
+                                          <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                              <children>
+                                                  <Label text="Theme: "/>
+                                                  <ChoiceBox fx:id="uiThemeChoiceBox" prefWidth="150.0"/>
+                                              </children>
+                                          </HBox>
+                                      </children>
+                                  </VBox>
+                              </children>
+                          </AnchorPane>
+                      </content>
+                  </TitledPane>
               </panes>
             </Accordion>
          </children>
