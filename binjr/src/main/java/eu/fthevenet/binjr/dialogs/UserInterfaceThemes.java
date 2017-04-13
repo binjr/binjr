@@ -1,6 +1,8 @@
 package eu.fthevenet.binjr.dialogs;
 
 /**
+ * An enumeration of supported user interface themes
+ *
  * @author Frederic Thevenet
  */
 public enum UserInterfaceThemes {

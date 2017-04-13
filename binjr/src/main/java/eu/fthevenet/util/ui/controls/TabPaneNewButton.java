@@ -49,9 +49,8 @@ public class TabPaneNewButton extends TabPane {
         }
         Pane tabHeaderArea = (Pane) this.lookup(".tab-header-area");
         logger.debug("tabHeaderArea.getHeight() = " + tabHeaderArea.getHeight());
-
         Button newTabButton = (Button) tabHeaderBg.lookup("#newTabButton");
-//        newTabButton.getStyleClass().add("new-tab-button");
+
         // Remove the button if it was already present
         if (newTabButton != null) {
             tabHeaderBg.getChildren().remove(newTabButton);
@@ -67,12 +66,6 @@ public class TabPaneNewButton extends TabPane {
         icon.setContent("m 31.25,54.09375 0,2.4375 -2.46875,0 0,0.375 2.46875,0 0,2.46875 0.375,0 0,-2.46875 2.46875,0 0,-0.375 -2.46875,0 0,-2.4375 -0.375,0 z");
         icon.getStyleClass().add("add-tab-button-icon");
         newTabButton.setGraphic(icon);
-        //     newTabButton.setGraphic(new SVGPath());
-
-//        newTabButton.setPrefHeight(headersRegion.getHeight());
-//        newTabButton.setPrefWidth(headersRegion.getHeight());
-//        newTabButton.setMaxHeight(newTabButton.getPrefHeight());
-//        newTabButton.setMinHeight(newTabButton.getPrefHeight());
         newTabButton.setAlignment(Pos.CENTER);
         newTabButton.setOnAction(event -> {
             newTabFactory.get().ifPresent(newTab -> {

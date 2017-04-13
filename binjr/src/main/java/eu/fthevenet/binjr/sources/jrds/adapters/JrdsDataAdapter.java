@@ -9,14 +9,19 @@ import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.util.http.HttpRequestException;
-import eu.fthevenet.util.http.HttpResponse;
-import eu.fthevenet.util.http.MicroHttpClient;
-import eu.fthevenet.util.http.URLBuilder;
+import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -24,7 +29,6 @@ import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.*;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -109,22 +113,28 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
 
     @Override
     public InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        URLBuilder requestUrl = new URLBuilder()
-                .setProtocol(jrdsProtocol)
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/download")
                 .addParameter("id", path)
                 .addParameter("begin", Long.toString(begin.toEpochMilli()))
                 .addParameter("end", Long.toString(end.toEpochMilli()));
-        try {
-            HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build());
-            return response.getContent();
-        } catch (IOException e) {
-            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
-        } catch (URISyntaxException e) {
-            throw new DataAdapterException("Error building URI for request");
-        }
+
+        return doHttpGet(requestUrl, response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status >= 200 && status < 300) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
+                }
+                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
+            }
+            else {
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+            }
+        });
     }
 
     @Override
@@ -178,50 +188,13 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 s -> ZonedDateTime.parse(s, formatter));
     }
 
-
-    //endregion
-
-
-    /**
-     * Returns a representation of the JRDS graph descriptor fot he provided id
-     *
-     * @param id the id ot the graph
-     * @return a representation of the JRDS graph descriptor fot he provided id
-     * @throws DataAdapterException if an error occurs while retrieving the graphdesc
-     */
-    public Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URLBuilder requestUrl = new URLBuilder()
-                .setProtocol(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/graphdesc")
-                .addParameter("id", id);
-        try {
-            HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build(), false);
-            if (response.getResponseCode() == HttpURLConnection.HTTP_NOT_FOUND) {
-                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
-                // so we're falling back to recovering the datastore name from the csv file provided by
-                // the download service.
-                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
-                try {
-                    return getGraphDescriptorLegacy(id);
-                } catch (Exception e) {
-                    throw new HttpRequestException(e.getMessage(), response, e);
-                }
+    private <T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
+        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString() + "]", logger::trace)) {
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                logger.debug(() -> "requestUrl = " + requestUrl);
+                HttpGet httpget = new HttpGet(requestUrl.build());
+                return httpClient.execute(httpget, responseHandler);
             }
-            else if (response.getResponseCode() == HttpURLConnection.HTTP_OK) {
-                try {
-                    Graphdesc g = JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(response.getContent()), Graphdesc.class);
-                    logger.trace(() -> "Retrieved graphdesc for probe [" + id + "]: " + g.toString());
-                    return g;
-                } catch (Exception e) {
-                    throw new HttpRequestException(e.getMessage(), response, e);
-                }
-            }
-            else {
-                throw new HttpRequestException(response);
-            }
-
         } catch (IOException e) {
             throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {
@@ -280,21 +253,64 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     private String getJsonTree(JrdsTreeFilter filter) throws DataAdapterException {
-        URLBuilder requestUrl = new URLBuilder()
-                .setProtocol(jrdsProtocol)
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/jsontree")
                 .addParameter("tab", filter.getCommand());
 
-        try {
-            HttpResponse response = MicroHttpClient.doHttpGet(requestUrl.build());
-            return response.getResponseAsString();
-        } catch (IOException e) {
-            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
-        } catch (URISyntaxException e) {
-            throw new DataAdapterException("Error building URI for request");
-        }
+        return doHttpGet(requestUrl, response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status >= 200 && status < 300) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    return EntityUtils.toString(entity);
+                }
+                return null;
+            }
+            else {
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+            }
+        });
+    }
+
+    private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
+                .setHost(jrdsHost)
+                .setPort(jrdsPort)
+                .setPath(jrdsPath + "/graphdesc")
+                .addParameter("id", id);
+
+        return doHttpGet(requestUrl, response -> {
+            int status = response.getStatusLine().getStatusCode();
+            if (status == 404) {
+                // This is probably an older version of JRDS that doesn't provide the graphdesc service,
+                // so we're falling back to recovering the datastore name from the csv file provided by
+                // the download service.
+                logger.warn("Cannot found graphdesc service; falling back to legacy mode.");
+                try {
+                    return getGraphDescriptorLegacy(id);
+                } catch (Exception e) {
+                    throw new IOException("", e);
+                }
+            }
+            if (status >= 200 && status < 300) {
+                HttpEntity entity = response.getEntity();
+                if (entity != null) {
+                    try {
+                        return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
+                    } catch (Exception e) {
+                        throw new IOException("", e);
+                    }
+                }
+                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
+            }
+            else {
+                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+            }
+        });
     }
 
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {

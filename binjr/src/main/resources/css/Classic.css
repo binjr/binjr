@@ -59,6 +59,7 @@
     -fx-fill:  black;
     -fx-scale-x: 2.5;
     -fx-scale-y: 2.5;
+    -fx-smooth: false;
  }
 
 

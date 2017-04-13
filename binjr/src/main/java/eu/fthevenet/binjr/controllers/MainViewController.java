@@ -144,16 +144,6 @@ public class MainViewController implements Initializable {
             workspace.clearSources();
             workspace.addSources(c.getList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
             logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-
-//            while (c.next()) {
-//                if (c.wasAdded()) {
-//                    workspace.addSources(c.getAddedSubList().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-//                }
-//                if (c.wasRemoved()) {
-//                    workspace.removeSources(c.getRemoved().stream().map(t -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
-//                }
-//            }
-//            logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
         sourcesTabPane.setNewTabFactory(() -> {
@@ -164,16 +154,8 @@ public class MainViewController implements Initializable {
             return Optional.empty();
         });
 
-//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addSourceLabel.setStyle("-fx-fill: #7c7c7c;"));
-//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addSourceLabel.setStyle("-fx-fill: #c3c3c3;"));
-//        addSourceLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddJrdsSource(new ActionEvent()));
-//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_ENTERED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #7c7c7c;"));
-//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_EXITED, e -> addWorksheetLabel.setStyle("-fx-text-fill: #c3c3c3;"));
-//        addWorksheetLabel.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> handleAddNewWorksheet(new ActionEvent()));
         root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-//        showXmarkerMenuItem.selectedProperty().bindBidirectional(showVerticalMarker);
-//        showYmarkerMenuItem.selectedProperty().bindBidirectional(showHorizontalMarker);
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -649,6 +631,7 @@ public class MainViewController implements Initializable {
     private void setUiTheme(UserInterfaceThemes theme) {
         root.getStylesheets().clear();
         Application.setUserAgentStylesheet(null);
+        root.getStylesheets().add(getClass().getResource("/css/Graphics.css").toExternalForm());
         root.getStylesheets().add(getClass().getResource(theme.getCssPath()).toExternalForm());
     }
 
