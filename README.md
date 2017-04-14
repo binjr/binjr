@@ -10,14 +10,17 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
 
-## How to use it?
+## Getting started
 
-*binjr* is pure Java application, built on top of JavaFX, and requires a Java 1.8 JRE with JavaFX 8u40 or later.
-Using the latest available version of either Oracle's Hotspot or OpenJDK (with OpenJFX) is highly recommended, as JavaFX is still an area where bug fixes and performance improvments are routinely provided with each new version.
+*binjr* is Java application, built on top of JavaFX, and requires a Java Runtime Environement version 1.8 with JavaFX version 8u40 or later.
 
-The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest) 
+Using the latest available version of either Oracle's Hotspot or OpenJDK (with OpenJFX) is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
 
-You can either build it from source using Maven, or use the provided runnable JAR file, which encapsulate all dependencies.
+The latest release can be found  [here](https://github.com/fthevenet/binjr/releases/latest) 
+
+You can either build it from source using Maven after cloning the repository, or download binjr.jar.
+
+All dependencies are shaded inside the executable jar, so in order to start the application simply run: java -jar binj.jar (or double-click the jar file if you're environment is configured to handle such an action).
 
 The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference)
 
