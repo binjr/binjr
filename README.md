@@ -8,7 +8,9 @@ Its focus is on enabling end users to constitute their own custom sets of views 
 
 As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively.
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
+![Screenshot Windows](http://www.binjr.eu/assets/images/screenshot01.png)
+
+![Screenshot Ubuntu](http://www.binjr.eu/assets/images/screenshot02.png)
 
 ## Getting started
 
