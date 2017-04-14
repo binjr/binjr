@@ -22,7 +22,7 @@ The latest release can be found  [here](https://github.com/fthevenet/binjr/relea
 
 You can either build it from source using Maven after cloning the repository, or download binjr.jar.
 
-All dependencies are shaded inside the executable jar, so in order to start the application simply run: java -jar binj.jar (or double-click the jar file if you're environment is configured to handle such an action).
+All dependencies are shaded inside the executable jar, so in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file if you're environment is configured to do so).
 
 The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference)
 
