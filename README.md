@@ -2,19 +2,29 @@
 
 *binjr* is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
+It is a client application, packaged as a single executable JAR file and has no other requirement than a Java Runtime Environment of the correct version.
+
 Its focus is on enabling end users to constitute their own custom sets of views for the data exposed by various sources, generally in ways that are not proposed by the front-ends these sources might already propose. 
 
-As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively (e.g. visualizing the coincidence of CPU usage spikes with user load metrics).
+As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively.
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
+![Screenshot Windows](http://www.binjr.eu/assets/images/screenshot01.png)
 
-## How to use it?
+![Screenshot Ubuntu](http://www.binjr.eu/assets/images/screenshot02.png)
 
-*binjr* is pure Java application, built on top of JavaFX, and requires a Java 1.8 JRE with JavaFX 8u40 or later.
+## Getting started
 
-The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest).
+*binjr* is Java application, built on top of JavaFX, and requires a Java Runtime Environement version 1.8 with JavaFX version 8u40 or later.
 
-You can either build it from source using Maven, or use the provided runnable JAR file, which encapsulate all dependencies.
+Using the latest available version of either Oracle's Hotspot or OpenJDK (with OpenJFX) is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
+
+The latest release can be found  [here](https://github.com/fthevenet/binjr/releases/latest) 
+
+You can either build it from source using Maven after cloning the repository, or download binjr.jar.
+
+All dependencies are shaded inside the executable jar, so in order to start the application simply run: java -jar binj.jar (or double-click the jar file if you're environment is configured to handle such an action).
+
+The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference)
 
 ## How is it licensed?
 
@@ -28,7 +38,7 @@ For the moment, its feature set is far from complete, and absolutely no guarante
 
 Still, because binjr only consumes data, in a read-only fashion, the only risk you’re taking in trying it out is that it might not work quite as you like (or work at all…).
 
-For the moment, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the aim of the project is to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
+For the moment, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
 
 
 
