@@ -19,7 +19,7 @@ The latest release can be found [here](https://github.com/fthevenet/binjr/releas
 
 You can either build it from source using Maven, or use the provided runnable JAR file, which encapsulate all dependencies.
 
-A short tutorial on how to get started can be found [here](https://github.com/fthevenet/binjr/wiki/Getting-started)
+The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference)
 
 ## How is it licensed?
 
