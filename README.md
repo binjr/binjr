@@ -36,7 +36,7 @@ For the moment, its feature set is far from complete, and absolutely no guarante
 
 Still, because binjr only consumes data, in a read-only fashion, the only risk you’re taking in trying it out is that it might not work quite as you like (or work at all…).
 
-For the moment, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the aim of the project is to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
+For the moment, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
 
 
 
