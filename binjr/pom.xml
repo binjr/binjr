@@ -107,10 +107,10 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>binjr beta v${project.version}</description>
-                    <releaseName>binjr beta v${project.version}</releaseName>
+                    <description>binjr v${project.version}</description>
+                    <releaseName>binjr v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
-                    <prerelease>true</prerelease>
+                    <prerelease>false</prerelease>
                     <!-- If your project has additional artifacts, such as ones produced by
                          the maven-assembly-plugin, you can define the following
                          (requires version 1.1.1 of the plugin or higher): -->
