@@ -263,7 +263,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleHelpAction(ActionEvent event) {
         try {
-            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_BINJR_WIKI);
         } catch (IOException | URISyntaxException e) {
             logger.error(e);
         }

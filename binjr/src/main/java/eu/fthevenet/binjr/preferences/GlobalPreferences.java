@@ -23,6 +23,7 @@ public class GlobalPreferences {
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
+    public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
     public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
     private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
