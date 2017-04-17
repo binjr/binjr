@@ -223,23 +223,14 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                         try {
                             Graphdesc graphdesc = getGraphDescriptor(currentPath);
                             newBranch.setValue(bindingFactory.of(tree.getValue().getTreeHierarchy(), newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
-                           boolean isDummyRecycled = false;
                             for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                                 String graphType = graphdesc.seriesDescList.get(i).graphType;
                                 if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                                    TimeSeriesBinding<Double> binding = bindingFactory.of(tree.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this);
-                                    // I suspect that removing the dummy tree branch is the cause for the infinite loop in WinAccessible.navigate(),
-                                    // so now the dummy node is recycled as the first of the graphdesc.
-                                    // This might be troublesome if a call to graphdesc returns nothing (or nothing plotable) as this would cause an empty node
-                                    // to linger on the parent leaf. No really dangerous but not very clean either...
-                                    if (!isDummyRecycled && newBranch.getChildren().size() > 0){
-                                        newBranch.getChildren().get(0).setValue(binding);
-                                        isDummyRecycled =true;
-                                    } else {
-                                        newBranch.getChildren().add(new TreeItem<>(binding));
-                                    }
+                                    newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
                                 }
                             }
+                            //remove dummy node
+                            newBranch.getChildren().remove(0);
                             // remove the listener so it isn't executed next time node is expanded
                             newBranch.expandedProperty().removeListener(this);
                         } catch (Exception e) {

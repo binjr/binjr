@@ -59,7 +59,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         // Disabling accessibility support could work around hanging issue on Windows  10
         // see "https://bugs.openjdk.java.net/browse/JDK-8132897"
-        // System.setProperty("glass.accessible.force", "false");
+         System.setProperty("glass.accessible.force", "false");
         launch(args);
     }
 
