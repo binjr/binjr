@@ -21,6 +21,15 @@ Copyright 2002-2012 Ramnivas Laddad, Juergen Hoeller, Chris Beams
 ------------------------------------------------------------------------------
 ------------------------------------------------------------------------------
 
+Apache HttpComponents Client
+Copyright 1999-2017 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+
 ControlsFX
 Copyright (c) 2013, 2014, ControlsFX
 All rights reserved.
@@ -32,7 +41,7 @@ notice, this list of conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright
 notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
- * Neither the displayName of ControlsFX, any associated website, nor the
+ * Neither the name of ControlsFX, any associated website, nor the
 names of its contributors may be used to endorse or promote products
 derived from this software without specific prior written permission.
 
