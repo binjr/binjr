@@ -36,7 +36,7 @@ public class GlobalPreferences {
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
     private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
-    public static final int MAX_RECENT_FILES = 20;
+    private static final int MAX_RECENT_FILES = 20;
     private final Manifest manifest;
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
@@ -249,7 +249,7 @@ public class GlobalPreferences {
      */
     public String getMostRecentSaveFolder() {
         String recentPath = mostRecentSaveFolder.getValue();
-        if (recentPath == null && recentPath.trim().length() == 0) {
+        if (recentPath == null || recentPath.trim().length() == 0) {
             recentPath = System.getProperty("user.home");
         }
         return recentPath;
