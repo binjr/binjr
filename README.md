@@ -39,6 +39,6 @@ If you would like to contribute, please sumbit a pull request.
 
 *binjr* is very much **a work in progress** by it has reached its first milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more usefull than frustrating.
 
-It still seriously lack polish in some area (I hear drag and drop is a "thing" with the youngs nowadays...) and I have ideas for more features.
+That said, it still seriously lack polish in some area (I hear drag and drop is a "thing" with young people nowadays...) and I have ideas for more features.
 
 Also, for the time being, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
