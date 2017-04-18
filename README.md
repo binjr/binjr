@@ -37,7 +37,7 @@ If you would like to contribute, please sumbit a pull request.
 
 ## What is the status of the project?
 
-*binjr* is very much **a work in progress** by it has reached its first milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more usefull than frustrating.
+*binjr* is very much **a work in progress** but it has reached its first milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more usefull than frustrating.
 
 That said, it still seriously lack polish in some area (I hear drag and drop is a "thing" with young people nowadays...) and I have ideas for more features.
 
