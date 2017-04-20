@@ -10,7 +10,7 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
 
-![Screenshot](/assets/images/screenshot02.png)
+![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
 
 ## Getting started
 
@@ -24,7 +24,12 @@ You can either build it from source using Maven after cloning the repository, or
 
 All dependencies are packaged inside the executable jar, so in order to start the application simply run: java -jar binj.jar (or double-click the jar file, provided your environment is configured adequately).
 
-The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference)
+## Getting help
+The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference). It's no yet complete, but getting there.
+
+If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/fthevenet/binjr/issues).
+
+If you would like to contribute, please sumbit a pull request.
 
 ## How is it licensed?
 
@@ -32,10 +37,8 @@ The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Re
 
 ## What is the status of the project?
 
-*binjr* is very much **a work in progress** and the project is still in its early days.
+*binjr* is very much **a work in progress** but it has reached its first milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more usefull than frustrating.
 
-For the moment, its feature set is far from complete, and absolutely no guarantee is made that the features currently in there right now will actually works, or are not going to evolve significantly in the near future.
+That said, it still seriously lack polish in some area (I hear drag and drop is a "thing" with young people nowadays...) and I have ideas for more features.
 
-Still, because binjr only consumes data, in a read-only fashion, the only risk you’re taking in trying it out is that it might not work quite as you like (or work at all…).
-
-For the moment, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
+Also, for the time being, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
