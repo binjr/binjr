@@ -48,7 +48,6 @@ public class Main extends Application {
         if (splash != null) {
             splash.close();
         }
-
     }
 
     /**

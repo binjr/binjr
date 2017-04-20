@@ -136,6 +136,8 @@
                     <bundler>ALL</bundler>
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <appName>${project.build.finalName}</appName>
+                    <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
+                    <jvmArgs>splash:./resources/splashscreen.png</jvmArgs>
                     <manifestAttributes>
                         <Specification-Title>${project.name}</Specification-Title>
                         <Specification-Version>${project.version}</Specification-Version>
@@ -145,9 +147,10 @@
                         <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                         <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
                     </manifestAttributes>
-                    <!--<bundleArguments>-->
-                    <!--<runtime/>-->
-                    <!--</bundleArguments>-->
+                    <bundleArguments>
+                        <!--<runtime/>-->
+                        <licenseFile>LICENSE</licenseFile>
+                    </bundleArguments>
                 </configuration>
                 <executions>
                     <execution>
