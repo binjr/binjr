@@ -131,7 +131,7 @@ public class Dialogs {
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
     public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
-        switch (GlobalPreferences.getInstance().getOsFamilly()) {
+        switch (GlobalPreferences.getInstance().getOsFamily()) {
             case WINDOWS:
                 if (Desktop.isDesktopSupported()) {
                     Desktop desktop = Desktop.getDesktop();

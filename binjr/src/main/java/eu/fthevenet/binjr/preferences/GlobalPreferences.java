@@ -333,14 +333,28 @@ public class GlobalPreferences {
         this.loadLastWorkspaceOnStartup.set(loadLastWorkspaceOnStartup);
     }
 
+    /**
+     * Gets the current UI theme
+     *
+     * @return the current UI theme
+     */
     public UserInterfaceThemes getUserInterfaceTheme() {
         return userInterfaceTheme.getValue();
     }
 
+    /**
+     * The UI theme property
+     *
+     * @return the UI theme property
+     */
     public Property<UserInterfaceThemes> userInterfaceThemeProperty() {
         return userInterfaceTheme;
     }
 
+    /**
+     * Sets the UI theme
+     * @param userInterfaceTheme  the UI theme to apply
+     */
     public void setUserInterfaceTheme(UserInterfaceThemes userInterfaceTheme) {
         this.userInterfaceTheme.setValue(userInterfaceTheme);
     }
@@ -429,18 +443,23 @@ public class GlobalPreferences {
         return sysInfo;
     }
 
-    public OsFamilly getOsFamilly() {
+    /**
+     * Returns the family of the currently running OS
+     *
+     * @return the family of the currently running OS
+     */
+    public OsFamily getOsFamily() {
         if (OS_NAME.startsWith("windows")) {
-            return OsFamilly.WINDOWS;
+            return OsFamily.WINDOWS;
         }
         if (OS_NAME.startsWith("mac")) {
-            return OsFamilly.OSX;
+            return OsFamily.OSX;
         }
         if (OS_NAME.startsWith("linux")) {
-            return OsFamilly.LINUX;
+            return OsFamily.LINUX;
         }
         else {
-            return OsFamilly.UNSUPPORTED;
+            return OsFamily.UNSUPPORTED;
         }
     }
 
