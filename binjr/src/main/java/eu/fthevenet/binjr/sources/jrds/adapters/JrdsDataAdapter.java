@@ -1,10 +1,13 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonParseException;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.SimpleCachingDataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.exceptions.ResponseProcessingException;
+import eu.fthevenet.binjr.data.adapters.exceptions.SourceCommunicationException;
 import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
@@ -101,14 +104,19 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     @Override
     public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
-        JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
-        Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
-        List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
-        for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
-            attachNode(tree, branch.id, m);
+        try {
+            JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
+
+            Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+            TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
+            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
+                attachNode(tree, branch.id, m);
+            }
+            return tree;
+        } catch (JsonParseException e) {
+            throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
         }
-        return tree;
     }
 
     @Override
@@ -196,9 +204,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 return httpClient.execute(httpget, responseHandler);
             }
         } catch (IOException e) {
-            throw new DataAdapterException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
+            throw new SourceCommunicationException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {
-            throw new DataAdapterException("Error building URI for request");
+            throw new SourceCommunicationException("Error building URI for request");
         }
     }
 
@@ -302,7 +310,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     try {
                         return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
                     } catch (Exception e) {
-                        throw new IOException("", e);
+                        throw new IOException("Failed to unmarshall graphdesc response", e);
                     }
                 }
                 throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
@@ -324,7 +332,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     }
                     String[] headers = header.split(SEPARATOR);
                     if (headers.length < 1) {
-                        throw new DataAdapterException("Could not to retrieve data store names for graph id=" + id + ": header line in csv is blank.");
+                        throw new ResponseProcessingException("Could not to retrieve data store names for graph id=" + id + ": header line in csv is blank.");
                     }
                     Graphdesc desc = new Graphdesc();
                     desc.seriesDescList = new ArrayList<>();
@@ -337,7 +345,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 }
             }
         } catch (IOException e) {
-            throw new DataAdapterException(e);
+            throw new ResponseProcessingException(e);
         }
     }
 

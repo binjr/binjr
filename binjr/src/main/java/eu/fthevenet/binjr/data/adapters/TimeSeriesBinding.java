@@ -34,7 +34,7 @@ public class TimeSeriesBinding<T extends Number> {
     @XmlTransient
     private DataAdapter<T> adapter;
 
-    private TimeSeriesBinding() {
+    public TimeSeriesBinding() {
         this.label = "";
         this.path = "";
         this.color = null;
@@ -57,7 +57,7 @@ public class TimeSeriesBinding<T extends Number> {
         this.unitName = unitName;
         this.treeHierarchy = treeHierarchy;
         this.adapter = adapter;
-        this.adapterId = adapter.getId();
+        this.adapterId = adapter != null ? adapter.getId() : null;
     }
 
     /**

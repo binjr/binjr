@@ -1,7 +1,7 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;

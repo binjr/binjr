@@ -1,4 +1,4 @@
-package eu.fthevenet.binjr.data.adapters;
+package eu.fthevenet.binjr.data.adapters.exceptions;
 
 /**
  * Signals that an error happened while using a DataAdapter.

@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.util.cache.LRUMap;
 import eu.fthevenet.util.io.IOUtils;
 import eu.fthevenet.util.logging.Profiler;

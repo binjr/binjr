@@ -1,8 +1,9 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.workspace.Source;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
@@ -32,6 +33,7 @@ import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -387,14 +389,14 @@ public class MainViewController implements Initializable {
                 }
                 for (Worksheet<?> worksheet : wsFromfile.getWorksheets()) {
                     for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
-                        s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedTabController.refresh());
                         UUID id = s.getBinding().getAdapterId();
                         DataAdapter<?> da = sourcesAdapters.values()
                                 .stream()
                                 .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                                 .findAny()
-                                .orElseThrow(() -> new DataAdapterException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
+                                .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
                         s.getBinding().setAdapter(da);
+                        s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedTabController.refresh());
                     }
                     loadWorksheet(worksheet);
                 }
@@ -459,23 +461,39 @@ public class MainViewController implements Initializable {
         dlg.showAndWait().ifPresent(da -> {
             newTab.setText(da.getSourceName());
             newTab.setUserData(da);
-            TreeView<TimeSeriesBinding<Double>> treeView;
+            Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
             treeView = buildTreeViewForTarget(da);
-            newTab.setContent(treeView);
-            sourcesAdapters.put(newTab, da);
-            res.set(true);
+            if (treeView.isPresent()) {
+                newTab.setContent(treeView.get());
+                sourcesAdapters.put(newTab, da);
+                res.set(true);
+            }
+            else {
+                res.set(false);
+            }
         });
         return res.get();
     }
 
-    private void loadAdapters(DataAdapter da) {
+    // String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter
+    private void loadAdapters(DataAdapter da) throws DataAdapterException {
         Tab newTab = new Tab();
         newTab.setText(da.getSourceName());
         newTab.setUserData(da);
-        TreeView<TimeSeriesBinding<Double>> treeView;
+        Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
         treeView = buildTreeViewForTarget(da);
-        newTab.setContent(treeView);
-        sourcesAdapters.put(newTab, da);
+        if (treeView.isPresent()) {
+            newTab.setContent(treeView.get());
+            sourcesAdapters.put(newTab, da);
+        }
+        else {
+            TreeItem<TimeSeriesBinding<Double>> i = new TreeItem<>();
+            i.setValue(new TimeSeriesBinding<>());
+            Label l = new Label("<Failed to connect to \"" + da.getSourceName() + "\">");
+            l.setTextFill(Color.RED);
+            i.setGraphic(l);
+            newTab.setContent(new TreeView<>(i));
+        }
         sourcesTabPane.getTabs().add(newTab);
         sourcesTabPane.getSelectionModel().select(newTab);
     }
@@ -534,17 +552,19 @@ public class MainViewController implements Initializable {
     }
 
 
-    private TreeView<TimeSeriesBinding<Double>> buildTreeViewForTarget(DataAdapter dp) {
+    private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView)));
         try {
             TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
             root.setExpanded(true);
             treeView.setRoot(root);
+            return Optional.of(treeView);
+
         } catch (DataAdapterException e) {
-            Dialogs.displayException("An error occurred while building the tree from " + dp.getSourceName(), e, root);
+            Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
         }
-        return treeView;
+        return Optional.empty();
     }
 
     private <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {

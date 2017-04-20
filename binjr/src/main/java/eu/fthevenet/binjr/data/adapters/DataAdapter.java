@@ -1,5 +1,6 @@
 package eu.fthevenet.binjr.data.adapters;
 
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import javafx.scene.control.TreeItem;
@@ -17,8 +18,8 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 public abstract class DataAdapter<T extends Number> implements Serializable, AutoCloseable {
-
     private UUID id = UUID.randomUUID();
+    private boolean loaded = false;
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -97,5 +98,13 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
      */
     public UUID getId() {
         return id;
+    }
+
+    public boolean isLoaded() {
+        return loaded;
+    }
+
+    public void setLoaded(boolean loaded) {
+        this.loaded = loaded;
     }
 }

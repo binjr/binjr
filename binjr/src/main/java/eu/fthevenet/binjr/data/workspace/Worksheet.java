@@ -1,7 +1,7 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.DataAdapterException;
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
