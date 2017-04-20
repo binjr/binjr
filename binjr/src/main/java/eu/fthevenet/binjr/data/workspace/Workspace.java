@@ -1,6 +1,5 @@
 package eu.fthevenet.binjr.data.workspace;
 
-import com.sun.javafx.collections.ObservableListWrapper;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
@@ -9,6 +8,7 @@ import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +51,7 @@ public class Workspace implements Serializable, Dirtyable {
      * Initializes a new instance of the {@link Workspace} class
      */
     public Workspace() {
-        this(new ObservableListWrapper<>(new ArrayList<>()), new ObservableListWrapper<>(new ArrayList<>()));
+        this(FXCollections.observableList(new ArrayList<>()), FXCollections.observableList(new ArrayList<>()));
     }
 
     /**

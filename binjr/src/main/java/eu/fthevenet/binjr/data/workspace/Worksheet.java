@@ -1,6 +1,5 @@
 package eu.fthevenet.binjr.data.workspace;
 
-import com.sun.javafx.collections.ObservableListWrapper;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterException;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
@@ -11,6 +10,7 @@ import eu.fthevenet.binjr.data.timeseries.transform.DecimationTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.beans.property.*;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,7 +71,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
                 ChartType.STACKED,
                 ZoneId.systemDefault(),
-                new ObservableListWrapper<>(new LinkedList<>()),
+                FXCollections.observableList(new LinkedList<>()),
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
                 UnitPrefixes.METRIC,
                 0.8);
@@ -88,7 +88,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this(name,
                 chartType,
                 timezone,
-                new ObservableListWrapper<>(new LinkedList<>()),
+                FXCollections.observableList(new LinkedList<>()),
                 fromDateTime,
                 toDateTime,
                 unitName,
@@ -107,7 +107,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getTimeZone(),
                 initWorksheet.getSeries().stream()
                         .map(TimeSeriesInfo::new)
-                        .collect(Collectors.toCollection(() -> new ObservableListWrapper<>(new LinkedList<>()))),
+                        .collect(Collectors.toCollection(() -> FXCollections.observableList(new LinkedList<>()))),
                 initWorksheet.getFromDateTime(),
                 initWorksheet.getToDateTime(),
                 initWorksheet.getUnit(),
@@ -119,7 +119,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
-        this.series = new ObservableListWrapper<>(new LinkedList<>(bindings));
+        this.series = FXCollections.observableList(new LinkedList<>(bindings));
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
