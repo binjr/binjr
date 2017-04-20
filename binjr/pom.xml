@@ -137,7 +137,7 @@
                     <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                     <appName>${project.build.finalName}</appName>
                     <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
-                    <jvmArgs>splash:./resources/splashscreen.png</jvmArgs>
+                    <jvmArgs>splash:splashscreen.png</jvmArgs>
                     <manifestAttributes>
                         <Specification-Title>${project.name}</Specification-Title>
                         <Specification-Version>${project.version}</Specification-Version>
