@@ -21,6 +21,61 @@
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
         <tag>v0.99.5</tag>
     </scm>
+    <profiles>
+        <profile>
+            <id>buildNativeBundles</id>
+            <activation>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.zenjava</groupId>
+                        <artifactId>javafx-maven-plugin</artifactId>
+                        <version>8.8.3</version>
+                        <configuration>
+                            <mainClass>eu.fthevenet.binjr.Main</mainClass>
+                            <vendor>${project.build.finalName}</vendor>
+                            <bundler>ALL</bundler>
+                            <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
+                            <appName>${project.build.finalName}</appName>
+                            <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
+                            <jvmArgs>splash:splashscreen.png</jvmArgs>
+                            <manifestAttributes>
+                                <Specification-Title>${project.name}</Specification-Title>
+                                <Specification-Version>${project.version}</Specification-Version>
+                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                                <Implementation-Title>${project.name}</Implementation-Title>
+                                <Implementation-Version>${project.version}</Implementation-Version>
+                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                                <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
+                            </manifestAttributes>
+                            <bundleArguments>
+                                <!--<runtime/>-->
+                                <licenseFile>LICENSE</licenseFile>
+                            </bundleArguments>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <!-- required before build-native -->
+                                <id>fromUrl-jfxjar</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build-jar</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>fromUrl-native</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>build-native</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
     <build>
         <finalName>${project.name}</finalName>
         <plugins>
@@ -125,52 +180,6 @@
                     </fileSets>
                 </configuration>
             </plugin>
-
-            <plugin>
-                <groupId>com.zenjava</groupId>
-                <artifactId>javafx-maven-plugin</artifactId>
-                <version>8.8.3</version>
-                <configuration>
-                    <mainClass>eu.fthevenet.binjr.Main</mainClass>
-                    <vendor>${project.build.finalName}</vendor>
-                    <bundler>ALL</bundler>
-                    <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
-                    <appName>${project.build.finalName}</appName>
-                    <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
-                    <jvmArgs>splash:splashscreen.png</jvmArgs>
-                    <manifestAttributes>
-                        <Specification-Title>${project.name}</Specification-Title>
-                        <Specification-Version>${project.version}</Specification-Version>
-                        <Specification-Vendor>${project.organization.name}</Specification-Vendor>
-                        <Implementation-Title>${project.name}</Implementation-Title>
-                        <Implementation-Version>${project.version}</Implementation-Version>
-                        <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                        <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
-                    </manifestAttributes>
-                    <bundleArguments>
-                        <!--<runtime/>-->
-                        <licenseFile>LICENSE</licenseFile>
-                    </bundleArguments>
-                </configuration>
-                <executions>
-                    <execution>
-                        <!-- required before build-native -->
-                        <id>fromUrl-jfxjar</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build-jar</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>fromUrl-native</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>build-native</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
     <dependencies>
