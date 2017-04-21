@@ -39,6 +39,9 @@ public class Source implements Serializable, Dirtyable {
      */
     @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
+        if (adapter == null) {
+            throw new IllegalArgumentException("adapter cannot be null");
+        }
         Source newSource = new Source();
         newSource.setName(adapter.getSourceName());
         newSource.setAdapterClass(adapter.getClass());

@@ -144,7 +144,11 @@ public class MainViewController implements Initializable {
 
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
             workspace.clearSources();
-            workspace.addSources(c.getList().stream().map((t) -> Source.of(sourcesAdapters.get(t))).collect(Collectors.toList()));
+            workspace.addSources(c.getList()
+                    .stream()
+                    .filter(t -> sourcesAdapters.get(t) != null)
+                    .map((t) -> Source.of(sourcesAdapters.get(t)))
+                    .collect(Collectors.toList()));
             logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
@@ -494,6 +498,7 @@ public class MainViewController implements Initializable {
             i.setGraphic(l);
             newTab.setContent(new TreeView<>(i));
         }
+
         sourcesTabPane.getTabs().add(newTab);
         sourcesTabPane.getSelectionModel().select(newTab);
     }
@@ -560,7 +565,6 @@ public class MainViewController implements Initializable {
             root.setExpanded(true);
             treeView.setRoot(root);
             return Optional.of(treeView);
-
         } catch (DataAdapterException e) {
             Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
         }
