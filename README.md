@@ -29,9 +29,13 @@ All dependencies are packaged inside the executable jar, so in order to start th
 
 _**binjr relies on JavaFX for its user interface and WILL NOT START if is not present.**_
 
-_**As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with OpenJDK packages provided by most Linux distributions, and it must be built or installed separately.**_
+As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with the OpenJDK runtime environement provided by most Linux distributions.
 
-_**For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:**_
+In this case, you can either:
+* Install the Oracle JRE for your platform.
+* Build or installed a prebuilf package for [OpenJFX](http://openjdk.java.net/projects/openjfx/).
+
+For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:
 
 `sudo apt-get install openjfx`
 
