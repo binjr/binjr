@@ -33,7 +33,7 @@ As of version 8, JavaFX is distributed by default in Oracle's JRE on all support
 
 In this case, you can either:
 * Install the Oracle JRE for your platform.
-* Build or installed a prebuilf package for [OpenJFX](http://openjdk.java.net/projects/openjfx/).
+* Build or installed a prebuilt package for [OpenJFX](http://openjdk.java.net/projects/openjfx/).
 
 For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:
 
