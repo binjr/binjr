@@ -11,8 +11,11 @@ import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
+import javafx.scene.effect.Bloom;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
@@ -43,9 +46,6 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private Label versionLabel;
-
-    @FXML
-    private TitledPane updatePane;
 
     @FXML
     private TextFlow versionCheckFlow;
@@ -105,7 +105,6 @@ public class AboutBoxController implements Initializable {
         assert licenseTextFlow != null : "fx:id\"licenseTextFlow\" was not injected!";
         assert acknowledgementTextFlow != null : "fx:id\"acknowledgementTextFlow\" was not injected!";
         assert versionCheckFlow != null : "fx:id\"versionCheckFlow\" was not injected!";
-        assert updatePane != null : "fx:id\"updatePane\" was not injected!";
 
         try {
             BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_license.txt").openStream(), "utf-8"));
@@ -134,11 +133,7 @@ public class AboutBoxController implements Initializable {
                 header.setVisible(false);
             }
         });
-        updatePane.expandedProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                checkNewRelease();
-            }
-        });
+        checkNewRelease();
         sysInfoListTable.getItems().addAll(GlobalPreferences.getInstance().getSysInfoProperties());
         versionLabel.setText("version " + GlobalPreferences.getInstance().getManifestVersion());
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
@@ -152,7 +147,10 @@ public class AboutBoxController implements Initializable {
     private void checkNewRelease() {
         //  maskerPane.setVisible(true);
         versionCheckFlow.getChildren().clear();
-        versionCheckFlow.getChildren().add(new Text("Checking for updates..."));
+        Label l =new Label("Checking for updates...");
+        l.setTextFill(Color.LIGHTGRAY);
+        l.setPadding(new Insets(3,0,0,4));
+        versionCheckFlow.getChildren().add(l);
         Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
@@ -164,16 +162,18 @@ public class AboutBoxController implements Initializable {
             logger.trace("UI update running on " + Thread.currentThread().getName());
             Optional<GithubRelease> latest = getLatestTask.getValue();
             //    maskerPane.setVisible(false);
-            versionCheckFlow.getChildren().clear();
+
             Version current = GlobalPreferences.getInstance().getManifestVersion();
             if (latest.isPresent()) {
-                versionCheckFlow.getChildren().add(new Text("You're currently running version " + current.toString() + ".\n"));
-                versionCheckFlow.getChildren().add(new Text("Version  " + latest.get().getVersion().toString() + " is available at:\n"));
-
-                Hyperlink latestReleaseLink = new Hyperlink(latest.get().getHtmlUrl());
+//                versionCheckFlow.getChildren().add(new Text("You're currently running version " + current.toString() + ".\n"));
+//                versionCheckFlow.getChildren().add(new Text("Version  " + latest.get().getVersion().toString() + " is available at:\n"));
+                versionCheckFlow.getChildren().clear();
+                Hyperlink latestReleaseLink = new Hyperlink("v" + latest.get().getVersion().toString() + " is available");
+                latestReleaseLink.setTextFill(Color.valueOf("#ff6500"));
+                latestReleaseLink.setEffect(new Bloom());
                 latestReleaseLink.setOnAction(event -> {
                     try {
-                        Dialogs.launchUrlInExternalBrowser(latestReleaseLink.getText());
+                        Dialogs.launchUrlInExternalBrowser(latest.get().getHtmlUrl());
                     } catch (IOException | URISyntaxException e) {
                         logger.error(e);
                     }
@@ -181,7 +181,8 @@ public class AboutBoxController implements Initializable {
                 versionCheckFlow.getChildren().add(latestReleaseLink);
             }
             else {
-                versionCheckFlow.getChildren().add(new Text("You are running the latest release of binjr (" + current.toString() + ")"));
+                l.setText("binjr is up to date");
+              //  versionCheckFlow.getChildren().add(l);
             }
         });
         ForkJoinPool.commonPool().submit(getLatestTask);
