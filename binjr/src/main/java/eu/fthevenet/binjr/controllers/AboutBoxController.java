@@ -4,7 +4,10 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
+import eu.fthevenet.util.github.GithubRelease;
+import eu.fthevenet.util.version.Version;
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -17,13 +20,16 @@ import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.MaskerPane;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * The controller for the about dialog
@@ -37,6 +43,15 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private Label versionLabel;
+
+    @FXML
+    private TitledPane updatePane;
+
+    @FXML
+    private TextFlow versionCheckFlow;
+
+//    @FXML
+//    private Hyperlink newReleaseURL;
 
     public Hyperlink getBinjrUrl() {
         return binjrUrl;
@@ -62,10 +77,14 @@ public class AboutBoxController implements Initializable {
     @FXML
     private TextFlow acknowledgementTextFlow;
 
-    @FXML private TextFlow licenseTextFlow;
+    @FXML
+    private TextFlow licenseTextFlow;
 
     @FXML
     private TitledPane acknowledgementPane;
+
+    @FXML
+    private MaskerPane maskerPane;
 
     @FXML
     private void handleCloseButtonAction(ActionEvent event) {
@@ -85,12 +104,14 @@ public class AboutBoxController implements Initializable {
         assert acknowledgementPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
         assert licenseTextFlow != null : "fx:id\"licenseTextFlow\" was not injected!";
         assert acknowledgementTextFlow != null : "fx:id\"acknowledgementTextFlow\" was not injected!";
+        assert versionCheckFlow != null : "fx:id\"versionCheckFlow\" was not injected!";
+        assert updatePane != null : "fx:id\"updatePane\" was not injected!";
 
         try {
             BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_license.txt").openStream(), "utf-8"));
             Text binjrTxt = new Text("binjr\n");//
-            binjrTxt.setFont(Font.font("Bauhaus 93", FontWeight.BOLD,  18));
-            Text noticeTxt = new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2+"\n")));
+            binjrTxt.setFont(Font.font("Bauhaus 93", FontWeight.BOLD, 18));
+            Text noticeTxt = new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2 + "\n")));
 
             licenseTextFlow.getChildren().add(binjrTxt);
             licenseTextFlow.getChildren().add(noticeTxt);
@@ -99,28 +120,71 @@ public class AboutBoxController implements Initializable {
         }
         try {
             BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_Acknowledgement.txt").openStream(), "utf-8"));
-            acknowledgementTextFlow.getChildren().add(new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2+"\n"))));
+            acknowledgementTextFlow.getChildren().add(new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2 + "\n"))));
 
         } catch (IOException e) {
             logger.error("Failed to get resource \"/text/about_Acknowledgement.txt\"", e);
         }
-        Platform.runLater( () -> {
-                    Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
-                    if (header != null) {
-                        header.setMaxHeight(0);
-                        header.setMinHeight(0);
-                        header.setPrefHeight(0);
-                        header.setVisible(false);
-                    }
-                });
-        sysInfoListTable.getItems().addAll( GlobalPreferences.getInstance().getSysInfoProperties());
+        Platform.runLater(() -> {
+            Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
+            if (header != null) {
+                header.setMaxHeight(0);
+                header.setMinHeight(0);
+                header.setPrefHeight(0);
+                header.setVisible(false);
+            }
+        });
+        updatePane.expandedProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                checkNewRelease();
+            }
+        });
+        sysInfoListTable.getItems().addAll(GlobalPreferences.getInstance().getSysInfoProperties());
         versionLabel.setText("version " + GlobalPreferences.getInstance().getManifestVersion());
-        detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
-            Platform.runLater( () -> {
+        detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
+            Platform.runLater(() -> {
                 p.requestLayout();
                 p.getScene().getWindow().sizeToScene();
-            } );
-        } ));
+            });
+        }));
+    }
+
+    private void checkNewRelease() {
+        //  maskerPane.setVisible(true);
+        versionCheckFlow.getChildren().clear();
+        versionCheckFlow.getChildren().add(new Text("Checking for updates..."));
+        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
+            @Override
+            protected Optional<GithubRelease> call() throws Exception {
+                logger.trace("checkForNewerRelease running on " + Thread.currentThread().getName());
+                return GlobalPreferences.getInstance().checkForNewerRelease();
+            }
+        };
+        getLatestTask.setOnSucceeded(workerStateEvent -> {
+            logger.trace("UI update running on " + Thread.currentThread().getName());
+            Optional<GithubRelease> latest = getLatestTask.getValue();
+            //    maskerPane.setVisible(false);
+            versionCheckFlow.getChildren().clear();
+            Version current = GlobalPreferences.getInstance().getManifestVersion();
+            if (latest.isPresent()) {
+                versionCheckFlow.getChildren().add(new Text("You're currently running version " + current.toString() + ".\n"));
+                versionCheckFlow.getChildren().add(new Text("Version  " + latest.get().getVersion().toString() + " is available at:\n"));
+
+                Hyperlink latestReleaseLink = new Hyperlink(latest.get().getHtmlUrl());
+                latestReleaseLink.setOnAction(event -> {
+                    try {
+                        Dialogs.launchUrlInExternalBrowser(latestReleaseLink.getText());
+                    } catch (IOException | URISyntaxException e) {
+                        logger.error(e);
+                    }
+                });
+                versionCheckFlow.getChildren().add(latestReleaseLink);
+            }
+            else {
+                versionCheckFlow.getChildren().add(new Text("You are running the latest release of binjr (" + current.toString() + ")"));
+            }
+        });
+        ForkJoinPool.commonPool().submit(getLatestTask);
     }
 
     public void goTobinjrDotEu(ActionEvent actionEvent) {

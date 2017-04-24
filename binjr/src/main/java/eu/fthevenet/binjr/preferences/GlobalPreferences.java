@@ -1,6 +1,9 @@
 package eu.fthevenet.binjr.preferences;
 
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
+import eu.fthevenet.util.github.GithubApi;
+import eu.fthevenet.util.github.GithubRelease;
+import eu.fthevenet.util.version.Version;
 import javafx.beans.property.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,6 +40,8 @@ public class GlobalPreferences {
     private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
     private static final int MAX_RECENT_FILES = 20;
+    public static final String GITHUB_OWNER = "fthevenet";
+    public static final String GITHUB_REPO = "binjr";
     private final Manifest manifest;
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
@@ -353,7 +358,8 @@ public class GlobalPreferences {
 
     /**
      * Sets the UI theme
-     * @param userInterfaceTheme  the UI theme to apply
+     *
+     * @param userInterfaceTheme the UI theme to apply
      */
     public void setUserInterfaceTheme(UserInterfaceThemes userInterfaceTheme) {
         this.userInterfaceTheme.setValue(userInterfaceTheme);
@@ -407,17 +413,21 @@ public class GlobalPreferences {
      *
      * @return the version information held in the containing jar's manifest
      */
-    public String getManifestVersion() {
+    public Version getManifestVersion() {
         if (manifest != null) {
             String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
             for (String key : keys) {
                 String value = manifest.getMainAttributes().getValue(key);
                 if (value != null) {
-                    return value;
+                    try {
+                        return new Version(value);
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Could not parse version number: " + value, e);
+                    }
                 }
             }
         }
-        return "unknown";
+        return Version.emptyVersion;
     }
 
     /**
@@ -431,7 +441,7 @@ public class GlobalPreferences {
         double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
 
         List<SysInfoProperty> sysInfo = new ArrayList<>();
-        sysInfo.add(new SysInfoProperty("binjr version", getManifestVersion()));
+        sysInfo.add(new SysInfoProperty("binjr version", getManifestVersion().toString()));
         sysInfo.add(new SysInfoProperty("Java version", System.getProperty("java.version")));
         sysInfo.add(new SysInfoProperty("Java vendor", System.getProperty("java.vendor")));
         sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
@@ -461,6 +471,21 @@ public class GlobalPreferences {
         else {
             return OsFamily.UNSUPPORTED;
         }
+    }
+
+    public Optional<GithubRelease> checkForNewerRelease() {
+        try {
+            GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+            if (latestRelease != null) {
+                if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
+                    return Optional.of(latestRelease);
+                }
+            }
+        } catch (Exception e) {
+            logger.error("Error while checking for update", e);
+        }
+
+        return Optional.empty();
     }
 
     private Manifest getManifest() {
