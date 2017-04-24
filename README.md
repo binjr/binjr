@@ -14,15 +14,31 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 
 ## Getting started
 
-*binjr* is Java application, built on top of JavaFX, and requires a Java Runtime Environement version 1.8 with JavaFX version 8u40 or later.
 
-Using the latest available version of either Oracle's Hotspot or OpenJDK (with OpenJFX) is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
+_binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime Environement version 1.8 with JavaFX version 8u40 or later.
 
-The latest release can be found  [here](https://github.com/fthevenet/binjr/releases/latest) 
+Using the latest available version is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
 
-You can either build it from source using Maven after cloning the repository, or download binjr.jar.
+The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest) 
 
-All dependencies are packaged inside the executable jar, so in order to start the application simply run: java -jar binj.jar (or double-click the jar file, provided your environment is configured adequately).
+You can either build it from source using Maven after cloning the repository, or download `binjr.jar`.
+
+All dependencies are packaged inside the executable jar, so in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file, provided your environment is configured adequately).
+
+### Important Notice:
+
+_**binjr relies on JavaFX for its user interface and WILL NOT START if is not present.**_
+
+As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with the OpenJDK runtime environement provided by most Linux distributions.
+
+In this case, you can either:
+* Install the Oracle JRE for your platform.
+* Build or installed a prebuilt package for [OpenJFX](http://openjdk.java.net/projects/openjfx/).
+
+For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:
+
+`sudo apt-get install openjfx`
+
 
 ## Getting help
 The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference). It's no yet complete, but getting there.
