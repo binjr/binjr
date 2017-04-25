@@ -4,10 +4,7 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
-import eu.fthevenet.util.github.GithubRelease;
-import eu.fthevenet.util.version.Version;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,9 +27,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * The controller for the about dialog
@@ -133,7 +128,28 @@ public class AboutBoxController implements Initializable {
                 header.setVisible(false);
             }
         });
-        checkNewRelease();
+
+        versionCheckFlow.getChildren().clear();
+        Label l = new Label("Checking for updates...");
+        l.setTextFill(Color.DARKGRAY);
+        l.setPadding(new Insets(3, 0, 0, 4));
+        versionCheckFlow.getChildren().add(l);
+        GlobalPreferences.getInstance().asyncCheckForUpdate(githubRelease -> {
+                    versionCheckFlow.getChildren().clear();
+                    Hyperlink latestReleaseLink = new Hyperlink("v" + githubRelease.getVersion().toString() + " is available");
+                    latestReleaseLink.setTextFill(Color.valueOf("#4BACC6"));
+                    latestReleaseLink.setEffect(new Bloom());
+                    latestReleaseLink.setOnAction(event -> {
+                        try {
+                            Dialogs.launchUrlInExternalBrowser(githubRelease.getHtmlUrl());
+                        } catch (IOException | URISyntaxException e) {
+                            logger.error(e);
+                        }
+                    });
+                    versionCheckFlow.getChildren().add(latestReleaseLink);
+                },
+                version -> l.setText("binjr is up to date"),
+                () -> versionCheckFlow.getChildren().clear());
         sysInfoListTable.getItems().addAll(GlobalPreferences.getInstance().getSysInfoProperties());
         versionLabel.setText("version " + GlobalPreferences.getInstance().getManifestVersion());
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
@@ -142,50 +158,6 @@ public class AboutBoxController implements Initializable {
                 p.getScene().getWindow().sizeToScene();
             });
         }));
-    }
-
-    private void checkNewRelease() {
-        //  maskerPane.setVisible(true);
-        versionCheckFlow.getChildren().clear();
-        Label l =new Label("Checking for updates...");
-        l.setTextFill(Color.LIGHTGRAY);
-        l.setPadding(new Insets(3,0,0,4));
-        versionCheckFlow.getChildren().add(l);
-        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
-            @Override
-            protected Optional<GithubRelease> call() throws Exception {
-                logger.trace("checkForNewerRelease running on " + Thread.currentThread().getName());
-                return GlobalPreferences.getInstance().checkForNewerRelease();
-            }
-        };
-        getLatestTask.setOnSucceeded(workerStateEvent -> {
-            logger.trace("UI update running on " + Thread.currentThread().getName());
-            Optional<GithubRelease> latest = getLatestTask.getValue();
-            //    maskerPane.setVisible(false);
-
-            Version current = GlobalPreferences.getInstance().getManifestVersion();
-            if (latest.isPresent()) {
-//                versionCheckFlow.getChildren().add(new Text("You're currently running version " + current.toString() + ".\n"));
-//                versionCheckFlow.getChildren().add(new Text("Version  " + latest.get().getVersion().toString() + " is available at:\n"));
-                versionCheckFlow.getChildren().clear();
-                Hyperlink latestReleaseLink = new Hyperlink("v" + latest.get().getVersion().toString() + " is available");
-                latestReleaseLink.setTextFill(Color.valueOf("#ff6500"));
-                latestReleaseLink.setEffect(new Bloom());
-                latestReleaseLink.setOnAction(event -> {
-                    try {
-                        Dialogs.launchUrlInExternalBrowser(latest.get().getHtmlUrl());
-                    } catch (IOException | URISyntaxException e) {
-                        logger.error(e);
-                    }
-                });
-                versionCheckFlow.getChildren().add(latestReleaseLink);
-            }
-            else {
-                l.setText("binjr is up to date");
-              //  versionCheckFlow.getChildren().add(l);
-            }
-        });
-        ForkJoinPool.commonPool().submit(getLatestTask);
     }
 
     public void goTobinjrDotEu(ActionEvent actionEvent) {

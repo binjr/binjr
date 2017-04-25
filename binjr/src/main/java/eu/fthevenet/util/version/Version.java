@@ -23,8 +23,8 @@ public class Version implements Comparable {
     private final int minor;
     private final int micro;
     private final String qualifier;
-    private static final String VERSION_SEPARATOR = ".";
-    private static final String QUALIFIER_SEPARATOR = "-";
+    private final boolean snapshot;
+    private static final String SEPARATOR = ".";
     /**
      * The empty version "0.0.0". Equivalent to calling
      * <code>new Version(0,0,0)</code>.
@@ -47,6 +47,10 @@ public class Version implements Comparable {
         this(major, minor, micro, null);
     }
 
+    public Version(int major, int minor, int micro, String qualifier) {
+        this(major, minor, micro, qualifier, false);
+    }
+
     /**
      * Creates a version identifier from the specifed components.
      *
@@ -59,7 +63,7 @@ public class Version implements Comparable {
      * @throws IllegalArgumentException If the numerical components are negative
      *                                  or the qualifier string is invalid.
      */
-    public Version(int major, int minor, int micro, String qualifier) {
+    public Version(int major, int minor, int micro, String qualifier, boolean snapshot) {
         if (qualifier == null) {
             qualifier = ""; //$NON-NLS-1$
         }
@@ -67,6 +71,7 @@ public class Version implements Comparable {
         this.minor = minor;
         this.micro = micro;
         this.qualifier = qualifier;
+        this.snapshot = snapshot;
         validate();
     }
 
@@ -93,12 +98,23 @@ public class Version implements Comparable {
      *                                  formatted.
      */
     public Version(String version) {
+        if (version == null) {
+            throw new IllegalArgumentException("Provided version string is null");
+        }
         int major = 0;
         int minor = 0;
         int micro = 0;
         String qualifier = ""; //$NON-NLS-1$
+        if (version.endsWith("-SNAPSHOT")) {
+            this.snapshot = true;
+            version = version.substring(0, version.length() - 9);
+        }
+        else {
+            snapshot = false;
+        }
+
         try {
-            StringTokenizer st = new StringTokenizer(version, VERSION_SEPARATOR + QUALIFIER_SEPARATOR, true);
+            StringTokenizer st = new StringTokenizer(version, SEPARATOR, true);
             major = Integer.parseInt(st.nextToken());
             if (st.hasMoreTokens()) {
                 st.nextToken(); // consume delimiter
@@ -143,7 +159,7 @@ public class Version implements Comparable {
         }
         int length = qualifier.length();
         for (int i = 0; i < length; i++) {
-            if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-" .indexOf(qualifier.charAt(i)) == -1) { //$NON-NLS-1$
+            if ("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-".indexOf(qualifier.charAt(i)) == -1) { //$NON-NLS-1$
                 throw new IllegalArgumentException("invalid qualifier"); //$NON-NLS-1$
             }
         }
@@ -211,6 +227,10 @@ public class Version implements Comparable {
         return qualifier;
     }
 
+    public boolean isSnapshot() {
+        return snapshot;
+    }
+
     /**
      * Returns the string representation of this version identifier.
      * <p>
@@ -222,12 +242,12 @@ public class Version implements Comparable {
      * @return The string representation of this version identifier.
      */
     public String toString() {
-        String base = major + VERSION_SEPARATOR + minor + VERSION_SEPARATOR + micro;
+        String base = major + SEPARATOR + minor + SEPARATOR + micro;
         if (qualifier.length() == 0) { //$NON-NLS-1$
-            return base;
+            return snapshot ? base + "-SNAPSHOT" : base;
         }
         else {
-            return base + QUALIFIER_SEPARATOR + qualifier;
+            return snapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + "-SNAPSHOT";
         }
     }
 
@@ -308,14 +328,10 @@ public class Version implements Comparable {
         if (result != 0) {
             return result;
         }
-        if("SNAPSHOT".equals(other.qualifier)){
-            if ("SNAPSHOT".equals(qualifier)){
-                return 0;
-            }
-            else{
-                return 1;
-            }
+        result = qualifier.compareTo(other.qualifier);
+        if (result != 0) {
+            return result;
         }
-        return qualifier.compareTo(other.qualifier);
+        return (this.snapshot ? 1 : 0) - (other.snapshot ? 1 : 0);
     }
 }

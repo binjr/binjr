@@ -1,13 +1,21 @@
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextFlow;
 import javafx.util.converter.NumberStringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -18,6 +26,7 @@ import java.util.ResourceBundle;
  * @author Frederic Thevenet
  */
 public class PreferenceDialogController implements Initializable {
+    private static final Logger logger = LogManager.getLogger(PreferenceDialogController.class);
     @FXML
     public TextField downSamplingThreshold;
     @FXML
@@ -36,6 +45,10 @@ public class PreferenceDialogController implements Initializable {
     private CheckBox loadAtStartupCheckbox;
     @FXML
     private ChoiceBox<UserInterfaceThemes> uiThemeChoiceBox;
+    @FXML
+    private TextFlow updateFlow;
+    @FXML
+    private CheckBox updateCheckBox;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -48,6 +61,8 @@ public class PreferenceDialogController implements Initializable {
         assert useSourceColors != null : "fx:id\"useSourceColors\" was not injected!";
         assert loadAtStartupCheckbox != null : "fx:id\"loadAtStartupCheckbox\" was not injected!";
         assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
+        assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
+        assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -66,20 +81,50 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
         uiThemeChoiceBox.getSelectionModel().select(GlobalPreferences.getInstance().getUserInterfaceTheme());
         GlobalPreferences.getInstance().userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
+        updateCheckBox.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().checkForUpdateOnStartUpProperty());
 
-        Platform.runLater(()-> {
-            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener( (obs, oldValue, newValue) -> {
+        Platform.runLater(() -> {
+            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
                 p.requestLayout();
                 p.getScene().getWindow().sizeToScene();
-            } ));
+            }));
 
             if (accordionPane.getPanes() != null
                     && accordionPane.getPanes().size() > 0
                     && accordionPane.getPanes().get(0) != null) {
                 accordionPane.getPanes().get(0).setExpanded(true);
             }
-
-
         });
+    }
+
+    public void handleCheckForUpdate(ActionEvent actionEvent) {
+        Button btn = (Button) actionEvent.getSource();
+        btn.setDisable(true);
+        updateFlow.getChildren().clear();
+        Label l = new Label("Checking for updates...");
+        l.setTextFill(Color.DIMGRAY);
+        updateFlow.getChildren().add(l);
+        GlobalPreferences.getInstance().asyncCheckForUpdate(githubRelease -> {
+                    updateFlow.getChildren().clear();
+                    Hyperlink latestReleaseLink = new Hyperlink("Version " + githubRelease.getVersion().toString() + " is available.");
+                    latestReleaseLink.setTextFill(Color.valueOf("#4BACC6"));
+                    latestReleaseLink.setOnAction(event -> {
+                        try {
+                            Dialogs.launchUrlInExternalBrowser(githubRelease.getHtmlUrl());
+                        } catch (IOException | URISyntaxException e) {
+                            logger.error(e);
+                        }
+                    });
+                    updateFlow.getChildren().add(latestReleaseLink);
+                    btn.setDisable(false);
+                },
+                version -> {
+                    btn.setDisable(false);
+                    l.setText("binjr is up to date (v" + version.toString() + ")");
+                },
+                () -> {
+                    btn.setDisable(false);
+                    l.setText("Could not check for update");
+                });
     }
 }

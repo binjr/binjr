@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
 <DialogPane xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
    <content>
       <AnchorPane>
@@ -67,6 +68,21 @@
                                                   <ChoiceBox fx:id="uiThemeChoiceBox" prefWidth="150.0"/>
                                               </children>
                                           </HBox>
+                                      </children>
+                                  </VBox>
+                              </children>
+                          </AnchorPane>
+                      </content>
+                  </TitledPane>
+                  <TitledPane animated="false" text="Updates">
+                      <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                              <children>
+                                  <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <children>
+                                          <CheckBox fx:id="updateCheckBox" mnemonicParsing="false" text="Check for updates on start-up"/>
+                                          <Button mnemonicParsing="false" text="Check now" onAction="#handleCheckForUpdate"/>
+                                          <TextFlow fx:id="updateFlow"/>
                                       </children>
                                   </VBox>
                               </children>

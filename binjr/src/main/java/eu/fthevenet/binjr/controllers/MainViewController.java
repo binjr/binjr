@@ -29,6 +29,7 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
@@ -38,8 +39,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.Notifications;
+import org.controlsfx.control.action.Action;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -207,6 +211,31 @@ public class MainViewController implements Initializable {
                 else {
                     logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
                 }
+            }
+
+            if (GlobalPreferences.getInstance().isCheckForUpdateOnStartUp()) {
+                GlobalPreferences.getInstance().asyncCheckForUpdate(
+                        githubRelease -> {
+                            Notifications n = Notifications.create()
+                                    .title("New release available!")
+                                    .text("You are currently running binjr version " + GlobalPreferences.getInstance().getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
+                                    .hideAfter(Duration.seconds(20))
+                                    .position(Pos.BOTTOM_RIGHT)
+                                    .owner(root);
+                            n.action(new Action("Download", actionEvent -> {
+                                String newReleaseUrl = githubRelease.getHtmlUrl();
+                                if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
+                                    try {
+                                        Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
+                                    } catch (IOException | URISyntaxException e) {
+                                        logger.error("Failed to launch url in browser " + newReleaseUrl, e);
+                                    }
+                                }
+                                n.hideAfter(Duration.seconds(0));
+                            }));
+                            n.showInformation();
+                        }
+                );
             }
         });
     }

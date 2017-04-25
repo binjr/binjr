@@ -5,6 +5,7 @@ import eu.fthevenet.util.github.GithubApi;
 import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.*;
+import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,6 +14,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ForkJoinPool;
+import java.util.function.Consumer;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -37,11 +40,13 @@ public class GlobalPreferences {
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
+    public static final String CHECK_FOR_UPDATE_ON_START_UP = "checkForUpdateOnStartUp";
     private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
     private static final int MAX_RECENT_FILES = 20;
     public static final String GITHUB_OWNER = "fthevenet";
     public static final String GITHUB_REPO = "binjr";
+
     private final Manifest manifest;
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
@@ -52,7 +57,7 @@ public class GlobalPreferences {
     private BooleanProperty useSourceColors;
     private StringProperty mostRecentSaveFolder;
     private Property<Path> mostRecentSavedWorkspace;
-
+    private BooleanProperty checkForUpdateOnStartUp;
     private Property<UserInterfaceThemes> userInterfaceTheme;
     private Deque<String> recentFiles;
 
@@ -84,9 +89,10 @@ public class GlobalPreferences {
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
         String recentFileString = prefs.get(RECENT_FILES, "");
         recentFiles = new ArrayDeque<>(Arrays.stream(recentFileString.split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
-
         userInterfaceTheme = new SimpleObjectProperty<>(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
+        checkForUpdateOnStartUp = new SimpleBooleanProperty(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
+        checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
 
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
@@ -408,6 +414,18 @@ public class GlobalPreferences {
         return recentFiles;
     }
 
+    public boolean isCheckForUpdateOnStartUp() {
+        return checkForUpdateOnStartUp.get();
+    }
+
+    public BooleanProperty checkForUpdateOnStartUpProperty() {
+        return checkForUpdateOnStartUp;
+    }
+
+    public void setCheckForUpdateOnStartUp(boolean checkForUpdateOnStartUp) {
+        this.checkForUpdateOnStartUp.set(checkForUpdateOnStartUp);
+    }
+
     /**
      * Returns the version information held in the containing jar's manifest
      *
@@ -473,19 +491,63 @@ public class GlobalPreferences {
         }
     }
 
-    public Optional<GithubRelease> checkForNewerRelease() {
-        try {
-            GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
-            if (latestRelease != null) {
-                if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
-                    return Optional.of(latestRelease);
+//    public Optional<GithubRelease> getNewRelease() throws IOException, URISyntaxException {
+//       try {
+//            GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+//            if (latestRelease != null) {
+//                if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
+//                    return Optional.of(latestRelease);
+//                }
+//            }
+//        } catch (Exception e) {
+//            logger.error("Error while checking for update", e);
+//        }
+//        return Optional.empty();
+//    }
+
+    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable) {
+        asyncCheckForUpdate(newReleaseAvailable, null, null);
+    }
+
+    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Runnable onFailure) {
+        asyncCheckForUpdate(newReleaseAvailable, null, onFailure);
+    }
+
+
+    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure) {
+        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
+            @Override
+            protected Optional<GithubRelease> call() throws Exception {
+                logger.trace("getNewRelease running on " + Thread.currentThread().getName());
+                GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+                if (latestRelease != null) {
+                    if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
+                        return Optional.of(latestRelease);
+                    }
+                }
+                return Optional.empty();
+            }
+        };
+        getLatestTask.setOnSucceeded(workerStateEvent -> {
+            logger.trace("UI update running on " + Thread.currentThread().getName());
+            Optional<GithubRelease> latest = getLatestTask.getValue();
+            Version current = GlobalPreferences.getInstance().getManifestVersion();
+            if (latest.isPresent()) {
+                newReleaseAvailable.accept(latest.get());
+            }
+            else {
+                if (upToDate != null) {
+                    upToDate.accept(current);
                 }
             }
-        } catch (Exception e) {
-            logger.error("Error while checking for update", e);
-        }
-
-        return Optional.empty();
+        });
+        getLatestTask.setOnFailed(workerStateEvent -> {
+            logger.error("Error while checking for update", getLatestTask.getException());
+            if (onFailure != null) {
+                onFailure.run();
+            }
+        });
+        ForkJoinPool.commonPool().submit(getLatestTask);
     }
 
     private Manifest getManifest() {

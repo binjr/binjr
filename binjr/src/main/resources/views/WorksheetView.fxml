@@ -173,21 +173,6 @@
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/lockCrosshairHorizontal_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Toggle horizontal crosshair marker">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </ToggleButton>
                 <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
                               prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                     <graphic>
@@ -197,6 +182,21 @@
                     </graphic>
                     <tooltip>
                         <Tooltip text="Toggle vertical crosshair marker">
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </ToggleButton>
+                <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                    <graphic>
+                        <ImageView fitHeight="20.0" fitWidth="20.0">
+                            <Image url="@/images/lockCrosshairHorizontal_40.png"/>
+                        </ImageView>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Toggle horizontal crosshair marker">
                             <font>
                                 <Font size="10.0"/>
                             </font>

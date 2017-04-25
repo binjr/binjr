@@ -12,12 +12,14 @@ public class VersionTest {
         Version[] versions = new Version[]{
                 new Version("1.0.0-SNAPSHOT"),
                 new Version("1.0.0"),
-                new Version("1.0.0-A"),
-                new Version("1.0.0-B"),
+                new Version("1.0.0.a-SNAPSHOT"),
+                new Version("1.0.0.a"),
+                new Version("1.0.0.b"),
                 new Version("1.0.1-SNAPSHOT"),
                 new Version("1.0.1"),
-                new Version("1.0.1-A"),
-                new Version("1.0.1-B")
+                new Version("1.0.1.a-SNAPSHOT"),
+                new Version("1.0.1.a"),
+                new Version("1.0.1.b")
         };
 
 
