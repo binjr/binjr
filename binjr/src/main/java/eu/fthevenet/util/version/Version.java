@@ -308,6 +308,14 @@ public class Version implements Comparable {
         if (result != 0) {
             return result;
         }
+        if("SNAPSHOT".equals(other.qualifier)){
+            if ("SNAPSHOT".equals(qualifier)){
+                return 0;
+            }
+            else{
+                return 1;
+            }
+        }
         return qualifier.compareTo(other.qualifier);
     }
 }

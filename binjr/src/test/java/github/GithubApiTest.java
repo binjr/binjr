@@ -1,4 +1,4 @@
-package jrds;
+package github;
 
 import eu.fthevenet.util.github.GithubApi;
 import eu.fthevenet.util.github.GithubRelease;
@@ -24,6 +24,7 @@ public class GithubApiTest {
 
             List<GithubRelease> releases = GithubApi.getInstance().getReleases("fthevenet", "binjr");
             releases.forEach(r -> logger.info("r = " + r));
+
 
 
         } catch (IOException e) {
