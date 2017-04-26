@@ -23,6 +23,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
+import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.chart.ValueAxis;
@@ -222,11 +223,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
 
         chart = buildChart(xAxis, (ValueAxis) yAxis);
-        //  chart.getStylesheets().add(getClass().getResource("/css/Classic.css").toExternalForm());
+        chart.setCache(true);
+        chart.setCacheHint(CacheHint.QUALITY);
+        chart.setCacheShape(true);
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
-        //  chart.titleProperty().bind(getWorksheet().nameProperty());
+
 
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
