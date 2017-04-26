@@ -31,10 +31,10 @@ public class GlobalPreferences {
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
     public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
-    private static final String CHART_ANIMATION_ENABLED = "chartAnimationEnabled";
+    private static final String CHART_ANIMATION_ENABLED = "enableChartAnimation";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
     private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
-    private static final String DOWN_SAMPLING_ENABLED = "downSamplingEnabled";
+    private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String USE_SOURCE_COLORS = "useSourceColors";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
@@ -46,6 +46,10 @@ public class GlobalPreferences {
     private static final int MAX_RECENT_FILES = 20;
     public static final String GITHUB_OWNER = "fthevenet";
     public static final String GITHUB_REPO = "binjr";
+    public static final String ENABLE_CROSSHAIR_ON_KEY_PRESSED = "enableCrosshairOnKeyPressed";
+    public static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
+    public static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
+
 
     private final Manifest manifest;
     private BooleanProperty loadLastWorkspaceOnStartup;
@@ -60,6 +64,11 @@ public class GlobalPreferences {
     private BooleanProperty checkForUpdateOnStartUp;
     private Property<UserInterfaceThemes> userInterfaceTheme;
     private Deque<String> recentFiles;
+    private BooleanProperty enableCrosshairOnKeyPressed;
+    private BooleanProperty horizontalMarkerOn;
+    private BooleanProperty verticalMarkerOn;
+
+
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -79,7 +88,7 @@ public class GlobalPreferences {
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
         sampleSymbolsVisible = new SimpleBooleanProperty(prefs.getBoolean(SAMPLE_SYMBOLS_VISIBLE, false));
         sampleSymbolsVisible.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SAMPLE_SYMBOLS_VISIBLE, newValue));
-        chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, false));
+        chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, true));
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
         useSourceColors = new SimpleBooleanProperty(prefs.getBoolean(USE_SOURCE_COLORS, true));
         useSourceColors.addListener((observable, oldValue, newValue) -> prefs.putBoolean(USE_SOURCE_COLORS, newValue));
@@ -93,6 +102,12 @@ public class GlobalPreferences {
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
         checkForUpdateOnStartUp = new SimpleBooleanProperty(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
+        enableCrosshairOnKeyPressed = new SimpleBooleanProperty(prefs.getBoolean(ENABLE_CROSSHAIR_ON_KEY_PRESSED, false));
+        enableCrosshairOnKeyPressed.addListener((observable, oldValue, newValue) -> prefs.putBoolean(ENABLE_CROSSHAIR_ON_KEY_PRESSED, newValue));
+        horizontalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
+        horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
+        verticalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(VERTICAL_MARKER_ON, true));
+        verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
 
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
@@ -424,6 +439,42 @@ public class GlobalPreferences {
 
     public void setCheckForUpdateOnStartUp(boolean checkForUpdateOnStartUp) {
         this.checkForUpdateOnStartUp.set(checkForUpdateOnStartUp);
+    }
+
+    public boolean isEnableCrosshairOnKeyPressed() {
+        return enableCrosshairOnKeyPressed.get();
+    }
+
+    public BooleanProperty enableCrosshairOnKeyPressedProperty() {
+        return enableCrosshairOnKeyPressed;
+    }
+
+    public void setEnableCrosshairOnKeyPressed(boolean enableCrosshairOnKeyPressed) {
+        this.enableCrosshairOnKeyPressed.set(enableCrosshairOnKeyPressed);
+    }
+
+    public boolean getHorizontalMarkerOn() {
+        return horizontalMarkerOn.get();
+    }
+
+    public BooleanProperty horizontalMarkerOnProperty() {
+        return horizontalMarkerOn;
+    }
+
+    public void setHorizontalMarkerOn(boolean horizontalMarkerOn) {
+        this.horizontalMarkerOn.set(horizontalMarkerOn);
+    }
+
+    public boolean getVerticalMarkerOn() {
+        return verticalMarkerOn.get();
+    }
+
+    public BooleanProperty verticalMarkerOnProperty() {
+        return verticalMarkerOn;
+    }
+
+    public void setVerticalMarkerOn(boolean verticalMarkerOn) {
+        this.verticalMarkerOn.set(verticalMarkerOn);
     }
 
     /**

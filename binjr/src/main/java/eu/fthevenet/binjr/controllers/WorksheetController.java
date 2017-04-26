@@ -279,10 +279,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
         });
+        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
+        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bindBidirectional(hCrosshair.selectedProperty());
         crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
-        mainViewController.showHorizontalMarkerProperty().bindBidirectional(crossHair.horizontalMarkerVisibleProperty());
-        mainViewController.showVerticalMarkerProperty().bindBidirectional(crossHair.verticalMarkerVisibleProperty());
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
 

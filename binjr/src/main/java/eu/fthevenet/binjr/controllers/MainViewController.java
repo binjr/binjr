@@ -22,7 +22,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -80,10 +79,8 @@ public class MainViewController implements Initializable {
     @FXML
     private Menu openRecentMenu;
 
-    private SimpleBooleanProperty showVerticalMarker = new SimpleBooleanProperty();
     private WorksheetController selectedTabController;
     private DataAdapter<Double> selectedDataAdapter;
-    private SimpleBooleanProperty showHorizontalMarker = new SimpleBooleanProperty();
     private final Workspace workspace;
     private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
@@ -196,10 +193,10 @@ public class MainViewController implements Initializable {
             });
 
             stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue && oldValue) {
+                if (GlobalPreferences.getInstance().isEnableCrosshairOnKeyPressed() && !newValue && oldValue) {
                     //main stage lost focus -> invalidates crosshair
-                    showHorizontalMarker.set(false);
-                    showVerticalMarker.set(false);
+                    GlobalPreferences.getInstance().setHorizontalMarkerOn(false);
+                    GlobalPreferences.getInstance().setVerticalMarkerOn(false);
                 }
             });
 
@@ -341,24 +338,6 @@ public class MainViewController implements Initializable {
     }
     //endregion
 
-    //region Public properties
-    public boolean isShowVerticalMarker() {
-        return showVerticalMarker.getValue();
-    }
-
-    public SimpleBooleanProperty showVerticalMarkerProperty() {
-        return showVerticalMarker;
-    }
-
-    public boolean isShowHorizontalMarker() {
-        return showHorizontalMarker.getValue();
-    }
-
-    public SimpleBooleanProperty showHorizontalMarkerProperty() {
-        return showHorizontalMarker;
-    }
-
-    //endregion
 
     //region private members
 
@@ -612,19 +591,21 @@ public class MainViewController implements Initializable {
     }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
-        switch (event.getCode()) {
-            case SHIFT:
-                showHorizontalMarker.set(pressed);
-                event.consume();
-                break;
-            case CONTROL:
-            case META:
-            case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
-                showVerticalMarker.set(pressed);
-                event.consume();
-                break;
-            default:
-                //do nothing
+        if (GlobalPreferences.getInstance().isEnableCrosshairOnKeyPressed()) {
+            switch (event.getCode()) {
+                case SHIFT:
+                    GlobalPreferences.getInstance().setHorizontalMarkerOn(pressed);
+                    event.consume();
+                    break;
+                case CONTROL:
+                case META:
+                case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
+                    GlobalPreferences.getInstance().setVerticalMarkerOn(pressed);
+                    event.consume();
+                    break;
+                default:
+                    //do nothing
+            }
         }
     }
 

@@ -50,6 +50,9 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private CheckBox updateCheckBox;
 
+    @FXML
+    private RadioButton showCrosshairOnKeyPressedRadio;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
@@ -63,6 +66,7 @@ public class PreferenceDialogController implements Initializable {
         assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
+        assert showCrosshairOnKeyPressedRadio != null : "fx:id\"showCrosshairOnKeyPressedRadio\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
@@ -82,6 +86,7 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getSelectionModel().select(GlobalPreferences.getInstance().getUserInterfaceTheme());
         GlobalPreferences.getInstance().userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
         updateCheckBox.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().checkForUpdateOnStartUpProperty());
+        showCrosshairOnKeyPressedRadio.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().enableCrosshairOnKeyPressedProperty());
 
         Platform.runLater(() -> {
             accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
