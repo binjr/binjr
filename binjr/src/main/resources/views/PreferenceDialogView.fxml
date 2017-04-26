@@ -9,18 +9,33 @@
          <children>
             <Accordion fx:id="accordionPane" layoutX="40.0" layoutY="35.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
               <panes>
-                  <TitledPane animated="false" text="Workspace">
-                    <content>
-                      <AnchorPane minHeight="0.0" minWidth="0.0">
-                           <children>
-                              <VBox layoutX="9.600000381469727" layoutY="9.600000381469727" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                 <children>
-                                    <CheckBox fx:id="loadAtStartupCheckbox" mnemonicParsing="false" text="Reload last workspace at startup" />
-                                 </children>
-                              </VBox>
-                           </children>
-                        </AnchorPane>
-                    </content>
+                  <TitledPane animated="false" text="Appearance &amp; Behavior">
+                      <content>
+                          <AnchorPane minHeight="0.0" minWidth="0.0">
+                              <children>
+                                  <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                      <children>
+                                          <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                              <children>
+                                                  <Label text="Theme: "/>
+                                                  <ChoiceBox fx:id="uiThemeChoiceBox" prefWidth="150.0"/>
+                                              </children>
+                                          </HBox>
+                                          <Separator prefWidth="200.0"/>
+                                          <RadioButton mnemonicParsing="false" selected="true" text="Always display crosshair markers">
+                                              <toggleGroup>
+                                                  <ToggleGroup fx:id="enableCrosshairOnKeyPressed"/>
+                                              </toggleGroup>
+                                          </RadioButton>
+                                          <RadioButton fx:id="showCrosshairOnKeyPressedRadio" mnemonicParsing="false" text="Only display crosshair when pressing control &amp; shift keys"
+                                                       toggleGroup="$enableCrosshairOnKeyPressed"/>
+                                          <Separator prefWidth="200.0"/>
+                                          <CheckBox fx:id="loadAtStartupCheckbox" mnemonicParsing="false" text="Reload last workspace on start-up"/>
+                                      </children>
+                                  </VBox>
+                              </children>
+                          </AnchorPane>
+                      </content>
                   </TitledPane>
                 <TitledPane fx:id="chartPrefsPane" animated="false" text="Charts">
                   <content>
@@ -31,46 +46,27 @@
                                     <CheckBox fx:id="enableChartAnimation" mnemonicParsing="false" text="Enable animation" />
                                     <CheckBox fx:id="showChartSymbols" mnemonicParsing="false" text="Show sample symbols" />
                                      <CheckBox fx:id="useSourceColors" mnemonicParsing="false" text="Use source colors" />
-                                     <Separator prefWidth="200.0"/>
-                                    <CheckBox fx:id="enableDownSampling" mnemonicParsing="false" selected="true" text="Enable sample reduction" />
+                                     <CheckBox fx:id="showOutline" mnemonicParsing="false" text="Show outline on area charts"/>
                                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                                        <children>
-                                          <Label fx:id="maxSampleLabel" text="Maximum number of samples:" />
-                                          <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="63.0" text="1000" />
+                                           <Label text="Default chart area  opacity:"/>
+                                           <TextField fx:id="defaultOpacityText" prefHeight="25.0" prefWidth="45.0"/>
                                        </children>
                                     </HBox>
                                      <Separator prefWidth="200.0"/>
-                                     <RadioButton mnemonicParsing="false" selected="true" text="Always display crosshair markers">
-                                         <toggleGroup>
-                                             <ToggleGroup fx:id="enableCrosshairOnKeyPressed"/>
-                                         </toggleGroup>
-                                     </RadioButton>
-                                     <RadioButton fx:id="showCrosshairOnKeyPressedRadio" mnemonicParsing="false" text="Only display crosshair when pressing control &amp; shift keys"
-                                                  toggleGroup="$enableCrosshairOnKeyPressed"/>
+                                     <CheckBox fx:id="enableDownSampling" mnemonicParsing="false" selected="true" text="Enable sample reduction"/>
+                                     <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                         <children>
+                                             <Label fx:id="maxSampleLabel" text="Maximum number of samples:"/>
+                                             <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="63.0" text="1000"/>
+                                         </children>
+                                     </HBox>
                                  </children>
                               </VBox>
                            </children>
                     </AnchorPane>
                   </content>
                 </TitledPane>
-                  <TitledPane animated="false" text="Appearance">
-                      <content>
-                          <AnchorPane minHeight="0.0" minWidth="0.0">
-                              <children>
-                                  <VBox layoutX="53.0" layoutY="-10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                      <children>
-                                          <HBox alignment="CENTER_LEFT" spacing="10.0">
-                                              <children>
-                                                  <Label text="Theme: "/>
-                                                  <ChoiceBox fx:id="uiThemeChoiceBox" prefWidth="150.0"/>
-                                              </children>
-                                          </HBox>
-                                      </children>
-                                  </VBox>
-                              </children>
-                          </AnchorPane>
-                      </content>
-                  </TitledPane>
                   <TitledPane animated="false" text="Updates">
                       <content>
                           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">

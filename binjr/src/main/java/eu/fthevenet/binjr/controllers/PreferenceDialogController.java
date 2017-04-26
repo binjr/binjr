@@ -53,6 +53,12 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private RadioButton showCrosshairOnKeyPressedRadio;
 
+    @FXML
+    private CheckBox showOutline;
+    @FXML
+    private TextField defaultOpacityText;
+
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
@@ -67,26 +73,32 @@ public class PreferenceDialogController implements Initializable {
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showCrosshairOnKeyPressedRadio != null : "fx:id\"showCrosshairOnKeyPressedRadio\" was not injected!";
+        assert showOutline != null : "fx:id\"showOutline\" was not injected!";
+        assert defaultOpacityText != null : "fx:id\"defaultOpacityText\" was not injected!";
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
 
-        enableChartAnimation.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().chartAnimationEnabledProperty());
-        showChartSymbols.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
-        useSourceColors.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().useSourceColorsProperty());
-        enableDownSampling.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingEnabledProperty());
-        loadAtStartupCheckbox.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().loadLastWorkspaceOnStartupProperty());
+        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        enableChartAnimation.selectedProperty().bindBidirectional(prefs.chartAnimationEnabledProperty());
+        showChartSymbols.selectedProperty().bindBidirectional(prefs.sampleSymbolsVisibleProperty());
+        useSourceColors.selectedProperty().bindBidirectional(prefs.useSourceColorsProperty());
+        enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
+        loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
-        formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().downSamplingThresholdProperty());
-
+        formatter.valueProperty().bindBidirectional(prefs.downSamplingThresholdProperty());
         uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
-        uiThemeChoiceBox.getSelectionModel().select(GlobalPreferences.getInstance().getUserInterfaceTheme());
-        GlobalPreferences.getInstance().userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
-        updateCheckBox.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().checkForUpdateOnStartUpProperty());
-        showCrosshairOnKeyPressedRadio.selectedProperty().bindBidirectional(GlobalPreferences.getInstance().enableCrosshairOnKeyPressedProperty());
+        uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
+        prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
+        updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
+        showCrosshairOnKeyPressedRadio.selectedProperty().bindBidirectional(prefs.enableCrosshairOnKeyPressedProperty());
+        final TextFormatter<Number> opacityFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        defaultOpacityText.setTextFormatter(opacityFormatter);
+        opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
+        showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
 
         Platform.runLater(() -> {
             accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {

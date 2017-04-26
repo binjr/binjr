@@ -1,8 +1,8 @@
 package eu.fthevenet.binjr.controllers;
 
-import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -19,11 +19,10 @@ public class AreaChartWorksheetController extends WorksheetController {
     /**
      * Initializes a new instance of the {@link AreaChartWorksheetController} class
      *
-     * @param mainViewController A reference to the {@link MainViewController} instance
      * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public AreaChartWorksheetController(MainViewController mainViewController, Worksheet worksheet) {
-        super(mainViewController, worksheet);
+    public AreaChartWorksheetController(Worksheet worksheet) {
+        super(worksheet);
     }
 
     @Override

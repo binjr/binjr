@@ -115,8 +115,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private MenuItem opacityMenuItem;
     @FXML
     private MenuButton opacityMenuButton;
+    @FXML
+    private CheckBox showAreaOutline;
 
-    private MainViewController mainViewController;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
@@ -157,8 +158,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     //endregion
 
 
-    public WorksheetController(MainViewController mainViewController, Worksheet<Double> worksheet) {
-        this.mainViewController = mainViewController;
+    public WorksheetController(Worksheet<Double> worksheet) {
         this.worksheet = worksheet;
         switch (this.worksheet.getUnitPrefixes()) {
             case BINARY:
@@ -201,6 +201,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
         assert opacityMenuItem != null : "fx:id\"opacityMenuItem\" was not injected!";
         assert opacityMenuButton != null : "fx:id\"opacityMenuButton\" was not injected!";
+        assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
 
         //endregion
 
@@ -248,7 +249,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-
+        showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
         //endregion
 
 
@@ -358,7 +359,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     event.consume();
                 }
             });
-
             return row;
         });
 
@@ -535,7 +535,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                         if (children.size() >= 1) {
                             Path stroke = (Path) children.get(1);
                             Path fill = (Path) children.get(0);
-                            stroke.setVisible(false);
+
                             if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
                                 // use default javaFX theme colors for series
                                 stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
@@ -545,6 +545,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                                 });
                             }
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                            stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
+                            stroke.strokeProperty().bind(series.displayColorProperty());
                             fill.fillProperty().bind(Bindings.createObjectBinding(
                                     () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, graphOpacitySlider.getValue()),
                                     series.displayColorProperty(),

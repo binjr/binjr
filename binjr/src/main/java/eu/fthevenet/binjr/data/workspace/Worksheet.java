@@ -62,6 +62,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     private Property<ZonedDateTime> toDateTime;
     @IsDirtyable
     private DoubleProperty graphOpacity;
+    @IsDirtyable
+    private BooleanProperty showAreaOutline;
+
     private final ChangeWatcher<Worksheet> status;
 
     /**
@@ -74,7 +77,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 FXCollections.observableList(new LinkedList<>()),
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
                 UnitPrefixes.METRIC,
-                0.8);
+                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
+                false);
     }
 
     /**
@@ -93,7 +97,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 toDateTime,
                 unitName,
                 prefix,
-                0.8);
+                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
+                GlobalPreferences.getInstance().isShowAreaOutline());
     }
 
     /**
@@ -112,10 +117,11 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getToDateTime(),
                 initWorksheet.getUnit(),
                 initWorksheet.getUnitPrefixes(),
-                initWorksheet.getGraphOpacity());
+                initWorksheet.getGraphOpacity(),
+                initWorksheet.isShowAreaOutline());
     }
 
-    private Worksheet(String name, ChartType chartType, ZoneId timezone, List<TimeSeriesInfo<T>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base, double graphOpacity) {
+    private Worksheet(String name, ChartType chartType, ZoneId timezone, List<TimeSeriesInfo<T>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base, double graphOpacity, boolean showAreaOutline) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -125,6 +131,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
+        this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.status = new ChangeWatcher<>(this);
     }
 
@@ -428,6 +435,18 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
      */
     public void setGraphOpacity(double graphOpacity) {
         this.graphOpacity.set(graphOpacity);
+    }
+
+    public boolean isShowAreaOutline() {
+        return showAreaOutline.get();
+    }
+
+    public BooleanProperty showAreaOutlineProperty() {
+        return showAreaOutline;
+    }
+
+    public void setShowAreaOutline(boolean showAreaOutline) {
+        this.showAreaOutline.set(showAreaOutline);
     }
 
     @Override

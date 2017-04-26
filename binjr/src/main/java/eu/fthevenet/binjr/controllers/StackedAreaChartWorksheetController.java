@@ -20,11 +20,10 @@ public class StackedAreaChartWorksheetController extends WorksheetController {
     /**
      * Initializes a new instance of the {@link StackedAreaChartWorksheetController} class
      *
-     * @param mainViewController A reference to the {@link MainViewController} instance.
      * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public StackedAreaChartWorksheetController(MainViewController mainViewController, Worksheet worksheet) {
-        super(mainViewController, worksheet);
+    public StackedAreaChartWorksheetController(Worksheet worksheet) {
+        super(worksheet);
     }
 
     @Override

@@ -1,5 +1,7 @@
 package eu.fthevenet.binjr.preferences;
 
+import com.sun.javafx.tk.Toolkit;
+import com.sun.prism.GraphicsPipeline;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.util.github.GithubApi;
 import eu.fthevenet.util.github.GithubRelease;
@@ -52,6 +54,8 @@ public class GlobalPreferences {
     public static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
     public static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
     public static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
+    public static final String SHOW_AREA_OUTLINE = "showAreaOutline";
+    public static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
 
 
     private final Manifest manifest;
@@ -71,8 +75,8 @@ public class GlobalPreferences {
     private BooleanProperty horizontalMarkerOn;
     private BooleanProperty verticalMarkerOn;
     private Property<LocalDateTime> lastCheckForUpdate;
-
-
+    private BooleanProperty showAreaOutline;
+    private DoubleProperty defaultGraphOpacity;
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -114,6 +118,10 @@ public class GlobalPreferences {
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+        showAreaOutline = new SimpleBooleanProperty(prefs.getBoolean(SHOW_AREA_OUTLINE, true));
+        showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
+        defaultGraphOpacity = new SimpleDoubleProperty(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
+        defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
 
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
@@ -494,6 +502,31 @@ public class GlobalPreferences {
     public void setLastCheckForUpdate(LocalDateTime lastCheckForUpdate) {
         this.lastCheckForUpdate.setValue(lastCheckForUpdate);
     }
+
+    public boolean isShowAreaOutline() {
+        return showAreaOutline.getValue();
+    }
+
+    public BooleanProperty showAreaOutlineProperty() {
+        return showAreaOutline;
+    }
+
+    public void setShowAreaOutline(boolean showAreaOutline) {
+        this.showAreaOutline.setValue(showAreaOutline);
+    }
+
+    public double getDefaultGraphOpacity() {
+        return defaultGraphOpacity.get();
+    }
+
+    public DoubleProperty defaultGraphOpacityProperty() {
+        return defaultGraphOpacity;
+    }
+
+    public void setDefaultGraphOpacity(double defaultGraphOpacity) {
+        this.defaultGraphOpacity.set(defaultGraphOpacity);
+    }
+
     /**
      * Returns the version information held in the containing jar's manifest
      *
@@ -536,6 +569,10 @@ public class GlobalPreferences {
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
         sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
         sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
+        Toolkit toolkit = Toolkit.getToolkit();
+        sysInfo.add((new SysInfoProperty("JavaFX Toolkit", toolkit != null ? toolkit.getClass().getSimpleName() : "unknown")));
+        GraphicsPipeline pipeline = GraphicsPipeline.getPipeline();
+        sysInfo.add((new SysInfoProperty("Rendering Pipeline", pipeline != null ? pipeline.getClass().getSimpleName() : "unknown")));
         return sysInfo;
     }
 

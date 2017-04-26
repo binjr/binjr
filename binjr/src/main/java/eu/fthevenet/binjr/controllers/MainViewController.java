@@ -402,7 +402,7 @@ public class MainViewController implements Initializable {
                     da.setId(source.getAdapterId());
                     loadAdapters(da);
                 }
-                for (Worksheet<?> worksheet : wsFromfile.getWorksheets()) {
+                for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
                     for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
                         UUID id = s.getBinding().getAdapterId();
                         DataAdapter<?> da = sourcesAdapters.values()
@@ -514,7 +514,7 @@ public class MainViewController implements Initializable {
         sourcesTabPane.getSelectionModel().select(newTab);
     }
 
-    private boolean loadWorksheet(Worksheet<?> worksheet) {
+    private boolean loadWorksheet(Worksheet<Double> worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
         loadWorksheet(worksheet, newTab);
         worksheetTabPane.getTabs().add(newTab);
@@ -522,18 +522,18 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void loadWorksheet(Worksheet<?> worksheet, EditableTab newTab) {
+    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
             switch (worksheet.getChartType()) {
                 case AREA:
-                    current = new AreaChartWorksheetController(MainViewController.this, worksheet);
+                    current = new AreaChartWorksheetController(worksheet);
                     break;
                 case STACKED:
-                    current = new StackedAreaChartWorksheetController(MainViewController.this, worksheet);
+                    current = new StackedAreaChartWorksheetController(worksheet);
                     break;
                 case LINE:
-                    current = new LineChartWorksheetController(MainViewController.this, worksheet);
+                    current = new LineChartWorksheetController(worksheet);
                     break;
                 default:
                     throw new UnsupportedOperationException("Unsupported chart");

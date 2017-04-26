@@ -86,8 +86,7 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
 
             fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
             toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());
-            // TODO: ChartType.LINE is not an option for the time being
-            chartTypeChoice.getItems().setAll(Arrays.stream(ChartType.values()).filter(v-> v != ChartType.LINE).collect(Collectors.toSet()));
+            chartTypeChoice.getItems().setAll(Arrays.stream(ChartType.values()).collect(Collectors.toSet()));
             chartTypeChoice.getSelectionModel().select(resultWorksheet.getChartType());
             resultWorksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
