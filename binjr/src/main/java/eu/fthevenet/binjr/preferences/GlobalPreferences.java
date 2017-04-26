@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
@@ -49,6 +51,7 @@ public class GlobalPreferences {
     public static final String ENABLE_CROSSHAIR_ON_KEY_PRESSED = "enableCrosshairOnKeyPressed";
     public static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
     public static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
+    public static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
 
 
     private final Manifest manifest;
@@ -67,6 +70,7 @@ public class GlobalPreferences {
     private BooleanProperty enableCrosshairOnKeyPressed;
     private BooleanProperty horizontalMarkerOn;
     private BooleanProperty verticalMarkerOn;
+    private Property<LocalDateTime> lastCheckForUpdate;
 
 
 
@@ -108,6 +112,8 @@ public class GlobalPreferences {
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
         verticalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(VERTICAL_MARKER_ON, true));
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
+        lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+        lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
 
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
@@ -477,6 +483,17 @@ public class GlobalPreferences {
         this.verticalMarkerOn.set(verticalMarkerOn);
     }
 
+    public LocalDateTime getLastCheckForUpdate() {
+        return lastCheckForUpdate.getValue();
+    }
+
+    public Property<LocalDateTime> lastCheckForUpdateProperty() {
+        return lastCheckForUpdate;
+    }
+
+    public void setLastCheckForUpdate(LocalDateTime lastCheckForUpdate) {
+        this.lastCheckForUpdate.setValue(lastCheckForUpdate);
+    }
     /**
      * Returns the version information held in the containing jar's manifest
      *

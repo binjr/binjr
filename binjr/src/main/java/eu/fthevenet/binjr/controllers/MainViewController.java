@@ -49,6 +49,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -98,12 +99,13 @@ public class MainViewController implements Initializable {
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
 
-        GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 setUiTheme(newValue);
             }
         });
-        setUiTheme(GlobalPreferences.getInstance().getUserInterfaceTheme());
+        setUiTheme(prefs.getUserInterfaceTheme());
 
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
@@ -193,15 +195,15 @@ public class MainViewController implements Initializable {
             });
 
             stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (GlobalPreferences.getInstance().isEnableCrosshairOnKeyPressed() && !newValue && oldValue) {
+                if (prefs.isEnableCrosshairOnKeyPressed() && !newValue && oldValue) {
                     //main stage lost focus -> invalidates crosshair
-                    GlobalPreferences.getInstance().setHorizontalMarkerOn(false);
-                    GlobalPreferences.getInstance().setVerticalMarkerOn(false);
+                    prefs.setHorizontalMarkerOn(false);
+                    prefs.setVerticalMarkerOn(false);
                 }
             });
 
-            if (GlobalPreferences.getInstance().isLoadLastWorkspaceOnStartup()) {
-                File latestWorkspace = GlobalPreferences.getInstance().getMostRecentSavedWorkspace().toFile();
+            if (prefs.isLoadLastWorkspaceOnStartup()) {
+                File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
                 if (latestWorkspace.exists()) {
                     loadWorkspace(latestWorkspace);
                 }
@@ -210,12 +212,13 @@ public class MainViewController implements Initializable {
                 }
             }
 
-            if (GlobalPreferences.getInstance().isCheckForUpdateOnStartUp()) {
-                GlobalPreferences.getInstance().asyncCheckForUpdate(
+            if (prefs.isCheckForUpdateOnStartUp() && (LocalDateTime.now().minus(1, ChronoUnit.HOURS).isAfter(prefs.getLastCheckForUpdate()))) {
+                prefs.setLastCheckForUpdate(LocalDateTime.now());
+                prefs.asyncCheckForUpdate(
                         githubRelease -> {
                             Notifications n = Notifications.create()
                                     .title("New release available!")
-                                    .text("You are currently running binjr version " + GlobalPreferences.getInstance().getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
+                                    .text("You are currently running binjr version " + prefs.getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
                                     .hideAfter(Duration.seconds(20))
                                     .position(Pos.BOTTOM_RIGHT)
                                     .owner(root);
