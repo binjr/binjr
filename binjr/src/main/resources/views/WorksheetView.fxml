@@ -10,6 +10,7 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.*?>
+<?import org.controlsfx.control.ToggleSwitch?>
 <?import java.lang.*?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="850.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -208,33 +209,44 @@
                     </tooltip>
                 </ToggleButton>
                 <MenuButton fx:id="opacityMenuButton"
+                            styleClass="no-arrow-menu-button"
                             contentDisplay="GRAPHIC_ONLY"
+                            alignment="CENTER"
+                            textAlignment="CENTER"
                             maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
                             prefHeight="40.0" prefWidth="40.0">
                     <items>
                         <MenuItem mnemonicParsing="false">
+
                             <graphic>
-                                <CheckBox fx:id="showAreaOutline" mnemonicParsing="false" text="Show area outline"/>
+                                <ToggleSwitch fx:id="showAreaOutline" mnemonicParsing="false" text="Show Outline:" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
                             </graphic>
                         </MenuItem>
                         <MenuItem fx:id="opacityMenuItem" mnemonicParsing="false" text="Action 1">
                             <graphic>
-                                <HBox>
-                                    <Label text="Area opacity:"/>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Opacity:  "/>
                                     <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" prefWidth="150.0" value="0.8"/>
                                 </HBox>
                             </graphic>
                         </MenuItem>
                     </items>
                     <graphic>
-                        <!--<ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
-                        <!--<image>-->
-                        <!--<Image url="@/images/opacity_40.png"/>-->
-                        <!--</image>-->
-                        <!--</ImageView>-->
-                        <SVGPath content="$settingSvgPath" scaleX="3" scaleY="3">
-
-                        </SVGPath>
+                        <Region minHeight="20.0"
+                                minWidth="20.0"
+                                maxHeight="20.0"
+                                maxWidth="20.0" layoutX="10" layoutY="10">
+                            <background>
+                                <Background>
+                                    <fills>
+                                        <BackgroundFill fill="black"/>
+                                    </fills>
+                                </Background>
+                            </background>
+                            <shape>
+                                <SVGPath content="$settingSvgPath"/>
+                            </shape>
+                        </Region>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Chart display properties">

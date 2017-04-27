@@ -9,6 +9,7 @@
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center;
+
 }
 
 .button:hover,
@@ -46,8 +47,15 @@
     -fx-text-fill: white;
 }
 
- .menu-button .arrow-button {
+ .no-arrow-menu-button .arrow-button {
     -fx-padding:-2;
+    -size:0;
+    -fx-min-width:-size;
+    -fx-pref-width:-size;
+    -fx-max-width:-size;
+    -fx-min-height:-size;
+    -fx-pref-height:-size;
+    -fx-max-height:-size;
      visibility: hidden;
  }
 
@@ -522,25 +530,31 @@
      -fx-padding: 0 0 0 21;
   }
 
-  .command-bar .menu-button .label,
-  .command-bar .button {
-     /*  -fx-content-display:graphic_only;*/
-  }
+/*** Menu ***/
+
   .command-bar .context-menu {
       -fx-background-color: #204656;
       -fx-text-fill:white;
       -fx-border-color: white;
       -fx-border-style: solid;
-        -fx-content-display:left;
+      -fx-content-display:left;
+  }
+
+  .context-menu .label{
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 11pt;
+   /* -fx-padding: 0 0 0 21;*/
   }
  /*
   .command-bar .context-menu .separator {
       -fx-padding: 0.58333275em 1.333332em 0.58333275em 1.333332em;
   }
  */
-
-  .command-bar .menu-item {
-      -fx-padding: 10 10 10 17 ;
+.command-bar .menu-item{
+ -fx-padding: 10 10 10 17 ;
+}
+  .menu-item {
+      -fx-padding: 8 ;
   }
 
   .command-bar .menu-item:focused {

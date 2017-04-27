@@ -40,6 +40,7 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.ToggleSwitch;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -116,7 +117,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     @FXML
     private MenuButton opacityMenuButton;
     @FXML
-    private CheckBox showAreaOutline;
+    private ToggleSwitch showAreaOutline;
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -221,8 +222,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
-
-
         chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setCache(true);
         chart.setCacheHint(CacheHint.QUALITY);
@@ -230,8 +229,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
-
-
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
@@ -251,7 +248,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
         //endregion
-
 
         //region *** Global preferences ***
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
