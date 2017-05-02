@@ -25,13 +25,16 @@ import javafx.beans.binding.Bindings;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
@@ -41,6 +44,7 @@ import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
@@ -163,9 +167,6 @@ public class MainViewController implements Initializable {
             return Optional.empty();
         });
 
-        root.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
-        root.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 this.selectedTabController = seriesControllers.get(newValue);
@@ -194,13 +195,14 @@ public class MainViewController implements Initializable {
                 }
             });
 
+            stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
+            stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
             stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (prefs.isEnableCrosshairOnKeyPressed() && !newValue && oldValue) {
-                    //main stage lost focus -> invalidates crosshair
-                    prefs.setHorizontalMarkerOn(false);
-                    prefs.setVerticalMarkerOn(false);
-                }
+                //main stage lost focus -> invalidates shift or ctrl pressed
+                prefs.setShiftPressed(false);
+                prefs.setCtrlPressed(false);
             });
+
 
             if (prefs.isLoadLastWorkspaceOnStartup()) {
                 File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
@@ -265,9 +267,39 @@ public class MainViewController implements Initializable {
         }
     }
 
+    class SideNode extends Label {
+
+        public SideNode(final String text, final Side side,
+                        final HiddenSidesPane pane) {
+
+            super(text + " (Click to pin / unpin)");
+
+            setAlignment(Pos.CENTER);
+            setPrefSize(200, 200);
+
+            setOnMouseClicked(new EventHandler<MouseEvent>() {
+                @Override
+                public void handle(MouseEvent event) {
+                    if (pane.getPinnedSide() != null) {
+                        setText(text + " (unpinned)");
+                        pane.setPinnedSide(null);
+                    }
+                    else {
+                        setText(text + " (pinned)");
+                        pane.setPinnedSide(side);
+                    }
+                }
+            });
+        }
+    }
+
     @FXML
     protected void handlePreferencesAction(ActionEvent actionEvent) {
         try {
+            commandBar.setExpanded(true);
+
+
+
             Dialog<String> dialog = new Dialog<>();
             dialog.initModality(Modality.NONE);
             dialog.initStyle(StageStyle.UTILITY);
@@ -278,6 +310,11 @@ public class MainViewController implements Initializable {
         } catch (Exception ex) {
             Dialogs.displayException("Failed to display preference dialog", ex, root);
         }
+    }
+
+    @FXML
+    public void handleExpandCommandBar(ActionEvent actionEvent) {
+        commandBar.setExpanded(!commandBar.isExpanded());
     }
 
     @FXML
@@ -594,21 +631,19 @@ public class MainViewController implements Initializable {
     }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
-        if (GlobalPreferences.getInstance().isEnableCrosshairOnKeyPressed()) {
-            switch (event.getCode()) {
-                case SHIFT:
-                    GlobalPreferences.getInstance().setHorizontalMarkerOn(pressed);
-                    event.consume();
-                    break;
-                case CONTROL:
-                case META:
-                case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
-                    GlobalPreferences.getInstance().setVerticalMarkerOn(pressed);
-                    event.consume();
-                    break;
-                default:
-                    //do nothing
-            }
+        switch (event.getCode()) {
+            case SHIFT:
+                GlobalPreferences.getInstance().setShiftPressed(pressed);
+                event.consume();
+                break;
+            case CONTROL:
+            case META:
+            case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
+                GlobalPreferences.getInstance().setCtrlPressed(pressed);
+                event.consume();
+                break;
+            default:
+                //do nothing
         }
     }
 
@@ -691,8 +726,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void handleExpandCommandBar(ActionEvent actionEvent) {
-        commandBar.setExpanded(!commandBar.isExpanded());
-    }
+
     //endregion
 }

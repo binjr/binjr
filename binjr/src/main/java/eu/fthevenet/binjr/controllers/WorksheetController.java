@@ -5,6 +5,7 @@ import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
+import eu.fthevenet.binjr.dialogs.ChartPropertiesPopup;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.logging.Profiler;
@@ -108,16 +109,16 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
-    @FXML
-    private Slider graphOpacitySlider;
+    //    @FXML
+    private Slider graphOpacitySlider = new Slider();
     @FXML
     private ContextMenu seriesListMenu;
+    //@FXML
+    private Label opacityText = new Label();
     @FXML
-    private MenuItem opacityMenuItem;
-    @FXML
-    private MenuButton opacityMenuButton;
-    @FXML
-    private ToggleSwitch showAreaOutline;
+    private Button opacityMenuButton;
+    //   @FXML
+    private ToggleSwitch showAreaOutline = new ToggleSwitch();
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -194,13 +195,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+//        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
         assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
         assert minColumn != null : "fx:id\"minColumn\" was not injected!";
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
-        assert opacityMenuItem != null : "fx:id\"opacityMenuItem\" was not injected!";
+        assert opacityText != null : "fx:id\"opacityText\" was not injected!";
         assert opacityMenuButton != null : "fx:id\"opacityMenuButton\" was not injected!";
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
 
@@ -224,7 +225,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         yAxis.labelProperty().bind(worksheet.unitProperty());
         chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setCache(true);
-        chart.setCacheHint(CacheHint.QUALITY);
+        chart.setCacheHint(CacheHint.SPEED);
         chart.setCacheShape(true);
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
@@ -245,8 +246,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
-        opacityMenuItem.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+        opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
+        opacityMenuButton.setOnAction(event -> {
+            ChartPropertiesPopup popup = new ChartPropertiesPopup();
+            popup.show(opacityMenuButton, 0, 0);
+        });
         //endregion
 
         //region *** Global preferences ***
@@ -278,13 +283,14 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         });
         hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
-        crossHair.horizontalMarkerVisibleProperty().bindBidirectional(hCrosshair.selectedProperty());
-        crossHair.verticalMarkerVisibleProperty().bindBidirectional(vCrosshair.selectedProperty());
+        crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
+        crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+
+
+
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
-
         //endregion
-
 
         //region *** Series TableView ***
         seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);

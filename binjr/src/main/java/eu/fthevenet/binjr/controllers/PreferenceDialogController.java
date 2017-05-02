@@ -13,6 +13,7 @@ import javafx.scene.text.TextFlow;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.ToggleSwitch;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -30,31 +31,28 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     public TextField downSamplingThreshold;
     @FXML
-    private CheckBox showChartSymbols;
+    private ToggleSwitch showChartSymbols;
     @FXML
-    private CheckBox enableDownSampling;
+    private ToggleSwitch enableDownSampling;
     @FXML
-    private CheckBox enableChartAnimation;
+    private ToggleSwitch enableChartAnimation;
     @FXML
-    private CheckBox useSourceColors;
+    private ToggleSwitch useSourceColors;
     @FXML
     private Label maxSampleLabel;
     @FXML
     private Accordion accordionPane;
     @FXML
-    private CheckBox loadAtStartupCheckbox;
+    private ToggleSwitch loadAtStartupCheckbox;
     @FXML
     private ChoiceBox<UserInterfaceThemes> uiThemeChoiceBox;
     @FXML
     private TextFlow updateFlow;
     @FXML
-    private CheckBox updateCheckBox;
+    private ToggleSwitch updateCheckBox;
 
     @FXML
-    private RadioButton showCrosshairOnKeyPressedRadio;
-
-    @FXML
-    private CheckBox showOutline;
+    private ToggleSwitch showOutline;
     @FXML
     private TextField defaultOpacityText;
 
@@ -72,7 +70,6 @@ public class PreferenceDialogController implements Initializable {
         assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
-        assert showCrosshairOnKeyPressedRadio != null : "fx:id\"showCrosshairOnKeyPressedRadio\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
         assert defaultOpacityText != null : "fx:id\"defaultOpacityText\" was not injected!";
 
@@ -94,7 +91,6 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
         prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
-        showCrosshairOnKeyPressedRadio.selectedProperty().bindBidirectional(prefs.enableCrosshairOnKeyPressedProperty());
         final TextFormatter<Number> opacityFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         defaultOpacityText.setTextFormatter(opacityFormatter);
         opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());

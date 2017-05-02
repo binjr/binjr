@@ -38,13 +38,13 @@
  *******************/
 
 .command-bar {
-   -fx-pref-width: 48;
-   -fx-min-width: 48;
+ /*  -fx-pref-width: 48;
+   -fx-min-width: 48;*/
     -fx-padding:5;
 }
 
 .command-bar:expanded {
-  -fx-min-width: 160;
+/*  -fx-min-width: 160;
  /*  -fx-pref-width: 200;
    -fx-max-width: 200;*/
 }

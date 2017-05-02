@@ -10,14 +10,9 @@
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.shape.SVGPath?>
 <?import javafx.scene.text.*?>
-<?import org.controlsfx.control.ToggleSwitch?>
 <?import java.lang.*?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="850.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1">
-    <fx:define>
-        <String fx:id="settingSvgPath"
-                fx:value="m 42.537247,57.307492 -0.113918,0.606336 0.815799,0.610012 -0.606337,1.02526 -0.911342,-0.418923 -0.514468,0.418923 0.09554,0.911343 -1.120805,0.305006 -0.305005,-0.819474 -0.701881,-0.09554 -0.606337,0.72393 -1.02526,-0.628386 0.418923,-0.815798 -0.418923,-0.492419 -0.911343,0.09554 -0.305006,-1.216349 0.911343,-0.305005 0,-0.624711 -0.720255,-0.610012 0.624711,-1.006886 0.911342,0.40055 0.40055,-0.40055 -0.09554,-0.929717 1.120805,-0.305006 0.396875,0.819474 0.628385,0.113918 0.701881,-0.72393 0.911343,0.610012 -0.301331,0.815799 0.301331,0.510792 1.02526,-0.09187 0.305006,1.11713 z m -4.343576,-0.0441 c -3e-6,0.227839 0.04287,0.441588 0.128617,0.641247 0.08574,0.199665 0.203334,0.374216 0.352777,0.523655 0.149437,0.149442 0.323989,0.267035 0.523655,0.352778 0.199658,0.08575 0.413407,0.128618 0.641247,0.128617 0.227831,10e-7 0.442192,-0.04287 0.643085,-0.128617 0.200881,-0.08574 0.375433,-0.203336 0.523654,-0.352778 0.14821,-0.149439 0.265802,-0.32399 0.352778,-0.523655 0.08696,-0.199659 0.130448,-0.413408 0.130454,-0.641247 -6e-6,-0.227832 -0.04349,-0.442193 -0.130454,-0.643084 -0.08698,-0.200884 -0.204568,-0.375435 -0.352778,-0.523655 -0.148221,-0.148211 -0.322773,-0.265803 -0.523654,-0.352777 -0.200893,-0.08696 -0.415254,-0.13045 -0.643085,-0.130455 -0.22784,5e-6 -0.441589,0.04349 -0.641247,0.130455 -0.199666,0.08697 -0.374218,0.204566 -0.523655,0.352777 -0.149443,0.14822 -0.267036,0.322771 -0.352777,0.523655 -0.08575,0.200891 -0.12862,0.415252 -0.128617,0.643084 z"/>
-    </fx:define>
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
             <HBox alignment="CENTER_LEFT">
@@ -208,29 +203,29 @@
                         </Tooltip>
                     </tooltip>
                 </ToggleButton>
-                <MenuButton fx:id="opacityMenuButton"
-                            styleClass="no-arrow-menu-button"
-                            contentDisplay="GRAPHIC_ONLY"
-                            alignment="CENTER"
-                            textAlignment="CENTER"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0">
-                    <items>
-                        <MenuItem mnemonicParsing="false">
+                <Button fx:id="opacityMenuButton"
+                        styleClass="no-arrow-menu-button"
+                        contentDisplay="GRAPHIC_ONLY"
+                        alignment="CENTER_LEFT"
+                        textAlignment="CENTER"
+                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                        prefHeight="40.0" prefWidth="40.0">
+                    <!--<items>-->
+                    <!--<MenuItem fx:id="outlineMenuItem" mnemonicParsing="false" text="Show Outline:">-->
+                    <!--<graphic>-->
+                    <!--<ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>-->
+                    <!--</graphic>-->
+                    <!--</MenuItem>-->
+                    <!--<MenuItem mnemonicParsing="false" text="Opacity:">-->
+                    <!--<graphic>-->
+                    <!--<HBox alignment="CENTER_LEFT">-->
 
-                            <graphic>
-                                <ToggleSwitch fx:id="showAreaOutline" mnemonicParsing="false" text="Show Outline:" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0"/>
-                            </graphic>
-                        </MenuItem>
-                        <MenuItem fx:id="opacityMenuItem" mnemonicParsing="false" text="Action 1">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT">
-                                    <Label text="Opacity:  "/>
-                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" prefWidth="150.0" value="0.8"/>
-                                </HBox>
-                            </graphic>
-                        </MenuItem>
-                    </items>
+                    <!--<Label fx:id="opacityText" text="100%"/>-->
+                    <!--<Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>-->
+                    <!--</HBox>-->
+                    <!--</graphic>-->
+                    <!--</MenuItem>-->
+                    <!--</items>-->
                     <graphic>
                         <Region minHeight="20.0"
                                 minWidth="20.0"
@@ -244,7 +239,8 @@
                                 </Background>
                             </background>
                             <shape>
-                                <SVGPath content="$settingSvgPath"/>
+                                <SVGPath
+                                        content="m 42.537247,57.307492 -0.113918,0.606336 0.815799,0.610012 -0.606337,1.02526 -0.911342,-0.418923 -0.514468,0.418923 0.09554,0.911343 -1.120805,0.305006 -0.305005,-0.819474 -0.701881,-0.09554 -0.606337,0.72393 -1.02526,-0.628386 0.418923,-0.815798 -0.418923,-0.492419 -0.911343,0.09554 -0.305006,-1.216349 0.911343,-0.305005 0,-0.624711 -0.720255,-0.610012 0.624711,-1.006886 0.911342,0.40055 0.40055,-0.40055 -0.09554,-0.929717 1.120805,-0.305006 0.396875,0.819474 0.628385,0.113918 0.701881,-0.72393 0.911343,0.610012 -0.301331,0.815799 0.301331,0.510792 1.02526,-0.09187 0.305006,1.11713 z m -4.343576,-0.0441 c -3e-6,0.227839 0.04287,0.441588 0.128617,0.641247 0.08574,0.199665 0.203334,0.374216 0.352777,0.523655 0.149437,0.149442 0.323989,0.267035 0.523655,0.352778 0.199658,0.08575 0.413407,0.128618 0.641247,0.128617 0.227831,10e-7 0.442192,-0.04287 0.643085,-0.128617 0.200881,-0.08574 0.375433,-0.203336 0.523654,-0.352778 0.14821,-0.149439 0.265802,-0.32399 0.352778,-0.523655 0.08696,-0.199659 0.130448,-0.413408 0.130454,-0.641247 -6e-6,-0.227832 -0.04349,-0.442193 -0.130454,-0.643084 -0.08698,-0.200884 -0.204568,-0.375435 -0.352778,-0.523655 -0.148221,-0.148211 -0.322773,-0.265803 -0.523654,-0.352777 -0.200893,-0.08696 -0.415254,-0.13045 -0.643085,-0.130455 -0.22784,5e-6 -0.441589,0.04349 -0.641247,0.130455 -0.199666,0.08697 -0.374218,0.204566 -0.523655,0.352777 -0.149443,0.14822 -0.267036,0.322771 -0.352777,0.523655 -0.08575,0.200891 -0.12862,0.415252 -0.128617,0.643084 z"/>
                             </shape>
                         </Region>
                     </graphic>
@@ -255,7 +251,7 @@
                             </font>
                         </Tooltip>
                     </tooltip>
-                </MenuButton>
+                </Button>
             </HBox>
         </VBox>
         <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">

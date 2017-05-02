@@ -1,5 +1,6 @@
 package eu.fthevenet.util.ui.charts;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.geometry.Point2D;
@@ -37,12 +38,12 @@ public class XYChartCrosshair<X, Y> {
     private final Function<X, String> xValuesFormatter;
     private final Function<Y, String> yValuesFormatter;
     private final XYChartInfo chartInfo;
-    private final SimpleBooleanProperty isSelecting = new SimpleBooleanProperty(false);
+    private final BooleanProperty isSelecting = new SimpleBooleanProperty(false);
     private Point2D selectionStart = new Point2D(-1, -1);
     private Point2D mousePosition = new Point2D(-1, -1);
     private final Rectangle selection = new Rectangle(0, 0, 0, 0);
-    private final SimpleBooleanProperty verticalMarkerVisible = new SimpleBooleanProperty();
-    private final SimpleBooleanProperty horizontalMarkerVisible = new SimpleBooleanProperty();
+    private final BooleanProperty verticalMarkerVisible = new SimpleBooleanProperty();
+    private final BooleanProperty horizontalMarkerVisible = new SimpleBooleanProperty();
     private Consumer<XYChartSelection<X, Y>> selectionDoneEvent;
 
     /**
@@ -112,7 +113,7 @@ public class XYChartCrosshair<X, Y> {
      *
      * @return the boolean property that tracks the visibility of the vertical marker of the crosshair
      */
-    public SimpleBooleanProperty verticalMarkerVisibleProperty() {
+    public BooleanProperty verticalMarkerVisibleProperty() {
         return verticalMarkerVisible;
     }
 
@@ -121,7 +122,7 @@ public class XYChartCrosshair<X, Y> {
      *
      * @return the boolean property that tracks the visibility of the horizontal marker of the crosshair
      */
-    public SimpleBooleanProperty horizontalMarkerVisibleProperty() {
+    public BooleanProperty horizontalMarkerVisibleProperty() {
         return horizontalMarkerVisible;
     }
 

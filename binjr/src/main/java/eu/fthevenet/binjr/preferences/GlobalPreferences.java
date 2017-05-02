@@ -71,12 +71,37 @@ public class GlobalPreferences {
     private BooleanProperty checkForUpdateOnStartUp;
     private Property<UserInterfaceThemes> userInterfaceTheme;
     private Deque<String> recentFiles;
-    private BooleanProperty enableCrosshairOnKeyPressed;
     private BooleanProperty horizontalMarkerOn;
     private BooleanProperty verticalMarkerOn;
     private Property<LocalDateTime> lastCheckForUpdate;
     private BooleanProperty showAreaOutline;
     private DoubleProperty defaultGraphOpacity;
+    private BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
+    private BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
+
+    public Boolean isShiftPressed() {
+        return shiftPressed.get();
+    }
+
+    public void setShiftPressed(Boolean shiftPressed) {
+        this.shiftPressed.set(shiftPressed);
+    }
+
+    public BooleanProperty shiftPressedProperty() {
+        return shiftPressed;
+    }
+
+    public Boolean isCtrlPressed() {
+        return ctrlPressed.getValue();
+    }
+
+    public void setCtrlPressed(Boolean ctrlPressed) {
+        this.ctrlPressed.set(ctrlPressed);
+    }
+
+    public BooleanProperty ctrlPressedProperty() {
+        return ctrlPressed;
+    }
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -110,8 +135,6 @@ public class GlobalPreferences {
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
         checkForUpdateOnStartUp = new SimpleBooleanProperty(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
-        enableCrosshairOnKeyPressed = new SimpleBooleanProperty(prefs.getBoolean(ENABLE_CROSSHAIR_ON_KEY_PRESSED, false));
-        enableCrosshairOnKeyPressed.addListener((observable, oldValue, newValue) -> prefs.putBoolean(ENABLE_CROSSHAIR_ON_KEY_PRESSED, newValue));
         horizontalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
         verticalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(VERTICAL_MARKER_ON, true));
@@ -122,7 +145,6 @@ public class GlobalPreferences {
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
         defaultGraphOpacity = new SimpleDoubleProperty(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
-
         this.manifest = getManifest();
         if (logger.isDebugEnabled()) {
             logger.debug("Global preferences initial values");
@@ -453,18 +475,6 @@ public class GlobalPreferences {
 
     public void setCheckForUpdateOnStartUp(boolean checkForUpdateOnStartUp) {
         this.checkForUpdateOnStartUp.set(checkForUpdateOnStartUp);
-    }
-
-    public boolean isEnableCrosshairOnKeyPressed() {
-        return enableCrosshairOnKeyPressed.get();
-    }
-
-    public BooleanProperty enableCrosshairOnKeyPressedProperty() {
-        return enableCrosshairOnKeyPressed;
-    }
-
-    public void setEnableCrosshairOnKeyPressed(boolean enableCrosshairOnKeyPressed) {
-        this.enableCrosshairOnKeyPressed.set(enableCrosshairOnKeyPressed);
     }
 
     public boolean getHorizontalMarkerOn() {

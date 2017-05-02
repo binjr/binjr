@@ -49,7 +49,7 @@
     </fx:define>
 
     <children>
-        <CommandBarPane fx:id="commandBar" prefWidth="40.0" styleClass="command-bar">
+        <CommandBarPane fx:id="commandBar" prefWidth="48.0" styleClass="command-bar" cache="true" cacheHint="SPEED" minWidth="48">
             <children>
                 <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                         minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
@@ -260,7 +260,7 @@
                 <Insets/>
             </HBox.margin>
         </CommandBarPane>
-        <SplitPane dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
+        <SplitPane dividerPositions="0.35" focusTraversable="true" cache="true" cacheHint="SCALE" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
                    prefWidth="-1.0" HBox.hgrow="ALWAYS">
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">

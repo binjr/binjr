@@ -431,14 +431,16 @@
   ***************************/
  .command-bar {
     -fx-background-color: #204656;
-    -fx-pref-width: 48;
-    -fx-min-width: 48;
+  /*  -fx-pref-width: 48;*/
+  /*  -fx-min-width: 48;*/
  }
 
  .command-bar:expanded {
-   -fx-min-width: 200;
-  /*  -fx-pref-width: 200;
-    -fx-max-width: 200;*/
+   /*  -fx-min-width: 200;
+
+   -fx-pref-width: 200;
+    -fx-max-width: 200;
+    */
  }
 
  .command-bar .button,
