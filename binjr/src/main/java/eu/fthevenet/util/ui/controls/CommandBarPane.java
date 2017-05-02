@@ -33,11 +33,6 @@ public class CommandBarPane extends AnchorPane {
         if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
             return;
         }
-        Duration duration = Duration.millis(getAnimationDuration());
-        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, getExpandedWidth()));
-        showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> this.expanded.set(true));
-        showTimeline.setDelay(delay);
         showTimeline.play();
     }
 
@@ -53,13 +48,20 @@ public class CommandBarPane extends AnchorPane {
         if (commandBarWidth.get() <= getInitialWidth()) {
             return;
         }
-        Duration duration = Duration.millis(getAnimationDuration());
-        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, getInitialWidth()));
-        hideTimeline = new Timeline(keyFrame);
+
         hideTimeline.play();
     }
 
     public CommandBarPane() {
+
+        Duration duration = Duration.millis(getAnimationDuration());
+        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, getExpandedWidth()));
+        showTimeline = new Timeline(keyFrame);
+        showTimeline.setOnFinished(event -> this.expanded.set(true));
+        showTimeline.setDelay(delay);
+        //  Duration duration = Duration.millis(getAnimationDuration());
+        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, getInitialWidth())));
+
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             this.setMinWidth(newValue.doubleValue());
         });
