@@ -10,6 +10,7 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.css.PseudoClass;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.util.Duration;
 
 /**
@@ -33,6 +34,12 @@ public class CommandBarPane extends AnchorPane {
         if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
             return;
         }
+
+        Pane p = (Pane) this.getParent();
+        if (p != null) {
+            p.setMinWidth(expandedWidth);
+        }
+
         showTimeline.play();
     }
 
@@ -50,6 +57,11 @@ public class CommandBarPane extends AnchorPane {
         }
 
         hideTimeline.play();
+
+        Pane p = (Pane) this.getParent();
+        if (p != null) {
+            p.setMinWidth(collapsedWidth);
+        }
     }
 
     public CommandBarPane() {
