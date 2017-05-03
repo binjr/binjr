@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.TextFlow?>
+<?import org.controlsfx.control.*?>
+<AnchorPane fx:id="root" prefHeight="500.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+    <children>
+        <Button onAction="#handleHideSettings" prefHeight="40.0" text="Back" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+        <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+            <panes>
+                <TitledPane animated="true" text="Appearance &amp; Behavior">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0">
+                            <children>
+                                <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="Theme: "/>
+                                                <ChoiceBox fx:id="uiThemeChoiceBox" prefWidth="150.0"/>
+                                            </children>
+                                        </HBox>
+                                        <Separator/>
+                                        <ToggleSwitch fx:id="loadAtStartupCheckbox" mnemonicParsing="false" text="Reload last workspace on start-up"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </TitledPane>
+                <TitledPane fx:id="chartPrefsPane" animated="true" text="Charts">
+                    <content>
+                        <AnchorPane>
+                            <children>
+                                <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <ToggleSwitch fx:id="enableChartAnimation" mnemonicParsing="false" text="Enable animation"/>
+                                        <ToggleSwitch fx:id="showChartSymbols" mnemonicParsing="false" text="Show sample symbols"/>
+                                        <ToggleSwitch fx:id="useSourceColors" mnemonicParsing="false" text="Use source colors"/>
+                                        <ToggleSwitch fx:id="showOutline" mnemonicParsing="false" text="Show outline on area charts"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label text="Default chart area  opacity:"/>
+                                                <TextField fx:id="defaultOpacityText" prefHeight="25.0" prefWidth="45.0"/>
+                                            </children>
+                                        </HBox>
+                                        <Separator/>
+                                        <ToggleSwitch fx:id="enableDownSampling" mnemonicParsing="false" selected="true" text="Enable sample reduction"/>
+                                        <HBox alignment="CENTER_LEFT" spacing="10.0">
+                                            <children>
+                                                <Label fx:id="maxSampleLabel" text="Maximum number of samples:"/>
+                                                <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="63.0" text="1000"/>
+                                            </children>
+                                        </HBox>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </TitledPane>
+                <TitledPane animated="true" text="Updates">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0">
+                            <children>
+                                <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <ToggleSwitch fx:id="updateCheckBox" mnemonicParsing="false" text="Check for updates on start-up"/>
+                                        <Button mnemonicParsing="false" onAction="#handleCheckForUpdate" text="Check now"/>
+                                        <TextFlow fx:id="updateFlow"/>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
+                    </content>
+                </TitledPane>
+            </panes>
+        </Accordion>
+    </children>
+</AnchorPane>

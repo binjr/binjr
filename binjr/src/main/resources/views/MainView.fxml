@@ -9,8 +9,8 @@
 <?import javafx.scene.shape.*?>
 <?import javafx.scene.text.*?>
 <?import java.lang.*?>
-<HBox fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111"
-      xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <fx:define>
         <String fx:id="menuSvgPath"
                 fx:value="m 39.78125,92.15625 0,0.28125 5.65625,0 0,-0.28125 -5.65625,0 z m 0,1.40625 0,0.28125 5.65625,0 0,-0.28125 -5.65625,0 z m 0,1.40625 0,0.28125 5.65625,0 0,-0.28125 -5.65625,0 z"/>
@@ -49,222 +49,12 @@
     </fx:define>
 
     <children>
-        <AnchorPane fx:id="commandBarParent" minWidth="48" prefWidth="48">
-            <CommandBarPane fx:id="commandBar" prefWidth="48.0" styleClass="command-bar" cache="true" cacheHint="SPEED" minWidth="48" AnchorPane.bottomAnchor="0" AnchorPane.topAnchor="0">
-                <children>
-                    <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
-                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
-                            styleClass="command-bar-menu-button"
-                            onAction="#handleExpandCommandBar">
-                        <graphic>
-                            <SVGPath content="$menuSvgPath"></SVGPath>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Expand">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
-                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                popupSide="RIGHT" prefHeight="40.0" prefWidth="-1"
-                                text="Workspaces" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                AnchorPane.topAnchor="45.0">
-                        <tooltip>
-                            <Tooltip text="Workspaces">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                        <graphic>
-                            <SVGPath content="$fileNewSvgPath"/>
-                        </graphic>
-                        <items>
-                            <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
-                                <accelerator>
-                                    <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP"
-                                                        shortcut="DOWN"/>
-                                </accelerator>
-                                <graphic>
-                                    <SVGPath content="$fileNewSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                            <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
-                                <accelerator>
-                                    <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP"
-                                                        shortcut="DOWN"/>
-                                </accelerator>
-                                <graphic>
-                                    <SVGPath content="$fileOpenSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-
-                            <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu"
-                                  text="Open Recent">
-                                <graphic>
-                                    <SVGPath content="$fileRecentSvgPath"/>
-                                </graphic>
-                                <MenuItem disable="true" mnemonicParsing="false" text="none"/>
-                            </Menu>
-                            <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace"
-                                      text="Save">
-                                <accelerator>
-                                    <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP"
-                                                        shortcut="DOWN"/>
-                                </accelerator>
-                                <graphic>
-                                    <SVGPath content="$fileSaveSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                            <MenuItem mnemonicParsing="false" onAction="#handleSaveAsWorkspace" text="Save As…">
-                                <graphic>
-                                    <SVGPath content="$fileSaveAsSvgPath"/>
-                                </graphic>
-                                <accelerator>
-                                    <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP"
-                                                        shortcut="DOWN"/>
-                                </accelerator>
-                            </MenuItem>
-                        </items>
-                    </MenuButton>
-                    <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
-                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                popupSide="RIGHT" prefHeight="40.0" prefWidth="40"
-                                text="Sources" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                AnchorPane.topAnchor="90.0">
-                        <graphic>
-                            <SVGPath content="$sourceSvgPath"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Sources">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                        <items>
-                            <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                                <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
-                                    <accelerator>
-                                        <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP"
-                                                            shortcut="DOWN"/>
-                                    </accelerator>
-                                </MenuItem>
-                                <graphic>
-                                    <SVGPath content="$addSourceSvgPath"/>
-                                </graphic>
-                            </Menu>
-                        </items>
-                    </MenuButton>
-                    <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
-                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                                prefHeight="40.0" prefWidth="40.0" text="Worksheets"
-                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                AnchorPane.topAnchor="135.0">
-                        <graphic>
-                            <SVGPath content="$chartSvgPath"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Worksheets">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                        <items>
-                            <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
-                                <accelerator>
-                                    <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP"
-                                                        shortcut="DOWN"/>
-                                </accelerator>
-                                <graphic>
-                                    <SVGPath content="$addWorksheetSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                            <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false"
-                                      onAction="#handleRefreshAction" text="Refresh">
-                                <graphic>
-                                    <SVGPath content="$refreshSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                        </items>
-                    </MenuButton>
-                    <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
-                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                popupSide="RIGHT" prefHeight="40.0" text="Help"
-                                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
-                        <graphic>
-                            <SVGPath content="$helpSvgPath"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Help">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                        <items>
-                            <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
-                                <graphic>
-                                    <SVGPath content="$helpSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                            <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction"
-                                      text="Get Latest Release">
-                                <graphic>
-                                    <SVGPath content="$latestReleaseSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                            <SeparatorMenuItem mnemonicParsing="false"/>
-                            <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
-                                <graphic>
-                                    <SVGPath content="$aboutSvgPath"/>
-                                </graphic>
-                            </MenuItem>
-                        </items>
-                    </MenuButton>
-                    <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction"
-                            prefHeight="40.0" text="Settings"
-                            AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                        <graphic>
-                            <SVGPath
-                                    content="$settingSvgPath"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Settings">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction"
-                            prefHeight="40.0" text="Exit"
-                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                        <graphic>
-                            <SVGPath content="$quitSvgPath"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Exit">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                </children>
-                <HBox.margin>
-                    <Insets/>
-                </HBox.margin>
-            </CommandBarPane>
-        </AnchorPane>
-
-        <SplitPane dividerPositions="0.35" focusTraversable="true" cache="true" cacheHint="SCALE" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
-                   prefWidth="-1.0" HBox.hgrow="ALWAYS">
+        <SplitPane fx:id="contentView" dividerPositions="0.35" focusTraversable="true" cache="true" cacheHint="SCALE" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0"
+                   prefWidth="-1.0" HBox.hgrow="ALWAYS"
+                   AnchorPane.leftAnchor="48"
+                   AnchorPane.rightAnchor="0"
+                   AnchorPane.bottomAnchor="0"
+                   AnchorPane.topAnchor="0">
             <items>
                 <AnchorPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
@@ -321,5 +111,238 @@
                 </AnchorPane>
             </items>
         </SplitPane>
+        <CommandBarPane fx:id="commandBar" prefWidth="48.0" styleClass="command-bar" cache="true" cacheHint="SPEED" minWidth="48"
+                        AnchorPane.leftAnchor="0"
+                        AnchorPane.bottomAnchor="0"
+                        AnchorPane.topAnchor="0">
+            <children>
+                <Button contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                        AnchorPane.leftAnchor="0"
+                        AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                        styleClass="command-bar-menu-button"
+                        onAction="#handleExpandCommandBar">
+                    <graphic>
+                        <SVGPath content="$menuSvgPath"></SVGPath>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Expand">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0" prefWidth="-1"
+                            text="Workspaces"
+                            AnchorPane.leftAnchor="0"
+                            AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="45.0">
+                    <tooltip>
+                        <Tooltip text="Workspaces">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                    <graphic>
+                        <SVGPath content="$fileNewSvgPath"/>
+                    </graphic>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <SVGPath content="$fileNewSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <SVGPath content="$fileOpenSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+
+                        <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu"
+                              text="Open Recent">
+                            <graphic>
+                                <SVGPath content="$fileRecentSvgPath"/>
+                            </graphic>
+                            <MenuItem disable="true" mnemonicParsing="false" text="none"/>
+                        </Menu>
+                        <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace"
+                                  text="Save">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <SVGPath content="$fileSaveSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#handleSaveAsWorkspace" text="Save As…">
+                            <graphic>
+                                <SVGPath content="$fileSaveAsSvgPath"/>
+                            </graphic>
+                            <accelerator>
+                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
+                            </accelerator>
+                        </MenuItem>
+                    </items>
+                </MenuButton>
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0" prefWidth="40"
+                            text="Sources"
+                            AnchorPane.leftAnchor="0"
+                            AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="90.0">
+                    <graphic>
+                        <SVGPath content="$sourceSvgPath"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Sources">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                    <items>
+                        <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
+                            <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
+                                <accelerator>
+                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP"
+                                                        shortcut="DOWN"/>
+                                </accelerator>
+                            </MenuItem>
+                            <graphic>
+                                <SVGPath content="$addSourceSvgPath"/>
+                            </graphic>
+                        </Menu>
+                    </items>
+                </MenuButton>
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
+                            prefHeight="40.0" prefWidth="40.0" text="Worksheets"
+                            AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="135.0">
+                    <graphic>
+                        <SVGPath content="$chartSvgPath"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Worksheets">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP"
+                                                    shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <SVGPath content="$addWorksheetSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false"
+                                  onAction="#handleRefreshAction" text="Refresh">
+                            <graphic>
+                                <SVGPath content="$refreshSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                </MenuButton>
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            popupSide="RIGHT" prefHeight="40.0" text="Help"
+                            AnchorPane.leftAnchor="0.0"
+                            AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="180.0">
+                    <graphic>
+                        <SVGPath content="$helpSvgPath"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Help">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                    <items>
+                        <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
+                            <graphic>
+                                <SVGPath content="$helpSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction"
+                                  text="Get Latest Release">
+                            <graphic>
+                                <SVGPath content="$latestReleaseSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
+                            <graphic>
+                                <SVGPath content="$aboutSvgPath"/>
+                            </graphic>
+                        </MenuItem>
+                    </items>
+                </MenuButton>
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction"
+                        prefHeight="40.0" text="Settings"
+                        AnchorPane.leftAnchor="0.0"
+                        AnchorPane.bottomAnchor="45.0"
+                        AnchorPane.rightAnchor="0.0">
+                    <graphic>
+                        <SVGPath
+                                content="$settingSvgPath"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Settings">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction"
+                        prefHeight="40.0" text="Exit"
+                        AnchorPane.bottomAnchor="0.0"
+                        AnchorPane.leftAnchor="0.0"
+                        AnchorPane.rightAnchor="0.0">
+                    <graphic>
+                        <SVGPath content="$quitSvgPath"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Exit">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
+
+            </children>
+            <HBox.margin>
+                <Insets/>
+            </HBox.margin>
+        </CommandBarPane>
+        <StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="command-bar"
+                   AnchorPane.leftAnchor="-200"
+                   AnchorPane.topAnchor="0"
+                   AnchorPane.bottomAnchor="40">
+            <fx:include source="PreferencePaneView.fxml"></fx:include>
+        </StackPane>
     </children>
-</HBox>
+</AnchorPane>

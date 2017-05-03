@@ -18,33 +18,32 @@ import eu.fthevenet.util.ui.controls.CommandBarPane;
 import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
 import eu.fthevenet.util.ui.controls.EditableTab;
 import eu.fthevenet.util.ui.controls.TabPaneNewButton;
+import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.HiddenSidesPane;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
@@ -72,7 +71,7 @@ public class MainViewController implements Initializable {
     @FXML
     public CommandBarPane commandBar;
     @FXML
-    public HBox root;
+    public AnchorPane root;
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -83,12 +82,24 @@ public class MainViewController implements Initializable {
     private MenuItem saveMenuItem;
     @FXML
     private Menu openRecentMenu;
+    @FXML
+    private SplitPane contentView;
+    @FXML
+    private StackPane settingsPane;
 
     private WorksheetController selectedTabController;
     private DataAdapter<Double> selectedDataAdapter;
     private final Workspace workspace;
     private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
+    private double collapsedWidth = 48;
+    private double expandedWidth = 200;
+    private int animationDuration = 50;
+
+    private Timeline showTimeline;
+    private Timeline hideTimeline;
+    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+
 
     public MainViewController() {
         super();
@@ -102,6 +113,8 @@ public class MainViewController implements Initializable {
         assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
+        assert contentView != null : "fx:id\"contentView\" was not injected!";
+
 
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
@@ -240,6 +253,11 @@ public class MainViewController implements Initializable {
                 );
             }
         });
+
+        commandBarWidth.addListener((observable, oldValue, newValue) -> {
+            doCommandBarResize(newValue.doubleValue());
+
+        });
     }
 
     //region UI handlers
@@ -267,46 +285,30 @@ public class MainViewController implements Initializable {
         }
     }
 
-    class SideNode extends Label {
-
-        public SideNode(final String text, final Side side,
-                        final HiddenSidesPane pane) {
-
-            super(text + " (Click to pin / unpin)");
-
-            setAlignment(Pos.CENTER);
-            setPrefSize(200, 200);
-
-            setOnMouseClicked(new EventHandler<MouseEvent>() {
-                @Override
-                public void handle(MouseEvent event) {
-                    if (pane.getPinnedSide() != null) {
-                        setText(text + " (unpinned)");
-                        pane.setPinnedSide(null);
-                    }
-                    else {
-                        setText(text + " (pinned)");
-                        pane.setPinnedSide(side);
-                    }
-                }
-            });
-        }
-    }
-
+    boolean showPrefs;
     @FXML
     protected void handlePreferencesAction(ActionEvent actionEvent) {
         try {
-            commandBar.setExpanded(true);
+            if (!showPrefs) {
+                //  commandBar.setExpanded(true);
+                //     show();
+                TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
+                openNav.setToX(200);
+                //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
+                openNav.play();
+                showPrefs = true;
+
+            }
 
 
-
-            Dialog<String> dialog = new Dialog<>();
-            dialog.initModality(Modality.NONE);
-            dialog.initStyle(StageStyle.UTILITY);
-            dialog.setTitle("Preferences");
-            dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
-            dialog.initOwner(Dialogs.getStage(root));
-            dialog.show();
+//
+//            Dialog<String> dialog = new Dialog<>();
+//            dialog.initModality(Modality.NONE);
+//            dialog.initStyle(StageStyle.UTILITY);
+//            dialog.setTitle("Preferences");
+//            dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
+//            dialog.initOwner(Dialogs.getStage(root));
+//            dialog.show();
         } catch (Exception ex) {
             Dialogs.displayException("Failed to display preference dialog", ex, root);
         }
@@ -314,6 +316,14 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void handleExpandCommandBar(ActionEvent actionEvent) {
+
+        if (!commandBar.isExpanded()) {
+            show();
+        }
+        else {
+            hide();
+        }
+
         commandBar.setExpanded(!commandBar.isExpanded());
     }
 
@@ -380,6 +390,42 @@ public class MainViewController implements Initializable {
 
 
     //region private members
+
+    private void show() {
+        if (hideTimeline != null) {
+            hideTimeline.stop();
+        }
+        if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
+            return;
+        }
+        Duration duration = Duration.millis(animationDuration);
+        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
+        showTimeline = new Timeline(keyFrame);
+        showTimeline.setOnFinished(event -> AnchorPane.setLeftAnchor(contentView, expandedWidth));
+        showTimeline.play();
+    }
+
+
+    private void hide() {
+        if (showTimeline != null) {
+            showTimeline.stop();
+        }
+        if (hideTimeline != null && hideTimeline.getStatus() == Animation.Status.RUNNING) {
+            return;
+        }
+        if (commandBarWidth.get() <= collapsedWidth) {
+            return;
+        }
+        Duration duration = Duration.millis(animationDuration);
+        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, collapsedWidth)));
+        AnchorPane.setLeftAnchor(contentView, collapsedWidth);
+        hideTimeline.play();
+    }
+
+    private void doCommandBarResize(double v) {
+        commandBar.setMinWidth(v);
+        // AnchorPane.setLeftAnchor(contentView,  v);
+    }
 
     private void expandBranch(TreeItem<TimeSeriesBinding<Double>> branch) {
         if (branch == null) {

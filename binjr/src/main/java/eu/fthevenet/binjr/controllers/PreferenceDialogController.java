@@ -3,13 +3,16 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.application.Platform;
+import javafx.animation.TranslateTransition;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
+import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,6 +59,9 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private TextField defaultOpacityText;
 
+    @FXML
+    private AnchorPane root;
+
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -96,18 +102,18 @@ public class PreferenceDialogController implements Initializable {
         opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
 
-        Platform.runLater(() -> {
-            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
-                p.requestLayout();
-                p.getScene().getWindow().sizeToScene();
-            }));
-
-            if (accordionPane.getPanes() != null
-                    && accordionPane.getPanes().size() > 0
-                    && accordionPane.getPanes().get(0) != null) {
-                accordionPane.getPanes().get(0).setExpanded(true);
-            }
-        });
+//        Platform.runLater(() -> {
+//            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
+//                p.requestLayout();
+//                p.getScene().getWindow().sizeToScene();
+//            }));
+//
+//            if (accordionPane.getPanes() != null
+//                    && accordionPane.getPanes().size() > 0
+//                    && accordionPane.getPanes().get(0) != null) {
+//                accordionPane.getPanes().get(0).setExpanded(true);
+//            }
+//        });
     }
 
     public void handleCheckForUpdate(ActionEvent actionEvent) {
@@ -139,5 +145,14 @@ public class PreferenceDialogController implements Initializable {
                     btn.setDisable(false);
                     l.setText("Could not check for update");
                 });
+    }
+
+    public void handleHideSettings(ActionEvent actionEvent) {
+        Node n = root.getParent();
+        TranslateTransition openNav = new TranslateTransition(new Duration(350), n);
+        openNav.setToX(-200);
+        //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
+        openNav.play();
+
     }
 }
