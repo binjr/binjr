@@ -68,6 +68,7 @@ import java.util.stream.StreamSupport;
  */
 public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
+
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -95,6 +96,7 @@ public class MainViewController implements Initializable {
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
     private int animationDuration = 50;
+    public static final int settingsPaneDistance = 250;
 
     private Timeline showTimeline;
     private Timeline hideTimeline;
@@ -292,11 +294,11 @@ public class MainViewController implements Initializable {
             if (!showPrefs) {
                 //  commandBar.setExpanded(true);
                 //     show();
-                TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
-                openNav.setToX(200);
+                TranslateTransition openNav = new TranslateTransition(new Duration(200), settingsPane);
+                openNav.setToX(settingsPaneDistance);
                 //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
                 openNav.play();
-                showPrefs = true;
+                //  showPrefs = true;
 
             }
 

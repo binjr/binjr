@@ -315,7 +315,6 @@
   ******************************************************************************/
 
  .scroll-bar > .thumb{
-
      -fx-background-color: #BABABA;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
@@ -442,7 +441,6 @@
     -fx-max-width: 200;
     */
  }
-
  .command-bar .button,
  .command-bar .toggle-button,
  .command-bar .menu-button{
@@ -512,8 +510,11 @@
      -fx-fill: white;
       visibility: visible;
   }
-  .command-bar:expanded .menu-button .arrow-button .arrow {
+  .command-bar .arrow {
      -fx-background-color:white;
+  }
+.command-bar .titled-pane:focused .arrow {
+    -fx-effect:null;
   }
 
   .command-bar:expanded  .menu-button .label,
@@ -531,6 +532,58 @@
      -fx-font-size: 11pt;
      -fx-padding: 0 0 0 21;
   }
+
+  .command-bar .square-button {
+    -fx-alignment: center;
+    -fx-text-fill:white;
+    -fx-padding: 10;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
+  }
+
+   .command-bar  .titled-pane{
+        -fx-alignment: center_left;
+        -fx-graphic-text-gap:20;
+        -fx-text-fill:white;
+        -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+        -fx-font-size: 11pt;
+   }
+
+
+   .command-bar  .label{
+       -fx-alignment: center_left;
+       -fx-graphic-text-gap:20;
+       -fx-text-fill:white;
+       -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+       -fx-font-size: 10pt;
+
+    }
+
+   .command-bar .separator{
+     -fx-border-width:0;
+       -fx-border-color: white;
+           -fx-border-style: solid;
+               -fx-background-radius: 0;
+               -fx-background-insets: 0;
+               -fx-background-color:transparent;
+
+   }
+
+ .command-bar .arrow {
+    -fx-fill-color: red;
+ }
+
+  .command-bar  .content,
+.scroll-pane .viewport,
+  .command-bar .title {
+    -fx-background-color: #204656;
+     -fx-border-width:0;
+
+  }
+
+
+
+
 
 /*** Menu ***/
 
@@ -576,11 +629,50 @@
   }
 
  */
+  .command-bar .settings-text {
+  -fx-alignment: center_left;
+        -fx-text-fill:white;
+        -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
+        -fx-font-size: 18pt;
+ }
+
+/*******************************************************************************
+ *                                                                             *
+ * ChoiceBox                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.choice-box {
+    -fx-background-color: transparent;
+    -fx-border-color:white;
+    -fx-border-width:2;
+    -fx-background-radius: 0, 0, 0, 0;
+  /*  -fx-padding: 0em 0.166667em 0em 0.166667em; /* 0 2px 0 2px*/
+    -fx-background-insets: -1.4, 0, 1, 2;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+}
+
+
+
+.choice-box:hover {
+    -fx-background-color: #336F87;
+     -fx-border-color:#4BACC6;
+}
+
+.choice-box:disabled {
+    -fx-opacity: .4;
+}
+
+.radio-menu-item:checked > .left-container > .radio {
+    -fx-shape: "M9.005,17.766l13.759,14.739h1.716L49.02,0l10.298,8.488L25.997,50.453h-3.629L0,26.897L9.005,17.766z";
+    -fx-padding:7px;
+    -fx-scale-shape: true;
+}
 
 /*** Color picker ***/
 
 .borderless-color-picker,
-.borderless-color-picker:hover{
+.borderless-color-picker:hover {
     -fx-color-label-visible: false;
     -fx-background-color: transparent;
     -fx-background-radius: 0;
@@ -605,3 +697,57 @@
     -fx-padding:-2;
      visibility: hidden;
  }
+
+/*******************************************************************************
+ *                                                                             *
+ * ToggleSwitch                                                                *
+ *                                                                             *
+ ******************************************************************************/
+.toggle-switch{
+    -thumb-move-animation-time: 200;
+}
+
+.toggle-switch .text {
+    -fx-font-size: 1em;
+    -fx-text-fill: white;
+      -fx-padding: 0,0,0,-10;
+}
+
+.toggle-switch .thumb {
+    -fx-background-color: white;
+    -fx-background-insets: 5, 2, 2;
+    -fx-background-radius: 1.0em; /* large value to make sure this remains circular */
+    -fx-padding: 0.75em;
+    -fx-alignment: CENTER;
+    -fx-content-display: LEFT;
+}
+
+.toggle-switch .thumb-area{
+    -fx-background-radius: 1em;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0, 1;
+    -fx-border-color:white;
+    -fx-border-color:white;
+    -fx-border-radius:1em;
+    -fx-border-width:2;
+}
+
+.toggle-switch:hover .thumb{
+    -fx-color: -fx-hover-base
+}
+
+.toggle-switch:selected .thumb-area{
+
+    -fx-background-color: linear-gradient(to bottom, derive(-fx-text-box-border, -20%), derive(-fx-text-box-border, -30%)),
+                            linear-gradient(to bottom, derive(#0b99c9, 30%), #0b99c9);
+    -fx-background-insets: 0, 1;
+
+}
+
+.toggle-switch .thumb-area{
+    -fx-padding: 0.5em 1.333333em 0.7em 1.333333em; /* 7 16 7 16 */
+}
+
+.toggle-switch:disabled{
+    -fx-opacity: 0.4;
+}

@@ -41,6 +41,9 @@
  /*  -fx-pref-width: 48;
    -fx-min-width: 48;*/
     -fx-padding:5;
+    -fx-background-color: #F4F4F4;
+    -fx-border-width:1;
+    -fx-border-color: #C2C2C2;
 }
 
 .command-bar:expanded {
@@ -48,6 +51,7 @@
  /*  -fx-pref-width: 200;
    -fx-max-width: 200;*/
 }
+
 
  .command-bar .menu-button .arrow-button {
     -fx-padding:-2;
@@ -92,6 +96,11 @@
     -fx-text-fill:black;
     -fx-padding: 0 0 0 16;
  }
+
+  .command-bar .square-button {
+     -fx-alignment: center;
+     -fx-padding: 0 0 0 0;
+   }
 
  .command-bar  .menu-item {
       -fx-padding: 10 10 10 17 ;

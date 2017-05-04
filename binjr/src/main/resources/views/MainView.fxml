@@ -338,10 +338,10 @@
                 <Insets/>
             </HBox.margin>
         </CommandBarPane>
-        <StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="command-bar"
-                   AnchorPane.leftAnchor="-200"
+        <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar"
+                   AnchorPane.leftAnchor="-252"
                    AnchorPane.topAnchor="0"
-                   AnchorPane.bottomAnchor="40">
+                   AnchorPane.bottomAnchor="0">
             <fx:include source="PreferencePaneView.fxml"></fx:include>
         </StackPane>
     </children>

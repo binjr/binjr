@@ -149,8 +149,8 @@ public class PreferenceDialogController implements Initializable {
 
     public void handleHideSettings(ActionEvent actionEvent) {
         Node n = root.getParent();
-        TranslateTransition openNav = new TranslateTransition(new Duration(350), n);
-        openNav.setToX(-200);
+        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        openNav.setToX(-MainViewController.settingsPaneDistance);
         //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
         openNav.play();
 
