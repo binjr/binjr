@@ -4,6 +4,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -101,18 +102,24 @@ public class PreferenceDialogController implements Initializable {
         defaultOpacityText.setTextFormatter(opacityFormatter);
         opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
+        root.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue){
+                hide();
+            }
+        });
 
 //        Platform.runLater(() -> {
-//            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
-//                p.requestLayout();
-//                p.getScene().getWindow().sizeToScene();
-//            }));
-//
-//            if (accordionPane.getPanes() != null
-//                    && accordionPane.getPanes().size() > 0
-//                    && accordionPane.getPanes().get(0) != null) {
-//                accordionPane.getPanes().get(0).setExpanded(true);
-//            }
+//            root.requestFocus();
+////            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
+////                p.requestLayout();
+////                p.getScene().getWindow().sizeToScene();
+////            }));
+////
+////            if (accordionPane.getPanes() != null
+////                    && accordionPane.getPanes().size() > 0
+////                    && accordionPane.getPanes().get(0) != null) {
+////                accordionPane.getPanes().get(0).setExpanded(true);
+////            }
 //        });
     }
 
@@ -122,6 +129,7 @@ public class PreferenceDialogController implements Initializable {
         updateFlow.getChildren().clear();
         Label l = new Label("Checking for updates...");
         l.setTextFill(Color.DIMGRAY);
+        l.setWrapText(true);
         updateFlow.getChildren().add(l);
         GlobalPreferences.getInstance().asyncCheckForUpdate(githubRelease -> {
                     updateFlow.getChildren().clear();
@@ -148,11 +156,14 @@ public class PreferenceDialogController implements Initializable {
     }
 
     public void handleHideSettings(ActionEvent actionEvent) {
+        hide();
+    }
+
+    private void hide(){
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setToX(-MainViewController.settingsPaneDistance);
         //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
         openNav.play();
-
     }
 }

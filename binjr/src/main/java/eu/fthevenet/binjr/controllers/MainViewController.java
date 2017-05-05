@@ -256,6 +256,7 @@ public class MainViewController implements Initializable {
             }
         });
 
+
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
 
@@ -302,15 +303,6 @@ public class MainViewController implements Initializable {
 
             }
 
-
-//
-//            Dialog<String> dialog = new Dialog<>();
-//            dialog.initModality(Modality.NONE);
-//            dialog.initStyle(StageStyle.UTILITY);
-//            dialog.setTitle("Preferences");
-//            dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/PreferenceDialogView.fxml")));
-//            dialog.initOwner(Dialogs.getStage(root));
-//            dialog.show();
         } catch (Exception ex) {
             Dialogs.displayException("Failed to display preference dialog", ex, root);
         }
@@ -403,7 +395,7 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(animationDuration);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> AnchorPane.setLeftAnchor(contentView, expandedWidth));
+      //  showTimeline.setOnFinished(event -> AnchorPane.setLeftAnchor(contentView, expandedWidth));
         showTimeline.play();
     }
 

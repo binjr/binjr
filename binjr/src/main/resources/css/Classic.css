@@ -97,6 +97,9 @@
     -fx-padding: 0 0 0 16;
  }
 
+  .command-bar .border-button{
+    -fx-padding: 4 10 4 10;
+  }
   .command-bar .square-button {
      -fx-alignment: center;
      -fx-padding: 0 0 0 0;
