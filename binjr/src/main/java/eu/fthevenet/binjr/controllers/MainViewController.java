@@ -14,10 +14,7 @@ import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
-import eu.fthevenet.util.ui.controls.CommandBarPane;
-import eu.fthevenet.util.ui.controls.ContextMenuTreeViewCell;
-import eu.fthevenet.util.ui.controls.EditableTab;
-import eu.fthevenet.util.ui.controls.TabPaneNewButton;
+import eu.fthevenet.util.ui.controls.*;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -395,7 +392,7 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(animationDuration);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
         showTimeline = new Timeline(keyFrame);
-      //  showTimeline.setOnFinished(event -> AnchorPane.setLeftAnchor(contentView, expandedWidth));
+        showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), ()-> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit() );
         showTimeline.play();
     }
 

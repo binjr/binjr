@@ -4,7 +4,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -24,6 +24,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.ForkJoinPool;
 
 /**
  * The controller for the preference view.
@@ -102,11 +103,12 @@ public class PreferenceDialogController implements Initializable {
         defaultOpacityText.setTextFormatter(opacityFormatter);
         opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
-        root.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue){
-                hide();
-            }
-        });
+//
+//        root.hoverProperty().addListener((observable, oldValue, newValue) -> {
+//            if (!newValue){
+//                hide(Duration.millis(800));
+//            }
+//        });
 
 //        Platform.runLater(() -> {
 //            root.requestFocus();
@@ -156,12 +158,13 @@ public class PreferenceDialogController implements Initializable {
     }
 
     public void handleHideSettings(ActionEvent actionEvent) {
-        hide();
+        hide(Duration.millis(0));
     }
 
-    private void hide(){
+    private void hide(Duration delay){
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        openNav.setDelay(delay);
         openNav.setToX(-MainViewController.settingsPaneDistance);
         //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
         openNav.play();
