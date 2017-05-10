@@ -751,12 +751,12 @@
 
 .toggle-switch .text {
     -fx-font-size: 1em;
-    -fx-text-fill: white;
+    -fx-text-fill: black;
       -fx-padding: 0,0,0,-10;
 }
 
 .toggle-switch .thumb {
-    -fx-background-color: white;
+    -fx-background-color: black;
     -fx-background-insets: 5, 2, 2;
     -fx-background-radius: 1.0em; /* large value to make sure this remains circular */
     -fx-padding: 0.75em;
@@ -764,12 +764,25 @@
     -fx-content-display: LEFT;
 }
 
+.command-bar .toggle-switch .thumb {
+    -fx-background-color: white;
+}
+
+.command-bar .toggle-switch .thumb-area {
+   -fx-border-color:white;
+}
+
+.command-bar .toggle-switch .text {
+    -fx-text-fill: white;
+}
+
+
+
 .toggle-switch .thumb-area{
     -fx-background-radius: 1em;
     -fx-background-color: transparent;
     -fx-background-insets: 0, 1;
-    -fx-border-color:white;
-    -fx-border-color:white;
+    -fx-border-color:black;
     -fx-border-radius:1em;
     -fx-border-width:2;
 }

@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
+<?import org.controlsfx.control.ToggleSwitch?>
 <?import java.lang.*?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="850.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -202,29 +203,32 @@
                         </Tooltip>
                     </tooltip>
                 </ToggleButton>
-                <Button fx:id="opacityMenuButton"
-                        styleClass="no-arrow-menu-button"
-                        contentDisplay="GRAPHIC_ONLY"
-                        alignment="CENTER_LEFT"
-                        textAlignment="CENTER"
-                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0">
-                    <!--<items>-->
-                    <!--<MenuItem fx:id="outlineMenuItem" mnemonicParsing="false" text="Show Outline:">-->
-                    <!--<graphic>-->
-                    <!--<ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>-->
-                    <!--</graphic>-->
-                    <!--</MenuItem>-->
-                    <!--<MenuItem mnemonicParsing="false" text="Opacity:">-->
-                    <!--<graphic>-->
-                    <!--<HBox alignment="CENTER_LEFT">-->
-
-                    <!--<Label fx:id="opacityText" text="100%"/>-->
-                    <!--<Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>-->
-                    <!--</HBox>-->
-                    <!--</graphic>-->
-                    <!--</MenuItem>-->
-                    <!--</items>-->
+                <MenuButton fx:id="opacityMenuButton"
+                            styleClass="no-arrow-menu-button"
+                            contentDisplay="GRAPHIC_ONLY"
+                            alignment="CENTER_LEFT"
+                            textAlignment="CENTER"
+                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            prefHeight="40.0" prefWidth="40.0">
+                    <items>
+                        <MenuItem fx:id="outlineMenuItem" mnemonicParsing="false">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Show Outline:"/>
+                                    <ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>
+                                </HBox>
+                            </graphic>
+                        </MenuItem>
+                        <MenuItem mnemonicParsing="false">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Label text="Opacity:"/>
+                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>
+                                    <Label fx:id="opacityText" text="100%"/>
+                                </HBox>
+                            </graphic>
+                        </MenuItem>
+                    </items>
                     <graphic>
                         <Region styleClass="settings-icon"/>
                     </graphic>
@@ -235,7 +239,7 @@
                             </font>
                         </Tooltip>
                     </tooltip>
-                </Button>
+                </MenuButton>
             </HBox>
         </VBox>
         <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">

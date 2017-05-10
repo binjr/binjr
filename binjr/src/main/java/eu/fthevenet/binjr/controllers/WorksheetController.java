@@ -116,7 +116,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     //@FXML
     private Label opacityText = new Label();
     @FXML
-    private Button opacityMenuButton;
+    private MenuButton opacityMenuButton;
     //   @FXML
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
 
