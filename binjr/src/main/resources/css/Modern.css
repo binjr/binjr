@@ -1,3 +1,46 @@
+/********************************
+*      button icons
+********************************/
+
+
+.command-bar * {
+    -icon-scale-x: 3;
+    -icon-scale-y: 3;
+    -icon-color: white;
+}
+
+.command-bar .menu-icon {
+    -fx-alignment: center_left;
+    -fx-scale-y: .6;
+     -fx-scale-x: .6;
+    -fx-smooth: false;
+}
+
+.icon-container {
+    -fx-padding: 0 0 0 14;
+}
+
+.context-menu .icon-container {
+    -fx-padding: 0 14 0 8;
+}
+
+.command-bar .context-menu * {
+    -icon-scale-x: 2.5;
+    -icon-scale-y: 2.5;
+}
+
+.command-bar-menu-graphic {
+    -fx-padding:6;
+
+    -fx-fill:red;
+}
+
+.command-bar-menu-graphic Line {
+    -fx-stroke:white;
+}
+
+/**********************************************/
+
 .button,
 .toggle-button,
 .menu-button{
@@ -9,7 +52,6 @@
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center;
-
 }
 
 .button:hover,
@@ -410,20 +452,25 @@
     -fx-text-fill:  #DADADA;
  }
 
- .add-source-background-icon SVGPath,
- .add-worksheet-background-icon SVGPath{
-    -fx-fill:  #DADADA;
- }
 
  .add-source-background-icon:hover,
  .add-worksheet-background-icon:hover{
     -fx-text-fill:  #C2C2C2;
  }
 
- .add-source-background-icon:hover SVGPath,
- .add-worksheet-background-icon:hover SVGPath {
-    -fx-fill:  #969696;
- }
+ .add-worksheet-background-icon .addWorksheet-icon,
+ .add-source-background-icon .addSource-icon {
+  -fx-scale-x:20;
+  -fx-scale-y:20;
+  -fx-background-color:#DADADA;
+}
+
+ .add-worksheet-background-icon .addWorksheet-icon:hover,
+ .add-source-background-icon .addSource-icon:hover,
+ .add-worksheet-background-icon .addWorksheet-icon:hover:pressed,
+ .add-source-background-icon .addSource-icon:hover:pressed {
+  -fx-background-color:#969696;
+}
 
  /****************************
   Command bar
@@ -450,7 +497,7 @@
      -fx-border-color: #737373;
      -fx-border-width:0;
      -fx-border-radius:0;
-     -fx-alignment: center;
+     -fx-alignment: center_left;
  }
 
  .command-bar .button:hover,
@@ -493,17 +540,6 @@
       visibility: hidden;
   }
 
-  .command-bar .button SVGPath,
- .command-bar .menu-button SVGPath{
-     -fx-fill:  white;
-     -fx-scale-x: 3;
-     -fx-scale-y: 3;
-  }
-
- .command-bar .command-bar-menu-button SVGPath {
-     -fx-scale-y: 3.5;
-    /* -fx-smooth: false;*/
-  }
 
   .command-bar:expanded .menu-button .arrow-button {
      -fx-padding:10;
@@ -519,7 +555,6 @@
 
   .command-bar:expanded  .menu-button .label,
   .command-bar:expanded .button {
-     -fx-margins:5;
      -fx-content-display:left;
   }
 
@@ -530,13 +565,10 @@
      -fx-text-fill:white;
      -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
      -fx-font-size: 11pt;
-     -fx-padding: 0 0 0 21;
   }
 
   .command-bar .square-button {
-    -fx-alignment: center;
     -fx-text-fill:white;
-    -fx-padding: 10;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
   }
@@ -544,7 +576,6 @@
  .command-bar .border-button {
     -fx-border-width:2;
     -fx-border-color:white;
-     -fx-padding: 4 10 4 10;
  }
 
   .command-bar .border-button:hover:pressed,
@@ -617,7 +648,7 @@
   }
  */
 .command-bar .menu-item{
- -fx-padding: 10 10 10 17 ;
+ -fx-padding: 10 10 10 10 ;
 }
   .menu-item {
       -fx-padding: 8 ;

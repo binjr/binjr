@@ -1,3 +1,27 @@
+/********************************
+*      button icons
+********************************/
+
+{
+    -icon-scale-x: 3;
+    -icon-scale-y: 3;
+    -icon-color:black;
+}
+
+.command-bar *{
+    -icon-scale-x: 2.5;
+    -icon-scale-y: 2.5;
+    -icon-color: black;
+}
+
+.command-bar .context-menu * {
+  -icon-scale-x: 2.5;
+  -icon-scale-y: 2.5;
+}
+
+.context-menu .icon-container {
+  -fx-padding: 0 14 0 8;
+}
 
  .menu-button .arrow-button {
     -fx-padding:-2;
@@ -13,6 +37,15 @@
     -fx-padding:5;
 }
 
+.command-bar-menu-graphic {
+    -fx-padding:2;
+}
+
+.command-bar-menu-graphic Line {
+    -fx-stroke:black;
+}
+
+/*
 .add-source-background-icon,
 .add-worksheet-background-icon{
    -fx-text-fill:  #DADADA;
@@ -31,6 +64,31 @@
 .add-source-background-icon:hover SVGPath,
 .add-worksheet-background-icon:hover SVGPath {
    -fx-fill:  #969696;
+}*/
+
+ .add-source-background-icon,
+ .add-worksheet-background-icon{
+    -fx-text-fill:  #DADADA;
+ }
+
+
+ .add-source-background-icon:hover,
+ .add-worksheet-background-icon:hover{
+    -fx-text-fill:  #C2C2C2;
+ }
+
+ .add-worksheet-background-icon .addWorksheet-icon,
+ .add-source-background-icon .addSource-icon {
+  -fx-scale-x:20;
+  -fx-scale-y:20;
+  -fx-background-color:#DADADA;
+}
+
+ .add-worksheet-background-icon .addWorksheet-icon:hover,
+ .add-source-background-icon .addSource-icon:hover,
+ .add-worksheet-background-icon .addWorksheet-icon:hover:pressed,
+ .add-source-background-icon .addSource-icon:hover:pressed {
+  -fx-background-color:#969696;
 }
 
   /*******************
@@ -58,17 +116,10 @@
      visibility: hidden;
  }
 
- .command-bar .button SVGPath,
- .command-bar .menu-button SVGPath{
-    -fx-fill:  black;
-    -fx-scale-x: 2.5;
-    -fx-scale-y: 2.5;
- }
 
 
- .command-bar .command-bar-menu-button SVGPath{
-    -fx-fill:black;
-   /* -fx-smooth: false;*/
+ .command-bar .command-bar-menu-button .menu-icon{
+    -fx-fill:red;
     -fx-scale-x: 3;
     -fx-scale-y: 3.5;
  }
@@ -94,15 +145,15 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:15;
     -fx-text-fill:black;
-    -fx-padding: 0 0 0 16;
+   /* -fx-padding: 0 0 0 16;*/
  }
 
   .command-bar .border-button{
-    -fx-padding: 4 10 4 10;
+  /*  -fx-padding: 4 10 4 10;*/
   }
   .command-bar .square-button {
      -fx-alignment: center;
-     -fx-padding: 0 0 0 0;
+   /*  -fx-padding: 0 0 0 0;*/
    }
 
  .command-bar  .menu-item {

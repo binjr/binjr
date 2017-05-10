@@ -606,19 +606,6 @@ public class GlobalPreferences {
         }
     }
 
-//    public Optional<GithubRelease> getNewRelease() throws IOException, URISyntaxException {
-//       try {
-//            GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
-//            if (latestRelease != null) {
-//                if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
-//                    return Optional.of(latestRelease);
-//                }
-//            }
-//        } catch (Exception e) {
-//            logger.error("Error while checking for update", e);
-//        }
-//        return Optional.empty();
-//    }
 
     public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable) {
         asyncCheckForUpdate(newReleaseAvailable, null, null);

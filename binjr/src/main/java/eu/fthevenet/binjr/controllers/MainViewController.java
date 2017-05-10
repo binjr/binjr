@@ -285,20 +285,12 @@ public class MainViewController implements Initializable {
         }
     }
 
-    boolean showPrefs;
     @FXML
     protected void handlePreferencesAction(ActionEvent actionEvent) {
         try {
-            if (!showPrefs) {
-                //  commandBar.setExpanded(true);
-                //     show();
-                TranslateTransition openNav = new TranslateTransition(new Duration(200), settingsPane);
-                openNav.setToX(settingsPaneDistance);
-                //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
-                openNav.play();
-                //  showPrefs = true;
-
-            }
+            TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
+            openNav.setToX(settingsPaneDistance);
+            openNav.play();
 
         } catch (Exception ex) {
             Dialogs.displayException("Failed to display preference dialog", ex, root);
@@ -392,7 +384,7 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(animationDuration);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), ()-> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit() );
+        showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), () -> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit());
         showTimeline.play();
     }
 
@@ -740,7 +732,9 @@ public class MainViewController implements Initializable {
     private void setUiTheme(UserInterfaceThemes theme) {
         root.getStylesheets().clear();
         Application.setUserAgentStylesheet(null);
-        root.getStylesheets().add(getClass().getResource(theme.getCssPath()).toExternalForm());
+        root.getStylesheets().addAll(
+                getClass().getResource("/css/Icons.css").toExternalForm(),
+                getClass().getResource(theme.getCssPath()).toExternalForm());
     }
 
 

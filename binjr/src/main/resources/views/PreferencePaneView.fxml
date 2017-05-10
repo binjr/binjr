@@ -1,21 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
-<?import org.controlsfx.control.ToggleSwitch?>
-
+<?import org.controlsfx.control.*?>
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
     <children>
         <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" onAction="#handleHideSettings" prefHeight="40.0" prefWidth="40.0" styleClass="square-button" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -23,11 +13,14 @@
                 <Font size="18.0" />
             </font>
             <graphic>
-                <ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
-                    <image>
-                        <Image url="@/images/backArrow_40.png" />
-                    </image>
-                </ImageView>
+
+                <Region styleClass="backArrow-icon"/>
+
+                <!--<ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
+                <!--<image>-->
+                <!--<Image url="@/images/backArrow_40.png" />-->
+                <!--</image>-->
+                <!--</ImageView>-->
             </graphic>
         </Button>
         <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
@@ -149,7 +142,7 @@
                 <Font size="14.0" />
             </font>
             <padding>
-                <Insets left="10.0" />
+                <Insets left="5.0"/>
             </padding>
         </Label>
     </children>
