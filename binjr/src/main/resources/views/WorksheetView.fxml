@@ -9,238 +9,237 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
-<?import org.controlsfx.control.ToggleSwitch?>
 <?import java.lang.*?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="850.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-        <VBox alignment="CENTER_RIGHT" prefHeight="56.0" prefWidth="687.0">
-            <HBox alignment="CENTER_LEFT">
-                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
-                    <HBox.margin>
-                        <Insets left="5.0"/>
-                    </HBox.margin>
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/backArrow_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Go back">
+        <VBox alignment="CENTER_RIGHT">
+            <AnchorPane minWidth="755.0">
+                <children>
+                    <HBox alignment="CENTER_LEFT" minWidth="710.0" AnchorPane.leftAnchor="0.0">
+                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
+                            <HBox.margin>
+                                <Insets left="5.0"/>
+                            </HBox.margin>
+                            <graphic>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/backArrow_40.png"/>
+                                </ImageView>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Go back">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="forward" textAlignment="CENTER">
+                            <graphic>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/forwardArrow_40.png"/>
+                                </ImageView>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Go forward">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="refresh" textAlignment="CENTER">
+                            <graphic>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/refresh_40.png"/>
+                                </ImageView>
+                            </graphic>
                             <font>
                                 <Font size="10.0"/>
                             </font>
-                        </Tooltip>
-                    </tooltip>
-                </Button>
-                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="forward" textAlignment="CENTER">
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/forwardArrow_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Go forward">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </Button>
-                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="refresh" textAlignment="CENTER">
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/refresh_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <font>
-                        <Font size="10.0"/>
-                    </font>
-                    <tooltip>
-                        <Tooltip text="Refresh">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </Button>
-                <GridPane hgap="10.0" vgap="10.0">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES"/>
-                        <ColumnConstraints hgrow="SOMETIMES"/>
-                        <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
-                        <ColumnConstraints hgrow="SOMETIMES"/>
-                        <ColumnConstraints hgrow="SOMETIMES"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints vgrow="SOMETIMES"/>
-                        <RowConstraints vgrow="SOMETIMES"/>
-                    </rowConstraints>
-                    <children>
-                        <ZonedDateTimePicker fx:id="startDate" GridPane.columnIndex="1">
                             <tooltip>
-                                <Tooltip text="Lower bound for the X axis"/>
+                                <Tooltip text="Refresh">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
                             </tooltip>
-                        </ZonedDateTimePicker>
-                        <ZonedDateTimePicker fx:id="endDate" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                            <tooltip>
-                                <Tooltip text="Upper bound for the X axis"/>
-                            </tooltip>
-                        </ZonedDateTimePicker>
-                        <Label text="From:"/>
-                        <Label text="To:" GridPane.rowIndex="1"/>
-                        <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="4">
-                            <tooltip>
-                                <Tooltip text="Lower bound for the Y axis"/>
-                            </tooltip>
-                        </TextField>
-                        <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
-                            <tooltip>
-                                <Tooltip text="Upper bound for the Y axis"/>
-                            </tooltip>
-                        </TextField>
-                        <Label text="Min:" GridPane.columnIndex="3"/>
-                        <Label text="Max:" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                    </children>
-                    <HBox.margin>
-                        <Insets bottom="5.0" left="10.0" top="5.0"/>
-                    </HBox.margin>
-                </GridPane>
-                <VBox alignment="CENTER_LEFT" HBox.hgrow="NEVER">
-                    <Polyline stroke="#b5b5b5" strokeType="INSIDE">
-                        <points>
-                            <Double fx:value="0.0"/>
-                            <Double fx:value="0.0"/>
-                            <Double fx:value="0.0"/>
-                            <Double fx:value="-7.0"/>
-                            <Double fx:value="-15.0"/>
-                            <Double fx:value="-7.0"/>
-                        </points>
-                    </Polyline>
-                    <Button fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
-                            prefWidth="21.0" textOverrun="CLIP">
-                        <graphic>
-                            <ImageView fitHeight="15" fitWidth="11">
-                                <Image url="@/images/autoScale.png"/>
-                            </ImageView>
-                        </graphic>
-                        <font>
-                            <Font size="1.0"/>
-                        </font>
-                        <VBox.margin>
-                            <Insets bottom="2.0" left="4.0" right="10.0" top="2.0"/>
-                        </VBox.margin>
-                        <tooltip>
-                            <Tooltip text="Automatically set the range for the Y axis">
+                        </Button>
+                        <GridPane hgap="10.0" vgap="10.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES"/>
+                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                            </rowConstraints>
+                            <children>
+                                <ZonedDateTimePicker fx:id="startDate" GridPane.columnIndex="1">
+                                    <tooltip>
+                                        <Tooltip text="Lower bound for the X axis"/>
+                                    </tooltip>
+                                </ZonedDateTimePicker>
+                                <ZonedDateTimePicker fx:id="endDate" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <tooltip>
+                                        <Tooltip text="Upper bound for the X axis"/>
+                                    </tooltip>
+                                </ZonedDateTimePicker>
+                                <Label text="From:"/>
+                                <Label text="To:" GridPane.rowIndex="1"/>
+                                <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="4">
+                                    <tooltip>
+                                        <Tooltip text="Lower bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                    <tooltip>
+                                        <Tooltip text="Upper bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <Label text="Min:" GridPane.columnIndex="3"/>
+                                <Label text="Max:" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                            </children>
+                            <HBox.margin>
+                                <Insets bottom="5.0" left="10.0" top="5.0"/>
+                            </HBox.margin>
+                        </GridPane>
+                        <VBox alignment="CENTER_LEFT" HBox.hgrow="NEVER">
+                            <Polyline stroke="#b5b5b5" strokeType="INSIDE">
+                                <points>
+                                    <Double fx:value="0.0"/>
+                                    <Double fx:value="0.0"/>
+                                    <Double fx:value="0.0"/>
+                                    <Double fx:value="-7.0"/>
+                                    <Double fx:value="-15.0"/>
+                                    <Double fx:value="-7.0"/>
+                                </points>
+                            </Polyline>
+                            <Button fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
+                                    prefWidth="21.0" textOverrun="CLIP">
+                                <graphic>
+                                    <ImageView fitHeight="15" fitWidth="11">
+                                        <Image url="@/images/autoScale.png"/>
+                                    </ImageView>
+                                </graphic>
                                 <font>
-                                    <Font size="10.0"/>
+                                    <Font size="1.0"/>
                                 </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <Polyline stroke="#b5b5b5" strokeType="INSIDE">
-                        <points>
-                            <Double fx:value="0.0"/>
-                            <Double fx:value="7.0"/>
-                            <Double fx:value="15.0"/>
-                            <Double fx:value="7.0"/>
-                            <Double fx:value="15.0"/>
-                            <Double fx:value="0.0"/>
-                        </points>
-                    </Polyline>
-                    <HBox.margin>
-                        <Insets left="2.0"/>
-                    </HBox.margin>
-                </VBox>
-                <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" text="Snapshot">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/snapshot_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Take a snapshot of the worksheet">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </Button>
-                <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/lockCrosshairVertical_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Toggle vertical crosshair marker">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </ToggleButton>
-                <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                              prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
-                    <graphic>
-                        <ImageView fitHeight="20.0" fitWidth="20.0">
-                            <Image url="@/images/lockCrosshairHorizontal_40.png"/>
-                        </ImageView>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Toggle horizontal crosshair marker">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </ToggleButton>
-                <MenuButton fx:id="opacityMenuButton"
-                            styleClass="no-arrow-menu-button"
-                            contentDisplay="GRAPHIC_ONLY"
-                            alignment="CENTER_LEFT"
-                            textAlignment="CENTER"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0">
-                    <items>
-                        <MenuItem fx:id="outlineMenuItem" mnemonicParsing="false">
+                                <VBox.margin>
+                                    <Insets bottom="2.0" left="4.0" right="10.0" top="2.0"/>
+                                </VBox.margin>
+                                <tooltip>
+                                    <Tooltip text="Automatically set the range for the Y axis">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
+                            <Polyline stroke="#b5b5b5" strokeType="INSIDE">
+                                <points>
+                                    <Double fx:value="0.0"/>
+                                    <Double fx:value="7.0"/>
+                                    <Double fx:value="15.0"/>
+                                    <Double fx:value="7.0"/>
+                                    <Double fx:value="15.0"/>
+                                    <Double fx:value="0.0"/>
+                                </points>
+                            </Polyline>
+                            <HBox.margin>
+                                <Insets left="2.0"/>
+                            </HBox.margin>
+                        </VBox>
+                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                prefHeight="40.0" prefWidth="40.0" text="Snapshot">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT">
-                                    <Label text="Show Outline:"/>
-                                    <ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>
-                                </HBox>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/snapshot_40.png"/>
+                                </ImageView>
                             </graphic>
-                        </MenuItem>
-                        <MenuItem mnemonicParsing="false">
+                            <tooltip>
+                                <Tooltip text="Take a snapshot of the worksheet">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                      prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
-                                <HBox alignment="CENTER_LEFT">
-                                    <Label text="Opacity:"/>
-                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>
-                                    <Label fx:id="opacityText" text="100%"/>
-                                </HBox>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/lockCrosshairVertical_40.png"/>
+                                </ImageView>
                             </graphic>
-                        </MenuItem>
-                    </items>
-                    <graphic>
-                        <Region styleClass="settings-icon"/>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip text="Chart display properties">
-                            <font>
-                                <Font size="10.0"/>
-                            </font>
-                        </Tooltip>
-                    </tooltip>
-                </MenuButton>
-            </HBox>
+                            <tooltip>
+                                <Tooltip text="Toggle vertical crosshair marker">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </ToggleButton>
+                        <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                      prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                            <graphic>
+                                <ImageView fitHeight="20.0" fitWidth="20.0">
+                                    <Image url="@/images/lockCrosshairHorizontal_40.png"/>
+                                </ImageView>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Toggle horizontal crosshair marker">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </ToggleButton>
+                    </HBox>
+                    <HBox alignment="CENTER_RIGHT" layoutX="712.0" layoutY="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
+                        <children>
+                            <ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                          styleClass="no-arrow-menu-button" textAlignment="CENTER">
+                                <!--<items>-->
+                                <!--<MenuItem fx:id="outlineMenuItem" mnemonicParsing="false">-->
+                                <!--<graphic>-->
+                                <!--<HBox alignment="CENTER_LEFT">-->
+                                <!--<Label text="Show Outline:"/>-->
+                                <!--<ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>-->
+                                <!--</HBox>-->
+                                <!--</graphic>-->
+                                <!--</MenuItem>-->
+                                <!--<MenuItem mnemonicParsing="false">-->
+                                <!--<graphic>-->
+                                <!--<HBox alignment="CENTER_LEFT">-->
+                                <!--<Label text="Opacity:"/>-->
+                                <!--<Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>-->
+                                <!--<Label fx:id="opacityText" text="100%"/>-->
+                                <!--</HBox>-->
+                                <!--</graphic>-->
+                                <!--</MenuItem>-->
+                                <!--</items>-->
+                                <graphic>
+                                    <Region styleClass="settings-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Chart display properties">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </ToggleButton>
+                        </children>
+                    </HBox>
+                </children>
+            </AnchorPane>
         </VBox>
         <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
             <VBox.margin>
@@ -252,6 +251,13 @@
                 </cursor>
                 <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <!--<StackPane fx:id="chartPlaceHolder"/>-->
+                        <!--<StackPane fx:id="crosshairPlaceHolder"/>-->
+                        <!--<StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="chartSettings" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="-210" AnchorPane.topAnchor="0">-->
+                        <!--<fx:include source="ChartPropertiesView.fxml"/>-->
+                        <!--</StackPane>-->
+                    </children>
                 </AnchorPane>
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">

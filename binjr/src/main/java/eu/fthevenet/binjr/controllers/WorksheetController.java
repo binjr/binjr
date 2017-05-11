@@ -5,7 +5,6 @@ import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.dialogs.ChartPropertiesPopup;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.logging.Profiler;
@@ -22,11 +21,13 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -34,6 +35,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
@@ -116,9 +118,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     //@FXML
     private Label opacityText = new Label();
     @FXML
-    private MenuButton opacityMenuButton;
+    private ToggleButton chartPropertiesButton;
     //   @FXML
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
+
+    //   @FXML
+    private StackPane settingsPane;
+    private ChartPropertiesController propertiesController;
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
@@ -160,7 +166,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     //endregion
 
 
-    public WorksheetController(Worksheet<Double> worksheet) {
+    public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
         switch (this.worksheet.getUnitPrefixes()) {
             case BINARY:
@@ -173,6 +179,19 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             default:
                 throw new IllegalArgumentException("Unknown unit prefix");
         }
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
+        propertiesController = new ChartPropertiesController();
+        loader.setController(propertiesController);
+        Parent p = loader.load();
+        settingsPane = new StackPane(p);
+        AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);
+        AnchorPane.setBottomAnchor(settingsPane, 0.0);
+        AnchorPane.setTopAnchor(settingsPane, 0.0);
+        settingsPane.getStyleClass().add("chartSettings");
+        settingsPane.setPrefWidth(200);
+        settingsPane.setMinWidth(200);
+
     }
 
     //region [Initializable Members]
@@ -202,7 +221,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
         assert opacityText != null : "fx:id\"opacityText\" was not injected!";
-        assert opacityMenuButton != null : "fx:id\"opacityMenuButton\" was not injected!";
+        assert chartPropertiesButton != null : "fx:id\"chartPropertiesButton\" was not injected!";
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
 
         //endregion
@@ -230,6 +249,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
+        //     chart.setVisible(false);
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
@@ -248,10 +268,16 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
-        opacityMenuButton.setOnAction(event -> {
-            ChartPropertiesPopup popup = new ChartPropertiesPopup();
-            popup.show(opacityMenuButton, 0, 0);
-        });
+        chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
+//        chartPropertiesButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue){
+//                propertiesController.show();
+//            }else{
+//                propertiesController.hide();
+//            }
+//
+//
+//        });
         //endregion
 
         //region *** Global preferences ***
@@ -285,11 +311,27 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
-
-
-
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+        //endregion
+
+        //region *** chart properties ***
+        chartParent.getChildren().add(settingsPane);
+//        try {
+//            settingsPane = new StackPane((Parent) FXMLLoader.load(getClass().getResource("/views/ChartPropertiesView.fxml")));
+//            AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);
+//            AnchorPane.setBottomAnchor(settingsPane, 0.0);
+//            AnchorPane.setTopAnchor(settingsPane, 0.0);
+//            settingsPane.getStyleClass().add("chartSettings");
+//            settingsPane.setPrefWidth(200);
+//            settingsPane.setMinWidth(200);
+//
+//
+//        } catch (IOException e) {
+//            logger.error("Failed to create ChartPropertiesView from FXML", e);
+//        }
+
+
         //endregion
 
         //region *** Series TableView ***

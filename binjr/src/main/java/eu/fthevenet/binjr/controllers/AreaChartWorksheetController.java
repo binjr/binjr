@@ -7,6 +7,7 @@ import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 
 /**
@@ -21,7 +22,7 @@ public class AreaChartWorksheetController extends WorksheetController {
      *
      * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public AreaChartWorksheetController(Worksheet worksheet) {
+    public AreaChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);
     }
 

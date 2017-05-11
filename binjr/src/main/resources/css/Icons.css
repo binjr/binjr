@@ -27,14 +27,23 @@
 .addWorksheet-icon,
 .latestRelease-icon,
 .about-icon,
-.refresh-icon {
-
+.refresh-icon,
+.cross-icon,
+.forwardArrow-icon {
   -fx-scale-x: -icon-scale-x;
   -fx-scale-y: -icon-scale-y;
   -fx-scale-shape: false;
   -fx-position-shape: true;
   -fx-snap-to-pixel: true;
   -fx-background-color:-icon-color;
+}
+
+.cross-icon {
+    -fx-shape:"m 74.367417,95.1227 -2.092069,2.085166 -2.07826,-2.078261 -0.158805,0.158804 2.07826,2.07826 -2.098973,2.098974 0.158804,0.158804 2.098974,-2.098973 2.105878,2.098973 0.1519,-0.1519 -2.105879,-2.105878 2.09207,-2.092069 -0.1519,-0.1519 z";
+}
+
+.forwardArrow-icon {
+    -fx-shape:"m 116.90776,111.42751 2.31241,2.75284 0.0976,0.11406 -0.10245,0.11405 -2.31241,2.54548 -0.22442,-0.22811 2.06362,-2.27589 -5.06878,0 0,-0.3318 5.07366,0 -2.07337,-2.4729 0.23416,-0.21773 z";
 }
 
 .backArrow-icon {

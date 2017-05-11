@@ -7,6 +7,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
 
+import java.io.IOException;
 import java.time.ZonedDateTime;
 
 /**
@@ -21,7 +22,7 @@ public class LineChartWorksheetController extends WorksheetController {
      *
      * @param worksheet          the {@link Worksheet} instance associated to the controller
      */
-    public LineChartWorksheetController(Worksheet worksheet) {
+    public LineChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);
     }
 
