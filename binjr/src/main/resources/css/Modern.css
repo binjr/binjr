@@ -41,6 +41,19 @@
 
 /**********************************************/
 
+.translucent {
+     -fx-opacity: 50%;
+}
+
+.translucent:hover {
+     -fx-opacity: 100%;
+}
+
+.translucent:hover:pressed {
+     -fx-opacity: 100%;
+}
+
+
 .button,
 .toggle-button,
 .menu-button{
@@ -57,6 +70,7 @@
 .button:hover,
 .toggle-button:hover,
 .menu-button:hover {
+
     -fx-background-color:#DADADA;
 }
 
@@ -64,6 +78,7 @@
 .button:default:hover:pressed,
 .menu-button:pressed,
 .menu-button:default:hover:pressed {
+  -fx-opacity: 100%;
   -fx-background-color:#C2C2C2 ;
   -fx-text-fill: white;
 }
@@ -474,7 +489,7 @@
 
 .chartSettings {
   -fx-background-color: white;
-  -fx-opacity:90%;
+  -fx-opacity:100%;
   -fx-border-width:1;
   -fx-border-color:#DADADA;
 }

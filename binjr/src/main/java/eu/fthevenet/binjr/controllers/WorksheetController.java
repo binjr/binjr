@@ -35,6 +35,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
@@ -117,7 +118,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ContextMenu seriesListMenu;
     //@FXML
     private Label opacityText = new Label();
-    @FXML
+   // @FXML
     private ToggleButton chartPropertiesButton;
     //   @FXML
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
@@ -221,7 +222,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
         assert opacityText != null : "fx:id\"opacityText\" was not injected!";
-        assert chartPropertiesButton != null : "fx:id\"chartPropertiesButton\" was not injected!";
+//        assert chartPropertiesButton != null : "fx:id\"chartPropertiesButton\" was not injected!";
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
 
         //endregion
@@ -268,7 +269,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
-        chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
+
 //        chartPropertiesButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
 //            if (newValue){
 //                propertiesController.show();
@@ -316,7 +317,37 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //endregion
 
         //region *** chart properties ***
+
+        Region r = new Region();
+        r.getStyleClass().add("settings-icon");
+        chartPropertiesButton = new ToggleButton("", r);
+        chartPropertiesButton.setMinSize(40,40);
+        chartPropertiesButton.setPrefSize(40,40);
+        chartPropertiesButton.setMaxSize(40,40);
+        chartPropertiesButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        chartPropertiesButton.getStyleClass().add("translucent");
+        AnchorPane.setTopAnchor(chartPropertiesButton, 5.0);
+        AnchorPane.setRightAnchor(chartPropertiesButton, 5.0);
+        chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
+        chartParent.getChildren().add(chartPropertiesButton);
+
+
         chartParent.getChildren().add(settingsPane);
+
+//        <ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
+//                                          <!--styleClass="no-arrow-menu-button" textAlignment="CENTER">-->
+//                                <!--<graphic>-->
+//                                    <!--<Region styleClass="settings-icon"/>-->
+//                                <!--</graphic>-->
+//                                <!--<tooltip>-->
+//                                    <!--<Tooltip text="Chart display properties">-->
+//                                        <!--<font>-->
+//                                            <!--<Font size="10.0"/>-->
+//                                        <!--</font>-->
+//                                    <!--</Tooltip>-->
+//                                <!--</tooltip>-->
+//                            <!--</ToggleButton>
+
 //        try {
 //            settingsPane = new StackPane((Parent) FXMLLoader.load(getClass().getResource("/views/ChartPropertiesView.fxml")));
 //            AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);

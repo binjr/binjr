@@ -45,6 +45,31 @@
     -fx-stroke:black;
 }
 
+.translucent {
+     -fx-opacity: 50%;
+}
+
+.translucent:hover {
+     -fx-opacity: 100%;
+}
+
+.translucent:hover:pressed {
+     -fx-opacity: 100%;
+}
+
+.chartSettings {
+  -fx-background-color: linear-gradient(to right, #EEEEEE  , #DADADA );
+  -fx-border-width:1;
+  -fx-border-color:#DADADA;
+}
+
+.chartSettings .content,
+.chartSettings .title,
+.chartSettings .scroll-pane,
+.chartSettings .scroll-pane .viewport {
+    -fx-background-color: transparent;
+  }
+
 /*
 .add-source-background-icon,
 .add-worksheet-background-icon{

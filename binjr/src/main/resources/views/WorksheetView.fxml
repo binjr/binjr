@@ -14,9 +14,9 @@
             xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
-            <AnchorPane minWidth="755.0">
+            <AnchorPane>
                 <children>
-                    <HBox alignment="CENTER_LEFT" minWidth="710.0" AnchorPane.leftAnchor="0.0">
+                    <HBox alignment="CENTER_LEFT"  AnchorPane.leftAnchor="0.0">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                 mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
                             <HBox.margin>
@@ -204,38 +204,19 @@
                     </HBox>
                     <HBox alignment="CENTER_RIGHT" layoutX="712.0" layoutY="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
                         <children>
-                            <ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                          styleClass="no-arrow-menu-button" textAlignment="CENTER">
-                                <!--<items>-->
-                                <!--<MenuItem fx:id="outlineMenuItem" mnemonicParsing="false">-->
+                            <!--<ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
+                                          <!--styleClass="no-arrow-menu-button" textAlignment="CENTER">-->
                                 <!--<graphic>-->
-                                <!--<HBox alignment="CENTER_LEFT">-->
-                                <!--<Label text="Show Outline:"/>-->
-                                <!--<ToggleSwitch fx:id="showAreaOutline" alignment="CENTER_LEFT"/>-->
-                                <!--</HBox>-->
+                                    <!--<Region styleClass="settings-icon"/>-->
                                 <!--</graphic>-->
-                                <!--</MenuItem>-->
-                                <!--<MenuItem mnemonicParsing="false">-->
-                                <!--<graphic>-->
-                                <!--<HBox alignment="CENTER_LEFT">-->
-                                <!--<Label text="Opacity:"/>-->
-                                <!--<Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" value="0.8"/>-->
-                                <!--<Label fx:id="opacityText" text="100%"/>-->
-                                <!--</HBox>-->
-                                <!--</graphic>-->
-                                <!--</MenuItem>-->
-                                <!--</items>-->
-                                <graphic>
-                                    <Region styleClass="settings-icon"/>
-                                </graphic>
-                                <tooltip>
-                                    <Tooltip text="Chart display properties">
-                                        <font>
-                                            <Font size="10.0"/>
-                                        </font>
-                                    </Tooltip>
-                                </tooltip>
-                            </ToggleButton>
+                                <!--<tooltip>-->
+                                    <!--<Tooltip text="Chart display properties">-->
+                                        <!--<font>-->
+                                            <!--<Font size="10.0"/>-->
+                                        <!--</font>-->
+                                    <!--</Tooltip>-->
+                                <!--</tooltip>-->
+                            <!--</ToggleButton>-->
                         </children>
                     </HBox>
                 </children>

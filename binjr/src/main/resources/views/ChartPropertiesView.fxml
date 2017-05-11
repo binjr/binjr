@@ -9,24 +9,14 @@
     <children>
         <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="40.0" prefWidth="40.0" styleClass="square-button" AnchorPane.rightAnchor="5.0"
                 AnchorPane.topAnchor="5.0">
-            <font>
-                <Font size="18.0"/>
-            </font>
             <graphic>
-
                 <Region styleClass="cross-icon"/>
-
-                <!--<ImageView fitHeight="20.0" fitWidth="20.0" pickOnBounds="true" preserveRatio="true">-->
-                <!--<image>-->
-                <!--<Image url="@/images/backArrow_40.png" />-->
-                <!--</image>-->
-                <!--</ImageView>-->
             </graphic>
         </Button>
         <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="settings-text" text="Chart Properties" AnchorPane.leftAnchor="0.0"
                AnchorPane.topAnchor="5.0">
             <font>
-                <Font size="14.0"/>
+                <Font size="16.0"/>
             </font>
             <padding>
                 <Insets left="5.0"/>
@@ -43,9 +33,6 @@
                                 <VBox fillWidth="false">
                                     <children>
                                         <ToggleSwitch fx:id="enableChartAnimation" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" prefWidth="1.0">
-                                            <font>
-                                                <Font size="10.0"/>
-                                            </font>
                                         </ToggleSwitch>
                                     </children>
                                 </VBox>
@@ -53,9 +40,6 @@
                                 <VBox fillWidth="false">
                                     <children>
                                         <ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">
-                                            <font>
-                                                <Font size="10.0"/>
-                                            </font>
                                         </ToggleSwitch>
                                     </children>
                                 </VBox>
@@ -63,9 +47,6 @@
                                 <VBox fillWidth="false">
                                     <children>
                                         <ToggleSwitch fx:id="useSourceColors" prefWidth="1.0">
-                                            <font>
-                                                <Font size="10.0"/>
-                                            </font>
                                         </ToggleSwitch>
                                     </children>
                                 </VBox>
@@ -73,9 +54,6 @@
                                 <VBox fillWidth="false">
                                     <children>
                                         <ToggleSwitch fx:id="showOutline" prefWidth="1.0">
-                                            <font>
-                                                <Font size="10.0"/>
-                                            </font>
                                         </ToggleSwitch>
                                     </children>
                                 </VBox>
