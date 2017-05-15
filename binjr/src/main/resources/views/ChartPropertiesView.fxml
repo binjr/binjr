@@ -3,7 +3,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="349.0" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <children>
@@ -29,11 +29,22 @@
                     <children>
                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <children>
-                                <Label text="Enable animation" wrapText="true"/>
+                                <Label text="Show outline on area charts" wrapText="true"/>
                                 <VBox fillWidth="false">
                                     <children>
-                                        <ToggleSwitch fx:id="enableChartAnimation" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" prefWidth="1.0">
+                                        <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
                                         </ToggleSwitch>
+                                    </children>
+                                </VBox>
+                                <Label text="Chart area  opacity" wrapText="true"/>
+                                <VBox>
+                                    <children>
+                                        <HBox alignment="CENTER_LEFT">
+                                            <children>
+                                                <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                                                <Label fx:id="opacityText" text="100%"/>
+                                            </children>
+                                        </HBox>
                                     </children>
                                 </VBox>
                                 <Label text="Show sample symbols" wrapText="true"/>
@@ -48,24 +59,6 @@
                                     <children>
                                         <ToggleSwitch fx:id="useSourceColors" prefWidth="1.0">
                                         </ToggleSwitch>
-                                    </children>
-                                </VBox>
-                                <Label text="Show outline on area charts" wrapText="true"/>
-                                <VBox fillWidth="false">
-                                    <children>
-                                        <ToggleSwitch fx:id="showOutline" prefWidth="1.0">
-                                        </ToggleSwitch>
-                                    </children>
-                                </VBox>
-                                <Label text="Chart area  opacity" wrapText="true"/>
-                                <VBox>
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT">
-                                            <children>
-                                                <Slider blockIncrement="1.0"/>
-                                                <Label text="100%"/>
-                                            </children>
-                                        </HBox>
                                     </children>
                                 </VBox>
                             </children>

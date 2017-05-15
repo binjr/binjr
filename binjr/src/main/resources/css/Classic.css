@@ -45,15 +45,17 @@
     -fx-stroke:black;
 }
 
-.translucent {
+.chart-properties-button {
      -fx-opacity: 50%;
+      -fx-scale-x: 0.75;
+      -fx-scale-y: 0.75;
 }
 
-.translucent:hover {
+.chart-properties-button:hover {
      -fx-opacity: 100%;
 }
 
-.translucent:hover:pressed {
+.chart-properties-button:hover:pressed {
      -fx-opacity: 100%;
 }
 

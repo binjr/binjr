@@ -41,18 +41,6 @@
 
 /**********************************************/
 
-.translucent {
-     -fx-opacity: 50%;
-}
-
-.translucent:hover {
-     -fx-opacity: 100%;
-}
-
-.translucent:hover:pressed {
-     -fx-opacity: 100%;
-}
-
 
 .button,
 .toggle-button,
@@ -115,6 +103,23 @@
     -fx-max-height:-size;
      visibility: hidden;
  }
+
+
+.chart-properties-button {
+     -fx-opacity: 50%;
+    -fx-background-color: white;
+     -fx-scale-x: 0.75;
+     -fx-scale-y: 0.75;
+}
+
+.chart-properties-button:hover {
+     -fx-opacity: 100%;
+}
+
+.chart-properties-button:hover:pressed {
+     -fx-opacity: 100%;
+}
+
 
  /* TextField */
  .text-input,  .date-picker .text-input{

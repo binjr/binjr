@@ -64,6 +64,10 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     private DoubleProperty graphOpacity;
     @IsDirtyable
     private BooleanProperty showAreaOutline;
+    @IsDirtyable
+    private BooleanProperty showChartSymbols;
+    @IsDirtyable
+    private BooleanProperty useSourceColors;
 
     private final ChangeWatcher<Worksheet> status;
 
@@ -78,7 +82,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
                 UnitPrefixes.METRIC,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                false);
+                GlobalPreferences.getInstance().isShowAreaOutline(),
+                GlobalPreferences.getInstance().getSampleSymbolsVisible(),
+                GlobalPreferences.getInstance().isUseSourceColors());
     }
 
     /**
@@ -98,7 +104,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 unitName,
                 prefix,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline());
+                GlobalPreferences.getInstance().isShowAreaOutline(),
+                GlobalPreferences.getInstance().getSampleSymbolsVisible(),
+                GlobalPreferences.getInstance().isUseSourceColors());
     }
 
     /**
@@ -118,10 +126,23 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getUnit(),
                 initWorksheet.getUnitPrefixes(),
                 initWorksheet.getGraphOpacity(),
-                initWorksheet.isShowAreaOutline());
+                initWorksheet.isShowAreaOutline(),
+                initWorksheet.isShowChartSymbols(),
+                initWorksheet.isUseSourceColors());
     }
 
-    private Worksheet(String name, ChartType chartType, ZoneId timezone, List<TimeSeriesInfo<T>> bindings, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, String unitName, UnitPrefixes base, double graphOpacity, boolean showAreaOutline) {
+    private Worksheet(String name,
+                      ChartType chartType,
+                      ZoneId timezone,
+                      List<TimeSeriesInfo<T>> bindings,
+                      ZonedDateTime fromDateTime,
+                      ZonedDateTime toDateTime,
+                      String unitName,
+                      UnitPrefixes base,
+                      double graphOpacity,
+                      boolean showAreaOutline,
+                      boolean showChartSymbols,
+                      boolean useSourceColors) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -132,6 +153,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
+        this.showChartSymbols = new SimpleBooleanProperty(showChartSymbols);
+        this.useSourceColors = new SimpleBooleanProperty(useSourceColors);
         this.status = new ChangeWatcher<>(this);
     }
 
@@ -478,6 +501,30 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     @Override
     public void close() throws Exception {
         series.clear();
+    }
+
+    public boolean isShowChartSymbols() {
+        return showChartSymbols.get();
+    }
+
+    public BooleanProperty showChartSymbolsProperty() {
+        return showChartSymbols;
+    }
+
+    public void setShowChartSymbols(boolean showChartSymbols) {
+        this.showChartSymbols.set(showChartSymbols);
+    }
+
+    public boolean isUseSourceColors() {
+        return useSourceColors.get();
+    }
+
+    public BooleanProperty useSourceColorsProperty() {
+        return useSourceColors;
+    }
+
+    public void setUseSourceColors(boolean useSourceColors) {
+        this.useSourceColors.set(useSourceColors);
     }
 }
 

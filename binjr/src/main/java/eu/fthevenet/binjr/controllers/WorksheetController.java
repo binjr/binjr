@@ -44,7 +44,6 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.ToggleSwitch;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -112,21 +111,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
-    //    @FXML
-    private Slider graphOpacitySlider = new Slider();
+
     @FXML
     private ContextMenu seriesListMenu;
-    //@FXML
-    private Label opacityText = new Label();
-   // @FXML
-    private ToggleButton chartPropertiesButton;
-    //   @FXML
-    private ToggleSwitch showAreaOutline = new ToggleSwitch();
-
-    //   @FXML
     private StackPane settingsPane;
     private ChartPropertiesController propertiesController;
-
+    private ToggleButton chartPropertiesButton;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
@@ -182,7 +172,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
-        propertiesController = new ChartPropertiesController();
+        propertiesController = new ChartPropertiesController<>(getWorksheet());
         loader.setController(propertiesController);
         Parent p = loader.load();
         settingsPane = new StackPane(p);
@@ -221,9 +211,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert minColumn != null : "fx:id\"minColumn\" was not injected!";
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
-        assert opacityText != null : "fx:id\"opacityText\" was not injected!";
-//        assert chartPropertiesButton != null : "fx:id\"chartPropertiesButton\" was not injected!";
-        assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
+
 
         //endregion
 
@@ -266,9 +254,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
-        graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
-        opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-        showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
+
 
 //        chartPropertiesButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
 //            if (newValue){
@@ -285,7 +271,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
         globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
         globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
-        globalPrefs.useSourceColorsProperty().addListener(refreshOnPreferenceListener);
+        getWorksheet().useSourceColorsProperty().addListener(refreshOnPreferenceListener);
         //endregion
 
         //region *** Time pickers ***
@@ -325,43 +311,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chartPropertiesButton.setPrefSize(40,40);
         chartPropertiesButton.setMaxSize(40,40);
         chartPropertiesButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        chartPropertiesButton.getStyleClass().add("translucent");
+        chartPropertiesButton.getStyleClass().add("chart-properties-button");
         AnchorPane.setTopAnchor(chartPropertiesButton, 5.0);
         AnchorPane.setRightAnchor(chartPropertiesButton, 5.0);
         chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
         chartParent.getChildren().add(chartPropertiesButton);
-
-
         chartParent.getChildren().add(settingsPane);
-
-//        <ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
-//                                          <!--styleClass="no-arrow-menu-button" textAlignment="CENTER">-->
-//                                <!--<graphic>-->
-//                                    <!--<Region styleClass="settings-icon"/>-->
-//                                <!--</graphic>-->
-//                                <!--<tooltip>-->
-//                                    <!--<Tooltip text="Chart display properties">-->
-//                                        <!--<font>-->
-//                                            <!--<Font size="10.0"/>-->
-//                                        <!--</font>-->
-//                                    <!--</Tooltip>-->
-//                                <!--</tooltip>-->
-//                            <!--</ToggleButton>
-
-//        try {
-//            settingsPane = new StackPane((Parent) FXMLLoader.load(getClass().getResource("/views/ChartPropertiesView.fxml")));
-//            AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);
-//            AnchorPane.setBottomAnchor(settingsPane, 0.0);
-//            AnchorPane.setTopAnchor(settingsPane, 0.0);
-//            settingsPane.getStyleClass().add("chartSettings");
-//            settingsPane.setPrefWidth(200);
-//            settingsPane.setMinWidth(200);
-//
-//
-//        } catch (IOException e) {
-//            logger.error("Failed to create ChartPropertiesView from FXML", e);
-//        }
-
 
         //endregion
 
@@ -453,7 +408,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Unregistering listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
-            globalPrefs.useSourceColorsProperty().removeListener(refreshOnPreferenceListener);
+            getWorksheet().useSourceColorsProperty().removeListener(refreshOnPreferenceListener);
         }
     }
 
@@ -611,21 +566,25 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                             Path stroke = (Path) children.get(1);
                             Path fill = (Path) children.get(0);
 
-                            if (series.getBinding().getColor() == null || !GlobalPreferences.getInstance().isUseSourceColors()) {
+                            if (series.getBinding().getColor() == null || !getWorksheet().isUseSourceColors()) {
                                 // use default javaFX theme colors for series
+                                //TODO retrieve default color from elsewhere
                                 stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
                                     if (newValue != null) {
                                         series.setDisplayColor((Color) newValue);
                                     }
                                 });
                             }
+                            else {
+                                series.setDisplayColor(series.getBinding().getColor());
+                            }
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                             stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
                             stroke.strokeProperty().bind(series.displayColorProperty());
                             fill.fillProperty().bind(Bindings.createObjectBinding(
-                                    () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, graphOpacitySlider.getValue()),
+                                    () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
                                     series.displayColorProperty(),
-                                    graphOpacitySlider.valueProperty()));
+                                    getWorksheet().graphOpacityProperty()));
                         }
                     }
                 }
