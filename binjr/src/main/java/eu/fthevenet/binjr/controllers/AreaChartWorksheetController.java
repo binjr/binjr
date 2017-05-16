@@ -1,8 +1,8 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
+import javafx.beans.property.BooleanProperty;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -27,10 +27,10 @@ public class AreaChartWorksheetController extends WorksheetController {
     }
 
     @Override
-    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis) {
+    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty) {
         AreaChart<ZonedDateTime, Double> newChart = new AreaChart<>(xAxis, yAxis);
         newChart.setCreateSymbols(false);
-        newChart.createSymbolsProperty().bindBidirectional(GlobalPreferences.getInstance().sampleSymbolsVisibleProperty());
+        newChart.createSymbolsProperty().bindBidirectional(showSymbolsProperty);
         return newChart;
     }
 

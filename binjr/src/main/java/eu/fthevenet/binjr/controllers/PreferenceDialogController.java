@@ -4,7 +4,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.animation.TranslateTransition;
-import javafx.concurrent.Task;
+import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -24,7 +24,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
-import java.util.concurrent.ForkJoinPool;
 
 /**
  * The controller for the preference view.
@@ -58,11 +57,15 @@ public class PreferenceDialogController implements Initializable {
 
     @FXML
     private ToggleSwitch showOutline;
-    @FXML
-    private TextField defaultOpacityText;
+    //  @FXML
+    //  private TextField defaultOpacityText;
 
     @FXML
     private AnchorPane root;
+    @FXML
+    private Slider graphOpacitySlider = new Slider();
+    @FXML
+    private Label opacityText = new Label();
 
 
     @Override
@@ -79,17 +82,20 @@ public class PreferenceDialogController implements Initializable {
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
-        assert defaultOpacityText != null : "fx:id\"defaultOpacityText\" was not injected!";
+        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
+        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
+        opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
 
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
 
-        GlobalPreferences prefs = GlobalPreferences.getInstance();
+
         enableChartAnimation.selectedProperty().bindBidirectional(prefs.chartAnimationEnabledProperty());
         showChartSymbols.selectedProperty().bindBidirectional(prefs.sampleSymbolsVisibleProperty());
-        useSourceColors.selectedProperty().bindBidirectional(prefs.useSourceColorsProperty());
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
@@ -99,29 +105,15 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
         prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
-        final TextFormatter<Number> opacityFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
-        defaultOpacityText.setTextFormatter(opacityFormatter);
-        opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
+        //  final TextFormatter<Number> opacityFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        //  defaultOpacityText.setTextFormatter(opacityFormatter);
+        //  opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
 //
 //        root.hoverProperty().addListener((observable, oldValue, newValue) -> {
 //            if (!newValue){
 //                hide(Duration.millis(800));
 //            }
-//        });
-
-//        Platform.runLater(() -> {
-//            root.requestFocus();
-////            accordionPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
-////                p.requestLayout();
-////                p.getScene().getWindow().sizeToScene();
-////            }));
-////
-////            if (accordionPane.getPanes() != null
-////                    && accordionPane.getPanes().size() > 0
-////                    && accordionPane.getPanes().get(0) != null) {
-////                accordionPane.getPanes().get(0).setExpanded(true);
-////            }
 //        });
     }
 

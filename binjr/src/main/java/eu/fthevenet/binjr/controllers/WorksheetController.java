@@ -205,14 +205,11 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-//        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
         assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
         assert minColumn != null : "fx:id\"minColumn\" was not injected!";
         assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
-
-
         //endregion
 
         //region *** XYChart ***
@@ -231,7 +228,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
-        chart = buildChart(xAxis, (ValueAxis) yAxis);
+        chart = buildChart(xAxis, (ValueAxis) yAxis, worksheet.showChartSymbolsProperty());
         chart.setCache(true);
         chart.setCacheHint(CacheHint.SPEED);
         chart.setCacheShape(true);
@@ -255,23 +252,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
 
-
-//        chartPropertiesButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue){
-//                propertiesController.show();
-//            }else{
-//                propertiesController.hide();
-//            }
-//
-//
-//        });
         //endregion
 
         //region *** Global preferences ***
         chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
         globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
         globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
-        getWorksheet().useSourceColorsProperty().addListener(refreshOnPreferenceListener);
+
         //endregion
 
         //region *** Time pickers ***
@@ -408,13 +395,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Unregistering listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
-            getWorksheet().useSourceColorsProperty().removeListener(refreshOnPreferenceListener);
         }
     }
 
     //region *** protected members ***
 
-    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
+    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty);
 
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
@@ -565,19 +551,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                         if (children.size() >= 1) {
                             Path stroke = (Path) children.get(1);
                             Path fill = (Path) children.get(0);
-
-                            if (series.getBinding().getColor() == null || !getWorksheet().isUseSourceColors()) {
-                                // use default javaFX theme colors for series
-                                //TODO retrieve default color from elsewhere
-                                stroke.strokeProperty().addListener((observable, oldValue, newValue) -> {
-                                    if (newValue != null) {
-                                        series.setDisplayColor((Color) newValue);
-                                    }
-                                });
-                            }
-                            else {
-                                series.setDisplayColor(series.getBinding().getColor());
-                            }
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                             stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
                             stroke.strokeProperty().bind(series.displayColorProperty());

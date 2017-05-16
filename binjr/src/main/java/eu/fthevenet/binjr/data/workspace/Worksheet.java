@@ -66,8 +66,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     private BooleanProperty showAreaOutline;
     @IsDirtyable
     private BooleanProperty showChartSymbols;
-    @IsDirtyable
-    private BooleanProperty useSourceColors;
+
 
     private final ChangeWatcher<Worksheet> status;
 
@@ -83,8 +82,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 UnitPrefixes.METRIC,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
                 GlobalPreferences.getInstance().isShowAreaOutline(),
-                GlobalPreferences.getInstance().getSampleSymbolsVisible(),
-                GlobalPreferences.getInstance().isUseSourceColors());
+                GlobalPreferences.getInstance().getSampleSymbolsVisible());
     }
 
     /**
@@ -105,8 +103,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 prefix,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
                 GlobalPreferences.getInstance().isShowAreaOutline(),
-                GlobalPreferences.getInstance().getSampleSymbolsVisible(),
-                GlobalPreferences.getInstance().isUseSourceColors());
+                GlobalPreferences.getInstance().getSampleSymbolsVisible());
     }
 
     /**
@@ -127,8 +124,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getUnitPrefixes(),
                 initWorksheet.getGraphOpacity(),
                 initWorksheet.isShowAreaOutline(),
-                initWorksheet.isShowChartSymbols(),
-                initWorksheet.isUseSourceColors());
+                initWorksheet.isShowChartSymbols());
     }
 
     private Worksheet(String name,
@@ -141,8 +137,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                       UnitPrefixes base,
                       double graphOpacity,
                       boolean showAreaOutline,
-                      boolean showChartSymbols,
-                      boolean useSourceColors) {
+                      boolean showChartSymbols) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -154,7 +149,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.showChartSymbols = new SimpleBooleanProperty(showChartSymbols);
-        this.useSourceColors = new SimpleBooleanProperty(useSourceColors);
         this.status = new ChangeWatcher<>(this);
     }
 
@@ -515,16 +509,5 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.showChartSymbols.set(showChartSymbols);
     }
 
-    public boolean isUseSourceColors() {
-        return useSourceColors.get();
-    }
-
-    public BooleanProperty useSourceColorsProperty() {
-        return useSourceColors;
-    }
-
-    public void setUseSourceColors(boolean useSourceColors) {
-        this.useSourceColors.set(useSourceColors);
-    }
 }
 

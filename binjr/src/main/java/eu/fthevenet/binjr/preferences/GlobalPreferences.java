@@ -40,7 +40,6 @@ public class GlobalPreferences {
     private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
     private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
     private static final String BINJR_GLOBAL = "binjr/global";
-    private static final String USE_SOURCE_COLORS = "useSourceColors";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
@@ -50,7 +49,6 @@ public class GlobalPreferences {
     private static final int MAX_RECENT_FILES = 20;
     public static final String GITHUB_OWNER = "fthevenet";
     public static final String GITHUB_REPO = "binjr";
-    public static final String ENABLE_CROSSHAIR_ON_KEY_PRESSED = "enableCrosshairOnKeyPressed";
     public static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
     public static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
     public static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
@@ -65,7 +63,6 @@ public class GlobalPreferences {
     private BooleanProperty sampleSymbolsVisible;
     private BooleanProperty chartAnimationEnabled;
     private Preferences prefs;
-    private BooleanProperty useSourceColors;
     private StringProperty mostRecentSaveFolder;
     private Property<Path> mostRecentSavedWorkspace;
     private BooleanProperty checkForUpdateOnStartUp;
@@ -123,8 +120,6 @@ public class GlobalPreferences {
         sampleSymbolsVisible.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SAMPLE_SYMBOLS_VISIBLE, newValue));
         chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, true));
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
-        useSourceColors = new SimpleBooleanProperty(prefs.getBoolean(USE_SOURCE_COLORS, true));
-        useSourceColors.addListener((observable, oldValue, newValue) -> prefs.putBoolean(USE_SOURCE_COLORS, newValue));
         mostRecentSavedWorkspace = new SimpleObjectProperty<>(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
         loadLastWorkspaceOnStartup = new SimpleBooleanProperty(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
@@ -152,7 +147,6 @@ public class GlobalPreferences {
             logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
             logger.debug("  downSamplingEnabled = " + downSamplingEnabled.getValue());
             logger.debug("  mostRecentSaveFolder = " + mostRecentSaveFolder.getValue());
-            logger.debug("  useSourceColors = " + useSourceColors.getValue());
             logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
             logger.debug("  mostRecentSavedWorkspace = " + mostRecentSavedWorkspace.getValue());
             logger.debug("  loadLastWorkspaceOnStartup = " + loadLastWorkspaceOnStartup.getValue());
@@ -275,33 +269,6 @@ public class GlobalPreferences {
      */
     public void setDownSamplingThreshold(int downSamplingThreshold) {
         this.downSamplingThreshold.setValue(downSamplingThreshold);
-    }
-
-    /**
-     * Returns true if the series graph should use the colors defined in the source, false otherwise
-     *
-     * @return true if the series graph should use the colors defined in the source, false otherwise
-     */
-    public Boolean isUseSourceColors() {
-        return useSourceColors.getValue();
-    }
-
-    /**
-     * The useSourceColors property
-     *
-     * @return the useSourceColors property
-     */
-    public BooleanProperty useSourceColorsProperty() {
-        return useSourceColors;
-    }
-
-    /**
-     * Set to true to have the series graph use the colors defined in the source, false otherwise
-     *
-     * @param useSourceColors Set to true to have the series graph use the colors defined in the source, false otherwise
-     */
-    public void setUseSourceColors(Boolean useSourceColors) {
-        this.useSourceColors.setValue(useSourceColors);
     }
 
     /**

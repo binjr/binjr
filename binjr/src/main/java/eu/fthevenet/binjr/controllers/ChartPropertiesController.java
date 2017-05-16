@@ -38,8 +38,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
-    private ToggleSwitch useSourceColors = new ToggleSwitch();
-    @FXML
     private ToggleSwitch showChartSymbols = new ToggleSwitch();
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
@@ -72,7 +70,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     public void initialize(URL location, ResourceBundle resources) {
         assert opacityText != null : "fx:id\"opacityText\" was not injected!";
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
-        assert useSourceColors != null : "fx:id\"showAreaOutline\" was not injected!";
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
 
@@ -80,7 +77,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
         showChartSymbols.selectedProperty().bindBidirectional(worksheet.showChartSymbolsProperty());
-        useSourceColors.selectedProperty().bindBidirectional(worksheet.useSourceColorsProperty());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {

@@ -13,7 +13,7 @@
                 <Region styleClass="cross-icon"/>
             </graphic>
         </Button>
-        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="settings-text" text="Chart Properties" AnchorPane.leftAnchor="0.0"
+        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="pane-title" text="Chart Properties" AnchorPane.leftAnchor="0.0"
                AnchorPane.topAnchor="5.0">
             <font>
                 <Font size="16.0"/>
@@ -51,13 +51,6 @@
                                 <VBox fillWidth="false">
                                     <children>
                                         <ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">
-                                        </ToggleSwitch>
-                                    </children>
-                                </VBox>
-                                <Label text="Use source colors" wrapText="true"/>
-                                <VBox fillWidth="false">
-                                    <children>
-                                        <ToggleSwitch fx:id="useSourceColors" prefWidth="1.0">
                                         </ToggleSwitch>
                                     </children>
                                 </VBox>

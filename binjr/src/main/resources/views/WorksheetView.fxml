@@ -14,9 +14,9 @@
             xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
-            <AnchorPane>
+            <AnchorPane prefHeight="70.0" prefWidth="666.0">
                 <children>
-                    <HBox alignment="CENTER_LEFT"  AnchorPane.leftAnchor="0.0">
+                    <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                 mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
                             <HBox.margin>
@@ -71,34 +71,34 @@
                         <GridPane hgap="10.0" vgap="10.0">
                             <columnConstraints>
                                 <ColumnConstraints hgrow="SOMETIMES"/>
-                                <ColumnConstraints hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0"/>
                                 <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
                                 <ColumnConstraints hgrow="SOMETIMES"/>
-                                <ColumnConstraints hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0"/>
                             </columnConstraints>
                             <rowConstraints>
                                 <RowConstraints vgrow="SOMETIMES"/>
                                 <RowConstraints vgrow="SOMETIMES"/>
                             </rowConstraints>
                             <children>
-                                <ZonedDateTimePicker fx:id="startDate" GridPane.columnIndex="1">
+                                <ZonedDateTimePicker fx:id="startDate" minWidth="50.0" GridPane.columnIndex="1">
                                     <tooltip>
                                         <Tooltip text="Lower bound for the X axis"/>
                                     </tooltip>
                                 </ZonedDateTimePicker>
-                                <ZonedDateTimePicker fx:id="endDate" GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                <ZonedDateTimePicker fx:id="endDate" minWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                     <tooltip>
                                         <Tooltip text="Upper bound for the X axis"/>
                                     </tooltip>
                                 </ZonedDateTimePicker>
                                 <Label text="From:"/>
                                 <Label text="To:" GridPane.rowIndex="1"/>
-                                <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="4">
+                                <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="4">
                                     <tooltip>
                                         <Tooltip text="Lower bound for the Y axis"/>
                                     </tooltip>
                                 </TextField>
-                                <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1">
+                                <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
                                     <tooltip>
                                         <Tooltip text="Upper bound for the Y axis"/>
                                     </tooltip>
@@ -201,23 +201,6 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                    </HBox>
-                    <HBox alignment="CENTER_RIGHT" layoutX="712.0" layoutY="15.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="0.0">
-                        <children>
-                            <!--<ToggleButton fx:id="chartPropertiesButton" contentDisplay="GRAPHIC_ONLY" minWidth="40.0" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
-                                          <!--styleClass="no-arrow-menu-button" textAlignment="CENTER">-->
-                                <!--<graphic>-->
-                                    <!--<Region styleClass="settings-icon"/>-->
-                                <!--</graphic>-->
-                                <!--<tooltip>-->
-                                    <!--<Tooltip text="Chart display properties">-->
-                                        <!--<font>-->
-                                            <!--<Font size="10.0"/>-->
-                                        <!--</font>-->
-                                    <!--</Tooltip>-->
-                                <!--</tooltip>-->
-                            <!--</ToggleButton>-->
-                        </children>
                     </HBox>
                 </children>
             </AnchorPane>
