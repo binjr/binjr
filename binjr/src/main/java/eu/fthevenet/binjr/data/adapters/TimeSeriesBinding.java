@@ -68,11 +68,12 @@ public class TimeSeriesBinding<T extends Number> {
     private final ChartType graphType;
     private final String unitName;
     private final String treeHierarchy;
-
     @XmlTransient
     private DataAdapter<T> adapter;
 
-
+    /**
+     * Creates a new instance of the {@link TimeSeriesBinding} class.
+     */
     public TimeSeriesBinding() {
         this.label = "";
         this.path = "";
@@ -86,6 +87,19 @@ public class TimeSeriesBinding<T extends Number> {
         adapterId = null;
     }
 
+    /**
+     * Creates a new instance of the {@link TimeSeriesBinding} class with the provided properties
+     *
+     * @param label         the label for the binding
+     * @param path          the path to retrieve value from the source
+     * @param color         the color of the graph
+     * @param legend        the legend of the binding
+     * @param prefix        the unit prefix
+     * @param graphType     the preferred type of graph representation
+     * @param unitName      the unit for values
+     * @param treeHierarchy the hierarchy in the tree representation
+     * @param adapter       the {@link DataAdapter} to the source
+     */
     public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
         this.label = label;
         this.path = path;
@@ -191,13 +205,18 @@ public class TimeSeriesBinding<T extends Number> {
         return adapterId;
     }
 
+    /**
+     * Returns the full hierarchy in the tree for the binding
+     *
+     * @return the full hierarchy in the tree for the binding
+     */
+    public String getTreeHierarchy() {
+        return treeHierarchy;
+    }
+
     @Override
     public String toString() {
         return getLegend();
-    }
-
-    public String getTreeHierarchy() {
-        return treeHierarchy;
     }
 
     private Color computeDefaultColor() {

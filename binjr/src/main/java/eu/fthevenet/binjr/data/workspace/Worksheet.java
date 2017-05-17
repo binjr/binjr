@@ -454,16 +454,58 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.graphOpacity.set(graphOpacity);
     }
 
+    /**
+     * Returns true if area charts should display an outline stroke, false otherwise
+     *
+     * @return true if area charts should display an outline stroke, false otherwise
+     */
     public boolean isShowAreaOutline() {
         return showAreaOutline.get();
     }
 
+    /**
+     * The showAreaOutline property
+     *
+     * @return The showAreaOutline property
+     */
     public BooleanProperty showAreaOutlineProperty() {
         return showAreaOutline;
     }
 
+    /**
+     * Set to true if area charts should display an outline stroke, false otherwise
+     *
+     * @param showAreaOutline true if area charts should display an outline stroke, false otherwise
+     */
     public void setShowAreaOutline(boolean showAreaOutline) {
         this.showAreaOutline.set(showAreaOutline);
+    }
+
+    /**
+     * Returns true if charts should display sample symbols, false otherwise
+     *
+     * @return true if charts should display sample symbols, false otherwise
+     */
+    public boolean isShowChartSymbols() {
+        return showChartSymbols.get();
+    }
+
+    /**
+     * Returns the showChartSymbols property
+     *
+     * @return the showChartSymbols property
+     */
+    public BooleanProperty showChartSymbolsProperty() {
+        return showChartSymbols;
+    }
+
+    /**
+     * Set to true if charts should display sample symbols, false otherwise
+     *
+     * @param showChartSymbols true if charts should display sample symbols, false otherwise
+     */
+    public void setShowChartSymbols(boolean showChartSymbols) {
+        this.showChartSymbols.set(showChartSymbols);
     }
 
     @Override
@@ -491,23 +533,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         status.cleanUp();
     }
 
-
     @Override
     public void close() throws Exception {
         series.clear();
     }
-
-    public boolean isShowChartSymbols() {
-        return showChartSymbols.get();
-    }
-
-    public BooleanProperty showChartSymbolsProperty() {
-        return showChartSymbols;
-    }
-
-    public void setShowChartSymbols(boolean showChartSymbols) {
-        this.showChartSymbols.set(showChartSymbols);
-    }
-
 }
 

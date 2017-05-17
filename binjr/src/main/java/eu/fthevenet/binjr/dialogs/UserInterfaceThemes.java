@@ -17,6 +17,11 @@ public enum UserInterfaceThemes {
         this.cssPath = cssPath;
     }
 
+    /**
+     * Returns the path of the css for this theme.
+     *
+     * @return the path of the css for this theme.
+     */
     public String getCssPath() {
         return cssPath;
     }

@@ -206,7 +206,6 @@ public class MainViewController implements Initializable {
                     event.consume();
                 }
             });
-
             stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
             stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
             stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
@@ -214,8 +213,6 @@ public class MainViewController implements Initializable {
                 prefs.setShiftPressed(false);
                 prefs.setCtrlPressed(false);
             });
-
-
             if (prefs.isLoadLastWorkspaceOnStartup()) {
                 File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
                 if (latestWorkspace.exists()) {
@@ -225,7 +222,6 @@ public class MainViewController implements Initializable {
                     logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
                 }
             }
-
             if (prefs.isCheckForUpdateOnStartUp() && (LocalDateTime.now().minus(1, ChronoUnit.HOURS).isAfter(prefs.getLastCheckForUpdate()))) {
                 prefs.setLastCheckForUpdate(LocalDateTime.now());
                 prefs.asyncCheckForUpdate(
@@ -252,8 +248,6 @@ public class MainViewController implements Initializable {
                 );
             }
         });
-
-
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
 
@@ -299,7 +293,6 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void handleExpandCommandBar(ActionEvent actionEvent) {
-
         if (!commandBar.isExpanded()) {
             show();
         }
@@ -407,7 +400,6 @@ public class MainViewController implements Initializable {
 
     private void doCommandBarResize(double v) {
         commandBar.setMinWidth(v);
-        // AnchorPane.setLeftAnchor(contentView,  v);
     }
 
     private void expandBranch(TreeItem<TimeSeriesBinding<Double>> branch) {
@@ -556,7 +548,6 @@ public class MainViewController implements Initializable {
         return res.get();
     }
 
-    // String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter
     private void loadAdapters(DataAdapter da) throws DataAdapterException {
         Tab newTab = new Tab();
         newTab.setText(da.getSourceName());
@@ -632,7 +623,6 @@ public class MainViewController implements Initializable {
         });
         return wasNewTabCreated.get();
     }
-
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();

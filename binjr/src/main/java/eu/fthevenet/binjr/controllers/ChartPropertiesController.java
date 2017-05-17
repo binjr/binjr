@@ -20,6 +20,8 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 /**
+ * The controller class for the chart properties view.
+ *
  * @author Frederic Thevenet
  */
 public class ChartPropertiesController<T extends Number> implements Initializable {
