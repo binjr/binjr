@@ -52,10 +52,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.Collection;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -235,7 +232,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
-        //     chart.setVisible(false);
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
@@ -294,9 +290,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         Region r = new Region();
         r.getStyleClass().add("settings-icon");
         chartPropertiesButton = new ToggleButton("", r);
-        chartPropertiesButton.setMinSize(40,40);
-        chartPropertiesButton.setPrefSize(40,40);
-        chartPropertiesButton.setMaxSize(40,40);
+        chartPropertiesButton.setMinSize(40, 40);
+        chartPropertiesButton.setPrefSize(40, 40);
+        chartPropertiesButton.setMaxSize(40, 40);
         chartPropertiesButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         chartPropertiesButton.getStyleClass().add("chart-properties-button");
         AnchorPane.setTopAnchor(chartPropertiesButton, 5.0);
@@ -413,9 +409,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     }
 
     protected void removeSelectedBinding() {
-        ObservableList<TimeSeriesInfo<Double>> selected = seriesTable.getSelectionModel().getSelectedItems();
+        List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
         if (selected != null) {
             seriesTable.getItems().removeAll(selected);
+            seriesTable.getSelectionModel().clearSelection();
             refresh();
         }
     }
