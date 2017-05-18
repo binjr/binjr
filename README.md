@@ -41,7 +41,7 @@ For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:
 
 
 ## Getting help
-The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference). It's no yet complete, but getting there.
+The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference). It's not yet complete, but getting there.
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/fthevenet/binjr/issues).
 
@@ -53,8 +53,6 @@ If you would like to contribute, please sumbit a pull request.
 
 ## What is the status of the project?
 
-*binjr* is very much **a work in progress** but it has reached its first milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more usefull than frustrating.
+*binjr* is very much **a work in progress** but it has reached its first significant milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more useful than frustrating.
 
-That said, it still seriously lack polish in some area (I hear drag and drop is a "thing" with young people nowadays...) and I have ideas for more features.
-
-Also, for the time being, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
+For the time being, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
