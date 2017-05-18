@@ -2,6 +2,7 @@ package eu.fthevenet.binjr.preferences;
 
 import com.sun.javafx.tk.Toolkit;
 import com.sun.prism.GraphicsPipeline;
+import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.util.github.GithubApi;
 import eu.fthevenet.util.github.GithubRelease;
@@ -616,7 +617,9 @@ public class GlobalPreferences {
                 onFailure.run();
             }
         });
-        ForkJoinPool.commonPool().submit(getLatestTask);
+        AsyncTaskManager.getInstance().submit(getLatestTask);
+
+       // ForkJoinPool.commonPool().submit(getLatestTask);
     }
 
     private Manifest getManifest() {

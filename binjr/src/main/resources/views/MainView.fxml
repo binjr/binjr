@@ -2,69 +2,77 @@
 
 <?import eu.fthevenet.util.ui.controls.CommandBarPane?>
 <?import eu.fthevenet.util.ui.controls.TabPaneNewButton?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.*?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<?import javafx.scene.text.Font?>
+<?import org.controlsfx.control.MaskerPane?>
+
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <children>
-        <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0"
-                   AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
+        <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
             <items>
                 <StackPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
 
                         <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
                             <graphic>
-                                <Region styleClass="addSource-icon"/>
+                                <Region styleClass="addSource-icon" />
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Click to add a new source">
                                     <font>
-                                        <Font size="11.0"/>
+                                        <Font size="11.0" />
                                     </font>
                                 </Tooltip>
                             </tooltip>
                         </Label>
-                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <tabs>
                             </tabs>
                         </TabPaneNewButton>
+                  <MaskerPane fx:id="sourceMaskerPane" visible="false" />
                     </children>
                 </StackPane>
                 <StackPane SplitPane.resizableWithParent="true">
                     <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
                         <graphic>
-                            <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"/>
+                            <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon" />
                         </graphic>
                         <tooltip>
                             <Tooltip text="Click to add a new worksheet">
                                 <font>
-                                    <Font size="11.0"/>
+                                    <Font size="11.0" />
                                 </font>
                             </Tooltip>
                         </tooltip>
                     </Label>
-                    <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <tabs>
                         </tabs>
                     </TabPaneNewButton>
                 </StackPane>
             </items>
         </SplitPane>
-        <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                        AnchorPane.topAnchor="0.0">
+        <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
             <children>
-                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0"
-                        AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tooltip>
                         <Tooltip text="Expand">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
@@ -73,52 +81,51 @@
                             <children>
                                 <VBox alignment="CENTER" spacing="3.0">
                                     <children>
-                                        <Line endX="15.0"/>
-                                        <Line endX="15.0"/>
-                                        <Line endX="15.0"/>
+                                        <Line endX="15.0" />
+                                        <Line endX="15.0" />
+                                        <Line endX="15.0" />
                                     </children>
                                 </VBox>
                             </children>
                         </HBox>
                     </graphic>
                 </Button>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0" prefWidth="-1" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="-1" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
                     <tooltip>
                         <Tooltip text="Workspaces">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="fileNew-icon"/>
+                                <Region styleClass="fileNew-icon" />
                             </children>
                         </HBox>
                     </graphic>
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="fileNew-icon"/>
+                                        <Region styleClass="fileNew-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                         </MenuItem>
                         <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="fileOpen-icon"/>
+                                        <Region styleClass="fileOpen-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
@@ -128,20 +135,20 @@
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="fileRecent-icon"/>
+                                        <Region styleClass="fileRecent-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
-                            <MenuItem disable="true" mnemonicParsing="false" text="none"/>
+                            <MenuItem disable="true" mnemonicParsing="false" text="none" />
                         </Menu>
                         <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace" text="Save">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="fileSave-icon"/>
+                                        <Region styleClass="fileSave-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
@@ -150,29 +157,28 @@
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="fileSaveAs-icon"/>
+                                        <Region styleClass="fileSaveAs-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                             <accelerator>
-                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                         </MenuItem>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="source-icon"/>
+                                <Region styleClass="source-icon" />
                             </children>
                         </HBox>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Sources">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
@@ -180,44 +186,43 @@
                         <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                             <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
                                 <accelerator>
-                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                    <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                                 </accelerator>
                             </MenuItem>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="addSource-icon"/>
+                                        <Region styleClass="addSource-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                         </Menu>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="chart-icon"/>
+                                <Region styleClass="chart-icon" />
                             </children>
                         </HBox>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Worksheets">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
                     <items>
                         <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                             </accelerator>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="addWorksheet-icon"/>
+                                        <Region styleClass="addWorksheet-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
@@ -225,12 +230,12 @@
 
                         <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
                             <accelerator>
-                                <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                                <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="DOWN" shortcut="DOWN" />
                             </accelerator>
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="settings-icon"/>
+                                        <Region styleClass="settings-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
@@ -239,26 +244,25 @@
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="refresh-icon"/>
+                                        <Region styleClass="refresh-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                         </MenuItem>
                     </items>
                 </MenuButton>
-                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
+                <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="help-icon"/>
+                                <Region styleClass="help-icon" />
                             </children>
                         </HBox>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Help">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
@@ -267,7 +271,7 @@
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="help-icon"/>
+                                        <Region styleClass="help-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
@@ -276,29 +280,28 @@
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="latestRelease-icon"/>
+                                        <Region styleClass="latestRelease-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                         </MenuItem>
-                        <SeparatorMenuItem mnemonicParsing="false"/>
+                        <SeparatorMenuItem mnemonicParsing="false" />
                         <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
                             <graphic>
                                 <HBox styleClass="icon-container">
                                     <children>
-                                        <Region styleClass="about-icon"/>
+                                        <Region styleClass="about-icon" />
                                     </children>
                                 </HBox>
                             </graphic>
                         </MenuItem>
                     </items>
                 </MenuButton>
-                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0"
-                        AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="settings-icon"/>
+                                <Region styleClass="settings-icon" />
                             </children>
                         </HBox>
                         <!--<-icon-->
@@ -307,24 +310,23 @@
                     <tooltip>
                         <Tooltip text="Settings">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                        AnchorPane.rightAnchor="0.0">
+                <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
-                                <Region styleClass="quit-icon"/>
+                                <Region styleClass="quit-icon" />
                             </children>
                         </HBox>
                     </graphic>
                     <tooltip>
                         <Tooltip text="Exit">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
@@ -336,7 +338,7 @@
             <!--</HBox.margin>-->
         </CommandBarPane>
         <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-252" AnchorPane.topAnchor="0">
-            <fx:include source="PreferencePaneView.fxml"/>
+            <fx:include source="PreferencePaneView.fxml" />
         </StackPane>
     </children>
 </AnchorPane>

@@ -32,7 +32,7 @@ public class Dialogs {
      *
      * @param e the exception to display
      */
-    public static void displayException(Exception e) {
+    public static void displayException(Throwable e) {
         displayException(e.getLocalizedMessage(), e, null);
     }
 
@@ -42,7 +42,7 @@ public class Dialogs {
      * @param header the header text for the dialog
      * @param e      the exception to display
      */
-    public static void displayException(String header, Exception e) {
+    public static void displayException(String header, Throwable e) {
         displayException(header, e, null);
     }
 
@@ -53,7 +53,7 @@ public class Dialogs {
      * @param e      the exception to display
      * @param owner  the {@link Node} used to recover the stage the dialog should be linked to
      */
-    public static void displayException(String header, Exception e, Node owner) {
+    public static void displayException(String header, Throwable e, Node owner) {
         logger.error(header, e);
         ExceptionDialog dlg = new ExceptionDialog(e);
         dlg.initStyle(StageStyle.UTILITY);

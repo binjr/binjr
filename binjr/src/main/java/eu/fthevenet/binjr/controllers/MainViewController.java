@@ -4,6 +4,7 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.exceptions.NoAdapterFoundException;
+import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.workspace.Source;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
@@ -23,6 +24,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -42,6 +44,7 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.MaskerPane;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
@@ -55,6 +58,8 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -79,6 +84,8 @@ public class MainViewController implements Initializable {
     public Label addWorksheetLabel;
     @FXML
     public MenuItem chartPropertiesMenuItem;
+    @FXML
+    public MaskerPane sourceMaskerPane;
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -479,6 +486,8 @@ public class MainViewController implements Initializable {
     }
 
     private void loadWorkspace(File file) {
+        sourceMaskerPane.setVisible(true);
+
         try {
             if (confirmAndClearWorkspace()) {
                 Workspace wsFromfile = Workspace.from(file);
@@ -688,6 +697,7 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
+
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
 
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
@@ -714,14 +724,50 @@ public class MainViewController implements Initializable {
         };
 
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
-        try {
-            TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
+        // try {
+
+        Task<TreeItem<TimeSeriesBinding<Double>>> t = new Task<TreeItem<TimeSeriesBinding<Double>>>() {
+            @Override
+            protected TreeItem<TimeSeriesBinding<Double>> call() throws Exception {
+
+                return dp.getBindingTree();
+            }
+        };
+
+        t.setOnSucceeded(event -> {
+            TreeItem<TimeSeriesBinding<Double>> root = t.getValue();
             root.setExpanded(true);
             treeView.setRoot(root);
+            sourceMaskerPane.setVisible(false);
+        });
+        t.setOnFailed(event -> {
+            sourceMaskerPane.setVisible(false);
+            Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), t.getException(), root);
+        });
+
+        try {
+           Future<?> f= AsyncTaskManager.getInstance().submit(t);
+           while(!f.isDone()){
+               Thread.sleep(100);
+           }
             return Optional.of(treeView);
-        } catch (DataAdapterException e) {
-            Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+//        try {
+//            TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
+//            root.setExpanded(true);
+//            treeView.setRoot(root);
+//            return Optional.of(treeView);
+//        } catch (DataAdapterException e) {
+//            Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
+//        }
+//        return Optional.empty();
+
+//        } catch (DataAdapterException e) {
+//            Dialogs.displayException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
+//        }
         return Optional.empty();
     }
 
