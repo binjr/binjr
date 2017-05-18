@@ -394,6 +394,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
     }
 
+    public void showPropertiesPane(boolean show) {
+        this.chartPropertiesButton.setSelected(show);
+    }
+
     //region *** protected members ***
 
     protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty);

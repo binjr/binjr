@@ -78,6 +78,8 @@ public class MainViewController implements Initializable {
     @FXML
     public Label addWorksheetLabel;
     @FXML
+    public MenuItem chartPropertiesMenuItem;
+    @FXML
     private MenuItem refreshMenuItem;
     @FXML
     private TabPaneNewButton sourcesTabPane;
@@ -126,6 +128,7 @@ public class MainViewController implements Initializable {
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
+        chartPropertiesMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
 
@@ -383,9 +386,9 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    protected void handleTakeSnapshot(ActionEvent event) {
+    protected void handleDisplayChartProperties(ActionEvent actionEvent) {
         if (selectedWorksheetController != null) {
-            selectedWorksheetController.handleTakeSnapshot(event);
+            selectedWorksheetController.showPropertiesPane(true);
         }
     }
     //endregion
@@ -832,5 +835,7 @@ public class MainViewController implements Initializable {
             openRecentMenu.getItems().setAll(none);
         }
     }
+
+
     //endregion
 }

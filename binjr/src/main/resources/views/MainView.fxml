@@ -222,6 +222,19 @@
                                 </HBox>
                             </graphic>
                         </MenuItem>
+
+                        <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <children>
+                                        <Region styleClass="settings-icon"/>
+                                    </children>
+                                </HBox>
+                            </graphic>
+                        </MenuItem>
                         <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
                             <graphic>
                                 <HBox styleClass="icon-container">
