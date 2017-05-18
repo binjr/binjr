@@ -5,7 +5,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.4-SNAPSHOT</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
