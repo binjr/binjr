@@ -1,6 +1,8 @@
 package eu.fthevenet.binjr.dialogs;
 
+import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
@@ -26,24 +28,43 @@ import java.net.URISyntaxException;
  * @author Frederic Thevenet
  */
 public class Dialogs {
+    public static final int NOTIFICATION_DURATION = 8;
     private static final Logger logger = LogManager.getLogger(Dialogs.class);
+
     /**
-     * Displays a modal dialog box to shows details about an {@link Exception}.
+     * Display an error notification
      *
      * @param e the exception to display
      */
-    public static void displayException(Throwable e) {
-        displayException(e.getLocalizedMessage(), e, null);
+    public static void notifyException(Throwable e) {
+        notifyException(e.getLocalizedMessage(), e, null);
     }
 
     /**
-     * Displays a modal dialog box to shows details about an {@link Exception}.
+     * Display an error notification
      *
      * @param header the header text for the dialog
      * @param e      the exception to display
      */
-    public static void displayException(String header, Throwable e) {
-        displayException(header, e, null);
+    public static void notifyException(String header, Throwable e) {
+        notifyException(header, e, null);
+    }
+
+    /**
+     * Display an error notification
+     *
+     * @param title the title for the notification
+     * @param e     the exception to notify
+     * @param owner the node to which the notification is attached
+     */
+    public static void notifyException(String title, Throwable e, Node owner) {
+        logger.error(title, e);
+        runOnFXThread(() -> Notifications.create()
+                .title(title)
+                .text(e.getMessage())
+                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(owner).showError());
     }
 
     /**
@@ -53,29 +74,33 @@ public class Dialogs {
      * @param e      the exception to display
      * @param owner  the {@link Node} used to recover the stage the dialog should be linked to
      */
-    public static void displayException(String header, Throwable e, Node owner) {
+    public static void displayException(String header, DataAdapterException e, Node owner) {
         logger.error(header, e);
-        ExceptionDialog dlg = new ExceptionDialog(e);
-        dlg.initStyle(StageStyle.UTILITY);
-        dlg.initOwner(getStage(owner));
-        dlg.getDialogPane().setHeaderText(header);
-        dlg.showAndWait();
+        runOnFXThread(() -> {
+            ExceptionDialog dlg = new ExceptionDialog(e);
+            dlg.initStyle(StageStyle.UTILITY);
+            dlg.initOwner(getStage(owner));
+            dlg.getDialogPane().setHeaderText(header);
+            dlg.showAndWait();
+        });
     }
 
     /**
      * Display an error notification
      *
-     * @param title   the title for the notification
-     * @param message the title for the notification
-     * @param owner   the node to whichposition the notification is attached
+     * @param title    the title for the notification
+     * @param message  the title for the notification
+     * @param position the position for the notification
+     * @param owner    the node to which the notification is attached
      */
     public static void notifyError(String title, String message, Pos position, Node owner) {
-        Notifications.create()
+        logger.error(title + " - " + message);
+        runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(3))
+                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
                 .position(position)
-                .owner(owner).showError();
+                .owner(owner).showError());
     }
 
     /**
@@ -83,15 +108,16 @@ public class Dialogs {
      *
      * @param title   the title for the notification
      * @param message the title for the notification
-     * @param owner   the node to whichposition the notification is attached
+     * @param owner   the node to which the notification is attached
      */
     public static void notifyWarning(String title, String message, Pos position, Node owner) {
-        Notifications.create()
+        logger.warn(title + " - " + message);
+        runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(3))
+                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
                 .position(position)
-                .owner(owner).showWarning();
+                .owner(owner).showWarning());
     }
 
     /**
@@ -99,15 +125,16 @@ public class Dialogs {
      *
      * @param title   the title for the notification
      * @param message the title for the notification
-     * @param owner   the node to whichposition the notification is attached
+     * @param owner   the node to which the notification is attached
      */
     public static void notifyInfo(String title, String message, Pos position, Node owner) {
-        Notifications.create()
+        logger.info(title + " - " + message);
+        runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(3))
+                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
                 .position(position)
-                .owner(owner).showInformation();
+                .owner(owner).showInformation());
     }
 
     /**
@@ -188,5 +215,15 @@ public class Dialogs {
         dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
+
+    private static void runOnFXThread(Runnable r) {
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        }
+        else {
+            Platform.runLater(r);
+        }
+    }
+
 
 }

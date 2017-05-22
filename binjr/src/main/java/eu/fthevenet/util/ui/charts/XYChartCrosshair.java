@@ -178,7 +178,8 @@ public class XYChartCrosshair<X, Y> {
                             getValueFromXcoord(selection.getX() - 0.5),
                             getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
                             getValueFromYcoord(selection.getY() + selection.getHeight() - 0.5),
-                            getValueFromYcoord(selection.getY() - 0.5)
+                            getValueFromYcoord(selection.getY() - 0.5),
+                            selection.getHeight() != chartInfo.getPlotArea().getHeight()
                     )
             );
         }

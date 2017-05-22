@@ -1,7 +1,7 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
@@ -44,6 +44,8 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.MaskerPane;
+import org.gillius.jfxutils.chart.XYChartInfo;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -64,6 +66,9 @@ import java.util.stream.Collectors;
 public abstract class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
+    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
+    private final Worksheet<Double> worksheet;
+    private final PrefixFormatter prefixFormatter;
     @FXML
     public AnchorPane root;
     @FXML
@@ -83,7 +88,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     @FXML
     private Button refreshButton;
     @FXML
-    private Button resetYButton;
+    private ToggleButton resetYButton;
     @FXML
     private Button snapshotButton;
     @FXML
@@ -108,51 +113,22 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
-
+    @FXML
+    private MaskerPane worksheetMaskerPane;
     @FXML
     private ContextMenu seriesListMenu;
+
     private StackPane settingsPane;
     private ChartPropertiesController propertiesController;
     private ToggleButton chartPropertiesButton;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
+    private XYChartInfo chartInfo;
     private History backwardHistory = new History();
     private History forwardHistory = new History();
-    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private String name;
-    private final Worksheet<Double> worksheet;
-    private final PrefixFormatter prefixFormatter;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
-
-    //region [Properties]
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
-        return crossHair;
-    }
-
-    public XYChart<ZonedDateTime, Double> getChart() {
-        return chart;
-    }
-
-    /**
-     * Returns the {@link Worksheet} instance associated with this controller
-     *
-     * @return the {@link Worksheet} instance associated with this controller
-     */
-    public Worksheet<Double> getWorksheet() {
-        return this.worksheet;
-    }
-
-    //endregion
-
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
@@ -180,6 +156,34 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
 
+    }
+
+    //region [Properties]
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
+        return crossHair;
+    }
+
+    public XYChart<ZonedDateTime, Double> getChart() {
+        return chart;
+    }
+
+    //endregion
+
+    /**
+     * Returns the {@link Worksheet} instance associated with this controller
+     *
+     * @return the {@link Worksheet} instance associated with this controller
+     */
+    public Worksheet<Double> getWorksheet() {
+        return this.worksheet;
     }
 
     //region [Initializable Members]
@@ -221,7 +225,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             yAxis = new MetricStableTicksAxis();
         }
         yAxis.setSide(Side.LEFT);
-        yAxis.setAutoRanging(true);
+        // yAxis.setAutoRanging(true);
+        yAxis.autoRangingProperty().bindBidirectional(resetYButton.selectedProperty());
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
@@ -232,6 +237,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
         chartParent.getChildren().add(chart);
+        chartInfo = new XYChartInfo(chart);
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
@@ -242,7 +248,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
-        resetYButton.setOnAction(this::handleResetYRangeButton);
+        //  resetYButton.setOnAction(this::handleResetYRangeButton);
+
         snapshotButton.setOnAction(this::handleTakeSnapshot);
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
@@ -409,7 +416,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             worksheet.addSeries(newSeries);
         }
         refresh();
-        chart.getYAxis().setAutoRanging(true);
+        //  chart.getYAxis().setAutoRanging(true);
     }
 
     protected void removeSelectedBinding() {
@@ -475,70 +482,61 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
     }
 
-    private void saveSnapshot() {
-        WritableImage snapImg = root.snapshot(null, null);
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save SnapShot");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
-        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
-        if (selectedFile != null) {
-            try {
-                if (selectedFile.getParent() != null) {
-                    globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
-                }
-                ImageIO.write(
-                        SwingFXUtils.fromFXImage(snapImg, null),
-                        "png",
-                        selectedFile);
-            } catch (IOException e) {
-                Dialogs.displayException("Failed to save snapshot to disk", e, root);
-            }
-        }
-    }
-
-    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
-        final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        formatter.valueProperty().bindBidirectional(stateProperty);
-        axisBoundProperty.bindBidirectional(stateProperty);
-        formatter.valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
-        textField.setTextFormatter(formatter);
-    }
-
-    private void restoreSelectionFromHistory(History history, History toHistory) {
-        if (!history.isEmpty()) {
-            toHistory.push(currentState.asSelection());
-            currentState.setSelection(history.pop(), false);
-        }
-        else {
-            logger.debug(() -> "History is empty: nothing to go back to.");
-        }
-    }
-
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
         try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
-            getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
-            chart.getData().setAll(getWorksheet().getSeries()
-                    .stream()
-                    .filter(series -> {
-                        if (series.getProcessor() == null) {
-                            logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
-                            return false;
-                        }
-                        if (!series.isSelected()) {
-                            logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
-                            return false;
-                        }
-                        return true;
-                    })
-                    .map(this::makeXYChartSeries)
-                    .collect(Collectors.toList()));
+            worksheetMaskerPane.setVisible(true);
+            AsyncTaskManager.getInstance().submit(() -> {
+                        getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
+                        return getWorksheet().getSeries()
+                                .stream()
+                                .filter(series -> {
+                                    if (series.getProcessor() == null) {
+                                        logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
+                                        return false;
+                                    }
+                                    if (!series.isSelected()) {
+                                        logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
+                                        return false;
+                                    }
+                                    return true;
+                                })
+                                .map(this::makeXYChartSeries)
+                                .collect(Collectors.toList());
+                    },
+                    event -> {
+                        worksheetMaskerPane.setVisible(false);
+                        chart.getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
 
-        } catch (DataAdapterException e) {
-            Dialogs.displayException("Failed to retrieve data from source", e, root);
+                    },
+                    event -> {
+                        worksheetMaskerPane.setVisible(false);
+                        Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                    }
+            );
         }
+
+//        try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
+//            getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
+//            chart.getData().setAll(getWorksheet().getSeries()
+//                    .stream()
+//                    .filter(series -> {
+//                        if (series.getProcessor() == null) {
+//                            logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
+//                            return false;
+//                        }
+//                        if (!series.isSelected()) {
+//                            logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
+//                            return false;
+//                        }
+//                        return true;
+//                    })
+//                    .map(this::makeXYChartSeries)
+//                    .collect(Collectors.toList()));
+//
+//        } catch (DataAdapterException e) {
+//            Dialogs.notifyException("Failed to retrieve data from source", e, root);
+//        }
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
@@ -564,6 +562,47 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 }
             });
             return newSeries;
+        }
+    }
+
+    private void saveSnapshot() {
+        WritableImage snapImg = root.snapshot(null, null);
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save SnapShot");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
+        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
+        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
+        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            try {
+                if (selectedFile.getParent() != null) {
+                    globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
+                }
+                ImageIO.write(
+                        SwingFXUtils.fromFXImage(snapImg, null),
+                        "png",
+                        selectedFile);
+            } catch (IOException e) {
+                Dialogs.notifyException("Failed to save snapshot to disk", e, root);
+            }
+        }
+    }
+
+    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
+        final TextFormatter<T> formatter = new TextFormatter<>(converter);
+        formatter.valueProperty().bindBidirectional(stateProperty);
+        axisBoundProperty.bindBidirectional(stateProperty);
+        //  formatter.valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
+        textField.setTextFormatter(formatter);
+    }
+
+    private void restoreSelectionFromHistory(History history, History toHistory) {
+        if (!history.isEmpty()) {
+            toHistory.push(currentState.asSelection());
+            currentState.setSelection(history.pop(), false);
+        }
+        else {
+            logger.debug(() -> "History is empty: nothing to go back to.");
         }
     }
 
@@ -656,42 +695,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         private boolean frozen;
 
         /**
-         * Returns the current state as a {@link XYChartSelection}
-         *
-         * @return the current state as a {@link XYChartSelection}
-         */
-        XYChartSelection<ZonedDateTime, Double> asSelection() {
-            return new XYChartSelection<>(
-                    startX.get(),
-                    endX.get(),
-                    startY.get(),
-                    endY.get()
-            );
-        }
-
-        /**
-         * Sets the current state from a {@link XYChartSelection}
-         *
-         * @param selection the {@link XYChartSelection} to set as the current state
-         * @param toHistory true if the change in state should be recorded in the history
-         */
-        void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
-            frozen = true;
-            try {
-                ZonedDateTime newStartX = roundDateTime(selection.getStartX());
-                ZonedDateTime newEndX = roundDateTime(selection.getEndX());
-                boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
-                this.startX.set(newStartX);
-                this.endX.set(newEndX);
-                this.startY.set(roundYValue(selection.getStartY()));
-                this.endY.set(roundYValue(selection.getEndY()));
-                invalidate(toHistory, dontPlotChart);
-            } finally {
-                frozen = false;
-            }
-        }
-
-        /**
          * Initializes a new instance of the {@link XYChartViewState} class.
          *
          * @param startX the start of the time interval
@@ -727,8 +730,53 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             });
         }
 
+        /**
+         * Returns the current state as a {@link XYChartSelection}
+         *
+         * @return the current state as a {@link XYChartSelection}
+         */
+        XYChartSelection<ZonedDateTime, Double> asSelection() {
+            return new XYChartSelection<>(
+                    startX.get(),
+                    endX.get(),
+                    startY.get(),
+                    endY.get(),
+                    resetYButton.isSelected()
+            );
+        }
+
+        /**
+         * Sets the current state from a {@link XYChartSelection}
+         *
+         * @param selection the {@link XYChartSelection} to set as the current state
+         * @param toHistory true if the change in state should be recorded in the history
+         */
+        void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
+            frozen = true;
+            try {
+                ZonedDateTime newStartX = roundDateTime(selection.getStartX());
+                ZonedDateTime newEndX = roundDateTime(selection.getEndX());
+                boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
+                this.startX.set(newStartX);
+                this.endX.set(newEndX);
+                // Disable auto range on Y axis if zoomed in
+                if (toHistory && (Math.abs(selection.getEndY() - selection.getStartY()) != Math.abs(((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()))) {
+                    resetYButton.setSelected(false);
+                }
+                else if (!toHistory) {
+                    resetYButton.setSelected(selection.isAutoRangeY());
+                }
+
+                this.startY.set(roundYValue(selection.getStartY()));
+                this.endY.set(roundYValue(selection.getEndY()));
+                invalidate(toHistory, dontPlotChart);
+            } finally {
+                frozen = false;
+            }
+        }
+
         private double roundYValue(double y) {
-            return Math.round(y);
+            return y;// Math.round(y);
         }
 
         private ZonedDateTime roundDateTime(ZonedDateTime zdt) {

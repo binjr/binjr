@@ -869,3 +869,32 @@
 .slider .fill:pressed {
     -fx-background-color: #25bbc4;
 }
+
+/*******************************************************************************
+ *                                                                             *
+ * MaskerPane                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+ .masker-pane {}
+
+ .masker-pane .masker-glass {
+    /* -fx-background-color: rgba(0, 0, 0, .3);*/
+     -fx-background-color: rgba(255, 255, 255, .4);
+    /* -fx-background-color: transparent;*/
+ }
+
+ .masker-pane .masker-text {
+    -visibility:false;
+     -fx-text-fill: white;
+     -fx-font-weight: bold;
+ }
+
+ .masker-pane .masker-center {
+     -fx-background-color:transparent;
+    /*  -fx-background-color: rgba(255, 255, 255, .6);
+   /*  -fx-background-color: rgba(0, 0, 0, .6);*/
+
+     -fx-max-height: 1.50in;
+     -fx-padding: .25in;
+     -fx-background-radius: .1in;
+ }

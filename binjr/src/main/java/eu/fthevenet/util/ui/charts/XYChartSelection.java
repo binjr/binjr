@@ -11,6 +11,8 @@ public class XYChartSelection<X, Y> {
     private final Y startY;
     private final Y endY;
 
+    private final boolean autoRangeY;
+
     /**
      * Returns the lower bound on the X axis of the selection
      *
@@ -47,6 +49,10 @@ public class XYChartSelection<X, Y> {
         return endY;
     }
 
+    public boolean isAutoRangeY() {
+        return autoRangeY;
+    }
+
     /**
      * Copy constructor for the {@link XYChartSelection} class.
      *
@@ -57,6 +63,7 @@ public class XYChartSelection<X, Y> {
         this.endX = selection.getEndX();
         this.startY = selection.getStartY();
         this.endY = selection.getEndY();
+        this.autoRangeY = selection.isAutoRangeY();
     }
 
     /**
@@ -67,11 +74,12 @@ public class XYChartSelection<X, Y> {
      * @param startY the lower bound on the Y axis of the selection
      * @param endY   the upper bound on the Y axis of the selection
      */
-    public XYChartSelection(X startX, X endX, Y startY, Y endY) {
+    public XYChartSelection(X startX, X endX, Y startY, Y endY, boolean autoRangeY) {
         this.startX = startX;
         this.endX = endX;
         this.startY = startY;
         this.endY = endY;
+        this.autoRangeY = autoRangeY;
     }
 
     @Override

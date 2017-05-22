@@ -1,6 +1,8 @@
 package eu.fthevenet.binjr.data.async;
 
 import javafx.concurrent.Task;
+import javafx.concurrent.WorkerStateEvent;
+import javafx.event.EventHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,28 +43,16 @@ public class AsyncTaskManager {
   }
 
 
-    public <V> Future<?> submit(Runnable setWaitScreen, Callable<V> action, Runnable closeWaitScreen ) {
-        setWaitScreen.run();
-
+    public <V> Future<?> submit(Callable<V> mainAction, EventHandler<WorkerStateEvent> successAction, EventHandler<WorkerStateEvent> errorAction) {
         Task<V> t = new Task<V>() {
             @Override
             protected V call() throws Exception {
-                return  action.call();
-            }
-
-            @Override
-            protected void succeeded() {
-                super.succeeded();
-            }
-
-            @Override
-            protected void done() {
-                super.done();
-                closeWaitScreen.run();
+                return mainAction.call();
             }
         };
+        t.setOnSucceeded(successAction);
+        t.setOnFailed(errorAction);
+
         return threadPool.submit(t);
     }
-
-
 }

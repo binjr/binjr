@@ -242,7 +242,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                             // remove the listener so it isn't executed next time node is expanded
                             newBranch.expandedProperty().removeListener(this);
                         } catch (Exception e) {
-                            Dialogs.displayException("Failed to retrieve graph description", e);
+                            Dialogs.notifyException("Failed to retrieve graph description", e);
                         }
                     }
                 }

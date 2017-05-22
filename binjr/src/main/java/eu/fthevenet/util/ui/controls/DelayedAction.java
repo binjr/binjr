@@ -1,18 +1,14 @@
 package eu.fthevenet.util.ui.controls;
 
+import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import javafx.concurrent.Task;
 import javafx.util.Duration;
 
-
-import java.util.concurrent.ForkJoinPool;
-
 /**
- * Created by fred on 05/05/2017.
+ * Schedule a tasks to start after the specified delay
+ * @author Frederic Thevenet
  */
 public class DelayedAction {
-
-
-
     private Task<Object> delayedTask;
     public DelayedAction(Duration delay, Runnable action){
 
@@ -26,7 +22,6 @@ public class DelayedAction {
         delayedTask.setOnSucceeded(event ->action.run());
     }
     public void submit(){
-        ForkJoinPool.commonPool().submit(delayedTask);
+        AsyncTaskManager.getInstance().submit(delayedTask);
     }
-
 }

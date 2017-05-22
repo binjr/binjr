@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
+<?import org.controlsfx.control.MaskerPane?>
 <?import java.lang.*?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
             xmlns:fx="http://javafx.com/fxml/1">
@@ -121,8 +122,8 @@
                                     <Double fx:value="-7.0"/>
                                 </points>
                             </Polyline>
-                            <Button fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
-                                    prefWidth="21.0" textOverrun="CLIP">
+                            <ToggleButton fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
+                                          prefWidth="21.0" selected="true" textOverrun="CLIP">
                                 <graphic>
                                     <ImageView fitHeight="15" fitWidth="11">
                                         <Image url="@/images/autoScale.png"/>
@@ -141,7 +142,7 @@
                                         </font>
                                     </Tooltip>
                                 </tooltip>
-                            </Button>
+                            </ToggleButton>
                             <Polyline stroke="#b5b5b5" strokeType="INSIDE">
                                 <points>
                                     <Double fx:value="0.0"/>
@@ -223,6 +224,8 @@
                         <!--</StackPane>-->
                     </children>
                 </AnchorPane>
+                <MaskerPane text="" fx:id="worksheetMaskerPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
                 <children>
