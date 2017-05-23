@@ -332,6 +332,6 @@ public class Version implements Comparable {
         if (result != 0) {
             return result;
         }
-        return (this.snapshot ? 1 : 0) - (other.snapshot ? 1 : 0);
+        return (this.snapshot ? 0 : 1) - (other.snapshot ? 0 : 1);
     }
 }
