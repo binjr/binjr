@@ -122,7 +122,6 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {

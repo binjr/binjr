@@ -48,7 +48,7 @@ public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T
         double every = (double) (dataLength - 2) / (threshold - 2);
         XYChart.Data<ZonedDateTime, T> maxAreaPoint = data.get(0);
         sampled.add(data.get(0)); // Always add the first point
-        for (int i = 0; i < threshold - 2; i++) {
+        for (int i = 1; i < threshold - 1; i++) {
             sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));
         }
         sampled.add(data.get(dataLength - 1));
