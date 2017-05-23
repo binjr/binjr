@@ -507,7 +507,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     event -> {
                         worksheetMaskerPane.setVisible(false);
                         chart.getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-
                     },
                     event -> {
                         worksheetMaskerPane.setVisible(false);
@@ -515,28 +514,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     }
             );
         }
-
-//        try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
-//            getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
-//            chart.getData().setAll(getWorksheet().getSeries()
-//                    .stream()
-//                    .filter(series -> {
-//                        if (series.getProcessor() == null) {
-//                            logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
-//                            return false;
-//                        }
-//                        if (!series.isSelected()) {
-//                            logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
-//                            return false;
-//                        }
-//                        return true;
-//                    })
-//                    .map(this::makeXYChartSeries)
-//                    .collect(Collectors.toList()));
-//
-//        } catch (DataAdapterException e) {
-//            Dialogs.notifyException("Failed to retrieve data from source", e, root);
-//        }
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
@@ -590,9 +567,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
+        textField.setOnKeyPressed(event -> chart.getYAxis().setAutoRanging(false));
         formatter.valueProperty().bindBidirectional(stateProperty);
         axisBoundProperty.bindBidirectional(stateProperty);
-        //  formatter.valueProperty().addListener((observable, o, v) -> chart.getYAxis().setAutoRanging(false));
         textField.setTextFormatter(formatter);
     }
 
@@ -760,10 +737,14 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 this.startX.set(newStartX);
                 this.endX.set(newEndX);
                 // Disable auto range on Y axis if zoomed in
-                if (toHistory && (Math.abs(selection.getEndY() - selection.getStartY()) != Math.abs(((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()))) {
-                    resetYButton.setSelected(false);
+                if (toHistory) {
+                    double r = (((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
+                    logger.debug(() -> "Y selection - Y axis range = " + r);
+                    if (r > 0.0001) {
+                        resetYButton.setSelected(false);
+                    }
                 }
-                else if (!toHistory) {
+                else {
                     resetYButton.setSelected(selection.isAutoRangeY());
                 }
 

@@ -180,13 +180,7 @@ public class MainViewController implements Initializable {
             logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
 
-        sourcesTabPane.setNewTabFactory(() -> {
-            Tab newTab = new Tab();
-            if (getAdapterDlg2(newTab)) {
-                return Optional.of(newTab);
-            }
-            return Optional.empty();
-        });
+        sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -348,10 +342,6 @@ public class MainViewController implements Initializable {
         DataAdapterDialog dlg = new JrdsAdapterDialog(root);
         Tab newTab = new Tab();
         getAdapterDlg(newTab);
-//        if (getAdapterDlg(newTab)) {
-//            sourcesTabPane.getTabs().add(newTab);
-//            sourcesTabPane.getSelectionModel().select(newTab);
-//        }
     }
 
     @FXML
@@ -511,39 +501,6 @@ public class MainViewController implements Initializable {
     }
 
     private void loadWorksheets(Workspace wsFromfile) {
-//
-//        worksheetMaskerPane.setVisible(true);
-//        AsyncTaskManager.getInstance().submit(
-//                () -> {
-//                    List<Worksheet<Double>> worksheets = new ArrayList<>();
-//                    for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
-//                        for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
-//                            UUID id = s.getBinding().getAdapterId();
-//                            DataAdapter<?> da = sourcesAdapters.values()
-//                                    .stream()
-//                                    .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-//                                    .findAny()
-//                                    .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-//                            s.getBinding().setAdapter(da);
-//                            s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedWorksheetController.refresh());
-//                        }
-//                        worksheets.add(worksheet);
-//                    }
-//                    return worksheets;
-//                },
-//                event -> {
-//                    worksheetMaskerPane.setVisible(false);
-//                    List<Worksheet<Double>> worksheets = (List<Worksheet<Double>>) event.getSource().getValue();
-//                    worksheets.forEach(this::loadWorksheet);
-//                    workspace.cleanUp();
-//                    GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
-//                    logger.debug(() -> "Recently loaded workspaces: " + GlobalPreferences.getInstance().getRecentFiles().stream().collect(Collectors.joining(" ")));
-//                },
-//                event -> {
-//                    worksheetMaskerPane.setVisible(false);
-//                    Dialogs.notifyException("Error while loading worksheet", event.getSource().getException(), root);
-//                });
-
         try {
             for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
                 for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
@@ -556,7 +513,6 @@ public class MainViewController implements Initializable {
                     s.getBinding().setAdapter(da);
                     s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedWorksheetController.refresh());
                 }
-
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
@@ -608,28 +564,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private boolean getAdapterDlg2(Tab newTab) {
-        AtomicBoolean res = new AtomicBoolean(false);
-        DataAdapterDialog dlg = new JrdsAdapterDialog(root);
-        dlg.showAndWait().ifPresent(da -> {
-            newTab.setText(da.getSourceName());
-            Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
-            treeView = buildTreeViewForTarget(da);
-            if (treeView.isPresent()) {
-                newTab.setContent(treeView.get());
-                sourcesAdapters.put(newTab, da);
-                res.set(true);
-            }
-            else {
-                res.set(false);
-            }
-        });
-        return res.get();
-    }
-
-
     private void getAdapterDlg(Tab newTab) {
-        // AtomicBoolean res = new AtomicBoolean(false);
         DataAdapterDialog dlg = new JrdsAdapterDialog(root);
         dlg.showAndWait().ifPresent(da -> {
             newTab.setText(da.getSourceName());
@@ -641,29 +576,12 @@ public class MainViewController implements Initializable {
                         if (treeView.isPresent()) {
                             newTab.setContent(treeView.get());
                             sourcesAdapters.put(newTab, da);
-                            // res.set(true);
                             sourcesTabPane.getTabs().add(newTab);
                             sourcesTabPane.getSelectionModel().select(newTab);
                         }
-
                     },
-                    event -> {
-                        sourceMaskerPane.setVisible(false);
-                        //  res.set(false);
-                    });
-
-//            Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
-//            treeView = buildTreeViewForTarget(da);
-//            if (treeView.isPresent()) {
-//                newTab.setContent(treeView.get());
-//                sourcesAdapters.put(newTab, da);
-//                res.set(true);
-//            }
-//            else {
-//                res.set(false);
-//            }
+                    event -> sourceMaskerPane.setVisible(false));
         });
-        // return res.get();
     }
 
     private void loadAdapters(DataAdapter da) throws DataAdapterException {
@@ -683,7 +601,6 @@ public class MainViewController implements Initializable {
             i.setGraphic(l);
             newTab.setContent(new TreeView<>(i));
         }
-
         Platform.runLater(() -> {
             sourcesTabPane.getTabs().add(newTab);
             sourcesTabPane.getSelectionModel().select(newTab);

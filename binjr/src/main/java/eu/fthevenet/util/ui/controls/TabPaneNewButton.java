@@ -1,6 +1,8 @@
 package eu.fthevenet.util.ui.controls;
 
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
@@ -22,6 +24,7 @@ import java.util.function.Supplier;
 public class TabPaneNewButton extends TabPane {
     private static final Logger logger = LogManager.getLogger(TabPaneNewButton.class);
     private Supplier<Optional<Tab>> newTabFactory = () -> Optional.of(new Tab());
+    private EventHandler<ActionEvent> onNewTabAction;
 
     public TabPaneNewButton() {
         this((Tab[]) null);
@@ -67,12 +70,17 @@ public class TabPaneNewButton extends TabPane {
         icon.getStyleClass().add("add-tab-button-icon");
         newTabButton.setGraphic(icon);
         newTabButton.setAlignment(Pos.CENTER);
-        newTabButton.setOnAction(event -> {
-            newTabFactory.get().ifPresent(newTab -> {
-                getTabs().add(newTab);
-                this.getSelectionModel().select(newTab);
+        if (onNewTabAction != null) {
+            newTabButton.setOnAction(onNewTabAction);
+        }
+        else {
+            newTabButton.setOnAction(event -> {
+                newTabFactory.get().ifPresent(newTab -> {
+                    getTabs().add(newTab);
+                    this.getSelectionModel().select(newTab);
+                });
             });
-        });
+        }
 
 
         tabHeaderBg.getChildren().add(newTabButton);
@@ -115,5 +123,13 @@ public class TabPaneNewButton extends TabPane {
 
     public void setNewTabFactory(Supplier<Optional<Tab>> newTabFactory) {
         this.newTabFactory = newTabFactory;
+    }
+
+    public EventHandler<ActionEvent> getOnNewTabAction() {
+        return onNewTabAction;
+    }
+
+    public void setOnNewTabAction(EventHandler<ActionEvent> onNewTabAction) {
+        this.onNewTabAction = onNewTabAction;
     }
 }
