@@ -1,6 +1,5 @@
 package eu.fthevenet.binjr.dialogs;
 
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
@@ -15,6 +14,7 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.Notifications;
+import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.awt.*;
@@ -64,6 +64,7 @@ public class Dialogs {
                 .text(e.getMessage())
                 .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
                 .position(Pos.BOTTOM_RIGHT)
+                .action(new Action("Details", ae -> displayException(title, e, owner)))
                 .owner(owner).showError());
     }
 
@@ -74,7 +75,7 @@ public class Dialogs {
      * @param e      the exception to display
      * @param owner  the {@link Node} used to recover the stage the dialog should be linked to
      */
-    public static void displayException(String header, DataAdapterException e, Node owner) {
+    public static void displayException(String header, Throwable e, Node owner) {
         logger.error(header, e);
         runOnFXThread(() -> {
             ExceptionDialog dlg = new ExceptionDialog(e);
@@ -224,6 +225,4 @@ public class Dialogs {
             Platform.runLater(r);
         }
     }
-
-
 }
