@@ -32,6 +32,7 @@ public class AsyncTaskManager {
             public Thread newThread(Runnable r) {
                 Thread thread = new Thread(r);
                 thread.setName("binjr-async-thread-" + threadNum.incrementAndGet());
+                thread.setDaemon(true);
                 return thread;
             }
         };
@@ -52,6 +53,7 @@ public class AsyncTaskManager {
         };
         t.setOnSucceeded(successAction);
         t.setOnFailed(errorAction);
+
 
         return threadPool.submit(t);
     }
