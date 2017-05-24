@@ -1,3 +1,20 @@
+/*
+ *    Copyright 2017 Frederic Thevenet
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ */
+
 package eu.fthevenet.binjr.controllers;
 
 
@@ -17,10 +34,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.controlsfx.control.MaskerPane;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,13 +59,6 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private TextFlow versionCheckFlow;
-
-//    @FXML
-//    private Hyperlink newReleaseURL;
-
-    public Hyperlink getBinjrUrl() {
-        return binjrUrl;
-    }
 
     @FXML
     private Hyperlink binjrUrl;
@@ -77,14 +85,6 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private TitledPane acknowledgementPane;
-
-    @FXML
-    private MaskerPane maskerPane;
-
-    @FXML
-    private void handleCloseButtonAction(ActionEvent event) {
-        ((Stage) aboutRoot.getScene().getWindow()).close();
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -168,5 +168,4 @@ public class AboutBoxController implements Initializable {
         }
         binjrUrl.setVisited(false);
     }
-
 }

@@ -1,3 +1,20 @@
+/*
+ *    Copyright 2017 Frederic Thevenet
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ *
+ */
+
 package eu.fthevenet.binjr.dialogs;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
@@ -39,6 +56,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     protected final DialogPane parent;
     protected final Button okButton;
     protected final GridPane paramsGridPane;
+
     /**
      * Initializes a new instance of the {@link DataAdapterDialog} class.
      *
@@ -52,23 +70,19 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         String KNOWN_JRDS_URL = "urls_mru";
         Preferences prefs = Preferences.userRoot().node(BINJR_SOURCES);
         suggestedUrls = new HashSet<>(Arrays.asList(prefs.get(KNOWN_JRDS_URL, "").split(" ")));
-
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/DataAdapterView.fxml"));
         try {
             parent = fXMLLoader.load();
         } catch (IOException e) {
-           throw new IllegalArgumentException("Failed to load /views/DataAdapterView.fxml", e);
+            throw new IllegalArgumentException("Failed to load /views/DataAdapterView.fxml", e);
         }
         this.setDialogPane(parent);
         urlField = (TextField) parent.lookup("#urlField");
         timezoneField = (TextField) parent.lookup("#timezoneField");
         paramsGridPane = (GridPane) parent.lookup("#paramsGridPane");
         okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
-
         Platform.runLater(urlField::requestFocus);
-
         autoCompletionBinding = TextFields.bindAutoCompletion(urlField, suggestedUrls);
-
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
@@ -93,7 +107,6 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         );
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
         timezoneField.setText(ZoneId.systemDefault().toString());
-
     }
 
     /**
