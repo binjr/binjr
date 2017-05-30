@@ -1,0 +1,19 @@
+1.  When accessing a source over SSL/TLS, make sure the certificate is valid.
+    If need be, add any CA root certificate required for validation into the JVM keystore.
+    I.e.: keytool -importcert -alias startssl -keystore $JAVA_HOME/jre/lib/security/cacerts -storepass changeit -file [myCaCert.der]
+
+2.  If Kerberos authentication is required and appears to fail:
+    *   Enable kerberos debug information for easier troubleshooting:
+            -Dsun.security.krb5.debug=true
+
+    *   Make sure the information in krb5.ini/krb5.conf is correct.
+        To override the default location for the krb5 configuration file, use:
+            -Djava.security.auth.login.config=[PathTo]/krb5.conf
+        Refer to http://web.mit.edu/kerberos/krb5-1.4/krb5-1.4.1/doc/krb5-admin/krb5.conf.html for reference on how to configure
+
+    *   If you need to override the JAAS login configuration, use the following propoerty to target the new config file:
+            -Djava.security.auth.login.config=[PathTo]/jaas_login.conf
+
+    *   If configuration is correct but authentication still fails, try to clear any Java specific ticket cache created by kinit.
+        Default naming for kinit ticket cache file is $HOME/krb5cc_[username]
+

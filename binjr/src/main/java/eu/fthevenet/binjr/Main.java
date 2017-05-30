@@ -67,6 +67,7 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         // Disabling accessibility support to work around hanging issue on Windows  10
         // see "https://bugs.openjdk.java.net/browse/JDK-8132897"
         System.setProperty("glass.accessible.force", "false");

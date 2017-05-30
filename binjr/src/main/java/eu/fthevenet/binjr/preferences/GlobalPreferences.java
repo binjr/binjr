@@ -634,8 +634,6 @@ public class GlobalPreferences {
             }
         });
         AsyncTaskManager.getInstance().submit(getLatestTask);
-
-        // ForkJoinPool.commonPool().submit(getLatestTask);
     }
 
     private Manifest getManifest() {

@@ -29,16 +29,25 @@ import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
+import org.apache.http.auth.AuthSchemeProvider;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.config.RegistryBuilder;
+import org.apache.http.impl.auth.SPNegoSchemeFactory;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
@@ -52,6 +61,7 @@ import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -68,6 +78,8 @@ import java.util.stream.Collectors;
 public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final String SEPARATOR = ",";
+    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
+    private final CloseableHttpClient httpClient;
     private String jrdsHost;
     private int jrdsPort;
     private String jrdsPath;
@@ -75,24 +87,12 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private ZoneId zoneId;
     private String encoding;
     private JrdsTreeFilter treeFilter;
-    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
-
-    /**
-     * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
-     *
-     * @param url    the URL to the JRDS webapp.
-     * @param zoneId the id of the time zone used to record dates.
-     * @return a new instance of the {@link JrdsDataAdapter} class.
-     */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeFilter treeFilter) throws MalformedURLException {
-        URL u = new URL(url.replaceAll("/$", ""));
-        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
-    }
 
     /**
      * Default constructor
      */
     public JrdsDataAdapter() {
+        httpClient = httpClientFactory();
     }
 
     /**
@@ -115,6 +115,19 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.treeFilter = treeFilter;
+        httpClient = httpClientFactory();
+    }
+
+    /**
+     * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
+     *
+     * @param url    the URL to the JRDS webapp.
+     * @param zoneId the id of the time zone used to record dates.
+     * @return a new instance of the {@link JrdsDataAdapter} class.
+     */
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeFilter treeFilter) throws MalformedURLException {
+        URL u = new URL(url.replaceAll("/$", ""));
+        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
     }
 
     //region [DataAdapter Members]
@@ -192,6 +205,38 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     @Override
+    public boolean ping() {
+        URIBuilder requestUrl = new URIBuilder()
+                .setScheme(jrdsProtocol)
+                .setHost(jrdsHost)
+                .setPort(jrdsPort)
+                .setPath(jrdsPath);
+
+
+        try {
+            return doHttpGet(requestUrl, response -> {
+                int status = response.getStatusLine().getStatusCode();
+                if (status >= 200 && status < 300) {
+                    logger.trace("getJsonTree status:" + status);
+                    HttpEntity entity = response.getEntity();
+                    if (entity != null) {
+                        String entityString = EntityUtils.toString(entity);
+                        logger.trace(entityString);
+                        return true;
+                    }
+                    return false;
+                }
+                else {
+                    throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+                }
+            });
+        } catch (DataAdapterException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
     public String getEncoding() {
         return encoding;
     }
@@ -213,17 +258,26 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 s -> ZonedDateTime.parse(s, formatter));
     }
 
+    @Override
+    public void close() throws Exception {
+        super.close();
+        this.httpClient.close();
+    }
+
     private <T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString() + "]", logger::trace)) {
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                logger.debug(() -> "requestUrl = " + requestUrl);
-                HttpGet httpget = new HttpGet(requestUrl.build());
-                return httpClient.execute(httpget, responseHandler);
-            }
+            logger.debug(() -> "requestUrl = " + requestUrl);
+            HttpGet httpget = new HttpGet(requestUrl.build());
+            // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
+            httpget.setHeader("User-Agent", "binjr/" + GlobalPreferences.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+            return httpClient.execute(httpget, responseHandler);
+
         } catch (IOException e) {
             throw new SourceCommunicationException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {
             throw new SourceCommunicationException("Error building URI for request");
+        } catch (Exception e) {
+            throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
         }
     }
 
@@ -288,9 +342,12 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         return doHttpGet(requestUrl, response -> {
             int status = response.getStatusLine().getStatusCode();
             if (status >= 200 && status < 300) {
+                logger.trace("getJsonTree status:" + status);
                 HttpEntity entity = response.getEntity();
                 if (entity != null) {
-                    return EntityUtils.toString(entity);
+                    String entityString = EntityUtils.toString(entity);
+                    logger.trace(entityString);
+                    return entityString;
                 }
                 return null;
             }
@@ -364,6 +421,30 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         } catch (IOException e) {
             throw new ResponseProcessingException(e);
         }
+    }
+
+    private CloseableHttpClient httpClientFactory() {
+        RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
+        schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        credsProvider.setCredentials(
+                new AuthScope(null, -1, null),
+                new Credentials() {
+                    @Override
+                    public Principal getUserPrincipal() {
+                        return null;
+                    }
+
+                    @Override
+                    public String getPassword() {
+                        return null;
+                    }
+                });
+
+        return HttpClients.custom()
+                .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
+                .setDefaultCredentialsProvider(credsProvider)
+                .build();
     }
 
     /**

@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name="graphdec")
+@XmlRootElement(name = "graphdec")
 class Graphdesc {
     @XmlElement(name = "name")
     String name;
@@ -39,8 +39,8 @@ class Graphdesc {
     String graphTitle;
     @XmlElementWrapper(name = "unit")
     @XmlElements({
-            @XmlElement(name="SI", type=JrdsMetricUnitType.class),
-            @XmlElement(name="binary", type=JrdsBinaryUnitType.class)
+            @XmlElement(name = "SI", type = JrdsMetricUnitType.class),
+            @XmlElement(name = "binary", type = JrdsBinaryUnitType.class)
     })
     List<JrdsUnitType> unit;
     @XmlElement(name = "verticalLabel")
@@ -56,21 +56,39 @@ class Graphdesc {
     @XmlElement(name = "tree")
     List<Tree> trees;
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Graphdesc{");
+        sb.append("name='").append(name).append('\'');
+        sb.append(", graphName='").append(graphName).append('\'');
+        sb.append(", graphClass='").append(graphClass).append('\'');
+        sb.append(", graphTitle='").append(graphTitle).append('\'');
+        sb.append(", unit='").append(unit).append('\'');
+        sb.append(", verticalLabel='").append(verticalLabel).append('\'');
+        sb.append(", upperLimit='").append(upperLimit).append('\'');
+        sb.append(", lowerLimit='").append(lowerLimit).append('\'');
+        sb.append(", logarithmic='").append(logarithmic).append('\'');
+        sb.append(", seriesDescList=").append(seriesDescList.stream().map(SeriesDesc::toString).collect(Collectors.joining(";")));
+        sb.append(", trees=").append(trees.stream().map(Tree::toString).collect(Collectors.joining(";")));
+        sb.append('}');
+        return sb.toString();
+    }
+
     @XmlAccessorType(XmlAccessType.FIELD)
     @XmlRootElement(name = "add")
     static class SeriesDesc {
         @XmlElement(name = "name")
-        String name ="";
+        String name = "";
         @XmlElement(name = "dsName")
-        String dsName ="";
+        String dsName = "";
         @XmlElement(name = "graphType")
-        String graphType ="";
+        String graphType = "";
         @XmlElement(name = "color")
-        String color ="";
+        String color = "";
         @XmlElement(name = "legend")
-        String legend ="";
+        String legend = "";
         @XmlElement(name = "rpn")
-        String rpn ="";
+        String rpn = "";
 
         @Override
         public String toString() {
@@ -101,14 +119,12 @@ class Graphdesc {
         }
     }
 
-
     @XmlSeeAlso({JrdsMetricUnitType.class, JrdsBinaryUnitType.class})
-    public static abstract class JrdsUnitType{
-
+    public static abstract class JrdsUnitType {
     }
 
     @XmlType(name = "SI")
-    public static class JrdsMetricUnitType extends JrdsUnitType{
+    public static class JrdsMetricUnitType extends JrdsUnitType {
         @Override
         public String toString() {
             return "SI";
@@ -116,29 +132,11 @@ class Graphdesc {
     }
 
     @XmlType(name = "binary")
-    public  static class JrdsBinaryUnitType extends JrdsUnitType{
+    public static class JrdsBinaryUnitType extends JrdsUnitType {
         @Override
         public String toString() {
             return "binary";
         }
 
-    }
-
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("Graphdesc{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", graphName='").append(graphName).append('\'');
-        sb.append(", graphClass='").append(graphClass).append('\'');
-        sb.append(", graphTitle='").append(graphTitle).append('\'');
-        sb.append(", unit='").append(unit).append('\'');
-        sb.append(", verticalLabel='").append(verticalLabel).append('\'');
-        sb.append(", upperLimit='").append(upperLimit).append('\'');
-        sb.append(", lowerLimit='").append(lowerLimit).append('\'');
-        sb.append(", logarithmic='").append(logarithmic).append('\'');
-        sb.append(", seriesDescList=").append(seriesDescList.stream().map(SeriesDesc::toString).collect(Collectors.joining(";")));
-        sb.append(", trees=").append(trees.stream().map(Tree::toString).collect(Collectors.joining(";")));
-        sb.append('}');
-        return sb.toString();
     }
 }

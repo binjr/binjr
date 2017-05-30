@@ -19,7 +19,6 @@ package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
-import eu.fthevenet.binjr.sources.jrds.adapters.JrdsSeriesBindingFactory;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +41,7 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
 public class TimeSeriesBinding<T extends Number> {
-    private static final Logger logger = LogManager.getLogger(JrdsSeriesBindingFactory.class);
+    private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
             return MessageDigest.getInstance("MD5");
@@ -248,9 +247,6 @@ public class TimeSeriesBinding<T extends Number> {
         long hashVal;
         messageDigest.get().update(value.getBytes(Charset.forName("UTF-8")));
         hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Hash: [" + hashVal + "] original value: [" + value + "]");
-        }
         return hashVal;
     }
 

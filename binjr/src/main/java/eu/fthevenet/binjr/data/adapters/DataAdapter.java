@@ -99,6 +99,9 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
      */
     public abstract void setParams(Map<String, String> params);
 
+    public abstract boolean ping();
+
+
     /**
      * Sets the unique id for the adapter
      *
@@ -117,11 +120,5 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
         return id;
     }
 
-    public boolean isLoaded() {
-        return loaded;
-    }
 
-    public void setLoaded(boolean loaded) {
-        this.loaded = loaded;
-    }
 }
