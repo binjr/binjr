@@ -163,40 +163,6 @@ public class ClientKerberosAuthentication {
                 .build();
 
         doGet(httpClient, targetUrl);
-
-//        LoginContext loginCOntext = new LoginContext("com.sun.security.jgss.login", callbacks -> {
-//            Scanner scanner = new Scanner(System.in);
-//            for (Callback callback : callbacks) {
-//                if (callback instanceof NameCallback) {
-//                    NameCallback nc = (NameCallback) callback;
-//                    System.out.print("User name:");
-//                    String username = scanner.next();
-//                    nc.setName(username);
-//                }
-//                else if (callback instanceof PasswordCallback) {
-//                    PasswordCallback pc = (PasswordCallback) callback;
-//                    System.out.print("Password:");
-//                    String password = scanner.next();
-//                    pc.setPassword(password.toCharArray());
-//                }
-//                else {
-//                    throw new UnsupportedCallbackException(callback, "Unknown Callback");
-//                }
-//            }
-//        });
-//
-//        loginCOntext.login();
-//
-//
-//        Subject.doAs(loginCOntext.getSubject(),(PrivilegedAction<Object>) () -> {
-//            try {
-//                doGet(httpClient, targetUrl);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//            return true;
-//        });
-
         httpClient.close();
     }
 

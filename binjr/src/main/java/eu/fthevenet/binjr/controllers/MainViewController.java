@@ -116,6 +116,9 @@ public class MainViewController implements Initializable {
     private SplitPane contentView;
     @FXML
     private StackPane settingsPane;
+    @FXML
+    private StackPane worksheetArea;
+
     private WorksheetController selectedWorksheetController;
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
@@ -205,7 +208,7 @@ public class MainViewController implements Initializable {
 
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
 
-        addWorksheetLabel.setOnDragOver(event -> {
+        worksheetArea.setOnDragOver(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
                 event.acceptTransferModes(TransferMode.COPY);
@@ -213,7 +216,7 @@ public class MainViewController implements Initializable {
             }
         });
 
-        addWorksheetLabel.setOnDragDropped(event -> {
+        worksheetArea.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
                 TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
@@ -801,33 +804,38 @@ public class MainViewController implements Initializable {
     }
 
     private void addToNewWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
-        try {
-            TimeSeriesBinding<Double> binding = treeItem.getValue();
-            ZonedDateTime toDateTime;
-            ZonedDateTime fromDateTime;
-            if (selectedWorksheetController != null && selectedWorksheetController.getWorksheet() != null) {
-                toDateTime = selectedWorksheetController.getWorksheet().getToDateTime();
-                fromDateTime = selectedWorksheetController.getWorksheet().getFromDateTime();
+        // Schedule for later execution in order to let other UI components get refreshed
+        // before modal dialog gets displayed (fixes unsightly UI glitches on Linux)
+        Platform.runLater(() -> {
+            try {
+                TimeSeriesBinding<Double> binding = treeItem.getValue();
+                ZonedDateTime toDateTime;
+                ZonedDateTime fromDateTime;
+                if (selectedWorksheetController != null && selectedWorksheetController.getWorksheet() != null) {
+                    toDateTime = selectedWorksheetController.getWorksheet().getToDateTime();
+                    fromDateTime = selectedWorksheetController.getWorksheet().getFromDateTime();
+                }
+                else {
+                    toDateTime = ZonedDateTime.now();
+                    fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
+                }
+                Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
+                        binding.getGraphType(),
+                        fromDateTime,
+                        toDateTime,
+                        ZoneId.systemDefault(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix());
+
+                if (editWorksheet(worksheet) && selectedWorksheetController != null) {
+                    List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                    getAllBindingsFromBranch(treeItem, bindings);
+                    selectedWorksheetController.addBindings(bindings);
+                }
+            } catch (Exception e) {
+                Dialogs.notifyException("Error adding bindings to new worksheet", e);
             }
-            else {
-                toDateTime = ZonedDateTime.now();
-                fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
-            }
-            Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
-                    binding.getGraphType(),
-                    fromDateTime,
-                    toDateTime,
-                    ZoneId.systemDefault(),
-                    binding.getUnitName(),
-                    binding.getUnitPrefix());
-            if (editWorksheet(worksheet) && selectedWorksheetController != null) {
-                List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
-                getAllBindingsFromBranch(treeItem, bindings);
-                selectedWorksheetController.addBindings(bindings);
-            }
-        } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to new worksheet", e);
-        }
+        });
     }
 
     private void setUiTheme(UserInterfaceThemes theme) {

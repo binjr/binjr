@@ -50,10 +50,10 @@
                             <tabs>
                             </tabs>
                         </TabPaneNewButton>
-                        <MaskerPane text="" fx:id="sourceMaskerPane" visible="false"/>
+                        <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
                     </children>
                 </StackPane>
-                <StackPane SplitPane.resizableWithParent="true">
+                <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
                     <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
                         <graphic>
                             <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"/>
@@ -101,8 +101,7 @@
                     </graphic>
                 </Button>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0"
-                            prefWidth="-1" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+                            prefHeight="40.0" prefWidth="-1" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
                     <tooltip>
                         <Tooltip text="Workspaces">
                             <font>
@@ -180,8 +179,7 @@
                     </items>
                 </MenuButton>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0"
-                            prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
+                            prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
@@ -214,8 +212,7 @@
                     </items>
                 </MenuButton>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0"
-                            prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
+                            prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>
@@ -268,8 +265,7 @@
                     </items>
                 </MenuButton>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                            prefHeight="40.0"
-                            text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
+                            prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <children>

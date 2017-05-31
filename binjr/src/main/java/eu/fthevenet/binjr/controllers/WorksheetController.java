@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
@@ -86,6 +87,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final Worksheet<Double> worksheet;
     private final PrefixFormatter prefixFormatter;
+
     @FXML
     public AnchorPane root;
     @FXML
@@ -191,6 +193,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     public XYChart<ZonedDateTime, Double> getChart() {
         return chart;
     }
+
+    public abstract ChartType getChartType();
 
     //endregion
 
@@ -539,18 +543,20 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             newSeries.getData().addAll(series.getProcessor().getData());
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
-                    ObservableList<Node> children = ((Group) newNode).getChildren();
-                    if (children != null) {
-                        if (children.size() >= 1) {
-                            Path stroke = (Path) children.get(1);
-                            Path fill = (Path) children.get(0);
-                            logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                            stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
-                            stroke.strokeProperty().bind(series.displayColorProperty());
-                            fill.fillProperty().bind(Bindings.createObjectBinding(
-                                    () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
-                                    series.displayColorProperty(),
-                                    getWorksheet().graphOpacityProperty()));
+                    if (getChartType() == ChartType.AREA || getChartType() == ChartType.STACKED) {
+                        ObservableList<Node> children = ((Group) newNode).getChildren();
+                        if (children != null) {
+                            if (children.size() >= 1) {
+                                Path stroke = (Path) children.get(1);
+                                Path fill = (Path) children.get(0);
+                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
+                                stroke.strokeProperty().bind(series.displayColorProperty());
+                                fill.fillProperty().bind(Bindings.createObjectBinding(
+                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
+                                        series.displayColorProperty(),
+                                        getWorksheet().graphOpacityProperty()));
+                            }
                         }
                     }
                 }

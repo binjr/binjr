@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.util.ui.charts.ZonedDateTimeAxis;
 import javafx.beans.property.BooleanProperty;
@@ -41,6 +42,11 @@ public class AreaChartWorksheetController extends WorksheetController {
      */
     public AreaChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);
+    }
+
+    @Override
+    public ChartType getChartType() {
+        return ChartType.LINE;
     }
 
     @Override
