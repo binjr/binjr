@@ -32,23 +32,16 @@ import java.util.Set;
 public class HttpClientKerberosDoAS {
 
     public static void main(String[] args) throws Exception {
-
         System.setProperty("java.security.auth.login.config", HttpClientKerberosDoAS.class.getResource("/jaas_login.conf").toExternalForm());
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         System.setProperty("sun.security.krb5.debug", "true");
-
 
         String url = "";
 
         if (args.length == 1) {
             url = args[0];
-//            password = args[1];
-//            url = args[2];
-
-
             HttpClientKerberosDoAS kcd = new HttpClientKerberosDoAS();
 
-            //  System.out.println("Loggin in with user [" + user + "] password [" + password + "] ");
             kcd.test(url);
         }
         else {
