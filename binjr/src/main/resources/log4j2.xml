@@ -29,7 +29,7 @@
         <!--</File>-->
     </Appenders>
     <Loggers>
-        <Root level="trace">
+        <Root level="debug">
             <AppenderRef ref="STDOUT"/>
             <!--<AppenderRef ref="File"/>-->
         </Root>

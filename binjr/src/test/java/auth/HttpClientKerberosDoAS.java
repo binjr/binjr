@@ -26,29 +26,30 @@ import java.io.IOException;
 import java.security.AccessController;
 import java.security.Principal;
 import java.security.PrivilegedAction;
+import java.util.Scanner;
 import java.util.Set;
 
 public class HttpClientKerberosDoAS {
 
     public static void main(String[] args) throws Exception {
 
+        System.setProperty("java.security.auth.login.config", HttpClientKerberosDoAS.class.getResource("/jaas_login.conf").toExternalForm());
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        System.setProperty("sun.security.krb5.debug", "false");
+        System.setProperty("sun.security.krb5.debug", "true");
 
-        String user = "";
-        String password = "";
+
         String url = "";
 
-        if (args.length == 3) {
-            user = args[0];
-            password = args[1];
-            url = args[2];
+        if (args.length == 1) {
+            url = args[0];
+//            password = args[1];
+//            url = args[2];
 
 
             HttpClientKerberosDoAS kcd = new HttpClientKerberosDoAS();
 
-            System.out.println("Loggin in with user [" + user + "] password [" + password + "] ");
-            kcd.test(user, password, url);
+            //  System.out.println("Loggin in with user [" + user + "] password [" + password + "] ");
+            kcd.test(url);
         }
         else {
             System.out.println("run with User Password URL");
@@ -56,35 +57,28 @@ public class HttpClientKerberosDoAS {
 
     }
 
-    public void test(String user, String password, final String url) {
+    public void test(final String url) {
         try {
 
-            LoginContext loginCOntext = new LoginContext("KrbLogin", new KerberosCallBackHandler(user, password));
+            LoginContext loginCOntext = new LoginContext("com.sun.security.jgss.login", new KerberosCallBackHandler());
             loginCOntext.login();
+            Subject.doAs(loginCOntext.getSubject(), (PrivilegedAction<Object>) () -> {
+                try {
 
-            PrivilegedAction sendAction = new PrivilegedAction() {
-
-                @Override
-                public Object run() {
-                    try {
-
-                        Subject current = Subject.getSubject(AccessController.getContext());
-                        System.out.println("----------------------------------------");
-                        Set<Principal> principals = current.getPrincipals();
-                        for (Principal next : principals) {
-                            System.out.println("DOAS Principal: " + next.getName());
-                        }
-                        System.out.println("----------------------------------------");
-
-                        call(url);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    Subject current = Subject.getSubject(AccessController.getContext());
+                    System.out.println("----------------------------------------");
+                    Set<Principal> principals = current.getPrincipals();
+                    for (Principal next : principals) {
+                        System.out.println("DOAS Principal: " + next.getName());
                     }
-                    return true;
-                }
-            };
+                    System.out.println("----------------------------------------");
 
-            Subject.doAs(loginCOntext.getSubject(), sendAction);
+                    call(url);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return true;
+            });
 
         } catch (LoginException le) {
             le.printStackTrace();
@@ -139,12 +133,15 @@ public class HttpClientKerberosDoAS {
 
     class KerberosCallBackHandler implements CallbackHandler {
 
-        private final String user;
-        private final String password;
+        //        private final String user;
+//        private final String password;
+        private final Scanner scanner;
 
-        public KerberosCallBackHandler(String user, String password) {
-            this.user = user;
-            this.password = password;
+        public KerberosCallBackHandler() {
+            scanner = new Scanner(System.in);
+//
+//                    this.user = user;
+//            this.password = password;
         }
 
         public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
@@ -153,10 +150,14 @@ public class HttpClientKerberosDoAS {
 
                 if (callback instanceof NameCallback) {
                     NameCallback nc = (NameCallback) callback;
-                    nc.setName(user);
+                    System.out.print("User name:");
+                    String username = scanner.next();
+                    nc.setName(username);
                 }
                 else if (callback instanceof PasswordCallback) {
                     PasswordCallback pc = (PasswordCallback) callback;
+                    System.out.print("Password:");
+                    String password = scanner.next();
                     pc.setPassword(password.toCharArray());
                 }
                 else {

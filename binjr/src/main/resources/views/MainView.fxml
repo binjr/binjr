@@ -33,7 +33,6 @@
             <items>
                 <StackPane prefWidth="335.0" SplitPane.resizableWithParent="false">
                     <children>
-
                         <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
                             <graphic>
                                 <Region styleClass="addSource-icon"/>

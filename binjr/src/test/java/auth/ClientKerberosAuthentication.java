@@ -24,6 +24,7 @@ import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -34,6 +35,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.security.Principal;
 
 /**
@@ -125,6 +127,7 @@ public class ClientKerberosAuthentication {
 
     public static void main(String[] args) throws Exception {
 
+        System.setProperty("java.security.auth.login.config", ClientKerberosAuthentication.class.getResource("/jaas_login.conf").toExternalForm());
         System.setProperty("sun.security.krb5.debug", "true");
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
 
@@ -133,21 +136,23 @@ public class ClientKerberosAuthentication {
             throw new IllegalArgumentException("Please specify a target URL");
         }
         targetUrl = args[0];
-/************************************************************************************************/
+        /* ***********************************************************************************************/
         RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
         schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
 
         CredentialsProvider credsProvider = new BasicCredentialsProvider();
         credsProvider.setCredentials(
-                new AuthScope(null, -1, null),
+                new AuthScope(AuthScope.ANY_HOST, AuthScope.ANY_PORT, AuthScope.ANY_REALM),
                 new Credentials() {
                     @Override
                     public Principal getUserPrincipal() {
+                        System.out.print("Get principal!");
                         return null;
                     }
 
                     @Override
                     public String getPassword() {
+                        System.out.print("Get pwd!");
                         return null;
                     }
                 });
@@ -156,28 +161,46 @@ public class ClientKerberosAuthentication {
                 .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
                 .setDefaultCredentialsProvider(credsProvider)
                 .build();
-/**********************************************************************************
- DefaultHttpClient httpClient = new DefaultHttpClient();
 
- NegotiateSchemeFactory nsf = new NegotiateSchemeFactory();
- //        nsf.setStripPort(false);
- //        nsf.setSpnegoCreate(true);
- //        nsf.setSpengoGenerator(new BouncySpnegoTokenGenerator());
+        doGet(httpClient, targetUrl);
 
- httpClient.getAuthSchemes().register(AuthPolicy.SPNEGO, nsf);
+//        LoginContext loginCOntext = new LoginContext("com.sun.security.jgss.login", callbacks -> {
+//            Scanner scanner = new Scanner(System.in);
+//            for (Callback callback : callbacks) {
+//                if (callback instanceof NameCallback) {
+//                    NameCallback nc = (NameCallback) callback;
+//                    System.out.print("User name:");
+//                    String username = scanner.next();
+//                    nc.setName(username);
+//                }
+//                else if (callback instanceof PasswordCallback) {
+//                    PasswordCallback pc = (PasswordCallback) callback;
+//                    System.out.print("Password:");
+//                    String password = scanner.next();
+//                    pc.setPassword(password.toCharArray());
+//                }
+//                else {
+//                    throw new UnsupportedCallbackException(callback, "Unknown Callback");
+//                }
+//            }
+//        });
+//
+//        loginCOntext.login();
+//
+//
+//        Subject.doAs(loginCOntext.getSubject(),(PrivilegedAction<Object>) () -> {
+//            try {
+//                doGet(httpClient, targetUrl);
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//            return true;
+//        });
 
- Credentials use_jaas_creds = new Credentials() {
- public String getPassword() {
- return null;
- }
- public Principal getUserPrincipal() {
- return null;
- }
- };
- httpClient.getCredentialsProvider().setCredentials(
- new AuthScope(null, -1, null),
- use_jaas_creds);
- **********************************************************************************/
+        httpClient.close();
+    }
+
+    private static void doGet(HttpClient httpClient, String targetUrl) throws IOException {
 
         HttpUriRequest request = new HttpGet(targetUrl + "/jsontree?tab=hoststab");
         // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
@@ -189,19 +212,14 @@ public class ClientKerberosAuthentication {
         System.out.println(response.getStatusLine());
         System.out.println("----------------------------------------");
         if (entity != null) {
-            System.out.println(EntityUtils.toString(entity));
+            //   System.out.println(EntityUtils.toString(entity));
         }
         System.out.println("----------------------------------------");
 
         // This ensures the connection gets released back to the manager
         if (entity != null) {
-            entity.consumeContent();
+            EntityUtils.consume(entity);
         }
 
-        // When HttpClient instance is no longer needed,
-        // shut down the connection manager to ensure
-        // immediate deallocation of all system resources
-        httpClient.close();
     }
-
 }

@@ -67,6 +67,10 @@ public class Main extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        String jaasCfgPath = System.getProperty("java.security.auth.login.config");
+        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
+            System.setProperty("java.security.auth.login.config", Main.class.getResource("/jaas_login.conf").toExternalForm());
+        }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         // Disabling accessibility support to work around hanging issue on Windows  10
         // see "https://bugs.openjdk.java.net/browse/JDK-8132897"

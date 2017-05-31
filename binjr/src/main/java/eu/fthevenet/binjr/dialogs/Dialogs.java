@@ -75,7 +75,10 @@ public class Dialogs {
      * @param owner the node to which the notification is attached
      */
     public static void notifyException(String title, Throwable e, Node owner) {
-        logger.error(title, e);
+        logger.error(title + " - " + e.getMessage());
+        if (logger.isDebugEnabled()) {
+            logger.debug(title, e);
+        }
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(e.getMessage())
@@ -93,7 +96,6 @@ public class Dialogs {
      * @param owner  the {@link Node} used to recover the stage the dialog should be linked to
      */
     public static void displayException(String header, Throwable e, Node owner) {
-        logger.error(header, e);
         runOnFXThread(() -> {
             ExceptionDialog dlg = new ExceptionDialog(e);
             dlg.initStyle(StageStyle.UTILITY);
