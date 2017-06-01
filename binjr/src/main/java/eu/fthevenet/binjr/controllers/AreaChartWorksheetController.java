@@ -46,7 +46,7 @@ public class AreaChartWorksheetController extends WorksheetController {
 
     @Override
     public ChartType getChartType() {
-        return ChartType.LINE;
+        return ChartType.AREA;
     }
 
     @Override
