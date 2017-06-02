@@ -26,8 +26,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.Bloom;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -51,6 +53,10 @@ import java.util.ResourceBundle;
  */
 public class AboutBoxController implements Initializable {
     private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
+    @FXML
+    public ScrollPane licScroll;
+    @FXML
+    public ScrollPane ackScroll;
     @FXML
     private DialogPane aboutRoot;
 
@@ -85,6 +91,9 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private TitledPane acknowledgementPane;
+
+    @FXML
+    private AnchorPane textArea;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -127,7 +136,18 @@ public class AboutBoxController implements Initializable {
                 header.setPrefHeight(0);
                 header.setVisible(false);
             }
+
+            //disable cache on scrollpanes and children to avoid blurry text
+            licScroll.setCache(false);
+            for (Node n : licScroll.getChildrenUnmodifiable()) {
+                n.setCache(false);
+            }
+            ackScroll.setCache(false);
+            for (Node n : ackScroll.getChildrenUnmodifiable()) {
+                n.setCache(false);
+            }
         });
+
 
         versionCheckFlow.getChildren().clear();
         Label l = new Label("Checking for updates...");
@@ -155,6 +175,7 @@ public class AboutBoxController implements Initializable {
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
             Platform.runLater(() -> {
                 p.requestLayout();
+
                 p.getScene().getWindow().sizeToScene();
             });
         }));

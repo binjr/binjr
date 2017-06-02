@@ -87,9 +87,18 @@
                 </TitledPane>
                 <TitledPane fx:id="licensePane" animated="false" text="License">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0">
+                        <AnchorPane fx:id="textArea" minHeight="0.0" minWidth="0.0">
                             <children>
-                                <TextFlow fx:id="licenseTextFlow" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                <ScrollPane fx:id="licScroll" cacheHint="QUALITY" fitToHeight="true" fitToWidth="true" maxHeight="-Infinity" prefHeight="250.0" snapToPixel="false"
+                                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <content>
+                                        <TextFlow fx:id="licenseTextFlow" maxHeight="250.0">
+                                            <padding>
+                                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                            </padding>
+                                        </TextFlow>
+                                    </content>
+                                </ScrollPane>
                             </children>
                         </AnchorPane>
                     </content>
@@ -98,7 +107,8 @@
                     <content>
                         <AnchorPane minHeight="0.0" minWidth="0.0">
                             <children>
-                                <ScrollPane layoutX="9.600000381469727" layoutY="9.600000381469727" maxHeight="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <ScrollPane fx:id="ackScroll" maxHeight="-Infinity" prefHeight="250.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                            AnchorPane.topAnchor="0.0">
                                     <content>
                                         <TextFlow fx:id="acknowledgementTextFlow">
                                             <padding>
