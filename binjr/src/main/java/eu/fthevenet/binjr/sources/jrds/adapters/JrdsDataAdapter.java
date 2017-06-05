@@ -80,13 +80,14 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private static final String SEPARATOR = ",";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
     private final CloseableHttpClient httpClient;
+    private String filter;
     private String jrdsHost;
     private int jrdsPort;
     private String jrdsPath;
     private String jrdsProtocol;
     private ZoneId zoneId;
     private String encoding;
-    private JrdsTreeFilter treeFilter;
+    private JrdsTreeViewTab treeViewTab;
 
     /**
      * Default constructor
@@ -104,9 +105,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
      * @param path         the url path of the JRDS webapp.
      * @param zoneId       the id of the time zone used to record dates.
      * @param encoding     the encoding used by the download servlet.
-     * @param treeFilter   the filter to apply to the tree view
+     * @param treeViewTab  the filter to apply to the tree view
      */
-    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeFilter treeFilter) {
+    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) {
         super();
         this.jrdsHost = hostname;
         this.jrdsPort = port;
@@ -114,7 +115,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         this.jrdsProtocol = jrdsProtocol;
         this.zoneId = zoneId;
         this.encoding = encoding;
-        this.treeFilter = treeFilter;
+        this.treeViewTab = treeViewTab;
+        this.filter = filter;
         httpClient = httpClientFactory();
     }
 
@@ -125,22 +127,23 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
      * @param zoneId the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeFilter treeFilter) throws MalformedURLException {
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws MalformedURLException {
         URL u = new URL(url.replaceAll("/$", ""));
-        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeFilter);
+        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeViewTab, filter);
     }
 
     //region [DataAdapter Members]
+
     @Override
     public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         try {
-            JsonTree t = gson.fromJson(getJsonTree(treeFilter), JsonTree.class);
+            JsonTree t = gson.fromJson(getJsonTree(treeViewTab, filter), JsonTree.class);
 
             Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
             List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
-            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type)).collect(Collectors.toList())) {
+            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type) || "filter".equals(jsonItem.type)).collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
             return tree;
@@ -177,7 +180,15 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return "[JRDS] " + jrdsHost + ":" + jrdsPort + " (" + zoneId.toString() + ")";
+        return new StringBuilder("[JRDS] ")
+                .append(jrdsHost)
+                .append(jrdsPort > 0 ? ":" + jrdsPort : "")
+                .append(" - ")
+                .append(treeViewTab.toString())
+                .append(filter != null ? ": " + filter : "")
+                .append(" (")
+                .append(zoneId.toString())
+                .append(")").toString();
     }
 
     @Override
@@ -189,7 +200,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         params.put("jrdsPath", jrdsPath);
         params.put("zoneId", zoneId.toString());
         params.put("encoding", encoding);
-        params.put("treeFilter", treeFilter.name());
+        params.put("treeViewTab", treeViewTab.name());
+        params.put("filter", this.filter);
         return params;
     }
 
@@ -201,7 +213,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         jrdsPath = params.get("jrdsPath");
         zoneId = ZoneId.of(params.get("zoneId"));
         encoding = params.get("encoding");
-        treeFilter = JrdsTreeFilter.valueOf(params.get("treeFilter"));
+        treeViewTab = params.get("treeViewTab") != null ? JrdsTreeViewTab.valueOf(params.get("treeViewTab")) : JrdsTreeViewTab.HOSTS_TAB;
+        this.filter = params.get("filter");
     }
 
     @Override
@@ -259,9 +272,27 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
-        this.httpClient.close();
+        try {
+            this.httpClient.close();
+        } catch (IOException e) {
+            logger.error("Error closing JrdsDataAdapter", e);
+        }
+    }
+
+    public Collection<String> discoverFilters() throws DataAdapterException {
+        Gson gson = new Gson();
+        try {
+            JsonTree t = gson.fromJson(getJsonTree(this.treeViewTab), JsonTree.class);
+
+            Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+            TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
+            return Arrays.stream(t.items).filter(jsonItem -> "filter".equals(jsonItem.type)).map(i -> i.filter).collect(Collectors.toList());
+        } catch (JsonParseException e) {
+            throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
+        }
     }
 
     private <T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
@@ -281,46 +312,31 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         }
     }
 
-    private TreeItem<TimeSeriesBinding<Double>> attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
+    private void attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
         JsonTree.JsonItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
         TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
-        if (n.children != null) {
-            for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
-                attachNode(newBranch, ref._reference, nodes);
-            }
+
+        if ("filter".equals(n.type)) {
+            newBranch.getChildren().add(new TreeItem<>(null));
+            // add a listener that will get the treeview filtered according to the selected filter/tag
+            newBranch.expandedProperty().addListener(new FilteredViewListener(n, newBranch));
         }
         else {
-            // add a dummy node so that the branch can be expanded
-            newBranch.getChildren().add(new TreeItem<>(null));
-            // add a listener so that bindings for individual datastore are added lazily to avoid
-            // dozens of individual call to "graphdesc" when the tree is built.
-            newBranch.expandedProperty().addListener(new ChangeListener<Boolean>() {
-                @Override
-                public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
-                    if (newValue) {
-                        try {
-                            Graphdesc graphdesc = getGraphDescriptor(currentPath);
-                            newBranch.setValue(bindingFactory.of(tree.getValue().getTreeHierarchy(), newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
-                            for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
-                                String graphType = graphdesc.seriesDescList.get(i).graphType;
-                                if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                                    newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
-                                }
-                            }
-                            //remove dummy node
-                            newBranch.getChildren().remove(0);
-                            // remove the listener so it isn't executed next time node is expanded
-                            newBranch.expandedProperty().removeListener(this);
-                        } catch (Exception e) {
-                            Dialogs.notifyException("Failed to retrieve graph description", e);
-                        }
-                    }
+            if (n.children != null) {
+                for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
+                    attachNode(newBranch, ref._reference, nodes);
                 }
-            });
+            }
+            else {
+                // add a dummy node so that the branch can be expanded
+                newBranch.getChildren().add(new TreeItem<>(null));
+                // add a listener so that bindings for individual datastore are added lazily to avoid
+                // dozens of individual call to "graphdesc" when the tree is built.
+                newBranch.expandedProperty().addListener(new GraphDescListener(currentPath, newBranch, tree));
+            }
         }
         tree.getChildren().add(newBranch);
-        return tree;
     }
 
     private String normalizeId(String id) {
@@ -331,13 +347,20 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         return data[data.length - 1];
     }
 
-    private String getJsonTree(JrdsTreeFilter filter) throws DataAdapterException {
+    private String getJsonTree(JrdsTreeViewTab tab) throws DataAdapterException {
+        return getJsonTree(tab, null);
+    }
+
+    private String getJsonTree(JrdsTreeViewTab tab, String filter) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/jsontree")
-                .addParameter("tab", filter.getCommand());
+                .addParameter("tab", tab.getCommand());
+        if (filter != null && filter.trim().length() > 0) {
+            requestUrl.addParameter("filter", filter);
+        }
 
         return doHttpGet(requestUrl, response -> {
             int status = response.getStatusLine().getStatusCode();
@@ -459,10 +482,75 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             String name;
             String id;
             String type;
+            String filter;
             JsonTreeRef[] children;
 
             static class JsonTreeRef {
                 String _reference;
+            }
+        }
+    }
+
+    private class GraphDescListener implements ChangeListener<Boolean> {
+        private final String currentPath;
+        private final TreeItem<TimeSeriesBinding<Double>> newBranch;
+        private final TreeItem<TimeSeriesBinding<Double>> tree;
+
+        public GraphDescListener(String currentPath, TreeItem<TimeSeriesBinding<Double>> newBranch, TreeItem<TimeSeriesBinding<Double>> tree) {
+            this.currentPath = currentPath;
+            this.newBranch = newBranch;
+            this.tree = tree;
+        }
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            if (newValue) {
+                try {
+                    Graphdesc graphdesc = getGraphDescriptor(currentPath);
+                    newBranch.setValue(bindingFactory.of(tree.getValue().getTreeHierarchy(), newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
+                    for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
+                        String graphType = graphdesc.seriesDescList.get(i).graphType;
+                        if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
+                            newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
+                        }
+                    }
+                    //remove dummy node
+                    newBranch.getChildren().remove(0);
+                    // remove the listener so it isn't executed next time node is expanded
+                    newBranch.expandedProperty().removeListener(this);
+                } catch (Exception e) {
+                    Dialogs.notifyException("Failed to retrieve graph description", e);
+                }
+            }
+        }
+    }
+
+    private class FilteredViewListener implements ChangeListener<Boolean> {
+        private final JsonTree.JsonItem n;
+        private final TreeItem<TimeSeriesBinding<Double>> newBranch;
+
+        public FilteredViewListener(JsonTree.JsonItem n, TreeItem<TimeSeriesBinding<Double>> newBranch) {
+            this.n = n;
+            this.newBranch = newBranch;
+        }
+
+        @Override
+        public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+            if (newValue) {
+                try {
+                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab, n.name), JsonTree.class);
+                    Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+                    List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
+                    for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type) || "filter".equals(jsonItem.type)).collect(Collectors.toList())) {
+                        attachNode(newBranch, branch.id, m);
+                    }
+                    //remove dummy node
+                    newBranch.getChildren().remove(0);
+                    // remove the listener so it isn't executed next time node is expanded
+                    newBranch.expandedProperty().removeListener(this);
+                } catch (Exception e) {
+                    Dialogs.notifyException("Failed to retrieve graph description", e);
+                }
             }
         }
     }

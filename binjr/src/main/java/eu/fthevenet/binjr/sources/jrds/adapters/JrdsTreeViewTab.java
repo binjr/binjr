@@ -22,18 +22,20 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
  *
  * @author Frederic Thevenet
  */
-public enum JrdsTreeFilter {
-    FILTER_TAB("All Filters", "filtertab"),
+public enum JrdsTreeViewTab {
+    HOSTS_TAB("All Hosts", "hoststab"),
     SERVICE_TAB("All Services", "servicestab"),
     VIEWS_TAB("All Views", "viewstab"),
-    HOSTS_TAB("All Hosts", "hoststab"),
-    TAGS_TAB("All Tags", "tagstab");
+    FILTER_TAB("All Filters", "filtertab"),
+    TAGS_TAB("All Tags", "tagstab"),
+    SINGLE_FILTER("Specific Filter", "filtertab"),
+    SINGLE_TAG("Specific Tag", "tagstab");
 
     private String label;
     private String command;
 
 
-    JrdsTreeFilter(String label, String command) {
+    JrdsTreeViewTab(String label, String command) {
         this.label = label;
         this.command = command;
     }

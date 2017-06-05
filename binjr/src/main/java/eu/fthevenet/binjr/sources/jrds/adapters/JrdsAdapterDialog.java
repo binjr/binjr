@@ -19,13 +19,16 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
 import java.net.MalformedURLException;
@@ -39,8 +42,8 @@ import java.time.ZoneId;
  * @author Frederic Thevenet
  */
 public class JrdsAdapterDialog extends DataAdapterDialog {
-
-    private final ChoiceBox<JrdsTreeFilter> tabsChoiceBox;
+    private final ChoiceBox<JrdsTreeViewTab> tabsChoiceBox;
+    private final TextField filterTextField;
 
     /**
      * Initializes a new instance of the {@link JrdsAdapterDialog} class.
@@ -51,12 +54,18 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
         super(owner);
         this.parent.setHeaderText("Connect to a JRDS source");
         this.tabsChoiceBox = new ChoiceBox<>();
-        tabsChoiceBox.getItems().addAll(JrdsTreeFilter.values());
-        GridPane.setConstraints(tabsChoiceBox, 1,2,1,1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4,0,4,0));
-        tabsChoiceBox.getSelectionModel().select(JrdsTreeFilter.HOSTS_TAB);
-        Label tabsLabel = new Label("Tree View:");
-        GridPane.setConstraints(tabsLabel, 0,2,1,1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4,0,4,0));
-        this.paramsGridPane.getChildren().addAll(tabsLabel, tabsChoiceBox);
+        tabsChoiceBox.getItems().addAll(JrdsTreeViewTab.values());
+        this.filterTextField = new TextField();
+        filterTextField.setVisible(false);
+        filterTextField.visibleProperty().bind(Bindings.equal(this.tabsChoiceBox.valueProperty(), JrdsTreeViewTab.SINGLE_TAG).or(Bindings.equal(this.tabsChoiceBox.valueProperty(), JrdsTreeViewTab.SINGLE_FILTER)));
+        HBox.setHgrow(filterTextField, Priority.ALWAYS);
+        HBox hBox = new HBox(tabsChoiceBox, filterTextField);
+        hBox.setSpacing(10);
+        GridPane.setConstraints(hBox, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        tabsChoiceBox.getSelectionModel().select(JrdsTreeViewTab.HOSTS_TAB);
+        Label tabsLabel = new Label("Sorted By:");
+        GridPane.setConstraints(tabsLabel, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        this.paramsGridPane.getChildren().addAll(tabsLabel, hBox);
     }
 
     @Override
@@ -64,6 +73,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
         return JrdsDataAdapter.fromUrl(
                 this.urlField.getText(),
                 ZoneId.of(this.timezoneField.getText()),
-                this.tabsChoiceBox.getValue());
+                this.tabsChoiceBox.getValue(),
+                this.filterTextField.getText());
     }
 }
