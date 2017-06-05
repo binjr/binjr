@@ -98,8 +98,12 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
     public abstract InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
 
     @Override
-    public void close() throws Exception {
-        this.cache.clear();
+    public void close() {
+        try {
+            this.cache.clear();
+        } catch (Exception e) {
+            logger.error("Error closing SimpleCacheAdapter", e);
+        }
     }
 
 }
