@@ -25,13 +25,13 @@ import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.javafx.charts.*;
+import eu.fthevenet.util.javafx.controls.ColorTableCell;
+import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
-import eu.fthevenet.util.ui.charts.*;
-import eu.fthevenet.util.ui.controls.ColorTableCell;
-import eu.fthevenet.util.ui.controls.ZonedDateTimePicker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -171,7 +171,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
-        settingsPane.getStyleClass().add("chartSettings");
+        settingsPane.getStyleClass().add("toolPane");
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
 

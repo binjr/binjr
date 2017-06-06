@@ -15,23 +15,24 @@
  *
  */
 
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 
-import eu.fthevenet.util.text.BinaryPrefixFormatter;
+import eu.fthevenet.util.text.MetricPrefixFormatter;
 
 /**
- * An implementation of {@link StableTicksAxis} that divide up large numbers by powers of 2 and apply binary unit prefixes
+ * An implementation of {@link StableTicksAxis} that divide up large numbers by powers of 10 and apply metric unit prefixes
  *
  * @author Frederic Thevenet
  */
-public class BinaryStableTicksAxis extends StableTicksAxis {
-    public BinaryStableTicksAxis() {
-        super(new BinaryPrefixFormatter());
+public class MetricStableTicksAxis extends StableTicksAxis {
+
+    public MetricStableTicksAxis() {
+        super(new MetricPrefixFormatter());
     }
 
     @Override
     public double calculateTickSpacing(double delta, int maxTicks) {
-        final double[] dividers = new double[]{1.0, 2.0, 4.0, 8.0, 16.0};
+        final double[] dividers = new double[]{1.0, 2.5, 5.0};
         if (delta == 0.0) {
             return 0.0;
         }
@@ -42,10 +43,10 @@ public class BinaryStableTicksAxis extends StableTicksAxis {
             throw new IllegalArgumentException("must be at least one tick");
         }
 
-        //The factor will be close to the log2, this just optimizes the search
-        int factor = (int) (Math.log(delta) / Math.log(2));
+        //The factor will be close to the log10, this just optimizes the search
+        int factor = (int) Math.log10(delta);
         int divider = 0;
-        int base = 2;
+        int base = 10;
         double numTicks = delta / (dividers[divider] * Math.pow(base, factor));
 
         //We don't have enough ticks, so increase ticks until we're over the limit, then back off once.

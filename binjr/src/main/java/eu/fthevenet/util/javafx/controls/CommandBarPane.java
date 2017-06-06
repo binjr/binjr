@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.ui.controls;
+package eu.fthevenet.util.javafx.controls;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.BooleanPropertyBase;

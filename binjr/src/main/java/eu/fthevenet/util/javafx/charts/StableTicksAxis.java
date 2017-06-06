@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 
 import eu.fthevenet.util.text.PrefixFormatter;
 import javafx.animation.KeyFrame;

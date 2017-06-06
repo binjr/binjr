@@ -32,13 +32,16 @@ import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
-import eu.fthevenet.util.ui.controls.*;
+import eu.fthevenet.util.javafx.TreeViewUtils;
+import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -47,6 +50,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
@@ -87,9 +91,12 @@ public class MainViewController implements Initializable {
     public static final int settingsPaneDistance = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    private static double searchBarPaneDistance = -40;
     private final Workspace workspace;
     private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
+    private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
+    private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -102,6 +109,16 @@ public class MainViewController implements Initializable {
     public MaskerPane sourceMaskerPane;
     @FXML
     public MaskerPane worksheetMaskerPane;
+    @FXML
+    public AnchorPane searchBarRoot;
+    @FXML
+    public TextField searchField;
+    @FXML
+    public Button searchButton;
+    @FXML
+    public Button hideSearchBarButton;
+    List<TreeItem<TimeSeriesBinding<Double>>> searchResultSet;
+    int currentSearchHit = -1;
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -118,7 +135,6 @@ public class MainViewController implements Initializable {
     private StackPane settingsPane;
     @FXML
     private StackPane worksheetArea;
-
     private WorksheetController selectedWorksheetController;
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
@@ -126,6 +142,7 @@ public class MainViewController implements Initializable {
     private Timeline showTimeline;
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+
 
     public MainViewController() {
         super();
@@ -199,6 +216,7 @@ public class MainViewController implements Initializable {
         });
 
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
+        sourcesTabPane.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> invalidateSearchResults());
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -294,12 +312,29 @@ public class MainViewController implements Initializable {
             doCommandBarResize(newValue.doubleValue());
 
         });
-    }
 
-    private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
-        return (TreeView<TimeSeriesBinding<Double>>) sourcesTabPane.getSelectionModel().getSelectedItem().getContent();
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                invalidateSearchResults();
+                findNext();
+            }
+        });
+        searchBarVisible.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                searchField.requestFocus();
+                if (searchBarHidden.getValue()) {
+                    slidePanel(-1, Duration.millis(0));
+                    searchBarHidden.setValue(false);
+                }
+            }
+            else {
+                if (!searchBarHidden.getValue()) {
+                    slidePanel(1, Duration.millis(0));
+                    searchBarHidden.setValue(true);
+                }
+            }
+        });
     }
-
 
     //region UI handlers
     @FXML
@@ -341,10 +376,10 @@ public class MainViewController implements Initializable {
     @FXML
     public void handleExpandCommandBar(ActionEvent actionEvent) {
         if (!commandBar.isExpanded()) {
-            show();
+            showCommandBar();
         }
         else {
-            hide();
+            hideCommandBar();
         }
 
         commandBar.setExpanded(!commandBar.isExpanded());
@@ -391,6 +426,21 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
+    protected void handleShowSearchBar(ActionEvent actionEvent) {
+        this.searchBarVisible.setValue(true);
+    }
+
+    @FXML
+    public void handleHidePanel(ActionEvent actionEvent) {
+        this.searchBarVisible.setValue(false);
+    }
+
+    @FXML
+    protected void handleFindInTreeView(ActionEvent actionEvent) {
+        findNext();
+    }
+
+    @FXML
     protected void handleSaveWorkspace(ActionEvent event) {
         saveWorkspace();
     }
@@ -406,12 +456,38 @@ public class MainViewController implements Initializable {
             selectedWorksheetController.showPropertiesPane(true);
         }
     }
+
+    @FXML
+    protected void populateOpenRecentMenu(Event event) {
+        Menu openRecentMenu = (Menu) event.getSource();
+        Collection<String> recentPath = GlobalPreferences.getInstance().getRecentFiles();
+        if (recentPath.size() > 0) {
+            openRecentMenu.getItems().setAll(recentPath.stream().map(s -> {
+                MenuItem m = new MenuItem(s);
+                m.setOnAction(e -> {
+                    loadWorkspace(new File(((MenuItem) e.getSource()).getText()));
+                });
+                return m;
+            }).collect(Collectors.toList()));
+        }
+        else {
+            MenuItem none = new MenuItem("none");
+            none.setDisable(true);
+            openRecentMenu.getItems().setAll(none);
+        }
+    }
+
     //endregion
 
-
     //region private members
+    private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
+        if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
+            return null;
+        }
+        return (TreeView<TimeSeriesBinding<Double>>) sourcesTabPane.getSelectionModel().getSelectedItem().getContent();
+    }
 
-    private void show() {
+    private void showCommandBar() {
         if (hideTimeline != null) {
             hideTimeline.stop();
         }
@@ -425,7 +501,7 @@ public class MainViewController implements Initializable {
         showTimeline.play();
     }
 
-    private void hide() {
+    private void hideCommandBar() {
         if (showTimeline != null) {
             showTimeline.stop();
         }
@@ -439,6 +515,15 @@ public class MainViewController implements Initializable {
         hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, collapsedWidth)));
         AnchorPane.setLeftAnchor(contentView, collapsedWidth);
         hideTimeline.play();
+    }
+
+    private void slidePanel(int show, Duration delay) {
+        Node n = searchBarRoot;//.getParent();
+
+        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        openNav.setDelay(delay);
+        openNav.setToY(show * -searchBarPaneDistance);
+        openNav.play();
     }
 
     private void doCommandBarResize(double v) {
@@ -715,9 +800,7 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
-
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
-
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
             final TreeCell<TimeSeriesBinding<Double>> cell = new TreeCell<>();
             cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
@@ -846,24 +929,46 @@ public class MainViewController implements Initializable {
                 getClass().getResource(theme.getCssPath()).toExternalForm());
     }
 
+    private void findNext() {
 
-    public void populateOpenRecentMenu(Event event) {
-        Menu openRecentMenu = (Menu) event.getSource();
-        Collection<String> recentPath = GlobalPreferences.getInstance().getRecentFiles();
-        if (recentPath.size() > 0) {
-            openRecentMenu.getItems().setAll(recentPath.stream().map(s -> {
-                MenuItem m = new MenuItem(s);
-                m.setOnAction(e -> {
-                    loadWorkspace(new File(((MenuItem) e.getSource()).getText()));
-                });
-                return m;
-            }).collect(Collectors.toList()));
+        if (isNullOrEmpty(searchField.getText())) {
+            return;
+        }
+        if (getSelectedTreeView() == null) {
+            return;
+        }
+        if (searchResultSet == null) {
+            searchResultSet = TreeViewUtils.findAllInTree(getSelectedTreeView().getRoot(), i -> {
+                if (i.getValue() == null || i.getValue().getLabel() == null) {
+                    return false;
+                }
+                return i.getValue().getLabel().contains(searchField.getText());
+            }, new ArrayList<>());
+        }
+        if (searchResultSet.size() > 0) {
+            searchField.setStyle("-fx-background-color: white;");
+            currentSearchHit++;
+            if (currentSearchHit > searchResultSet.size() - 1) {
+                currentSearchHit = 0;
+            }
+            getSelectedTreeView().getSelectionModel().select(searchResultSet.get(currentSearchHit));
+            getSelectedTreeView().scrollTo(getSelectedTreeView().getRow(searchResultSet.get(currentSearchHit)));
         }
         else {
-            MenuItem none = new MenuItem("none");
-            none.setDisable(true);
-            openRecentMenu.getItems().setAll(none);
+            searchField.setStyle("-fx-background-color: #ffcccc;");
         }
     }
+
+    private void invalidateSearchResults() {
+        logger.trace("Invalidating search result");
+        searchField.setStyle("-fx-background-color: white;");
+        this.searchResultSet = null;
+        this.currentSearchHit = -1;
+    }
+
+    private boolean isNullOrEmpty(String s) {
+        return (s == null || s.trim().length() == 0);
+    }
+
     //endregion
 }

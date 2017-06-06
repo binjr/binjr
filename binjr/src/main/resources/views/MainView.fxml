@@ -17,8 +17,10 @@
   ~
   -->
 
-<?import eu.fthevenet.util.ui.controls.CommandBarPane?>
-<?import eu.fthevenet.util.ui.controls.TabPaneNewButton?>
+
+<?import eu.fthevenet.util.javafx.controls.CommandBarPane?>
+<?import eu.fthevenet.util.javafx.controls.TabPaneNewButton?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
@@ -31,28 +33,58 @@
         <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0"
                    AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
             <items>
-                <StackPane prefWidth="335.0" SplitPane.resizableWithParent="false">
+                <AnchorPane fx:id="search" mouseTransparent="false">
                     <children>
-                        <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
-                            <graphic>
-                                <Region styleClass="addSource-icon"/>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip text="Click to add a new source">
-                                    <font>
-                                        <Font size="11.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                        </Label>
-                        <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <tabs>
-                            </tabs>
-                        </TabPaneNewButton>
-                        <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
+
+                        <StackPane prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" SplitPane.resizableWithParent="false">
+                            <children>
+                                <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
+                                    <graphic>
+                                        <Region styleClass="addSource-icon"/>
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Click to add a new source">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                </Label>
+                                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB"
+                                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <tabs>
+                                    </tabs>
+                                </TabPaneNewButton>
+
+                                <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
+                            </children>
+                        </StackPane>
+                        <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                    styleClass="toolPane">
+                            <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="5.0"/>
+                            <HBox alignment="CENTER" layoutX="280.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                                </padding>
+                                <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="square-button"
+                                        onAction="#handleFindInTreeView">
+                                    <graphic>
+                                        <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
+                                    </graphic>
+                                </Button>
+                                <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0"
+                                        styleClass="square-button">
+                                    <graphic>
+                                        <Region styleClass="cross-icon"/>
+                                    </graphic>
+                                </Button>
+                            </HBox>
+                            <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                        </AnchorPane>
+
                     </children>
-                </StackPane>
+                </AnchorPane>
+
                 <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
                     <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
                         <graphic>
@@ -209,6 +241,18 @@
                                 </HBox>
                             </graphic>
                         </Menu>
+                        <MenuItem onAction="#handleShowSearchBar" text="Find...">
+                            <accelerator>
+                                <KeyCodeCombination alt="UP" code="F" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                            </accelerator>
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <children>
+                                        <Region styleClass="find-icon"/>
+                                    </children>
+                                </HBox>
+                            </graphic>
+                        </MenuItem>
                     </items>
                 </MenuButton>
                 <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"

@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

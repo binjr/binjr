@@ -59,16 +59,16 @@
      -fx-opacity: 100%;
 }
 
-.chartSettings {
+.toolPane {
   -fx-background-color: linear-gradient(to right, #EEEEEE  , #DADADA );
-  -fx-border-width:1;
-  -fx-border-color:#DADADA;
+/*  -fx-border-width:1;
+  -fx-border-color:#DADADA;*/
 }
 
-.chartSettings .content,
-.chartSettings .title,
-.chartSettings .scroll-pane,
-.chartSettings .scroll-pane .viewport {
+.toolPane .content,
+.toolPane .title,
+.toolPane .scroll-pane,
+.toolPane .scroll-pane .viewport {
     -fx-background-color: transparent;
   }
 

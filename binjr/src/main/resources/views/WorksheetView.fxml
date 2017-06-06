@@ -17,7 +17,7 @@
   ~
   -->
 
-<?import eu.fthevenet.util.ui.controls.*?>
+<?import eu.fthevenet.util.javafx.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.control.cell.PropertyValueFactory?>
@@ -236,7 +236,7 @@
                     <children>
                         <!--<StackPane fx:id="chartPlaceHolder"/>-->
                         <!--<StackPane fx:id="crosshairPlaceHolder"/>-->
-                        <!--<StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="chartSettings" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="-210" AnchorPane.topAnchor="0">-->
+                        <!--<StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="toolPane" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="-210" AnchorPane.topAnchor="0">-->
                         <!--<fx:include source="ChartPropertiesView.fxml"/>-->
                         <!--</StackPane>-->
                     </children>

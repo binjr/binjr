@@ -1,4 +1,4 @@
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 /*
  * The MIT License (MIT)
  *

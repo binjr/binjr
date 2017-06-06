@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.ui.controls;
+package eu.fthevenet.util.javafx.controls;
 
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import javafx.concurrent.Task;

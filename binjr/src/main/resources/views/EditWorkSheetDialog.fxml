@@ -17,7 +17,7 @@
   ~
   -->
 
-<?import eu.fthevenet.util.ui.controls.ZonedDateTimePicker?>
+<?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>

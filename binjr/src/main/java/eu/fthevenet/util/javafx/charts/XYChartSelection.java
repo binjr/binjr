@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 
 /**
  * An immutable representation of the selection of the portion of a chart.

@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.ui.charts;
+package eu.fthevenet.util.javafx.charts;
 
 import eu.fthevenet.util.logging.Profiler;
 import javafx.scene.chart.Axis;
