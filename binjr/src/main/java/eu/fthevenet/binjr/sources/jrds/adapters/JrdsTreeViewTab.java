@@ -23,21 +23,23 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
  * @author Frederic Thevenet
  */
 public enum JrdsTreeViewTab {
-    HOSTS_TAB("All Hosts", "hoststab"),
-    SERVICE_TAB("All Services", "servicestab"),
-    VIEWS_TAB("All Views", "viewstab"),
-    FILTER_TAB("All Filters", "filtertab"),
-    TAGS_TAB("All Tags", "tagstab"),
-    SINGLE_FILTER("Specific Filter", "filtertab"),
-    SINGLE_TAG("Specific Tag", "tagstab");
+    HOSTS_TAB("All Hosts", "hoststab", null),
+    SINGLE_HOST("Host: ", "hoststab", "host"),
+    SERVICE_TAB("All Services", "servicestab", null),
+    VIEWS_TAB("All Views", "viewstab", null),
+    FILTER_TAB("All Filters", "filtertab", null),
+    SINGLE_FILTER("Filter: ", "filtertab", "filter"),
+    TAGS_TAB("All Tags", "tagstab", null),
+    SINGLE_TAG("Tag: ", "tagstab", "filter");
 
-    private String label;
-    private String command;
+    private final String argument;
+    private final String label;
+    private final String command;
 
-
-    JrdsTreeViewTab(String label, String command) {
+    JrdsTreeViewTab(String label, String command, String argument) {
         this.label = label;
         this.command = command;
+        this.argument = argument;
     }
 
     @Override
@@ -52,5 +54,9 @@ public enum JrdsTreeViewTab {
      */
     public String getCommand() {
         return command;
+    }
+
+    public String getArgument() {
+        return argument;
     }
 }

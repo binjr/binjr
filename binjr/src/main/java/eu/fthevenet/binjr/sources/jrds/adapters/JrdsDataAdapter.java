@@ -185,7 +185,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .append(jrdsPort > 0 ? ":" + jrdsPort : "")
                 .append(" - ")
                 .append(treeViewTab.toString())
-                .append(filter != null ? ": " + filter : "")
+                .append(filter != null ? filter : "")
                 .append(" (")
                 .append(zoneId.toString())
                 .append(")").toString();
@@ -358,8 +358,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/jsontree")
                 .addParameter("tab", tab.getCommand());
-        if (filter != null && filter.trim().length() > 0) {
-            requestUrl.addParameter("filter", filter);
+        if (tab.getArgument() != null && filter != null && filter.trim().length() > 0) {
+            requestUrl.addParameter(tab.getArgument(), filter);
         }
 
         return doHttpGet(requestUrl, response -> {
