@@ -117,6 +117,8 @@ public class MainViewController implements Initializable {
     public Button searchButton;
     @FXML
     public Button hideSearchBarButton;
+    @FXML
+    public ToggleButton searchCaseSensitiveToggle;
     List<TreeItem<TimeSeriesBinding<Double>>> searchResultSet;
     int currentSearchHit = -1;
     @FXML
@@ -142,6 +144,7 @@ public class MainViewController implements Initializable {
     private Timeline showTimeline;
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+    private TreeView<TimeSeriesBinding<Double>> selectedTreeView;
 
 
     public MainViewController() {
@@ -216,7 +219,12 @@ public class MainViewController implements Initializable {
         });
 
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
-        sourcesTabPane.getSelectionModel().selectedIndexProperty().addListener((observable, oldValue, newValue) -> invalidateSearchResults());
+        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            invalidateSearchResults();
+            if (newValue != null) {
+                findNext();
+            }
+        });
 
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -334,6 +342,10 @@ public class MainViewController implements Initializable {
                 }
             }
         });
+        searchCaseSensitiveToggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            invalidateSearchResults();
+            findNext();
+        });
     }
 
     //region UI handlers
@@ -436,7 +448,7 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    protected void handleFindInTreeView(ActionEvent actionEvent) {
+    protected void handleFindNextInTreeView(ActionEvent actionEvent) {
         findNext();
     }
 
@@ -481,6 +493,7 @@ public class MainViewController implements Initializable {
 
     //region private members
     private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
+        //       return this.selectedTreeView;
         if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
             return null;
         }
@@ -930,7 +943,6 @@ public class MainViewController implements Initializable {
     }
 
     private void findNext() {
-
         if (isNullOrEmpty(searchField.getText())) {
             return;
         }
@@ -939,10 +951,16 @@ public class MainViewController implements Initializable {
         }
         if (searchResultSet == null) {
             searchResultSet = TreeViewUtils.findAllInTree(getSelectedTreeView().getRoot(), i -> {
-                if (i.getValue() == null || i.getValue().getLabel() == null) {
+                if (i.getValue() == null || i.getValue().getLegend() == null) {
                     return false;
                 }
-                return i.getValue().getLabel().contains(searchField.getText());
+                if (searchCaseSensitiveToggle.isSelected()) {
+                    return i.getValue().getLegend().contains(searchField.getText());
+                }
+                else {
+                    return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
+                }
+
             }, new ArrayList<>());
         }
         if (searchResultSet.size() > 0) {
@@ -957,6 +975,7 @@ public class MainViewController implements Initializable {
         else {
             searchField.setStyle("-fx-background-color: #ffcccc;");
         }
+        logger.trace(() -> "Search for " + searchField.getText() + " yielded " + searchResultSet.size() + " match(es)");
     }
 
     private void invalidateSearchResults() {

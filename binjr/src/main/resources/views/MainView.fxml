@@ -61,22 +61,53 @@
                         </StackPane>
                         <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                                     styleClass="toolPane">
-                            <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="75.0" AnchorPane.topAnchor="5.0"/>
-                            <HBox alignment="CENTER" layoutX="280.0" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="5.0"/>
+                            <HBox alignment="CENTER" layoutX="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                 <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                 </padding>
                                 <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="square-button"
-                                        onAction="#handleFindInTreeView">
+                                        onAction="#handleFindNextInTreeView">
                                     <graphic>
                                         <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
                                     </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Find next occurrence">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
                                 </Button>
+                                <ToggleButton fx:id="searchCaseSensitiveToggle" text="Aa"
+                                              alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
+                                              styleClass="square-button">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                    <!--<graphic>-->
+                                    <!--<Region styleClass="cross-icon"/>-->
+                                    <!--</graphic>-->
+                                    <tooltip>
+                                        <Tooltip text="Toggle case sensitivity">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                </ToggleButton>
                                 <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0"
                                         styleClass="square-button">
                                     <graphic>
                                         <Region styleClass="cross-icon"/>
                                     </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Hide the search bar">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
                                 </Button>
                             </HBox>
                             <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
