@@ -50,7 +50,6 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
@@ -91,7 +90,7 @@ public class MainViewController implements Initializable {
     public static final int settingsPaneDistance = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
-    private static double searchBarPaneDistance = -40;
+    private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
     private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
@@ -119,6 +118,8 @@ public class MainViewController implements Initializable {
     public Button hideSearchBarButton;
     @FXML
     public ToggleButton searchCaseSensitiveToggle;
+    @FXML
+    public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding<Double>>> searchResultSet;
     int currentSearchHit = -1;
     @FXML
@@ -144,8 +145,6 @@ public class MainViewController implements Initializable {
     private Timeline showTimeline;
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
-    private TreeView<TimeSeriesBinding<Double>> selectedTreeView;
-
 
     public MainViewController() {
         super();
@@ -168,7 +167,6 @@ public class MainViewController implements Initializable {
             }
         });
         setUiTheme(prefs.getUserInterfaceTheme());
-
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -331,13 +329,13 @@ public class MainViewController implements Initializable {
             if (newValue) {
                 searchField.requestFocus();
                 if (searchBarHidden.getValue()) {
-                    slidePanel(-1, Duration.millis(0));
+                    slidePanel(1, Duration.millis(0));
                     searchBarHidden.setValue(false);
                 }
             }
             else {
                 if (!searchBarHidden.getValue()) {
-                    slidePanel(1, Duration.millis(0));
+                    slidePanel(-1, Duration.millis(0));
                     searchBarHidden.setValue(true);
                 }
             }
@@ -469,6 +467,8 @@ public class MainViewController implements Initializable {
         }
     }
 
+    //endregion
+
     @FXML
     protected void populateOpenRecentMenu(Event event) {
         Menu openRecentMenu = (Menu) event.getSource();
@@ -488,8 +488,6 @@ public class MainViewController implements Initializable {
             openRecentMenu.getItems().setAll(none);
         }
     }
-
-    //endregion
 
     //region private members
     private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
@@ -531,12 +529,11 @@ public class MainViewController implements Initializable {
     }
 
     private void slidePanel(int show, Duration delay) {
-        Node n = searchBarRoot;//.getParent();
-
-        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        TranslateTransition openNav = new TranslateTransition(new Duration(200), searchBarRoot);
         openNav.setDelay(delay);
         openNav.setToY(show * -searchBarPaneDistance);
         openNav.play();
+        openNav.setOnFinished(event -> AnchorPane.setBottomAnchor(sourceArea, show > 0 ? searchBarPaneDistance : 0));
     }
 
     private void doCommandBarResize(double v) {
@@ -964,7 +961,7 @@ public class MainViewController implements Initializable {
             }, new ArrayList<>());
         }
         if (searchResultSet.size() > 0) {
-            searchField.setStyle("-fx-background-color: white;");
+            searchField.setStyle("");
             currentSearchHit++;
             if (currentSearchHit > searchResultSet.size() - 1) {
                 currentSearchHit = 0;
@@ -980,7 +977,7 @@ public class MainViewController implements Initializable {
 
     private void invalidateSearchResults() {
         logger.trace("Invalidating search result");
-        searchField.setStyle("-fx-background-color: white;");
+        searchField.setStyle("");
         this.searchResultSet = null;
         this.currentSearchHit = -1;
     }

@@ -36,7 +36,8 @@
                 <AnchorPane fx:id="search" mouseTransparent="false">
                     <children>
 
-                        <StackPane prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" SplitPane.resizableWithParent="false">
+                        <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
+                                   SplitPane.resizableWithParent="false">
                             <children>
                                 <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
                                     <graphic>
@@ -82,12 +83,6 @@
                                 <ToggleButton fx:id="searchCaseSensitiveToggle" text="Aa"
                                               alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
                                               styleClass="square-button">
-                                    <font>
-                                        <Font size="11.0"/>
-                                    </font>
-                                    <!--<graphic>-->
-                                    <!--<Region styleClass="cross-icon"/>-->
-                                    <!--</graphic>-->
                                     <tooltip>
                                         <Tooltip text="Toggle case sensitivity">
                                             <font>
