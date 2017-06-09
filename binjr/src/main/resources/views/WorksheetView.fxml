@@ -139,7 +139,8 @@
                                     <Double fx:value="-7.0"/>
                                 </points>
                             </Polyline>
-                            <ToggleButton fx:id="resetYButton" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false" prefHeight="21.0"
+                            <ToggleButton fx:id="autoScaleYAxisToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false"
+                                          prefHeight="21.0"
                                           prefWidth="21.0" selected="true" textOverrun="CLIP">
                                 <graphic>
                                     <ImageView fitHeight="15" fitWidth="11">

@@ -107,7 +107,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     @FXML
     private Button refreshButton;
     @FXML
-    private ToggleButton resetYButton;
+    private ToggleButton autoScaleYAxisToggle;
     @FXML
     private Button snapshotButton;
     @FXML
@@ -218,7 +218,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert seriesTable != null : "fx:id\"seriesTable\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
-        assert resetYButton != null : "fx:id\"resetYButton\" was not injected!";
+        assert autoScaleYAxisToggle != null : "fx:id\"autoScaleYAxisToggle\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
@@ -246,8 +246,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             yAxis = new MetricStableTicksAxis();
         }
         yAxis.setSide(Side.LEFT);
-        // yAxis.setAutoRanging(true);
-        yAxis.autoRangingProperty().bindBidirectional(resetYButton.selectedProperty());
+        //yAxis.setAutoRanging(true);
+        yAxis.autoRangingProperty().bindBidirectional(autoScaleYAxisToggle.selectedProperty());
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
@@ -269,8 +269,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
-        //  resetYButton.setOnAction(this::handleResetYRangeButton);
-
         snapshotButton.setOnAction(this::handleTakeSnapshot);
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
@@ -437,7 +435,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             worksheet.addSeries(newSeries);
         }
         refresh();
-        //  chart.getYAxis().setAutoRanging(true);
     }
 
     protected void removeSelectedBinding() {
@@ -461,11 +458,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     @FXML
     protected void handleHistoryForward(ActionEvent actionEvent) {
         restoreSelectionFromHistory(forwardHistory, backwardHistory);
-    }
-
-    @FXML
-    protected void handleResetYRangeButton(ActionEvent actionEvent) {
-        chart.getYAxis().setAutoRanging(true);
     }
 
     @FXML
@@ -590,7 +582,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        textField.setOnKeyPressed(event -> chart.getYAxis().setAutoRanging(false));
+        textField.setOnKeyPressed(event -> autoScaleYAxisToggle.setSelected(false));
         formatter.valueProperty().bindBidirectional(stateProperty);
         axisBoundProperty.bindBidirectional(stateProperty);
         textField.setTextFormatter(formatter);
@@ -741,7 +733,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     endX.get(),
                     startY.get(),
                     endY.get(),
-                    resetYButton.isSelected()
+                    autoScaleYAxisToggle.isSelected()
             );
         }
 
@@ -764,11 +756,11 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     double r = (((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
                     logger.debug(() -> "Y selection - Y axis range = " + r);
                     if (r > 0.0001) {
-                        resetYButton.setSelected(false);
+                        autoScaleYAxisToggle.setSelected(false);
                     }
                 }
                 else {
-                    resetYButton.setSelected(selection.isAutoRangeY());
+                    autoScaleYAxisToggle.setSelected(selection.isAutoRangeY());
                 }
 
                 this.startY.set(roundYValue(selection.getStartY()));

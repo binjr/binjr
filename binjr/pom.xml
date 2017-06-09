@@ -30,6 +30,7 @@
     </organization>
     <properties>
         <github.global.server>github</github.global.server>
+        <github.deploy.prerelease>true</github.deploy.prerelease>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
@@ -49,7 +50,7 @@
                         <artifactId>javafx-maven-plugin</artifactId>
                         <version>8.8.3</version>
                         <configuration>
-                            <mainClass>eu.fthevenet.binjr.Main</mainClass>
+                            <mainClass>eu.fthevenet.binjr.Binjr</mainClass>
                             <vendor>${project.build.finalName}</vendor>
                             <bundler>ALL</bundler>
                             <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
@@ -120,7 +121,8 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <Main-Class>eu.fthevenet.binjr.Main</Main-Class>
+                                        <!--<Premain-Class>eu.fthevenet.binjr.CheckForJavaFX</Premain-Class>-->
+                                        <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
                                         <Specification-Title>${project.name}</Specification-Title>
                                         <Specification-Version>${project.version}</Specification-Version>
                                         <Specification-Vendor>${project.organization.name}</Specification-Vendor>
@@ -182,7 +184,7 @@
                     <description>binjr v${project.version}</description>
                     <releaseName>binjr v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
-                    <prerelease>false</prerelease>
+                    <prerelease>${github.deploy.prerelease}</prerelease>
                     <!-- If your project has additional artifacts, such as ones produced by
                          the maven-assembly-plugin, you can define the following
                          (requires version 1.1.1 of the plugin or higher): -->

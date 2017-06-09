@@ -34,8 +34,8 @@ import java.awt.*;
  *
  * @author Frederic Thevenet
  */
-public class Main extends Application {
-    private static final Logger logger = LogManager.getLogger(Main.class);
+public class Binjr extends Application {
+    private static final Logger logger = LogManager.getLogger(Binjr.class);
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -69,7 +69,7 @@ public class Main extends Application {
     public static void main(String[] args) {
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
-            System.setProperty("java.security.auth.login.config", Main.class.getResource("/jaas_login.conf").toExternalForm());
+            System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         // Disabling accessibility support to work around hanging issue on Windows  10
