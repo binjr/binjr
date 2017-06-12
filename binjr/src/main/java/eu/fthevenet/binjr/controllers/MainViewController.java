@@ -557,6 +557,9 @@ public class MainViewController implements Initializable {
             clearWorkspace();
             return true;
         }
+        // Make sure that main stage is visible before invoking modal dialog, else modal dialog may appear
+        // behind main stage when made visible again.
+        Dialogs.getStage(root).setIconified(false);
         ButtonType res = Dialogs.confirmSaveDialog(root, (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
         if (res == ButtonType.CANCEL) {
             return false;
