@@ -64,7 +64,6 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
         Label tabsLabel = new Label("Sorted By:");
         GridPane.setConstraints(tabsLabel, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         this.paramsGridPane.getChildren().addAll(tabsLabel, hBox);
-        extraArgumentTextField.setVisible(false);
         extraArgumentTextField.visibleProperty().bind(Bindings.createBooleanBinding(() -> this.tabsChoiceBox.valueProperty().get().getArgument() != null, this.tabsChoiceBox.valueProperty()));
     }
 
