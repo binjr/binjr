@@ -55,7 +55,6 @@ public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T
                 }));
     }
 
-
     private List<XYChart.Data<ZonedDateTime, T>> decimate(List<XYChart.Data<ZonedDateTime, T>> data, int threshold) {
         int dataLength = data.size();
         if (threshold >= dataLength || threshold == 0) {
@@ -63,7 +62,6 @@ public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T
         }
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
         double every = (double) (dataLength - 2) / (threshold - 2);
-        XYChart.Data<ZonedDateTime, T> maxAreaPoint = data.get(0);
         sampled.add(data.get(0)); // Always add the first point
         for (int i = 1; i < threshold - 1; i++) {
             sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));

@@ -27,7 +27,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 /**
- * Created by FTT2 on 24/04/2017.
+ * @author Frederic Thevenet
  */
 public class GithubApiTest {
     private static final Logger logger = LogManager.getLogger(GithubApiTest.class);
