@@ -138,7 +138,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         try {
-            JsonTree t = gson.fromJson(getJsonTree(treeViewTab, filter), JsonTree.class);
+            JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonTree.class);
 
             Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
@@ -284,7 +284,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     public Collection<String> discoverFilters() throws DataAdapterException {
         Gson gson = new Gson();
         try {
-            JsonTree t = gson.fromJson(getJsonTree(this.treeViewTab), JsonTree.class);
+            JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonTree.class);
 
             Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
@@ -318,6 +318,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
         if ("filter".equals(n.type)) {
+            // add a dummy node so that the branch can be expanded
             newBranch.getChildren().add(new TreeItem<>(null));
             // add a listener that will get the treeview filtered according to the selected filter/tag
             newBranch.expandedProperty().addListener(new FilteredViewListener(n, newBranch));
@@ -347,19 +348,19 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         return data[data.length - 1];
     }
 
-    private String getJsonTree(JrdsTreeViewTab tab) throws DataAdapterException {
-        return getJsonTree(tab, null);
+    private String getJsonTree(String tabName, String argName) throws DataAdapterException {
+        return getJsonTree(tabName, argName, null);
     }
 
-    private String getJsonTree(JrdsTreeViewTab tab, String filter) throws DataAdapterException {
+    private String getJsonTree(String tabName, String argName, String argValue) throws DataAdapterException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(jrdsProtocol)
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath + "/jsontree")
-                .addParameter("tab", tab.getCommand());
-        if (tab.getArgument() != null && filter != null && filter.trim().length() > 0) {
-            requestUrl.addParameter(tab.getArgument(), filter);
+                .addParameter("tab", tabName);
+        if (argName != null && argValue != null && argValue.trim().length() > 0) {
+            requestUrl.addParameter(argName, argValue);
         }
 
         return doHttpGet(requestUrl, response -> {
@@ -538,7 +539,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
             if (newValue) {
                 try {
-                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab, n.name), JsonTree.class);
+                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab.getCommand(), "filter", n.name), JsonTree.class);
                     Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
                     List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
                     for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type) || "filter".equals(jsonItem.type)).collect(Collectors.toList())) {
