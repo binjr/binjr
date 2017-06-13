@@ -53,11 +53,6 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
         cache = new LRUMap<>(CACHE_SIZE);
     }
 
-//    @Override
-//    public InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException {
-//        return getData(path, begin, end, false);
-//    }
-
     @Override
     public InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
         ByteArrayOutputStream cached = null;
