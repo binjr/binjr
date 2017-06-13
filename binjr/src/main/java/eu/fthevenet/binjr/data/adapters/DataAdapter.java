@@ -49,13 +49,15 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
     /**
      * Gets raw data from the source as an output stream, for the time interval specified.
      *
-     * @param path  the path of the data in the source
-     * @param begin the start of the time interval.
-     * @param end   the end of the time interval.
+     * @param path        the path of the data in the source
+     * @param begin       the start of the time interval.
+     * @param end         the end of the time interval.*
+     * @param bypassCache true if adapter cache should be bypassed, false otherwise. This parameter is ignored if adapter does not support caching
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    public abstract InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException;
+    // public abstract InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException;
+    public abstract InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
 
     /**
      * Gets the encoding used to decode textual data sent by the source.
@@ -101,6 +103,14 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
 
     public abstract boolean ping();
 
+    /**
+     * Gets the unique id for the adapter
+     *
+     * @return the unique id for the adapter
+     */
+    public UUID getId() {
+        return id;
+    }
 
     /**
      * Sets the unique id for the adapter
@@ -109,15 +119,6 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
      */
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    /**
-     * Gets the unique id for the adapter
-     *
-     * @return the unique id for the adapter
-     */
-    public UUID getId() {
-        return id;
     }
 
 

@@ -412,16 +412,28 @@ public class MainViewController implements Initializable {
         try {
             Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_BINJR_WIKI);
         } catch (IOException | URISyntaxException e) {
-            logger.error(e);
+            logger.error("Failed to launch url in browser: " + GlobalPreferences.HTTP_BINJR_WIKI);
+            logger.debug("Exception stack", e);
         }
     }
 
     @FXML
-    protected void handleLatestReleaseAction(ActionEvent event) {
+    protected void handleViewOnGitHub(ActionEvent event) {
         try {
-            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_LATEST_RELEASE);
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_GITHUB_REPO);
         } catch (IOException | URISyntaxException e) {
-            logger.error(e);
+            logger.error("Failed to launch url in browser: " + GlobalPreferences.HTTP_GITHUB_REPO);
+            logger.debug("Exception stack", e);
+        }
+    }
+
+    @FXML
+    protected void handleBinjrWebsite(ActionEvent actionEvent) {
+        try {
+            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
+        } catch (IOException | URISyntaxException e) {
+            logger.error("Failed to launch url in browser: " + GlobalPreferences.HTTP_WWW_BINJR_EU);
+            logger.debug("Exception stack", e);
         }
     }
 

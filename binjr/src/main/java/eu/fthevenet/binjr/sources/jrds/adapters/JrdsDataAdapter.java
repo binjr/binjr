@@ -422,7 +422,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            try (InputStream in = getData(id, now.minusSeconds(300), now)) {
+            try (InputStream in = getData(id, now.minusSeconds(300), now, false)) {
                 try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
                     String header = br.readLine();
                     if (header == null || header.isEmpty()) {

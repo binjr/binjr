@@ -176,7 +176,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
      * @param endTime   the end of the time interval
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
-    public void fillData(ZonedDateTime startTime, ZonedDateTime endTime) throws DataAdapterException {
+    public void fillData(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
         // Define the reduction transform to apply
         //   TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
@@ -190,7 +190,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 String path = byPathEntry.getKey();
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     // Get raw data for source
-                    try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant())) {
+                    try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant(), bypassCache)) {
                         // Parse raw data obtained from adapter
                         Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> rawDataMap = adapter.getParser().parse(in, byPathEntry.getValue());
                         // Applying point reduction

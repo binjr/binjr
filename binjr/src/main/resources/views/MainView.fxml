@@ -313,10 +313,10 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem mnemonicParsing="false" onAction="#handleLatestReleaseAction" text="Get Latest Release">
+                <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr website">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="latestRelease-icon"/>
+                            <Region styleClass="binjr-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>

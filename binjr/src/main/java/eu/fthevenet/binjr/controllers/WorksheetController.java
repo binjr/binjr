@@ -287,7 +287,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
         getWorksheet().fromDateTimeProperty().bind(currentState.startX);
         getWorksheet().toDateTimeProperty().bind(currentState.endX);
-        plotChart(currentState.asSelection());
+        plotChart(currentState.asSelection(), true);
         endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startX);
@@ -394,7 +394,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     seriesTable.getItems().add(dropIndex, draggedseries);
                     event.setDropCompleted(true);
                     seriesTable.getSelectionModel().clearAndSelect(dropIndex);
-                    refresh();
+                    invalidate(false, false, false);
                     event.consume();
                 }
             });
@@ -431,10 +431,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
-            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> refresh());
+            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false, false, false));
             worksheet.addSeries(newSeries);
         }
-        refresh();
+        invalidate(false, false, false);
     }
 
     protected void removeSelectedBinding() {
@@ -442,12 +442,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         if (selected != null) {
             seriesTable.getItems().removeAll(selected);
             seriesTable.getSelectionModel().clearSelection();
-            refresh();
+            invalidate(false, false, false);
         }
     }
 
     protected void refresh() {
-        invalidate(false, false);
+        invalidate(false, false, true);
     }
 
     @FXML
@@ -479,7 +479,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     //region [Private Members]
 
-    private void invalidate(boolean saveToHistory, boolean dontPlotChart) {
+    private void invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName(), logger::trace)) {
             XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.asSelection();
             logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
@@ -490,17 +490,17 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             previousState = currentState.asSelection();
             logger.debug(() -> backwardHistory.dump());
             if (!dontPlotChart) {
-                plotChart(currentSelection);
+                plotChart(currentSelection, forceRefresh);
             }
         }
     }
 
     //TODO make sure this is only called if worksheet is visible/current
-    private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection) {
+    private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
             worksheetMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> {
-                        getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX());
+                        getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
                         return getWorksheet().getSeries()
                                 .stream()
                                 .filter(series -> {
@@ -702,22 +702,22 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
             this.startX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    invalidate(true, false, false);
                 }
             });
             this.endX.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(true, false);
+                    invalidate(true, false, false);
                 }
             });
             this.startY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(false, true);
+                    invalidate(false, true, false);
                 }
             });
             this.endY.addListener((observable, oldValue, newValue) -> {
                 if (!frozen) {
-                    invalidate(false, true);
+                    invalidate(false, true, false);
                 }
             });
         }
@@ -765,7 +765,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
                 this.startY.set(roundYValue(selection.getStartY()));
                 this.endY.set(roundYValue(selection.getEndY()));
-                invalidate(toHistory, dontPlotChart);
+                invalidate(toHistory, dontPlotChart, false);
             } finally {
                 frozen = false;
             }

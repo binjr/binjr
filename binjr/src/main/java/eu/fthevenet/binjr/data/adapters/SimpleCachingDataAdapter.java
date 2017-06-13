@@ -42,9 +42,8 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Frederic Thevenet
  */
 public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
-    private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
     public static final int CACHE_SIZE = 32;
-
+    private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
     /**
@@ -54,13 +53,25 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
         cache = new LRUMap<>(CACHE_SIZE);
     }
 
+//    @Override
+//    public InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException {
+//        return getData(path, begin, end, false);
+//    }
+
     @Override
-    public InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException {
+    public InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
+        ByteArrayOutputStream cached = null;
         String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
-        SoftReference<ByteArrayOutputStream> cacheHit = cache.get(cacheEntryKey);
-        ByteArrayOutputStream cached = cacheHit != null ? cacheHit.get() : null;
+        if (!bypassCache) {
+            SoftReference<ByteArrayOutputStream> cacheHit = cache.get(cacheEntryKey);
+            cached = cacheHit != null ? cacheHit.get() : null;
+        }
         if (cached == null) {
-            logger.debug(() -> String.format("Cache miss for entry %s %s %s", path, begin.toString(), end.toString()));
+            logger.trace(() -> String.format(
+                    (bypassCache ? "Cache was explicitly bypassed" : "Cache miss") + " for entry %s %s %s",
+                    path,
+                    begin.toString(),
+                    end.toString()));
             InputStream in = onCacheMiss(path, begin, end);
             try {
                 cached = new ByteArrayOutputStream();
@@ -70,18 +81,21 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
                 }
                 cache.put(cacheEntryKey, new SoftReference<>(cached));
             } catch (IOException e) {
-                logger.error("Error while caching source data to cache.", e);
+                logger.error("Error while committing source data to cache: " + e.getMessage());
+                logger.debug("Exception stack", e);
                 try {
-                    in.close();
+                    if (in != null) {
+                        in.close();
+                    }
                 } catch (IOException e1) {
-                    // failed attempt to close stream
+                    logger.debug("failed attempt to close stream", e1);
                 }
                 logger.warn("Attempting to return data from source without caching");
                 return onCacheMiss(path, begin, end);
             }
         }
         else {
-            logger.debug(() -> String.format("Data successfully retrieved from cache for %s %s %s", path, begin.toString(), end.toString()));
+            logger.trace(() -> String.format("Data successfully retrieved from cache for %s %s %s", path, begin.toString(), end.toString()));
         }
         return new ByteArrayInputStream(cached.toByteArray());
     }
