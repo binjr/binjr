@@ -26,22 +26,16 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.Bloom;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.scene.web.WebView;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -53,10 +47,13 @@ import java.util.ResourceBundle;
  */
 public class AboutBoxController implements Initializable {
     private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
+
     @FXML
-    public ScrollPane licScroll;
+    public WebView licenseView;
+
     @FXML
-    public ScrollPane ackScroll;
+    public WebView acknowledgementView;
+
     @FXML
     private DialogPane aboutRoot;
 
@@ -71,8 +68,6 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private Accordion detailsPane;
-    @FXML
-    private ListView<String> sysInfoListView;
 
     @FXML
     private TableView<SysInfoProperty> sysInfoListTable;
@@ -84,50 +79,35 @@ public class AboutBoxController implements Initializable {
     private TitledPane licensePane;
 
     @FXML
-    private TextFlow acknowledgementTextFlow;
-
-    @FXML
-    private TextFlow licenseTextFlow;
-
-    @FXML
     private TitledPane acknowledgementPane;
-
-    @FXML
-    private AnchorPane textArea;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert aboutRoot != null : "fx:id\"aboutRoot\" was not injected!";
         assert versionLabel != null : "fx:id\"versionLabel\" was not injected!";
-        assert sysInfoListView != null : "fx:id\"sysInfoListView\" was not injected!";
         assert binjrUrl != null : "fx:id\"binjrUrl\" was not injected!";
         assert detailsPane != null : "fx:id\"detailsPane\" was not injected!";
         assert sysInfoPane != null : "fx:id\"sysInfoPane\" was not injected!";
         assert sysInfoListTable != null : "fx:id\"sysInfoListTable\" was not injected!";
         assert licensePane != null : "fx:id\"licensePane\" was not injected!";
         assert acknowledgementPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
-        assert licenseTextFlow != null : "fx:id\"licenseTextFlow\" was not injected!";
-        assert acknowledgementTextFlow != null : "fx:id\"acknowledgementTextFlow\" was not injected!";
         assert versionCheckFlow != null : "fx:id\"versionCheckFlow\" was not injected!";
 
-        try {
-            BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_license.txt").openStream(), "utf-8"));
-            Text binjrTxt = new Text("binjr\n");//
-            binjrTxt.setFont(Font.font("Bauhaus 93", FontWeight.BOLD, 18));
-            Text noticeTxt = new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2 + "\n")));
+        acknowledgementView.getEngine().load(getClass().getResource("/text/about_Acknowledgement.html").toExternalForm());
+        licenseView.getEngine().load(getClass().getResource("/text/about_license.html").toExternalForm());
 
-            licenseTextFlow.getChildren().add(binjrTxt);
-            licenseTextFlow.getChildren().add(noticeTxt);
-        } catch (IOException e) {
-            logger.error("Failed to get resource \"/text/about_license.txt\"", e);
-        }
-        try {
-            BufferedReader sr = new BufferedReader(new InputStreamReader(getClass().getResource("/text/about_Acknowledgement.txt").openStream(), "utf-8"));
-            acknowledgementTextFlow.getChildren().add(new Text(sr.lines().reduce("", (s, s2) -> s.concat(s2 + "\n"))));
+        aboutRoot.sceneProperty().addListener((observable, oldValue, scene) -> {
+            if (scene != null) {
+                licenseView.setMaxSize(scene.getWidth(), scene.getHeight());
+                licenseView.maxWidthProperty().bind(scene.widthProperty());
+                licenseView.maxHeightProperty().bind(scene.heightProperty());
+            }
+            else {
+                licenseView.maxWidthProperty().unbind();
+                licenseView.maxHeightProperty().unbind();
+            }
+        });
 
-        } catch (IOException e) {
-            logger.error("Failed to get resource \"/text/about_Acknowledgement.txt\"", e);
-        }
         Platform.runLater(() -> {
             Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
             if (header != null) {
@@ -136,18 +116,9 @@ public class AboutBoxController implements Initializable {
                 header.setPrefHeight(0);
                 header.setVisible(false);
             }
-
-            //disable cache on scrollpanes and children to avoid blurry text
-            licScroll.setCache(false);
-            for (Node n : licScroll.getChildrenUnmodifiable()) {
-                n.setCache(false);
-            }
-            ackScroll.setCache(false);
-            for (Node n : ackScroll.getChildrenUnmodifiable()) {
-                n.setCache(false);
-            }
+            licenseView.setContextMenuEnabled(false);
+            acknowledgementView.setContextMenuEnabled(false);
         });
-
 
         versionCheckFlow.getChildren().clear();
         Label l = new Label("Checking for updates...");
