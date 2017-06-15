@@ -93,7 +93,7 @@ public class AboutBoxController implements Initializable {
         assert acknowledgementPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
         assert versionCheckFlow != null : "fx:id\"versionCheckFlow\" was not injected!";
 
-        acknowledgementView.getEngine().load(getClass().getResource("/text/about_Acknowledgement.html").toExternalForm());
+        acknowledgementView.getEngine().load(getClass().getResource("/text/about_Acknowledgements.html").toExternalForm());
         licenseView.getEngine().load(getClass().getResource("/text/about_license.html").toExternalForm());
 
         aboutRoot.sceneProperty().addListener((observable, oldValue, scene) -> {
@@ -146,7 +146,6 @@ public class AboutBoxController implements Initializable {
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
             Platform.runLater(() -> {
                 p.requestLayout();
-
                 p.getScene().getWindow().sizeToScene();
             });
         }));

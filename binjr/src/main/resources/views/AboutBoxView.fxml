@@ -23,55 +23,88 @@
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
 <?import javafx.scene.text.TextFlow?>
 <?import javafx.scene.web.WebView?>
-<DialogPane fx:id="aboutRoot" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.AboutBoxController">
+<DialogPane fx:id="aboutRoot" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="about" stylesheets="@/css/About.css" xmlns="http://javafx.com/javafx/8.0.112"
+            xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.AboutBoxController">
+
     <header>
-        <AnchorPane minWidth="0.0">
-            <ImageView fitHeight="300.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                       AnchorPane.topAnchor="0.0">
-                <Image url="@../images/logo_med.png"/>
-            </ImageView>
-            <Label layoutX="5.0" layoutY="283.0" text="Copyright © 2017 Frederic Thevenet" textFill="#3a879a" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="10.0"/>
-            <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="205.0">
-                <Label fx:id="versionLabel" text="version 0.0.0" textFill="WHITE">
-                    <VBox.margin>
-                        <Insets left="4.0"/>
-                    </VBox.margin>
-                </Label>
-                <TextFlow fx:id="versionCheckFlow"/>
-            </VBox>
-            <Hyperlink fx:id="binjrUrl" graphicTextGap="0.0" layoutX="512.0" layoutY="270.0" onAction="#goTobinjrDotEu" text="www.binjr.eu" textFill="#3a879a" AnchorPane.bottomAnchor="0.0"
-                       AnchorPane.rightAnchor="5.0"/>
-        </AnchorPane>
+        <VBox>
+            <children>
+                <AnchorPane minWidth="0.0">
+                    <ImageView fitHeight="300.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                               AnchorPane.topAnchor="0.0">
+                        <Image url="@../images/logo_med.png"/>
+                    </ImageView>
+                    <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="205.0">
+                        <Label fx:id="versionLabel" text="version 0.0.0" textFill="WHITE">
+                            <VBox.margin>
+                                <Insets left="4.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <TextFlow fx:id="versionCheckFlow"/>
+                    </VBox>
+                </AnchorPane>
+                <AnchorPane>
+                    <children>
+                        <Label styleClass="about-text" text="Copyright © 2017 Frederic Thevenet" textFill="#3a879a" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="10.0"
+                               AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                        </Label>
+                        <Hyperlink fx:id="binjrUrl" alignment="TOP_LEFT" graphicTextGap="0.0" onAction="#goTobinjrDotEu" styleClass="about-text" text="www.binjr.eu" textFill="#3a879a"
+                                   AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                            <opaqueInsets>
+                                <Insets/>
+                            </opaqueInsets>
+                            <padding>
+                                <Insets top="-3.7"/>
+                            </padding>
+                        </Hyperlink>
+                    </children>
+                </AnchorPane>
+            </children>
+        </VBox>
     </header>
     <content>
-        <Accordion fx:id="detailsPane" prefWidth="600.0">
-            <panes>
-                <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT" text="System Information">
-                    <TableView fx:id="sysInfoListTable" maxWidth="-Infinity" minHeight="0.0" minWidth="-Infinity" prefHeight="250.0" prefWidth="578.0">
-                        <columns>
-                            <TableColumn editable="false" prefWidth="140.0" resizable="false" sortable="false" text="C1">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="key"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                            <TableColumn editable="false" prefWidth="425.0" resizable="false" sortable="false" text="C2">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="value"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                        </columns>
-                    </TableView>
-                </TitledPane>
-                <TitledPane fx:id="licensePane" animated="false" minHeight="0.0" text="License">
-                    <WebView fx:id="licenseView" maxHeight="-1.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="250.0" prefWidth="578.0"/>
-                </TitledPane>
-                <TitledPane fx:id="acknowledgementPane" animated="false" text="Acknowledgement">
-                    <WebView fx:id="acknowledgementView" minWidth="-1.0" prefHeight="250.0" prefWidth="-1.0"/>
-                </TitledPane>
-            </panes>
-        </Accordion>
+        <VBox>
+            <children>
+                <Accordion fx:id="detailsPane" prefWidth="600.0" styleClass="skinnable-pane-border">
+                    <panes>
+                        <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT" text="System Information">
+                            <TableView fx:id="sysInfoListTable" maxWidth="-Infinity" minHeight="0.0" minWidth="-Infinity" prefHeight="220.0" prefWidth="578.0">
+                                <columns>
+                                    <TableColumn editable="false" prefWidth="150.0" resizable="false" sortable="false" text="C1">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="key"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn editable="false" prefWidth="350.0" resizable="false" sortable="false" text="C2">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="value"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                                <padding>
+                                    <Insets left="15.0"/>
+                                </padding>
+                            </TableView>
+                        </TitledPane>
+                        <TitledPane fx:id="licensePane" animated="false" minHeight="0.0" text="License">
+                            <WebView fx:id="licenseView" maxHeight="-1.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="578.0"/>
+                        </TitledPane>
+                        <TitledPane fx:id="acknowledgementPane" animated="false" text="Acknowledgements">
+                            <WebView fx:id="acknowledgementView" minWidth="-Infinity" prefHeight="220.0" prefWidth="578.0"/>
+                        </TitledPane>
+                    </panes>
+                </Accordion>
+            </children>
+        </VBox>
     </content>
     <ButtonType fx:constant="CLOSE"/>
 </DialogPane>

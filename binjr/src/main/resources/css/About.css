@@ -1,0 +1,174 @@
+.content,
+.web-view,
+.titled-pane,
+.title,
+.web-view,
+.table-row-cell,
+.root {
+    -fx-background-color: #DAEEF3;
+}
+/*
+.table-row-cell:odd{
+    -fx-background-color:#B7DEE8;
+}*/
+
+.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
+.table-row-cell:filled:selected,
+.table-row-cell:filled > .table-cell:selected,
+table-view:focused:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:focused,
+.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:focused
+ {
+    -fx-background-color: #4BACC6;
+}
+
+.arrow {
+ -fx-background-color: #3a879a;
+}
+
+ .button,
+.about-text{
+  -fx-text-fill:#3a879a;/*#B7DEE8;*//*#204656;*/
+
+  -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
+   -fx-font-size: 12pt;
+}
+
+.titled-pane {
+    /* -fx-background-color: #DAEEF3;
+    /*  -fx-border-color:#204656;*/
+    -fx-border-size:0;
+    -fx-text-fill:#204656;/*#3a879a;/*#B7DEE8;*//*#204656;*/
+    -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 14pt;
+    /*  -fx-font-weight: bold;*/
+}
+
+.web-view,
+.table-view,
+.cell,
+   .content{
+    -fx-border-size:0;
+    -fx-text-fill:#204656;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 9pt;
+    -fx-font-weight:normal;
+  }
+
+/*******************************************************************************
+  *                                                                             *
+  * ScrollBar                                                                   *
+  *                                                                             *
+  ******************************************************************************/
+
+ .scroll-bar > .thumb{
+     -fx-background-color: #B7DEE8;
+     -fx-background-insets: 0;
+     -fx-background-radius: 0;
+ }
+
+/*
+.scroll-bar .thumb:hover {
+     -fx-background-color: #3a879a;
+}
+
+ .scroll-bar > .thumb:pressed {
+     -fx-background-color: #204656;
+ }
+*/
+ .scroll-bar > .track {
+     -fx-background-color: #DAEEF3;
+     -fx-background-insets: 0;
+     -fx-background-radius: 0;
+     -fx-border-size:0;
+ }
+ .scroll-bar > .track-background {
+     -fx-background-color: #DAEEF3;
+     -fx-background-insets: 0;
+ }
+
+ .scroll-bar > .increment-button,
+ .scroll-bar > .decrement-button {
+     -fx-background-color: #DAEEF3;
+     -fx-background-insets: 0;
+     -fx-background-radius: 0;
+
+     -fx-padding: 0.25em;
+ }
+/*
+ .scroll-bar > .increment-button:hover,
+ .scroll-bar > .decrement-button:hover  {
+     -fx-background-color: #DAEEF3;
+ }
+
+.web-view  .scroll-bar .increment-button:pressed,
+ .scroll-bar > .increment-button:pressed,
+ .scroll-bar > .decrement-button:pressed {
+     -fx-background-color: #3a879a;
+ }*/
+
+ .scroll-bar > .decrement-button > .decrement-arrow,
+ .scroll-bar > .increment-button > .increment-arrow{
+     -fx-background-insets: 1 0 -1 0, 0;
+     -fx-background-color: transparent, #204656;
+     -fx-effect: null;
+ }
+/*
+ .scroll-bar > .decrement-button:pressed > .decrement-arrow,
+ .scroll-bar > .increment-button:pressed > .increment-arrow {
+     -fx-background-color: transparent, white;
+     -fx-effect: null;
+ }*/
+
+ .scroll-bar:vertical > .increment-button > .increment-arrow,
+ .scroll-bar:vertical > .decrement-button > .decrement-arrow {
+     -fx-padding: 0.333333em 0.5em 0.0em 0.0em; /* 4 6 0 0 */
+ }
+
+ .scroll-bar:horizontal > .increment-button > .increment-arrow,
+ .scroll-bar:horizontal > .decrement-button > .decrement-arrow {
+     -fx-padding: 0.5em 0.333333em 0.0em 0.0em; /* 6 4 0 0 */
+ }
+
+
+.scroll-bar * {
+    -fx-padding:1;
+}
+
+ .scroll-bar:disabled {
+     -fx-opacity: 0.4;
+ }
+
+ .button{
+    /*-fx-text-fill: #204656;
+     -fx-background-color: #B7DEE8;
+     -fx-border-color: #B7DEE8;*/
+
+    -fx-text-fill: white;
+     -fx-background-color: #4BACC6;
+     -fx-border-color: #4BACC6;
+
+     -fx-border-width:2;
+     -fx-border-radius:0;
+     -fx-background-radius: 0;
+     -fx-background-insets: 0;
+ }
+
+.button:hover{
+    /* -fx-background-color:#336F87;*/
+     -fx-border-color: #336F87;
+ }
+
+.button:pressed,
+.button:default:hover:pressed {
+     -fx-background-color:#204656;
+    -fx-border-color: #204656;
+     -fx-text-fill: white;
+ }
+
+.skinnable-pane-border * {
+    -fx-border-color: red;
+    -fx-border-width:0;
+}
+
+
+
