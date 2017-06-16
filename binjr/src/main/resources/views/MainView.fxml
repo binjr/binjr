@@ -17,7 +17,6 @@
   ~
   -->
 
-
 <?import eu.fthevenet.util.javafx.controls.CommandBarPane?>
 <?import eu.fthevenet.util.javafx.controls.TabPaneNewButton?>
 <?import javafx.geometry.Insets?>
@@ -45,22 +44,20 @@
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB"
-                                  AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                     </tabs>
                 </TabPaneNewButton>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
             </StackPane>
-            <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                        styleClass="toolPane">
+            <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                 <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="5.0"/>
                 <HBox alignment="CENTER" layoutX="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </padding>
-                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="square-button"
-                            onAction="#handleFindNextInTreeView">
+                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0" styleClass="square-button">
                         <graphic>
                             <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
                         </graphic>
@@ -72,9 +69,8 @@
                             </Tooltip>
                         </tooltip>
                     </Button>
-                    <ToggleButton fx:id="searchCaseSensitiveToggle" text="Aa"
-                                  alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
-                                  styleClass="square-button">
+                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="square-button"
+                                  text="Aa" textOverrun="CLIP">
                         <tooltip>
                             <Tooltip text="Toggle case sensitivity">
                                 <font>
@@ -83,8 +79,7 @@
                             </Tooltip>
                         </tooltip>
                     </ToggleButton>
-                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0"
-                            styleClass="square-button">
+                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="square-button">
                         <graphic>
                             <Region styleClass="cross-icon"/>
                         </graphic>
@@ -141,8 +136,8 @@
                 </HBox>
             </graphic>
         </Button>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                    prefHeight="40.0" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
+                    text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
             <tooltip>
                 <Tooltip text="Workspaces">
                     <font>
@@ -207,8 +202,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                    prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
+                    prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="source-icon"/>
@@ -246,8 +241,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                    prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
+                    prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="chart-icon"/>
@@ -291,8 +286,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT"
-                    prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
+                    text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="help-icon"/>
@@ -330,8 +325,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0"
-                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0"
+                AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="settings-icon"/>

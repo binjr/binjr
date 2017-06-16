@@ -41,7 +41,7 @@
 
 .titled-pane {
     -fx-border-size:0;
-    -fx-text-fill:-binjr-darker-color;/*-binjr-dark-color;/*-binjr-light-color;*//*-binjr-darker-color;*/
+    -fx-text-fill:-binjr-darker-color;
     -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 14pt;
 }
