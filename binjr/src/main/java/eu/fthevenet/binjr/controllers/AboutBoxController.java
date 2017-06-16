@@ -26,8 +26,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.Bloom;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
@@ -96,6 +98,12 @@ public class AboutBoxController implements Initializable {
         acknowledgementView.getEngine().load(getClass().getResource("/text/about_Acknowledgements.html").toExternalForm());
         licenseView.getEngine().load(getClass().getResource("/text/about_license.html").toExternalForm());
 
+        aboutRoot.setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.ESCAPE) {
+                Dialogs.getStage(aboutRoot).close();
+            }
+        });
+
         aboutRoot.sceneProperty().addListener((observable, oldValue, scene) -> {
             if (scene != null) {
                 licenseView.setMaxSize(scene.getWidth(), scene.getHeight());
@@ -116,6 +124,7 @@ public class AboutBoxController implements Initializable {
                 header.setPrefHeight(0);
                 header.setVisible(false);
             }
+
             licenseView.setContextMenuEnabled(false);
             acknowledgementView.setContextMenuEnabled(false);
         });
@@ -149,6 +158,9 @@ public class AboutBoxController implements Initializable {
                 p.getScene().getWindow().sizeToScene();
             });
         }));
+        Node closeButton = aboutRoot.lookupButton(ButtonType.CLOSE);
+        closeButton.managedProperty().bind(closeButton.visibleProperty());
+        closeButton.setVisible(false);
     }
 
     public void goTobinjrDotEu(ActionEvent actionEvent) {

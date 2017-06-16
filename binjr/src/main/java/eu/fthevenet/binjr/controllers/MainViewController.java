@@ -350,7 +350,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
         Dialog<String> dialog = new Dialog<>();
-        dialog.initStyle(StageStyle.UTILITY);
+        dialog.initStyle(StageStyle.DECORATED);
         dialog.setTitle("About binjr");
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/views/AboutBoxView.fxml")));
         dialog.initOwner(Dialogs.getStage(root));
