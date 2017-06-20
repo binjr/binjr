@@ -30,7 +30,11 @@ final public class Bootstrap {
 
     public static void main(String[] args) {
         if (checkForJavaFX()) {
-            Binjr.main(args);
+            try {
+                Binjr.main(args);
+            } catch (Exception e) {
+                logger.fatal("Failed to load binjr", e);
+            }
         }
         else {
             logger.fatal("The JavaFX runtime must be present in order to run binjr. Please check with your Java vendor to see is JavaFX is available on your platform and how to install it.");
