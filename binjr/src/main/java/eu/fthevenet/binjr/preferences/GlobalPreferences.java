@@ -78,7 +78,6 @@ public class GlobalPreferences {
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
     private IntegerProperty downSamplingThreshold;
-    private BooleanProperty sampleSymbolsVisible;
     private BooleanProperty chartAnimationEnabled;
     private Preferences prefs;
     private StringProperty mostRecentSaveFolder;
@@ -134,8 +133,6 @@ public class GlobalPreferences {
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold = new SimpleIntegerProperty(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
-        sampleSymbolsVisible = new SimpleBooleanProperty(prefs.getBoolean(SAMPLE_SYMBOLS_VISIBLE, false));
-        sampleSymbolsVisible.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SAMPLE_SYMBOLS_VISIBLE, newValue));
         chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, true));
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
         mostRecentSavedWorkspace = new SimpleObjectProperty<>(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
@@ -162,10 +159,8 @@ public class GlobalPreferences {
         if (logger.isDebugEnabled()) {
             logger.debug("Global preferences initial values");
             logger.debug("  downSamplingThreshold = " + downSamplingThreshold.getValue());
-            logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
             logger.debug("  downSamplingEnabled = " + downSamplingEnabled.getValue());
             logger.debug("  mostRecentSaveFolder = " + mostRecentSaveFolder.getValue());
-            logger.debug("  sampleSymbolsVisible = " + sampleSymbolsVisible.getValue());
             logger.debug("  mostRecentSavedWorkspace = " + mostRecentSavedWorkspace.getValue());
             logger.debug("  loadLastWorkspaceOnStartup = " + loadLastWorkspaceOnStartup.getValue());
             logger.debug("  recentFileString = " + recentFileString);
@@ -206,33 +201,6 @@ public class GlobalPreferences {
      */
     public void setChartAnimationEnabled(boolean chartAnimationEnabled) {
         this.chartAnimationEnabled.setValue(chartAnimationEnabled);
-    }
-
-    /**
-     * Returns true if the chart symbols are visible, false otherwise.
-     *
-     * @return true if the chart symbols are visible, false otherwise.
-     */
-    public Boolean getSampleSymbolsVisible() {
-        return sampleSymbolsVisible.getValue();
-    }
-
-    /**
-     * Return the chart symbols visibility property
-     *
-     * @return the chart symbols visibility property
-     */
-    public BooleanProperty sampleSymbolsVisibleProperty() {
-        return sampleSymbolsVisible;
-    }
-
-    /**
-     * Sets the visibility of chart symbols
-     *
-     * @param sampleSymbolsVisible the visibility of chart symbols
-     */
-    public void setSampleSymbolsVisible(boolean sampleSymbolsVisible) {
-        this.sampleSymbolsVisible.setValue(sampleSymbolsVisible);
     }
 
     /**

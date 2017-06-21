@@ -82,7 +82,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     @IsDirtyable
     private BooleanProperty showAreaOutline;
     @IsDirtyable
-    private BooleanProperty showChartSymbols;
+    private BooleanProperty showChartSymbols = new SimpleBooleanProperty(false);
 
 
     private final ChangeWatcher<Worksheet> status;
@@ -98,8 +98,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
                 UnitPrefixes.METRIC,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
-                GlobalPreferences.getInstance().getSampleSymbolsVisible());
+                GlobalPreferences.getInstance().isShowAreaOutline());
     }
 
     /**
@@ -119,8 +118,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 unitName,
                 prefix,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
-                GlobalPreferences.getInstance().getSampleSymbolsVisible());
+                GlobalPreferences.getInstance().isShowAreaOutline());
     }
 
     /**
@@ -140,8 +138,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getUnit(),
                 initWorksheet.getUnitPrefixes(),
                 initWorksheet.getGraphOpacity(),
-                initWorksheet.isShowAreaOutline(),
-                initWorksheet.isShowChartSymbols());
+                initWorksheet.isShowAreaOutline());
     }
 
     private Worksheet(String name,
@@ -153,8 +150,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                       String unitName,
                       UnitPrefixes base,
                       double graphOpacity,
-                      boolean showAreaOutline,
-                      boolean showChartSymbols) {
+                      boolean showAreaOutline) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -165,7 +161,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
-        this.showChartSymbols = new SimpleBooleanProperty(showChartSymbols);
         this.status = new ChangeWatcher<>(this);
     }
 

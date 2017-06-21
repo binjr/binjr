@@ -52,13 +52,9 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     public TextField downSamplingThreshold;
     @FXML
-    private ToggleSwitch showChartSymbols;
-    @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
     private ToggleSwitch enableChartAnimation;
-    @FXML
-    private ToggleSwitch useSourceColors;
     @FXML
     private Label maxSampleLabel;
     @FXML
@@ -88,18 +84,15 @@ public class PreferenceDialogController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
-        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
-        assert useSourceColors != null : "fx:id\"useSourceColors\" was not injected!";
         assert loadAtStartupCheckbox != null : "fx:id\"loadAtStartupCheckbox\" was not injected!";
         assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
-        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
@@ -109,10 +102,7 @@ public class PreferenceDialogController implements Initializable {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-
-
         enableChartAnimation.selectedProperty().bindBidirectional(prefs.chartAnimationEnabledProperty());
-        showChartSymbols.selectedProperty().bindBidirectional(prefs.sampleSymbolsVisibleProperty());
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
@@ -122,9 +112,6 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
         prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
-        //  final TextFormatter<Number> opacityFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
-        //  defaultOpacityText.setTextFormatter(opacityFormatter);
-        //  opacityFormatter.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
 //
 //        root.hoverProperty().addListener((observable, oldValue, newValue) -> {
@@ -175,7 +162,6 @@ public class PreferenceDialogController implements Initializable {
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);
         openNav.setToX(-MainViewController.settingsPaneDistance);
-        //TranslateTransition closeNav=new TranslateTransition(new Duration(350), navList);
         openNav.play();
     }
 }
