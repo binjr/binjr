@@ -42,7 +42,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private final BooleanProperty selected;
     @IsDirtyable
     private final Property<Color> displayColor;
-    private TimeSeriesProcessor<T> processor;
+    private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
 
@@ -212,7 +212,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      */
     @XmlTransient
     public TimeSeriesProcessor<T> getProcessor() {
-        return processor;
+        return processor.getValue();
     }
 
     /**
@@ -221,7 +221,11 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      * @param processor the data processor for the series
      */
     public void setProcessor(TimeSeriesProcessor<T> processor) {
-        this.processor = processor;
+        this.processor.setValue(processor);
+    }
+
+    public Property<TimeSeriesProcessor<T>> processorProperty(){
+        return this.processor;
     }
 
     @XmlTransient

@@ -337,26 +337,22 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
         avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
-                worksheet.toDateTimeProperty(),
-                worksheet.fromDateTimeProperty()
+                p.getValue().processorProperty()
         ));
         minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
-                worksheet.toDateTimeProperty(),
-                worksheet.fromDateTimeProperty()
+                p.getValue().processorProperty()
         ));
 
         maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
-                worksheet.toDateTimeProperty(),
-                worksheet.fromDateTimeProperty()
+                p.getValue().processorProperty()
         ));
 
         currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormatter.format(Double.NaN)));
 
         seriesTable.setRowFactory(tv -> {
             TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
-
             row.setOnDragDetected(event -> {
                 if (!row.isEmpty()) {
                     Integer index = row.getIndex();
