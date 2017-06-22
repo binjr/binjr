@@ -50,23 +50,22 @@ public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T
         return m.entrySet()
                 .parallelStream()
                 .collect(Collectors.toMap(Map.Entry::getKey, o -> {
-                    o.getValue().setData(decimate(o.getValue().getData(), threshold));
+                    if (threshold > 0 && o.getValue().size() > threshold) {
+                        o.getValue().setData(decimate(o.getValue(), threshold));
+                    }
                     return o.getValue();
                 }));
     }
 
-    private List<XYChart.Data<ZonedDateTime, T>> decimate(List<XYChart.Data<ZonedDateTime, T>> data, int threshold) {
+    private Iterable<XYChart.Data<ZonedDateTime, T>> decimate(TimeSeriesProcessor<T> data, int threshold) {
         int dataLength = data.size();
-        if (threshold >= dataLength || threshold == 0) {
-            return data;
-        }
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
         double every = (double) (dataLength - 2) / (threshold - 2);
-        sampled.add(data.get(0)); // Always add the first point
+        sampled.add(data.getSample(0)); // Always add the first point
         for (int i = 1; i < threshold - 1; i++) {
-            sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));
+            sampled.add(data.getSample(Math.min(dataLength - 1, (int) Math.round(i * every))));
         }
-        sampled.add(data.get(dataLength - 1));
+        sampled.add(data.getSample(dataLength - 1));
         return sampled;
     }
 }

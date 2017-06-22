@@ -40,19 +40,19 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor<Double> {
     }
 
     @Override
-    public Double getMinValue() {
+    public Double computeMinValue() {
         OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).min();
         return res.isPresent() ? res.getAsDouble() : Double.NaN;
     }
 
     @Override
-    public Double getAverageValue() {
+    public Double computeAverageValue() {
         OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).average();
         return res.isPresent() ? res.getAsDouble() : Double.NaN;
     }
 
     @Override
-    public Double getMaxValue() {
+    public Double computeMaxValue() {
         OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).max();
         return res.isPresent() ? res.getAsDouble() : Double.NaN;
     }

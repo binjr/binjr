@@ -3,6 +3,10 @@
     -binjr-command-bar-accent-color: #336F87;
 }
 
+.column-bold-text{
+    /*-fx-text-fill: -binjr-command-bar-bg-color;*/
+    -fx-font-weight:bold;
+}
 
 /********************************
 *      button icons

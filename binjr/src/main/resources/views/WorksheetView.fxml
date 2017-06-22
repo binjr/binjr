@@ -262,22 +262,22 @@
                                     <PropertyValueFactory property="displayName"/>
                                 </cellValueFactory>
                             </TableColumn>
-                            <TableColumn fx:id="minColumn" prefWidth="76.0" sortable="false" text="Min.">
+                            <TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT"/>
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="avgColumn" prefWidth="76.0" sortable="false" text="Avg.">
+                            <TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT"/>
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="maxColumn" sortable="false" text="Max.">
+                            <TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT"/>
                                 </cellFactory>
                             </TableColumn>
-                            <TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" text="Current" visible="false">
+                            <TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" text="Current" styleClass="column-bold-text">
                                 <cellFactory>
                                     <DecimalFormatTableCellFactory alignment="RIGHT"/>
                                 </cellFactory>

@@ -17,9 +17,7 @@
 
 package eu.fthevenet.util.javafx.charts;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.*;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.chart.XYChart;
@@ -62,6 +60,8 @@ public class XYChartCrosshair<X, Y> {
     private final BooleanProperty verticalMarkerVisible = new SimpleBooleanProperty();
     private final BooleanProperty horizontalMarkerVisible = new SimpleBooleanProperty();
     private Consumer<XYChartSelection<X, Y>> selectionDoneEvent;
+    private final Property<Y> currentYValue = new SimpleObjectProperty<>();
+    private final Property<X> currentXValue = new SimpleObjectProperty<>();
 
     /**
      * Initializes a new instance of the {@link XYChartCrosshair} class.
@@ -108,6 +108,7 @@ public class XYChartCrosshair<X, Y> {
             yAxisLabel.setVisible(newValue);
             if (!newValue && !verticalMarkerVisible.get()) {
                 isSelecting.set(false);
+                currentYValue.setValue(null);
             }
         });
 
@@ -117,11 +118,8 @@ public class XYChartCrosshair<X, Y> {
             xAxisLabel.setVisible(newValue);
             if (!newValue && !horizontalMarkerVisible.get()) {
                 isSelecting.set(false);
+                currentXValue.setValue(null);
             }
-        });
-
-        chart.focusedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            focusState(newValue);
         });
     }
 
@@ -188,6 +186,22 @@ public class XYChartCrosshair<X, Y> {
         selectionDoneEvent = action;
     }
 
+    public Y getCurrentYValue() {
+        return currentYValue.getValue();
+    }
+
+    public ReadOnlyProperty<Y> currentYValueProperty() {
+        return currentYValue;
+    }
+
+    public X getCurrentXValue() {
+        return currentXValue.getValue();
+    }
+
+    public Property<X> currentXValueProperty() {
+        return currentXValue;
+    }
+
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             selectionDoneEvent.accept(
@@ -202,15 +216,6 @@ public class XYChartCrosshair<X, Y> {
         }
     }
 
-    private void focusState(boolean value) {
-        if (value) {
-            logger.info("Focus Gained");
-        }
-        else {
-            logger.info("Focus Lost");
-        }
-    }
-
     private void drawHorizontalMarker() {
         if (mousePosition.getY() < 0) {
             return;
@@ -221,7 +226,8 @@ public class XYChartCrosshair<X, Y> {
         horizontalMarker.setEndY(mousePosition.getY() + 0.5);
         yAxisLabel.setLayoutX(Math.max(chart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
         yAxisLabel.setLayoutY(Math.min(mousePosition.getY(), chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
-        yAxisLabel.setText(yValuesFormatter.apply(getValueFromYcoord(mousePosition.getY())));
+        currentYValue.setValue(getValueFromYcoord(mousePosition.getY()));
+        yAxisLabel.setText(yValuesFormatter.apply(currentYValue.getValue()));
     }
 
     private Y getValueFromYcoord(double yPosition) {
@@ -246,7 +252,8 @@ public class XYChartCrosshair<X, Y> {
         verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
-        xAxisLabel.setText(xValuesFormatter.apply(getValueFromXcoord(mousePosition.getX())));
+        currentXValue.setValue(getValueFromXcoord(mousePosition.getX()));
+        xAxisLabel.setText(xValuesFormatter.apply(currentXValue.getValue()));
     }
 
     private void handleMouseMoved(MouseEvent event) {

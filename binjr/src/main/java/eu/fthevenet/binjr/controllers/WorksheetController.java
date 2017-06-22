@@ -307,6 +307,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
+        crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> {
+            currentColumn.setVisible(newValue);
+        });
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
         //endregion
@@ -337,19 +341,27 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
         avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
-                p.getValue().processorProperty()
-        ));
+                p.getValue().processorProperty()));
+
         minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
-                p.getValue().processorProperty()
-        ));
+                p.getValue().processorProperty()));
 
         maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
-                p.getValue().processorProperty()
-        ));
+                p.getValue().processorProperty()));
 
-        currentColumn.setCellValueFactory(p -> new SimpleStringProperty(prefixFormatter.format(Double.NaN)));
+        currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                () -> {
+                    if (p.getValue().getProcessor() == null) {
+                        return "";
+                    }
+                    Double currentValue = p.getValue().getProcessor().getNearestValue(crossHair.getCurrentXValue());
+                    if (currentValue == null) {
+                        return "";
+                    }
+                    return prefixFormatter.format(currentValue);
+                }, crossHair.currentXValueProperty()));
 
         seriesTable.setRowFactory(tv -> {
             TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
@@ -528,7 +540,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
-            newSeries.getData().addAll(series.getProcessor().getData());
+            for (XYChart.Data<ZonedDateTime, Double> sample : series.getProcessor().getData()) {
+                newSeries.getData().add(sample);
+            }
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
                     if (getChartType() == ChartType.AREA || getChartType() == ChartType.STACKED) {

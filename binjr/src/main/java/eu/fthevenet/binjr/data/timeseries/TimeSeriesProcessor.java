@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.data.timeseries;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.util.concurrent.ReadWriteLockHelper;
 import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,11 +34,11 @@ import java.util.List;
  */
 public abstract class TimeSeriesProcessor<T extends Number> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesProcessor.class);
+    private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, T>> data;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
-     *
      */
     public TimeSeriesProcessor() {
         this.data = new ArrayList<>();
@@ -48,29 +49,48 @@ public abstract class TimeSeriesProcessor<T extends Number> {
      *
      * @return the minimum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public abstract T getMinValue();
+    public final T getMinValue() {
+        return monitor.read().lock(this::computeMinValue);
+    }
 
     /**
      * Gets the average for all Y coordinates of the {@link TimeSeriesProcessor}
      *
      * @return the average for all Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public abstract T getAverageValue();
+    public final T getAverageValue() {
+        return monitor.read().lock(this::computeAverageValue);
+    }
 
     /**
      * Gets the maximum value for the Y coordinates of the {@link TimeSeriesProcessor}
      *
      * @return the maximum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public abstract T getMaxValue();
+    public final T getMaxValue() {
+        return monitor.read().lock(this::computeMaxValue);
+    }
 
     /**
-     * Sets the data for the {@link TimeSeriesProcessor}
+     * Gets the nearest value for the specified time stamp.
      *
-     * @param data the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
+     * @param xValue the time stamp to get the value for.
+     * @return the value for the specified time stamp.
      */
-    public void setData(List<XYChart.Data<ZonedDateTime, T>> data) {
-        this.data = data;
+    public T getNearestValue(ZonedDateTime xValue) {
+        // If the lock is already
+        return monitor.read().tryLock(() -> {
+            T value = null;
+            if (xValue != null && data != null) {
+                for (XYChart.Data<ZonedDateTime, T> sample : data) {
+                    value = sample.getYValue();
+                    if (xValue.isBefore(sample.getXValue())) {
+                        return value;
+                    }
+                }
+            }
+            return value;
+        }).orElse(null);
     }
 
     /**
@@ -78,8 +98,56 @@ public abstract class TimeSeriesProcessor<T extends Number> {
      *
      * @return the data of the {@link TimeSeriesProcessor}
      */
-    public List<XYChart.Data<ZonedDateTime, T>> getData() {
-        return data;
+    public Iterable<XYChart.Data<ZonedDateTime, T>> getData() {
+        return monitor.read().lock(() -> this.data);
     }
+
+    /**
+     * Sets the content for the {@link TimeSeriesProcessor}'s data store
+     *
+     * @param data the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
+     */
+    public void setData(Iterable<XYChart.Data<ZonedDateTime, T>> data) {
+        monitor.write().lock(() -> {
+            this.data.clear();
+            for (XYChart.Data<ZonedDateTime, T> sample : data) {
+                this.data.add(sample);
+            }
+        });
+    }
+
+    /**
+     * Returns the data sample at the given index.
+     *
+     * @param index the index of the sample to retrieve.
+     * @return the data sample at the given index.
+     */
+    public XYChart.Data<ZonedDateTime, T> getSample(int index) {
+        return monitor.read().lock(() -> this.data.get(index));
+    }
+
+    /**
+     * Returns the number of elements in the processor's data store
+     *
+     * @return the number of elements in the processor's data store
+     */
+    public int size() {
+        return monitor.read().lock(() -> this.data.size());
+    }
+
+    /**
+     * Adds a new sample to the processor's data store
+     *
+     * @param sample a new sample to add to the processor's data store
+     */
+    public void addSample(XYChart.Data<ZonedDateTime, T> sample) {
+        monitor.write().lock(() -> this.data.add(sample));
+    }
+
+    protected abstract T computeMinValue();
+
+    protected abstract T computeAverageValue();
+
+    protected abstract T computeMaxValue();
 
 }

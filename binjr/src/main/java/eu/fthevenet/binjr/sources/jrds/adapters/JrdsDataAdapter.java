@@ -93,6 +93,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
      * Default constructor
      */
     public JrdsDataAdapter() {
+        super();
         httpClient = httpClientFactory();
     }
 
@@ -224,8 +225,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .setHost(jrdsHost)
                 .setPort(jrdsPort)
                 .setPath(jrdsPath);
-
-
         try {
             return doHttpGet(requestUrl, response -> {
                 int status = response.getStatusLine().getStatusCode();
@@ -306,7 +305,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         } catch (IOException e) {
             throw new SourceCommunicationException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
         } catch (URISyntaxException e) {
-            throw new SourceCommunicationException("Error building URI for request");
+            throw new SourceCommunicationException("Error building URI for request", e);
         } catch (Exception e) {
             throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
         }

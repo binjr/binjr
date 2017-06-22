@@ -94,7 +94,7 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                             T val = numberParser.apply(data[i]);
                             XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
                             TimeSeriesProcessor<T> l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
-                            l.getData().add(point);
+                            l.addSample(point);
                         }
                     }
                 }
