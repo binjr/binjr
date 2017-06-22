@@ -26,6 +26,7 @@ import org.apache.logging.log4j.Logger;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The base class for time series processor classes, which holds raw data points and provides access to summary properties.
@@ -75,10 +76,10 @@ public abstract class TimeSeriesProcessor<T extends Number> {
      * Gets the nearest value for the specified time stamp.
      *
      * @param xValue the time stamp to get the value for.
-     * @return the value for the specified time stamp.
+     * @return An {@link Optional} instance that contains the value for the specified time stamp if process could complete and value is non-null.
      */
-    public T getNearestValue(ZonedDateTime xValue) {
-        // If the lock is already
+    public Optional<T> getNearestValue(ZonedDateTime xValue) {
+        // If the lock is already acquired, just abandon the request
         return monitor.read().tryLock(() -> {
             T value = null;
             if (xValue != null && data != null) {
@@ -90,7 +91,7 @@ public abstract class TimeSeriesProcessor<T extends Number> {
                 }
             }
             return value;
-        }).orElse(null);
+        });
     }
 
     /**

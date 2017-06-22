@@ -354,13 +354,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> {
                     if (p.getValue().getProcessor() == null) {
-                        return "";
+                        return "NaN";
                     }
-                    Double currentValue = p.getValue().getProcessor().getNearestValue(crossHair.getCurrentXValue());
-                    if (currentValue == null) {
-                        return "";
-                    }
-                    return prefixFormatter.format(currentValue);
+                    return prefixFormatter.format(p.getValue().getProcessor().getNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
                 }, crossHair.currentXValueProperty()));
 
         seriesTable.setRowFactory(tv -> {
