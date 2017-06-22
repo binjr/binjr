@@ -38,7 +38,8 @@ public class SuffixFormatTests {
 
 
         double[] doubles = new double[50];
-        for (int i = 0; i < numbers.length; i++)
+        doubles[0] = Double.NaN;
+        for (int i = 1; i < numbers.length; i++)
             doubles[i] = Math.random() < 0.5 ? Math.random() * Short.MAX_VALUE : Math.random() * Short.MIN_VALUE;
 
         System.out.println(convert(new MetricPrefixFormatter(), doubles) );
