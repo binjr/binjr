@@ -443,11 +443,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     protected void removeSelectedBinding() {
         List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
-        if (selected != null) {
-            seriesTable.getItems().removeAll(selected);
-            seriesTable.getSelectionModel().clearSelection();
-            invalidate(false, false, false);
-        }
+        seriesTable.getItems().removeAll(selected);
+        seriesTable.getSelectionModel().clearSelection();
+        invalidate(false, false, false);
     }
 
     protected void refresh() {
@@ -541,21 +539,33 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             }
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
-                    if (getChartType() == ChartType.AREA || getChartType() == ChartType.STACKED) {
-                        ObservableList<Node> children = ((Group) newNode).getChildren();
-                        if (children != null) {
-                            if (children.size() >= 1) {
-                                Path stroke = (Path) children.get(1);
-                                Path fill = (Path) children.get(0);
-                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                                stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
-                                stroke.strokeProperty().bind(series.displayColorProperty());
-                                fill.fillProperty().bind(Bindings.createObjectBinding(
-                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
-                                        series.displayColorProperty(),
-                                        getWorksheet().graphOpacityProperty()));
+                    switch (getChartType()) {
+                        case AREA:
+                        case STACKED:
+                            ObservableList<Node> children = ((Group) newNode).getChildren();
+                            if (children != null) {
+                                if (children.size() >= 1) {
+                                    Path stroke = (Path) children.get(1);
+                                    Path fill = (Path) children.get(0);
+                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                    stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
+                                    stroke.strokeProperty().bind(series.displayColorProperty());
+                                    fill.fillProperty().bind(Bindings.createObjectBinding(
+                                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
+                                            series.displayColorProperty(),
+                                            getWorksheet().graphOpacityProperty()));
+                                }
                             }
-                        }
+                            break;
+                        case LINE:
+                            Path stroke = (Path)newNode;
+                            logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                            stroke.strokeWidthProperty().bind(series.strokeWidthProperty());
+                            stroke.strokeProperty().bind(series.displayColorProperty());
+                            break;
+                        default:
+                            break;
+
                     }
                 }
             });

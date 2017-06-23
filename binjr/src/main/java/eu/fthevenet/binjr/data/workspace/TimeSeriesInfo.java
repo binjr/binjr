@@ -36,35 +36,20 @@ import java.io.Serializable;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
 public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable {
+    public static final double DEFAULT_STROKE_WIDTH = 0.1;
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
     private final BooleanProperty selected;
     @IsDirtyable
     private final Property<Color> displayColor;
-    private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
+    @IsDirtyable
+    private DoubleProperty strokeWidth;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
-
     private final ChangeWatcher<TimeSeriesInfo> status;
+    private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
-    /**
-     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     *
-     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
-     * @param <T>     the type of Y data for that series
-     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     */
-    public static <T extends Number> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding) {
-        if (binding == null) {
-            throw new IllegalArgumentException("binding cannot be null");
-        }
-        return new TimeSeriesInfo<>(binding.getLegend(),
-                true,
-                binding.getColor(),
-                null,
-                binding);
-    }
 
     /**
      * Parameter-less constructor (needed for XMl serialization)
@@ -73,6 +58,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this("",
                 true,
                 null,
+                DEFAULT_STROKE_WIDTH,
                 null,
                 null);
     }
@@ -90,6 +76,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
+                DEFAULT_STROKE_WIDTH,
                 null,
                 seriesInfo.getBinding());
     }
@@ -106,13 +93,34 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
+                           double strokeWidth,
                            TimeSeriesProcessor<T> data,
                            TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
+        this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
         status = new ChangeWatcher<>(this);
+    }
+
+    /**
+     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     *
+     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
+     * @param <T>     the type of Y data for that series
+     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     */
+    public static <T extends Number> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding) {
+        if (binding == null) {
+            throw new IllegalArgumentException("binding cannot be null");
+        }
+        return new TimeSeriesInfo<>(binding.getLegend(),
+                true,
+                binding.getColor(),
+                DEFAULT_STROKE_WIDTH,
+                null,
+                binding);
     }
 
     /**
@@ -125,21 +133,21 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     }
 
     /**
-     * The displayName property
-     *
-     * @return the displayName property
-     */
-    public StringProperty displayNameProperty() {
-        return displayName;
-    }
-
-    /**
      * Sets the display name fo the series
      *
      * @param displayName the display name fo the series
      */
     public void setDisplayName(String displayName) {
         this.displayName.set(displayName);
+    }
+
+    /**
+     * The displayName property
+     *
+     * @return the displayName property
+     */
+    public StringProperty displayNameProperty() {
+        return displayName;
     }
 
     /**
@@ -152,21 +160,21 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     }
 
     /**
-     * The selected property
-     *
-     * @return the selected property
-     */
-    public BooleanProperty selectedProperty() {
-        return selected;
-    }
-
-    /**
      * Set to true if the series is selected, false otherwise
      *
      * @param selected true if the series is selected, false otherwise
      */
     public void setSelected(boolean selected) {
         this.selected.set(selected);
+    }
+
+    /**
+     * The selected property
+     *
+     * @return the selected property
+     */
+    public BooleanProperty selectedProperty() {
+        return selected;
     }
 
     /**
@@ -179,21 +187,21 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     }
 
     /**
-     * The displayColor property
-     *
-     * @return the displayColor property
-     */
-    public Property<Color> displayColorProperty() {
-        return displayColor;
-    }
-
-    /**
      * Sets the display color for the series
      *
      * @param displayColor the display color for the series
      */
     public void setDisplayColor(Color displayColor) {
         this.displayColor.setValue(displayColor);
+    }
+
+    /**
+     * The displayColor property
+     *
+     * @return the displayColor property
+     */
+    public Property<Color> displayColorProperty() {
+        return displayColor;
     }
 
     /**
@@ -224,8 +232,40 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this.processor.setValue(processor);
     }
 
-    public Property<TimeSeriesProcessor<T>> processorProperty(){
+    /**
+     * The processor property.
+     *
+     * @return The processor property.
+     */
+    public Property<TimeSeriesProcessor<T>> processorProperty() {
         return this.processor;
+    }
+
+    /**
+     * The strokeWidth property.
+     *
+     * @return The strokewidth property.
+     */
+    public DoubleProperty strokeWidthProperty() {
+        return strokeWidth;
+    }
+
+    /**
+     * Return the stroke width for line charts
+     *
+     * @return the stroke width for line charts
+     */
+    public double getStrokeWidth() {
+        return strokeWidth.get();
+    }
+
+    /**
+     * Sets the stroke width for line charts.
+     *
+     * @param value the stroke width for line charts.
+     */
+    public void setStrokeWidth(double value) {
+        strokeWidth.setValue(value);
     }
 
     @XmlTransient
@@ -243,4 +283,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     public void cleanUp() {
         status.cleanUp();
     }
+
+
 }
