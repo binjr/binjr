@@ -356,7 +356,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     if (p.getValue().getProcessor() == null) {
                         return "NaN";
                     }
-                    return prefixFormatter.format(p.getValue().getProcessor().getNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
+                    return prefixFormatter.format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
                 }, crossHair.currentXValueProperty()));
 
         seriesTable.setRowFactory(tv -> {
@@ -534,9 +534,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
-            for (XYChart.Data<ZonedDateTime, Double> sample : series.getProcessor().getData()) {
-                newSeries.getData().add(sample);
-            }
+            newSeries.getData().setAll(series.getProcessor().getData());
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
                     switch (getChartType()) {

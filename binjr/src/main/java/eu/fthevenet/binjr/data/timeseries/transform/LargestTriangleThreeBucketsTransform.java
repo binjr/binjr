@@ -24,6 +24,7 @@ import javafx.scene.chart.XYChart;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,7 +69,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
      * @param threshold d the maximum number of samples to keep.
      * @return a reduced list of samples.
      */
-    private Iterable<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(TimeSeriesProcessor<T> data, int threshold) {
+    private Collection<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(TimeSeriesProcessor<T> data, int threshold) {
         int dataLength = data.size();
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
         ZoneId zoneId = data.getSample(0).getXValue().getZone();

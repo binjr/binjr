@@ -23,6 +23,7 @@ import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T
                 }));
     }
 
-    private Iterable<XYChart.Data<ZonedDateTime, T>> decimate(TimeSeriesProcessor<T> data, int threshold) {
+    private Collection<XYChart.Data<ZonedDateTime, T>> decimate(TimeSeriesProcessor<T> data, int threshold) {
         int dataLength = data.size();
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
         double every = (double) (dataLength - 2) / (threshold - 2);

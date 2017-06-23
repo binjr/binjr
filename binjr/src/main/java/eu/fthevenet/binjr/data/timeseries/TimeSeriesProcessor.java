@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,48 +74,49 @@ public abstract class TimeSeriesProcessor<T extends Number> {
     }
 
     /**
-     * Gets the nearest value for the specified time stamp.
-     *
+     * Try to get the nearest value for the specified time stamp.
+     * <p>
+     * <p><b>Remark:</b> If the processor is already being accessed by another thread, returns immediately with Optional.empty</p>
      * @param xValue the time stamp to get the value for.
-     * @return An {@link Optional} instance that contains the value for the specified time stamp if process could complete and value is non-null.
+     * @return An {@link Optional} instance that contains tthe value for the time position nearest to the one requested if process could complete and value is non-null.
      */
-    public Optional<T> getNearestValue(ZonedDateTime xValue) {
+    public Optional<T> tryGetNearestValue(ZonedDateTime xValue) {
         // If the lock is already acquired, just abandon the request
-        return monitor.read().tryLock(() -> {
-            T value = null;
-            if (xValue != null && data != null) {
-                for (XYChart.Data<ZonedDateTime, T> sample : data) {
-                    value = sample.getYValue();
-                    if (xValue.isBefore(sample.getXValue())) {
-                        return value;
-                    }
-                }
-            }
-            return value;
-        });
+        return monitor.read().tryLock(this::unsafeGetNearestValue, xValue);
+    }
+
+    /**
+     * Get the nearest value for the specified time stamp.
+     * <p>
+     * <p><b>Remark:</b> If the processor is already being accessed by another thread, waits until lock is released and returns requested value</p>
+     * @param xValue the time stamp to get the value for.
+     * @return the value for the time position nearest to the one requested.
+     */
+    public T getNearestValue(ZonedDateTime xValue) {
+        return monitor.read().lock(this::unsafeGetNearestValue, xValue);
     }
 
     /**
      * Gets the data of the {@link TimeSeriesProcessor}
+     * <p>
+     * <p><b>Remark:</b> the returned collection is a shallow copy of the the processor's own backing collection,
+     * so it can be iterated through without risking a concurrent access error even if content is being added or
+     * removed to the processor on a seperate thread. However, the the actual data for individual samples  are
+     * not guarded against concurrent access in any capacity.</p>
      *
      * @return the data of the {@link TimeSeriesProcessor}
      */
-    public Iterable<XYChart.Data<ZonedDateTime, T>> getData() {
-        return monitor.read().lock(() -> this.data);
+    public Collection<XYChart.Data<ZonedDateTime, T>> getData() {
+        return monitor.read().lock(() -> new ArrayList<>(data));
     }
 
     /**
      * Sets the content for the {@link TimeSeriesProcessor}'s data store
      *
-     * @param data the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
+     * @param newData the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
      */
-    public void setData(Iterable<XYChart.Data<ZonedDateTime, T>> data) {
-        monitor.write().lock(() -> {
-            this.data.clear();
-            for (XYChart.Data<ZonedDateTime, T> sample : data) {
-                this.data.add(sample);
-            }
-        });
+    public void setData(Collection<XYChart.Data<ZonedDateTime, T>> newData) {
+        monitor.write().lock(() -> this.data = new ArrayList<>(newData));
     }
 
     /**
@@ -150,5 +152,19 @@ public abstract class TimeSeriesProcessor<T extends Number> {
     protected abstract T computeAverageValue();
 
     protected abstract T computeMaxValue();
+
+    private  T unsafeGetNearestValue(ZonedDateTime xValue) {
+        T value = null;
+        if (xValue != null && data != null) {
+            for (XYChart.Data<ZonedDateTime, T> sample : data) {
+                value = sample.getYValue();
+                if (xValue.isBefore(sample.getXValue())) {
+                    //TODO check if previous value is nearer and return corresponding value instead
+                    return value;
+                }
+            }
+        }
+        return value;
+    }
 
 }
