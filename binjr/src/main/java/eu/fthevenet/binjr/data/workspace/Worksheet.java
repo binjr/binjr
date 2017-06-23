@@ -83,6 +83,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     private BooleanProperty showAreaOutline;
     @IsDirtyable
     private BooleanProperty showChartSymbols = new SimpleBooleanProperty(false);
+    @IsDirtyable
+    private DoubleProperty strokeWidth;
 
 
     private final ChangeWatcher<Worksheet> status;
@@ -98,7 +100,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
                 UnitPrefixes.METRIC,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline());
+                GlobalPreferences.getInstance().isShowAreaOutline(),
+                1.0);
     }
 
     /**
@@ -118,7 +121,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 unitName,
                 prefix,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline());
+                GlobalPreferences.getInstance().isShowAreaOutline(),
+                1.0);
     }
 
     /**
@@ -138,7 +142,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                 initWorksheet.getUnit(),
                 initWorksheet.getUnitPrefixes(),
                 initWorksheet.getGraphOpacity(),
-                initWorksheet.isShowAreaOutline());
+                initWorksheet.isShowAreaOutline(),
+                initWorksheet.getStrokeWidth());
     }
 
     private Worksheet(String name,
@@ -150,7 +155,8 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
                       String unitName,
                       UnitPrefixes base,
                       double graphOpacity,
-                      boolean showAreaOutline) {
+                      boolean showAreaOutline,
+                      double strokeWidth) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -161,6 +167,9 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
+        this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
+
+        // Change watcher must be initialized before  dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher<>(this);
     }
 
@@ -520,6 +529,35 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.showChartSymbols.set(showChartSymbols);
     }
 
+
+    /**
+     * The strokeWidth property.
+     *
+     * @return The strokewidth property.
+     */
+    public DoubleProperty strokeWidthProperty() {
+        return strokeWidth;
+    }
+
+    /**
+     * Return the stroke width for line charts
+     *
+     * @return the stroke width for line charts
+     */
+    public double getStrokeWidth() {
+        return strokeWidth.get();
+    }
+
+    /**
+     * Sets the stroke width for line charts.
+     *
+     * @param value the stroke width for line charts.
+     */
+    public void setStrokeWidth(double value) {
+        strokeWidth.setValue(value);
+    }
+
+
     @Override
     public String toString() {
         return String.format("%s - %s - %s",
@@ -549,5 +587,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     public void close() throws Exception {
         series.clear();
     }
+
 }
 

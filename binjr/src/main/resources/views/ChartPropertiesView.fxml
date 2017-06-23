@@ -23,63 +23,59 @@
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="349.0" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="40.0" prefWidth="40.0" styleClass="square-button" AnchorPane.rightAnchor="5.0"
-                AnchorPane.topAnchor="5.0">
-            <graphic>
-                <Region styleClass="cross-icon"/>
-            </graphic>
-        </Button>
-        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="pane-title" text="Chart Properties" AnchorPane.leftAnchor="0.0"
-               AnchorPane.topAnchor="5.0">
-            <font>
-                <Font size="16.0"/>
-            </font>
-            <padding>
-                <Insets left="5.0"/>
-            </padding>
-        </Label>
-        <ScrollPane fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
-            <content>
-
-                <AnchorPane>
+    <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="40.0" prefWidth="40.0" styleClass="square-button" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+        <graphic>
+            <Region styleClass="cross-icon"/>
+        </graphic>
+    </Button>
+    <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="pane-title" text="Chart Properties" AnchorPane.leftAnchor="0.0"
+           AnchorPane.topAnchor="5.0">
+        <font>
+            <Font size="16.0"/>
+        </font>
+        <padding>
+            <Insets left="5.0"/>
+        </padding>
+    </Label>
+    <ScrollPane fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <padding>
+            <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+        </padding>
+        <AnchorPane>
+            <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox>
                     <children>
-                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <children>
-                                <Label text="Show outline on area charts" wrapText="true"/>
-                                <VBox fillWidth="false">
-                                    <children>
-                                        <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
-                                        </ToggleSwitch>
-                                    </children>
-                                </VBox>
-                                <Label text="Chart area  opacity" wrapText="true"/>
-                                <VBox>
-                                    <children>
-                                        <HBox alignment="CENTER_LEFT">
-                                            <children>
-                                                <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
-                                                <Label fx:id="opacityText" text="100%"/>
-                                            </children>
-                                        </HBox>
-                                    </children>
-                                </VBox>
-                                <Label text="Show sample symbols" wrapText="true"/>
-                                <VBox fillWidth="false">
-                                    <children>
-                                        <ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">
-                                        </ToggleSwitch>
-                                    </children>
-                                </VBox>
-                            </children>
-                        </VBox>
+                        <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                     </children>
-                </AnchorPane>
-            </content>
-            <padding>
-                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-            </padding>
-        </ScrollPane>
-        <Separator orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-    </children>
+                </VBox>
+                <Label text="Show outline" wrapText="true"/>
+                <VBox fillWidth="false">
+                    <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
+                    </ToggleSwitch>
+                </VBox>
+                <Label fx:id="strokeWidthLabel" text="Stroke width" wrapText="true"/>
+                <VBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Slider fx:id="strokeWidthSlider" blockIncrement="0.5" majorTickUnit="10.0" max="10.0" min="0.0" minorTickCount="10" value="1.0"/>
+                        <Label fx:id="strokeWidthText" text="1.0"/>
+                    </HBox>
+                </VBox>
+                <Label fx:id="graphOpacityLabel" text="Area opacity" wrapText="true"/>
+                <VBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                        <Label fx:id="opacityText" text="100%"/>
+                    </HBox>
+                </VBox>
+                <Label text="Show sample symbols" wrapText="true"/>
+                <VBox fillWidth="false">
+                    <children>
+                        <ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">
+                        </ToggleSwitch>
+                    </children>
+                </VBox>
+            </VBox>
+        </AnchorPane>
+    </ScrollPane>
+    <Separator orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 </AnchorPane>

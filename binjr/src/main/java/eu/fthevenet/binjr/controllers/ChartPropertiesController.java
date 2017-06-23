@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
@@ -27,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.layout.AnchorPane;
@@ -53,9 +55,19 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private Slider graphOpacitySlider = new Slider();
     @FXML
+    private Label graphOpacityLabel = new Label();
+    @FXML
+    private Slider strokeWidthSlider = new Slider();
+    @FXML
+    private Label strokeWidthText = new Label();
+    @FXML
+    private Label strokeWidthLabel = new Label();
+    @FXML
     private Label opacityText = new Label();
     @FXML
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
+    @FXML
+    private ChoiceBox<ChartType> chartTypeChoice;
     @FXML
     private ToggleSwitch showChartSymbols = new ToggleSwitch();
 
@@ -91,10 +103,33 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
         assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+        assert strokeWidthText != null : "fx:id\"strokeWidthText\" was not injected!";
+        assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
 
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+
+        strokeWidthSlider.valueProperty().bindBidirectional(worksheet.strokeWidthProperty());
+        strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
+
+        adaptToChartType(worksheet.getChartType() == ChartType.LINE);
+        worksheet.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                adaptToChartType(newValue == ChartType.LINE);
+            }
+        });
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
+
+
+        chartTypeChoice.getItems().setAll(ChartType.values());
+        chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
+        worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
+
+
+        strokeWidthControlDisabled(!showAreaOutline.isSelected());
+        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            strokeWidthControlDisabled(!newValue);
+        });
         showChartSymbols.selectedProperty().bindBidirectional(worksheet.showChartSymbolsProperty());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
@@ -113,6 +148,21 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
 //                hide(Duration.millis(800));
 //            }
 //        });
+    }
+
+    private void adaptToChartType(boolean disable) {
+        showAreaOutline.setDisable(disable);
+        showAreaOutline.setSelected(disable);
+        graphOpacitySlider.setDisable(disable);
+        graphOpacityLabel.setDisable(disable);
+        opacityText.setDisable(disable);
+    }
+
+    private void strokeWidthControlDisabled(boolean disable) {
+        strokeWidthSlider.setDisable(disable);
+        strokeWidthText.setDisable(disable);
+        strokeWidthLabel.setDisable(disable);
+
     }
 
     public ReadOnlyBooleanProperty hiddenProperty() {

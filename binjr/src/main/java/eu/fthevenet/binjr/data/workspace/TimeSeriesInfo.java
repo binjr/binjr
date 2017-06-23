@@ -36,15 +36,12 @@ import java.io.Serializable;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
 public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable {
-    public static final double DEFAULT_STROKE_WIDTH = 0.1;
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
     private final BooleanProperty selected;
     @IsDirtyable
     private final Property<Color> displayColor;
-    @IsDirtyable
-    private DoubleProperty strokeWidth;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
     private final ChangeWatcher<TimeSeriesInfo> status;
@@ -58,7 +55,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this("",
                 true,
                 null,
-                DEFAULT_STROKE_WIDTH,
                 null,
                 null);
     }
@@ -76,7 +72,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
-                DEFAULT_STROKE_WIDTH,
                 null,
                 seriesInfo.getBinding());
     }
@@ -93,14 +88,12 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           double strokeWidth,
                            TimeSeriesProcessor<T> data,
                            TimeSeriesBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
-        this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
         status = new ChangeWatcher<>(this);
     }
 
@@ -118,7 +111,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         return new TimeSeriesInfo<>(binding.getLegend(),
                 true,
                 binding.getColor(),
-                DEFAULT_STROKE_WIDTH,
                 null,
                 binding);
     }
@@ -239,33 +231,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      */
     public Property<TimeSeriesProcessor<T>> processorProperty() {
         return this.processor;
-    }
-
-    /**
-     * The strokeWidth property.
-     *
-     * @return The strokewidth property.
-     */
-    public DoubleProperty strokeWidthProperty() {
-        return strokeWidth;
-    }
-
-    /**
-     * Return the stroke width for line charts
-     *
-     * @return the stroke width for line charts
-     */
-    public double getStrokeWidth() {
-        return strokeWidth.get();
-    }
-
-    /**
-     * Sets the stroke width for line charts.
-     *
-     * @param value the stroke width for line charts.
-     */
-    public void setStrokeWidth(double value) {
-        strokeWidth.setValue(value);
     }
 
     @XmlTransient

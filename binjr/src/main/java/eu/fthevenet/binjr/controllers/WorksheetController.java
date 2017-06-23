@@ -246,7 +246,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             yAxis = new MetricStableTicksAxis();
         }
         yAxis.setSide(Side.LEFT);
-        //yAxis.setAutoRanging(true);
         yAxis.autoRangingProperty().bindBidirectional(autoScaleYAxisToggle.selectedProperty());
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
@@ -547,6 +546,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                                     Path fill = (Path) children.get(0);
                                     logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                                     stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
+                                    stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
                                     stroke.strokeProperty().bind(series.displayColorProperty());
                                     fill.fillProperty().bind(Bindings.createObjectBinding(
                                             () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
@@ -558,7 +558,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                         case LINE:
                             Path stroke = (Path)newNode;
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                            stroke.strokeWidthProperty().bind(series.strokeWidthProperty());
+                            stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
                             stroke.strokeProperty().bind(series.displayColorProperty());
                             break;
                         default:
