@@ -92,7 +92,7 @@ public class MainViewController implements Initializable {
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
-    private final Map<Tab, WorksheetController> seriesControllers = new HashMap<>();
+    private final Map<EditableTab, WorksheetController> seriesControllers = new HashMap<EditableTab, WorksheetController>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
@@ -743,6 +743,25 @@ public class MainViewController implements Initializable {
         return false;
     }
 
+    private void reloadController(WorksheetController worksheetCtrl) {
+        if (worksheetCtrl == null) {
+            throw new IllegalArgumentException("Provided Worksheet controller cannot be null");
+        }
+        EditableTab tab = null;
+        for (Map.Entry<EditableTab, WorksheetController> entry : seriesControllers.entrySet()) {
+
+            if (entry.getValue().equals(worksheetCtrl)) {
+                tab = entry.getKey();
+            }
+        }
+        if (tab == null) {
+            throw new IllegalStateException("cannot find associated tab or WorksheetController for" + worksheetCtrl.getName());
+        }
+        Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
+        worksheetCtrl.close();
+        loadWorksheet(worksheet, tab);
+    }
+
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
@@ -760,6 +779,8 @@ public class MainViewController implements Initializable {
                     throw new UnsupportedOperationException("Unsupported chart");
             }
             try {
+                // Register reload listener
+                current.setReloadRequiredHandler(this::reloadController);
                 FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();

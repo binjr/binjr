@@ -67,13 +67,13 @@
                         <Label fx:id="opacityText" text="100%"/>
                     </HBox>
                 </VBox>
-                <Label text="Show sample symbols" wrapText="true"/>
-                <VBox fillWidth="false">
-                    <children>
-                        <ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">
-                        </ToggleSwitch>
-                    </children>
-                </VBox>
+                <!--<Label text="Show sample symbols" wrapText="true"/>-->
+                <!--<VBox fillWidth="false">-->
+                <!--<children>-->
+                <!--<ToggleSwitch fx:id="showChartSymbols" prefWidth="1.0">-->
+                <!--</ToggleSwitch>-->
+                <!--</children>-->
+                <!--</VBox>-->
             </VBox>
         </AnchorPane>
     </ScrollPane>

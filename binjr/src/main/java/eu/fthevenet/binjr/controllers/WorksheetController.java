@@ -74,6 +74,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -148,6 +149,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private History forwardHistory = new History();
     private String name;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
+    private ChangeListener<ChartType> chartTypeListener;
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
@@ -410,6 +412,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             }
         });
         seriesTable.setItems(worksheet.getSeries());
+
+
         //endregion
     }
     //endregion
@@ -425,6 +429,20 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     public void showPropertiesPane(boolean show) {
         this.chartPropertiesButton.setSelected(show);
+    }
+
+
+    public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
+        if (this.chartTypeListener != null) {
+            this.worksheet.chartTypeProperty().removeListener(this.chartTypeListener);
+        }
+        this.chartTypeListener = (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                logger.debug("Reloading worksheet controller because chart type change from: " + oldValue + " to " + newValue);
+                action.accept(this);
+            }
+        };
+        this.worksheet.chartTypeProperty().addListener(this.chartTypeListener);
     }
 
     //region *** protected members ***

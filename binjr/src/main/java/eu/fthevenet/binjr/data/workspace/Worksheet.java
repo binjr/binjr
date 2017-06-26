@@ -86,7 +86,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     @IsDirtyable
     private DoubleProperty strokeWidth;
 
-
     private final ChangeWatcher<Worksheet> status;
 
     /**
@@ -166,7 +165,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
-        this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
+        this.showAreaOutline = new SimpleBooleanProperty((chartType == ChartType.LINE) || showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
 
         // Change watcher must be initialized before  dirtyable properties or they will not be tracked.
@@ -587,6 +586,5 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     public void close() throws Exception {
         series.clear();
     }
-
 }
 

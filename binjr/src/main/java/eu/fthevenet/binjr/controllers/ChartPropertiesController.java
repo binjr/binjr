@@ -68,8 +68,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
-    @FXML
-    private ToggleSwitch showChartSymbols = new ToggleSwitch();
+//    @FXML
+//    private ToggleSwitch showChartSymbols = new ToggleSwitch();
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
         this.worksheet = worksheet;
@@ -101,7 +101,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     public void initialize(URL location, ResourceBundle resources) {
         assert opacityText != null : "fx:id\"opacityText\" was not injected!";
         assert showAreaOutline != null : "fx:id\"showAreaOutline\" was not injected!";
-        assert showChartSymbols != null : "fx:id\"showChartSymbols\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         assert strokeWidthText != null : "fx:id\"strokeWidthText\" was not injected!";
         assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
@@ -130,7 +129,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> {
             strokeWidthControlDisabled(!newValue);
         });
-        showChartSymbols.selectedProperty().bindBidirectional(worksheet.showChartSymbolsProperty());
+        //   showChartSymbols.selectedProperty().bindBidirectional(worksheet.showChartSymbolsProperty());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
@@ -162,7 +161,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         strokeWidthSlider.setDisable(disable);
         strokeWidthText.setDisable(disable);
         strokeWidthLabel.setDisable(disable);
-
     }
 
     public ReadOnlyBooleanProperty hiddenProperty() {

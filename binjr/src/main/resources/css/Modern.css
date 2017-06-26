@@ -1,6 +1,13 @@
 {
     -binjr-command-bar-bg-color: #204656;
     -binjr-command-bar-accent-color: #336F87;
+    -binjr-button-background-color: transparent;
+    -binjr-color-lighter-gray: #DADADA;
+    -binjr-color-light-gray: #C2C2C2;
+    -binjr-color-gray: #999999;
+    -binjr-color-dark-gray: #666666;
+    -binjr-color-darker-gray: #333333;
+
 }
 
 .column-bold-text{
@@ -11,7 +18,6 @@
 /********************************
 *      button icons
 ********************************/
-
 
 .command-bar * {
     -icon-scale-x: 3;
@@ -41,7 +47,6 @@
 
 .command-bar-menu-graphic {
     -fx-padding:6;
-
     -fx-fill:red;
 }
 
@@ -56,10 +61,10 @@
 .toggle-button,
 .menu-button{
    /* -fx-color-label-visible: false;*/
-    -fx-background-color: transparent;
+    -fx-background-color: -binjr-button-background-color;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color: #737373;
+    -fx-border-color: -binjr-color-dark-gray;
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center;
@@ -68,7 +73,7 @@
 .button:hover,
 .toggle-button:hover,
 .menu-button:hover {
-    -fx-background-color:#DADADA;
+    -fx-background-color:-binjr-color-lighter-gray;
 }
 
 .button:pressed,
@@ -76,27 +81,27 @@
 .menu-button:pressed,
 .menu-button:default:hover:pressed {
   -fx-opacity: 100%;
-  -fx-background-color:#C2C2C2 ;
+  -fx-background-color:-binjr-color-light-gray ;
   -fx-text-fill: white;
 }
 
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
  .toggle-button:selected:hover:pressed {
-  -fx-background-color:#969696 ;
+  -fx-background-color:-binjr-color-gray ;
   -fx-text-fill: white;
 }
 
 .toggle-button:selected,
 .menu-button:selected {
-    -fx-background-color: #C2C2C2;
+    -fx-background-color: -binjr-color-light-gray;
     -fx-text-fill: white;
 }
 
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
-    -fx-background-color: #C2C2C2;
-    -fx-border-color:#737373;
+    -fx-background-color: -binjr-color-light-gray;
+    -fx-border-color:-binjr-color-dark-gray;
     -fx-border-width:1;
     -fx-text-fill: white;
 }
@@ -148,8 +153,8 @@
  }
 
  .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
-   /*     -fx-background-color: #5c5c5c, transparent;*/
-     -fx-border-color:#737373;
+   /*     -fx-background-color: #5c5c5c, -binjr-button-background-color;*/
+     -fx-border-color:-binjr-color-dark-gray;
    /*  -fx-text-fill: black;*/
  }
 
@@ -170,7 +175,7 @@
  }
 
  .date-picker {
-    -fx-background-color: transparent;
+    -fx-background-color: -binjr-button-background-color;
     -fx-background-insets: 0;
     -fx-border-width:0;
     -fx-border-radius:0;
@@ -179,11 +184,11 @@
  .date-picker .text-input{
      -fx-background-radius: 0, 0;
 
-     -fx-background-color: transparent, white;
+     -fx-background-color: -binjr-button-background-color, white;
      -fx-background-insets: 2, 2;
  }*/
   .date-picker > .arrow-button {
-    -fx-background-color: transparent;
+    -fx-background-color: -binjr-button-background-color;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
     -fx-border-width:0;
@@ -231,7 +236,7 @@
  }
 
  .date-picker-popup > * > .spinner > .button:hover {
-     -fx-background-color: #dadada;
+     -fx-background-color: -binjr-color-lighter-gray;
  }
 
  .date-picker-popup > * > .spinner > .button:armed {
@@ -344,7 +349,7 @@
 .tab-pane .tab-header-area .headers-region .tab{
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color: #737373;
+    -fx-border-color: -binjr-color-dark-gray;
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-background-color:transparent;
@@ -431,13 +436,13 @@
  .scroll-bar > .decrement-button > .decrement-arrow,
  .scroll-bar > .increment-button > .increment-arrow{
      -fx-background-insets: 1 0 -1 0, 0;
-     -fx-background-color: transparent, #606060;
+     -fx-background-color: -binjr-button-background-color, #606060;
      -fx-effect: null;
  }
 
  .scroll-bar > .decrement-button:pressed > .decrement-arrow,
  .scroll-bar > .increment-button:pressed > .increment-arrow {
-     -fx-background-color: transparent, white;
+     -fx-background-color: -binjr-button-background-color, white;
      -fx-effect: null;
  }
 
@@ -478,27 +483,27 @@
 
  .add-source-background-icon,
  .add-worksheet-background-icon{
-    -fx-text-fill:  #DADADA;
+    -fx-text-fill:  -binjr-color-lighter-gray;
  }
 
 
  .add-source-background-icon:hover,
  .add-worksheet-background-icon:hover{
-    -fx-text-fill:  #969696;
+    -fx-text-fill:  -binjr-color-gray;
  }
 
  .add-worksheet-background-icon .addWorksheet-icon,
  .add-source-background-icon .addSource-icon {
   -fx-scale-x:20;
   -fx-scale-y:20;
-  -fx-background-color:#DADADA;
+  -fx-background-color:-binjr-color-lighter-gray;
 }
 
  .add-worksheet-background-icon .addWorksheet-icon:hover,
  .add-source-background-icon .addSource-icon:hover,
  .add-worksheet-background-icon .addWorksheet-icon:hover:pressed,
  .add-source-background-icon .addSource-icon:hover:pressed {
-  -fx-background-color:#969696;
+  -fx-background-color:-binjr-color-gray;
 }
 
 .toolPane {
@@ -511,7 +516,8 @@
 
 
 .toolPane .scroll-pane .viewport .text {
-  -fx-font-size: 10pt;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
 }
 
 .toolPane .pane-title {
@@ -547,7 +553,7 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color: #737373;
+    -fx-border-color: -binjr-color-dark-gray;
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center_left;
@@ -570,7 +576,7 @@
 .command-bar .toggle-button:pressed,
 .command-bar .toggle-button:default:hover:pressed,
 .command-bar .toggle-button:selected:hover:pressed {
-    -fx-background-color:#969696 ;
+    -fx-background-color:-binjr-color-gray ;
     -fx-text-fill: white;
 }
 
@@ -583,7 +589,7 @@
 .command-bar .toggle-button:selected:hover,
 .command-bar .menu-button:selected:hover {
      -fx-background-color: -binjr-command-bar-accent-color;
-     -fx-border-color:#737373;
+     -fx-border-color:-binjr-color-dark-gray;
      -fx-border-width:1;
      -fx-text-fill: white;
 }
@@ -684,7 +690,7 @@
 
 .context-menu .label{
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-font-size: 11pt;
+    -fx-font-size: 10pt;
 }
 
 .command-bar .menu-item{
@@ -718,26 +724,53 @@
  *                                                                             *
  ******************************************************************************/
 
-.choice-box {
+.command-bar .choice-box {
     -fx-background-color: transparent;
     -fx-border-color:white;
     -fx-border-width:2;
     -fx-background-radius: 0, 0, 0, 0;
-  /*  -fx-padding: 0em 0.166667em 0em 0.166667em; /* 0 2px 0 2px*/
+    -fx-padding: 0em 0.166667em 0em 0.166667em;
     -fx-background-insets: -1.4, 0, 1, 2;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 
 
-.choice-box:hover {
+.command-bar .choice-box:hover {
     -fx-background-color: -binjr-command-bar-accent-color;
      -fx-border-color:#4BACC6;
 }
 
+.command-bar .choice-box:disabled {
+    -fx-opacity: .4;
+}
+
+.choice-box {
+    -fx-background-color: -binjr-button-background-color;
+    -fx-border-color: -binjr-color-gray;
+    -fx-border-width:2;
+    -fx-background-radius: 0, 0, 0, 0;
+    -fx-padding: 0em 0.166667em 0em 0.166667em;
+    -fx-background-insets: -1.4, 0, 1, 2;
+   /* -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 11pt;*/
+}
+
+.choice-box:hover {
+    -fx-border-color: -binjr-color-dark-gray;
+}
+
+.choice-box:pressed:hover {
+    -fx-background-color: -binjr-color-lighter-gray;
+    -fx-border-color: -binjr-color-gray;
+}
+
+
 .choice-box:disabled {
     -fx-opacity: .4;
 }
+
+/*****************************************************************/
 
 .radio-menu-item:checked > .left-container > .radio {
     -fx-shape: "M9.005,17.766l13.759,14.739h1.716L49.02,0l10.298,8.488L25.997,50.453h-3.629L0,26.897L9.005,17.766z";
@@ -815,7 +848,7 @@
 
 .toggle-switch .thumb-area{
     -fx-background-radius: 1em;
-    -fx-background-color: transparent;
+    -fx-background-color: -binjr-button-background-color;
     -fx-background-insets: 0, 1;
     -fx-border-color:black;
     -fx-border-radius:1em;
