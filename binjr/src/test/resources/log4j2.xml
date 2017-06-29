@@ -24,14 +24,14 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
         </Console>
-        <!--<File name="File" fileName="${filename}">-->
-        <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>-->
-        <!--</File>-->
+        <File name="File" fileName="${filename}">
+            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
+        </File>
     </Appenders>
     <Loggers>
-        <Root level="info">
+        <Root level="trace">
             <AppenderRef ref="STDOUT"/>
-            <!--<AppenderRef ref="File"/>-->
+            <AppenderRef ref="File"/>
         </Root>
     </Loggers>
 </Configuration>
