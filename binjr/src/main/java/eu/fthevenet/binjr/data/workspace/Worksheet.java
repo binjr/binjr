@@ -165,7 +165,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
-        this.showAreaOutline = new SimpleBooleanProperty((chartType == ChartType.LINE) || showAreaOutline);
+        this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
 
         // Change watcher must be initialized before  dirtyable properties or they will not be tracked.

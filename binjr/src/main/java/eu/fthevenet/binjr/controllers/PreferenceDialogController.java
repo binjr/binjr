@@ -70,8 +70,6 @@ public class PreferenceDialogController implements Initializable {
 
     @FXML
     private ToggleSwitch showOutline;
-    //  @FXML
-    //  private TextField defaultOpacityText;
 
     @FXML
     private AnchorPane root;

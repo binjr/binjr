@@ -35,7 +35,8 @@
             <AnchorPane prefHeight="70.0" prefWidth="666.0">
                 <children>
                     <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity"
                                 mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
                             <HBox.margin>
                                 <Insets left="5.0"/>
@@ -53,7 +54,8 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity"
                                 mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="forward" textAlignment="CENTER">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
@@ -68,7 +70,8 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity"
                                 mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="refresh" textAlignment="CENTER">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
@@ -175,7 +178,8 @@
                                 <Insets left="2.0"/>
                             </HBox.margin>
                         </VBox>
-                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false"
                                 prefHeight="40.0" prefWidth="40.0" text="Snapshot">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">

@@ -68,8 +68,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
-//    @FXML
-//    private ToggleSwitch showChartSymbols = new ToggleSwitch();
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
         this.worksheet = worksheet;
@@ -129,7 +127,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> {
             strokeWidthControlDisabled(!newValue);
         });
-        //   showChartSymbols.selectedProperty().bindBidirectional(worksheet.showChartSymbolsProperty());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {

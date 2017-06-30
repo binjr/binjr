@@ -57,7 +57,7 @@
                     <padding>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </padding>
-                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0" styleClass="square-button">
+                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button">
                         <graphic>
                             <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
                         </graphic>
@@ -69,7 +69,7 @@
                             </Tooltip>
                         </tooltip>
                     </Button>
-                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="square-button"
+                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
                                   text="Aa" textOverrun="CLIP">
                         <tooltip>
                             <Tooltip text="Toggle case sensitivity">
@@ -79,7 +79,7 @@
                             </Tooltip>
                         </tooltip>
                     </ToggleButton>
-                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="square-button">
+                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="exit">
                         <graphic>
                             <Region styleClass="cross-icon"/>
                         </graphic>
@@ -340,7 +340,8 @@
                 </Tooltip>
             </tooltip>
         </Button>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+        <Button styleClass="exit" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" text="Exit" AnchorPane.bottomAnchor="0.0"
+                AnchorPane.leftAnchor="0.0"
                 AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">

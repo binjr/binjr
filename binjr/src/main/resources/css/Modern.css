@@ -1,13 +1,16 @@
 {
     -binjr-command-bar-bg-color: #204656;
     -binjr-command-bar-accent-color: #336F87;
+    -binjr-window-background-color: #F4F4F4;
+    -binjr-control-background-color:#E8E8E8;
     -binjr-button-background-color: transparent;
     -binjr-color-lighter-gray: #DADADA;
     -binjr-color-light-gray: #C2C2C2;
     -binjr-color-gray: #999999;
     -binjr-color-dark-gray: #666666;
     -binjr-color-darker-gray: #333333;
-
+    -binjr-color-red: #E81123;
+    -binjr-color-light-red: #F1707A;
 }
 
 .column-bold-text{
@@ -28,7 +31,7 @@
 .command-bar .menu-icon {
     -fx-alignment: center_left;
     -fx-scale-y: .6;
-     -fx-scale-x: .6;
+    -fx-scale-x: .6;
     -fx-smooth: false;
 }
 
@@ -56,11 +59,24 @@
 
 /**********************************************/
 
+.button {
+    -fx-background-color: -binjr-color-lighter-gray;
+    -fx-border-width:1;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color: -binjr-color-gray;
+    -fx-border-radius:0;
+    -fx-alignment: center;
+}
+.button:hover{
+    -fx-border-color: -binjr-color-dark-gray;
+}
 
-.button,
+.exit,
+.add-tab-button,
+.dialog-button,
 .toggle-button,
 .menu-button{
-   /* -fx-color-label-visible: false;*/
     -fx-background-color: -binjr-button-background-color;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
@@ -70,24 +86,25 @@
     -fx-alignment: center;
 }
 
-.button:hover,
+.dialog-button:hover,
 .toggle-button:hover,
 .menu-button:hover {
     -fx-background-color:-binjr-color-lighter-gray;
 }
 
-.button:pressed,
-.button:default:hover:pressed,
-.menu-button:pressed,
-.menu-button:default:hover:pressed {
+.dialog-button:hover:pressed,
+.button:hover:pressed,
+.menu-button:hover:pressed {
   -fx-opacity: 100%;
   -fx-background-color:-binjr-color-light-gray ;
   -fx-text-fill: white;
 }
 
+
+
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
- .toggle-button:selected:hover:pressed {
+.toggle-button:selected:hover:pressed {
   -fx-background-color:-binjr-color-gray ;
   -fx-text-fill: white;
 }
@@ -289,7 +306,7 @@
  }
 
  .skinnable-pane-border {
-   -fx-border-color:  #F4F4F4;
+   -fx-border-color:  -binjr-window-background-color;
    -fx-border-width:0;
       -fx-padding: -1;
 
@@ -304,7 +321,7 @@
 .table-view .column-header-background .filler ,
 .table-view .column-header-background .nested-column-header,
 .table-view .column-header-background .nested-column-header .column-header {
-    -fx-background-color: #F4F4F4;
+    -fx-background-color: -binjr-window-background-color;
  }
 
  .table-view .virtual-flow .clipped-container .sheet .cell{
@@ -565,10 +582,9 @@
     -fx-background-color:-binjr-command-bar-accent-color;
 }
 
-.command-bar .button:pressed,
-.command-bar .button:default:hover:pressed,
-.command-bar .menu-button:pressed,
-.command-bar .menu-button:default:hover:pressed {
+
+.command-bar .button:hover:pressed,
+.command-bar .menu-button:hover:pressed {
     -fx-background-color:#4BACC6;
     -fx-text-fill: white;
 }
@@ -678,6 +694,26 @@
     -fx-border-width:0;
   }
 
+
+.icon-button{
+
+}
+
+   .exit:hover,
+   .command-bar .exit:hover {
+       -fx-background-color: -binjr-color-red;
+   }
+
+  .exit:hover *{
+    -icon-color: white;
+  }
+
+  .command-bar .exit:hover:pressed,
+  .exit:hover:pressed{
+       -fx-background-color: -binjr-color-light-red;
+   }
+
+
 /*** Menu ***/
 
 .command-bar .context-menu {
@@ -745,15 +781,14 @@
     -fx-opacity: .4;
 }
 
+
 .choice-box {
-    -fx-background-color: -binjr-button-background-color;
+    -fx-background-color: -binjr-window-background-color; /*-binjr-button-background-color;*/
     -fx-border-color: -binjr-color-gray;
-    -fx-border-width:2;
+    -fx-border-width:1;
     -fx-background-radius: 0, 0, 0, 0;
     -fx-padding: 0em 0.166667em 0em 0.166667em;
     -fx-background-insets: -1.4, 0, 1, 2;
-   /* -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-font-size: 11pt;*/
 }
 
 .choice-box:hover {
@@ -764,7 +799,6 @@
     -fx-background-color: -binjr-color-lighter-gray;
     -fx-border-color: -binjr-color-gray;
 }
-
 
 .choice-box:disabled {
     -fx-opacity: .4;
@@ -940,3 +974,5 @@
      -fx-padding: .25in;
      -fx-background-radius: .1in;
  }
+
+

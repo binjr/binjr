@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.javafx;
+package eu.fthevenet.util.javafx.controls;
 
 import javafx.scene.control.TreeItem;
 

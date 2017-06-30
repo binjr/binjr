@@ -32,7 +32,6 @@ import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
-import eu.fthevenet.util.javafx.TreeViewUtils;
 import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -166,7 +165,7 @@ public class MainViewController implements Initializable {
                 setUiTheme(newValue);
             }
         });
-        setUiTheme(prefs.getUserInterfaceTheme());
+
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -261,6 +260,7 @@ public class MainViewController implements Initializable {
         });
 
         Platform.runLater(() -> {
+            setUiTheme(prefs.getUserInterfaceTheme());
             Stage stage = Dialogs.getStage(root);
             stage.titleProperty().bind(Bindings.createStringBinding(
                     () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
@@ -377,6 +377,7 @@ public class MainViewController implements Initializable {
             TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
             openNav.setToX(settingsPaneDistance);
             openNav.play();
+            showCommandBar();
 
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
@@ -391,8 +392,6 @@ public class MainViewController implements Initializable {
         else {
             hideCommandBar();
         }
-
-        commandBar.setExpanded(!commandBar.isExpanded());
     }
 
     @FXML
@@ -522,6 +521,7 @@ public class MainViewController implements Initializable {
         showTimeline = new Timeline(keyFrame);
         showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), () -> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit());
         showTimeline.play();
+        commandBar.setExpanded(true);
     }
 
     private void hideCommandBar() {
@@ -538,6 +538,7 @@ public class MainViewController implements Initializable {
         hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, collapsedWidth)));
         AnchorPane.setLeftAnchor(contentView, collapsedWidth);
         hideTimeline.play();
+        commandBar.setExpanded(false);
     }
 
     private void slidePanel(int show, Duration delay) {
@@ -968,11 +969,17 @@ public class MainViewController implements Initializable {
     }
 
     private void setUiTheme(UserInterfaceThemes theme) {
-        root.getStylesheets().clear();
-        Application.setUserAgentStylesheet(null);
-        root.getStylesheets().addAll(
-                getClass().getResource("/css/Icons.css").toExternalForm(),
-                getClass().getResource(theme.getCssPath()).toExternalForm());
+        Stage mainStage = Dialogs.getStage(root);
+        if (mainStage != null) {
+            mainStage.getScene().getStylesheets().clear();
+            Application.setUserAgentStylesheet(null);
+            mainStage.getScene().getStylesheets().addAll(
+                    getClass().getResource("/css/Icons.css").toExternalForm(),
+                    getClass().getResource(theme.getCssPath()).toExternalForm());
+        }
+        else {
+            logger.warn("Cannot set UI theme: Main scene is not yet ready");
+        }
     }
 
     private void findNext() {
