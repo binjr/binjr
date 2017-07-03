@@ -36,20 +36,19 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
+import org.apache.http.StatusLine;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.client.*;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,9 +57,7 @@ import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.security.Principal;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -164,17 +161,10 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .addParameter("begin", Long.toString(begin.toEpochMilli()))
                 .addParameter("end", Long.toString(end.toEpochMilli()));
 
-        return doHttpGet(requestUrl, response -> {
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
-                }
-                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
-            }
-            else {
-                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+        return doHttpGet(requestUrl, new AbstractResponseHandler<InputStream>() {
+            @Override
+            public InputStream handleEntity(HttpEntity entity) throws IOException {
+                return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
             }
         });
     }
@@ -226,24 +216,16 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .setPort(jrdsPort)
                 .setPath(jrdsPath);
         try {
-            return doHttpGet(requestUrl, response -> {
-                int status = response.getStatusLine().getStatusCode();
-                if (status >= 200 && status < 300) {
-                    logger.trace("getJsonTree status:" + status);
-                    HttpEntity entity = response.getEntity();
-                    if (entity != null) {
-                        String entityString = EntityUtils.toString(entity);
-                        logger.trace(entityString);
-                        return true;
-                    }
-                    return false;
-                }
-                else {
-                    throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
+            return doHttpGet(requestUrl, new AbstractResponseHandler<Boolean>() {
+                @Override
+                public Boolean handleEntity(HttpEntity entity) throws IOException {
+                    String entityString = EntityUtils.toString(entity);
+                    logger.trace(entityString);
+                    return true;
                 }
             });
-        } catch (DataAdapterException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            logger.debug(() -> "Ping failed", e);
             return false;
         }
     }
@@ -300,10 +282,34 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             HttpGet httpget = new HttpGet(requestUrl.build());
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
             httpget.setHeader("User-Agent", "binjr/" + GlobalPreferences.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
-            return httpClient.execute(httpget, responseHandler);
-
+            T result = httpClient.execute(httpget, responseHandler);
+            if (result == null) {
+                throw new ResponseProcessingException("Response entity to \"" + requestUrl.toString() + "\" is null.");
+            }
+            return result;
+        } catch (HttpResponseException e) {
+            String msg = "Error executing HTTP request \"" + requestUrl.toString() + "\": " + e.getMessage();
+            switch (e.getStatusCode()) {
+                case 401:
+                    msg = "Authentication failed while trying to access \"" + requestUrl.toString() + "\"";
+                    break;
+                case 403:
+                    msg = "Access to the resource at \"" + requestUrl.toString() + "\" is denied.";
+                    break;
+                case 404:
+                    msg = "The resource at \"" + requestUrl.toString() + "\" could not be found.";
+                    break;
+                case 500:
+                    msg = "A server-side error has occurred while trying to access the resource at \"" + requestUrl.toString() + "\": " + e.getMessage();
+                    break;
+            }
+            throw new SourceCommunicationException(msg, e);
+        } catch (ConnectException e) {
+            throw new SourceCommunicationException(e.getMessage(), e);
+        } catch (UnknownHostException e) {
+            throw new SourceCommunicationException("Host \"" + jrdsHost + (jrdsPort > 0 ? ":" + jrdsPort : "") + "\" could not be found.", e);
         } catch (IOException e) {
-            throw new SourceCommunicationException("Error executing HTTP request [" + requestUrl.toString() + "]", e);
+            throw new SourceCommunicationException("IO error while communicating with host \"" + jrdsHost + (jrdsPort > 0 ? ":" + jrdsPort : "") + "\"", e);
         } catch (URISyntaxException e) {
             throw new SourceCommunicationException("Error building URI for request", e);
         } catch (Exception e) {
@@ -362,22 +368,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             requestUrl.addParameter(argName, argValue);
         }
 
-        return doHttpGet(requestUrl, response -> {
-            int status = response.getStatusLine().getStatusCode();
-            if (status >= 200 && status < 300) {
-                logger.trace("getJsonTree status:" + status);
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    String entityString = EntityUtils.toString(entity);
-                    logger.trace(entityString);
-                    return entityString;
-                }
-                return null;
-            }
-            else {
-                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
-            }
-        });
+        String entityString = doHttpGet(requestUrl, new BasicResponseHandler());
+        logger.trace(entityString);
+        return entityString;
     }
 
     private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
@@ -389,8 +382,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                 .addParameter("id", id);
 
         return doHttpGet(requestUrl, response -> {
-            int status = response.getStatusLine().getStatusCode();
-            if (status == 404) {
+            StatusLine statusLine = response.getStatusLine();
+            if (statusLine.getStatusCode() == 404) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,
                 // so we're falling back to recovering the datastore name from the csv file provided by
                 // the download service.
@@ -401,20 +394,20 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     throw new IOException("", e);
                 }
             }
-            if (status >= 200 && status < 300) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    try {
-                        return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
-                    } catch (Exception e) {
-                        throw new IOException("Failed to unmarshall graphdesc response", e);
-                    }
+            HttpEntity entity = response.getEntity();
+            if (statusLine.getStatusCode() >= 300) {
+                EntityUtils.consume(entity);
+                throw new HttpResponseException(statusLine.getStatusCode(),
+                        statusLine.getReasonPhrase());
+            }
+            if (entity != null) {
+                try {
+                    return JAXB.unmarshal(XmlUtils.toNonValidatingSAXSource(entity.getContent()), Graphdesc.class);
+                } catch (Exception e) {
+                    throw new IOException("Failed to unmarshall graphdesc response", e);
                 }
-                throw new IOException("Http entity in response to [" + requestUrl.toString() + "] is null");
             }
-            else {
-                throw new ClientProtocolException("Unexpected response status: " + status + " - " + response.getStatusLine().getReasonPhrase());
-            }
+            return null;
         });
     }
 
