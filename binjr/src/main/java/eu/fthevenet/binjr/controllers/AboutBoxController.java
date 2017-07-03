@@ -34,6 +34,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
 import javafx.scene.web.WebView;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -117,6 +118,7 @@ public class AboutBoxController implements Initializable {
         });
 
         Platform.runLater(() -> {
+            overrideCss();
             Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
             if (header != null) {
                 header.setMaxHeight(0);
@@ -161,6 +163,15 @@ public class AboutBoxController implements Initializable {
         Node closeButton = aboutRoot.lookupButton(ButtonType.CLOSE);
         closeButton.managedProperty().bind(closeButton.visibleProperty());
         closeButton.setVisible(false);
+    }
+
+    private void overrideCss() {
+        Stage aboutStage = Dialogs.getStage(aboutRoot);
+        if (aboutStage == null || aboutStage.getScene() == null) {
+            logger.warn("Cannot set css: About dialog scene is not ready.");
+            return;
+        }
+        aboutStage.getScene().getStylesheets().clear();
     }
 
     public void goTobinjrDotEu(ActionEvent actionEvent) {
