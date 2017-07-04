@@ -6,9 +6,11 @@ addons:
     - oracle-java8-installer
 jdk:
 - oraclejdk8
-before_install: "git clone -b travis `git config --get remote.origin.url` target/travis"
+before_install: "git clone -b travis `git config --get remote.origin.url` binjr/target/travis"
 script:
+- ls
 - cd binjr
+- ls
 - mvn clean deploy --settings target/travis/settings.xml
 branches:
   only:
