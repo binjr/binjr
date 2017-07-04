@@ -239,6 +239,7 @@
  }
 
  .date-picker-popup > * > .spinner > .button {
+     -fx-border-width:0;
      -fx-padding: 0.25em 0.583333em 0.25em 0.583333em; /* 3 7 3 7 */
  }
 
