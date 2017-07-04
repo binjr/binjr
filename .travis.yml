@@ -10,7 +10,7 @@ before_install: "git clone -b travis `git config --get remote.origin.url` binjr/
 script:
 - cd binjr
 - cat target/travis/settings.xml
-- mvn -e clean deploy --settings target/travis/settings.xml
+- mvn -e -X clean deploy --settings target/travis/settings.xml
 branches:
   only:
   - master
