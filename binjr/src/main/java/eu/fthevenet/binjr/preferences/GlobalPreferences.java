@@ -574,19 +574,13 @@ public class GlobalPreferences {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                GithubRelease latestRelease = GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
-                if (latestRelease != null) {
-                    if (latestRelease.getVersion().compareTo(getManifestVersion()) > 0) {
-                        return Optional.of(latestRelease);
-                    }
-                }
-                return Optional.empty();
+                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(getManifestVersion()) > 0);
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
             logger.trace("UI update running on " + Thread.currentThread().getName());
             Optional<GithubRelease> latest = getLatestTask.getValue();
-            Version current = GlobalPreferences.getInstance().getManifestVersion();
+            Version current = getManifestVersion();
             if (latest.isPresent()) {
                 newReleaseAvailable.accept(latest.get());
             }

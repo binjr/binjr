@@ -27,6 +27,7 @@ import java.util.function.BiFunction;
  * @param <U> the type of the second input to the function.
  * @param <R> the type of the result of the function.
  * @param <E> the type of checked exception thrown.
+ * @author Frederic Thevenet
  */
 @FunctionalInterface
 public interface CheckedBiFunction<T, U, R, E extends Exception> {

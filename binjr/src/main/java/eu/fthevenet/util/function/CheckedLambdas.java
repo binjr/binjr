@@ -26,6 +26,8 @@ import java.util.function.Supplier;
  * exceptions inside their standard (non throwing) counterparts, so they can be
  * used with streams or other classes expecting standards functional interfaces
  * and have them acting transparent to the exception thrown within the lambda.
+ *
+ * @author Frederic Thevenet
  */
 public final class CheckedLambdas {
     /**

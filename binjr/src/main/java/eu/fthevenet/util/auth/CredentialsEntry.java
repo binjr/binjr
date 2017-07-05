@@ -23,19 +23,42 @@ package eu.fthevenet.util.auth;
  * @author Frederic Thevenet
  */
 public class CredentialsEntry {
-    public static CredentialsEntry EMPTY = new CredentialsEntry("", new char[0], false);
-    public static CredentialsEntry CANCELLED = new CredentialsEntry("", new char[0], true);
     private final String login;
     private final char[] pwd;
     private final boolean filled;
 
+    /**
+     * An empty credential set.
+     * <p>This specific credential set should be used to intend that no credentials where explicitly provided</p>
+     */
+    public static CredentialsEntry EMPTY = new CredentialsEntry("", new char[0], false);
+
+    /**
+     * A canceled  credential set.
+     * <p>This specific credential set should be used to intend that the query for explicit credentials was initiated but canceled</p>
+     */
+    public static CredentialsEntry CANCELLED = new CredentialsEntry("", new char[0], true);
+
+    /**
+     * Initializes a new instance of the {@link CredentialsEntry} class
+     *
+     * @param login    the principle's login
+     * @param password the principle's password
+     */
     public CredentialsEntry(String login, char[] password) {
         this(login, password, true);
     }
 
+    /**
+     * Creates a deep clone of the provided {@link CredentialsEntry} instance.
+     *
+     * @param credentials the  {@link CredentialsEntry} instance to copy.
+     * @return a deep clone of the provided {@link CredentialsEntry} instance.
+     */
     public static CredentialsEntry copyOf(CredentialsEntry credentials) {
         return new CredentialsEntry(credentials.login, credentials.pwd, credentials.filled);
     }
+
 
     private CredentialsEntry(String login, char[] password, boolean filled) {
         this.login = login;
@@ -43,18 +66,36 @@ public class CredentialsEntry {
         this.filled = filled;
     }
 
+    /**
+     * Returns the principle's password
+     *
+     * @return the password
+     */
     public char[] getPwd() {
         return pwd;
     }
 
+    /**
+     * Returns the principle's login
+     *
+     * @return the principle's login
+     */
     public String getLogin() {
         return login;
     }
 
+    /**
+     * Returns true if the current set of credentials have been filled-in, false otherwise.
+     *
+     * @return true if the current set of credentials have been filled-in, false otherwise.
+     */
     public boolean isFilled() {
         return filled;
     }
 
+    /**
+     * Overwrites the array backing the principle's password property.
+     */
     public void clearPassword() {
         for (int i = 0; i < pwd.length; i++) {
             pwd[i] = '#';

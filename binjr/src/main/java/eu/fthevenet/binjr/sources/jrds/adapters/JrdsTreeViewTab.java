@@ -56,6 +56,11 @@ public enum JrdsTreeViewTab {
         return command;
     }
 
+    /**
+     * Gets the argument associated with the enum entry
+     *
+     * @return the argument associated with the enum entry
+     */
     public String getArgument() {
         return argument;
     }

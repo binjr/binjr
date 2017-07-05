@@ -22,6 +22,7 @@ package eu.fthevenet.util.function;
  * throws a checked exception.
  *
  * @param <E> the type of checked exception thrown.
+ * @author Frederic Thevenet
  */
 @FunctionalInterface
 public interface CheckedRunnable<E extends Exception> {

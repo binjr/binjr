@@ -25,6 +25,7 @@ import java.util.function.Consumer;
  *
  * @param <T> the type of the input to the operation.
  * @param <E> the type of checked exception thrown.
+ * @author Frederic Thevenet
  */
 @FunctionalInterface
 public interface CheckedConsumer<T, E extends Exception> {

@@ -28,6 +28,11 @@ import org.apache.logging.log4j.Logger;
 final public class Bootstrap {
     private static final Logger logger = LogManager.getLogger(Bootstrap.class);
 
+    /**
+     * The entry point fo the application.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         if (checkForJavaFX()) {
             try {

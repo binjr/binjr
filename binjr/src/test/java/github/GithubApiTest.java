@@ -25,6 +25,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Frederic Thevenet
@@ -34,9 +35,14 @@ public class GithubApiTest {
 
     public static void main(String[] args) {
         try {
-            GithubRelease release = GithubApi.getInstance().getLatestRelease("fthevenet", "binjr");
-            logger.info("release = " + release.toString());
-            logger.info("release.getTagName() = " + release.getTagName().replaceAll("^v", ""));
+            Optional<GithubRelease> release = GithubApi.getInstance().getLatestRelease("fthevenet", "binjr");
+            if (release.isPresent()) {
+                logger.info("release = " + release.get().toString());
+                logger.info("release.getTagName() = " + release.get().getTagName().replaceAll("^v", ""));
+            }
+            else {
+                logger.error("Could not find latest release");
+            }
 
 
             List<GithubRelease> releases = GithubApi.getInstance().getReleases("fthevenet", "binjr");
