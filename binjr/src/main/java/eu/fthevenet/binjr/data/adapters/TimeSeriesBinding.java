@@ -104,6 +104,25 @@ public class TimeSeriesBinding<T extends Number> {
     }
 
     /**
+     * Creates a clone of the provided binding, save for its {@link DataAdapter} instance which should be reassigned based its adapter ID
+     *
+     * @param binding the {@link TimeSeriesBinding} instance to clone.
+     */
+    public TimeSeriesBinding(TimeSeriesBinding<T> binding) {
+        this(binding.label,
+                binding.path,
+                binding.color,
+                binding.legend,
+                binding.prefix,
+                binding.graphType,
+                binding.unitName,
+                binding.treeHierarchy,
+                null,
+                binding.adapterId);
+    }
+
+
+    /**
      * Creates a new instance of the {@link TimeSeriesBinding} class with the provided properties
      *
      * @param label         the label for the binding
@@ -117,6 +136,19 @@ public class TimeSeriesBinding<T extends Number> {
      * @param adapter       the {@link DataAdapter} to the source
      */
     public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
+        this(label,
+                path,
+                color,
+                legend,
+                prefix,
+                graphType,
+                unitName,
+                treeHierarchy,
+                adapter,
+                null);
+    }
+
+    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
         this.legend = legend;
@@ -125,7 +157,7 @@ public class TimeSeriesBinding<T extends Number> {
         this.unitName = unitName;
         this.treeHierarchy = treeHierarchy;
         this.adapter = adapter;
-        this.adapterId = adapter != null ? adapter.getId() : null;
+        this.adapterId = adapterId != null ? adapterId : (adapter != null ? adapter.getId() : null);
         if (color == null) {
             // pickup a default color at random, based on the hash of the binding path, so it stays stable
             this.color = computeDefaultColor();

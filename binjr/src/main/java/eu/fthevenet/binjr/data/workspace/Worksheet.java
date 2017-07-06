@@ -583,7 +583,7 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         series.clear();
     }
 }

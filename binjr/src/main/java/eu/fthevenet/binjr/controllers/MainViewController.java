@@ -632,24 +632,13 @@ public class MainViewController implements Initializable {
     private void loadWorksheets(Workspace wsFromfile) {
         try {
             for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
-                for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
-                    UUID id = s.getBinding().getAdapterId();
-                    DataAdapter<?> da = sourcesAdapters.values()
-                            .stream()
-                            .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-                            .findAny()
-                            .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-                    s.getBinding().setAdapter(da);
-                    s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedWorksheetController.refresh());
-                }
+
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
             GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
             logger.debug(() -> "Recently loaded workspaces: " + GlobalPreferences.getInstance().getRecentFiles().stream().collect(Collectors.joining(" ")));
 
-        } catch (DataAdapterException e) {
-            Dialogs.notifyException("Error while instantiating DataAdapter", e, root);
         } catch (Exception e) {
             Dialogs.notifyException("Error loading workspace", e, root);
         }
@@ -780,6 +769,17 @@ public class MainViewController implements Initializable {
                     throw new UnsupportedOperationException("Unsupported chart");
             }
             try {
+                // Attach bindings
+                for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
+                    UUID id = s.getBinding().getAdapterId();
+                    DataAdapter<?> da = sourcesAdapters.values()
+                            .stream()
+                            .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+                            .findAny()
+                            .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
+                    s.getBinding().setAdapter(da);
+                    s.selectedProperty().addListener((observable, oldValue, newValue) -> selectedWorksheetController.refresh());
+                }
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
                 FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));

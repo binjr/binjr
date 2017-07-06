@@ -29,7 +29,7 @@ import javax.xml.bind.annotation.*;
 import java.io.Serializable;
 
 /**
- * A class that represents and holds the current state of a single time series
+ * A class that represents and holds the current state of the representation of a single time series
  *
  * @author Frederic Thevenet
  */
@@ -46,7 +46,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private final TimeSeriesBinding<T> binding;
     private final ChangeWatcher<TimeSeriesInfo> status;
     private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
-
 
     /**
      * Parameter-less constructor (needed for XMl serialization)
@@ -90,7 +89,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
                            Color displayColor,
                            TimeSeriesProcessor<T> data,
                            TimeSeriesBinding<T> binding) {
-        this.binding = binding;
+        this.binding = binding;// new TimeSeriesBinding<T>(binding);
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);

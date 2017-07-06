@@ -149,6 +149,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private History forwardHistory = new History();
     private String name;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
+    private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidate(false, false, false);
     private ChangeListener<ChartType> chartTypeListener;
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
@@ -176,7 +177,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         settingsPane.getStyleClass().add("toolPane");
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
-
     }
 
     //region [Properties]
@@ -412,8 +412,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             }
         });
         seriesTable.setItems(worksheet.getSeries());
-
-
         //endregion
     }
     //endregion
@@ -424,6 +422,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Unregistering listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
+            for (TimeSeriesInfo<Double> t : worksheet.getSeries()) {
+                t.selectedProperty().removeListener(refreshOnSelectSeries);
+            }
         }
     }
 
@@ -452,7 +453,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
-            newSeries.selectedProperty().addListener((observable, oldValue, newValue) -> invalidate(false, false, false));
+            newSeries.selectedProperty().addListener(refreshOnSelectSeries);
             worksheet.addSeries(newSeries);
         }
         invalidate(false, false, false);
@@ -581,7 +582,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                             break;
                         default:
                             break;
-
                     }
                 }
             });

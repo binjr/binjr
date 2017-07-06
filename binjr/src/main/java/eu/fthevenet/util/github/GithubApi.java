@@ -37,7 +37,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A series of helper method to wrap GitHub API
+ * A series of helper methods to wrap some GitHub APIs
  * See: https://developer.github.com/v3/
  *
  * @author Frederic Thevenet
@@ -98,13 +98,12 @@ public class GithubApi {
 
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = new HttpGet(requestUrl.build());
-        GithubRelease release = httpClient.execute(httpget, new AbstractResponseHandler<GithubRelease>() {
+        return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<GithubRelease>() {
             @Override
             public GithubRelease handleEntity(HttpEntity entity) throws IOException {
                 return gson.fromJson(EntityUtils.toString(entity), GithubRelease.class);
             }
-        });
-        return release != null ? Optional.of(release) : Optional.empty();
+        }));
     }
 
     /**
