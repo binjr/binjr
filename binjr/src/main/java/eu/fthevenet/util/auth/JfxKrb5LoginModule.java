@@ -34,7 +34,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * An extention of the Krb5LoginModule that displays a JavaFX dialog to obtain credentials from the end-user if need be.
+ * An extension of the Krb5LoginModule that displays a JavaFX dialog to obtain credentials from the end-user if need be.
  *
  * @author Frederic Thevenet
  */
