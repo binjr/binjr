@@ -36,7 +36,7 @@
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
         <url>https://github.com/fthevenet/binjr</url>
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
-        <tag>v1.0.14b</tag>
+        <tag>v1.0.14</tag>
     </scm>
     <profiles>
         <profile>
