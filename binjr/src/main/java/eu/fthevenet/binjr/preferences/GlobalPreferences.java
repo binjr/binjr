@@ -518,9 +518,10 @@ public class GlobalPreferences {
             String value = manifest.getMainAttributes().getValue("Build-Number");
             if (value != null) {
                 try {
-                    return Long.getLong(value);
-                } catch (IllegalArgumentException e) {
-                    logger.error("Could not parse build number: " + value, e);
+                    return Long.valueOf(value);
+                } catch (NumberFormatException e) {
+                    logger.error("Could not parse build number: " + value);
+                    logger.debug(() -> "Full stack", e);
                 }
             }
         }
