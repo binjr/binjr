@@ -20,7 +20,7 @@ deploy:
   provider: releases
   api_key:
     secure: q13R8owl5kImv591zcDi+DkcADA5ghc0uqjqHbxxFPPABl/hroSGrTJ/xubvWZ1Ta6YGT0we9+/vNOuPEqAnfy3FhqE3ZREZytGoE5dCEewowgNidKu1OLhMYJD3QnEsrW8mIyLSwBk9hEBToQuD2ZXTf+zWfVenBdvUAP1WBWbXooLo/+RiFnTK1t3dx7206EPIhWQatm+PXzR/GtXC9B1h36XUPgscdkuDiTSrKFxxIZUUAMC4l1lyIZwlqrJG/sbypKsUH3V+JTh0W8VUeobNJ8l9D/7ez1osUxBC4CNnAlGAf5r0pC2lLwh/P4g0jPiMrekGFs2yvFlNe6RPHAZeZCRZXmXzkDLq23KpU/oRw60CR+GVrs+HOM8uObtjMhIeRpCJQwqQYlKqHJd3/169CZo4FcwRfTFGEZMYswopsBY5zLgczHeZ5aaoRPzRig7oHEImqMMv3o/WTHbrjJtdjZmeWkB/Zzr2zcWACRu80vijSLBecyrkIqaf9Bl8uh0dsp++OQXMNf4j29AMTY+tV0GaINrgzts7OtQudEGTfy3hBSy2XNJ+/vISwAs6u1xWNzjZWUDshK/tifcaZ8HwIk6WuLAXmzo/ogmH3xhiO6AE/6qhQLs2F0VEwEagZCLKzB7sNm4915E0GQB8jNJIpLDaXxCt0yBP1sa5Hkw=
-  file: "/binjr/target/binjr.jar"
+  file: "/home/travis/build/fthevenet/binjr/binjr/target/binjr.jar"
   skip_cleanup: true
   overwrite: true
   on:
