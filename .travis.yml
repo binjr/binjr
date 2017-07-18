@@ -25,3 +25,4 @@ deploy:
   overwrite: true
   on:
     tags: true
+    all_branches: true
