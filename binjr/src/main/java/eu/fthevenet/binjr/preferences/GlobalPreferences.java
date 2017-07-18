@@ -525,7 +525,7 @@ public class GlobalPreferences {
                 }
             }
         }
-        return 99999L;
+        return -1L;
     }
 
     /**

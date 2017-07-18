@@ -122,7 +122,6 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <!--<Premain-Class>eu.fthevenet.binjr.CheckForJavaFX</Premain-Class>-->
                                         <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
                                         <Specification-Title>${project.name}</Specification-Title>
                                         <Specification-Version>${project.version}</Specification-Version>
@@ -131,7 +130,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                                         <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
-                                        <Build-Number>${env.TRAVIS_BUILD_NUMBER}</Build-Number>
+                                        <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
