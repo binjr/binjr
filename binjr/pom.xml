@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.14-SNAPSHOT</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -59,7 +59,7 @@
                             <jvmArgs>splash:splashscreen.png</jvmArgs>
                             <manifestAttributes>
                                 <Specification-Title>${project.name}</Specification-Title>
-                                <Specification-Version>${project.version}</Specification-Version>
+                                <Specification-Version>${env.BINJR_VERSION}</Specification-Version>
                                 <Specification-Vendor>${project.organization.name}</Specification-Vendor>
                                 <Implementation-Title>${project.name}</Implementation-Title>
                                 <Implementation-Version>${project.version}</Implementation-Version>
