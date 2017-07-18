@@ -93,6 +93,7 @@ public class GlobalPreferences {
     private BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
     private BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
 
+
     public Boolean isShiftPressed() {
         return shiftPressed.get();
     }
@@ -512,6 +513,20 @@ public class GlobalPreferences {
         return Version.emptyVersion;
     }
 
+    public Long getBuildNumber() {
+        if (manifest != null) {
+            String value = manifest.getMainAttributes().getValue("Build-Number");
+            if (value != null) {
+                try {
+                    return Long.getLong(value);
+                } catch (IllegalArgumentException e) {
+                    logger.error("Could not parse build number: " + value, e);
+                }
+            }
+        }
+        return 99999L;
+    }
+
     /**
      * Returns a list of system properties
      *
@@ -523,11 +538,11 @@ public class GlobalPreferences {
         double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
 
         List<SysInfoProperty> sysInfo = new ArrayList<>();
-        sysInfo.add(new SysInfoProperty("binjr version", getManifestVersion().toString()));
-        sysInfo.add(new SysInfoProperty("Java version", System.getProperty("java.version")));
-        sysInfo.add(new SysInfoProperty("Java vendor", System.getProperty("java.vendor")));
+        sysInfo.add(new SysInfoProperty("Version", getManifestVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
+        sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
+        sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
         sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
-        sysInfo.add(new SysInfoProperty("Java home", System.getProperty("java.home")));
+        sysInfo.add(new SysInfoProperty("Java Home", System.getProperty("java.home")));
         sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
         sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));

@@ -9,7 +9,17 @@ jdk:
 before_install: "git clone -b travis `git config --get remote.origin.url` binjr/target/travis"
 script:
 - cd binjr
-- mvn clean deploy --settings target/travis/settings.xml
+- mvn clean package # --settings target/travis/settings.xml
+
+deploy:
+  provider: releases
+  api_key:
+    secure: sH9fhG7xsKMVf3vnFNH8bM902hG+AGLooDB0ZNBiTYl7/8VvmJxDKDNI+dMsf/xiZZdaS02uvAXOlVHaaGDeAlVz7wV24chcsTkxWmBqguMS/BSLrepM3Luucf0lhw5X4KAxGnyhmJKShM0+3Rh1FyCUWL7DO9vxJpTQYzR9wQ85+ta3+QHSa4i5Fa7tKgHJBj3q22FNPS8QT/4RCNor1AFERuBJaGXO1hAPaBUHA//lrPZJM/xP7VsM7aYRoLTZxL0ZtSS45VRFqmlf16I6Q/ATATSO786SsMFVOcuvVyi2UwsBivCZbEQGcct3YHDk5jj4MgDePD+FsNjmLhLGt/Wvx0peqwhuMTfcNC6otCVqmOrCoL4GbtYengllFkHqymzt+KQMNQ+AmWjorpb7Fl2JwmF9f2pPt3g7aFiDX/pJDWHOoi/XEFp6ppOwg6zsbb4wcwI8u7aX6Yuy1IkZg6jFfNibTV0u4XWGInxI1RsiSxvYdGiNkJgJdBkwcGr3m2j0HO6uP4iYZQIIkkVHhWZO84wm5V5wIfH8SE9oukVAjlu+msrAwjMVTjsjWxYWf/jelyMxl8bM3s5+cVGDmnuKgVOdvehWS10ltYhsSUoX7BpVscZ8g2538YeU+V9p1qZG5HEAmqezr1/XK3+liCW55ru0KCDZ0JyKtCQXJV4=
+  file: "/target/binjr.jar"
+  skip_cleanup: true
+  on:
+    tags: true
+
 branches:
   only:
   - master

@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.14</version>
+    <version>1.0.14-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -36,7 +36,7 @@
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
         <url>https://github.com/fthevenet/binjr</url>
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
-        <tag>v1.0.14</tag>
+        <tag>v1.0.14-SNAPSHOT</tag>
     </scm>
     <profiles>
         <profile>
@@ -130,6 +130,7 @@
                                         <Implementation-Version>${project.version}</Implementation-Version>
                                         <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                                         <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
+                                        <Build-Number>${env.TRAVIS_BUILD_NUMBER}</Build-Number>
                                     </manifestEntries>
                                 </transformer>
                             </transformers>
@@ -168,37 +169,37 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <plugin>
-                <groupId>de.jutzig</groupId>
-                <artifactId>github-release-plugin</artifactId>
-                <version>1.2.0</version>
-                <executions>
-                    <execution>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>release</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <description>binjr v${project.version}</description>
-                    <releaseName>binjr v${project.version}</releaseName>
-                    <tag>v${project.version}</tag>
-                    <prerelease>${github.deploy.prerelease}</prerelease>
-                    <overwriteArtifact>true</overwriteArtifact>
-                    <!-- If your project has additional artifacts, such as ones produced by
-                         the maven-assembly-plugin, you can define the following
-                         (requires version 1.1.1 of the plugin or higher): -->
-                    <fileSets>
-                        <fileSet>
-                            <directory>${project.build.directory}</directory>
-                            <includes>
-                                <include>${project.artifactId}.jar</include>
-                            </includes>
-                        </fileSet>
-                    </fileSets>
-                </configuration>
-            </plugin>
+            <!--<plugin>-->
+            <!--<groupId>de.jutzig</groupId>-->
+            <!--<artifactId>github-release-plugin</artifactId>-->
+            <!--<version>1.2.0</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>deploy</phase>-->
+            <!--<goals>-->
+            <!--<goal>release</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--<configuration>-->
+            <!--<description>binjr v${project.version}</description>-->
+            <!--<releaseName>binjr v${project.version}</releaseName>-->
+            <!--<tag>v${project.version}</tag>-->
+            <!--<prerelease>${github.deploy.prerelease}</prerelease>-->
+            <!--<overwriteArtifact>true</overwriteArtifact>-->
+            <!--&lt;!&ndash; If your project has additional artifacts, such as ones produced by-->
+            <!--the maven-assembly-plugin, you can define the following-->
+            <!--(requires version 1.1.1 of the plugin or higher): &ndash;&gt;-->
+            <!--<fileSets>-->
+            <!--<fileSet>-->
+            <!--<directory>${project.build.directory}</directory>-->
+            <!--<includes>-->
+            <!--<include>${project.artifactId}.jar</include>-->
+            <!--</includes>-->
+            <!--</fileSet>-->
+            <!--</fileSets>-->
+            <!--</configuration>-->
+            <!--</plugin>-->
         </plugins>
     </build>
     <dependencies>
