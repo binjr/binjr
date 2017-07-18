@@ -24,7 +24,6 @@ deploy:
   skip_cleanup: true
   overwrite: true
   name: binjr $TRAVIS_TAG
-  body: binjr release TRAVIS_TAG.
   on:
     tags: true
     all_branches: true
