@@ -1,9 +1,9 @@
 language: java
 sudo: false
-#addons:
-#  apt:
-#    packages:
-#    - oracle-java8-installer
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
 jdk:
 - oraclejdk8
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
