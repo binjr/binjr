@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 cd binjr
 
-if [[ $TRAVIS_COMMIT_MESSAGE == *"=>Release:v"* ]]; then
+if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
   echo "Start Maven release"
   mvn --batch-mode release:prepare release:perform -Dresume=false
 else
