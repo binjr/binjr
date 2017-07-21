@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-cd binjr
 
 if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
-  echo "Start Maven release"
-  mvn --batch-mode release:prepare release:perform -Dresume=false --settings target/travis/settings.xml
+    git checkout master
+    cd binjr
+    echo "Start Maven release"
+    mvn --batch-mode release:prepare release:perform -Dresume=false --settings target/travis/settings.xml
 else
-  echo "Start Maven test"
+    cd binjr
+    echo "Start Maven test"
     mvn clean test
 fi
