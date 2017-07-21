@@ -30,7 +30,7 @@
     </organization>
     <properties>
         <github.global.server>github</github.global.server>
-        <github.deploy.prerelease>true</github.deploy.prerelease>
+        <github.deploy.prerelease>false</github.deploy.prerelease>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
