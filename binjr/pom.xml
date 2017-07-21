@@ -30,6 +30,7 @@
     </organization>
     <properties>
         <github.global.server>github</github.global.server>
+        <project.scm.id>github</project.scm.id>
         <github.deploy.prerelease>false</github.deploy.prerelease>
     </properties>
     <scm>
