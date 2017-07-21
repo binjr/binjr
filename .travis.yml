@@ -11,7 +11,7 @@ install:
   - git fetch --unshallow
 #  - git clone https://github.com/$TRAVIS_REPO_SLUG.git $TRAVIS_REPO_SLUG
 #  - cd $TRAVIS_REPO_SLUG
-#  - git checkout -qf $TRAVIS_COMMIT
+  - git checkout -qf **
 
 #before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 script: ./binjr/scripts/build.sh
