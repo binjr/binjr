@@ -7,7 +7,7 @@ addons:
 jdk:
 - oraclejdk8
 #before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
-script: ./build.sh
+script: ./scripts/build.sh
 
 env:
   global:
