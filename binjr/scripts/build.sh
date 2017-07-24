@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -ev
+echo $TRAVIS_TAG
 if [[-z $TRAVIS_TAG && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
    #"Explicitly swith to master to avoid disjointed HEAD"
     git checkout master
