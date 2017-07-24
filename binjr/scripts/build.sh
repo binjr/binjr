@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-
+set -ev
 if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
+    echo "Explicitly swith to master to avoid disjointed HEAD"
     git checkout master
     cd binjr
     echo "Start Maven release"
