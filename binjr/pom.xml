@@ -151,9 +151,6 @@
                     <checkModificationExcludes>
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
-                    <providerImplementations>
-                        <git>gitexe</git>
-                    </providerImplementations>
                 </configuration>
 
                 <dependencies>
