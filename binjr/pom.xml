@@ -29,8 +29,8 @@
         <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
-        <github.global.server>github</github.global.server>
-        <project.scm.id>github</project.scm.id>
+        <github.global.server>github.com</github.global.server>
+        <project.scm.id>github.com</project.scm.id>
         <github.deploy.prerelease>false</github.deploy.prerelease>
     </properties>
     <scm>
@@ -152,6 +152,7 @@
                     <checkModificationExcludes>
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
+
                 </configuration>
                 <dependencies>
                     <dependency>
