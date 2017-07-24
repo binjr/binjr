@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -ev
-if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
+if [[-z $TRAVIS_TAG && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
    #"Explicitly swith to master to avoid disjointed HEAD"
     git checkout master
     cd binjr
@@ -8,6 +8,6 @@ if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
     mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml"
 else
     cd binjr
-    echo "Start Maven test"
-    mvn clean test
+    echo "Start Maven package"
+    mvn package
 fi
