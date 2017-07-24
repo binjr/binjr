@@ -152,14 +152,14 @@
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
                     <providerImplementations>
-                        <git>jgit</git>
+                        <git>gitexe</git>
                     </providerImplementations>
                 </configuration>
 
                 <dependencies>
                     <dependency>
                         <groupId>org.apache.maven.scm</groupId>
-                        <artifactId>maven-scm-provider-jgit</artifactId>
+                        <artifactId>maven-scm-provider-gitexe</artifactId>
                         <version>1.9.5</version>
                     </dependency>
                 </dependencies>
