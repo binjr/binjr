@@ -26,5 +26,5 @@ deploy:
   overwrite: true
   name: binjr $TRAVIS_TAG
   on:
-#    tags: true
+    tags: true
     all_branches: true

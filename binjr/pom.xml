@@ -16,7 +16,8 @@
   ~
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
@@ -170,37 +171,37 @@
                     <skip>true</skip>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>de.jutzig</groupId>-->
-            <!--<artifactId>github-release-plugin</artifactId>-->
-            <!--<version>1.2.0</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>deploy</phase>-->
-            <!--<goals>-->
-            <!--<goal>release</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--<configuration>-->
-            <!--<description>binjr v${project.version}</description>-->
-            <!--<releaseName>binjr v${project.version}</releaseName>-->
-            <!--<tag>v${project.version}</tag>-->
-            <!--<prerelease>${github.deploy.prerelease}</prerelease>-->
-            <!--<overwriteArtifact>true</overwriteArtifact>-->
-            <!--&lt;!&ndash; If your project has additional artifacts, such as ones produced by-->
-            <!--the maven-assembly-plugin, you can define the following-->
-            <!--(requires version 1.1.1 of the plugin or higher): &ndash;&gt;-->
-            <!--<fileSets>-->
-            <!--<fileSet>-->
-            <!--<directory>${project.build.directory}</directory>-->
-            <!--<includes>-->
-            <!--<include>${project.artifactId}.jar</include>-->
-            <!--</includes>-->
-            <!--</fileSet>-->
-            <!--</fileSets>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>de.jutzig</groupId>
+                <artifactId>github-release-plugin</artifactId>
+                <version>1.2.0</version>
+                <executions>
+                    <execution>
+                        <phase>deploy</phase>
+                        <goals>
+                            <goal>release</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <description>binjr v${project.version}</description>
+                    <releaseName>binjr v${project.version}</releaseName>
+                    <tag>v${project.version}</tag>
+                    <prerelease>true</prerelease>
+                    <overwriteArtifact>true</overwriteArtifact>
+                    <!-- If your project has additional artifacts, such as ones produced by
+                    the maven-assembly-plugin, you can define the following
+                    (requires version 1.1.1 of the plugin or higher): -->
+                    <fileSets>
+                        <fileSet>
+                            <directory>${project.build.directory}</directory>
+                            <includes>
+                                <include>${project.artifactId}.jar</include>
+                            </includes>
+                        </fileSet>
+                    </fileSets>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <dependencies>
