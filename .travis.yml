@@ -17,15 +17,18 @@ env:
   - secure: sH9fhG7xsKMVf3vnFNH8bM902hG+AGLooDB0ZNBiTYl7/8VvmJxDKDNI+dMsf/xiZZdaS02uvAXOlVHaaGDeAlVz7wV24chcsTkxWmBqguMS/BSLrepM3Luucf0lhw5X4KAxGnyhmJKShM0+3Rh1FyCUWL7DO9vxJpTQYzR9wQ85+ta3+QHSa4i5Fa7tKgHJBj3q22FNPS8QT/4RCNor1AFERuBJaGXO1hAPaBUHA//lrPZJM/xP7VsM7aYRoLTZxL0ZtSS45VRFqmlf16I6Q/ATATSO786SsMFVOcuvVyi2UwsBivCZbEQGcct3YHDk5jj4MgDePD+FsNjmLhLGt/Wvx0peqwhuMTfcNC6otCVqmOrCoL4GbtYengllFkHqymzt+KQMNQ+AmWjorpb7Fl2JwmF9f2pPt3g7aFiDX/pJDWHOoi/XEFp6ppOwg6zsbb4wcwI8u7aX6Yuy1IkZg6jFfNibTV0u4XWGInxI1RsiSxvYdGiNkJgJdBkwcGr3m2j0HO6uP4iYZQIIkkVHhWZO84wm5V5wIfH8SE9oukVAjlu+msrAwjMVTjsjWxYWf/jelyMxl8bM3s5+cVGDmnuKgVOdvehWS10ltYhsSUoX7BpVscZ8g2538YeU+V9p1qZG5HEAmqezr1/XK3+liCW55ru0KCDZ0JyKtCQXJV4=
   - secure: X37P+GADtAv3cx/Dv4DEZzEJXuINuAIZzmWIChKGTOZgmj+Cyb872bxVbzncrf7n2i5fCcZxlf4K60ti3u2Iy5LHRmoEGJl9v1Vi8FQLhxcG9nSblIxnhyxxTmmRW/kgWxS210Mkp2bEgcFDpO0qZLqCB0nWB+yIoYnzoy+qUOQjbTZDlili/dAgX0ocf2yWINoBRVwJ9kNXkAndYBizU/8X8WWr3gOaIdGy9T1/21x9Y8659iJYwySMqg2DF6V9Km9mgl21vnX0/q+P8uTFJ5WzBXrTSyxwlLBuiC+wuLKWXI8nhlUV/mcGZe3DqTIdSALj9F4rXvtWx7nI78ItfTlQNecJfm9p4QbTPAj/29tsfIeURieeQdLa1iQTG/Tq6GMG1KjnCZM3iYyTFE4pmyLjfqo5gNsxS/wuHkC9QctvpKb4mO9Ywqx1G4P2ioMWPBB8Pao7gN15z95eUyd0uKT6zXzHTO0ru6dXEyTcsb2fDEQiNGqA/NL3ZWRNfdE/zqrOUKR/rZUT3eIqKJEUylKi7YM/7Gm7c3EM7NWfPY3O3P2NRhytYpbVeMOzRjTkcaycIZAhaLJEhi9SRGCiBftrHI9lxszKEaiDKoaJmFoznThxzN1W63tiLt5MLb8ausQyvuiFSib6XiEO1PtSFOEw9/Iv4JX7ZI5A7snJMaA=
 
-deploy:
-  provider: releases
-  api_key:
-    secure: q13R8owl5kImv591zcDi+DkcADA5ghc0uqjqHbxxFPPABl/hroSGrTJ/xubvWZ1Ta6YGT0we9+/vNOuPEqAnfy3FhqE3ZREZytGoE5dCEewowgNidKu1OLhMYJD3QnEsrW8mIyLSwBk9hEBToQuD2ZXTf+zWfVenBdvUAP1WBWbXooLo/+RiFnTK1t3dx7206EPIhWQatm+PXzR/GtXC9B1h36XUPgscdkuDiTSrKFxxIZUUAMC4l1lyIZwlqrJG/sbypKsUH3V+JTh0W8VUeobNJ8l9D/7ez1osUxBC4CNnAlGAf5r0pC2lLwh/P4g0jPiMrekGFs2yvFlNe6RPHAZeZCRZXmXzkDLq23KpU/oRw60CR+GVrs+HOM8uObtjMhIeRpCJQwqQYlKqHJd3/169CZo4FcwRfTFGEZMYswopsBY5zLgczHeZ5aaoRPzRig7oHEImqMMv3o/WTHbrjJtdjZmeWkB/Zzr2zcWACRu80vijSLBecyrkIqaf9Bl8uh0dsp++OQXMNf4j29AMTY+tV0GaINrgzts7OtQudEGTfy3hBSy2XNJ+/vISwAs6u1xWNzjZWUDshK/tifcaZ8HwIk6WuLAXmzo/ogmH3xhiO6AE/6qhQLs2F0VEwEagZCLKzB7sNm4915E0GQB8jNJIpLDaXxCt0yBP1sa5Hkw=
-  file: "/home/travis/build/fthevenet/binjr/binjr/target/binjr.jar"
-  skip_cleanup: true
-  overwrite: true
-  name: binjr $TRAVIS_TAG
-  on:
-    tags: true
-    condition: $TRAVIS_TAG != *"SNAPSHOT"*
-    all_branches: true
+branches:
+  only:
+  - master
+
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: q13R8owl5kImv591zcDi+DkcADA5ghc0uqjqHbxxFPPABl/hroSGrTJ/xubvWZ1Ta6YGT0we9+/vNOuPEqAnfy3FhqE3ZREZytGoE5dCEewowgNidKu1OLhMYJD3QnEsrW8mIyLSwBk9hEBToQuD2ZXTf+zWfVenBdvUAP1WBWbXooLo/+RiFnTK1t3dx7206EPIhWQatm+PXzR/GtXC9B1h36XUPgscdkuDiTSrKFxxIZUUAMC4l1lyIZwlqrJG/sbypKsUH3V+JTh0W8VUeobNJ8l9D/7ez1osUxBC4CNnAlGAf5r0pC2lLwh/P4g0jPiMrekGFs2yvFlNe6RPHAZeZCRZXmXzkDLq23KpU/oRw60CR+GVrs+HOM8uObtjMhIeRpCJQwqQYlKqHJd3/169CZo4FcwRfTFGEZMYswopsBY5zLgczHeZ5aaoRPzRig7oHEImqMMv3o/WTHbrjJtdjZmeWkB/Zzr2zcWACRu80vijSLBecyrkIqaf9Bl8uh0dsp++OQXMNf4j29AMTY+tV0GaINrgzts7OtQudEGTfy3hBSy2XNJ+/vISwAs6u1xWNzjZWUDshK/tifcaZ8HwIk6WuLAXmzo/ogmH3xhiO6AE/6qhQLs2F0VEwEagZCLKzB7sNm4915E0GQB8jNJIpLDaXxCt0yBP1sa5Hkw=
+#  file: "/home/travis/build/fthevenet/binjr/binjr/target/binjr.jar"
+#  skip_cleanup: true
+#  overwrite: true
+#  name: binjr $TRAVIS_TAG
+#  on:
+#    tags: true
+#    all_branches: true

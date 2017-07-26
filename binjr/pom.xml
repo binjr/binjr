@@ -186,7 +186,7 @@
                     <description>binjr v${project.version}</description>
                     <releaseName>binjr v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
-                    <prerelease>true</prerelease>
+                    <prerelease>${github.deploy.prerelease}</prerelease>
                     <overwriteArtifact>true</overwriteArtifact>
                     <!-- If your project has additional artifacts, such as ones produced by
                     the maven-assembly-plugin, you can define the following
