@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.16-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -58,6 +58,7 @@
                             <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
                             <jvmArgs>splash:splashscreen.png</jvmArgs>
                             <manifestAttributes>
+                                <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
                                 <Specification-Title>${project.name}</Specification-Title>
                                 <Specification-Version>${project.version}</Specification-Version>
                                 <Specification-Vendor>${project.organization.name}</Specification-Vendor>
@@ -65,6 +66,7 @@
                                 <Implementation-Version>${project.version}</Implementation-Version>
                                 <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
                                 <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
+                                <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
                             </manifestAttributes>
                             <bundleArguments>
                                 <!--<runtime />-->
