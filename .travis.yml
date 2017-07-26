@@ -27,4 +27,5 @@ deploy:
   name: binjr $TRAVIS_TAG
   on:
     tags: true
+    condition: $TRAVIS_TAG != *"SNAPSHOT"*
     all_branches: true
