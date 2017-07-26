@@ -9,5 +9,5 @@ if [[ -z "$TRAVIS_TAG" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
 else
     cd binjr
     echo "Start Maven package"
-    mvn package
+    mvn deploy
 fi
