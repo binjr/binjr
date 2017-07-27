@@ -1,13 +1,21 @@
 version: '{build}'
+
 branches:
+
   only:
+
   - master
+
 build_script:
+
 - cmd: >-
+
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
 
-#    git clone -b travis `git config --get remote.origin.url` binjr/target/travis
+
 
     cd binjr
 
-    mvn clean verify #--settings "./target/travis/settings.xml"
+
+
+    mvn clean verify
