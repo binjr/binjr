@@ -77,14 +77,14 @@
                             <execution>
                                 <!-- required before build-native -->
                                 <id>fromUrl-jfxjar</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>build-jar</goal>
                                 </goals>
                             </execution>
                             <execution>
                                 <id>fromUrl-native</id>
-                                <phase>package</phase>
+                                <phase>install</phase>
                                 <goals>
                                     <goal>build-native</goal>
                                 </goals>
@@ -195,9 +195,16 @@
                             <directory>${project.build.directory}</directory>
                             <includes>
                                 <include>${project.artifactId}.jar</include>
-                                <include>/jfx/native/${project.artifactId}*.msi</include>
-                                <include>/jfx/native/${project.artifactId}*.deb</include>
-                                <include>/jfx/native/${project.artifactId}*.rpm</include>
+                            </includes>
+                        </fileSet>
+                        <fileSet>
+                            <directory>${project.build.directory}/jfx/native/</directory>
+                            <includes>
+                                <include>${project.artifactId}*.exe</include>
+                                <include>${project.artifactId}*.msi</include>
+                                <include>${project.artifactId}*.deb</include>
+                                <include>${project.artifactId}*.rpm</include>
+                                <include>${project.artifactId}*.dmg</include>
                             </includes>
                         </fileSet>
                     </fileSets>
