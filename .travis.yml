@@ -21,6 +21,10 @@ branches:
   only:
   - master
 
+os:
+  - linux
+  - osx
+
 #deploy:
 #  provider: releases
 #  api_key:

@@ -5,7 +5,7 @@ if [[ -z "$TRAVIS_TAG" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
     git checkout master
     cd binjr
     echo "*** RELEASE ***"
-    mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release
+    mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release,buildNativeBundles
 else
     cd binjr
     echo "*** SNAPSHOT ***"

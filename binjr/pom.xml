@@ -195,6 +195,9 @@
                             <directory>${project.build.directory}</directory>
                             <includes>
                                 <include>${project.artifactId}.jar</include>
+                                <include>/jfx/native/${project.artifactId}*.msi</include>
+                                <include>/jfx/native/${project.artifactId}*.deb</include>
+                                <include>/jfx/native/${project.artifactId}*.rpm</include>
                             </includes>
                         </fileSet>
                     </fileSets>
