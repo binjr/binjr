@@ -1,4 +1,6 @@
-# binjr ![](https://travis-ci.org/fthevenet/binjr.svg?branch=master)
+# binjr ![](https://travis-ci.org/fthevenet/binjr.svg?branch=master) [![Build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr)
+
+
 
 *binjr* is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
