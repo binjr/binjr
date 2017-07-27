@@ -91,6 +91,38 @@
                             </execution>
                         </executions>
                     </plugin>
+                    <plugin>
+                        <groupId>de.jutzig</groupId>
+                        <artifactId>github-release-plugin</artifactId>
+                        <version>1.2.0</version>
+                        <executions>
+                            <execution>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>release</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <description>binjr v${project.version}</description>
+                            <releaseName>binjr v${project.version}</releaseName>
+                            <tag>v${project.version}</tag>
+                            <prerelease>${github.deploy.prerelease}</prerelease>
+                            <overwriteArtifact>true</overwriteArtifact>
+                            <fileSets>
+                                <fileSet>
+                                    <directory>${project.build.directory}/jfx/native/</directory>
+                                    <includes>
+                                        <include>${project.artifactId}*.exe</include>
+                                        <include>${project.artifactId}*.msi</include>
+                                        <include>${project.artifactId}*.deb</include>
+                                        <include>${project.artifactId}*.rpm</include>
+                                        <include>${project.artifactId}*.dmg</include>
+                                    </includes>
+                                </fileSet>
+                            </fileSets>
+                        </configuration>
+                    </plugin>
                 </plugins>
             </build>
         </profile>
@@ -195,16 +227,6 @@
                             <directory>${project.build.directory}</directory>
                             <includes>
                                 <include>${project.artifactId}.jar</include>
-                            </includes>
-                        </fileSet>
-                        <fileSet>
-                            <directory>${project.build.directory}/jfx/native/</directory>
-                            <includes>
-                                <include>${project.artifactId}*.exe</include>
-                                <include>${project.artifactId}*.msi</include>
-                                <include>${project.artifactId}*.deb</include>
-                                <include>${project.artifactId}*.rpm</include>
-                                <include>${project.artifactId}*.dmg</include>
                             </includes>
                         </fileSet>
                     </fileSets>

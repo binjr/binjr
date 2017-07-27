@@ -1,5 +1,11 @@
 version: '{build}'
 
+environment:
+  GITHUB_TOKEN:
+    secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
+  SCM_USERNAME:
+    secure: 8BjoFIdSfcFM5UNtivbS5w==
+
 branches:
 
   only:
@@ -12,10 +18,8 @@ build_script:
 
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
 
-
+    git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
     cd binjr
 
-
-
-    mvn clean verify
+    mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
