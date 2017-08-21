@@ -29,7 +29,7 @@ import eu.fthevenet.binjr.data.parsers.CsvParser;
 import eu.fthevenet.binjr.data.parsers.DataParser;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
@@ -281,7 +281,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             logger.debug(() -> "requestUrl = " + requestUrl);
             HttpGet httpget = new HttpGet(requestUrl.build());
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", "binjr/" + GlobalPreferences.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             T result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
                 throw new ResponseProcessingException("Response entity to \"" + requestUrl.toString() + "\" is null.");

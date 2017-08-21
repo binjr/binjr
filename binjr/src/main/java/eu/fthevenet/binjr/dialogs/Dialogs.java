@@ -17,7 +17,7 @@
 
 package eu.fthevenet.binjr.dialogs;
 
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -178,7 +178,7 @@ public class Dialogs {
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
     public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
-        switch (GlobalPreferences.getInstance().getOsFamily()) {
+        switch (AppEnvironment.getInstance().getOsFamily()) {
             case WINDOWS:
                 if (Desktop.isDesktopSupported()) {
                     Desktop desktop = Desktop.getDesktop();

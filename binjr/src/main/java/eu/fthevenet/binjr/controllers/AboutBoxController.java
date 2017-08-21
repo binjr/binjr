@@ -19,8 +19,10 @@ package eu.fthevenet.binjr.controllers;
 
 
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
+import eu.fthevenet.binjr.preferences.UpdateManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -136,7 +138,7 @@ public class AboutBoxController implements Initializable {
         l.setTextFill(Color.DARKGRAY);
         l.setPadding(new Insets(3, 0, 0, 4));
         versionCheckFlow.getChildren().add(l);
-        GlobalPreferences.getInstance().asyncCheckForUpdate(githubRelease -> {
+        UpdateManager.getInstance().asyncForcedCheckForUpdate(githubRelease -> {
                     versionCheckFlow.getChildren().clear();
                     Hyperlink latestReleaseLink = new Hyperlink("v" + githubRelease.getVersion().toString() + " is available");
                     latestReleaseLink.setTextFill(Color.valueOf("#4BACC6"));
@@ -152,8 +154,8 @@ public class AboutBoxController implements Initializable {
                 },
                 version -> l.setText("binjr is up to date"),
                 () -> versionCheckFlow.getChildren().clear());
-        sysInfoListTable.getItems().addAll(GlobalPreferences.getInstance().getSysInfoProperties());
-        versionLabel.setText("version " + GlobalPreferences.getInstance().getManifestVersion());
+        sysInfoListTable.getItems().addAll(AppEnvironment.getInstance().getSysInfoProperties());
+        versionLabel.setText("version " + AppEnvironment.getInstance().getManifestVersion());
         detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
             Platform.runLater(() -> {
                 p.requestLayout();

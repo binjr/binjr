@@ -30,8 +30,11 @@ import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.preferences.UpdateManager;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
+import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
 import javafx.application.Application;
@@ -71,7 +74,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -150,6 +152,14 @@ public class MainViewController implements Initializable {
         this.workspace = new Workspace();
     }
 
+    private static void worksheetAreaOnDragOver(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+            event.acceptTransferModes(TransferMode.COPY);
+            event.consume();
+        }
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
@@ -159,8 +169,7 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-        GlobalPreferences prefs = GlobalPreferences.getInstance();
-        prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+        GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 setUiTheme(newValue);
             }
@@ -172,49 +181,9 @@ public class MainViewController implements Initializable {
         chartPropertiesMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
-
-        worksheetTabPane.setNewTabFactory(() -> {
-            AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
-            EditableTab newTab = new EditableTab("");
-            new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
-                loadWorksheet(w, newTab);
-                wasNewTabCreated.set(true);
-            });
-            return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
-        });
-
-        worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            while (c.next()) {
-                if (c.wasAdded()) {
-                    workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-                }
-                if (c.wasRemoved()) {
-                    c.getRemoved().forEach((t -> {
-                        WorksheetController ctlr = seriesControllers.get(t);
-                        if (ctlr != null) {
-                            workspace.removeWorksheets(ctlr.getWorksheet());
-                            seriesControllers.remove(t);
-                            ctlr.close();
-                        }
-                        else {
-                            logger.warn("Could not find a controller assigned to tab " + t.getText());
-                        }
-                    }));
-                }
-            }
-            logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-        });
-
-        sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) c -> {
-            workspace.clearSources();
-            workspace.addSources(c.getList()
-                    .stream()
-                    .filter(t -> sourcesAdapters.get(t) != null)
-                    .map((t) -> Source.of(sourcesAdapters.get(t)))
-                    .collect(Collectors.toList()));
-            logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-        });
-
+        worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
+        worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
+        sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             invalidateSearchResults();
@@ -222,101 +191,18 @@ public class MainViewController implements Initializable {
                 findNext();
             }
         });
-
         worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 this.selectedWorksheetController = seriesControllers.get(newValue);
             }
         });
-
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
+        worksheetArea.setOnDragOver(MainViewController::worksheetAreaOnDragOver);
+        worksheetArea.setOnDragDropped(this::worksheetAreaOnDragDropped);
 
-        worksheetArea.setOnDragOver(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-                event.acceptTransferModes(TransferMode.COPY);
-                event.consume();
-            }
-        });
 
-        worksheetArea.setOnDragDropped(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-                TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
-                if (treeView != null) {
-                    TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
-                    if (item != null) {
-                        addToNewWorksheet(item);
-                    }
-                    else {
-                        logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
-                    }
-                }
-                else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-                }
-                event.consume();
-            }
-        });
-
-        Platform.runLater(() -> {
-            setUiTheme(prefs.getUserInterfaceTheme());
-            Stage stage = Dialogs.getStage(root);
-            stage.titleProperty().bind(Bindings.createStringBinding(
-                    () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
-                    workspace.pathProperty(),
-                    workspace.dirtyProperty()));
-
-            stage.setOnCloseRequest(event -> {
-                if (!confirmAndClearWorkspace()) {
-                    event.consume();
-                }
-            });
-            stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
-            stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-            stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                //main stage lost focus -> invalidates shift or ctrl pressed
-                prefs.setShiftPressed(false);
-                prefs.setCtrlPressed(false);
-            });
-            if (prefs.isLoadLastWorkspaceOnStartup()) {
-                File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
-                if (latestWorkspace.exists()) {
-                    loadWorkspace(latestWorkspace);
-                }
-                else {
-                    logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
-                }
-            }
-            if (prefs.isCheckForUpdateOnStartUp() && (LocalDateTime.now().minus(1, ChronoUnit.HOURS).isAfter(prefs.getLastCheckForUpdate()))) {
-                prefs.setLastCheckForUpdate(LocalDateTime.now());
-                prefs.asyncCheckForUpdate(
-                        githubRelease -> {
-                            Notifications n = Notifications.create()
-                                    .title("New release available!")
-                                    .text("You are currently running binjr version " + prefs.getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
-                                    .hideAfter(Duration.seconds(20))
-                                    .position(Pos.BOTTOM_RIGHT)
-                                    .owner(root);
-                            n.action(new Action("Download", actionEvent -> {
-                                String newReleaseUrl = githubRelease.getHtmlUrl();
-                                if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
-                                    try {
-                                        Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
-                                    } catch (IOException | URISyntaxException e) {
-                                        logger.error("Failed to launch url in browser " + newReleaseUrl, e);
-                                    }
-                                }
-                                n.hideAfter(Duration.seconds(0));
-                            }));
-                            n.showInformation();
-                        }
-                );
-            }
-        });
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
-
         });
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -344,7 +230,47 @@ public class MainViewController implements Initializable {
             invalidateSearchResults();
             findNext();
         });
+
+        Platform.runLater(this::postInitialization);
     }
+
+    protected void postInitialization() {
+        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        setUiTheme(prefs.getUserInterfaceTheme());
+        Stage stage = Dialogs.getStage(root);
+        stage.titleProperty().bind(Bindings.createStringBinding(
+                () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
+                workspace.pathProperty(),
+                workspace.dirtyProperty()));
+
+        stage.setOnCloseRequest(event -> {
+            if (!confirmAndClearWorkspace()) {
+                event.consume();
+            }
+        });
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
+        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
+        stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            //main stage lost focus -> invalidates shift or ctrl pressed
+            prefs.setShiftPressed(false);
+            prefs.setCtrlPressed(false);
+        });
+        if (prefs.isLoadLastWorkspaceOnStartup()) {
+            File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
+            if (latestWorkspace.exists()) {
+                loadWorkspace(latestWorkspace);
+            }
+            else {
+                logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
+            }
+        }
+        if (prefs.isCheckForUpdateOnStartUp()) {
+            UpdateManager.getInstance().asyncCheckForUpdate(
+                    this::onAvailableUpdate, null, null
+            );
+        }
+    }
+
 
     //region UI handlers
     @FXML
@@ -934,7 +860,7 @@ public class MainViewController implements Initializable {
     }
 
     private void addToNewWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
-        // Schedule for later execution in order to let other UI components get refreshed
+        // Schedule for later execution in order to let other UI components worksheetTabFactory refreshed
         // before modal dialog gets displayed (fixes unsightly UI glitches on Linux)
         Platform.runLater(() -> {
             try {
@@ -1027,6 +953,89 @@ public class MainViewController implements Initializable {
 
     private boolean isNullOrEmpty(String s) {
         return (s == null || s.trim().length() == 0);
+    }
+
+    private void onWorksheetTabChanged(ListChangeListener.Change<? extends Tab> c) {
+        while (c.next()) {
+            if (c.wasAdded()) {
+                workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+            }
+            if (c.wasRemoved()) {
+                c.getRemoved().forEach((t -> {
+                    WorksheetController ctlr = seriesControllers.get(t);
+                    if (ctlr != null) {
+                        workspace.removeWorksheets(ctlr.getWorksheet());
+                        seriesControllers.remove(t);
+                        ctlr.close();
+                    }
+                    else {
+                        logger.warn("Could not find a controller assigned to tab " + t.getText());
+                    }
+                }));
+            }
+        }
+        logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+    }
+
+    private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
+        workspace.clearSources();
+        workspace.addSources(c.getList()
+                .stream()
+                .filter(t -> sourcesAdapters.get(t) != null)
+                .map((t) -> Source.of(sourcesAdapters.get(t)))
+                .collect(Collectors.toList()));
+        logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+    }
+
+    private Optional<Tab> worksheetTabFactory() {
+        AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
+        EditableTab newTab = new EditableTab("");
+        new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
+            loadWorksheet(w, newTab);
+            wasNewTabCreated.set(true);
+        });
+        return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
+    }
+
+    private void worksheetAreaOnDragDropped(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+            TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    addToNewWorksheet(item);
+                }
+                else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            }
+            else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
+    }
+
+    private void onAvailableUpdate(GithubRelease githubRelease) {
+        Notifications n = Notifications.create()
+                .title("New release available!")
+                .text("You are currently running binjr version " + AppEnvironment.getInstance().getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
+                .hideAfter(Duration.seconds(20))
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(root);
+        n.action(new Action("Download", actionEvent -> {
+            String newReleaseUrl = githubRelease.getHtmlUrl();
+            if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
+                try {
+                    Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
+                } catch (IOException | URISyntaxException e) {
+                    logger.error("Failed to launch url in browser " + newReleaseUrl, e);
+                }
+            }
+            n.hideAfter(Duration.seconds(0));
+        }));
+        n.showInformation();
     }
 
     //endregion

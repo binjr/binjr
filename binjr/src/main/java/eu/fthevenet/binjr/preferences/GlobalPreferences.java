@@ -17,27 +17,17 @@
 
 package eu.fthevenet.binjr.preferences;
 
-import com.sun.javafx.tk.Toolkit;
-import com.sun.prism.GraphicsPipeline;
-import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
-import eu.fthevenet.util.github.GithubApi;
-import eu.fthevenet.util.github.GithubRelease;
-import eu.fthevenet.util.version.Version;
 import javafx.beans.property.*;
-import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.function.Consumer;
-import java.util.jar.Manifest;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
@@ -47,34 +37,27 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
-    private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
-    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
-    public static final String HTTP_LATEST_RELEASE = "https://github.com/fthevenet/binjr/releases/latest";
     public static final String HTTP_GITHUB_REPO = "https://github.com/fthevenet/binjr";
+
+    private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String CHART_ANIMATION_ENABLED = "enableChartAnimation";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
-    private static final String SAMPLE_SYMBOLS_VISIBLE = "sampleSymbolsVisible";
     private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
-    public static final String CHECK_FOR_UPDATE_ON_START_UP = "checkForUpdateOnStartUp";
+    private static final String CHECK_FOR_UPDATE_ON_START_UP = "checkForUpdateOnStartUp";
     private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
     private static final int MAX_RECENT_FILES = 20;
-    public static final String GITHUB_OWNER = "fthevenet";
-    public static final String GITHUB_REPO = "binjr";
-    public static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
-    public static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
-    public static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
-    public static final String SHOW_AREA_OUTLINE = "showAreaOutline";
-    public static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
+    private static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
+    private static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
+    private static final String SHOW_AREA_OUTLINE = "showAreaOutline";
+    private static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
 
-
-    private final Manifest manifest;
     private BooleanProperty loadLastWorkspaceOnStartup;
     private BooleanProperty downSamplingEnabled;
     private IntegerProperty downSamplingThreshold;
@@ -87,12 +70,10 @@ public class GlobalPreferences {
     private Deque<String> recentFiles;
     private BooleanProperty horizontalMarkerOn;
     private BooleanProperty verticalMarkerOn;
-    private Property<LocalDateTime> lastCheckForUpdate;
     private BooleanProperty showAreaOutline;
     private DoubleProperty defaultGraphOpacity;
     private BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
     private BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
-
 
     public Boolean isShiftPressed() {
         return shiftPressed.get();
@@ -150,22 +131,10 @@ public class GlobalPreferences {
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
         verticalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(VERTICAL_MARKER_ON, true));
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
-        lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
         showAreaOutline = new SimpleBooleanProperty(prefs.getBoolean(SHOW_AREA_OUTLINE, true));
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
         defaultGraphOpacity = new SimpleDoubleProperty(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
-        this.manifest = getManifest();
-        if (logger.isDebugEnabled()) {
-            logger.debug("Global preferences initial values");
-            logger.debug("  downSamplingThreshold = " + downSamplingThreshold.getValue());
-            logger.debug("  downSamplingEnabled = " + downSamplingEnabled.getValue());
-            logger.debug("  mostRecentSaveFolder = " + mostRecentSaveFolder.getValue());
-            logger.debug("  mostRecentSavedWorkspace = " + mostRecentSavedWorkspace.getValue());
-            logger.debug("  loadLastWorkspaceOnStartup = " + loadLastWorkspaceOnStartup.getValue());
-            logger.debug("  recentFileString = " + recentFileString);
-        }
     }
 
     /**
@@ -455,18 +424,6 @@ public class GlobalPreferences {
         this.verticalMarkerOn.set(verticalMarkerOn);
     }
 
-    public LocalDateTime getLastCheckForUpdate() {
-        return lastCheckForUpdate.getValue();
-    }
-
-    public Property<LocalDateTime> lastCheckForUpdateProperty() {
-        return lastCheckForUpdate;
-    }
-
-    public void setLastCheckForUpdate(LocalDateTime lastCheckForUpdate) {
-        this.lastCheckForUpdate.setValue(lastCheckForUpdate);
-    }
-
     public boolean isShowAreaOutline() {
         return showAreaOutline.getValue();
     }
@@ -491,142 +448,5 @@ public class GlobalPreferences {
         this.defaultGraphOpacity.set(defaultGraphOpacity);
     }
 
-    /**
-     * Returns the version information held in the containing jar's manifest
-     *
-     * @return the version information held in the containing jar's manifest
-     */
-    public Version getManifestVersion() {
-        if (manifest != null) {
-            String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
-            for (String key : keys) {
-                String value = manifest.getMainAttributes().getValue(key);
-                if (value != null) {
-                    try {
-                        return new Version(value);
-                    } catch (IllegalArgumentException e) {
-                        logger.error("Could not parse version number: " + value, e);
-                    }
-                }
-            }
-        }
-        return Version.emptyVersion;
-    }
 
-    public Long getBuildNumber() {
-        if (manifest != null) {
-            String value = manifest.getMainAttributes().getValue("Build-Number");
-            if (value != null) {
-                try {
-                    return Long.valueOf(value);
-                } catch (NumberFormatException e) {
-                    logger.error("Could not parse build number: " + value);
-                    logger.debug(() -> "Full stack", e);
-                }
-            }
-        }
-        return -1L;
-    }
-
-    /**
-     * Returns a list of system properties
-     *
-     * @return a list of system properties
-     */
-    public List<SysInfoProperty> getSysInfoProperties() {
-        Runtime rt = Runtime.getRuntime();
-        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
-        double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
-
-        List<SysInfoProperty> sysInfo = new ArrayList<>();
-        sysInfo.add(new SysInfoProperty("Version", getManifestVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
-        sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
-        sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
-        sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
-        sysInfo.add(new SysInfoProperty("Java Home", System.getProperty("java.home")));
-        sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
-        sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
-        sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
-        sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
-        Toolkit toolkit = Toolkit.getToolkit();
-        sysInfo.add((new SysInfoProperty("JavaFX Toolkit", toolkit != null ? toolkit.getClass().getSimpleName() : "unknown")));
-        GraphicsPipeline pipeline = GraphicsPipeline.getPipeline();
-        sysInfo.add((new SysInfoProperty("Rendering Pipeline", pipeline != null ? pipeline.getClass().getSimpleName() : "unknown")));
-        return sysInfo;
-    }
-
-    /**
-     * Returns the family of the currently running OS
-     *
-     * @return the family of the currently running OS
-     */
-    public OsFamily getOsFamily() {
-        if (OS_NAME.startsWith("windows")) {
-            return OsFamily.WINDOWS;
-        }
-        if (OS_NAME.startsWith("mac")) {
-            return OsFamily.OSX;
-        }
-        if (OS_NAME.startsWith("linux")) {
-            return OsFamily.LINUX;
-        }
-        else {
-            return OsFamily.UNSUPPORTED;
-        }
-    }
-
-
-    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable) {
-        asyncCheckForUpdate(newReleaseAvailable, null, null);
-    }
-
-    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Runnable onFailure) {
-        asyncCheckForUpdate(newReleaseAvailable, null, onFailure);
-    }
-
-
-    public void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure) {
-        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
-            @Override
-            protected Optional<GithubRelease> call() throws Exception {
-                logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(getManifestVersion()) > 0);
-            }
-        };
-        getLatestTask.setOnSucceeded(workerStateEvent -> {
-            logger.trace("UI update running on " + Thread.currentThread().getName());
-            Optional<GithubRelease> latest = getLatestTask.getValue();
-            Version current = getManifestVersion();
-            if (latest.isPresent()) {
-                newReleaseAvailable.accept(latest.get());
-            }
-            else {
-                if (upToDate != null) {
-                    upToDate.accept(current);
-                }
-            }
-        });
-        getLatestTask.setOnFailed(workerStateEvent -> {
-            logger.error("Error while checking for update", getLatestTask.getException());
-            if (onFailure != null) {
-                onFailure.run();
-            }
-        });
-        AsyncTaskManager.getInstance().submit(getLatestTask);
-    }
-
-    private Manifest getManifest() {
-        String className = this.getClass().getSimpleName() + ".class";
-        String classPath = this.getClass().getResource(className).toString();
-        if (classPath.startsWith("jar")) {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
-            try {
-                return new Manifest(new URL(manifestPath).openStream());
-            } catch (IOException e) {
-                logger.error("Error extracting manifest from jar", e);
-            }
-        }
-        logger.warn("Could not extract MANIFEST from jar!");
-        return null;
-    }
 }

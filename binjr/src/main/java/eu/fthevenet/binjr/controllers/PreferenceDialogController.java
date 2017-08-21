@@ -20,6 +20,7 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.preferences.UpdateManager;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
@@ -127,7 +128,7 @@ public class PreferenceDialogController implements Initializable {
         l.setTextFill(Color.DIMGRAY);
         l.setWrapText(true);
         updateFlow.getChildren().add(l);
-        GlobalPreferences.getInstance().asyncCheckForUpdate(githubRelease -> {
+        UpdateManager.getInstance().asyncForcedCheckForUpdate(githubRelease -> {
                     updateFlow.getChildren().clear();
                     Hyperlink latestReleaseLink = new Hyperlink("Version " + githubRelease.getVersion().toString() + " is available.");
                     latestReleaseLink.setTextFill(Color.valueOf("#4BACC6"));
