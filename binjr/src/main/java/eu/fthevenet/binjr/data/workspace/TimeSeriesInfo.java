@@ -44,7 +44,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
-    private final ChangeWatcher<TimeSeriesInfo> status;
+    private final transient ChangeWatcher<TimeSeriesInfo> status;
     private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
     /**

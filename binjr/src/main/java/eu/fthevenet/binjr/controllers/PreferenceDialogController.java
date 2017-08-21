@@ -112,12 +112,6 @@ public class PreferenceDialogController implements Initializable {
         prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
-//
-//        root.hoverProperty().addListener((observable, oldValue, newValue) -> {
-//            if (!newValue){
-//                hide(Duration.millis(800));
-//            }
-//        });
     }
 
     public void handleCheckForUpdate(ActionEvent actionEvent) {
@@ -160,7 +154,7 @@ public class PreferenceDialogController implements Initializable {
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);
-        openNav.setToX(-MainViewController.settingsPaneDistance);
+        openNav.setToX(-MainViewController.SETTINGS_PANE_DISTANCE);
         openNav.play();
     }
 }

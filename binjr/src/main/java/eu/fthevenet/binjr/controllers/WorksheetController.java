@@ -63,7 +63,6 @@ import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
-import org.gillius.jfxutils.chart.XYChartInfo;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -144,7 +143,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
-    private XYChartInfo chartInfo;
     private History backwardHistory = new History();
     private History forwardHistory = new History();
     private String name;
@@ -171,7 +169,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         loader.setController(propertiesController);
         Parent p = loader.load();
         settingsPane = new StackPane(p);
-        AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.settingsPaneDistance);
+        AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.SETTINGS_PANE_DISTANCE);
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
         settingsPane.getStyleClass().add("toolPane");
@@ -236,6 +234,20 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
         //endregion
 
+        //region Control initialization
+        initChartPane();
+        initChartSettingPane();
+        initNavigationPane();
+        initTableViewPane();
+        //endregion
+
+        //region *** Global preferences ***
+        globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
+        globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
+        //endregion
+    }
+
+    private void initChartPane() {
         //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.setAnimated(false);
@@ -258,14 +270,16 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chart.setCacheShape(true);
         chart.setFocusTraversable(true);
         chart.setLegendVisible(false);
+        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
         chartParent.getChildren().add(chart);
-        chartInfo = new XYChartInfo(chart);
         AnchorPane.setBottomAnchor(chart, 0.0);
         AnchorPane.setLeftAnchor(chart, 0.0);
         AnchorPane.setRightAnchor(chart, 0.0);
         AnchorPane.setTopAnchor(chart, 0.0);
         //endregion
+    }
 
+    private void initNavigationPane() {
         //region *** Buttons ***
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
@@ -274,14 +288,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
-
-        //endregion
-
-        //region *** Global preferences ***
-        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
-        globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
-        globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
-
         //endregion
 
         //region *** Time pickers ***
@@ -298,7 +304,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
-        crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, (n) -> String.format("%,.2f", n.doubleValue()));
+        crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
 
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -309,15 +315,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
-        crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> {
-            currentColumn.setVisible(newValue);
-        });
+        crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
         setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
         //endregion
+    }
 
-        //region *** chart properties ***
-
+    private void initChartSettingPane() {
         Region r = new Region();
         r.getStyleClass().add("settings-icon");
         chartPropertiesButton = new ToggleButton("", r);
@@ -331,10 +335,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
         chartParent.getChildren().add(chartPropertiesButton);
         chartParent.getChildren().add(settingsPane);
+    }
 
-        //endregion
-
-        //region *** Series TableView ***
+    private void initTableViewPane() {
         seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
         pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -360,51 +363,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     return prefixFormatter.format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
                 }, crossHair.currentXValueProperty()));
 
-        seriesTable.setRowFactory(tv -> {
-            TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
-            row.setOnDragDetected(event -> {
-                if (!row.isEmpty()) {
-                    Integer index = row.getIndex();
-                    Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                    db.setDragView(row.snapshot(null, null));
-                    ClipboardContent cc = new ClipboardContent();
-                    cc.put(SERIALIZED_MIME_TYPE, index);
-                    db.setContent(cc);
-                    event.consume();
-                }
-            });
-
-            row.setOnDragOver(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    if (row.getIndex() != ((Integer) db.getContent(SERIALIZED_MIME_TYPE)).intValue()) {
-                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                        event.consume();
-                    }
-                }
-            });
-
-            row.setOnDragDropped(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                    int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                    TimeSeriesInfo<Double> draggedseries = seriesTable.getItems().remove(draggedIndex);
-                    int dropIndex;
-                    if (row.isEmpty()) {
-                        dropIndex = seriesTable.getItems().size();
-                    }
-                    else {
-                        dropIndex = row.getIndex();
-                    }
-                    seriesTable.getItems().add(dropIndex, draggedseries);
-                    event.setDropCompleted(true);
-                    seriesTable.getSelectionModel().clearAndSelect(dropIndex);
-                    invalidate(false, false, false);
-                    event.consume();
-                }
-            });
-            return row;
-        });
+        seriesTable.setRowFactory(this::seriesTableRowFactory);
 
         seriesTable.setOnKeyReleased(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
@@ -412,8 +371,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             }
         });
         seriesTable.setItems(worksheet.getSeries());
-        //endregion
     }
+
     //endregion
 
     @Override
@@ -559,23 +518,21 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                         case AREA:
                         case STACKED:
                             ObservableList<Node> children = ((Group) newNode).getChildren();
-                            if (children != null) {
-                                if (children.size() >= 1) {
-                                    Path stroke = (Path) children.get(1);
-                                    Path fill = (Path) children.get(0);
-                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                                    stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
-                                    stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
-                                    stroke.strokeProperty().bind(series.displayColorProperty());
-                                    fill.fillProperty().bind(Bindings.createObjectBinding(
-                                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
-                                            series.displayColorProperty(),
-                                            getWorksheet().graphOpacityProperty()));
-                                }
+                            if (children != null && children.size() >= 1) {
+                                Path stroke = (Path) children.get(1);
+                                Path fill = (Path) children.get(0);
+                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
+                                stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
+                                stroke.strokeProperty().bind(series.displayColorProperty());
+                                fill.fillProperty().bind(Bindings.createObjectBinding(
+                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
+                                        series.displayColorProperty(),
+                                        getWorksheet().graphOpacityProperty()));
                             }
                             break;
                         case LINE:
-                            Path stroke = (Path)newNode;
+                            Path stroke = (Path) newNode;
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                             stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
                             stroke.strokeProperty().bind(series.displayColorProperty());
@@ -630,11 +587,55 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
     }
 
+    private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
+        TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
+        row.setOnDragDetected(event -> {
+            if (!row.isEmpty()) {
+                Integer index = row.getIndex();
+                Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
+                db.setDragView(row.snapshot(null, null));
+                ClipboardContent cc = new ClipboardContent();
+                cc.put(SERIALIZED_MIME_TYPE, index);
+                db.setContent(cc);
+                event.consume();
+            }
+        });
+
+        row.setOnDragOver(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasContent(SERIALIZED_MIME_TYPE) && row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
+                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                event.consume();
+            }
+        });
+
+        row.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasContent(SERIALIZED_MIME_TYPE)) {
+                int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
+                TimeSeriesInfo<Double> draggedseries = seriesTable.getItems().remove(draggedIndex);
+                int dropIndex;
+                if (row.isEmpty()) {
+                    dropIndex = seriesTable.getItems().size();
+                }
+                else {
+                    dropIndex = row.getIndex();
+                }
+                seriesTable.getItems().add(dropIndex, draggedseries);
+                event.setDropCompleted(true);
+                seriesTable.getSelectionModel().clearAndSelect(dropIndex);
+                invalidate(false, false, false);
+                event.consume();
+            }
+        });
+        return row;
+    }
+
     /**
      * Wraps a stack to record user navigation steps.
      */
     private class History {
-        private final Stack<XYChartSelection<ZonedDateTime, Double>> stack = new Stack<>();
+        private final Deque<XYChartSelection<ZonedDateTime, Double>> stack = new ArrayDeque<>();
         private final SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
 
         /**
@@ -643,15 +644,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
          * @param state the provided {@link XYChartSelection}
          * @return the provided {@link XYChartSelection}
          */
-        XYChartSelection<ZonedDateTime, Double> push(XYChartSelection<ZonedDateTime, Double> state) {
+        void push(XYChartSelection<ZonedDateTime, Double> state) {
             if (state == null) {
                 logger.warn(() -> "Trying to push null state into backwardHistory");
-                return null;
+                return;
             }
-            else {
-                emptyStackProperty.set(false);
-                return this.stack.push(state);
-            }
+            emptyStackProperty.set(false);
+            this.stack.push(state);
         }
 
         /**
@@ -804,7 +803,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
 
         private double roundYValue(double y) {
-            return y;// Math.round(y);
+            return y;
         }
 
         private ZonedDateTime roundDateTime(ZonedDateTime zdt) {

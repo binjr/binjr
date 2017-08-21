@@ -17,6 +17,8 @@
 
 package eu.fthevenet.binjr.data.timeseries.transform;
 
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 import java.util.LinkedList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ public class TransformPipeline<T extends Number> {
     private final List<TimeSeriesTransform<T>> transforms = new LinkedList<>();
 
     public TransformPipeline(){
-
+        throw new NotImplementedException();
     }
 
     public List<TimeSeriesTransform<T>> getTransforms() {

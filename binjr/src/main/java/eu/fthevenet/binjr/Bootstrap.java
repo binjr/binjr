@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
  *
  * @author Frederic Thevenet
  */
-final public class Bootstrap {
+public final class Bootstrap {
     private static final Logger logger = LogManager.getLogger(Bootstrap.class);
 
     /**
@@ -48,10 +48,10 @@ final public class Bootstrap {
 
     private static boolean checkForJavaFX() {
         try {
-            Class<?> c = Class.forName("javafx.application.Application");
-            logger.info("JavaFX runtime detected.");
+            logger.info("Class " + Class.forName("javafx.application.Application") + " found: JavaFX runtime is available.");
             return true;
-        } catch (ClassNotFoundException e) {
+
+        } catch (ClassNotFoundException | NullPointerException e) {
             logger.info("JavaFX is not available on the current runtime environment:" +
                     "\njava.version=" +
                     System.getProperty("java.version") +

@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
     public static final int CACHE_SIZE = 32;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
-    private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
+    private final transient Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
     /**
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class

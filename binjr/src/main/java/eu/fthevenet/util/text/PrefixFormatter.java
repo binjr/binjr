@@ -44,7 +44,7 @@ public abstract class PrefixFormatter {
         this.base = base;
         for (int i = 0; i < suffixes.length; i++) {
             this.longSuffixes.put(pow(base, i + 1), suffixes[i]);
-            this.doubleSuffixes.put(Math.pow(base, i + 1), suffixes[i]);
+            this.doubleSuffixes.put(Math.pow(base, i + 1.0), suffixes[i]);
         }
     }
 

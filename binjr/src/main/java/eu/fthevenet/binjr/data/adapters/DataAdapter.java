@@ -36,7 +36,6 @@ import java.util.UUID;
  */
 public abstract class DataAdapter<T extends Number> implements Serializable, AutoCloseable {
     private UUID id = UUID.randomUUID();
-    private boolean loaded = false;
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -56,7 +55,6 @@ public abstract class DataAdapter<T extends Number> implements Serializable, Aut
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    // public abstract InputStream getData(String path, Instant begin, Instant end) throws DataAdapterException;
     public abstract InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
 
     /**

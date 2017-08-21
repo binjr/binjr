@@ -98,16 +98,12 @@ public class TabPaneNewButton extends TabPane {
                 });
             });
         }
-
-
         tabHeaderBg.getChildren().add(newTabButton);
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
-        //  StackPane.setMargin(newTabButton, new Insets(2));
-
         switch (getSide()) {
             case TOP:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty()//.add(5)
+                        headersRegion.widthProperty()
                 );
                 break;
             case LEFT:
@@ -115,7 +111,6 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                        // .subtract(1)
                 );
                 break;
             case BOTTOM:
@@ -123,12 +118,11 @@ public class TabPaneNewButton extends TabPane {
                         tabHeaderBg.widthProperty()
                                 .subtract(headersRegion.widthProperty())
                                 .subtract(newTabButton.widthProperty())
-                        // .subtract(5)
                 );
                 break;
             case RIGHT:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty()//.add(5)
+                        headersRegion.widthProperty()
                 );
                 break;
         }

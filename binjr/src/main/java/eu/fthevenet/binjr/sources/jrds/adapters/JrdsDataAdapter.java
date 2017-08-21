@@ -288,7 +288,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             }
             return result;
         } catch (HttpResponseException e) {
-            String msg = "Error executing HTTP request \"" + requestUrl.toString() + "\": " + e.getMessage();
+            String msg;
             switch (e.getStatusCode()) {
                 case 401:
                     msg = "Authentication failed while trying to access \"" + requestUrl.toString() + "\"";
@@ -301,6 +301,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     break;
                 case 500:
                     msg = "A server-side error has occurred while trying to access the resource at \"" + requestUrl.toString() + "\": " + e.getMessage();
+                    break;
+                default:
+                    msg = "Error executing HTTP request \"" + requestUrl.toString() + "\": " + e.getMessage();
                     break;
             }
             throw new SourceCommunicationException(msg, e);

@@ -44,7 +44,7 @@ import java.util.ResourceBundle;
  * @author Frederic Thevenet
  */
 public class ChartPropertiesController<T extends Number> implements Initializable {
-    public static double settingsPaneDistance = -210;
+    public static final double SETTINGS_PANE_DISTANCE = -210;
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
     private final Worksheet<T> worksheet;
@@ -91,7 +91,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);
-        openNav.setToX(show * -settingsPaneDistance);
+        openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
         openNav.play();
     }
 
@@ -116,17 +116,11 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
             }
         });
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
-
-
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
         worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
-
-
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            strokeWidthControlDisabled(!newValue);
-        });
+        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
@@ -137,13 +131,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
             }
         });
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
-
-
-//        root.hoverProperty().addListener((observable, oldValue, newValue) -> {
-//            if (!newValue) {
-//                hide(Duration.millis(800));
-//            }
-//        });
     }
 
     private void adaptToChartType(boolean disable) {

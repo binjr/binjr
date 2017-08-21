@@ -88,12 +88,13 @@ import java.util.stream.StreamSupport;
  * @author Frederic Thevenet
  */
 public class MainViewController implements Initializable {
-    public static final int settingsPaneDistance = 250;
+    public static final int SETTINGS_PANE_DISTANCE = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
-    private final Map<EditableTab, WorksheetController> seriesControllers = new HashMap<EditableTab, WorksheetController>();
+    private final Map<EditableTab, WorksheetController> seriesControllers = new HashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
@@ -198,7 +199,7 @@ public class MainViewController implements Initializable {
         });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         worksheetArea.setOnDragOver(MainViewController::worksheetAreaOnDragOver);
-        worksheetArea.setOnDragDropped(this::worksheetAreaOnDragDropped);
+        worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
 
 
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
@@ -231,10 +232,10 @@ public class MainViewController implements Initializable {
             findNext();
         });
 
-        Platform.runLater(this::postInitialization);
+        Platform.runLater(this::runAfterInitialize);
     }
 
-    protected void postInitialization() {
+    protected void runAfterInitialize() {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         setUiTheme(prefs.getUserInterfaceTheme());
         Stage stage = Dialogs.getStage(root);
@@ -301,7 +302,7 @@ public class MainViewController implements Initializable {
     protected void handlePreferencesAction(ActionEvent actionEvent) {
         try {
             TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
-            openNav.setToX(settingsPaneDistance);
+            openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
             showCommandBar();
 
@@ -408,27 +409,24 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void populateOpenRecentMenu(Event event) {
-        Menu openRecentMenu = (Menu) event.getSource();
+        Menu menu = (Menu) event.getSource();
         Collection<String> recentPath = GlobalPreferences.getInstance().getRecentFiles();
-        if (recentPath.size() > 0) {
-            openRecentMenu.getItems().setAll(recentPath.stream().map(s -> {
+        if (!recentPath.isEmpty()) {
+            menu.getItems().setAll(recentPath.stream().map(s -> {
                 MenuItem m = new MenuItem(s);
-                m.setOnAction(e -> {
-                    loadWorkspace(new File(((MenuItem) e.getSource()).getText()));
-                });
+                m.setOnAction(e -> loadWorkspace(new File(((MenuItem) e.getSource()).getText())));
                 return m;
             }).collect(Collectors.toList()));
         }
         else {
             MenuItem none = new MenuItem("none");
             none.setDisable(true);
-            openRecentMenu.getItems().setAll(none);
+            menu.getItems().setAll(none);
         }
     }
 
     //region private members
     private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
-        //       return this.selectedTreeView;
         if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
             return null;
         }
@@ -503,10 +501,8 @@ public class MainViewController implements Initializable {
         if (res == ButtonType.CANCEL) {
             return false;
         }
-        if (res == ButtonType.YES) {
-            if (!saveWorkspace()) {
-                return false;
-            }
+        if (res == ButtonType.YES && !saveWorkspace()) {
+            return false;
         }
         clearWorkspace();
         return true;
@@ -521,7 +517,7 @@ public class MainViewController implements Initializable {
     private void openWorkspaceFromFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Workspace");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", "*.bjr"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
         fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
         File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
@@ -558,7 +554,6 @@ public class MainViewController implements Initializable {
     private void loadWorksheets(Workspace wsFromfile) {
         try {
             for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
-
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
@@ -590,9 +585,9 @@ public class MainViewController implements Initializable {
     private boolean saveWorkspaceAs() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Workspace");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", "*.bjr"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
         fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
-        fileChooser.setInitialFileName("*.bjr");
+        fileChooser.setInitialFileName(BINJR_FILE_PATTERN);
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
@@ -712,41 +707,8 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                p.setOnDragOver(event -> {
-                    Dragboard db = event.getDragboard();
-                    if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-                        event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                        event.consume();
-                    }
-                });
-
-                p.setOnDragDropped(event -> {
-                    Dragboard db = event.getDragboard();
-                    if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-                        TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
-                        if (treeView != null) {
-                            TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
-                            if (item != null) {
-                                if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
-                                    addToNewWorksheet(item);
-                                }
-                                else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                                    addToCurrentWorksheet(item);
-                                }
-                                else {
-                                    logger.warn("Unsupported drag and drop tansfert mode: " + event.getAcceptedTransferMode());
-                                }
-                            }
-                            else {
-                                logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
-                            }
-                        }
-                        else {
-                            logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-                        }
-                        event.consume();
-                    }
-                });
+                p.setOnDragOver(MainViewController::handleDragOverWorksheetView);
+                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
 
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
@@ -777,8 +739,7 @@ public class MainViewController implements Initializable {
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
             final TreeCell<TimeSeriesBinding<Double>> cell = new TreeCell<>();
             cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
-            cell.setOnDragDetected((event) -> {
-                System.out.println("cell setOnDragDetected");
+            cell.setOnDragDetected(event -> {
                 if (cell.getItem() != null) {
                     expandBranch(cell.getTreeItem());
                     Dragboard db = cell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
@@ -796,9 +757,9 @@ public class MainViewController implements Initializable {
         };
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
-            TreeItem<TimeSeriesBinding<Double>> root = dp.getBindingTree();
-            root.setExpanded(true);
-            treeView.setRoot(root);
+            TreeItem<TimeSeriesBinding<Double>> bindingTree = dp.getBindingTree();
+            bindingTree.setExpanded(true);
+            treeView.setRoot(bindingTree);
             return Optional.of(treeView);
         } catch (DataAdapterException e) {
             Dialogs.notifyException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
@@ -841,9 +802,7 @@ public class MainViewController implements Initializable {
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(treeView.getSelectionModel().getSelectedItem()));
         ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
-        contextMenu.setOnShowing(event -> {
-            expandBranch(treeView.getSelectionModel().getSelectedItem());
-        });
+        contextMenu.setOnShowing(event -> expandBranch(treeView.getSelectionModel().getSelectedItem()));
         return contextMenu;
     }
 
@@ -930,7 +889,7 @@ public class MainViewController implements Initializable {
 
             }, new ArrayList<>());
         }
-        if (searchResultSet.size() > 0) {
+        if (!searchResultSet.isEmpty()) {
             searchField.setStyle("");
             currentSearchHit++;
             if (currentSearchHit > searchResultSet.size() - 1) {
@@ -983,7 +942,7 @@ public class MainViewController implements Initializable {
         workspace.addSources(c.getList()
                 .stream()
                 .filter(t -> sourcesAdapters.get(t) != null)
-                .map((t) -> Source.of(sourcesAdapters.get(t)))
+                .map(t -> Source.of(sourcesAdapters.get(t)))
                 .collect(Collectors.toList()));
         logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
@@ -998,7 +957,7 @@ public class MainViewController implements Initializable {
         return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
     }
 
-    private void worksheetAreaOnDragDropped(DragEvent event) {
+    private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
             TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
@@ -1037,6 +996,42 @@ public class MainViewController implements Initializable {
             n.hideAfter(Duration.seconds(0));
         }));
         n.showInformation();
+    }
+
+    private static void handleDragOverWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            event.consume();
+        }
+    }
+
+    private void handleDragDroppedOnWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+            TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
+                        addToNewWorksheet(item);
+                    }
+                    else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
+                        addToCurrentWorksheet(item);
+                    }
+                    else {
+                        logger.warn("Unsupported drag and drop tansfert mode: " + event.getAcceptedTransferMode());
+                    }
+                }
+                else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            }
+            else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
     }
 
     //endregion

@@ -19,6 +19,7 @@ import java.util.StringTokenizer;
  * limitations under the License.
  */
 public class Version implements Comparable {
+    public static final String SNAPSHOT = "-SNAPSHOT";
     private final int major;
     private final int minor;
     private final int micro;
@@ -247,7 +248,7 @@ public class Version implements Comparable {
             return snapshot ? base + "-SNAPSHOT" : base;
         }
         else {
-            return snapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + "-SNAPSHOT";
+            return snapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + SNAPSHOT;
         }
     }
 

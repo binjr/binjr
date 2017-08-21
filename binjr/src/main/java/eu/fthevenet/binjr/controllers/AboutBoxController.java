@@ -156,12 +156,10 @@ public class AboutBoxController implements Initializable {
                 () -> versionCheckFlow.getChildren().clear());
         sysInfoListTable.getItems().addAll(AppEnvironment.getInstance().getSysInfoProperties());
         versionLabel.setText("version " + AppEnvironment.getInstance().getManifestVersion());
-        detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> {
-            Platform.runLater(() -> {
-                p.requestLayout();
-                p.getScene().getWindow().sizeToScene();
-            });
-        }));
+        detailsPane.getPanes().forEach(p -> p.expandedProperty().addListener((obs, oldValue, newValue) -> Platform.runLater(() -> {
+            p.requestLayout();
+            p.getScene().getWindow().sizeToScene();
+        })));
         Node closeButton = aboutRoot.lookupButton(ButtonType.CLOSE);
         closeButton.managedProperty().bind(closeButton.visibleProperty());
         closeButton.setVisible(false);
