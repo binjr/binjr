@@ -912,11 +912,12 @@ public class MainViewController implements Initializable {
         if (isNullOrEmpty(searchField.getText())) {
             return;
         }
-        if (getSelectedTreeView() == null) {
+        TreeView<TimeSeriesBinding<Double>> selectedTreeView = getSelectedTreeView();
+        if (selectedTreeView == null) {
             return;
         }
         if (searchResultSet == null) {
-            searchResultSet = TreeViewUtils.findAllInTree(getSelectedTreeView().getRoot(), i -> {
+            searchResultSet = TreeViewUtils.findAllInTree(selectedTreeView.getRoot(), i -> {
                 if (i.getValue() == null || i.getValue().getLegend() == null) {
                     return false;
                 }
@@ -935,8 +936,8 @@ public class MainViewController implements Initializable {
             if (currentSearchHit > searchResultSet.size() - 1) {
                 currentSearchHit = 0;
             }
-            getSelectedTreeView().getSelectionModel().select(searchResultSet.get(currentSearchHit));
-            getSelectedTreeView().scrollTo(getSelectedTreeView().getRow(searchResultSet.get(currentSearchHit)));
+            selectedTreeView.getSelectionModel().select(searchResultSet.get(currentSearchHit));
+            selectedTreeView.scrollTo(selectedTreeView.getRow(searchResultSet.get(currentSearchHit)));
         }
         else {
             searchField.setStyle("-fx-background-color: #ffcccc;");
