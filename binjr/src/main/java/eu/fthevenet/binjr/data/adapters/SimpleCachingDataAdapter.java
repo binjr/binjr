@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicLong;
 public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
     public static final int CACHE_SIZE = 32;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
-    private final transient Map<String, SoftReference<ByteArrayOutputStream>> cache;
+    private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
 
     /**
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class
@@ -63,7 +63,8 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
         }
         if (cached == null) {
             logger.trace(() -> String.format(
-                    (bypassCache ? "Cache was explicitly bypassed" : "Cache miss") + " for entry %s %s %s",
+                    "%s for entry %s %s %s",
+                    bypassCache ? "Cache was explicitly bypassed" : "Cache miss",
                     path,
                     begin.toString(),
                     end.toString()));
@@ -71,7 +72,7 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
             try {
                 cached = new ByteArrayOutputStream();
                 AtomicLong copied = new AtomicLong(0);
-                try (Profiler p = Profiler.start((e) -> logger.trace(() -> "Copied " + copied.get() + " bytes in " + e.getMicros() + "µs"))) {
+                try (Profiler p = Profiler.start(e -> logger.trace(() -> "Copied " + copied.get() + " bytes in " + e.getMicros() + "µs"))) {
                     copied.set(IOUtils.copyStreams(in, cached));
                 }
                 cache.put(cacheEntryKey, new SoftReference<>(cached));

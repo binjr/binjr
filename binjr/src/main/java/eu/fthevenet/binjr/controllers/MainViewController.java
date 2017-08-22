@@ -328,9 +328,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddJrdsSource(Event actionEvent) {
-        DataAdapterDialog dlg = new JrdsAdapterDialog(root);
-        Tab newTab = new Tab();
-        getAdapterDlg(newTab);
+        getAdapterDlg(new Tab());
     }
 
     @FXML

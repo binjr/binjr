@@ -26,7 +26,6 @@ import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.*;
-import java.io.Serializable;
 
 /**
  * A class that represents and holds the current state of the representation of a single time series
@@ -35,7 +34,7 @@ import java.io.Serializable;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
-public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable {
+public class TimeSeriesInfo<T extends Number> implements Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
@@ -44,7 +43,7 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
-    private final transient ChangeWatcher<TimeSeriesInfo> status;
+    private final ChangeWatcher<TimeSeriesInfo> status;
     private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
     /**
@@ -53,7 +52,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
     private TimeSeriesInfo() {
         this("",
                 true,
-                null,
                 null,
                 null);
     }
@@ -71,7 +69,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
-                null,
                 seriesInfo.getBinding());
     }
 
@@ -81,15 +78,13 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
      * @param displayName  the name for the series
      * @param selected     true if the series is selected, false otherwise
      * @param displayColor the color of the series
-     * @param data         the data processor for the series
      * @param binding      the {@link TimeSeriesBinding}  for the series
      */
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           TimeSeriesProcessor<T> data,
                            TimeSeriesBinding<T> binding) {
-        this.binding = binding;// new TimeSeriesBinding<T>(binding);
+        this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
@@ -110,7 +105,6 @@ public class TimeSeriesInfo<T extends Number> implements Serializable, Dirtyable
         return new TimeSeriesInfo<>(binding.getLegend(),
                 true,
                 binding.getColor(),
-                null,
                 binding);
     }
 

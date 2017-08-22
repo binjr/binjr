@@ -25,8 +25,8 @@
     <content>
         <GridPane fx:id="paramsGridPane">
             <columnConstraints>
-                <ColumnConstraints  maxWidth="248.0" minWidth="10.0" prefWidth="72.0"/>
-                <ColumnConstraints  maxWidth="500.0" minWidth="10.0" prefWidth="300.0"/>
+                <ColumnConstraints maxWidth="248.0" minWidth="10.0" prefWidth="72.0"/>
+                <ColumnConstraints maxWidth="500.0" minWidth="10.0" prefWidth="300.0"/>
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0"/>

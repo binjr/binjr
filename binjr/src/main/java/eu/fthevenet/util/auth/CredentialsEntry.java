@@ -31,13 +31,13 @@ public class CredentialsEntry {
      * An empty credential set.
      * <p>This specific credential set should be used to intend that no credentials where explicitly provided</p>
      */
-    public final static CredentialsEntry EMPTY = new CredentialsEntry("", new char[0], false);
+    public static final CredentialsEntry EMPTY = new CredentialsEntry("", new char[0], false);
 
     /**
      * A canceled  credential set.
      * <p>This specific credential set should be used to intend that the query for explicit credentials was initiated but canceled</p>
      */
-    public final static CredentialsEntry CANCELLED = new CredentialsEntry("", new char[0], true);
+    public static final CredentialsEntry CANCELLED = new CredentialsEntry("", new char[0], true);
 
     /**
      * Initializes a new instance of the {@link CredentialsEntry} class

@@ -38,7 +38,7 @@ public class StackedAreaChartWorksheetController extends WorksheetController {
     /**
      * Initializes a new instance of the {@link StackedAreaChartWorksheetController} class
      *
-     * @param worksheet          the {@link Worksheet} instance associated to the controller
+     * @param worksheet the {@link Worksheet} instance associated to the controller
      */
     public StackedAreaChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);

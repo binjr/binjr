@@ -24,7 +24,7 @@ public class Version implements Comparable {
     private final int minor;
     private final int micro;
     private final String qualifier;
-    private final boolean snapshot;
+    private final boolean isSnapshot;
     private static final String SEPARATOR = ".";
     /**
      * The empty version "0.0.0". Equivalent to calling
@@ -72,7 +72,7 @@ public class Version implements Comparable {
         this.minor = minor;
         this.micro = micro;
         this.qualifier = qualifier;
-        this.snapshot = snapshot;
+        this.isSnapshot = snapshot;
         validate();
     }
 
@@ -106,12 +106,12 @@ public class Version implements Comparable {
         int minor = 0;
         int micro = 0;
         String qualifier = ""; //$NON-NLS-1$
-        if (version.endsWith("-SNAPSHOT")) {
-            this.snapshot = true;
+        if (version.endsWith(SNAPSHOT)) {
+            this.isSnapshot = true;
             version = version.substring(0, version.length() - 9);
         }
         else {
-            snapshot = false;
+            isSnapshot = false;
         }
 
         try {
@@ -229,7 +229,7 @@ public class Version implements Comparable {
     }
 
     public boolean isSnapshot() {
-        return snapshot;
+        return isSnapshot;
     }
 
     /**
@@ -245,10 +245,10 @@ public class Version implements Comparable {
     public String toString() {
         String base = major + SEPARATOR + minor + SEPARATOR + micro;
         if (qualifier.length() == 0) { //$NON-NLS-1$
-            return snapshot ? base + "-SNAPSHOT" : base;
+            return isSnapshot ? base + SNAPSHOT : base;
         }
         else {
-            return snapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + SNAPSHOT;
+            return isSnapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + SNAPSHOT;
         }
     }
 
@@ -333,6 +333,6 @@ public class Version implements Comparable {
         if (result != 0) {
             return result;
         }
-        return (this.snapshot ? 0 : 1) - (other.snapshot ? 0 : 1);
+        return (this.isSnapshot ? 0 : 1) - (other.isSnapshot ? 0 : 1);
     }
 }

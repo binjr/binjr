@@ -23,7 +23,6 @@ import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import javafx.scene.control.TreeItem;
 
 import java.io.InputStream;
-import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.Map;
@@ -34,7 +33,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class DataAdapter<T extends Number> implements Serializable, AutoCloseable {
+public abstract class DataAdapter<T extends Number> implements AutoCloseable {
     private UUID id = UUID.randomUUID();
 
     /**

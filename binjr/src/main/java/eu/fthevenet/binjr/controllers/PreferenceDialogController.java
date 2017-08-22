@@ -150,7 +150,7 @@ public class PreferenceDialogController implements Initializable {
         hide(Duration.millis(0));
     }
 
-    private void hide(Duration delay){
+    private void hide(Duration delay) {
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);

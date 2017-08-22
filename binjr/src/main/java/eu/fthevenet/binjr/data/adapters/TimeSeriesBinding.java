@@ -27,7 +27,6 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-import java.io.Serializable;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -41,7 +40,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
-public class TimeSeriesBinding<T extends Number> implements Serializable {
+public class TimeSeriesBinding<T extends Number> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -158,7 +157,11 @@ public class TimeSeriesBinding<T extends Number> implements Serializable {
         this.unitName = unitName;
         this.treeHierarchy = treeHierarchy;
         this.adapter = adapter;
-        this.adapterId = adapterId != null ? adapterId : (adapter != null ? adapter.getId() : null);
+        UUID id = adapterId;
+        if (id == null && adapter != null) {
+            id = adapter.getId();
+        }
+        this.adapterId = id;
         if (color == null) {
             // pickup a default color at random, based on the hash of the binding path, so it stays stable
             this.color = computeDefaultColor();

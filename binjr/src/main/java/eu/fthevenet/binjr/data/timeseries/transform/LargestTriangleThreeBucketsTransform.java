@@ -21,7 +21,6 @@ import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -72,7 +71,6 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
     private Collection<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(TimeSeriesProcessor<T> data, int threshold) {
         int dataLength = data.size();
         List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
-        ZoneId zoneId = data.getSample(0).getXValue().getZone();
         // Bucket size. Leave room for start and end data points
         double every = (double) (dataLength - 2) / (threshold - 2);
         int a = 0;
@@ -115,7 +113,6 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
             sampled.add(maxAreaPoint); // Pick this point from the bucket
             a = nextA; // This a is the next a (chosen b)
         }
-
         sampled.add(data.getSample(dataLength - 1)); // Always add last
         return sampled;
     }

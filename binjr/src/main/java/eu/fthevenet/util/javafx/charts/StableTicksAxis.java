@@ -44,7 +44,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     /**
      * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
      */
-    private static final int numMinorTicks = 3;
+    private static final int NUM_MINOR_TICKS = 3;
 
     private final Timeline animationTimeline = new Timeline();
     private final WritableValue<Double> scaleValue = new WritableValue<Double>() {
@@ -59,7 +59,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         }
     };
 
-    private AxisTickFormatter axisTickFormatter;// = new DefaultAxisTickFormatter();
+    private AxisTickFormatter axisTickFormatter;
     private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
 
     private List<Number> minorTicks;
@@ -139,8 +139,6 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
 
     @Override
     protected Range autoRange(double minValue, double maxValue, double length, double labelSize) {
-//		System.out.printf( "autoRange(%f, %f, %f, %f)",
-//		                   minValue, maxValue, length, labelSize );
         //By dweil: if the range is very small, display it like a flat line, the scaling doesn't work very well at these
         //values. 1e-300 was chosen arbitrarily.
         if (Math.abs(minValue - maxValue) < 1e-300) {
@@ -249,12 +247,12 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         //first and last major tick.
         int numTicks = (int) (rangeVal.getDelta() / rangeVal.tickSpacing) + 1;
         List<Number> ret = new ArrayList<Number>(numTicks + 1);
-        minorTicks = new ArrayList<Number>((numTicks + 2) * numMinorTicks);
-        double minorTickSpacing = rangeVal.tickSpacing / (numMinorTicks + 1);
+        minorTicks = new ArrayList<Number>((numTicks + 2) * NUM_MINOR_TICKS);
+        double minorTickSpacing = rangeVal.tickSpacing / (NUM_MINOR_TICKS + 1);
         for (int i = 0; i <= numTicks; ++i) {
             double majorTick = firstTick + rangeVal.tickSpacing * i;
             ret.add(majorTick);
-            for (int j = 1; j <= numMinorTicks; ++j) {
+            for (int j = 1; j <= NUM_MINOR_TICKS; ++j) {
                 minorTicks.add(majorTick + minorTickSpacing * j);
             }
         }

@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.jar.Manifest;
 
 /**
- * Provides access to the application's environment properties
+ * Provides access to the application's environmental properties
  */
 public class AppEnvironment {
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
@@ -147,7 +147,7 @@ public class AppEnvironment {
         String className = this.getClass().getSimpleName() + ".class";
         String classPath = this.getClass().getResource(className).toString();
         if (classPath.startsWith("jar")) {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf("!") + 1) + "/META-INF/MANIFEST.MF";
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
             try {
                 return new Manifest(new URL(manifestPath).openStream());
             } catch (IOException e) {

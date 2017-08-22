@@ -38,7 +38,7 @@ public class LineChartWorksheetController extends WorksheetController {
     /**
      * Initializes a new instance of the {@link LineChartWorksheetController} class
      *
-     * @param worksheet          the {@link Worksheet} instance associated to the controller
+     * @param worksheet the {@link Worksheet} instance associated to the controller
      */
     public LineChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);

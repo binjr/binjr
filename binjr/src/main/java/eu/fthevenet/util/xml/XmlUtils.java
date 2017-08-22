@@ -41,7 +41,7 @@ import java.nio.file.Path;
 public class XmlUtils {
 
     public static <T> T deSerialize(Class<T> docClass, File file) throws JAXBException, IOException {
-        try(FileInputStream fin = new FileInputStream(file)) {
+        try (FileInputStream fin = new FileInputStream(file)) {
             return deSerialize(docClass, fin);
         }
     }
@@ -73,7 +73,7 @@ public class XmlUtils {
     }
 
     private static <T> T deSerialize(Class<T> docClass, StreamSource source) throws JAXBException {
-        return JAXB.unmarshal( source, docClass);
+        return JAXB.unmarshal(source, docClass);
     }
 
     /**
@@ -97,7 +97,7 @@ public class XmlUtils {
     }
 
     public static <T> void serialize(T object, File file) throws JAXBException, IOException {
-        try(FileOutputStream fout = new FileOutputStream(file)) {
+        try (FileOutputStream fout = new FileOutputStream(file)) {
             serialize(object, fout);
         }
     }

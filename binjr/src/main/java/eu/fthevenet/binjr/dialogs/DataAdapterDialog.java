@@ -60,7 +60,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     /**
      * Initializes a new instance of the {@link DataAdapterDialog} class.
      *
-     * @param owner          the owner window for the dialog
+     * @param owner the owner window for the dialog
      */
     public DataAdapterDialog(Node owner) {
         if (owner != null) {
@@ -86,7 +86,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
-                result =  getDataAdapter();
+                result = getDataAdapter();
                 autoCompletionLearnWord(urlField);
             } catch (MalformedURLException e) {
                 Dialogs.notifyError("Invalid URL", e.getLocalizedMessage(), Pos.CENTER, urlField);
@@ -111,9 +111,10 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
 
     /**
      * Returns an instance of {@link DataAdapter}
-     * @return  an instance of {@link DataAdapter}
+     *
+     * @return an instance of {@link DataAdapter}
      * @throws MalformedURLException if the provided url is invalid
-     * @throws DateTimeException if the provided {@link ZoneId] is invalid
+     * @throws DateTimeException     if the provided {@link ZoneId] is invalid
      */
     protected abstract DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException;
 

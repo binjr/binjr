@@ -27,7 +27,8 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 @FunctionalInterface
 public interface TimeSeriesProcessorFactory<T extends Number> {
     /**
-     *  Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
+     * Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
+     *
      * @return a new instance of the {@link TimeSeriesProcessor} class
      */
     TimeSeriesProcessor<T> create();

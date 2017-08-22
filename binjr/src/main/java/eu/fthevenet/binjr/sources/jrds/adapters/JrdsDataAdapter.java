@@ -75,6 +75,8 @@ import java.util.stream.Collectors;
 public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final String SEPARATOR = ",";
+    public static final String JRDS_FILTER = "filter";
+    public static final String JRDS_TREE = "tree";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
     private final CloseableHttpClient httpClient;
     private String filter;
@@ -137,11 +139,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         Gson gson = new Gson();
         try {
             JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonTree.class);
-
             Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
-            List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
-            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type) || "filter".equals(jsonItem.type)).collect(Collectors.toList())) {
+            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> JRDS_TREE.equals(jsonItem.type) || JRDS_FILTER.equals(jsonItem.type)).collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
             return tree;
@@ -192,7 +192,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         params.put("zoneId", zoneId.toString());
         params.put("encoding", encoding);
         params.put("treeViewTab", treeViewTab.name());
-        params.put("filter", this.filter);
+        params.put(JRDS_FILTER, this.filter);
         return params;
     }
 
@@ -205,7 +205,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         zoneId = ZoneId.of(params.get("zoneId"));
         encoding = params.get("encoding");
         treeViewTab = params.get("treeViewTab") != null ? JrdsTreeViewTab.valueOf(params.get("treeViewTab")) : JrdsTreeViewTab.HOSTS_TAB;
-        this.filter = params.get("filter");
+        this.filter = params.get(JRDS_FILTER);
     }
 
     @Override
@@ -266,11 +266,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         Gson gson = new Gson();
         try {
             JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonTree.class);
-
-            Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-            TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
-            List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
-            return Arrays.stream(t.items).filter(jsonItem -> "filter".equals(jsonItem.type)).map(i -> i.filter).collect(Collectors.toList());
+            return Arrays.stream(t.items).filter(jsonItem -> JRDS_FILTER.equals(jsonItem.type)).map(i -> i.filter).collect(Collectors.toList());
         } catch (JsonParseException e) {
             throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
         }
@@ -325,7 +321,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         String currentPath = normalizeId(n.id);
         TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
-        if ("filter".equals(n.type)) {
+        if (JRDS_FILTER.equals(n.type)) {
             // add a dummy node so that the branch can be expanded
             newBranch.getChildren().add(new TreeItem<>(null));
             // add a listener that will get the treeview filtered according to the selected filter/tag
@@ -534,10 +530,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
             if (newValue) {
                 try {
-                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab.getCommand(), "filter", n.name), JsonTree.class);
+                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab.getCommand(), JRDS_FILTER, n.name), JsonTree.class);
                     Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-                    List<TreeItem<JsonTree.JsonItem>> l = new ArrayList<>();
-                    for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> "tree".equals(jsonItem.type) || "filter".equals(jsonItem.type)).collect(Collectors.toList())) {
+                    for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> JRDS_TREE.equals(jsonItem.type) || JRDS_FILTER.equals(jsonItem.type)).collect(Collectors.toList())) {
                         attachNode(newBranch, branch.id, m);
                     }
                     //remove dummy node

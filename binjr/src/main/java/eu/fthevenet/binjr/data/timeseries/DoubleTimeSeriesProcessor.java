@@ -18,8 +18,6 @@
 package eu.fthevenet.binjr.data.timeseries;
 
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.OptionalDouble;
 
@@ -29,11 +27,9 @@ import java.util.OptionalDouble;
  * @author Frederic Thevenet
  */
 public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor<Double> {
-    private static final Logger logger = LogManager.getLogger(DoubleTimeSeriesProcessor.class);
 
     /**
      * Initializes a new instance of the {@link DoubleTimeSeriesProcessor} class with the provided binding.
-     *
      */
     public DoubleTimeSeriesProcessor() {
         super();

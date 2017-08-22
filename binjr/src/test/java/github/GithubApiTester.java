@@ -30,8 +30,8 @@ import java.util.Optional;
 /**
  * @author Frederic Thevenet
  */
-public class GithubApiTest {
-    private static final Logger logger = LogManager.getLogger(GithubApiTest.class);
+public class GithubApiTester {
+    private static final Logger logger = LogManager.getLogger(GithubApiTester.class);
 
     public static void main(String[] args) {
         try {

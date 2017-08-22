@@ -31,19 +31,21 @@ import java.text.DecimalFormat;
 public class SuffixFormatTests {
     public static void main(String[] args) {
         long[] numbers = new long[50];
-        for (int i = 0; i < numbers.length; i++)
+        for (int i = 0; i < numbers.length; i++) {
             numbers[i] = Math.random() < 0.5 ? (long) (Math.random() * Short.MAX_VALUE) : (long) (Math.random() * Short.MIN_VALUE);
-        System.out.println(convert(new MetricPrefixFormatter(), numbers) );
-        System.out.println(convert(new BinaryPrefixFormatter(), numbers) );
+        }
+        System.out.println(convert(new MetricPrefixFormatter(), numbers));
+        System.out.println(convert(new BinaryPrefixFormatter(), numbers));
 
 
         double[] doubles = new double[50];
         doubles[0] = Double.NaN;
-        for (int i = 1; i < numbers.length; i++)
+        for (int i = 1; i < numbers.length; i++) {
             doubles[i] = Math.random() < 0.5 ? Math.random() * Short.MAX_VALUE : Math.random() * Short.MIN_VALUE;
+        }
 
-        System.out.println(convert(new MetricPrefixFormatter(), doubles) );
-        System.out.println(convert(new BinaryPrefixFormatter(), doubles) );
+        System.out.println(convert(new MetricPrefixFormatter(), doubles));
+        System.out.println(convert(new BinaryPrefixFormatter(), doubles));
     }
 
 

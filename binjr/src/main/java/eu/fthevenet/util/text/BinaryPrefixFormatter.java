@@ -27,6 +27,6 @@ public class BinaryPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link BinaryPrefixFormatter} class
      */
     public BinaryPrefixFormatter() {
-        super(1024,new String[] {"ki", "Mi", "Gi", "Ti", "Pi", "Ei"});
+        super(1024, new String[]{"ki", "Mi", "Gi", "Ti", "Pi", "Ei"});
     }
 }

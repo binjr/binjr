@@ -34,7 +34,6 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -48,7 +47,7 @@ import java.util.Collection;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
-public class Workspace implements Serializable, Dirtyable {
+public class Workspace implements Dirtyable {
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlElementWrapper(name = "Sources")

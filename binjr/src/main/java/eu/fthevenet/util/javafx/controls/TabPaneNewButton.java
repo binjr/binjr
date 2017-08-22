@@ -125,6 +125,8 @@ public class TabPaneNewButton extends TabPane {
                         headersRegion.widthProperty()
                 );
                 break;
+            default:
+                throw new IllegalStateException("Invalid value for side enum");
         }
     }
 

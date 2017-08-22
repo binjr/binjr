@@ -23,6 +23,7 @@ package eu.fthevenet.util.javafx.charts;
  * @author Frederic Thevenet
  */
 public class XYChartSelection<X, Y> {
+    private static final int PRIME = 31;
     private final X startX;
     private final X endX;
     private final Y startY;
@@ -101,12 +102,11 @@ public class XYChartSelection<X, Y> {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
         int result = 1;
-        result = prime * result + ((this.getStartX() == null) ? 0 : this.getStartX().hashCode());
-        result = prime * result + ((this.getEndX() == null) ? 0 : this.getEndX().hashCode());
-        result = prime * result + ((this.getStartY() == null) ? 0 : this.getStartY().hashCode());
-        result = prime * result + ((this.getEndY() == null) ? 0 : this.getEndY().hashCode());
+        result = PRIME * result + ((this.getStartX() == null) ? 0 : this.getStartX().hashCode());
+        result = PRIME * result + ((this.getEndX() == null) ? 0 : this.getEndX().hashCode());
+        result = PRIME * result + ((this.getStartY() == null) ? 0 : this.getStartY().hashCode());
+        result = PRIME * result + ((this.getEndY() == null) ? 0 : this.getEndY().hashCode());
         return result;
     }
 

@@ -76,7 +76,7 @@ public class IOUtils {
         }
     }
 
-    public static long consumeStream(InputStream input) throws IOException{
+    public static long consumeStream(InputStream input) throws IOException {
         byte[] buffer = new byte[DEFAULT_COPY_BUFFER_SIZE];
         long count = 0;
         int n;

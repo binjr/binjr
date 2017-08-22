@@ -59,10 +59,10 @@ public abstract class TimeSeriesTransform<T extends Number> {
      * @return A map of the transformed series.
      */
     public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> transform(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series, boolean enabled) {
-        String names = series.keySet().stream().map(tTimeSeriesInfo -> tTimeSeriesInfo.getBinding().getLabel()).reduce((s, s2) -> s +" "+s2).orElse("null");
+        String names = series.keySet().stream().map(tTimeSeriesInfo -> tTimeSeriesInfo.getBinding().getLabel()).reduce((s, s2) -> s + " " + s2).orElse("null");
         if (enabled) {
             try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + names, logger::trace)) {
-                series = apply(series);
+                return apply(series);
             }
         }
         else {

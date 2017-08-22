@@ -39,7 +39,6 @@ import java.time.format.FormatStyle;
  */
 public class ZonedDateTimePicker extends DatePicker {
     private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
-    //private final DateTimeFormatter formatter;
     private final Property<ZoneId> zoneId;
     private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
 

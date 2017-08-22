@@ -60,7 +60,7 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
      * Initializes a new instance of the {@link EditWorksheetDialog} class.
      *
      * @param worksheet the worksheet to edit
-     * @param owner the owner window for the dialog
+     * @param owner     the owner window for the dialog
      */
     public EditWorksheetDialog(Worksheet<T> worksheet, Node owner) {
         // Clone the worksheet before binding it to the UI (we don't want to mutate the provided instance in case the user cancel the edition)
@@ -80,10 +80,10 @@ public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
             TextField nameField = (TextField) parent.lookup("#nameField");
             TextField timezoneField = (TextField) parent.lookup("#timezoneField");
             TextField unitNameField = (TextField) parent.lookup("#unitNameField");
-            ChoiceBox<ChartType> chartTypeChoice =(ChoiceBox<ChartType>) parent.lookup("#chartTypeChoice");
-            ChoiceBox<UnitPrefixes> unitPrefixesChoice =(ChoiceBox<UnitPrefixes>) parent.lookup("#unitPrefixesChoice");
-            ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker)parent.lookup("#fromDatePicker");
-            ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker)parent.lookup("#toDatePicker");
+            ChoiceBox<ChartType> chartTypeChoice = (ChoiceBox<ChartType>) parent.lookup("#chartTypeChoice");
+            ChoiceBox<UnitPrefixes> unitPrefixesChoice = (ChoiceBox<UnitPrefixes>) parent.lookup("#unitPrefixesChoice");
+            ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker) parent.lookup("#fromDatePicker");
+            ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker) parent.lookup("#toDatePicker");
 
             unitNameField.textProperty().bindBidirectional(resultWorksheet.unitProperty());
             nameField.textProperty().bindBidirectional(resultWorksheet.nameProperty());

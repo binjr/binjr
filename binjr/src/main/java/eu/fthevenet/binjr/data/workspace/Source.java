@@ -24,7 +24,6 @@ import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import javafx.beans.property.BooleanProperty;
 
 import javax.xml.bind.annotation.*;
-import java.io.Serializable;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,7 +34,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Source")
-public class Source implements Serializable, Dirtyable {
+public class Source implements Dirtyable {
     private UUID adapterId;
     @XmlElement(name = "Name")
     @IsDirtyable
@@ -44,7 +43,7 @@ public class Source implements Serializable, Dirtyable {
     private Class adapterClass;
     @XmlElementWrapper(name = "Parameters")
     @XmlElements(@XmlElement(name = "Parameter"))
-    private Map<String, String> AdapterParams;
+    private Map<String, String> adapterParams;
     @XmlTransient
     private final ChangeWatcher<Source> status;
 
@@ -107,7 +106,7 @@ public class Source implements Serializable, Dirtyable {
      * @return a map of the parameters required to establish a connection to the data source
      */
     public Map<String, String> getAdapterParams() {
-        return AdapterParams;
+        return adapterParams;
     }
 
     /**
@@ -149,6 +148,6 @@ public class Source implements Serializable, Dirtyable {
     }
 
     private void setAdapterParams(Map<String, String> adapterParams) {
-        AdapterParams = adapterParams;
+        this.adapterParams = adapterParams;
     }
 }

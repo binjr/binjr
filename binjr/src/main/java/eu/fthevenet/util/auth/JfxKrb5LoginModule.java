@@ -96,16 +96,16 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
         private final CountDownLatch latch = new CountDownLatch(1);
         private F value;
 
-        private boolean isDone() {
+        public boolean isDone() {
             return latch.getCount() == 0;
         }
 
-        private F get() throws InterruptedException {
+        public F get() throws InterruptedException {
             latch.await();
             return value;
         }
 
-        private F get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
+        public F get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
                 return value;
             }

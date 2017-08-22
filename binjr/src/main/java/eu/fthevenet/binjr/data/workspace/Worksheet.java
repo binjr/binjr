@@ -33,10 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -58,7 +56,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet<T extends Number> implements Serializable, Dirtyable, AutoCloseable {
+public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
@@ -181,7 +179,6 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
      */
     public void fillData(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
         // Define the reduction transform to apply
-        //   TimeSeriesTransform<T> reducer = new LargestTriangleThreeBucketsTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters
         Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
@@ -191,17 +188,15 @@ public class Worksheet<T extends Number> implements Serializable, Dirtyable, Aut
             Map<String, List<TimeSeriesInfo<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    // Get raw data for source
-                    try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant(), bypassCache)) {
-                        // Parse raw data obtained from adapter
-                        Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> rawDataMap = adapter.getParser().parse(in, byPathEntry.getValue());
-                        // Applying point reduction
-                        rawDataMap = reducer.transform(rawDataMap, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                        //Update timeSeries data
-                        for (TimeSeriesInfo<T> seriesInfo : rawDataMap.keySet()) {
-                            seriesInfo.setProcessor(rawDataMap.get(seriesInfo));
-                        }
+                // Get raw data for source
+                try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant(), bypassCache)) {
+                    // Parse raw data obtained from adapter
+                    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> rawDataMap = adapter.getParser().parse(in, byPathEntry.getValue());
+                    // Applying point reduction
+                    rawDataMap = reducer.transform(rawDataMap, GlobalPreferences.getInstance().getDownSamplingEnabled());
+                    //Update timeSeries data
+                    for (TimeSeriesInfo<T> seriesInfo : rawDataMap.keySet()) {
+                        seriesInfo.setProcessor(rawDataMap.get(seriesInfo));
                     }
                 } catch (IOException | ParseException e) {
                     throw new DataAdapterException("Error recovering data from source", e);

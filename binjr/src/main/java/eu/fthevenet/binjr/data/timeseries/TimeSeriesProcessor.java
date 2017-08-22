@@ -20,8 +20,6 @@ package eu.fthevenet.binjr.data.timeseries;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.util.concurrent.ReadWriteLockHelper;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -35,7 +33,6 @@ import java.util.Optional;
  * @author Frederic Thevenet
  */
 public abstract class TimeSeriesProcessor<T extends Number> {
-    private static final Logger logger = LogManager.getLogger(TimeSeriesProcessor.class);
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, T>> data;
 
@@ -77,6 +74,7 @@ public abstract class TimeSeriesProcessor<T extends Number> {
      * Try to get the nearest value for the specified time stamp.
      * <p>
      * <p><b>Remark:</b> If the processor is already being accessed by another thread, returns immediately with Optional.empty</p>
+     *
      * @param xValue the time stamp to get the value for.
      * @return An {@link Optional} instance that contains tthe value for the time position nearest to the one requested if process could complete and value is non-null.
      */
@@ -89,6 +87,7 @@ public abstract class TimeSeriesProcessor<T extends Number> {
      * Get the nearest value for the specified time stamp.
      * <p>
      * <p><b>Remark:</b> If the processor is already being accessed by another thread, waits until lock is released and returns requested value</p>
+     *
      * @param xValue the time stamp to get the value for.
      * @return the value for the time position nearest to the one requested.
      */
@@ -153,7 +152,7 @@ public abstract class TimeSeriesProcessor<T extends Number> {
 
     protected abstract T computeMaxValue();
 
-    private  T unsafeGetNearestValue(ZonedDateTime xValue) {
+    private T unsafeGetNearestValue(ZonedDateTime xValue) {
         T value = null;
         if (xValue != null && data != null) {
             for (XYChart.Data<ZonedDateTime, T> sample : data) {

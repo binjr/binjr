@@ -17,7 +17,6 @@
 
 package eu.fthevenet.binjr.data.parsers;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessorFactory;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
@@ -53,13 +52,14 @@ public class CsvParser<T extends Number> implements DataParser<T> {
 
     /**
      * Initializes a new instance of the {@link CsvParser} class.
-     * @param encoding the encoding used in the CSV stream
-     * @param separator the character to separate columns in the CSV stream
+     *
+     * @param encoding          the encoding used in the CSV stream
+     * @param separator         the character to separate columns in the CSV stream
      * @param timeSeriesFactory the factory used to fromUrl new {@link TimeSeriesProcessor} instances.
-     * @param numberParser the function used to parse numbers from the CSV stream
-     * @param dateParser the function used to parse dates from the CSV stream
+     * @param numberParser      the function used to parse numbers from the CSV stream
+     * @param dateParser        the function used to parse dates from the CSV stream
      */
-    public CsvParser(String encoding, String separator, TimeSeriesProcessorFactory<T> timeSeriesFactory, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser){
+    public CsvParser(String encoding, String separator, TimeSeriesProcessorFactory<T> timeSeriesFactory, Function<String, T> numberParser, Function<String, ZonedDateTime> dateParser) {
         this.encoding = encoding;
         this.separator = separator;
         this.timeSeriesFactory = timeSeriesFactory;
@@ -102,18 +102,6 @@ public class CsvParser<T extends Number> implements DataParser<T> {
                 return series;
             }
         }
-    }
-
-    private boolean isInNameList(List<TimeSeriesBinding<T>> bindings, String seriesName) {
-        if (bindings == null || bindings.size() == 0) {
-            return true;
-        }
-        for (TimeSeriesBinding<T> binding : bindings) {
-            if (binding.getLabel().equalsIgnoreCase(seriesName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private TimeSeriesInfo<T> getBindingFromName(List<TimeSeriesInfo<T>> seriesInfo, String seriesName) {

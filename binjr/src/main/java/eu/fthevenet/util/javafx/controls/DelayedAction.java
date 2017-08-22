@@ -23,12 +23,13 @@ import javafx.util.Duration;
 
 /**
  * Schedule a tasks to start after the specified delay
+ *
  * @author Frederic Thevenet
  */
 public class DelayedAction {
     private Task<Object> delayedTask;
 
-    public DelayedAction(Duration delay, Runnable action){
+    public DelayedAction(Duration delay, Runnable action) {
 
         delayedTask = new Task<Object>() {
             @Override
@@ -37,10 +38,10 @@ public class DelayedAction {
                 return null;
             }
         };
-        delayedTask.setOnSucceeded(event ->action.run());
+        delayedTask.setOnSucceeded(event -> action.run());
     }
 
-    public void submit(){
+    public void submit() {
         AsyncTaskManager.getInstance().submit(delayedTask);
     }
 }

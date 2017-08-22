@@ -22,7 +22,7 @@ import eu.fthevenet.util.version.Version;
 /**
  * Created by fred on 25/04/2017.
  */
-public class VersionTest {
+public class VersionTester {
 
     public static void main(String[] args) {
 
@@ -41,7 +41,7 @@ public class VersionTest {
 
 
         for (int i = 0; i < versions.length; i++) {
-            for (int j=0; j<versions.length; j++) {
+            for (int j = 0; j < versions.length; j++) {
                 int cp = versions[i].compareTo(versions[j]);
                 String sign = "==";
                 if (cp > 0) {

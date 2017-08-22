@@ -38,7 +38,7 @@ public class AreaChartWorksheetController extends WorksheetController {
     /**
      * Initializes a new instance of the {@link AreaChartWorksheetController} class
      *
-     * @param worksheet          the {@link Worksheet} instance associated to the controller
+     * @param worksheet the {@link Worksheet} instance associated to the controller
      */
     public AreaChartWorksheetController(Worksheet worksheet) throws IOException {
         super(worksheet);

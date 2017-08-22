@@ -28,8 +28,8 @@ import java.util.Map;
 public interface DataAdapterFactory<T extends Number> {
     /**
      * Initializes a new instance of the {@link DataAdapter} class from the provided URL and timezone
-     * @param params a map of parameters required to establish a connection to the source
      *
+     * @param params a map of parameters required to establish a connection to the source
      * @return a new instance of the {@link DataAdapter} class from the provided url and timezone
      */
     DataAdapter<T> fromParams(Map<String, String> params);
