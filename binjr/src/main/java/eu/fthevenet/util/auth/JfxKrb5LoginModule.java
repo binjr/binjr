@@ -18,6 +18,7 @@
 package eu.fthevenet.util.auth;
 
 import com.sun.security.auth.module.Krb5LoginModule;
+import eu.fthevenet.binjr.dialogs.Dialogs;
 import javafx.application.Platform;
 import javafx.stage.StageStyle;
 import javafx.util.Pair;
@@ -80,6 +81,7 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
             dlg.setHeaderText("Enter login credentials");
             dlg.setTitle("Login");
             dlg.initStyle(StageStyle.UTILITY);
+            Dialogs.setAlwaysOnTop(dlg);
             Optional<Pair<String, String>> res = dlg.showAndWait();
             if (res.isPresent()) {
                 CredentialsEntry newCreds = new CredentialsEntry(dlg.getResult().getKey(), dlg.getResult().getValue().toCharArray());

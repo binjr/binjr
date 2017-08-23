@@ -244,4 +244,17 @@ public class Dialogs {
             Platform.runLater(r);
         }
     }
+
+    public static void setAlwaysOnTop(Dialog dialog) {
+        if (dialog == null) {
+            throw new IllegalArgumentException("Dialog cannot be null");
+        }
+        Stage dlgStage = Dialogs.getStage(dialog.getDialogPane());
+        if (dlgStage != null) {
+            dlgStage.setAlwaysOnTop(true);
+        }
+        else {
+            logger.debug("Failed to retreive dialog's stage: cannot set dialog to be always on top");
+        }
+    }
 }
