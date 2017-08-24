@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.16-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -183,7 +183,7 @@
                     <checkModificationExcludes>
                         <checkModificationExclude>pom.xml</checkModificationExclude>
                     </checkModificationExcludes>
-                    <scmCommentPrefix>[maven-release-plugin] [ci skip]</scmCommentPrefix>
+                    <!--<scmCommentPrefix>[maven-release-plugin] [ci skip]</scmCommentPrefix>-->
                 </configuration>
                 <dependencies>
                     <dependency>
