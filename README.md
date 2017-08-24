@@ -31,7 +31,7 @@ All dependencies are packaged inside the executable jar, so in order to start th
 
 _**binjr relies on JavaFX for its user interface and WILL NOT START if is not present.**_
 
-As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with the OpenJDK runtime environement provided by most Linux distributions.
+As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with the OpenJDK runtime environment provided with most Linux distributions.
 
 In this case, you can either:
 * Install the Oracle JRE for your platform.
