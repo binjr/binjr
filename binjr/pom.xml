@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>1.0.16-SNAPSHOT</version>
     <packaging>jar</packaging>
     <organization>
         <name>Frederic Thevenet</name>
@@ -108,7 +108,7 @@
                             <releaseName>binjr v${project.version}</releaseName>
                             <tag>v${project.version}</tag>
                             <prerelease>${github.deploy.prerelease}</prerelease>
-                            <overwriteArtifact>true</overwriteArtifact>
+                            <overwriteArtifact>false</overwriteArtifact>
                             <fileSets>
                                 <fileSet>
                                     <directory>${project.build.directory}/jfx/native/</directory>

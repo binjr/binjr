@@ -8,8 +8,6 @@ if [[ -z "$TRAVIS_TAG" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
     cd binjr
     echo "*** RELEASE ***"
     mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release,buildNativeBundles
-    #Trigger AppVeyor build
-    curl -H "Authorization: Bearer $APPVEYOR_TOKEN" -H "Content-Type: application/json" -X POST -d '{"accountName":"fthevenet","projectSlug":"binjr","branch":"master"}' https://ci.appveyor.com/api/builds
 else
     cd binjr
     echo "*** SNAPSHOT ***"
