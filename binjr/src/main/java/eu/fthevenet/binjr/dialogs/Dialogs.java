@@ -226,6 +226,7 @@ public class Dialogs {
     public static ButtonType confirmSaveDialog(Node node, String fileName) {
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.initOwner(Dialogs.getStage(node));
+        setAlwaysOnTop(dlg);
         dlg.setTitle("Save");
         dlg.getDialogPane().setHeaderText("Do you want to save changes to " + fileName + "?");
         ImageView img = new ImageView(new Image(Dialogs.class.getResourceAsStream("/images/save_96.png")));
