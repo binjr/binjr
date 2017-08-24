@@ -1,11 +1,11 @@
 language: java
 sudo: false
-#addons:
-#  apt:
-#    packages:
-#    - oracle-java8-installer
-#    - fakeroot
-#    - rpm
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+    - fakeroot
+    - rpm
 jdk:
 - oraclejdk8
 env:
@@ -20,5 +20,5 @@ branches:
 os:
 - linux
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
-script: pwd #"./binjr/scripts/build.sh"
+script: "./binjr/scripts/build.sh"
 after_success: "./binjr/scripts/post_build.sh"
