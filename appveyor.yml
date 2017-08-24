@@ -7,23 +7,16 @@ environment:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
 
 branches:
-
   only:
-
   - master
 
-skip_non_tags: true
+only_commits:
+  message: /\[build appveyor\]/
 
 build_script:
-
 - cmd: >-
-
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
-
     git clone -b travis https://github.com/fthevenet/binjr.git binjr/target/travis
-
     cd binjr
-
     mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
-
     rem mvn clean verify
