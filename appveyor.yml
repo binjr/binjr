@@ -22,6 +22,6 @@ build_script:
 
     cd binjr
 
-    rem mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
+    mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
 
-    mvn clean verify
+    rem mvn clean verify

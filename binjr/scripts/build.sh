@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+echo "TAG=$TRAVIS_TAG"
+echo "MSG=$TRAVIS_COMMIT_MESSAGE"
 set -ev
 if [[ -z "$TRAVIS_TAG" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
     #Explicitly switch to master to avoid detached HEAD
