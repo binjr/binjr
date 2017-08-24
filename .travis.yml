@@ -20,5 +20,5 @@ branches:
 os:
 - linux
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
-script: echo "skip" #"./binjr/scripts/build.sh"
+script: cd binjr #"./binjr/scripts/build.sh"
 after_success: "./script/post_build.sh"
