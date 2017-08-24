@@ -21,4 +21,4 @@ os:
 - linux
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 script: pwd #"./binjr/scripts/build.sh"
-after_success: pwd #"/home/travis/.travis/binjr/script/post_build.sh"
+after_success: "./binjr/scripts/post_build.sh"
