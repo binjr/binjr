@@ -14,7 +14,7 @@ branches:
 
 only_commits:
 
-  message: /\[build appveyor\]/
+  message: /\[maven-release-plugin\] \[ci skip\]prepare release/
 
 build_script:
 

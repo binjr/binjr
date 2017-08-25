@@ -111,6 +111,12 @@
                             <overwriteArtifact>false</overwriteArtifact>
                             <fileSets>
                                 <fileSet>
+                                    <directory>${project.build.directory}</directory>
+                                    <includes>
+                                        <include>${project.artifactId}.jar</include>
+                                    </includes>
+                                </fileSet>
+                                <fileSet>
                                     <directory>${project.build.directory}/jfx/native/</directory>
                                     <includes>
                                         <include>${project.artifactId}*.exe</include>
