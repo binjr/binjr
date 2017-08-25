@@ -74,6 +74,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -98,6 +100,8 @@ public class MainViewController implements Initializable {
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+    //private final StringProperty associatedFile = new SimpleStringProperty(null);
+    private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -235,6 +239,16 @@ public class MainViewController implements Initializable {
         Platform.runLater(this::runAfterInitialize);
     }
 
+
+    public void setParameters(Application.Parameters parameters) {
+        // look for a .bjr file passed as a cmd line argument
+        associatedFile = parameters.getUnnamed()
+                .stream()
+                .filter(s -> s.endsWith(".bjr"))
+                .filter(s -> Files.exists(Paths.get(s)))
+                .findFirst();
+    }
+
     protected void runAfterInitialize() {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         setUiTheme(prefs.getUserInterfaceTheme());
@@ -256,7 +270,12 @@ public class MainViewController implements Initializable {
             prefs.setShiftPressed(false);
             prefs.setCtrlPressed(false);
         });
-        if (prefs.isLoadLastWorkspaceOnStartup()) {
+
+        if (associatedFile.isPresent()) {
+            logger.debug(() -> "Opening associated file " + associatedFile.get());
+            loadWorkspace(new File(associatedFile.get()));
+        }
+        else if (prefs.isLoadLastWorkspaceOnStartup()) {
             File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
             if (latestWorkspace.exists()) {
                 loadWorkspace(latestWorkspace);
@@ -265,6 +284,7 @@ public class MainViewController implements Initializable {
                 logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
             }
         }
+
         if (prefs.isCheckForUpdateOnStartUp()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
                     this::onAvailableUpdate, null, null

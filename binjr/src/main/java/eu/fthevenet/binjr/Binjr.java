@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr;
 
+import eu.fthevenet.binjr.controllers.MainViewController;
 import eu.fthevenet.util.logging.Profiler;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -40,7 +41,14 @@ public class Binjr extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         logger.info(() -> "Starting binjr");
-        Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
+        //  Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
+
+
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainView.fxml"));
+        Parent root = loader.load();
+        MainViewController mainViewController = loader.getController();
+        mainViewController.setParameters(getParameters());
+
         primaryStage.setTitle("binjr");
         primaryStage.getIcons().addAll(
                 new Image(getClass().getResourceAsStream("/icons/binjr_16.png")),
@@ -52,7 +60,6 @@ public class Binjr extends Application {
             primaryStage.setScene(new Scene(root));
         }
         try (Profiler p = Profiler.start("show", logger::trace)) {
-
             primaryStage.show();
         }
         SplashScreen splash = SplashScreen.getSplashScreen();

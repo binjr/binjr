@@ -50,7 +50,7 @@
                         <artifactId>javafx-maven-plugin</artifactId>
                         <version>8.8.3</version>
                         <configuration>
-                            <mainClass>eu.fthevenet.binjr.Binjr</mainClass>
+                            <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
                             <vendor>${project.build.finalName}</vendor>
                             <bundler>ALL</bundler>
                             <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
@@ -68,6 +68,17 @@
                                 <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
                                 <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
                             </manifestAttributes>
+                            <verbose>true</verbose>
+                            <description>binjr, a time-series visualization studio</description>
+                            <title>binjr, a time-series visualization studio</title>
+                            <fileAssociations>
+                                <fileAssociation>
+                                    <extensions>bjr</extensions>
+                                    <description>binjr Workspace Files</description>
+                                    <contentType>bjr</contentType>
+                                    <icon>binjr.ico</icon>
+                                </fileAssociation>
+                            </fileAssociations>
                             <bundleArguments>
                                 <!--<runtime />-->
                                 <licenseFile>LICENSE</licenseFile>
