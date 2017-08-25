@@ -5,8 +5,6 @@ environment:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
   SCM_USERNAME:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
-  PATH:
-    %WIX%;%PATH%
 
 branches:
 
@@ -23,7 +21,7 @@ build_script:
 - cmd: >-
 
 #  echo %PATH%
-   rem  setx PATH "%WIX%;%PATH%"
+    setx PATH "%WIX%;%PATH%"
 
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
 
