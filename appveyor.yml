@@ -20,6 +20,8 @@ build_script:
 
 - cmd: >-
 
+    set PATH=%WIX%;%PATH%
+
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
 
     git clone -b travis https://github.com/fthevenet/binjr.git binjr/target/travis
