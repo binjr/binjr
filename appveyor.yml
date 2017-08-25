@@ -14,7 +14,7 @@ branches:
 
 only_commits:
 
-  message: /\[maven-release-plugin\] \[ci skip\]prepare release/
+  message: /\[maven-release-plugin\] prepare release/
 
 build_script:
 
