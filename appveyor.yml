@@ -20,7 +20,7 @@ build_script:
 
 - cmd: >-
 
-    setx /M PATH "%WIX%";"%PATH%"
+    setx PATH "%WIX%";"%PATH%"
 
     set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
 
