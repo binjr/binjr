@@ -18,13 +18,11 @@ only_commits:
 
 build_script:
 
-- cmd: >-
+- ps: >-
 
-    setx PATH "%WIX%;%PATH%"
+    $ENV:PATH=”$ENV:PATH;$ENV:WIX”
 
-    echo %PATH%
-
-    set BINJR_BUILD_NUMBER=%APPVEYOR_BUILD_NUMBER%
+    $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
     git clone -b travis https://github.com/fthevenet/binjr.git binjr/target/travis
 
