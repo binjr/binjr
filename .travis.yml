@@ -24,4 +24,3 @@ before_install: git clone -b travis `git config --get remote.origin.url` binjr/t
 
 script: "./binjr/scripts/build.sh"
 
-# after_success: "./binjr/scripts/post_build.sh"
