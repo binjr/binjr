@@ -20,7 +20,7 @@ build_script:
 
 - ps: >-
 
-    $ENV:PATH=”$ENV:PATH;$ENV:WIX”
+    $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
