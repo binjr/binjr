@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~    Copyright 2017 Frederic Thevenet
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  ~
+  -->
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="*" Name="binjr"
+             Language="1033"
+             Version="1.0.0"
+             Manufacturer="Frederic Thevenet"
+             UpgradeCode="e39cb23d-5950-4f94-926e-106246cbac12">
+        <Package Description="binjr"
+                 Comments="A time-series visualization tool"
+                 InstallerVersion="200"
+                 Compressed="yes"
+                 InstallScope="perMachine"
+                 Platform="x64"/>
+        <Icon Id="binjr.ico" SourceFile="binjr.ico"/>
+        <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
+        <Upgrade Id="e39cb23d-5950-4f94-926e-106246cbac12">
+            <UpgradeVersion Minimum="1.0.0.0" Maximum="1.9.0.0" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no"/>
+        </Upgrade>
+        <InstallExecuteSequence>
+            <RemoveExistingProducts After="InstallInitialize"/>
+        </InstallExecuteSequence>
+        <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
+
+        <!-- We use RemoveFolderEx to ensure application folder is fully 
+             removed on uninstall. Including files created outside of MSI
+             after application had been installed (e.g. on AU or user state).
+             
+             Hovewer, RemoveFolderEx is only available in WiX 3.6, 
+             we will comment it out if we running older WiX.
+
+             RemoveFolderEx requires that we "remember" the path for uninstall.
+             Read the path value and set the APPLICATIONFOLDER property with the value.
+        -->
+        <Property Id="APPLICATIONFOLDER">
+            <RegistrySearch Key="SOFTWARE\Frederic Thevenet\binjr"
+                            Root="HKLM" Type="raw"
+                            Id="APPLICATIONFOLDER_REGSEARCH" Name="Path"/>
+        </Property>
+        <DirectoryRef Id="APPLICATIONFOLDER">
+            <Component Id="CleanupMainApplicationFolder" Guid="*" Win64="yes">
+                <RegistryValue Root="HKLM"
+                               Key="SOFTWARE\Frederic Thevenet\binjr"
+                               Name="Path" Type="string" Value="[APPLICATIONFOLDER]"
+                               KeyPath="yes"/>
+                <!-- We need to use APPLICATIONFOLDER variable here or RemoveFolderEx
+                     will not remove on "install". But only if WiX 3.6 is used. -->
+                <!--     
+                  <util:RemoveFolderEx On="uninstall" Property="APPLICATIONFOLDER" />
+                -->
+            </Component>
+        </DirectoryRef>
+        <?include bundle.wxi ?>
+        <WixVariable Id="WixUIBannerBmp" Value="..\images\Install_Banner.jpg"/>
+        <WixVariable Id="WixUIDialogBmp" Value="..\images\Install_Splash.jpg"/>
+
+        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
+        <UIRef Id="WixUI_Minimal"/>
+        <!--<UI Id="WixUI_InstallDir">-->
+        <!--<Property Id="WixUI_Mode" Value="InstallDir" />-->
+        <!--</UI>-->
+
+
+        <Icon Id="DesktopIcon.exe" SourceFile="binjr.ico"/>
+        <Icon Id="StartMenuIcon.exe" SourceFile="binjr.ico"/>
+
+    </Product>
+</Wix>

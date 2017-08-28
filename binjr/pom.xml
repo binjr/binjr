@@ -40,6 +40,15 @@
     </scm>
     <profiles>
         <profile>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>oss-sonatype-snapshots</id>
+                    <url>https://oss.sonatype.org/content/groups/public/</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
             <id>buildNativeBundles</id>
             <activation>
             </activation>
@@ -48,15 +57,17 @@
                     <plugin>
                         <groupId>com.zenjava</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
-                        <version>8.8.3</version>
+                        <version>8.8.4-SNAPSHOT</version>
                         <configuration>
+                            <identifier>{4C87B1A8-7080-45BA-AD7A-E8A15EE1F041}</identifier>
                             <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
-                            <vendor>${project.build.finalName}</vendor>
-                            <bundler>ALL</bundler>
+                            <vendor>${project.organization.name}</vendor>
+                            <bundler>msi</bundler>
                             <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                             <appName>${project.build.finalName}</appName>
                             <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
-                            <jvmArgs>splash:splashscreen.png</jvmArgs>
+                            <additionalBundlerResources>${project.basedir}/src/main/deploy/bundlers</additionalBundlerResources>
+                            <jvmArgs>-splash:splashscreen.png</jvmArgs>
                             <manifestAttributes>
                                 <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
                                 <Specification-Title>${project.name}</Specification-Title>
@@ -69,8 +80,8 @@
                                 <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
                             </manifestAttributes>
                             <verbose>true</verbose>
-                            <description>binjr, a time-series visualization studio</description>
-                            <title>binjr, a time-series visualization studio</title>
+                            <description>A time-series visualization studio</description>
+                            <title>binjr</title>
                             <fileAssociations>
                                 <fileAssociation>
                                     <extensions>bjr</extensions>
@@ -82,7 +93,9 @@
                             <bundleArguments>
                                 <!--<runtime />-->
                                 <licenseFile>LICENSE</licenseFile>
+                                <win.menuGroup>binjr</win.menuGroup>
                             </bundleArguments>
+                            <skipJNLP>true</skipJNLP>
                         </configuration>
                         <executions>
                             <execution>
