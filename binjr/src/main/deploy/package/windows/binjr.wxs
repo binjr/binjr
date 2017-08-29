@@ -19,7 +19,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="binjr"
              Language="1033"
-             Version="1.0.0"
+             Version="$(env.BINJR_VERSION)"
              Manufacturer="Frederic Thevenet"
              UpgradeCode="e39cb23d-5950-4f94-926e-106246cbac12">
         <Package Description="binjr"
@@ -71,7 +71,7 @@
         <WixVariable Id="WixUIDialogBmp" Value="..\images\Install_Splash.jpg"/>
 
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
-        <UIRef Id="WixUI_Minimal"/>
+        <UIRef Id="WixUI_FeatureTree"/>
         <!--<UI Id="WixUI_InstallDir">-->
         <!--<Property Id="WixUI_Mode" Value="InstallDir" />-->
         <!--</UI>-->

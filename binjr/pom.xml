@@ -62,7 +62,7 @@
                             <identifier>{4C87B1A8-7080-45BA-AD7A-E8A15EE1F041}</identifier>
                             <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
                             <vendor>${project.organization.name}</vendor>
-                            <bundler>msi</bundler>
+                            <bundler>ALL</bundler>
                             <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                             <appName>${project.build.finalName}</appName>
                             <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
