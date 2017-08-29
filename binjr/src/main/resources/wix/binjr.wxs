@@ -17,18 +17,18 @@
   -->
 
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Name="binjr"
+    <Product Id="*" Name="${project.name}"
              Language="1033"
-             Version="9.9.99"
-             Manufacturer="Frederic Thevenet"
+             Version="${project.version}"
+             Manufacturer="${project.organization.name}"
              UpgradeCode="e39cb23d-5950-4f94-926e-106246cbac12">
-        <Package Description="binjr"
-                 Comments="A time-series visualization tool"
+        <Package Description="${project.name}"
+                 Comments="${project.description}"
                  InstallerVersion="200"
                  Compressed="yes"
                  InstallScope="perMachine"
                  Platform="x64"/>
-        <Icon Id="binjr.ico" SourceFile="binjr.ico"/>
+        <Icon Id="binjr.ico" SourceFile="${project.name}.ico"/>
         <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
         <Upgrade Id="e39cb23d-5950-4f94-926e-106246cbac12">
             <UpgradeVersion Minimum="1.0.0.0" Maximum="10.0.0.0" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no"/>
@@ -49,14 +49,14 @@
              Read the path value and set the APPLICATIONFOLDER property with the value.
         -->
         <Property Id="APPLICATIONFOLDER">
-            <RegistrySearch Key="SOFTWARE\Frederic Thevenet\binjr"
+            <RegistrySearch Key="SOFTWARE\${project.organization.name}\${project.name}"
                             Root="HKLM" Type="raw"
                             Id="APPLICATIONFOLDER_REGSEARCH" Name="Path"/>
         </Property>
         <DirectoryRef Id="APPLICATIONFOLDER">
             <Component Id="CleanupMainApplicationFolder" Guid="*" Win64="yes">
                 <RegistryValue Root="HKLM"
-                               Key="SOFTWARE\Frederic Thevenet\binjr"
+                               Key="SOFTWARE\${project.organization.name}\${project.name}"
                                Name="Path" Type="string" Value="[APPLICATIONFOLDER]"
                                KeyPath="yes"/>
                 <!-- We need to use APPLICATIONFOLDER variable here or RemoveFolderEx
@@ -71,7 +71,7 @@
 
 
         <DirectoryRef Id="dirid7">
-            <Component Id="PatchBinjrCfg" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes" >
+            <Component Id="PatchBinjrCfg" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes">
                 <CreateFolder/>
                 <!--<Condition>!Runtime = 2</Condition>-->
                 <IniFile Id="ModifyCfg"
@@ -130,22 +130,22 @@
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
         <!--<UIRef Id="WixUI_FeatureTree"/>-->
         <UI Id="WixUI_binjr">
-            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
-            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
-            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
-            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
+            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
+            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes"/>
+            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal"/>
             <!--<Property Id="WixUI_Mode" Value="FeatureTree" />-->
-            <Property Id="WixUI_Mode" Value="InstallDir" />
-            <DialogRef Id="BrowseDlg" />
-            <DialogRef Id="DiskCostDlg" />
-            <DialogRef Id="ErrorDlg" />
-            <DialogRef Id="FatalError" />
-            <DialogRef Id="FilesInUse" />
-            <DialogRef Id="MsiRMFilesInUse" />
-            <DialogRef Id="PrepareDlg" />
-            <DialogRef Id="ProgressDlg" />
-            <DialogRef Id="ResumeDlg" />
-            <DialogRef Id="UserExit" />
+            <Property Id="WixUI_Mode" Value="InstallDir"/>
+            <DialogRef Id="BrowseDlg"/>
+            <DialogRef Id="DiskCostDlg"/>
+            <DialogRef Id="ErrorDlg"/>
+            <DialogRef Id="FatalError"/>
+            <DialogRef Id="FilesInUse"/>
+            <DialogRef Id="MsiRMFilesInUse"/>
+            <DialogRef Id="PrepareDlg"/>
+            <DialogRef Id="ProgressDlg"/>
+            <DialogRef Id="ResumeDlg"/>
+            <DialogRef Id="UserExit"/>
 
             <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
             <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
@@ -160,9 +160,6 @@
             <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
             <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
             <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <!--<Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="1">Installed</Publish>-->
-            <!--<Publish Dialog="CustomizeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="2">NOT Installed</Publish>-->
-            <!--<Publish Dialog="CustomizeDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>-->
 
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
             <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
@@ -171,7 +168,7 @@
             <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
             <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
         </UI>
-        <UIRef Id="WixUI_Common" />
+        <UIRef Id="WixUI_Common"/>
 
 
         <Icon Id="DesktopIcon.exe" SourceFile="binjr.ico"/>

@@ -22,8 +22,9 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.17-SNAPSHOT</version>
+    <version>9.9.99</version>
     <packaging>jar</packaging>
+    <description>A time-series visualization tool</description>
     <organization>
         <name>Frederic Thevenet</name>
         <url>http://www.fthevenet.eu/</url>
@@ -55,11 +56,36 @@
             <build>
                 <plugins>
                     <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <version>3.0.2</version>
+                        <executions>
+                            <execution>
+                                <id>installer</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}/src/main/deploy/package/windows</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/wix</directory>
+                                            <includes>
+                                                <include>*.wxs</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <groupId>com.zenjava</groupId>
                         <artifactId>javafx-maven-plugin</artifactId>
                         <version>8.8.4-SNAPSHOT</version>
                         <configuration>
-                            <identifier>{4C87B1A8-7080-45BA-AD7A-E8A15EE1F041}</identifier>
                             <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
                             <vendor>${project.organization.name}</vendor>
                             <bundler>ALL</bundler>

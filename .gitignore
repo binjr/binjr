@@ -5,3 +5,4 @@
 /binjr/target/binjr.jar
 /binjr/dependency-reduced-pom.xml
 /log4j2.xml
+/binjr/src/main/deploy/package/windows/binjr.wxs
