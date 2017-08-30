@@ -28,7 +28,12 @@
                  Compressed="yes"
                  InstallScope="perMachine"
                  Platform="x64"/>
-        <Icon Id="binjr.ico" SourceFile="${project.name}.ico"/>
+        <Icon Id="icon.ico" SourceFile="${project.name}.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="icon.ico"/>
+        <Property Id="ARPHELPLINK" Value="${helpUrl}"/>
+        <Property Id="ARPURLINFOABOUT" Value="${project.url}"/>
+        <Property Id="ARPURLUPDATEINFO" Value="${releaseUrl}"/>
+
         <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
         <Upgrade Id="e39cb23d-5950-4f94-926e-106246cbac12">
             <UpgradeVersion Minimum="1.0.0.0" Maximum="10.0.0.0" Property="PREVIOUSVERSIONSINSTALLED" IncludeMinimum="yes" IncludeMaximum="no"/>
@@ -69,16 +74,26 @@
 
         <?include bundle.wxi ?>
 
-
         <DirectoryRef Id="dirid7">
-            <Component Id="PatchBinjrCfg" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes">
+            <!--<Component Id="RemoveRuntimeEntry" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes">-->
+            <!--<CreateFolder/>-->
+            <!--&lt;!&ndash;<Condition>&amp;Runtime=2</Condition>&ndash;&gt;-->
+            <!--<IniFile Id="IniRemoveRuntimeEntry"-->
+            <!--Action="removeLine"-->
+            <!--Directory="dirid7"-->
+            <!--Section="Application"-->
+            <!--Name="binjr.cfg"-->
+            <!--Key="app.runtime"/>-->
+            <!--</Component>-->
+            <Component Id="AddRuntimeEntry" Guid="F00C41C2-AEF0-4F58-B28D-673A1F1D94D6" Win64="yes">
                 <CreateFolder/>
-                <!--<Condition>!Runtime = 2</Condition>-->
-                <IniFile Id="ModifyCfg"
-                         Action="removeLine"
+                <IniFile Id="IniAddRuntimeEntry"
+                         Action="addLine"
+                         Directory="dirid7"
                          Section="Application"
                          Name="binjr.cfg"
-                         Key="app.runtime"/>
+                         Key="app.runtime"
+                         Value="$APPDIR\runtime"/>
             </Component>
         </DirectoryRef>
 
@@ -89,13 +104,24 @@
                  TypicalDefault="install"
                  Absent="disallow"
                  AllowAdvertise="no"
-                 Description="The main application files for binjr."
+                 Description="binjr, a time series visualization tool."
                  InstallDefault="local"
                  Display="expand">
-            <ComponentRef Id="comp0"/>
-            <ComponentRef Id="comp1"/>
-            <ComponentRef Id="comp2"/>
+            <!--<ComponentRef Id="RemoveRuntimeEntry"/>-->
             <ComponentRef Id="CleanupMainApplicationFolder"/>
+            <Feature Id="AppFiles"
+                     Level="1"
+                     Title="Application Files"
+                     TypicalDefault="install"
+                     Absent="disallow"
+                     AllowAdvertise="no"
+                     Description="Core application files for binjr."
+                     InstallDefault="local"
+                     Display="expand">
+                <ComponentRef Id="comp0"/>
+                <ComponentRef Id="comp1"/>
+                <ComponentRef Id="comp2"/>
+            </Feature>
             <Feature Id="Runtime"
                      Level="1"
                      Title="Runtime"
@@ -120,59 +146,21 @@
                 <ComponentRef Id="comp15"/>
                 <ComponentRef Id="comp16"/>
                 <ComponentRef Id="comp17"/>
+                <ComponentRef Id="AddRuntimeEntry"/>
             </Feature>
-            <ComponentRef Id="PatchBinjrCfg"/>
         </Feature>
+
 
         <WixVariable Id="WixUIBannerBmp" Value="..\images\Install_Banner.jpg"/>
         <WixVariable Id="WixUIDialogBmp" Value="..\images\Install_Splash.jpg"/>
 
-        <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
-        <!--<UIRef Id="WixUI_FeatureTree"/>-->
-        <UI Id="WixUI_binjr">
-            <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
-            <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
-            <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes"/>
-            <Property Id="DefaultUIFont" Value="WixUI_Font_Normal"/>
-            <!--<Property Id="WixUI_Mode" Value="FeatureTree" />-->
-            <Property Id="WixUI_Mode" Value="InstallDir"/>
-            <DialogRef Id="BrowseDlg"/>
-            <DialogRef Id="DiskCostDlg"/>
-            <DialogRef Id="ErrorDlg"/>
-            <DialogRef Id="FatalError"/>
-            <DialogRef Id="FilesInUse"/>
-            <DialogRef Id="MsiRMFilesInUse"/>
-            <DialogRef Id="PrepareDlg"/>
-            <DialogRef Id="ProgressDlg"/>
-            <DialogRef Id="ResumeDlg"/>
-            <DialogRef Id="UserExit"/>
+        <!--<Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>-->
+        <!--<UIRef Id="WixUI_InstallDir"/>-->
 
-            <Publish Dialog="BrowseDlg" Control="OK" Event="DoAction" Value="WixUIValidatePath" Order="3">1</Publish>
-            <Publish Dialog="BrowseDlg" Control="OK" Event="SpawnDialog" Value="InvalidDirDlg" Order="4"><![CDATA[WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
+        <UIRef Id="WixUI_Mondo"/>
 
-            <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog" Value="Return" Order="999">1</Publish>
-            <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="InstallDirDlg">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="DoAction" Value="WixUIValidatePath" Order="2">NOT WIXUI_DONTVALIDATEPATH</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog" Value="InvalidDirDlg" Order="3"><![CDATA[NOT WIXUI_DONTVALIDATEPATH AND WIXUI_INSTALLDIR_VALID<>"1"]]></Publish>
-
-            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog" Value="BrowseDlg" Order="2">1</Publish>
-            <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="InstallDirDlg" Order="1">NOT Installed OR WixUI_InstallMode = "Change"</Publish>
-            <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog" Value="MaintenanceTypeDlg" Order="2">Installed</Publish>
-            <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog" Value="MaintenanceTypeDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog" Value="VerifyReadyDlg">1</Publish>
-            <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog" Value="MaintenanceWelcomeDlg">1</Publish>
-        </UI>
-        <UIRef Id="WixUI_Common"/>
-
-
-        <Icon Id="DesktopIcon.exe" SourceFile="binjr.ico"/>
-        <Icon Id="StartMenuIcon.exe" SourceFile="binjr.ico"/>
+        <Icon Id="DesktopIcon.exe" SourceFile="${project.name}.ico"/>
+        <Icon Id="StartMenuIcon.exe" SourceFile="${project.name}.ico"/>
 
     </Product>
 </Wix>

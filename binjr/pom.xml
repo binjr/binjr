@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>9.9.99</version>
+    <version>1.0.17-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
@@ -30,6 +30,8 @@
         <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
+        <releaseUrl>https://github.com/fthevenet/binjr/releases</releaseUrl>
+        <helpUrl>https://github.com/fthevenet/binjr/wiki</helpUrl>
         <github.global.server>github</github.global.server>
         <project.scm.id>${github.global.server}</project.scm.id>
     </properties>

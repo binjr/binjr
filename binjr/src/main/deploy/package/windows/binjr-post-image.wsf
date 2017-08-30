@@ -1,34 +1,23 @@
 <job id="Job1">
-
     <script language="VBScript">
 
-       Const ForReading = 1
+        Sub ReplaceInFile( strFileName, strOldText, strNewText )
+            Const ForReading = 1
+            Const ForWriting = 2
+            Set objFSO = CreateObject("Scripting.FileSystemObject")
+            Set objFile = objFSO.OpenTextFile(strFileName, ForReading)
+            strText = objFile.ReadAll
+            objFile.Close
+            strNewText = Replace(strText, strOldText, strNewText)
+            Set objFile = objFSO.OpenTextFile(strFileName, ForWriting)
+            objFile.WriteLine strNewText
+            objFile.Close
+        End Sub
 
-       Const ForWriting = 2
+        Call ReplaceInFile("..\..\windows\bundle.wxi", "Level=""1""", "Level=""0""")
 
-       strFileName = "..\..\windows\bundle.wxi"
-
-       strOldText = "Level=""1"""
-
-       strNewText = "Level=""0"""
-
-       Set objFSO = CreateObject("Scripting.FileSystemObject")
-
-       Set objFile = objFSO.OpenTextFile(strFileName, ForReading)
-
-       strText = objFile.ReadAll
-
-       objFile.Close
-
-       strNewText = Replace(strText, strOldText, strNewText)
-
-       Set objFile = objFSO.OpenTextFile(strFileName, ForWriting)
-
-       objFile.WriteLine strNewText
-
-       objFile.Close
+        Call ReplaceInFile(".\binjr\app\binjr.cfg", "app.runtime=$APPDIR\runtime", "")
 
     </script>
-
 </job>
 
