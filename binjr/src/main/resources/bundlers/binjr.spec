@@ -1,9 +1,11 @@
-Summary: ${project.name} - ${project.description}
+Summary: ${project.description}
 Name: ${project.name}
 Version: ${bundle.version}
 Release: 1
 License: ${license.shortName}
 Vendor: ${project.organization.name}
+Icon: ${project.name}.png
+Url: ${project.url}
 Prefix: /opt
 Provides: ${project.name}
 Requires: ld-linux.so.2 libX11.so.6 libXext.so.6 libXi.so.6 libXrender.so.1 libXtst.so.6 libasound.so.2 libc.so.6 libdl.so.2 libgcc_s.so.1 libm.so.6 libpthread.so.0 libthread_db.so.1
@@ -19,7 +21,7 @@ Autoreq: 0
 #%define __jar_repack %{nil}
 
 %description
-${project.description}
+${project.detailedDescription}
 
 %prep
 

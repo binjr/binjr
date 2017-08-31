@@ -30,6 +30,9 @@
         <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
+        <detailedDescription>binjr is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or
+            zoom in and out.
+        </detailedDescription>
         <license.name>Apache Software License 2.0</license.name>
         <License.url>http://www.apache.org/licenses/LICENSE-2.0</License.url>
         <license.shortName>ASL 2.0</license.shortName>
