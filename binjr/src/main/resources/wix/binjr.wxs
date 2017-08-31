@@ -160,6 +160,5 @@
 
         <Icon Id="DesktopIcon.exe" SourceFile="${project.name}.ico"/>
         <Icon Id="StartMenuIcon.exe" SourceFile="${project.name}.ico"/>
-
     </Product>
 </Wix>
