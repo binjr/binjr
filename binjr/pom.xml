@@ -87,7 +87,7 @@
                         <version>3.0.2</version>
                         <executions>
                             <execution>
-                                <id>installer</id>
+                                <id>installer-windows</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
@@ -99,6 +99,24 @@
                                             <directory>src/main/resources/bundlers</directory>
                                             <includes>
                                                 <include>*.wxs</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-linux</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}/src/main/deploy/package/linux</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/bundlers</directory>
+                                            <includes>
                                                 <include>*.spec</include>
                                             </includes>
                                             <filtering>true</filtering>
