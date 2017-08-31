@@ -21,8 +21,6 @@ only_commits:
 
   message: /\[maven-release-plugin\] prepare release/
 
-  message: /\[appveyor build\]/
-
 build_script:
 
 - ps: >-
