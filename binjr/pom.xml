@@ -111,7 +111,7 @@
                         <configuration>
                             <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
                             <vendor>${project.organization.name}</vendor>
-                            <bundler>ALL</bundler>
+                            <bundler>all</bundler>
                             <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
                             <appName>${project.build.finalName}</appName>
                             <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
