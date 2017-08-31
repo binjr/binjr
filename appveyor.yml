@@ -6,7 +6,8 @@ environment:
   SCM_USERNAME:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
   APPVEYOR_RDP_PASSWORD:
-    secure: Bn9blv99roeGySvoCMsymQ==
+    secure: 4amxfxphFUcpp60d9Q6gJg==
+
 
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
