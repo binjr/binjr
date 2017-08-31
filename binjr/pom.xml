@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.18-SNAPSHOT</version>
+    <version>1.0.17-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
@@ -30,6 +30,9 @@
         <url>http://www.fthevenet.eu/</url>
     </organization>
     <properties>
+        <license.name>Apache Software License 2.0</license.name>
+        <License.url>http://www.apache.org/licenses/LICENSE-2.0</License.url>
+        <license.shortName>ASL 2.0</license.shortName>
         <releaseUrl>https://github.com/fthevenet/binjr/releases</releaseUrl>
         <helpUrl>https://github.com/fthevenet/binjr/wiki</helpUrl>
         <github.global.server>github</github.global.server>
@@ -93,9 +96,10 @@
                                     <outputDirectory>${project.basedir}/src/main/deploy/package/windows</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>src/main/resources/wix</directory>
+                                            <directory>src/main/resources/bundlers</directory>
                                             <includes>
                                                 <include>*.wxs</include>
+                                                <include>*.spec</include>
                                             </includes>
                                             <filtering>true</filtering>
                                         </resource>
