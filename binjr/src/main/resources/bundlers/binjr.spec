@@ -21,7 +21,7 @@ Autoreq: 0
 #%define __jar_repack %{nil}
 
 %description
-${project.detailedDescription}
+${detailedDescription}
 
 %prep
 
