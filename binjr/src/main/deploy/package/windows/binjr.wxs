@@ -96,7 +96,6 @@
                          Value="$APPDIR\runtime"/>
             </Component>
         </DirectoryRef>
-
         <Feature Id="binjrRoot"
                  Level="1"
                  ConfigurableDirectory="APPLICATIONFOLDER"
@@ -161,6 +160,5 @@
 
         <Icon Id="DesktopIcon.exe" SourceFile="binjr.ico"/>
         <Icon Id="StartMenuIcon.exe" SourceFile="binjr.ico"/>
-
     </Product>
 </Wix>
