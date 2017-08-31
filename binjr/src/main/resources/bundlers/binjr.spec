@@ -4,7 +4,7 @@ Version: ${bundle.version}
 Release: 1
 License: ${license.shortName}
 Vendor: ${project.organization.name}
-Icon: ${project.name}.png
+Icon: ${project.name}.xpm
 Url: ${project.url}
 Prefix: /opt
 Provides: ${project.name}
