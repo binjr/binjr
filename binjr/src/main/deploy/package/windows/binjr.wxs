@@ -32,7 +32,7 @@
         <Property Id="ARPPRODUCTICON" Value="icon.ico"/>
         <Property Id="ARPHELPLINK" Value="https://github.com/fthevenet/binjr/wiki"/>
         <Property Id="ARPURLINFOABOUT" Value="http://www.binjr.eu"/>
-        <Property Id="ARPURLUPDATEINFO" Value="https://github.com/fthevenet/binjr/releases/latest"/>
+        <Property Id="ARPURLUPDATEINFO" Value="https://github.com/fthevenet/binjr/releases"/>
 
         <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
         <Upgrade Id="e39cb23d-5950-4f94-926e-106246cbac12">

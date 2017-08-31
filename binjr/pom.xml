@@ -58,6 +58,27 @@
             <build>
                 <plugins>
                     <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>3.0.0</version>
+                        <executions>
+                            <execution>
+                                <id>clean-version</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>regex-property</goal>
+                                </goals>
+                                <configuration>
+                                    <name>bundle.version</name>
+                                    <value>${project.version}</value>
+                                    <regex>^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$</regex>
+                                    <replacement>$1.$2.$3</replacement>
+                                    <failIfNoMatch>true</failIfNoMatch>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
                         <groupId>org.apache.maven.plugins</groupId>
                         <version>3.0.2</version>

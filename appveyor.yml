@@ -5,6 +5,11 @@ environment:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
   SCM_USERNAME:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
+  APPVEYOR_RDP_PASSWORD:
+    secure: Bn9blv99roeGySvoCMsymQ==
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 branches:
 
@@ -15,6 +20,8 @@ branches:
 only_commits:
 
   message: /\[maven-release-plugin\] prepare release/
+
+  message: /\[appveyor build\]/
 
 build_script:
 

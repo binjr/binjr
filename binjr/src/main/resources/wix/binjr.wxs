@@ -19,7 +19,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Product Id="*" Name="${project.name}"
              Language="1033"
-             Version="${project.version}"
+             Version="${bundle.version}"
              Manufacturer="${project.organization.name}"
              UpgradeCode="e39cb23d-5950-4f94-926e-106246cbac12">
         <Package Description="${project.name}"
