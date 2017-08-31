@@ -1,6 +1,22 @@
 <job id="Job1">
     <script language="VBScript">
 
+        On Error Resume Next
+
+        Call ReplaceInFile("..\..\windows\bundle.wxi", "Level=""1""", "Level=""0""")
+
+        If Err.Number <> 0 Then
+          WScript.Echo "Error while patching bundle.wxi: " & Err.Description
+          Err.Clear
+        End If
+
+        Call ReplaceInFile(".\binjr\app\binjr.cfg", "app.runtime=$APPDIR\runtime", "")
+
+        If Err.Number <> 0 Then
+          WScript.Echo "Error while patching binjr.csg:" & Err.Description
+          Err.Clear
+        End If
+
         Sub ReplaceInFile( strFileName, strOldText, strNewText )
             Const ForReading = 1
             Const ForWriting = 2
@@ -13,10 +29,6 @@
             objFile.WriteLine strNewText
             objFile.Close
         End Sub
-
-        Call ReplaceInFile("..\..\windows\bundle.wxi", "Level=""1""", "Level=""0""")
-
-        Call ReplaceInFile(".\binjr\app\binjr.cfg", "app.runtime=$APPDIR\runtime", "")
 
     </script>
 </job>
