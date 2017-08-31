@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=binjr
+Comment=Time-series viewer
+Exec=/opt/binjr/binjr
+Icon=/opt/binjr/binjr.png
+Terminal=false
+Type=Application
+Categories= Application;Viewers;
+MimeType=bjr

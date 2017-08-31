@@ -1,10 +1,9 @@
 Summary: ${project.description}
 Name: ${project.name}
 Version: ${bundle.version}
-Release: 1
+Release: 0
 License: ${license.shortName}
 Vendor: ${project.organization.name}
-Icon: ${project.name}.xpm
 Url: ${project.url}
 Prefix: /opt
 Provides: ${project.name}
