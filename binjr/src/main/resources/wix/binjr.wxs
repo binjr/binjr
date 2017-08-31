@@ -96,7 +96,6 @@
                          Value="$APPDIR\runtime"/>
             </Component>
         </DirectoryRef>
-
         <Feature Id="binjrRoot"
                  Level="1"
                  ConfigurableDirectory="APPLICATIONFOLDER"
