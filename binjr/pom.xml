@@ -119,6 +119,8 @@
                                             <directory>src/main/resources/bundlers</directory>
                                             <includes>
                                                 <include>*.spec</include>
+                                                <include>control</include>
+                                                <include>copyright</include>
                                             </includes>
                                             <filtering>true</filtering>
                                         </resource>

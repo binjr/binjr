@@ -1,0 +1,12 @@
+Package: ${project.name}
+Version: ${bundle.version}
+Section: base
+Maintainer: ${project.organization.name}
+Priority: optional
+Architecture: amd64
+Provides: ${project.name}
+Homepage: ${project.url}
+Description: ${project.description}
+ ${detailedDescription}
+
+
