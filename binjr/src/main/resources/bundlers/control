@@ -9,5 +9,3 @@ License: ${license.shortName}
 Homepage: ${project.url}
 Description: ${project.description}
  ${detailedDescription}
-
-
