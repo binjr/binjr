@@ -5,7 +5,6 @@ Maintainer: ${project.organization.name}
 Priority: optional
 Architecture: amd64
 Provides: ${project.name}
-License: ${license.shortName}
 Homepage: ${project.url}
 Description: ${project.description}
  ${detailedDescription}
