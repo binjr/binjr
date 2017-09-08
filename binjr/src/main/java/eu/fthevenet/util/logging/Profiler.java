@@ -20,28 +20,39 @@ package eu.fthevenet.util.logging;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A utility class that measures and reports the execution time of a portion of code.
+ * A utility class that measures and reports the execution time of a portion of
+ * code.
  * <p>
- * A time interval is measured from the creation of the object to its closing. It implements {@code AutoCloseable} and can be used
- * in conjunction with a try-with-resource statement to measure the amount of time totalTime from entering to exiting the try block.
+ * A time interval is measured from the creation of the object to its closing.
+ * It implements {@code AutoCloseable} and can be used in conjunction with a
+ * try-with-resource statement to measure the amount of time totalTime from
+ * entering to exiting the try block.
  *
  * @author Frederic Thevenet
  */
-public class Profiler implements AutoCloseable {
+public final class Profiler implements AutoCloseable {
     private final Elapsed elapsed;
     private final OutputDelegate writeCallback;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final long startTime;
+    private final long thresholdMs;
 
     /**
-     * A functional interface that represents the action to output the measured interval (for compatibility with &lt; 1.8)
+     * A functional interface that represents the action to output the measured
+     * interval (for compatibility with &lt; 1.8)
      */
     public interface OutputDelegate {
+        /**
+         * Invoke
+         *
+         * @param e Elapsed
+         */
         void invoke(Elapsed e);
     }
 
     /**
-     * A class that encapsulate the interval measured by a {@link Profiler} object.
+     * A class that encapsulate the interval measured by a {@link Profiler}
+     * object.
      */
     public static class Elapsed {
         private String message;
@@ -55,7 +66,8 @@ public class Profiler implements AutoCloseable {
         }
 
         /**
-         * Initializes a new instance of the {@link Elapsed} class with the specified message.
+         * Initializes a new instance of the {@link Elapsed} class with the
+         * specified message.
          *
          * @param message The specified message
          */
@@ -64,7 +76,8 @@ public class Profiler implements AutoCloseable {
         }
 
         /**
-         * Initializes a new instance of the {@link Elapsed} class with the specified message and initial value for the totalTime time.
+         * Initializes a new instance of the {@link Elapsed} class with the
+         * specified message and initial value for the totalTime time.
          *
          * @param intialValue the initial value for the totalTime time.
          * @param message     The specified message
@@ -134,36 +147,44 @@ public class Profiler implements AutoCloseable {
         }
 
         /**
-         * Returns a string representation of the profiler, composed ot the message and the time interval in ns.
+         * Returns a string representation of the profiler, composed ot the
+         * message and the time interval in ns.
          *
-         * @return a string representation of the profiler, composed ot the message and the time interval in ns.
+         * @return a string representation of the profiler, composed ot the
+         * message and the time interval in ns.
          */
         public String toNanoString() {
             return this.getMessage() + ": " + getNanos() + " ns";
         }
 
         /**
-         * Returns a string representation of the profiler, composed ot the message and the time interval in μs.
+         * Returns a string representation of the profiler, composed ot the
+         * message and the time interval in μs.
          *
-         * @return a string representation of the profiler, composed ot the message and the time interval in μs.
+         * @return a string representation of the profiler, composed ot the
+         * message and the time interval in μs.
          */
         public String toMicroString() {
             return this.getMessage() + ": " + getMicros() + " μs";
         }
 
         /**
-         * Returns a string representation of the profiler, composed ot the message and the time interval in ms.
+         * Returns a string representation of the profiler, composed ot the
+         * message and the time interval in ms.
          *
-         * @return a string representation of the profiler, composed ot the message and the time interval in ms.
+         * @return a string representation of the profiler, composed ot the
+         * message and the time interval in ms.
          */
         public String toMilliString() {
             return this.getMessage() + ": " + getMillis() + " ms";
         }
 
         /**
-         * Returns a string representation of the profiler, composed ot the message and the time interval in s.
+         * Returns a string representation of the profiler, composed ot the
+         * message and the time interval in s.
          *
-         * @return a string representation of the profiler, composed ot the message and the time interval in s.
+         * @return a string representation of the profiler, composed ot the
+         * message and the time interval in s.
          */
         public String toSecondString() {
             return this.getMessage() + ": " + getSeconds() + " s";
@@ -174,11 +195,26 @@ public class Profiler implements AutoCloseable {
      * Returns a new instance of the {@link Profiler} class.
      *
      * @param message       The message associated to the perf totalTime.
-     * @param writeCallback The callback that will be invoked to log the results of the totalTime.
+     * @param writeCallback The callback that will be invoked to log the results of the
+     *                      totalTime.
      * @return The new instance of the Profiler class
      */
     public static Profiler start(String message, OutputDelegate writeCallback) {
-        return new Profiler(new Elapsed(message), writeCallback);
+        return new Profiler(new Elapsed(message), writeCallback, -1);
+    }
+
+    /**
+     * Returns a new instance of the {@link Profiler} class.
+     *
+     * @param message       The message associated to the perf totalTime.
+     * @param writeCallback The callback that will be invoked to log the results of the
+     *                      totalTime.
+     * @param threshold     If the elapsed time is greater or equal to that threshold
+     *                      value (in ms) the message is logged otherwise it isn't.
+     * @return The new instance of the Profiler class
+     */
+    public static Profiler start(String message, OutputDelegate writeCallback, long threshold) {
+        return new Profiler(new Elapsed(message), writeCallback, threshold);
     }
 
     /**
@@ -188,33 +224,75 @@ public class Profiler implements AutoCloseable {
      * @return The newly created Profiler instance.
      */
     public static Profiler start(String message) {
-        return new Profiler(new Elapsed(message), null);
+        return new Profiler(new Elapsed(message), null, -1);
     }
 
     /**
      * Returns a new instance of the {@link Profiler} class.
      *
-     * @param writeCallback The callback that will be invoked to log the results of the totalTime.
+     * @param message   The message associated to the perf totalTime.
+     * @param threshold If the elapsed time is greater or equal to that threshold
+     *                  value (in ms) the message is logged otherwise it isn't.
+     * @return The newly created Profiler instance.
+     */
+    public static Profiler start(String message, long threshold) {
+        return new Profiler(new Elapsed(message), null, threshold);
+    }
+
+    /**
+     * Returns a new instance of the {@link Profiler} class.
+     *
+     * @param writeCallback The callback that will be invoked to log the results of the
+     *                      totalTime.
      * @return The new instance of the Profiler class.
      */
     public static Profiler start(OutputDelegate writeCallback) {
-        return new Profiler(new Elapsed(""), writeCallback);
+        return new Profiler(new Elapsed(""), writeCallback, -1);
     }
 
     /**
      * Returns a new instance of the {@link Profiler} class.
      *
-     * @param elapsed A Elapsed object that will be used to store the results of the totalTime.
+     * @param writeCallback The callback that will be invoked to log the results of the
+     *                      totalTime.
+     * @param threshold     If the elapsed time is greater or equal to that threshold
+     *                      value (in ms) the message is logged otherwise it isn't.
+     * @return The new instance of the Profiler class.
+     */
+    public static Profiler start(OutputDelegate writeCallback, long threshold) {
+        return new Profiler(new Elapsed(""), writeCallback, threshold);
+    }
+
+    /**
+     * Returns a new instance of the {@link Profiler} class.
+     *
+     * @param elapsed A Elapsed object that will be used to store the results of the
+     *                totalTime.
      * @return The newly created Profiler instance.
      */
     public static Profiler start(Elapsed elapsed) {
-        return new Profiler(elapsed, null);
+        return new Profiler(elapsed, null, -1);
     }
 
-    private Profiler(Elapsed elapsed, OutputDelegate writeCallback) {
+    /**
+     * Returns a new instance of the {@link Profiler} class.
+     *
+     * @param elapsed   A Elapsed object that will be used to store the results of the
+     *                  totalTime.
+     * @param threshold If the elapsed time is greater or equal to that threshold
+     *                  value (in ms) the message is logged otherwise it isn't.
+     * @return The newly created Profiler instance.
+     */
+    public static Profiler start(Elapsed elapsed, long threshold) {
+        return new Profiler(elapsed, null, threshold);
+    }
+
+    private Profiler(Elapsed elapsed, OutputDelegate writeCallback, long thresholdMs) {
         this.elapsed = elapsed;
         this.writeCallback = writeCallback;
+        this.thresholdMs = thresholdMs;
         this.startTime = System.nanoTime();
+
     }
 
     @Override
@@ -223,7 +301,9 @@ public class Profiler implements AutoCloseable {
             long stopTime = System.nanoTime();
             this.elapsed.nanoSec += stopTime - this.startTime;
             if (writeCallback != null) {
-                writeCallback.invoke(this.elapsed);
+                if (this.elapsed.getMillis() >= thresholdMs) {
+                    writeCallback.invoke(this.elapsed);
+                }
             }
         }
     }
