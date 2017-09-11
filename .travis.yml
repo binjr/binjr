@@ -6,8 +6,12 @@ addons:
 #    - oracle-java8-installer
 #    - fakeroot
 #    - rpm
-jdk:
-- oraclejdk8
+
+#jdk:
+#- oraclejdk8
+
+osx_image: xcode8.3
+
 env:
   global:
   - BINJR_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
@@ -18,7 +22,7 @@ branches:
   only:
   - master
 os:
-- linux
+#- linux
 - osx
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
