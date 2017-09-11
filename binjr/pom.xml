@@ -221,7 +221,7 @@
                                         <include>${project.artifactId}*.msi</include>
                                         <include>${project.artifactId}*.deb</include>
                                         <include>${project.artifactId}*.rpm</include>
-                                        <include>${project.artifactId}*.dmg</include>
+                                        <include>${project.artifactId}*.app</include>
                                     </includes>
                                 </fileSet>
                             </fileSets>
