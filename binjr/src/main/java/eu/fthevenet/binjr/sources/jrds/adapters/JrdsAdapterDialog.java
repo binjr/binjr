@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
@@ -68,7 +69,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException {
+    protected DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException, CannotInitializeDataAdapterException {
         return JrdsDataAdapter.fromUrl(
                 this.urlField.getText(),
                 ZoneId.of(this.timezoneField.getText()),

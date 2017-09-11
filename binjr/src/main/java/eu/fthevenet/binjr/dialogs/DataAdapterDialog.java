@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.dialogs;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.exceptions.CannotInitializeDataAdapterException;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
@@ -89,10 +90,14 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
                 result = getDataAdapter();
                 autoCompletionLearnWord(urlField);
             } catch (MalformedURLException e) {
-                Dialogs.notifyError("Invalid URL", e.getLocalizedMessage(), Pos.CENTER, urlField);
+                Dialogs.notifyError("Invalid URL", e.getMessage(), Pos.CENTER, urlField);
                 ae.consume();
-            } catch (DateTimeException de) {
-                Dialogs.notifyError("Invalid Timezone", de.getLocalizedMessage(), Pos.CENTER, timezoneField);
+            } catch (DateTimeException e) {
+                Dialogs.notifyError("Invalid Timezone", e.getMessage(), Pos.CENTER, timezoneField);
+                ae.consume();
+            } catch (CannotInitializeDataAdapterException e) {
+                logger.debug(() -> "Stack trace", e);
+                Dialogs.notifyError("Error initializing adapter to source", e.getMessage(), Pos.CENTER, timezoneField);
                 ae.consume();
             }
         });
@@ -116,7 +121,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * @throws MalformedURLException if the provided url is invalid
      * @throws DateTimeException     if the provided {@link ZoneId] is invalid
      */
-    protected abstract DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException;
+    protected abstract DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException, CannotInitializeDataAdapterException;
 
     private void autoCompletionLearnWord(TextField field) {
         suggestedUrls.add(field.getText());

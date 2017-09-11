@@ -22,6 +22,7 @@ import com.google.gson.JsonParseException;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.SimpleCachingDataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import eu.fthevenet.binjr.data.adapters.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.adapters.exceptions.ResponseProcessingException;
 import eu.fthevenet.binjr.data.adapters.exceptions.SourceCommunicationException;
@@ -47,18 +48,22 @@ import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.*;
+import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.net.ssl.SSLContext;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.*;
 import java.net.*;
-import java.security.Principal;
+import java.security.*;
+import java.security.cert.CertificateException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -91,9 +96,10 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     /**
      * Default constructor
      */
-    public JrdsDataAdapter() {
+    public JrdsDataAdapter() throws CannotInitializeDataAdapterException {
         super();
         httpClient = httpClientFactory();
+
     }
 
     /**
@@ -107,7 +113,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
      * @param encoding     the encoding used by the download servlet.
      * @param treeViewTab  the filter to apply to the tree view
      */
-    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) {
+    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
         super();
         this.jrdsHost = hostname;
         this.jrdsPort = port;
@@ -118,6 +124,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         this.treeViewTab = treeViewTab;
         this.filter = filter;
         httpClient = httpClientFactory();
+
     }
 
     /**
@@ -127,7 +134,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
      * @param zoneId the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws MalformedURLException {
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws MalformedURLException, CannotInitializeDataAdapterException {
         URL u = new URL(url.replaceAll("/$", ""));
         return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeViewTab, filter);
     }
@@ -146,7 +153,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             }
             return tree;
         } catch (JsonParseException e) {
-            throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
+            throw new DataAdapterException("An error occurred while parsing the json response to getBindingTree request", e);
         }
     }
 
@@ -172,13 +179,13 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     @Override
     public String getSourceName() {
         return new StringBuilder("[JRDS] ")
-                .append(jrdsHost)
+                .append(jrdsHost != null ? jrdsHost : "???")
                 .append(jrdsPort > 0 ? ":" + jrdsPort : "")
                 .append(" - ")
-                .append(treeViewTab.toString())
+                .append(treeViewTab != null ? treeViewTab : "???")
                 .append(filter != null ? filter : "")
                 .append(" (")
-                .append(zoneId.toString())
+                .append(zoneId != null ? zoneId : "???")
                 .append(")").toString();
     }
 
@@ -438,28 +445,63 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
         }
     }
 
-    private CloseableHttpClient httpClientFactory() {
-        RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
-        schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(
-                new AuthScope(null, -1, null),
-                new Credentials() {
-                    @Override
-                    public Principal getUserPrincipal() {
-                        return null;
-                    }
-
-                    @Override
-                    public String getPassword() {
-                        return null;
-                    }
-                });
-
-        return HttpClients.custom()
-                .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
-                .setDefaultCredentialsProvider(credsProvider)
+    private static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
+        // Load platform specific Trusted CA keystore
+        logger.trace(() -> Arrays.toString(Security.getProviders()));
+        KeyStore tks;
+        switch (AppEnvironment.getInstance().getOsFamily()) {
+            case WINDOWS:
+                tks = KeyStore.getInstance("Windows-ROOT", "SunMSCAPI");
+                tks.load(null, null);
+                break;
+            case OSX:
+                tks = KeyStore.getInstance("KeychainStore", "Apple");
+                tks.load(null, null);
+                break;
+            case LINUX:
+            case UNSUPPORTED:
+            default:
+                tks = null;
+                break;
+        }
+        return SSLContexts.custom()
+                .loadTrustMaterial(tks, null)
                 .build();
+    }
+
+    private CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
+        try {
+            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
+                    createSslCustomContext(),
+                    null,
+                    null,
+                    SSLConnectionSocketFactory.getDefaultHostnameVerifier());
+
+            RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
+            schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
+            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            credsProvider.setCredentials(
+                    new AuthScope(null, -1, null),
+                    new Credentials() {
+                        @Override
+                        public Principal getUserPrincipal() {
+                            return null;
+                        }
+
+                        @Override
+                        public String getPassword() {
+                            return null;
+                        }
+                    });
+
+            return HttpClients.custom()
+                    .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
+                    .setDefaultCredentialsProvider(credsProvider)
+                    .setSSLSocketFactory(csf)
+                    .build();
+        } catch (IOException | UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException | KeyManagementException e) {
+            throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
+        }
     }
 
     /**
