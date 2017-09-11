@@ -4,13 +4,22 @@ set -ev
 if git show -s HEAD | grep -F -q "[maven-release-plugin]" ; then echo "skip maven-release-plugin commit" && exit 0 ; fi
 
 if [[ -z "$TRAVIS_TAG" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
-    #Explicitly switch to master to avoid detached HEAD
+    echo "*** RELEASE ***"
+     #Explicitly switch to master to avoid detached HEAD
     git checkout master
     cd binjr
-    echo "*** RELEASE ***"
-    mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release,buildNativeBundles
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
+    else
+        mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release,buildNativeBundles
+    fi
 else
-    cd binjr
+ cd binjr
     echo "*** SNAPSHOT ***"
-    mvn deploy --settings "./target/travis/settings.xml" -P binjr-snapshot
+    cd binjr
+    if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
+        mvn verify --settings "./target/travis/settings.xml"
+    else
+        mvn deploy --settings "./target/travis/settings.xml" -P binjr-snapshot
+    fi
 fi
