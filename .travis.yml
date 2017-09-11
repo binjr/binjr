@@ -3,9 +3,9 @@ sudo: false
 addons:
   apt:
     packages:
-    - oracle-java8-installer
-    - fakeroot
-    - rpm
+#    - oracle-java8-installer
+#    - fakeroot
+#    - rpm
 jdk:
 - oraclejdk8
 env:
@@ -19,6 +19,7 @@ branches:
   - master
 os:
 - linux
+- osx
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
