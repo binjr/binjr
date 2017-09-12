@@ -55,7 +55,8 @@ public class Binjr extends Application {
                 new Image(getClass().getResourceAsStream("/icons/binjr_32.png")),
                 new Image(getClass().getResourceAsStream("/icons/binjr_48.png")),
                 new Image(getClass().getResourceAsStream("/icons/binjr_128.png")),
-                new Image(getClass().getResourceAsStream("/icons/binjr_256.png")));
+                new Image(getClass().getResourceAsStream("/icons/binjr_256.png")),
+                new Image(getClass().getResourceAsStream("/icons/binjr_512.png")));
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             primaryStage.setScene(new Scene(root));
         }
