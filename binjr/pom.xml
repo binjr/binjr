@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.0.20-SNAPSHOT</version>
+    <version>1.0.19-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
@@ -121,6 +121,26 @@
                                                 <include>*.spec</include>
                                                 <include>control</include>
                                                 <include>copyright</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>installer-linux</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.basedir}/src/main/deploy/package/macos</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/main/resources/bundlers</directory>
+                                            <includes>
+                                                <include>*.plist</include>
+                                                <include>*.dist</include>
                                             </includes>
                                             <filtering>true</filtering>
                                         </resource>
