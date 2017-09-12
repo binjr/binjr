@@ -128,7 +128,7 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>installer-linux</id>
+                                <id>installer-macos</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
