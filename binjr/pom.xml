@@ -128,13 +128,13 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>installer-macos</id>
+                                <id>installer-macosx</id>
                                 <phase>package</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.basedir}/src/main/deploy/package/macos</outputDirectory>
+                                    <outputDirectory>src/main/deploy/package/macosx</outputDirectory>
                                     <resources>
                                         <resource>
                                             <directory>src/main/resources/bundlers</directory>
