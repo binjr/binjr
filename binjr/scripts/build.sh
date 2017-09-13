@@ -9,7 +9,6 @@ if [[ -z "$TRAVIS_TAG" &&  "$TRAVIS_OS_NAME" == "linux" && $TRAVIS_COMMIT_MESSAG
     git checkout master
     cd binjr
     mvn --batch-mode release:prepare release:perform -Dresume=false --settings "./target/travis/settings.xml" -P binjr-release,buildNativeBundles
-
 else
     echo "*** SNAPSHOT ***"
     cd binjr
