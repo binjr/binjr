@@ -16,7 +16,7 @@ else
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
           mvn deploy --settings "./target/travis/settings.xml" -P binjr-snapshot
     else
-        if $TRAVIS_COMMIT_MESSAGE == *"[ci osx build]"* ]]; then
+        if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci osx build]"* ]]; then
             mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
         fi
     fi
