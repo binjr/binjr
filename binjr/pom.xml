@@ -226,7 +226,7 @@
                             <releaseName>binjr v${project.version}</releaseName>
                             <tag>v${project.version}</tag>
                             <prerelease>${github.deploy.prerelease}</prerelease>
-                            <overwriteArtifact>false</overwriteArtifact>
+                            <overwriteArtifact>true</overwriteArtifact>
                             <fileSets>
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
