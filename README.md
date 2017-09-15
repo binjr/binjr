@@ -21,11 +21,23 @@ _binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime
 
 Using the latest available version is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
 
-The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest) 
+The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is proposed in different forms:
+* _As a JAR_
 
-You can either build it from source using Maven after cloning the repository, or download `binjr.jar`.
+  All dependencies are packaged inside the executable jar, and in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file, provided your environment is configured adequately).
+  
+  You must have a compatible version of the Java Runtime Environement (see below) installed on your computer for this to work.
 
-All dependencies are packaged inside the executable jar, so in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file, provided your environment is configured adequately).
+* _As a native application bundle_
+
+  Plateform specific bundles are available, in the form of an MSI installer for Windows, RPM and DEB packages for Linux and DMG image for MacOS.
+  
+  Those bundles contain the application and all of its dependencies, as well as a minimal copy of the Oracle JRE for the target platform. 
+  If using the bundle for your operating system, it doesn't matter what other version of Java, if any, is installed on your computer.
+
+* _As source code_
+
+  A zip or tar.gz archive that contains all the source code, which can be built using Maven 3 and a 1.8 Java Development Kit.
 
 ### Important Notice:
 
