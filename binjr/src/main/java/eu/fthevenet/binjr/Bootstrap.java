@@ -50,7 +50,6 @@ public final class Bootstrap {
         try {
             logger.info("Class " + Class.forName("javafx.application.Application") + " found: JavaFX runtime is available.");
             return true;
-
         } catch (ClassNotFoundException | NullPointerException e) {
             logger.info("JavaFX is not available on the current runtime environment:" +
                     "\njava.version=" +
@@ -66,6 +65,5 @@ public final class Bootstrap {
             logger.debug("JavaFX not available", e);
             return false;
         }
-
     }
 }

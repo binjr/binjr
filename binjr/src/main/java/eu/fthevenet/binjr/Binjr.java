@@ -41,14 +41,10 @@ public class Binjr extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         logger.info(() -> "Starting binjr");
-        //  Parent root = FXMLLoader.load(getClass().getResource("/views/MainView.fxml"));
-
-
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainView.fxml"));
         Parent root = loader.load();
         MainViewController mainViewController = loader.getController();
         mainViewController.setParameters(getParameters());
-
         primaryStage.setTitle("binjr");
         primaryStage.getIcons().addAll(
                 new Image(getClass().getResourceAsStream("/icons/binjr_16.png")),
