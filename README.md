@@ -17,16 +17,16 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 ## Getting started
 
 
-_binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime Environement version 1.8 with JavaFX version 8u40 or later.
+_binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime Environment version 1.8 with JavaFX version 8u40 or later.
 
 Using the latest available version is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
 
-The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is proposed in different forms:
+The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is available in different forms:
 * _As a JAR_
 
   All dependencies are packaged inside the executable jar, and in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file, provided your environment is configured adequately).
   
-  You must have a compatible version of the Java Runtime Environement (see below) installed on your computer for this to work.
+  You must have a compatible version of the Java Runtime Environment (see below) installed on your computer for this to work.
 
 * _As a native application bundle_
 
