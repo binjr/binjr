@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -ev
 #Skip Maven release plugin commits
-if git show -s HEAD | grep -F -q "[maven-release-plugin]" ; then echo "skip maven-release-plugin commit" && exit 0 ; fi
+if git show -s HEAD | grep -F -q "[maven-release-plugin]" ; then
+    if [[ "$TRAVIS_OS_NAME" == "osx" && $TRAVIS_COMMIT_MESSAGE == *"prepare release"* ]]; then
+        cd binjr
+        mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
+    else
+        echo "skip maven-release-plugin commit"
+        exit 0
+    fi
+fi
 
 if [[ -z "$TRAVIS_TAG" &&  "$TRAVIS_OS_NAME" == "linux" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
     echo "*** RELEASE ***"
@@ -12,11 +20,5 @@ if [[ -z "$TRAVIS_TAG" &&  "$TRAVIS_OS_NAME" == "linux" && $TRAVIS_COMMIT_MESSAG
 else
     echo "*** SNAPSHOT ***"
     cd binjr
-    if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-          mvn deploy --settings "./target/travis/settings.xml" -P binjr-snapshot
-    else
-        if [[ $TRAVIS_COMMIT_MESSAGE == *"[ci osx build]"* ]]; then
-            mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
-        fi
-    fi
+    mvn deploy --settings "./target/travis/settings.xml" -P binjr-snapshot
 fi
