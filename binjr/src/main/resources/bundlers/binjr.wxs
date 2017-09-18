@@ -150,8 +150,8 @@
         </Feature>
 
 
-        <WixVariable Id="WixUIBannerBmp" Value="..\images\Install_Banner.jpg"/>
-        <WixVariable Id="WixUIDialogBmp" Value="..\images\Install_Splash.jpg"/>
+        <WixVariable Id="WixUIBannerBmp" Value="..\images\win-msi.image\Install_Banner.jpg"/>
+        <WixVariable Id="WixUIDialogBmp" Value="..\images\win-msi.image\Install_Splash.jpg"/>
 
         <!--<Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>-->
         <!--<UIRef Id="WixUI_InstallDir"/>-->
