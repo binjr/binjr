@@ -17,20 +17,32 @@
 
 package eu.fthevenet.util.javafx.controls;
 
+import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.Cursor;
+import javafx.scene.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.image.WritableImage;
+import javafx.scene.input.*;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
+import javafx.scene.transform.Transform;
+import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Optional;
+import java.awt.*;
+import java.util.*;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -38,17 +50,61 @@ import java.util.function.Supplier;
  *
  * @author Frederic Thevenet
  */
-public class TabPaneNewButton extends TabPane {
-    private static final Logger logger = LogManager.getLogger(TabPaneNewButton.class);
+public class TearableTabPane extends TabPane {
+    private static final Logger logger = LogManager.getLogger(TearableTabPane.class);
     private Supplier<Optional<Tab>> newTabFactory = () -> Optional.of(new Tab());
     private EventHandler<ActionEvent> onNewTabAction;
 
-    public TabPaneNewButton() {
+
+    private Tab currentTab;
+    private final List<Tab> originalTabs = new ArrayList<>();
+    ;
+    private final Map<Integer, Tab> tapTransferMap = new HashMap<>();
+    private String[] stylesheets = new String[]{};
+    private final BooleanProperty alwaysOnTop = new SimpleBooleanProperty();
+
+    public TearableTabPane() {
         this((Tab[]) null);
     }
 
-    public TabPaneNewButton(Tab... tabs) {
+    public TearableTabPane(Tab... tabs) {
         super(tabs);
+
+        originalTabs.addAll(this.getTabs());
+        for (int i = 0; i < this.getTabs().size(); i++) {
+            tapTransferMap.put(i, this.getTabs().get(i));
+        }
+        this.getTabs().stream().forEach(t -> {
+            t.setClosable(false);
+        });
+        this.setOnDragDetected(
+                (MouseEvent event) -> {
+                    if (event.getSource() instanceof TabPane) {
+                        Pane rootPane = (Pane) this.getScene().getRoot();
+                        rootPane.setOnDragOver((DragEvent event1) -> {
+                            event1.acceptTransferModes(TransferMode.ANY);
+                            event1.consume();
+                        });
+                        currentTab = this.getSelectionModel().getSelectedItem();
+                        SnapshotParameters snapshotParams = new SnapshotParameters();
+                        snapshotParams.setTransform(Transform.scale(0.4, 0.4));
+                        WritableImage snapshot = currentTab.getContent().snapshot(snapshotParams, null);
+                        Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
+                        ClipboardContent clipboardContent = new ClipboardContent();
+                        clipboardContent.put(DataFormat.PLAIN_TEXT, "");
+                        db.setDragView(snapshot, 40, 40);
+                        db.setContent(clipboardContent);
+                    }
+                    event.consume();
+                }
+        );
+        this.setOnDragDone(
+                (DragEvent event) -> {
+                    openTabInStage(currentTab);
+                    this.setCursor(Cursor.DEFAULT);
+                    event.consume();
+                }
+        );
 
         Platform.runLater(this::positionNewTabButton);
 
@@ -144,5 +200,54 @@ public class TabPaneNewButton extends TabPane {
 
     public void setOnNewTabAction(EventHandler<ActionEvent> onNewTabAction) {
         this.onNewTabAction = onNewTabAction;
+    }
+
+    /**
+     * Opens the content of the given {@link Tab} in a separate Stage. While the content is removed from the {@link Tab} it is
+     * added to the root of a new {@link Stage}. The Window title is set to the name of the {@link Tab};
+     *
+     * @param tab The {@link Tab} to get the content from.
+     */
+    public void openTabInStage(final Tab tab) {
+        if (tab == null) {
+            return;
+        }
+        int originalTab = originalTabs.indexOf(tab);
+        tapTransferMap.remove(originalTab);
+        Node content = tab.getContent();
+        if (content == null) {
+            throw new IllegalArgumentException("Can not detach Tab '" + tab.getText() + "': content is empty (null).");
+        }
+        tab.setContent(null);
+        final Scene scene = new Scene((Parent) content, content.prefWidth(0), content.prefHeight(0));
+        Stage stage = new Stage();
+        stage.setScene(scene);
+        stage.setTitle(tab.getText());
+        Point p = MouseInfo.getPointerInfo().getLocation(); // MouseRobot.getMousePosition();
+        stage.setX(p.getX());
+        stage.setY(p.getY());
+        stage.setOnCloseRequest((WindowEvent t) -> {
+            StageAppearanceManager.getInstance().unregister(stage);
+            stage.close();
+            tab.setContent(content);
+            int originalTabIndex = originalTabs.indexOf(tab);
+            tapTransferMap.put(originalTabIndex, tab);
+            int index = 0;
+            SortedSet<Integer> keys = new TreeSet<>(tapTransferMap.keySet());
+            for (Integer key : keys) {
+                Tab value = tapTransferMap.get(key);
+                if (!this.getTabs().contains(value)) {
+                    this.getTabs().add(index, value);
+                }
+                index++;
+            }
+            this.getSelectionModel().select(tab);
+        });
+        stage.setOnShown((WindowEvent t) -> {
+            tab.getTabPane().getTabs().remove(tab);
+        });
+        StageAppearanceManager.getInstance().register(stage);
+
+        stage.show();
     }
 }

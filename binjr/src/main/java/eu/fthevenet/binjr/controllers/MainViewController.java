@@ -29,7 +29,6 @@ import eu.fthevenet.binjr.data.workspace.Workspace;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
-import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
@@ -131,9 +130,9 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
-    private TabPaneNewButton sourcesTabPane;
+    private TearableTabPane sourcesTabPane;
     @FXML
-    private TabPaneNewButton worksheetTabPane;
+    private TearableTabPane worksheetTabPane;
     @FXML
     private MenuItem saveMenuItem;
     @FXML
@@ -174,12 +173,7 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-        GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                setUiTheme(newValue);
-            }
-        });
-
+        //TabPaneDetacher.create().makeTabsDetachable(worksheetTabPane);
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -251,7 +245,6 @@ public class MainViewController implements Initializable {
 
     protected void runAfterInitialize() {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
-        setUiTheme(prefs.getUserInterfaceTheme());
         Stage stage = Dialogs.getStage(root);
         stage.titleProperty().bind(Bindings.createStringBinding(
                 () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
@@ -869,20 +862,6 @@ public class MainViewController implements Initializable {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e);
             }
         });
-    }
-
-    private void setUiTheme(UserInterfaceThemes theme) {
-        Stage mainStage = Dialogs.getStage(root);
-        if (mainStage != null) {
-            mainStage.getScene().getStylesheets().clear();
-            Application.setUserAgentStylesheet(null);
-            mainStage.getScene().getStylesheets().addAll(
-                    getClass().getResource("/css/Icons.css").toExternalForm(),
-                    getClass().getResource(theme.getCssPath()).toExternalForm());
-        }
-        else {
-            logger.warn("Cannot set UI theme: Main scene is not yet ready");
-        }
     }
 
     private void findNext() {

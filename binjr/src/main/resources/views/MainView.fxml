@@ -18,7 +18,7 @@
   -->
 
 <?import eu.fthevenet.util.javafx.controls.CommandBarPane?>
-<?import eu.fthevenet.util.javafx.controls.TabPaneNewButton?>
+<?import eu.fthevenet.util.javafx.controls.TearableTabPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.input.*?>
@@ -44,11 +44,11 @@
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <TabPaneNewButton fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                     </tabs>
-                </TabPaneNewButton>
+                </TearableTabPane>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
             </StackPane>
             <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
@@ -108,11 +108,11 @@
                     </Tooltip>
                 </tooltip>
             </Label>
-            <TabPaneNewButton fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
+                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <tabs>
                 </tabs>
-            </TabPaneNewButton>
+            </TearableTabPane>
         </StackPane>
     </SplitPane>
     <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"

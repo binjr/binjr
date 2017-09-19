@@ -52,7 +52,6 @@ public class EditableTab extends Tab {
         super();
         label = new Label(text);
         label.textProperty();
-
         setGraphic(label);
 
         final TextField textField = new TextField();
@@ -78,7 +77,6 @@ public class EditableTab extends Tab {
                 setGraphic(label);
             }
         });
-
     }
 
 

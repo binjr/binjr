@@ -237,7 +237,7 @@ public class Dialogs {
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 
-    private static void runOnFXThread(Runnable r) {
+    public static void runOnFXThread(Runnable r) {
         if (Platform.isFxApplicationThread()) {
             r.run();
         }
