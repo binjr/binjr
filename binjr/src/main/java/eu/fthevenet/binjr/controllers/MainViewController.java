@@ -51,6 +51,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
@@ -182,6 +183,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
+        worksheetTabPane.setTearable(true);
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -944,10 +946,10 @@ public class MainViewController implements Initializable {
         logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
 
-    private Optional<Tab> worksheetTabFactory() {
+    private Optional<Tab> worksheetTabFactory(ActionEvent event) {
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         EditableTab newTab = new EditableTab("");
-        new EditWorksheetDialog<>(new Worksheet<>(), root).showAndWait().ifPresent(w -> {
+        new EditWorksheetDialog<>(new Worksheet<>(), (Node) event.getSource()).showAndWait().ifPresent(w -> {
             loadWorksheet(w, newTab);
             wasNewTabCreated.set(true);
         });

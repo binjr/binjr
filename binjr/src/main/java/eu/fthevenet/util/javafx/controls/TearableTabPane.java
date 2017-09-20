@@ -19,22 +19,23 @@ package eu.fthevenet.util.javafx.controls;
 
 import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableSet;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.Cursor;
-import javafx.scene.*;
+import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
-import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
@@ -43,7 +44,7 @@ import org.apache.logging.log4j.Logger;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 /**
  * A TabPane container with a button to add a new tab
@@ -52,69 +53,141 @@ import java.util.function.Supplier;
  */
 public class TearableTabPane extends TabPane {
     private static final Logger logger = LogManager.getLogger(TearableTabPane.class);
-    private Supplier<Optional<Tab>> newTabFactory = () -> Optional.of(new Tab());
+    private static final DataFormat TEARABLE_TAB_FORMAT = new DataFormat("TearableTabFormat");
+    ;
+    private boolean tearable;
+    private boolean draggable;
+    private Function<ActionEvent, Optional<Tab>> newTabFactory = (e) -> Optional.of(new Tab());
     private EventHandler<ActionEvent> onNewTabAction;
-
 
     private Tab currentTab;
     private final List<Tab> originalTabs = new ArrayList<>();
-    ;
-    private final Map<Integer, Tab> tapTransferMap = new HashMap<>();
-    private String[] stylesheets = new String[]{};
-    private final BooleanProperty alwaysOnTop = new SimpleBooleanProperty();
 
-    public TearableTabPane() {
-        this((Tab[]) null);
+    private final Map<Integer, Tab> tapTransferMap = new HashMap<>();
+    private final Map<Tab, TabState> tearableTabMap = new HashMap<>();
+    private final ObservableSet<Tab> tabsSet = FXCollections.observableSet(tearableTabMap.keySet());
+
+    public ObservableSet<Tab> getTearableTabs() {
+        return tabsSet;
     }
 
-    public TearableTabPane(Tab... tabs) {
-        super(tabs);
+    public TearableTabPane() {
+        this(false, false, (Tab[]) null);
+    }
 
+
+    public TearableTabPane(boolean draggable, boolean tearable, Tab... tabs) {
+        super(tabs);
+        this.tearable = tearable;
+        this.draggable = draggable;
         originalTabs.addAll(this.getTabs());
         for (int i = 0; i < this.getTabs().size(); i++) {
             tapTransferMap.put(i, this.getTabs().get(i));
         }
-        this.getTabs().stream().forEach(t -> {
-            t.setClosable(false);
+
+        this.getTabs().addListener((ListChangeListener<Tab>) c -> {
+            while (c.next()) {
+                if (c.wasAdded()) {
+                    c.getAddedSubList().forEach(t -> {
+                        this.tearableTabMap.put(t, new TabState(true));
+                    });
+                }
+                if (c.wasRemoved()) {
+                    c.getRemoved().forEach((this.tearableTabMap::remove));
+                }
+            }
+            //   logger.trace("Tearable tabs in tab pane: " + tearableTabMap.keySet().stream().map(tab -> tab.getText() == null ? tab.toString() : tab.getText()).reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
+
         this.setOnDragDetected(
                 (MouseEvent event) -> {
+                    if (!this.tearable) {
+                        return;
+                    }
                     if (event.getSource() instanceof TabPane) {
                         Pane rootPane = (Pane) this.getScene().getRoot();
-                        rootPane.setOnDragOver((DragEvent event1) -> {
-                            event1.acceptTransferModes(TransferMode.ANY);
-                            event1.consume();
-                        });
+//                        rootPane.setOnDragOver((DragEvent event1) -> {
+//                            event1.acceptTransferModes(TransferMode.ANY);
+//                            event1.consume();
+//                        });
                         currentTab = this.getSelectionModel().getSelectedItem();
                         SnapshotParameters snapshotParams = new SnapshotParameters();
-                        snapshotParams.setTransform(Transform.scale(0.4, 0.4));
+//                      snapshotParams.setTransform(Transform.scale(0.4,0.4));
                         WritableImage snapshot = currentTab.getContent().snapshot(snapshotParams, null);
                         Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
                         ClipboardContent clipboardContent = new ClipboardContent();
-                        clipboardContent.put(DataFormat.PLAIN_TEXT, "");
+                        clipboardContent.put(TEARABLE_TAB_FORMAT, "TEARABLE_TAB_FORMAT");
                         db.setDragView(snapshot, 40, 40);
                         db.setContent(clipboardContent);
+                        ReferenceClipboard.getInstance().put(TEARABLE_TAB_FORMAT, currentTab);
+
                     }
                     event.consume();
                 }
         );
+
+        this.setOnDragOver(event -> {
+            if (!this.tearable) {
+                return;
+            }
+            Dragboard db = event.getDragboard();
+            if (db.hasContent(TEARABLE_TAB_FORMAT)) {
+                event.acceptTransferModes(TransferMode.MOVE);
+                event.consume();
+            }
+        });
+
         this.setOnDragDone(
                 (DragEvent event) -> {
-                    openTabInStage(currentTab);
-                    this.setCursor(Cursor.DEFAULT);
+                    if (!this.tearable || event.isDropCompleted()) {
+                        return;
+                    }
+                    Dragboard db = event.getDragboard();
+                    if (db.hasContent(TEARABLE_TAB_FORMAT)) {
+                        logger.trace(() -> "setOnDragDone fired");
+
+                        openTabInStage(currentTab);
+
+                        this.getTabs().remove(currentTab);
+
+                        //  this.setCursor(Cursor.DEFAULT);
+                    }
+                    ReferenceClipboard.getInstance().clear();
                     event.consume();
                 }
         );
 
+
+        this.setOnDragDropped(event -> {
+            Dragboard db = event.getDragboard();
+            if (db.hasContent(TEARABLE_TAB_FORMAT)) {
+                logger.trace(() -> "setOnDragDropped fired");
+                try {
+
+                    Tab t = (Tab) ReferenceClipboard.getInstance().get(TEARABLE_TAB_FORMAT);
+                    if (t != null) {
+
+                        this.getTabs().add(t);
+                    }
+                } catch (Exception e) {
+                    logger.error("error", e);
+                } finally {
+                    db.clear();
+                }
+                event.consume();
+            }
+        });
+
         Platform.runLater(this::positionNewTabButton);
 
-        // Prepare to change the button on screen position if the tabs side changes
+        // Prepare to change the button on screen position if the tearableTabMap side changes
         sideProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 positionNewTabButton();
             }
         });
     }
+
 
 
     private void positionNewTabButton() {
@@ -148,7 +221,7 @@ public class TearableTabPane extends TabPane {
         }
         else {
             newTabButton.setOnAction(event -> {
-                newTabFactory.get().ifPresent(newTab -> {
+                newTabFactory.apply(event).ifPresent(newTab -> {
                     getTabs().add(newTab);
                     this.getSelectionModel().select(newTab);
                 });
@@ -186,11 +259,11 @@ public class TearableTabPane extends TabPane {
         }
     }
 
-    public Supplier<Optional<Tab>> getNewTabFactory() {
+    public Function<ActionEvent, Optional<Tab>> getNewTabFactory() {
         return newTabFactory;
     }
 
-    public void setNewTabFactory(Supplier<Optional<Tab>> newTabFactory) {
+    public void setNewTabFactory(Function<ActionEvent, Optional<Tab>> newTabFactory) {
         this.newTabFactory = newTabFactory;
     }
 
@@ -202,6 +275,7 @@ public class TearableTabPane extends TabPane {
         this.onNewTabAction = onNewTabAction;
     }
 
+
     /**
      * Opens the content of the given {@link Tab} in a separate Stage. While the content is removed from the {@link Tab} it is
      * added to the root of a new {@link Stage}. The Window title is set to the name of the {@link Tab};
@@ -209,45 +283,81 @@ public class TearableTabPane extends TabPane {
      * @param tab The {@link Tab} to get the content from.
      */
     public void openTabInStage(final Tab tab) {
-        if (tab == null) {
-            return;
-        }
+
         int originalTab = originalTabs.indexOf(tab);
         tapTransferMap.remove(originalTab);
-        Node content = tab.getContent();
-        if (content == null) {
-            throw new IllegalArgumentException("Can not detach Tab '" + tab.getText() + "': content is empty (null).");
-        }
-        tab.setContent(null);
-        final Scene scene = new Scene((Parent) content, content.prefWidth(0), content.prefHeight(0));
+//        Node content = tab.getContent();
+//        if (content == null) {
+//            throw new IllegalArgumentException("Can not detach Tab '" + tab.getText() + "': content is empty (null).");
+//        }
+        //tab.setContent(null);
+        TearableTabPane detachedTabPane = new TearableTabPane(true, true, tab);
+        detachedTabPane.setNewTabFactory(this.getNewTabFactory());
+
+        Pane root = new AnchorPane(detachedTabPane);
+        AnchorPane.setBottomAnchor(detachedTabPane, 0.0);
+        AnchorPane.setLeftAnchor(detachedTabPane, 0.0);
+        AnchorPane.setRightAnchor(detachedTabPane, 0.0);
+        AnchorPane.setTopAnchor(detachedTabPane, 0.0);
+        final Scene scene = new Scene(root, root.getPrefWidth(), root.getPrefHeight());
+
+
+        // final Scene scene = new Scene((Parent) content, content.prefWidth(0), content.prefHeight(0));
         Stage stage = new Stage();
         stage.setScene(scene);
-        stage.setTitle(tab.getText());
+
+
+        stage.setTitle("binjr");
         Point p = MouseInfo.getPointerInfo().getLocation(); // MouseRobot.getMousePosition();
         stage.setX(p.getX());
         stage.setY(p.getY());
-        stage.setOnCloseRequest((WindowEvent t) -> {
-            StageAppearanceManager.getInstance().unregister(stage);
-            stage.close();
-            tab.setContent(content);
-            int originalTabIndex = originalTabs.indexOf(tab);
-            tapTransferMap.put(originalTabIndex, tab);
-            int index = 0;
-            SortedSet<Integer> keys = new TreeSet<>(tapTransferMap.keySet());
-            for (Integer key : keys) {
-                Tab value = tapTransferMap.get(key);
-                if (!this.getTabs().contains(value)) {
-                    this.getTabs().add(index, value);
-                }
-                index++;
+        detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
+            if (c.getList().size() == 0) {
+                stage.close();
             }
-            this.getSelectionModel().select(tab);
         });
+
         stage.setOnShown((WindowEvent t) -> {
-            tab.getTabPane().getTabs().remove(tab);
+            this.getTabs().remove(tab);
+            // tab.getTabPane().getTabs().remove(tab);
         });
         StageAppearanceManager.getInstance().register(stage);
 
+
         stage.show();
+        detachedTabPane.getSelectionModel().select(tab);
+    }
+
+    public boolean isTearable() {
+        return tearable;
+    }
+
+    public void setTearable(boolean tearable) {
+        this.tearable = tearable;
+    }
+
+    public boolean isDraggable() {
+        return draggable;
+    }
+
+    public void setDraggable(boolean draggable) {
+        this.draggable = draggable;
+    }
+
+    private class TabState {
+        private boolean attached;
+
+        public boolean isAttached() {
+            return attached;
+        }
+
+        public void setAttached(boolean attached) {
+            this.attached = attached;
+        }
+
+
+        public TabState(boolean attached) {
+            this.attached = attached;
+        }
     }
 }
