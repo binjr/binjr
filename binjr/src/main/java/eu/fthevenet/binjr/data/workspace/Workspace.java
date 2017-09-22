@@ -88,13 +88,10 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
      */
-//    public void addWorksheets(Collection<Worksheet<?>> worksheetsToAdd) {
-//        this.worksheets.addAll(worksheetsToAdd);
-//    }
-//
-//    public void addWorksheet(Worksheet<?> worksheet){
-//        this.worksheets.add(worksheet);
-//    }
+    public void addWorksheets(Collection<Worksheet<?>> worksheetsToAdd) {
+        this.worksheets.addAll(worksheetsToAdd);
+    }
+
     public void addWorksheets(Worksheet<?>... worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }

@@ -45,7 +45,6 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.collections.ListChangeListener;
-import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
@@ -175,7 +174,6 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-        //TabPaneDetacher.create().makeTabsDetachable(worksheetTabPane);
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -183,31 +181,7 @@ public class MainViewController implements Initializable {
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
-
-        // worksheetTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
-        worksheetTabPane.getTabSet().addListener((MapChangeListener<? super Tab, ? super TabPane>) c -> {
-            if (c.wasAdded()) {
-                EditableTab t = (EditableTab) c.getKey();
-                Worksheet<?> w = seriesControllers.get(t).getWorksheet();
-                workspace.addWorksheets(w);
-            }
-            if (c.wasRemoved()) {
-                EditableTab t = (EditableTab) c.getKey();
-
-                WorksheetController ctlr = seriesControllers.get(t);
-                if (ctlr != null) {
-                    workspace.removeWorksheets(ctlr.getWorksheet());
-                    seriesControllers.remove(t);
-                    ctlr.close();
-                }
-                else {
-                    logger.warn("Could not find a controller assigned to tab " + t.getText());
-                }
-            }
-            logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-
-        });
-
+        worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         worksheetTabPane.setTearable(true);
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
@@ -217,11 +191,7 @@ public class MainViewController implements Initializable {
                 findNext();
             }
         });
-//        worksheetTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                this.selectedWorksheetController = seriesControllers.get(newValue);
-//            }
-//        });
+
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         worksheetArea.setOnDragOver(MainViewController::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
@@ -282,6 +252,7 @@ public class MainViewController implements Initializable {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
             }
+            Platform.exit();
         });
         stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
@@ -547,8 +518,8 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
-        worksheetTabPane.getTabs().clear();
-        sourcesTabPane.getTabs().clear();
+        worksheetTabPane.clearAllTabs();
+        sourcesTabPane.clearAllTabs();
         workspace.clear();
     }
 
@@ -698,7 +669,6 @@ public class MainViewController implements Initializable {
         }
         EditableTab tab = null;
         for (Map.Entry<EditableTab, WorksheetController> entry : seriesControllers.entrySet()) {
-
             if (entry.getValue().equals(worksheetCtrl)) {
                 tab = entry.getKey();
             }
@@ -760,17 +730,29 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(Worksheet<Double> worksheet) {
+//        assert worksheetTabPane.getSelectedTab() != null : "worksheetTabPane.getSelectedTab() is null";
+//        assert worksheetTabPane.getSelectedTab().getTabPane() != null : "worksheetTabPane.getSelectedTab().getTabPane() is null";
+//      //  TabPane targetTabPane;
+//        if (){
+//            targetTabPane  = worksheetTabPane.getSelectedTab().getTabPane();
+//        }else{
+//            targetTabPane = worksheetTabPane;
+//        }
+
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
-        EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, root);
+
+        TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
+        EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, targetTabPane);
         dlg.showAndWait().ifPresent(w -> {
             EditableTab newTab = new EditableTab("");
             loadWorksheet(w, newTab);
-            worksheetTabPane.getTabs().add(newTab);
-            worksheetTabPane.getSelectionModel().select(newTab);
+            targetTabPane.getTabs().add(newTab);
+            targetTabPane.getSelectionModel().select(newTab);
             wasNewTabCreated.set(true);
         });
         return wasNewTabCreated.get();
     }
+
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
@@ -939,32 +921,27 @@ public class MainViewController implements Initializable {
         return (s == null || s.trim().length() == 0);
     }
 
-    private void onWorksheetTabChanged(MapChangeListener<? super Tab, ? super TabPane> c) {
-
+    private void onWorksheetTabChanged(ListChangeListener.Change<? extends Tab> c) {
+        while (c.next()) {
+            if (c.wasAdded()) {
+                workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+            }
+            if (c.wasRemoved()) {
+                c.getRemoved().forEach((t -> {
+                    WorksheetController ctlr = seriesControllers.get(t);
+                    if (ctlr != null) {
+                        workspace.removeWorksheets(ctlr.getWorksheet());
+                        seriesControllers.remove(t);
+                        ctlr.close();
+                    }
+                    else {
+                        logger.warn("Could not find a controller assigned to tab " + t.getText());
+                    }
+                }));
+            }
+        }
+        logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
-
-
-//    private void onWorksheetTabChanged(ListChangeListener.Change<? extends Tab> c) {
-//        while (c.next()) {
-//            if (c.wasAdded()) {
-//                workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
-//            }
-//            if (c.wasRemoved()) {
-//                c.getRemoved().forEach((t -> {
-//                    WorksheetController ctlr = seriesControllers.get(t);
-//                    if (ctlr != null) {
-//                        workspace.removeWorksheets(ctlr.getWorksheet());
-//                        seriesControllers.remove(t);
-//                        ctlr.close();
-//                    }
-//                    else {
-//                        logger.warn("Could not find a controller assigned to tab " + t.getText());
-//                    }
-//                }));
-//            }
-//        }
-//        logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
-//    }
 
     private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
         workspace.clearSources();
@@ -1042,6 +1019,10 @@ public class MainViewController implements Initializable {
             if (treeView != null) {
                 TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
+                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    if (targetStage != null) {
+                        targetStage.requestFocus();
+                    }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
                         addToNewWorksheet(item);
                     }
@@ -1070,6 +1051,5 @@ public class MainViewController implements Initializable {
         }
         return this.selectedWorksheetController = seriesControllers.get(selectedTab);
     }
-
     //endregion
 }
