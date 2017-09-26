@@ -40,6 +40,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -362,7 +363,7 @@ public class TearableTabPane extends TabPane {
         return manager.getGlobalTabList();
     }
 
-    public void clearAllTabs() {
+    public void clearAllTabs(){
         manager.clearAllTabs();
     }
 
@@ -468,7 +469,7 @@ public class TearableTabPane extends TabPane {
                     .stream()
                     .distinct()
                     .collect(Collectors.toList())
-                    .forEach(p -> p.getTabs().clear());
+                    .forEach(p-> p.getTabs().clear());
         }
     }
 }
