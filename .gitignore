@@ -10,3 +10,6 @@ binjr/src/main/deploy/package/macosx/
 binjr/src/main/java/eu/fthevenet/binjr/sources/github/
 launcher/
 out/
+/binjr/src/main/deploy/package/linux/binjr.spec
+/binjr/src/main/deploy/package/linux/control
+/binjr/src/main/deploy/package/linux/copyright
