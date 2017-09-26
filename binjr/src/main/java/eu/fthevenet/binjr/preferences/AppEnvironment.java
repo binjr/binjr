@@ -17,8 +17,6 @@
 
 package eu.fthevenet.binjr.preferences;
 
-import com.sun.javafx.tk.Toolkit;
-import com.sun.prism.GraphicsPipeline;
 import eu.fthevenet.util.version.Version;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,10 +114,6 @@ public class AppEnvironment {
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
         sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
         sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
-        Toolkit toolkit = Toolkit.getToolkit();
-        sysInfo.add((new SysInfoProperty("JavaFX Toolkit", toolkit != null ? toolkit.getClass().getSimpleName() : "unknown")));
-        GraphicsPipeline pipeline = GraphicsPipeline.getPipeline();
-        sysInfo.add((new SysInfoProperty("Rendering Pipeline", pipeline != null ? pipeline.getClass().getSimpleName() : "unknown")));
         return sysInfo;
     }
 

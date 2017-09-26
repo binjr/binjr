@@ -23,15 +23,11 @@ package eu.fthevenet.util.javafx.charts;
  * THE SOFTWARE.
  */
 
-import com.sun.javafx.charts.ChartLayoutAnimator;
-import javafx.animation.KeyFrame;
-import javafx.animation.KeyValue;
 import javafx.beans.property.LongProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ObjectPropertyBase;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.scene.chart.Axis;
-import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -141,8 +137,6 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         }
     };
 
-    private ChartLayoutAnimator animator = new ChartLayoutAnimator(this);
-
     private Object currentAnimationID;
 
     private Interval actualInterval = Interval.DECADE;
@@ -222,25 +216,8 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         ZonedDateTime upper = (ZonedDateTime) r[1];
         setLowerBound(lower);
         setUpperBound(upper);
-
-        if (animating) {
-            animator.stop(currentAnimationID);
-            currentAnimationID = animator.animate(
-                    new KeyFrame(Duration.ZERO,
-                            new KeyValue(currentLowerBound, oldLowerBound.toEpochSecond()),
-                            new KeyValue(currentUpperBound, oldUpperBound.toEpochSecond())
-                    ),
-                    new KeyFrame(Duration.millis(700),
-                            new KeyValue(currentLowerBound, lower.toEpochSecond()),
-                            new KeyValue(currentUpperBound, upper.toEpochSecond())
-                    )
-            );
-
-        }
-        else {
-            currentLowerBound.set(getLowerBound().toEpochSecond());
-            currentUpperBound.set(getUpperBound().toEpochSecond());
-        }
+        currentLowerBound.set(getLowerBound().toEpochSecond());
+        currentUpperBound.set(getUpperBound().toEpochSecond());
     }
 
     @Override
