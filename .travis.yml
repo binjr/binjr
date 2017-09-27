@@ -13,7 +13,7 @@ matrix:
           - rpm
     - os: "osx"
       osx_image: xcode8.3
-      if: type = tag IS present
+      if: tag IS present
 
 env:
   global:
