@@ -12,7 +12,7 @@ matrix:
           - fakeroot
           - rpm
     - os: "osx"
-      if: env(TRAVIS_COMMIT_MESSAGE) =~ *osx*
+      if: env(TRAVIS_COMMIT_MESSAGE) =~ *\[maven-release-plugin\] prepare release*
       osx_image: xcode8.3
 
 
