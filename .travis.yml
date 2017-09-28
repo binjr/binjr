@@ -1,8 +1,13 @@
 language: java
 
+os:
+- linux
+- osx
+
 matrix:
   include:
     - os: "linux"
+      if: tag IS blank
       sudo: false
       jdk: oraclejdk8
       addons:
@@ -13,7 +18,7 @@ matrix:
           - rpm
     - os: "osx"
       if: tag IS present
-#      osx_image: xcode8.3
+      osx_image: xcode8.3
 
 
 env:
