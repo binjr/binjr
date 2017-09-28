@@ -10,21 +10,24 @@ env:
 branches:
   only:
   - master
+os:
+    - linux
+    - osx
 
 matrix:
-  include:
-    - os: "linux"
-      sudo: false
-      jdk: oraclejdk8
-      addons:
-        apt:
-          packages:
-          - oracle-java8-installer
-          - fakeroot
-          - rpm
-    - os: "osx"
-      if: env(TRAVIS_COMMIT_MESSAGE) =~ osx
-      osx_image: xcode8.3
+  allow_failures:
+    - os: osx
+
+sudo: false
+
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+    - fakeroot
+    - rpm
+
+osx_image: xcode8.3
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
