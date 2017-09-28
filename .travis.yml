@@ -24,7 +24,7 @@ matrix:
           - fakeroot
           - rpm
     - os: "osx"
-      if: env(COMMIT_MESSAGE) =~ ^bar$
+      if: env(COMMIT_MESSAGE) = bar
       osx_image: xcode8.3
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
