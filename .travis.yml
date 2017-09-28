@@ -17,7 +17,7 @@ matrix:
           - fakeroot
           - rpm
     - os: "osx"
-      if: tag IS present
+      if: tag IS blank
       osx_image: xcode8.3
 
 
