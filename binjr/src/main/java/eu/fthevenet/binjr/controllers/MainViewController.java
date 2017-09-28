@@ -29,6 +29,7 @@ import eu.fthevenet.binjr.data.workspace.Workspace;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
+import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
@@ -157,7 +158,7 @@ public class MainViewController implements Initializable {
         this.workspace = new Workspace();
     }
 
-    private static void worksheetAreaOnDragOver(DragEvent event) {
+    private void worksheetAreaOnDragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
             event.acceptTransferModes(TransferMode.COPY);
@@ -179,10 +180,16 @@ public class MainViewController implements Initializable {
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         chartPropertiesMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
-        worksheetTabPane.mouseTransparentProperty().bind(selectWorksheetPresent);
+        //  worksheetTabPane.mouseTransparentProperty().bind(Bindings.createBooleanBinding(() -> false)); //selectWorksheetPresent);
+
+        addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         worksheetTabPane.setTearable(true);
+        worksheetTabPane.setOnTearedTabsStageSetup(stage -> {
+            stage.setTitle("binjr");
+            StageAppearanceManager.getInstance().register(stage);
+        });
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
         sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -193,10 +200,8 @@ public class MainViewController implements Initializable {
         });
 
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
-        worksheetArea.setOnDragOver(MainViewController::worksheetAreaOnDragOver);
+        worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
-
-
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
         });
@@ -730,17 +735,7 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(Worksheet<Double> worksheet) {
-//        assert worksheetTabPane.getSelectedTab() != null : "worksheetTabPane.getSelectedTab() is null";
-//        assert worksheetTabPane.getSelectedTab().getTabPane() != null : "worksheetTabPane.getSelectedTab().getTabPane() is null";
-//      //  TabPane targetTabPane;
-//        if (){
-//            targetTabPane  = worksheetTabPane.getSelectedTab().getTabPane();
-//        }else{
-//            targetTabPane = worksheetTabPane;
-//        }
-
         AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
-
         TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
         EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, targetTabPane);
         dlg.showAndWait().ifPresent(w -> {
@@ -752,7 +747,6 @@ public class MainViewController implements Initializable {
         });
         return wasNewTabCreated.get();
     }
-
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
@@ -892,7 +886,6 @@ public class MainViewController implements Initializable {
                 else {
                     return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
                 }
-
             }, new ArrayList<>());
         }
         if (!searchResultSet.isEmpty()) {

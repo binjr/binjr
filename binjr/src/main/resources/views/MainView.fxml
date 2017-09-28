@@ -26,10 +26,9 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
-    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0"
-               AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
+               HBox.hgrow="ALWAYS">
         <AnchorPane SplitPane.resizableWithParent="false">
             <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                 <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
@@ -44,8 +43,7 @@
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
                     </tabs>
                 </TearableTabPane>
@@ -69,8 +67,7 @@
                             </Tooltip>
                         </tooltip>
                     </Button>
-                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
-                                  text="Aa" textOverrun="CLIP">
+                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
                         <tooltip>
                             <Tooltip text="Toggle case sensitivity">
                                 <font>
@@ -96,7 +93,11 @@
             </AnchorPane>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
-            <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
+            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <tabs>
+                </tabs>
+            </TearableTabPane>
+            <Label fx:id="addWorksheetLabel" visible="false" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
                 <graphic>
                     <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"/>
                 </graphic>
@@ -108,17 +109,10 @@
                     </Tooltip>
                 </tooltip>
             </Label>
-            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <tabs>
-                </tabs>
-            </TearableTabPane>
         </StackPane>
     </SplitPane>
-    <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                    AnchorPane.topAnchor="0.0">
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0"
-                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tooltip>
                 <Tooltip text="Expand">
                     <font>
@@ -136,8 +130,7 @@
                 </HBox>
             </graphic>
         </Button>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
-                    text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
             <tooltip>
                 <Tooltip text="Workspaces">
                     <font>
@@ -202,8 +195,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
-                    prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="90.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="source-icon"/>
@@ -241,8 +234,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
-                    prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="chart-icon"/>
@@ -286,8 +279,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0"
-                    text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
+        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="help-icon"/>
@@ -325,8 +317,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0"
-                AnchorPane.rightAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="settings-icon"/>
@@ -340,9 +331,7 @@
                 </Tooltip>
             </tooltip>
         </Button>
-        <Button styleClass="exit" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" text="Exit" AnchorPane.bottomAnchor="0.0"
-                AnchorPane.leftAnchor="0.0"
-                AnchorPane.rightAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" styleClass="exit" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="quit-icon"/>

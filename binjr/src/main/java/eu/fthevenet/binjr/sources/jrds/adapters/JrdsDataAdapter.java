@@ -446,7 +446,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     private static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
-        // Load platform specific Trusted CA keystore
+        // Load platform specific Trusted CA keystore²
         logger.trace(() -> Arrays.toString(Security.getProviders()));
         KeyStore tks;
         switch (AppEnvironment.getInstance().getOsFamily()) {

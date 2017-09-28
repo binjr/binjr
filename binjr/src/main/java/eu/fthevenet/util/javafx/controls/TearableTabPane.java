@@ -17,7 +17,7 @@
 
 package eu.fthevenet.util.javafx.controls;
 
-import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
+
 import javafx.application.Platform;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
@@ -40,8 +40,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,7 +60,7 @@ public class TearableTabPane extends TabPane {
     private final Map<Tab, TabState> tearableTabMap = new HashMap<>();
     private final ObservableSet<Tab> tabsSet = FXCollections.observableSet(tearableTabMap.keySet());
     private final TabPaneManager manager;
-
+    private Consumer<Stage> onTearedTabsStageSetup;
 
     public ObservableSet<Tab> getTearableTabs() {
         return tabsSet;
@@ -304,6 +304,7 @@ public class TearableTabPane extends TabPane {
 
     private void tearOffTab(Tab tab) {
         TearableTabPane detachedTabPane = new TearableTabPane(this.manager, false, true);
+        detachedTabPane.setOnTearedTabsStageSetup(this.onTearedTabsStageSetup);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
         this.getTabs().remove(tab);
         detachedTabPane.getTabs().add(tab);
@@ -315,7 +316,7 @@ public class TearableTabPane extends TabPane {
         final Scene scene = new Scene(root, root.getPrefWidth(), root.getPrefHeight());
         Stage stage = new Stage();
         stage.setScene(scene);
-        stage.setTitle("binjr");
+
         Point p = MouseInfo.getPointerInfo().getLocation();
         stage.setX(p.getX());
         stage.setY(p.getY());
@@ -324,13 +325,16 @@ public class TearableTabPane extends TabPane {
                 stage.close();
             }
         });
-        StageAppearanceManager.getInstance().register(stage);
+        if (onTearedTabsStageSetup != null) {
+            onTearedTabsStageSetup.accept(stage);
+        }
         stage.show();
         detachedTabPane.getSelectionModel().select(tab);
         stage.setOnCloseRequest(event -> {
             detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
         });
     }
+
 
     public boolean isTearable() {
         return tearable;
@@ -365,6 +369,14 @@ public class TearableTabPane extends TabPane {
 
     public void clearAllTabs(){
         manager.clearAllTabs();
+    }
+
+    public void setOnTearedTabsStageSetup(Consumer<Stage> action) {
+        this.onTearedTabsStageSetup = action;
+    }
+
+    public DataFormat getDataFormat() {
+        return manager.dragAndDropFormat;
     }
 
     private class TabState {
@@ -448,7 +460,6 @@ public class TearableTabPane extends TabPane {
         public Tab getSelectedTab() {
             return selectedTab;
         }
-
 
         public void setSelectedTab(Tab selectedTab) {
             this.selectedTab = selectedTab;
