@@ -1,13 +1,8 @@
 language: java
 
-#os:
-#- linux
-#- osx
-
 matrix:
   include:
     - os: "linux"
-      if: tag IS blank
       sudo: false
       jdk: oraclejdk8
       addons:
@@ -17,7 +12,7 @@ matrix:
           - fakeroot
           - rpm
     - os: "osx"
-      if: tag IS present
+      if: env(TRAVIS_COMMIT_MESSAGE) =~ *osx*
       osx_image: xcode8.3
 
 
