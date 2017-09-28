@@ -12,8 +12,9 @@ matrix:
           - fakeroot
           - rpm
     - os: "osx"
-      osx_image: xcode8.3
       if: tag IS present
+#      osx_image: xcode8.3
+
 
 env:
   global:
