@@ -145,7 +145,7 @@ public class MainViewController implements Initializable {
     private StackPane settingsPane;
     @FXML
     private StackPane worksheetArea;
-    private WorksheetController selectedWorksheetController;
+    //  private WorksheetController selectedWorksheetController;
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
     private int animationDuration = 50;
@@ -726,7 +726,6 @@ public class MainViewController implements Initializable {
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
-            selectedWorksheetController = current;
             seriesControllers.put(newTab, current);
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
         } catch (Exception e) {
@@ -1042,7 +1041,7 @@ public class MainViewController implements Initializable {
         if (selectedTab == null) {
             return null;
         }
-        return this.selectedWorksheetController = seriesControllers.get(selectedTab);
+        return seriesControllers.get(selectedTab);
     }
     //endregion
 }
