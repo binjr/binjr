@@ -63,7 +63,7 @@ If you would like to contribute, please sumbit a pull request.
 
 ## How is it licensed?
 
-*binjr* is released under the Apache License version 2.0.
+*binjr* is released under the [Apache License version 2.0](https://github.com/fthevenet/binjr/blob/master/LICENSE).
 
 ## What is the status of the project?
 
