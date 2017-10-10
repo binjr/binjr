@@ -24,7 +24,7 @@ Using the latest available version is highly recommended, as JavaFX is still an 
 The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is available in different forms:
 * _As a JAR_
 
-  All dependencies are packaged inside the executable jar, and in order to start the application simply run: `java -jar binj.jar` (or double-click the jar file, provided your environment is configured adequately).
+  All dependencies are packaged inside the executable jar, and in order to start the application simply run: `java -jar binjr.jar` (or double-click the jar file, provided your environment is configured adequately).
   
   You must have a compatible version of the Java Runtime Environment (see below) installed on your computer for this to work.
 
