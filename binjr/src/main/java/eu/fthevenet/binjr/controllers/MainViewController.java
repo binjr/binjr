@@ -101,7 +101,6 @@ public class MainViewController implements Initializable {
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
-    //private final StringProperty associatedFile = new SimpleStringProperty(null);
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
@@ -145,7 +144,6 @@ public class MainViewController implements Initializable {
     private StackPane settingsPane;
     @FXML
     private StackPane worksheetArea;
-    //  private WorksheetController selectedWorksheetController;
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
     private int animationDuration = 50;
@@ -180,8 +178,6 @@ public class MainViewController implements Initializable {
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         chartPropertiesMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
-        //  worksheetTabPane.mouseTransparentProperty().bind(Bindings.createBooleanBinding(() -> false)); //selectWorksheetPresent);
-
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
