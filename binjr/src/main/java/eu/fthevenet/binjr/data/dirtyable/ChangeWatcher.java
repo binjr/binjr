@@ -42,9 +42,8 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.NONE)
-public class ChangeWatcher<T> implements Dirtyable {
+public class ChangeWatcher implements Dirtyable {
     private static final Logger logger = LogManager.getLogger(ChangeWatcher.class);
-    private final T source;
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
     private final List<ObservableList<? extends Dirtyable>> watchedLists;
 
@@ -59,8 +58,7 @@ public class ChangeWatcher<T> implements Dirtyable {
      *
      * @param source the object to watch for changes
      */
-    public ChangeWatcher(T source) {
-        this.source = source;
+    public ChangeWatcher(Object source) {
         this.watchedLists = new ArrayList<>();
         List<Field> toWatch = getFieldsListWithAnnotation(source.getClass(), IsDirtyable.class);
         for (Field field : toWatch) {
@@ -128,15 +126,6 @@ public class ChangeWatcher<T> implements Dirtyable {
     public void cleanUp() {
         dirty.setValue(false);
         watchedLists.forEach(l -> l.forEach(Dirtyable::cleanUp));
-    }
-
-    /**
-     * Returns the watched object
-     *
-     * @return the watched object
-     */
-    public T getSource() {
-        return source;
     }
 
     private void evaluateDirty(Boolean isDirty) {

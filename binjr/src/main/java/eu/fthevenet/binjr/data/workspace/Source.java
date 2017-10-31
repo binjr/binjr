@@ -45,7 +45,7 @@ public class Source implements Dirtyable {
     @XmlElements(@XmlElement(name = "Parameter"))
     private Map<String, String> adapterParams;
     @XmlTransient
-    private final ChangeWatcher<Source> status;
+    private final ChangeWatcher status;
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
@@ -70,7 +70,7 @@ public class Source implements Dirtyable {
      * Initializes a new instance of the {@link Source} class
      */
     public Source() {
-        this.status = new ChangeWatcher<>(this);
+        this.status = new ChangeWatcher(this);
     }
 
     /**

@@ -61,7 +61,7 @@ public class Workspace implements Dirtyable {
     @IsDirtyable
     private final ObservableList<Worksheet> worksheets;
     @XmlTransient
-    private final ChangeWatcher<Workspace> status;
+    private final ChangeWatcher status;
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -80,7 +80,7 @@ public class Workspace implements Dirtyable {
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
-        status = new ChangeWatcher<>(this);
+        status = new ChangeWatcher(this);
     }
 
     /**

@@ -43,7 +43,7 @@ public class TimeSeriesInfo<T extends Number> implements Dirtyable {
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
     private final TimeSeriesBinding<T> binding;
-    private final ChangeWatcher<TimeSeriesInfo> status;
+    private final ChangeWatcher status;
     private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
     /**
@@ -88,7 +88,7 @@ public class TimeSeriesInfo<T extends Number> implements Dirtyable {
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
-        status = new ChangeWatcher<>(this);
+        status = new ChangeWatcher(this);
     }
 
     /**

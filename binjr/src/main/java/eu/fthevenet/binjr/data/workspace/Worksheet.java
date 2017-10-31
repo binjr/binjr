@@ -84,7 +84,7 @@ public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
     @IsDirtyable
     private DoubleProperty strokeWidth;
 
-    private final ChangeWatcher<Worksheet> status;
+    private final ChangeWatcher status;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -167,7 +167,7 @@ public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
 
         // Change watcher must be initialized before  dirtyable properties or they will not be tracked.
-        this.status = new ChangeWatcher<>(this);
+        this.status = new ChangeWatcher(this);
     }
 
     /**
