@@ -63,7 +63,7 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
                     }
                 }
             } catch (InterruptedException | TimeoutException e) {
-                logger.error("An exception occured while retrieving credentials - " + e.getMessage());
+                logger.error("An exception occurred while retrieving credentials - " + e.getMessage());
                 if (logger.isDebugEnabled()) {
                     logger.debug("Stack trace", e);
                 }

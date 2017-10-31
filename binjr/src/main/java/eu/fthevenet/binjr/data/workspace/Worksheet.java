@@ -166,7 +166,7 @@ public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
 
-        // Change watcher must be initialized before  dirtyable properties or they will not be tracked.
+        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
 

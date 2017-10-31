@@ -88,7 +88,8 @@ public class TimeSeriesInfo<T extends Number> implements Dirtyable {
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
-        status = new ChangeWatcher(this);
+        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
+        this.status = new ChangeWatcher(this);
     }
 
     /**

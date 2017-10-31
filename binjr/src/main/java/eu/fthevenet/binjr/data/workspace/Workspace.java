@@ -80,7 +80,8 @@ public class Workspace implements Dirtyable {
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
-        status = new ChangeWatcher(this);
+        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
+        this.status = new ChangeWatcher(this);
     }
 
     /**
