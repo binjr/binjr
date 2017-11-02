@@ -17,7 +17,6 @@ module eu.fthevenet.binjr {
     requires httpcore;
     requires jdk.security.auth;
     requires javafx.web;
-    requires xstream;
     exports eu.fthevenet.binjr;
     exports eu.fthevenet.binjr.controllers;
     opens eu.fthevenet.binjr.controllers;
