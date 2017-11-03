@@ -73,4 +73,4 @@ For the time being, the only source with significant support is [JRDS, a monitor
 
 ## Where's the FAQ? You've got to have a FAQ!
 
-Fret not, [here it is](https://github.com/fthevenet/binjr/wiki/MTMUFAQ.md)
+Fret not! [here it is](https://github.com/fthevenet/binjr/wiki/MTMUFAQ)
