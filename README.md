@@ -67,10 +67,6 @@ If you would like to contribute, please sumbit a pull request.
 
 ## What is the status of the project?
 
-*binjr* has reached its first significant milestone. The current release is reasonably stable and the feature set, while limited, should hopefully prove more useful than frustrating.
+*binjr* is very much **a work in progress** but it has reached its first significant milestone. The current release should be reasonably stable and the feature set, while limited, should hopefully prove more useful than frustrating.
 
 For the time being, the only source with significant support is [JRDS, a monitoring application written in Java](http://jrds.fr/), but the project aims to quickly offer an API flexible enough to allow the rapid development of data adapters for any systems capable of exporting time series data.
-
-## Where's the FAQ? You've got to have a FAQ!
-
-Fret not! [here it is](https://github.com/fthevenet/binjr/wiki/MTMUFAQ*)

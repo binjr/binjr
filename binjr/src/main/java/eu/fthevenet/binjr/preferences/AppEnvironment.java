@@ -66,7 +66,7 @@ public class AppEnvironment {
                     try {
                         return new Version(value);
                     } catch (IllegalArgumentException e) {
-                        logger.error("Could not parse version number: " + value, e);
+                        logger.error("Could not decode version number: " + value, e);
                     }
                 }
             }
@@ -86,7 +86,7 @@ public class AppEnvironment {
                 try {
                     return Long.valueOf(value);
                 } catch (NumberFormatException e) {
-                    logger.error("Could not parse build number: " + value);
+                    logger.error("Could not decode build number: " + value);
                     logger.debug(() -> "Full stack", e);
                 }
             }

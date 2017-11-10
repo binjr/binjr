@@ -25,7 +25,7 @@ import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
  * @author Frederic Thevenet
  */
 @FunctionalInterface
-public interface TimeSeriesProcessorFactory<T extends Number> {
+public interface TimeSeriesProcessorFactory<T> {
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
      *

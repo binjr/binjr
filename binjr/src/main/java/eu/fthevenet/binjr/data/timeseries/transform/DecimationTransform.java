@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class DecimationTransform<T extends Number> extends TimeSeriesTransform<T> {
+public class DecimationTransform<T> extends TimeSeriesTransform<T> {
     private final int threshold;
 
     /**

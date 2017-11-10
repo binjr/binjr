@@ -479,7 +479,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
             worksheetMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> {
-                        getWorksheet().fillData(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
+                        getWorksheet().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
                         return getWorksheet().getSeries()
                                 .stream()
                                 .filter(series -> {
@@ -503,8 +503,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     event -> {
                         worksheetMaskerPane.setVisible(false);
                         Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
-                    }
-            );
+                    });
         }
     }
 
@@ -515,6 +514,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
                     switch (getChartType()) {
+
                         case AREA:
                         case STACKED:
                             ObservableList<Node> children = ((Group) newNode).getChildren();
@@ -530,6 +530,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                                         series.displayColorProperty(),
                                         getWorksheet().graphOpacityProperty()));
                             }
+                            break;
+                        case SCATTER:
                             break;
                         case LINE:
                             Path stroke = (Path) newNode;

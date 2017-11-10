@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public interface DataParser<T extends Number> {
+public interface DataParser<T> {
 
     /**
      * Parse a stream of data into a map of {@link TimeSeriesProcessor} instances.

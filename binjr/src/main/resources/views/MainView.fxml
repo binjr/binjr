@@ -216,6 +216,11 @@
                             <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                         </accelerator>
                     </MenuItem>
+                    <MenuItem mnemonicParsing="false" onAction="#handleAddCsvSource" text="CSV File">
+                        <accelerator>
+                            <KeyCodeCombination alt="UP" code="V" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        </accelerator>
+                    </MenuItem>
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addSource-icon"/>

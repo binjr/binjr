@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class LargestTriangleThreeBucketsTransform<T extends Number> extends TimeSeriesTransform<T> {
+public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform<Double> {
     private final int threshold;
 
     /**
@@ -48,7 +48,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
     }
 
     @Override
-    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> apply(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> m) {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> apply(Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> m) {
         return m.entrySet()
                 .parallelStream()
                 .collect(Collectors.toMap(Map.Entry::getKey, o -> {
@@ -68,14 +68,14 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
      * @param threshold d the maximum number of samples to keep.
      * @return a reduced list of samples.
      */
-    private Collection<XYChart.Data<ZonedDateTime, T>> applyLTTBReduction(TimeSeriesProcessor<T> data, int threshold) {
+    private Collection<XYChart.Data<ZonedDateTime, Double>> applyLTTBReduction(TimeSeriesProcessor<Double> data, int threshold) {
         int dataLength = data.size();
-        List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
+        List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>(threshold);
         // Bucket size. Leave room for start and end data points
         double every = (double) (dataLength - 2) / (threshold - 2);
         int a = 0;
         int nextA = 0;
-        XYChart.Data<ZonedDateTime, T> maxAreaPoint = data.getSample(a);
+        XYChart.Data<ZonedDateTime, Double> maxAreaPoint = data.getSample(a);
         sampled.add(data.getSample(a)); // Always add the first point
         for (int i = 0; i < threshold - 2; i++) {
             // Calculate point average for next bucket (containing c)
@@ -87,7 +87,7 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
             int avgRangeLength = avgRangeEnd - avgRangeStart;
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
                 avgX += data.getSample(avgRangeStart).getXValue().toEpochSecond();
-                avgY += data.getSample(avgRangeStart).getYValue().doubleValue();
+                avgY += data.getSample(avgRangeStart).getYValue();
             }
             avgX /= avgRangeLength;
             avgY /= avgRangeLength;
@@ -97,11 +97,11 @@ public class LargestTriangleThreeBucketsTransform<T extends Number> extends Time
 
             // Point a
             double pointAx = data.getSample(a).getXValue().toEpochSecond();
-            double pointAy = data.getSample(a).getYValue().doubleValue();
+            double pointAy = data.getSample(a).getYValue();
             double maxArea = -1;
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
-                double area = Math.abs((pointAx - avgX) * (data.getSample(rangeOffs).getYValue().doubleValue() - pointAy) -
+                double area = Math.abs((pointAx - avgX) * (data.getSample(rangeOffs).getYValue() - pointAy) -
                         (pointAx - data.getSample(rangeOffs).getXValue().toEpochSecond()) * (avgY - pointAy)
                 ) * 0.5;
                 if (area > maxArea) {

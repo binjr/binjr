@@ -40,7 +40,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
-public class TimeSeriesBinding<T extends Number> {
+public class TimeSeriesBinding<T> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -85,7 +85,7 @@ public class TimeSeriesBinding<T extends Number> {
     private final String unitName;
     private final String treeHierarchy;
     @XmlTransient
-    private DataAdapter<T> adapter;
+    private DataAdapter<T, ?> adapter;
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class.
@@ -135,7 +135,7 @@ public class TimeSeriesBinding<T extends Number> {
      * @param treeHierarchy the hierarchy in the tree representation
      * @param adapter       the {@link DataAdapter} to the source
      */
-    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
+    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T, ?> adapter) {
         this(label,
                 path,
                 color,
@@ -148,7 +148,7 @@ public class TimeSeriesBinding<T extends Number> {
                 null);
     }
 
-    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
+    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T, ?> adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
         this.legend = legend;
@@ -195,7 +195,7 @@ public class TimeSeriesBinding<T extends Number> {
      * @return the {@link DataAdapter} of the binding
      */
     @XmlTransient
-    public DataAdapter<T> getAdapter() {
+    public DataAdapter<T, ?> getAdapter() {
         return this.adapter;
     }
 

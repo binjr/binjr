@@ -17,14 +17,19 @@
 
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
-import eu.fthevenet.binjr.data.parsers.DataParser;
+import eu.fthevenet.binjr.data.codec.Decoder;
+import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
+import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
+import eu.fthevenet.util.function.CheckedFunction;
 import javafx.scene.control.TreeItem;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,7 +38,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class DataAdapter<T extends Number> implements AutoCloseable {
+public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoCloseable {
     private UUID id = UUID.randomUUID();
 
     /**
@@ -54,7 +59,27 @@ public abstract class DataAdapter<T extends Number> implements AutoCloseable {
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    public abstract InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
+    public abstract InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
+
+    /**
+     * Gets decoded data from the source as an map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.
+     *
+     * @param path        the path of the data in the source
+     * @param begin       the start of the time interval.
+     * @param end         the end of the time interval.
+     * @param seriesInfo  the series to get data from.
+     * @param bypassCache true if adapter cache should be bypassed, false otherwise. This parameter is ignored if adapter does not support caching
+     * @return the output stream in which to return data.
+     * @throws DataAdapterException if an error occurs while retrieving data from the source.
+     */
+    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> getDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+        try (InputStream in = this.getRawData(path, begin, end, bypassCache)) {
+            // Parse raw data obtained from adapter
+            return this.getDecoder().decode(in, seriesInfo);
+        } catch (IOException e) {
+            throw new DataAdapterException("Error recovering data from source", e);
+        }
+    }
 
     /**
      * Gets the encoding used to decode textual data sent by the source.
@@ -71,11 +96,11 @@ public abstract class DataAdapter<T extends Number> implements AutoCloseable {
     public abstract ZoneId getTimeZoneId();
 
     /**
-     * Gets the {@link DataParser} used to produce {@link TimeSeriesProcessor} from the source.
+     * Gets the {@link Decoder} used to produce {@link TimeSeriesProcessor} from the source.
      *
-     * @return the {@link DataParser} used to produce {@link TimeSeriesProcessor} from the source.
+     * @return the {@link Decoder} used to produce {@link TimeSeriesProcessor} from the source.
      */
-    public abstract DataParser<T> getParser();
+    public abstract A getDecoder();
 
     /**
      * Gets the name of the source.
@@ -96,7 +121,22 @@ public abstract class DataAdapter<T extends Number> implements AutoCloseable {
      *
      * @param params the parameters required to establish a connection to the underlying data source
      */
-    public abstract void setParams(Map<String, String> params);
+    public abstract void initialize(Map<String, String> params) throws DataAdapterException;
+
+    protected String validateParameterNullity(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
+        return validateParameter(params, paramName, s -> {
+            if (s == null) {
+                throw new InvalidAdapterParameterException("Parameter " + paramName + " is missing for adapter " + this.getSourceName());
+            }
+            return s;
+        });
+    }
+
+    protected <R> R validateParameter(Map<String, String> params, String paramName, CheckedFunction<String, R, InvalidAdapterParameterException> validator) throws InvalidAdapterParameterException {
+        String paramValue = params.get(paramName);
+        return validator.apply(paramValue);
+    }
+
 
     public abstract boolean ping();
 
@@ -117,6 +157,4 @@ public abstract class DataAdapter<T extends Number> implements AutoCloseable {
     public void setId(UUID id) {
         this.id = id;
     }
-
-
 }

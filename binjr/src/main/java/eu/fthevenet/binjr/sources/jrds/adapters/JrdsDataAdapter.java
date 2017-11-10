@@ -22,12 +22,8 @@ import com.google.gson.JsonParseException;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.SimpleCachingDataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.adapters.exceptions.CannotInitializeDataAdapterException;
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.exceptions.ResponseProcessingException;
-import eu.fthevenet.binjr.data.adapters.exceptions.SourceCommunicationException;
-import eu.fthevenet.binjr.data.parsers.CsvParser;
-import eu.fthevenet.binjr.data.parsers.DataParser;
+import eu.fthevenet.binjr.data.codec.CsvDecoder;
+import eu.fthevenet.binjr.data.exceptions.*;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
@@ -60,7 +56,10 @@ import javax.net.ssl.SSLContext;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -77,9 +76,9 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
+public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder<Double>> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
-    private static final String SEPARATOR = ",";
+    private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
     public static final String JRDS_TREE = "tree";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
@@ -204,16 +203,38 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     @Override
-    public void setParams(Map<String, String> params) {
-        jrdsProtocol = params.get("jrdsProtocol");
-        jrdsHost = params.get("jrdsHost");
-        jrdsPort = Integer.parseInt(params.get("jrdsPort"));
-        jrdsPath = params.get("jrdsPath");
-        zoneId = ZoneId.of(params.get("zoneId"));
-        encoding = params.get("encoding");
-        treeViewTab = params.get("treeViewTab") != null ? JrdsTreeViewTab.valueOf(params.get("treeViewTab")) : JrdsTreeViewTab.HOSTS_TAB;
+    public void initialize(Map<String, String> params) throws InvalidAdapterParameterException {
+        if (params == null) {
+            throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
+        }
+        jrdsProtocol = validateParameterNullity(params, "jrdsProtocol");
+        jrdsHost = validateParameterNullity(params, "jrdsHost");
+        encoding = validateParameterNullity(params, "encoding");
+        jrdsPath = validateParameterNullity(params, "jrdsPath");
+        jrdsPort = validateParameter(params, "jrdsPort",
+                s -> {
+
+                    if (s == null) {
+                        throw new InvalidAdapterParameterException("Parameter jrdsPort is missing in adpater " + getSourceName());
+                    }
+                    int val = Integer.parseInt(s);
+                    if (val < 0 || val > 65535) {
+                        throw new InvalidAdapterParameterException("Value provided for parameter jrdsPort is not within the rang of valid IP ports in adpater " + getSourceName());
+                    }
+                    return val;
+
+                });
+        zoneId = validateParameter(params, "zoneId",
+                s -> {
+                    if (s == null) {
+                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adpater " + getSourceName());
+                    }
+                    return ZoneId.of(s);
+                });
+        treeViewTab = validateParameter(params, "treeViewTab", s -> s == null ? JrdsTreeViewTab.valueOf(params.get("treeViewTab")) : JrdsTreeViewTab.HOSTS_TAB);
         this.filter = params.get(JRDS_FILTER);
     }
+
 
     @Override
     public boolean ping() {
@@ -248,9 +269,9 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     @Override
-    public DataParser<Double> getParser() {
+    public CsvDecoder<Double> getDecoder() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvParser<>(getEncoding(), SEPARATOR,
+        return new CsvDecoder<>(getEncoding(), DELIMITER,
                 DoubleTimeSeriesProcessor::new,
                 s -> {
                     Double val = Double.parseDouble(s);
@@ -287,7 +308,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
             httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             T result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
-                throw new ResponseProcessingException("Response entity to \"" + requestUrl.toString() + "\" is null.");
+                throw new FetchingDataFromAdapterException("Response entity to \"" + requestUrl.toString() + "\" is null.");
             }
             return result;
         } catch (HttpResponseException e) {
@@ -420,33 +441,24 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            try (InputStream in = getData(id, now.minusSeconds(300), now, false)) {
-                try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
-                    String header = br.readLine();
-                    if (header == null || header.isEmpty()) {
-                        throw new IOException("CSV File is empty!");
-                    }
-                    String[] headers = header.split(SEPARATOR);
-                    if (headers.length < 1) {
-                        throw new ResponseProcessingException("Could not to retrieve data store names for graph id=" + id + ": header line in csv is blank.");
-                    }
-                    Graphdesc desc = new Graphdesc();
-                    desc.seriesDescList = new ArrayList<>();
-                    for (int i = 1; i < headers.length; i++) {
-                        Graphdesc.SeriesDesc d = new Graphdesc.SeriesDesc();
-                        d.name = headers[i];
-                        desc.seriesDescList.add(d);
-                    }
-                    return desc;
+            try (InputStream in = getRawData(id, now.minusSeconds(300), now, false)) {
+                List<String> headers = getDecoder().getDataColumnHeaders(in);
+                Graphdesc desc = new Graphdesc();
+                desc.seriesDescList = new ArrayList<>();
+                for (String header : headers) {
+                    Graphdesc.SeriesDesc d = new Graphdesc.SeriesDesc();
+                    d.name = header;
+                    desc.seriesDescList.add(d);
                 }
+                return desc;
             }
         } catch (IOException e) {
-            throw new ResponseProcessingException(e);
+            throw new FetchingDataFromAdapterException(e);
         }
     }
 
     private static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
-        // Load platform specific Trusted CA keystore²
+        // Load platform specific Trusted CA keystore
         logger.trace(() -> Arrays.toString(Security.getProviders()));
         KeyStore tks;
         switch (AppEnvironment.getInstance().getOsFamily()) {
@@ -476,7 +488,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
                     null,
                     null,
                     SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-
             RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
             schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
             CredentialsProvider credsProvider = new BasicCredentialsProvider();
@@ -505,7 +516,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double> {
     }
 
     /**
-     * POJO definition used to parse JSON message.
+     * POJO definition used to decode JSON message.
      */
     private static class JsonTree {
         String identifier;
