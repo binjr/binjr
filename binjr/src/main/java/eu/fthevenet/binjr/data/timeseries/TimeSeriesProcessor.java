@@ -22,7 +22,10 @@ import eu.fthevenet.util.concurrent.ReadWriteLockHelper;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The base class for time series processor classes, which holds raw data points and provides access to summary properties.
@@ -32,7 +35,6 @@ import java.util.*;
 public abstract class TimeSeriesProcessor<T> {
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, T>> data;
-    protected Map<ZonedDateTime, T> dataStore;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.

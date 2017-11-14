@@ -634,7 +634,10 @@ public class MainViewController implements Initializable {
                             sourcesTabPane.getSelectionModel().select(newTab);
                         }
                     },
-                    event -> sourceMaskerPane.setVisible(false));
+                    event -> {
+                        sourceMaskerPane.setVisible(false);
+                        Dialogs.notifyException("Unexpected error getting data adapter:", event.getSource().getException(), root);
+                    });
         });
     }
 

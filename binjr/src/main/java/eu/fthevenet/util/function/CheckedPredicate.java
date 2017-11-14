@@ -17,24 +17,25 @@
 
 package eu.fthevenet.util.function;
 
-import java.util.function.Supplier;
+import java.util.function.Consumer;
 
 /**
- * A functional interface equivalent to {@link Supplier}, whose method
+ * A functional interface equivalent to {@link Consumer}, whose method
  * throws a checked exception.
  *
- * @param <T> the type of results supplied by this supplier
+ * @param <T> the type of the input to the operation.
  * @param <E> the type of checked exception thrown.
  * @author Frederic Thevenet
  */
 @FunctionalInterface
-public interface CheckedSupplier<T, E extends Exception> {
+public interface CheckedPredicate<T, E extends Exception> {
     /**
-     * Gets a result.
+     * Performs this operation on the given argument.
      *
-     * @return a result
+     * @param t the input argument
      * @throws E a checked exception
      */
-    T get() throws E;
+    boolean test(T t) throws E;
 }
+
 

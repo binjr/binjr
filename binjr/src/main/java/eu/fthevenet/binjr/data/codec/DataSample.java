@@ -15,26 +15,26 @@
  *
  */
 
-package eu.fthevenet.util.function;
+package eu.fthevenet.binjr.data.codec;
 
-import java.util.function.Supplier;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * A functional interface equivalent to {@link Supplier}, whose method
- * throws a checked exception.
- *
- * @param <T> the type of results supplied by this supplier
- * @param <E> the type of checked exception thrown.
- * @author Frederic Thevenet
- */
-@FunctionalInterface
-public interface CheckedSupplier<T, E extends Exception> {
-    /**
-     * Gets a result.
-     *
-     * @return a result
-     * @throws E a checked exception
-     */
-    T get() throws E;
+public class DataSample<T> {
+    private final ZonedDateTime timeStamp;
+    private final Map<String, T> cells;
+
+    public DataSample(ZonedDateTime timeStamp) {
+        this.timeStamp = timeStamp;
+        this.cells = new HashMap<>();
+    }
+
+    public ZonedDateTime getTimeStamp() {
+        return timeStamp;
+    }
+
+    public Map<String, T> getCells() {
+        return cells;
+    }
 }
-

@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
 /**
  * This class provides an implementation of a {@link Decoder} that decode data from a CSV formatted text stream into a {@link TimeSeriesProcessor}.
@@ -74,29 +75,27 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
         this.dateParser = dateParser;
     }
 
-    /**
-     * @param in
-     * @return
-     * @throws IOException
-     * @throws DecodingDataFromAdapterException
-     */
     public List<String> getDataColumnHeaders(InputStream in) throws IOException, DecodingDataFromAdapterException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
+            CSVFormat csvFormat = CSVFormat.DEFAULT
+                    .withAllowMissingColumnNames(false)
+                    .withDelimiter(delimiter);
+            Iterable<CSVRecord> records = csvFormat.parse(reader);
+            return this.parseColumnHeaders(records.iterator().next());
+        }
+    }
+
+
+    private List<String> parseColumnHeaders(CSVRecord record) throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Getting hearders from csv data", logger::trace)) {
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-                CSVFormat csvFormat = CSVFormat.DEFAULT
-                        .withAllowMissingColumnNames(false)
-                        .withDelimiter(delimiter);
-                Iterable<CSVRecord> records = csvFormat.parse(reader);
-                CSVRecord record = records.iterator().next();
-                if (record == null) {
-                    throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
-                }
-                List<String> headerNames = new ArrayList<>();
-                for (int i = 1; i < record.size(); i++) {
-                    headerNames.add(record.get(i));
-                }
-                return headerNames;
+            if (record == null) {
+                throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
             }
+            List<String> headerNames = new ArrayList<>();
+            for (int i = 1; i < record.size(); i++) {
+                headerNames.add(record.get(i));
+            }
+            return headerNames;
         }
     }
 
@@ -113,11 +112,11 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
                 Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
-                for (CSVRecord record : records) {
+                for (CSVRecord csvRecord : records) {
                     nbpoints.incrementAndGet();
-                    ZonedDateTime timeStamp = dateParser.apply(record.get(0));
+                    ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
                     for (TimeSeriesInfo<T> info : seriesInfo) {
-                        T val = numberParser.apply(record.get(info.getBinding().getLabel()));
+                        T val = numberParser.apply(csvRecord.get(info.getBinding().getLabel()));
                         XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
                         TimeSeriesProcessor<T> l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
                         l.addSample(point);
@@ -126,37 +125,34 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                 logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)", seriesInfo.size(), nbpoints.get(), seriesInfo.size() * nbpoints.get()));
                 return series;
             }
+        }
+    }
 
-//            try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
-//                String header = br.readLine();
-//                if (header == null || header.isEmpty()) {
-//                    throw new DecodingDataFromAdapterException("CSV File is empty!");
-//                }
-//                String[] seriesNames = header.split(delimiter);
-//                final int nbSeries = seriesNames.length - 1;
+    public void decode(InputStream in, List<String> headers, Consumer<DataSample<T>> mapToResult) throws IOException, DecodingDataFromAdapterException {
+        try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
+
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
+
+                CSVFormat csvFormat = CSVFormat.DEFAULT
+                        .withAllowMissingColumnNames(false)
+                        .withFirstRecordAsHeader()
+                        .withSkipHeaderRecord()
+                        .withDelimiter(delimiter);
+                Iterable<CSVRecord> records = csvFormat.parse(reader);
+
+                for (CSVRecord csvRecord : records) {
+                    ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
+                    DataSample<T> tRecord = new DataSample<>(timeStamp);
+                    for (String h : headers) {
+                        tRecord.getCells().put(h, numberParser.apply(csvRecord.get(h)));
+                    }
+//                    csvRecord.toMap().entrySet().stream()
 //
-//                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series = new HashMap<>();
-//                final AtomicLong nbpoints = new AtomicLong(0);
-//                for (String line = br.readLine(); line != null; line = br.readLine()) {
-//                    nbpoints.incrementAndGet();
-//                    String[] data = line.split(delimiter);
-//                    if (data.length < 2) {
-//                        throw new DecodingDataFromAdapterException("Not enough columns in csv to plot a time series");
-//                    }
-//                    ZonedDateTime timeStamp = dateParser.apply(data[0].replace("\"", ""));
-//                    for (int i = 1; i < data.length; i++) {
-//                        TimeSeriesInfo<T> info = getBindingFromName(seriesInfo, seriesNames[i].replace("\"", ""));
-//                        if (info != null) {
-//                            T val = numberParser.apply(data[i].replace("\"", ""));
-//                            XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
-//                            TimeSeriesProcessor<T> l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
-//                            l.addSample(point);
-//                        }
-//                    }
-//                }
-//                logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)", nbSeries, nbpoints.get(), nbSeries * nbpoints.get()));
-//                return series;
-//            }
+//                            .forEach(CheckedLambdas.wrap((CheckedConsumer<Map.Entry<String, String>, DecodingDataFromAdapterException>)
+//                                    e ->);
+                    mapToResult.accept(tRecord);
+                }
+            }
         }
     }
 

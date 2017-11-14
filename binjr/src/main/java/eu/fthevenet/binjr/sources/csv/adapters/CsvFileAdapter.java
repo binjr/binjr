@@ -20,6 +20,7 @@ package eu.fthevenet.binjr.sources.csv.adapters;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.codec.CsvDecoder;
+import eu.fthevenet.binjr.data.codec.DataSample;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.FetchingDataFromAdapterException;
 import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
@@ -29,6 +30,7 @@ import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.util.logging.Profiler;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -56,8 +58,8 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     private Character delimiter;
     private String encoding;
     private CsvDecoder<Double> decoder;
-    private SortedMap<Long, String> sortedDataStore;
-    //  private String headerLine;
+    private SortedMap<Long, DataSample<Double>> sortedDataStore;
+    private List<String> headers;
 
     public CsvFileAdapter() throws DataAdapterException {
         this("", ZoneId.systemDefault(), "utf-8", "yyyy-MM-dd HH:mm:ss", ',');
@@ -89,7 +91,8 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
                         "-",
                         "/" + getSourceName(), this));
         try (InputStream in = Files.newInputStream(csvPath)) {
-            for (String header : getDecoder().getDataColumnHeaders(in)) {
+            this.headers = getDecoder().getDataColumnHeaders(in);
+            for (String header : headers) {
                 TimeSeriesBinding<Double> b = new TimeSeriesBinding<>(
                         header,
                         header,
@@ -110,27 +113,27 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
 
     @Override
     public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> getDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
-        throw new UnsupportedOperationException("Not implemented yet.");
+        Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
+        Map<String, TimeSeriesInfo<Double>> rDict = new HashMap<>();
+        for (TimeSeriesInfo<Double> info : seriesInfo) {
+            rDict.put(info.getBinding().getLabel(), info);
+            series.put(info, new DoubleTimeSeriesProcessor());
+        }
 
+        for (DataSample<Double> sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
+            for (String n : sample.getCells().keySet()) {
+                TimeSeriesInfo<Double> i = rDict.get(n);
+                if (i != null) {
+                    series.get(i).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
+                }
+            }
+        }
+        return series;
     }
 
     @Override
     public InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
         throw new UnsupportedOperationException("Recovery of raw data is not supported for this data source.");
-//        ByteArrayOutputStream out = new ByteArrayOutputStream();
-//        try {
-//            byte[] cr = "\n".getBytes(encoding);
-//            out.write(headerLine.getBytes(encoding));
-//            out.write(cr);
-//            Collection<String> data = getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values();
-//            for (String s : data) {
-//                out.write(s.getBytes(encoding));
-//                out.write(cr);
-//            }
-//            return new ByteArrayInputStream(out.toByteArray());
-//        } catch (IOException e) {
-//            throw new FetchingDataFromAdapterException(e);
-//        }
     }
 
     @Override
@@ -146,11 +149,22 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     @Override
     public CsvDecoder<Double> getDecoder() {
         if (decoder == null) {
-            throw new IllegalStateException("The CsvDecoder has not been properly initialized");
+            // setup the CSV decoder
+            this.decoder = new CsvDecoder<>(getEncoding(), delimiter,
+                    DoubleTimeSeriesProcessor::new,
+                    s -> {
+                        try {
+                            Double val = Double.parseDouble(s);
+                            return val.isNaN() ? 0 : val;
+                        } catch (NumberFormatException e) {
+                            logger.debug(() -> "Cannot format value as a number", e);
+                            return 0.0;
+                        }
+                    },
+                    s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(getTimeZoneId())));
         }
         return decoder;
     }
-
 
     @Override
     public String getSourceName() {
@@ -158,7 +172,8 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
                 .append(csvPath != null ? csvPath.getFileName() : "???")
                 .append(" (")
                 .append(zoneId != null ? zoneId : "???")
-                .append(")").toString();
+                .append(")")
+                .toString();
     }
 
     @Override
@@ -186,28 +201,18 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
                 });
         String path = validateParameterNullity(params, "csvPath");
         delimiter = validateParameter(params, "delimiter", s -> {
-            if (s == null || s.isEmpty()) {
+            if (s == null || s.isEmpty() || s.length() > 1) {
                 throw new InvalidAdapterParameterException("Parameter 'delimiter' is missing for adapter " + this.getSourceName());
             }
             return s.charAt(0);
         });
         encoding = validateParameterNullity(params, "encoding");
         dateTimePattern = validateParameterNullity(params, "dateTimePattern");
+
+
         this.csvPath = Paths.get(path);
 
-        // setup the CSV decoder
-        this.decoder = new CsvDecoder<>(getEncoding(), delimiter,
-                DoubleTimeSeriesProcessor::new,
-                s -> {
-                    try {
-                        Double val = Double.parseDouble(s);
-                        return val.isNaN() ? 0 : val;
-                    } catch (NumberFormatException e) {
-                        logger.debug("Cannot format value as a number", e);
-                        return Double.NaN;
-                    }
-                },
-                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(getTimeZoneId())));
+
     }
 
     @Override
@@ -220,7 +225,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
 
     }
 
-    protected SortedMap<Long, String> getDataStore() throws DataAdapterException {
+    protected SortedMap<Long, DataSample<Double>> getDataStore() throws DataAdapterException {
         if (sortedDataStore == null) {
             try (InputStream in = Files.newInputStream(csvPath)) {
                 this.sortedDataStore = buildSortedDataStore(in);
@@ -231,23 +236,11 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
         return sortedDataStore;
     }
 
-    private SortedMap<Long, String> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
-        SortedMap<Long, String> dataStore = new ConcurrentSkipListMap<>();
-        try (Profiler ignored = Profiler.start("Building seek index for csv file", logger::trace)) {
+    private SortedMap<Long, DataSample<Double>> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
+        SortedMap<Long, DataSample<Double>> dataStore = new ConcurrentSkipListMap<>();
 
-
-//            try (BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
-//                //ignore first line (headers)
-//                br.readLine();
-//                for (String line = br.readLine(); line != null; line = br.readLine()) {
-//                    String[] data = line.split(delimiter.toString());
-//                    if (data.length < 2) {
-//                        throw new DecodingDataFromAdapterException("Not enough columns in csv to plot a time series");
-//                    }
-//                    ZonedDateTime timeStamp = getDecoder().getDateParser().apply(data[0].replace("\"", ""));
-//                    dataStore.put(timeStamp.toEpochSecond(), line);
-//                }
-//            }
+        try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::trace)) {
+            getDecoder().decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toEpochSecond(), sample));
         }
         return dataStore;
     }
