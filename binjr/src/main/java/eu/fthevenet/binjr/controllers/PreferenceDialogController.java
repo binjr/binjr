@@ -117,11 +117,8 @@ public class PreferenceDialogController implements Initializable {
     public void handleCheckForUpdate(ActionEvent actionEvent) {
         Button btn = (Button) actionEvent.getSource();
         btn.setDisable(true);
-        updateFlow.getChildren().clear();
-        Label l = new Label("Checking for updates...");
-        l.setTextFill(Color.DIMGRAY);
-        l.setWrapText(true);
-        updateFlow.getChildren().add(l);
+        printToTextFlow("Checking for updates...", Color.DIMGRAY);
+
         UpdateManager.getInstance().asyncForcedCheckForUpdate(githubRelease -> {
                     updateFlow.getChildren().clear();
                     Hyperlink latestReleaseLink = new Hyperlink("Version " + githubRelease.getVersion().toString() + " is available.");
@@ -138,12 +135,26 @@ public class PreferenceDialogController implements Initializable {
                 },
                 version -> {
                     btn.setDisable(false);
-                    l.setText("binjr is up to date (v" + version.toString() + ")");
+                    printToTextFlow("binjr is up to date (v" + version.toString() + ")");
                 },
                 () -> {
                     btn.setDisable(false);
-                    l.setText("Could not check for update");
+                    printToTextFlow("Could not check for update!", Color.RED);
                 });
+    }
+
+    private void printToTextFlow(String text) {
+        printToTextFlow(text, null);
+    }
+
+    private void printToTextFlow(String text, Color color) {
+        updateFlow.getChildren().clear();
+        Label l = new Label(text);
+        if (color != null) {
+            l.setTextFill(color);
+        }
+        l.setWrapText(true);
+        updateFlow.getChildren().add(l);
     }
 
     public void handleHideSettings(ActionEvent actionEvent) {

@@ -236,8 +236,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
         //region Control initialization
         initChartPane();
-        initChartSettingPane();
         initNavigationPane();
+        initChartSettingPane();
         initTableViewPane();
         //endregion
 
@@ -514,7 +514,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
                 if (newNode != null) {
                     switch (getChartType()) {
-
                         case AREA:
                         case STACKED:
                             ObservableList<Node> children = ((Group) newNode).getChildren();
@@ -532,6 +531,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                             }
                             break;
                         case SCATTER:
+                            //TODO set colors to points
                             break;
                         case LINE:
                             Path stroke = (Path) newNode;

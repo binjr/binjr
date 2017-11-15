@@ -28,6 +28,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,6 +54,7 @@ import java.util.prefs.Preferences;
 public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     private static final Logger logger = LogManager.getLogger(DataAdapterDialog.class);
     private static final String BINJR_SOURCES = "binjr/sources";
+    private final HBox uriHBox;
     private DataAdapter result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final Set<String> suggestedUrls;
@@ -95,8 +97,10 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         uriField = (TextField) parent.lookup("#uriField");
         timezoneField = (TextField) parent.lookup("#timezoneField");
         paramsGridPane = (GridPane) parent.lookup("#paramsGridPane");
+        uriHBox = (HBox) parent.lookup("#uriHBox");
         if (mode == Mode.URL) {
             this.browseButton.setPrefWidth(0);
+            this.uriHBox.setSpacing(0);
             this.uriLabel.setText("Address:");
         }
         else {
