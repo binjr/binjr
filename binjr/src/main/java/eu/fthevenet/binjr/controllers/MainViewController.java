@@ -846,19 +846,22 @@ public class MainViewController implements Initializable {
                 TimeSeriesBinding<Double> binding = treeItem.getValue();
                 ZonedDateTime toDateTime;
                 ZonedDateTime fromDateTime;
+                ZoneId zoneId;
                 if (getSelectedWorksheetController() != null && getSelectedWorksheetController().getWorksheet() != null) {
                     toDateTime = getSelectedWorksheetController().getWorksheet().getToDateTime();
                     fromDateTime = getSelectedWorksheetController().getWorksheet().getFromDateTime();
+                    zoneId = getSelectedWorksheetController().getWorksheet().getTimeZone();
                 }
                 else {
                     toDateTime = ZonedDateTime.now();
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
+                    zoneId = ZoneId.systemDefault();
                 }
                 Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
                         binding.getGraphType(),
                         fromDateTime,
                         toDateTime,
-                        ZoneId.systemDefault(),
+                        zoneId,
                         binding.getUnitName(),
                         binding.getUnitPrefix());
 
