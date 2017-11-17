@@ -39,21 +39,6 @@ The latest release can be found [here](https://github.com/fthevenet/binjr/releas
 
   A zip or tar.gz archive that contains all the source code, which can be built using Maven 3 and a 1.8 Java Development Kit.
 
-### Important Notice:
-
-_**binjr relies on JavaFX for its user interface and WILL NOT START if is not present.**_
-
-As of version 8, JavaFX is distributed by default in Oracle's JRE on all supported platforms. Unfortunately, it is not the case with the OpenJDK runtime environment provided with most Linux distributions.
-
-In this case, you can either:
-* Install the Oracle JRE for your platform.
-* Build or install a prebuilt package for [OpenJFX](http://openjdk.java.net/projects/openjfx/).
-
-For instance, if you're running Ubuntu 16.04, OpenJFX can be installed via:
-
-`sudo apt-get install openjfx`
-
-
 ## Getting help
 The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference). It's not yet complete, but getting there.
 
