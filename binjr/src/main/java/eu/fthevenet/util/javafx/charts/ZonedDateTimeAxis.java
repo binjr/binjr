@@ -183,7 +183,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         super.invalidateRange(list);
         Collections.sort(list);
         if (list.isEmpty()) {
-            minDate = maxDate = ZonedDateTime.now();
+            minDate = maxDate = ZonedDateTime.now(zoneId);
         }
         else if (list.size() == 1) {
             minDate = maxDate = list.get(0);

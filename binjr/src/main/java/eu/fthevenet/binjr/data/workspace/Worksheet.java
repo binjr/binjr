@@ -18,10 +18,10 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.timeseries.transform.DecimationTransform;
 import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
@@ -33,9 +33,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -56,7 +53,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
+public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
@@ -177,29 +174,24 @@ public class Worksheet<T extends Number> implements Dirtyable, AutoCloseable {
      * @param endTime   the end of the time interval
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
-    public void fillData(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
+    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
         // Define the reduction transform to apply
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters
-        Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
-        for (Map.Entry<DataAdapter<T>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
-            DataAdapter<T> adapter = byAdapterEntry.getKey();
+        Map<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (Map.Entry<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
+            DataAdapter<T, ?> adapter = byAdapterEntry.getKey();
             // Group all bindings-by-adapters by path
             Map<String, List<TimeSeriesInfo<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
-                // Get raw data for source
-                try (InputStream in = adapter.getData(path, startTime.toInstant(), endTime.toInstant(), bypassCache)) {
-                    // Parse raw data obtained from adapter
-                    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> rawDataMap = adapter.getParser().parse(in, byPathEntry.getValue());
-                    // Applying point reduction
-                    rawDataMap = reducer.transform(rawDataMap, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                    //Update timeSeries data
-                    for (TimeSeriesInfo<T> seriesInfo : rawDataMap.keySet()) {
-                        seriesInfo.setProcessor(rawDataMap.get(seriesInfo));
-                    }
-                } catch (IOException | ParseException e) {
-                    throw new DataAdapterException("Error recovering data from source", e);
+                // Get data for source
+                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.getDecodedData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
+                // Applying point reduction
+                data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
+                //Update timeSeries data
+                for (TimeSeriesInfo<T> seriesInfo : data.keySet()) {
+                    seriesInfo.setProcessor(data.get(seriesInfo));
                 }
             }
         }

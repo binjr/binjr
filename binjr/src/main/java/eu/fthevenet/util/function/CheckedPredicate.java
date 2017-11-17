@@ -15,21 +15,27 @@
  *
  */
 
-package eu.fthevenet.binjr.data.timeseries;
+package eu.fthevenet.util.function;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import java.util.function.Consumer;
 
 /**
- * A functional interface to be used as a factory for {@link TimeSeriesProcessor} of type {@code T}
+ * A functional interface equivalent to {@link Consumer}, whose method
+ * throws a checked exception.
  *
+ * @param <T> the type of the input to the operation.
+ * @param <E> the type of checked exception thrown.
  * @author Frederic Thevenet
  */
 @FunctionalInterface
-public interface TimeSeriesProcessorFactory<T> {
+public interface CheckedPredicate<T, E extends Exception> {
     /**
-     * Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
+     * Performs this operation on the given argument.
      *
-     * @return a new instance of the {@link TimeSeriesProcessor} class
+     * @param t the input argument
+     * @throws E a checked exception
      */
-    TimeSeriesProcessor<T> create();
+    boolean test(T t) throws E;
 }
+
+

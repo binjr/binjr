@@ -56,6 +56,17 @@ public final class CheckedLambdas {
         };
     }
 
+
+//    public static <T, E extends Exception> Predicate<T> wrap(CheckedPredicate<T, E> predicate) throws E {
+//        return t -> {
+//            try {
+//                return predicate.test(t);
+//            } catch (Exception exception) {
+//                throw throwActualException(exception);
+//            }
+//        };
+//    }
+
     /**
      * Wraps a {@link CheckedRunnable} inside a {@link Runnable} and rethrow the
      * original exception.

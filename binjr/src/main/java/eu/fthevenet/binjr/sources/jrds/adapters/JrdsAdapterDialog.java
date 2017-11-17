@@ -18,7 +18,7 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.exceptions.CannotInitializeDataAdapterException;
+import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import javafx.beans.binding.Bindings;
 import javafx.geometry.HPos;
@@ -52,7 +52,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
      * @param owner the owner window for the dialog
      */
     public JrdsAdapterDialog(Node owner) {
-        super(owner);
+        super(owner, Mode.URL);
         this.parent.setHeaderText("Connect to a JRDS source");
         this.tabsChoiceBox = new ChoiceBox<>();
         tabsChoiceBox.getItems().addAll(JrdsTreeViewTab.values());
@@ -71,7 +71,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
     @Override
     protected DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException, CannotInitializeDataAdapterException {
         return JrdsDataAdapter.fromUrl(
-                this.urlField.getText(),
+                this.uriField.getText(),
                 ZoneId.of(this.timezoneField.getText()),
                 this.tabsChoiceBox.getValue(),
                 this.extraArgumentTextField.getText());

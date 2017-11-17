@@ -19,9 +19,9 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
-import eu.fthevenet.binjr.data.adapters.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
+import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.workspace.Source;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
@@ -33,6 +33,7 @@ import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
+import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapterDialog;
 import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
 import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.javafx.controls.*;
@@ -340,7 +341,12 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddJrdsSource(Event actionEvent) {
-        getAdapterDlg(new Tab());
+        showAdapterDialog(new Tab(), new JrdsAdapterDialog(root));
+    }
+
+    @FXML
+    public void handleAddCsvSource(ActionEvent actionEvent) {
+        showAdapterDialog(new Tab(), new CsvFileAdapterDialog(root));
     }
 
     @FXML
@@ -542,7 +548,7 @@ public class MainViewController implements Initializable {
                         Workspace wsFromfile = Workspace.from(file);
                         for (Source source : wsFromfile.getSources()) {
                             DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
-                            da.setParams(source.getAdapterParams());
+                            da.initialize(source.getAdapterParams());
                             da.setId(source.getAdapterId());
                             loadAdapters(da);
                         }
@@ -613,8 +619,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void getAdapterDlg(Tab newTab) {
-        DataAdapterDialog dlg = new JrdsAdapterDialog(root);
+    private void showAdapterDialog(Tab newTab, DataAdapterDialog dlg) {
         dlg.showAndWait().ifPresent(da -> {
             newTab.setText(da.getSourceName());
             sourceMaskerPane.setVisible(true);
@@ -629,7 +634,10 @@ public class MainViewController implements Initializable {
                             sourcesTabPane.getSelectionModel().select(newTab);
                         }
                     },
-                    event -> sourceMaskerPane.setVisible(false));
+                    event -> {
+                        sourceMaskerPane.setVisible(false);
+                        Dialogs.notifyException("Unexpected error getting data adapter:", event.getSource().getException(), root);
+                    });
         });
     }
 
@@ -686,6 +694,9 @@ public class MainViewController implements Initializable {
         try {
             WorksheetController current;
             switch (worksheet.getChartType()) {
+                case SCATTER:
+                    current = new ScatterChartWorksheetController(worksheet);
+                    break;
                 case AREA:
                     current = new AreaChartWorksheetController(worksheet);
                     break;
@@ -702,7 +713,7 @@ public class MainViewController implements Initializable {
                 // Attach bindings
                 for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
                     UUID id = s.getBinding().getAdapterId();
-                    DataAdapter<?> da = sourcesAdapters.values()
+                    DataAdapter<?, ?> da = sourcesAdapters.values()
                             .stream()
                             .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                             .findAny()
@@ -835,19 +846,22 @@ public class MainViewController implements Initializable {
                 TimeSeriesBinding<Double> binding = treeItem.getValue();
                 ZonedDateTime toDateTime;
                 ZonedDateTime fromDateTime;
+                ZoneId zoneId;
                 if (getSelectedWorksheetController() != null && getSelectedWorksheetController().getWorksheet() != null) {
                     toDateTime = getSelectedWorksheetController().getWorksheet().getToDateTime();
                     fromDateTime = getSelectedWorksheetController().getWorksheet().getFromDateTime();
+                    zoneId = getSelectedWorksheetController().getWorksheet().getTimeZone();
                 }
                 else {
                     toDateTime = ZonedDateTime.now();
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
+                    zoneId = ZoneId.systemDefault();
                 }
                 Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
                         binding.getGraphType(),
                         fromDateTime,
                         toDateTime,
-                        ZoneId.systemDefault(),
+                        zoneId,
                         binding.getUnitName(),
                         binding.getUnitPrefix());
 
@@ -1039,5 +1053,7 @@ public class MainViewController implements Initializable {
         }
         return seriesControllers.get(selectedTab);
     }
+
+
     //endregion
 }

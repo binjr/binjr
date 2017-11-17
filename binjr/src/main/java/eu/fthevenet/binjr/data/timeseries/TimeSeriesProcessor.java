@@ -32,7 +32,7 @@ import java.util.Optional;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesProcessor<T extends Number> {
+public abstract class TimeSeriesProcessor<T> {
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, T>> data;
 

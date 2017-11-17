@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesTransform<T extends Number> {
+public abstract class TimeSeriesTransform<T> {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
     private final String name;
 

@@ -17,7 +17,8 @@
 
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.data.adapters.exceptions.DataAdapterException;
+import eu.fthevenet.binjr.data.codec.Decoder;
+import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.util.cache.LRUMap;
 import eu.fthevenet.util.io.IOUtils;
 import eu.fthevenet.util.logging.Profiler;
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicLong;
  *
  * @author Frederic Thevenet
  */
-public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAdapter<T> {
+public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends DataAdapter<T, A> {
     public static final int CACHE_SIZE = 32;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
@@ -54,7 +55,7 @@ public abstract class SimpleCachingDataAdapter<T extends Number> extends DataAda
     }
 
     @Override
-    public InputStream getData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
+    public InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
         ByteArrayOutputStream cached = null;
         String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
         if (!bypassCache) {

@@ -15,32 +15,32 @@
  *
  */
 
-package eu.fthevenet.binjr.data.parsers;
+package eu.fthevenet.binjr.data.codec;
 
+import eu.fthevenet.binjr.data.exceptions.DecodingDataFromAdapterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Provides the means to parse data retreived from a data source via a {@link eu.fthevenet.binjr.data.adapters.DataAdapter}
+ * Provides the means to decode data retreived from a data source via a {@link eu.fthevenet.binjr.data.adapters.DataAdapter}
  *
  * @author Frederic Thevenet
  */
-public interface DataParser<T> {
+public interface Decoder<T> {
 
     /**
-     * Parse a stream of data into a map of {@link TimeSeriesProcessor} instances.
+     * Decode a stream of data into a map of {@link TimeSeriesProcessor} instances.
      *
-     * @param in          the input stream to parse.
+     * @param in          the input stream to decode.
      * @param seriesNames the name of the series to extract from the stream
      * @return a map of {@link TimeSeriesProcessor} instances.
-     * @throws IOException    in the event of an IO error
-     * @throws ParseException in the event of an parsing error
+     * @throws IOException                      in the event of an IO error
+     * @throws DecodingDataFromAdapterException in the event of an decoding error
      */
-    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> parse(InputStream in, List<TimeSeriesInfo<T>> seriesNames) throws IOException, ParseException;
+    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> decode(InputStream in, List<TimeSeriesInfo<T>> seriesNames) throws IOException, DecodingDataFromAdapterException;
 }

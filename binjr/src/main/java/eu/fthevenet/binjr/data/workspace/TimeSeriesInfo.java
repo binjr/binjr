@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
-public class TimeSeriesInfo<T extends Number> implements Dirtyable {
+public class TimeSeriesInfo<T> implements Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
@@ -99,7 +99,7 @@ public class TimeSeriesInfo<T extends Number> implements Dirtyable {
      * @param <T>     the type of Y data for that series
      * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
      */
-    public static <T extends Number> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding) {
+    public static <T> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding) {
         if (binding == null) {
             throw new IllegalArgumentException("binding cannot be null");
         }

@@ -324,7 +324,7 @@ public class GithubRelease {
         try {
             return new Version(tagName.replaceAll("^v", ""));
         } catch (IllegalArgumentException e) {
-            logger.error("Could not parse version number from tag: " + tagName, e);
+            logger.error("Could not decode version number from tag: " + tagName, e);
             return Version.emptyVersion;
         }
     }

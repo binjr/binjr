@@ -25,7 +25,8 @@ package eu.fthevenet.binjr.data.workspace;
 public enum ChartType {
     STACKED("Stacked area chart"),
     AREA("Area chart"),
-    LINE("Line chart");
+    LINE("Line chart"),
+    SCATTER("Scatter chart");
 
     private String label;
 

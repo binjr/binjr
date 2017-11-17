@@ -15,21 +15,26 @@
  *
  */
 
-package eu.fthevenet.binjr.data.timeseries;
+package eu.fthevenet.binjr.data.codec;
 
-import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * A functional interface to be used as a factory for {@link TimeSeriesProcessor} of type {@code T}
- *
- * @author Frederic Thevenet
- */
-@FunctionalInterface
-public interface TimeSeriesProcessorFactory<T> {
-    /**
-     * Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
-     *
-     * @return a new instance of the {@link TimeSeriesProcessor} class
-     */
-    TimeSeriesProcessor<T> create();
+public class DataSample<T> {
+    private final ZonedDateTime timeStamp;
+    private final Map<String, T> cells;
+
+    public DataSample(ZonedDateTime timeStamp) {
+        this.timeStamp = timeStamp;
+        this.cells = new HashMap<>();
+    }
+
+    public ZonedDateTime getTimeStamp() {
+        return timeStamp;
+    }
+
+    public Map<String, T> getCells() {
+        return cells;
+    }
 }

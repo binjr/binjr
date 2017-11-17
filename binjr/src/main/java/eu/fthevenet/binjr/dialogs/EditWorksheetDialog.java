@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class EditWorksheetDialog<T extends Number> extends Dialog<Worksheet> {
+public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
     private static final Logger logger = LogManager.getLogger(EditWorksheetDialog.class);
     private static final String BINJR_SUGGEST = "binjr/suggest";
     // private Worksheet<T> result = null;

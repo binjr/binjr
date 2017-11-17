@@ -66,7 +66,8 @@ public class AppEnvironment {
                     try {
                         return new Version(value);
                     } catch (IllegalArgumentException e) {
-                        logger.error("Could not parse version number: " + value, e);
+                        logger.error("Could not decode version number: " + value + ": " + e.getMessage());
+                        logger.debug(() -> "Full stack", e);
                     }
                 }
             }
@@ -86,7 +87,7 @@ public class AppEnvironment {
                 try {
                     return Long.valueOf(value);
                 } catch (NumberFormatException e) {
-                    logger.error("Could not parse build number: " + value);
+                    logger.error("Could not decode build number: " + value + ": " + e.getMessage());
                     logger.debug(() -> "Full stack", e);
                 }
             }
@@ -145,7 +146,8 @@ public class AppEnvironment {
             try {
                 return new Manifest(new URL(manifestPath).openStream());
             } catch (IOException e) {
-                logger.error("Error extracting manifest from jar", e);
+                logger.error("Error extracting manifest from jar: " + e.getMessage());
+                logger.debug(() -> "Full stack", e);
             }
         }
         logger.warn("Could not extract MANIFEST from jar!");
