@@ -101,6 +101,9 @@ public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
             formatter.valueProperty().bindBidirectional(resultWorksheet.timeZoneProperty());
             timezoneField.setTextFormatter(formatter);
 
+            fromDatePicker.zoneIdProperty().bind(resultWorksheet.timeZoneProperty());
+            toDatePicker.zoneIdProperty().bind(resultWorksheet.timeZoneProperty());
+
             fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
             toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());
             chartTypeChoice.getItems().setAll(Arrays.stream(ChartType.values()).collect(Collectors.toSet()));
