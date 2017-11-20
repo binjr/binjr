@@ -254,7 +254,9 @@ public class MainViewController implements Initializable {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
             }
-            Platform.exit();
+            else {
+                Platform.exit();
+            }
         });
         stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
         stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
