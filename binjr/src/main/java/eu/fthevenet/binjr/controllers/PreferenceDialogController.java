@@ -29,7 +29,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.paint.Color;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
@@ -42,6 +41,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.prefs.BackingStoreException;
 
 /**
  * The controller for the preference view.
@@ -109,7 +109,16 @@ public class PreferenceDialogController implements Initializable {
         formatter.valueProperty().bindBidirectional(prefs.downSamplingThresholdProperty());
         uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
         uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
-        prefs.userInterfaceThemeProperty().bind(uiThemeChoiceBox.getSelectionModel().selectedItemProperty());
+        prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                uiThemeChoiceBox.getSelectionModel().select(newValue);
+            }
+        });
+        uiThemeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                prefs.setUserInterfaceTheme(newValue);
+            }
+        });
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
     }
@@ -117,12 +126,11 @@ public class PreferenceDialogController implements Initializable {
     public void handleCheckForUpdate(ActionEvent actionEvent) {
         Button btn = (Button) actionEvent.getSource();
         btn.setDisable(true);
-        printToTextFlow("Checking for updates...", Color.DIMGRAY);
+        printToTextFlow("Checking for updates...", "#C2C2C2");
 
         UpdateManager.getInstance().asyncForcedCheckForUpdate(githubRelease -> {
                     updateFlow.getChildren().clear();
                     Hyperlink latestReleaseLink = new Hyperlink("Version " + githubRelease.getVersion().toString() + " is available.");
-                    latestReleaseLink.setTextFill(Color.valueOf("#4BACC6"));
                     latestReleaseLink.setOnAction(event -> {
                         try {
                             Dialogs.launchUrlInExternalBrowser(githubRelease.getHtmlUrl());
@@ -139,7 +147,7 @@ public class PreferenceDialogController implements Initializable {
                 },
                 () -> {
                     btn.setDisable(false);
-                    printToTextFlow("Could not check for update!", Color.RED);
+                    printToTextFlow("Could not check for update!", "#E81123");
                 });
     }
 
@@ -147,11 +155,11 @@ public class PreferenceDialogController implements Initializable {
         printToTextFlow(text, null);
     }
 
-    private void printToTextFlow(String text, Color color) {
+    private void printToTextFlow(String text, String color) {
         updateFlow.getChildren().clear();
         Label l = new Label(text);
         if (color != null) {
-            l.setTextFill(color);
+            l.setStyle("-fx-text-fill:" + color + ";");
         }
         l.setWrapText(true);
         updateFlow.getChildren().add(l);
@@ -161,11 +169,23 @@ public class PreferenceDialogController implements Initializable {
         hide(Duration.millis(0));
     }
 
+
     private void hide(Duration delay) {
         Node n = root.getParent();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);
         openNav.setToX(-MainViewController.SETTINGS_PANE_DISTANCE);
         openNav.play();
+    }
+
+    public void handleResetSettings(ActionEvent actionEvent) {
+        try {
+
+            if (Dialogs.confirmDialog(root, "Restore all settings to their default value.", "Are you sure?") == ButtonType.YES) {
+                GlobalPreferences.getInstance().reset();
+            }
+        } catch (BackingStoreException e) {
+            Dialogs.notifyException("Could not restore settings to default", e, root);
+        }
     }
 }

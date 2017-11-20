@@ -19,8 +19,6 @@
 
 <?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <DialogPane fx:id="dialogPane" headerText="Create a new worksheet" prefHeight="337.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <content>
@@ -63,10 +61,6 @@
         <ButtonType fx:constant="OK"/>
     </buttonTypes>
     <graphic>
-        <ImageView fitHeight="48.0" fitWidth="48.0">
-            <image>
-                <Image url="@/images/chart_96.png"/>
-            </image>
-        </ImageView>
+        <Region styleClass="chart-icon,dialog-icon"/>
     </graphic>
 </DialogPane>

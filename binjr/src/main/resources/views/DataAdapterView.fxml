@@ -18,8 +18,6 @@
   -->
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.*?>
 <DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <content>
@@ -50,10 +48,6 @@
         <ButtonType fx:constant="OK"/>
     </buttonTypes>
     <graphic>
-        <ImageView fitHeight="48.0" fitWidth="48.0">
-            <image>
-                <Image url="@/images/plug_96.png"/>
-            </image>
-        </ImageView>
+        <Region styleClass="source-icon,dialog-icon"/>
     </graphic>
 </DialogPane>

@@ -1,3 +1,12 @@
+{
+    -binjr-background-color: #204656;
+    -binjr-dark-blue-color: #336F87;
+    -binjr-blue-color: #4BACC6;
+    -binjr-light-blue-color: #92CDDC;
+    -binjr-lighter-blue-color: #B7DEE8;
+    -binjr-foreground-color: #DAEEF3;
+}
+
 /********************************
 *      button icons
 ********************************/
@@ -159,7 +168,7 @@
     -fx-background-color:black;
  }
 
- .command-bar:expanded  .menu-button .label,
+ .command-bar:expanded .menu-button .label,
  .command-bar:expanded .button {
     -fx-margins:5;
     -fx-content-display:left;
@@ -176,9 +185,17 @@
      -fx-alignment: center;
    }
 
- .command-bar  .menu-item {
+ .command-bar .menu-item {
       -fx-padding: 10 10 10 17 ;
   }
+
+.command-bar .hyperlink {
+    -fx-alignment: center_left;
+    -fx-graphic-text-gap:20;
+    -fx-text-fill: -binjr-blue-color;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
+}
 
 /*** Color picker ***/
 

@@ -23,8 +23,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Duration;
@@ -224,16 +223,32 @@ public class Dialogs {
      * @return the {@link ButtonType} for the button that was chosen by the user
      */
     public static ButtonType confirmSaveDialog(Node node, String fileName) {
+        String msg = "Workspace \"" + fileName + "\" contains unsaved modifications.";
+        Region icon = new Region();
+        icon.getStyleClass().addAll("dialog-icon", "fileSave-icon");
+        return confirmDialog(node, msg, "Save the changes?", icon, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+    }
+
+    public static ButtonType confirmDialog(Node node, String header, String message, ButtonType... buttons) {
+        return confirmDialog(node, header, message, null, buttons);
+    }
+
+    public static ButtonType confirmDialog(Node node, String header, String content, Node icon, ButtonType... buttons) {
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.initOwner(Dialogs.getStage(node));
         setAlwaysOnTop(dlg);
-        dlg.setTitle("Save");
-        dlg.getDialogPane().setHeaderText("Do you want to save changes to " + fileName + "?");
-        ImageView img = new ImageView(new Image(Dialogs.class.getResourceAsStream("/images/save_96.png")));
-        img.setFitHeight(32);
-        img.setFitWidth(32);
-        dlg.getDialogPane().setGraphic(img);
-        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+        dlg.setTitle("binjr");
+        dlg.getDialogPane().setHeaderText(header);
+        dlg.getDialogPane().setContentText(content);
+        if (icon == null) {
+            icon = new Region();
+            icon.getStyleClass().addAll("dialog-icon", "help-icon");
+        }
+        dlg.getDialogPane().setGraphic(icon);
+        if (buttons == null || buttons.length == 0) {
+            buttons = new ButtonType[]{ButtonType.YES, ButtonType.NO};
+        }
+        dlg.getDialogPane().getButtonTypes().addAll(buttons);
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 
