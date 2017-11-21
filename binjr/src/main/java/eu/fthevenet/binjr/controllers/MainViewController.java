@@ -18,8 +18,10 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
+import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.workspace.Source;
@@ -33,8 +35,6 @@ import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
-import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapterDialog;
-import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
 import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
@@ -53,6 +53,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
@@ -145,6 +146,9 @@ public class MainViewController implements Initializable {
     private StackPane settingsPane;
     @FXML
     private StackPane worksheetArea;
+    @FXML
+    private Menu addSourceMenu;
+
     private double collapsedWidth = 48;
     private double expandedWidth = 200;
     private int animationDuration = 50;
@@ -188,7 +192,7 @@ public class MainViewController implements Initializable {
             StageAppearanceManager.getInstance().register(stage);
         });
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
-        sourcesTabPane.setOnNewTabAction(this::handleAddJrdsSource);
+        sourcesTabPane.setOnNewTabAction(this::handleAddSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             invalidateSearchResults();
             if (newValue != null) {
@@ -228,7 +232,7 @@ public class MainViewController implements Initializable {
             invalidateSearchResults();
             findNext();
         });
-
+        this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
     }
 
@@ -342,13 +346,11 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    protected void handleAddJrdsSource(Event actionEvent) {
-        showAdapterDialog(new Tab(), new JrdsAdapterDialog(root));
-    }
-
-    @FXML
-    public void handleAddCsvSource(ActionEvent actionEvent) {
-        showAdapterDialog(new Tab(), new CsvFileAdapterDialog(root));
+    private void handleAddSource(Event event) {
+        Node sourceNode = (Node) event.getSource();
+        ContextMenu sourceMenu = new ContextMenu();
+        sourceMenu.getItems().addAll(populateSourceMenu());
+        sourceMenu.show(sourceNode, Side.BOTTOM, 0, 0);
     }
 
     @FXML
@@ -444,6 +446,24 @@ public class MainViewController implements Initializable {
     }
 
     //region private members
+    private Collection<MenuItem> populateSourceMenu() {
+        List<MenuItem> menuItems = new ArrayList<>();
+        for (DataAdapterFactory.DataAdapterInfo i : DataAdapterFactory.getInstance().getAdapterInfo()) {
+            MenuItem menuItem = new MenuItem(i.getName());
+            menuItem.setOnAction(eventHandler -> {
+                try {
+                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(i.getKey(), root));
+                } catch (NoAdapterFoundException e) {
+                    Dialogs.notifyException("Could not find source adapter " + i.getName(), e);
+                } catch (CannotInitializeDataAdapterException e) {
+                    Dialogs.notifyException("Could not initialize source adapter " + i.getName(), e);
+                }
+            });
+            menuItems.add(menuItem);
+        }
+        return menuItems;
+    }
+
     private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
         if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
             return null;
@@ -549,7 +569,7 @@ public class MainViewController implements Initializable {
             AsyncTaskManager.getInstance().submit(() -> {
                         Workspace wsFromfile = Workspace.from(file);
                         for (Source source : wsFromfile.getSources()) {
-                            DataAdapter da = (DataAdapter) source.getAdapterClass().newInstance();
+                            DataAdapter da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
                             da.initialize(source.getAdapterParams());
                             da.setId(source.getAdapterId());
                             loadAdapters(da);
@@ -1034,7 +1054,7 @@ public class MainViewController implements Initializable {
                         addToCurrentWorksheet(item);
                     }
                     else {
-                        logger.warn("Unsupported drag and drop tansfert mode: " + event.getAcceptedTransferMode());
+                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
                     }
                 }
                 else {
@@ -1055,7 +1075,5 @@ public class MainViewController implements Initializable {
         }
         return seriesControllers.get(selectedTab);
     }
-
-
     //endregion
 }

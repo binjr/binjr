@@ -26,12 +26,12 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
     <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
                HBox.hgrow="ALWAYS">
         <AnchorPane SplitPane.resizableWithParent="false">
             <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-                <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddJrdsSource" styleClass="add-source-background-icon" wrapText="true">
+                <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddSource" styleClass="add-source-background-icon" wrapText="true">
                     <graphic>
                         <Region styleClass="addSource-icon"/>
                     </graphic>
@@ -42,6 +42,14 @@
                             </font>
                         </Tooltip>
                     </tooltip>
+                    <!--<contextMenu>-->
+                    <!--<ContextMenu>-->
+                    <!--<items>-->
+                    <!--<MenuItem mnemonicParsing="false" text="Add JRDS source" onAction="#handleAddJrdsSource"/>-->
+                    <!--<MenuItem mnemonicParsing="false" text="Add CSV file" onAction="#handleAddCsvSource"/>-->
+                    <!--</items>-->
+                    <!--</ContextMenu>-->
+                    <!--</contextMenu>-->
                 </Label>
                 <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>
@@ -97,7 +105,7 @@
                 <tabs>
                 </tabs>
             </TearableTabPane>
-            <Label fx:id="addWorksheetLabel" visible="false" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" wrapText="true">
+            <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" visible="false" wrapText="true">
                 <graphic>
                     <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"/>
                 </graphic>
@@ -211,16 +219,16 @@
             </tooltip>
             <items>
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                    <MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">
-                        <accelerator>
-                            <KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                        </accelerator>
-                    </MenuItem>
-                    <MenuItem mnemonicParsing="false" onAction="#handleAddCsvSource" text="CSV File">
-                        <accelerator>
-                            <KeyCodeCombination alt="UP" code="V" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                        </accelerator>
-                    </MenuItem>
+                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">-->
+                    <!--<accelerator>-->
+                    <!--<KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
+                    <!--</accelerator>-->
+                    <!--</MenuItem>-->
+                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddCsvSource" text="CSV File">-->
+                    <!--<accelerator>-->
+                    <!--<KeyCodeCombination alt="UP" code="V" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
+                    <!--</accelerator>-->
+                    <!--</MenuItem>-->
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addSource-icon"/>

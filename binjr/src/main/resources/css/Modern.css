@@ -1,7 +1,7 @@
 {
     -binjr-background-color: #204656;
     -binjr-window-background-color: #F4F4F4;
-    -binjr-control-background-color:#E8E8E8;
+    -binjr-control-background-color: #E8E8E8;
     -binjr-button-background-color: transparent;
     -binjr-color-lighter-gray: #E1E1E1;
     -binjr-color-light-gray: #C2C2C2;
@@ -680,10 +680,11 @@
     -fx-text-fill:white;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
+    -fx-wrap-text: true;
 }
 
 .command-bar .hyperlink {
-     -fx-alignment: center_left;
+    -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill: -binjr-blue-color;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
