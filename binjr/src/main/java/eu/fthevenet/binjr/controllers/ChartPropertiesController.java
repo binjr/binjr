@@ -27,15 +27,14 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.net.URL;
+import java.time.ZoneId;
 import java.util.ResourceBundle;
 
 /**
@@ -68,6 +67,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
+    @FXML
+    private TextField timezoneField;
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
         this.worksheet = worksheet;
@@ -121,6 +122,21 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
+
+        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
+            @Override
+            public String toString(ZoneId object) {
+                return object.toString();
+            }
+
+            @Override
+            public ZoneId fromString(String string) {
+                return ZoneId.of(string);
+            }
+        });
+        formatter.valueProperty().bind(worksheet.timeZoneProperty());
+        timezoneField.setTextFormatter(formatter);
+        //  timezoneField.textProperty().bind(worksheet.timeZoneProperty());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {

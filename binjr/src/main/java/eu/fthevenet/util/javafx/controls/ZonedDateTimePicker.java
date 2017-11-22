@@ -109,6 +109,12 @@ public class ZonedDateTimePicker extends DatePicker {
                 getEditor().commitValue();
             }
         });
+
+        this.zoneId.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                dateTimeValue.setValue(dateTimeValue.get().withZoneSameInstant(newValue));
+            }
+        });
     }
 
     private DateTimeFormatter getFormatter() {

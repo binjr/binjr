@@ -729,7 +729,7 @@ public class MainViewController implements Initializable {
                     current = new LineChartWorksheetController(worksheet);
                     break;
                 default:
-                    throw new UnsupportedOperationException("Unsupported chart");
+                    throw new UnsupportedOperationException("Unsupported chart type");
             }
             try {
                 // Attach bindings

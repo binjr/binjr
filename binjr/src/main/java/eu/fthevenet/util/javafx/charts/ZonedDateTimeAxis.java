@@ -389,7 +389,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                     break;
             }
         }
-        return formatter.format(date);
+        return formatter.withZone(zoneId).format(date);
     }
 
     /**
