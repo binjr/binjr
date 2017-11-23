@@ -40,7 +40,7 @@ public class Source implements Dirtyable {
     @IsDirtyable
     private String name;
     @XmlElement(name = "Adapter")
-    private Class adapterClass;
+    private String adapterClassName;
     @XmlElementWrapper(name = "Parameters")
     @XmlElements(@XmlElement(name = "Parameter"))
     private Map<String, String> adapterParams;
@@ -60,7 +60,7 @@ public class Source implements Dirtyable {
         }
         Source newSource = new Source();
         newSource.setName(adapter.getSourceName());
-        newSource.setAdapterClass(adapter.getClass());
+        newSource.setAdapterClassName(adapter.getClass().getName());
         newSource.setAdapterParams(adapter.getParams());
         newSource.setAdapterId(adapter.getId());
         return newSource;
@@ -96,8 +96,8 @@ public class Source implements Dirtyable {
      *
      * @return the name of the class that implements the {@link DataAdapter} for the {@link Source}
      */
-    public Class getAdapterClass() {
-        return adapterClass;
+    public String getAdapterClassName() {
+        return adapterClassName;
     }
 
     /**
@@ -143,8 +143,8 @@ public class Source implements Dirtyable {
     }
 
 
-    private void setAdapterClass(Class adapterClass) {
-        this.adapterClass = adapterClass;
+    private void setAdapterClassName(String adapterClassName) {
+        this.adapterClassName = adapterClassName;
     }
 
     private void setAdapterParams(Map<String, String> adapterParams) {

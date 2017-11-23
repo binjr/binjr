@@ -40,7 +40,7 @@ import java.time.format.FormatStyle;
 public class ZonedDateTimePicker extends DatePicker {
     private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
     private final Property<ZoneId> zoneId;
-    private ObjectProperty<ZonedDateTime> dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now());
+    private final ObjectProperty<ZonedDateTime> dateTimeValue;//
 
     /**
      * Initializes a new instance of the {@link ZonedDateTimePicker} class with the system's default timezone
@@ -49,13 +49,19 @@ public class ZonedDateTimePicker extends DatePicker {
         this(ZoneId.systemDefault());
     }
 
+
+    public ZonedDateTimePicker(ZoneId zoneId) {
+        this(new SimpleObjectProperty<>(zoneId));
+    }
+
     /**
      * Initializes a new instance of the {@link ZonedDateTimePicker} class with the provided timezone
      *
-     * @param zoneId the timezone id to use in the control
+     * @param zoneIdProperty the timezone id to use in the control
      */
-    public ZonedDateTimePicker(ZoneId zoneId) {
-        this.zoneId = new SimpleObjectProperty<>(zoneId);
+    public ZonedDateTimePicker(SimpleObjectProperty<ZoneId> zoneIdProperty) {
+        this.zoneId = zoneIdProperty;
+        dateTimeValue = new SimpleObjectProperty<>(ZonedDateTime.now(zoneIdProperty.get()));
         getStyleClass().add("datetime-picker");
         setConverter(new StringConverter<LocalDate>() {
             public String toString(LocalDate object) {
@@ -71,6 +77,7 @@ public class ZonedDateTimePicker extends DatePicker {
                 }
                 try {
                     dateTimeValue.set(ZonedDateTime.parse(stringValue, getFormatter()));
+                    logger.trace(() -> "zonedId for dateTimeValue=" + dateTimeValue.get().getZone());
                 } catch (Exception ex) {
                     logger.debug("Error parsing date", ex);
                     throw ex;
@@ -100,6 +107,12 @@ public class ZonedDateTimePicker extends DatePicker {
         getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 getEditor().commitValue();
+            }
+        });
+
+        this.zoneId.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                dateTimeValue.setValue(dateTimeValue.get().withZoneSameInstant(newValue));
             }
         });
     }

@@ -83,7 +83,6 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 
-
     @Override
     protected DataAdapter getDataAdapter() throws FileNotFoundException, DateTimeException, DataAdapterException {
         if (!Files.exists(Paths.get(uriField.getText()))) {

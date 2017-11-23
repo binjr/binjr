@@ -50,7 +50,6 @@ import java.util.stream.Collectors;
 public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
     private static final Logger logger = LogManager.getLogger(EditWorksheetDialog.class);
     private static final String BINJR_SUGGEST = "binjr/suggest";
-    // private Worksheet<T> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final Set<String> suggestedUnits;
     private static final String SUGGEST_WORKSHEET_UNITS = "suggest_worksheet_units";
@@ -100,6 +99,9 @@ public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
             });
             formatter.valueProperty().bindBidirectional(resultWorksheet.timeZoneProperty());
             timezoneField.setTextFormatter(formatter);
+
+            fromDatePicker.zoneIdProperty().bind(resultWorksheet.timeZoneProperty());
+            toDatePicker.zoneIdProperty().bind(resultWorksheet.timeZoneProperty());
 
             fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
             toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());

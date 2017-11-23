@@ -290,6 +290,8 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
         }
     }
 
+    //endregion
+
     public Collection<String> discoverFilters() throws DataAdapterException {
         Gson gson = new Gson();
         try {

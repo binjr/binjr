@@ -70,7 +70,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.FormatStyle;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
@@ -250,6 +249,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private void initChartPane() {
         //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
+        xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
         StableTicksAxis yAxis;
@@ -302,7 +302,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //endregion
 
         //region *** Crosshair ***
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;//  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
 
@@ -390,7 +390,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     public void showPropertiesPane(boolean show) {
         this.chartPropertiesButton.setSelected(show);
     }
-
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         if (this.chartTypeListener != null) {

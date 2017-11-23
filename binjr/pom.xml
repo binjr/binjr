@@ -22,13 +22,19 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
         <name>Frederic Thevenet</name>
         <url>http://www.fthevenet.eu/</url>
     </organization>
+    <developers>
+        <developer>
+            <name>Frederic Thevenet</name>
+            <url>http://www.fthevenet.eu/</url>
+        </developer>
+    </developers>
     <properties>
         <detailedDescription>binjr is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.</detailedDescription>
         <license.name>Apache Software License 2.0</license.name>

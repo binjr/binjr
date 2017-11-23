@@ -28,11 +28,12 @@ import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
 /**
- * Stores the global user preferences for the application.
+ * Stores the global user prefs for the application.
  *
  * @author Frederic Thevenet
  */
@@ -42,38 +43,39 @@ public class GlobalPreferences {
     public static final String HTTP_GITHUB_REPO = "https://github.com/fthevenet/binjr";
 
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
+    private static final String BINJR_GLOBAL = "binjr/global";
     private static final String CHART_ANIMATION_ENABLED = "enableChartAnimation";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
     private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
-    private static final String BINJR_GLOBAL = "binjr/global";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
     private static final String CHECK_FOR_UPDATE_ON_START_UP = "checkForUpdateOnStartUp";
     private static final String UI_THEME_NAME = "userInterfaceTheme";
     private static final String RECENT_FILES = "recentFiles";
-    private static final int MAX_RECENT_FILES = 20;
     private static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
     private static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
     private static final String SHOW_AREA_OUTLINE = "showAreaOutline";
     private static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
+    private static final int MAX_RECENT_FILES = 20;
 
-    private BooleanProperty loadLastWorkspaceOnStartup;
-    private BooleanProperty downSamplingEnabled;
-    private IntegerProperty downSamplingThreshold;
-    private BooleanProperty chartAnimationEnabled;
-    private Preferences prefs;
-    private StringProperty mostRecentSaveFolder;
-    private Property<Path> mostRecentSavedWorkspace;
-    private BooleanProperty checkForUpdateOnStartUp;
-    private Property<UserInterfaceThemes> userInterfaceTheme;
+    private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
+    private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
+    private final IntegerProperty downSamplingThreshold = new SimpleIntegerProperty();
+    private final BooleanProperty chartAnimationEnabled = new SimpleBooleanProperty();
+    private final StringProperty mostRecentSaveFolder = new SimpleStringProperty();
+    private final Property<Path> mostRecentSavedWorkspace = new SimpleObjectProperty<>();
+    private final BooleanProperty checkForUpdateOnStartUp = new SimpleBooleanProperty();
+    private final Property<UserInterfaceThemes> userInterfaceTheme = new SimpleObjectProperty<>();
+    ;
+    private final BooleanProperty horizontalMarkerOn = new SimpleBooleanProperty();
+    private final BooleanProperty verticalMarkerOn = new SimpleBooleanProperty();
+    private final BooleanProperty showAreaOutline = new SimpleBooleanProperty();
+    private final DoubleProperty defaultGraphOpacity = new SimpleDoubleProperty();
+    private final BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
+    private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
+    private final Preferences prefs;
     private Deque<String> recentFiles;
-    private BooleanProperty horizontalMarkerOn;
-    private BooleanProperty verticalMarkerOn;
-    private BooleanProperty showAreaOutline;
-    private DoubleProperty defaultGraphOpacity;
-    private BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
-    private BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
 
     public Boolean isShiftPressed() {
         return shiftPressed.get();
@@ -104,37 +106,51 @@ public class GlobalPreferences {
     }
 
     private GlobalPreferences() {
-        prefs = Preferences.userRoot().node(BINJR_GLOBAL);
-        mostRecentSaveFolder = new SimpleStringProperty(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
+        this.prefs = Preferences.userRoot().node(BINJR_GLOBAL);
+        this.load();
         mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.put(MOST_RECENT_SAVE_FOLDER, newValue);
             }
         });
-        downSamplingEnabled = new SimpleBooleanProperty(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
-        downSamplingThreshold = new SimpleIntegerProperty(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
-        chartAnimationEnabled = new SimpleBooleanProperty(prefs.getBoolean(CHART_ANIMATION_ENABLED, true));
         chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
-        mostRecentSavedWorkspace = new SimpleObjectProperty<>(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
-        loadLastWorkspaceOnStartup = new SimpleBooleanProperty(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
-        String recentFileString = prefs.get(RECENT_FILES, "");
-        recentFiles = new ArrayDeque<>(Arrays.stream(recentFileString.split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
-        userInterfaceTheme = new SimpleObjectProperty<>(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
-        checkForUpdateOnStartUp = new SimpleBooleanProperty(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
-        horizontalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
-        verticalMarkerOn = new SimpleBooleanProperty(prefs.getBoolean(VERTICAL_MARKER_ON, true));
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
-        showAreaOutline = new SimpleBooleanProperty(prefs.getBoolean(SHOW_AREA_OUTLINE, true));
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
-        defaultGraphOpacity = new SimpleDoubleProperty(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
+
+    }
+
+    private void load() {
+        recentFiles = new ArrayDeque<>(Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
+        showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, false));
+        defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
+        verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
+        horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
+        checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
+        userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
+        loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
+        mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
+        chartAnimationEnabled.setValue(prefs.getBoolean(CHART_ANIMATION_ENABLED, false));
+        downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
+        downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
+        mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
+    }
+
+    /**
+     * Reset all prefs to their default values
+     *
+     * @throws BackingStoreException if an error occurred while trying to clear the prefs backing store.
+     */
+    public void reset() throws BackingStoreException {
+        prefs.clear();
+        this.load();
     }
 
     /**

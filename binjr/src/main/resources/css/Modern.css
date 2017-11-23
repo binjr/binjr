@@ -1,8 +1,7 @@
 {
-    -binjr-command-bar-bg-color: #204656;
-    -binjr-command-bar-accent-color: #336F87;
+    -binjr-background-color: #204656;
     -binjr-window-background-color: #F4F4F4;
-    -binjr-control-background-color:#E8E8E8;
+    -binjr-control-background-color: #E8E8E8;
     -binjr-button-background-color: transparent;
     -binjr-color-lighter-gray: #E1E1E1;
     -binjr-color-light-gray: #C2C2C2;
@@ -11,10 +10,15 @@
     -binjr-color-darker-gray: #333333;
     -binjr-color-red: #E81123;
     -binjr-color-light-red: #F1707A;
+    -binjr-dark-blue-color: #336F87;
+    -binjr-blue-color: #4BACC6;
+    -binjr-light-blue-color: #92CDDC;
+    -binjr-lighter-blue-color: #B7DEE8;
+    -binjr-foreground-color: #DAEEF3;
 }
 
 .column-bold-text{
-    /*-fx-text-fill: -binjr-command-bar-bg-color;*/
+    /*-fx-text-fill: -binjr-background-color;*/
     -fx-font-weight:bold;
 }
 
@@ -554,7 +558,7 @@
   Command bar
   ***************************/
  .command-bar {
-    -fx-background-color: -binjr-command-bar-bg-color;
+    -fx-background-color: -binjr-background-color;
   /*  -fx-pref-width: 48;*/
   /*  -fx-min-width: 48;*/
  }
@@ -580,13 +584,13 @@
 .command-bar .button:hover,
 .command-bar .toggle-button:hover,
 .command-bar .menu-button:hover {
-    -fx-background-color:-binjr-command-bar-accent-color;
+    -fx-background-color: -binjr-dark-blue-color;
 }
 
 
 .command-bar .button:hover:pressed,
 .command-bar .menu-button:hover:pressed {
-    -fx-background-color:#4BACC6;
+    -fx-background-color: -binjr-blue-color;
     -fx-text-fill: white;
 }
 
@@ -599,13 +603,13 @@
 
 .command-bar .toggle-button:selected,
 .command-bar .menu-button:selected {
-     -fx-background-color: -binjr-command-bar-accent-color;
+     -fx-background-color:  -binjr-dark-blue-color;
      -fx-text-fill: white;
 }
 
 .command-bar .toggle-button:selected:hover,
 .command-bar .menu-button:selected:hover {
-     -fx-background-color: -binjr-command-bar-accent-color;
+     -fx-background-color:  -binjr-dark-blue-color;
      -fx-border-color:-binjr-color-dark-gray;
      -fx-border-width:1;
      -fx-text-fill: white;
@@ -643,6 +647,8 @@
     -fx-font-size: 11pt;
 }
 
+
+
 .command-bar .square-button {
     -fx-text-fill:white;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
@@ -652,14 +658,15 @@
 .command-bar .border-button {
     -fx-border-width:2;
     -fx-border-color:white;
+     -fx-font-size: 10pt;
 }
 
 .command-bar .border-button:hover:pressed,
 .command-bar .border-button:hover {
-    -fx-border-color:#4BACC6;
+    -fx-border-color: -binjr-blue-color;
 }
 
-.command-bar  .titled-pane{
+.command-bar .titled-pane{
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill:white;
@@ -671,6 +678,15 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill:white;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
+    -fx-wrap-text: true;
+}
+
+.command-bar .hyperlink {
+    -fx-alignment: center_left;
+    -fx-graphic-text-gap:20;
+    -fx-text-fill: -binjr-blue-color;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
@@ -688,10 +704,10 @@
     -fx-fill-color: red;
 }
 
-.command-bar  .content,
+.command-bar .content,
 .command-bar .scroll-pane .viewport,
 .command-bar .title {
-    -fx-background-color: -binjr-command-bar-bg-color;
+    -fx-background-color: -binjr-background-color;
     -fx-border-width:0;
   }
 
@@ -718,7 +734,7 @@
 /*** Menu ***/
 
 .command-bar .context-menu {
-    -fx-background-color: -binjr-command-bar-bg-color;
+    -fx-background-color: -binjr-background-color;
     -fx-text-fill:white;
     -fx-border-color: white;
     -fx-border-style: solid;
@@ -741,11 +757,11 @@
 .command-bar .menu-item:focused {
     -fx-content-display:left;
     -fx-background: -fx-accent;
-    -fx-background-color: -binjr-command-bar-accent-color;
+    -fx-background-color:  -binjr-dark-blue-color;
 }
 
 .command-bar .menu-item:pressed {
-    -fx-background-color: #4BACC6;
+    -fx-background-color:  -binjr-blue-color;
 }
 
 .command-bar .pane-title {
@@ -774,8 +790,8 @@
 
 
 .command-bar .choice-box:hover {
-    -fx-background-color: -binjr-command-bar-accent-color;
-     -fx-border-color:#4BACC6;
+    -fx-background-color:  -binjr-dark-blue-color;
+     -fx-border-color: -binjr-blue-color;
 }
 
 .command-bar .choice-box:disabled {
@@ -895,7 +911,7 @@
 }
 
 .toggle-switch:selected .thumb-area{
-    -fx-background-color: #4BACC6;
+    -fx-background-color:  -binjr-blue-color;
      /*linear-gradient(to bottom, derive(-fx-text-box-border, -20%), derive(-fx-text-box-border, -30%)),
                             linear-gradient(to bottom, derive(#0b99c9, 30%), #0b99c9);*/
     -fx-background-insets: 0, 1;
