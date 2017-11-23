@@ -70,7 +70,7 @@
                 <Label text="Timezone"/>
                 <VBox>
                     <children>
-                        <TextField fx:id="timezoneField" editable="false"/>
+                        <TextField fx:id="timezoneField"/>
                     </children>
                 </VBox>
             </VBox>

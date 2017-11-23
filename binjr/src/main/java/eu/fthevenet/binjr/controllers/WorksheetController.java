@@ -249,6 +249,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private void initChartPane() {
         //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
+        xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
         StableTicksAxis yAxis;

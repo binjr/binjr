@@ -32,6 +32,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import org.controlsfx.control.ToggleSwitch;
+import org.controlsfx.control.textfield.TextFields;
 
 import java.net.URL;
 import java.time.ZoneId;
@@ -134,9 +135,10 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
                 return ZoneId.of(string);
             }
         });
-        formatter.valueProperty().bind(worksheet.timeZoneProperty());
+        formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
         timezoneField.setTextFormatter(formatter);
-        //  timezoneField.textProperty().bind(worksheet.timeZoneProperty());
+
+        TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
 
         visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {

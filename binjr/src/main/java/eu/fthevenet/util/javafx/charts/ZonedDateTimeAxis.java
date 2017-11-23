@@ -23,10 +23,7 @@ package eu.fthevenet.util.javafx.charts;
  * THE SOFTWARE.
  */
 
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ObjectPropertyBase;
-import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.*;
 import javafx.scene.chart.Axis;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
@@ -89,7 +86,8 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             return "tickLabelFormatter";
         }
     };
-    private final ZoneId zoneId;
+
+    private final Property<ZoneId> zoneId;
 
     /**
      * Stores the min and max date of the list of dates which is used.
@@ -146,11 +144,11 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
      * Default constructor. By default the lower and upper bound are calculated by the data.
      */
     public ZonedDateTimeAxis() {
-        this.zoneId = ZoneId.systemDefault();
+        this.zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
     }
 
     public ZonedDateTimeAxis(ZoneId zoneId) {
-        this.zoneId = zoneId;
+        this.zoneId = new SimpleObjectProperty<>(zoneId);
     }
 
     /**
@@ -183,7 +181,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         super.invalidateRange(list);
         Collections.sort(list);
         if (list.isEmpty()) {
-            minDate = maxDate = ZonedDateTime.now(zoneId);
+            minDate = maxDate = ZonedDateTime.now(zoneId.getValue());
         }
         else if (list.size() == 1) {
             minDate = maxDate = list.get(0);
@@ -269,13 +267,13 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             // displayPosition = getHeight() - ((date - lowerBound) / diff) * range + getZero
             // date = displayPosition - getZero - getHeight())/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition() - getHeight()) / -range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId);
+            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
         }
         else {
             // displayPosition = ((date - lowerBound) / diff) * range + getZero
             // date = displayPosition - getZero)/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition()) / range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId);
+            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
         }
     }
 
@@ -291,7 +289,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
     @Override
     public ZonedDateTime toRealValue(double v) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(Math.round(v)), zoneId);
+        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(Math.round(v)), zoneId.getValue());
     }
 
     @Override
@@ -389,7 +387,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                     break;
             }
         }
-        return formatter.withZone(zoneId).format(date);
+        return formatter.withZone(zoneId.getValue()).format(date);
     }
 
     /**
@@ -566,6 +564,15 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
     public final ObjectProperty<StringConverter<ZonedDateTime>> tickLabelFormatterProperty() {
         return tickLabelFormatter;
     }
+
+    public ZoneId getZoneId() {
+        return zoneId.getValue();
+    }
+
+    public Property<ZoneId> zoneIdProperty() {
+        return zoneId;
+    }
+
 
     /**
      * The intervals, which are used for the tick labels. Beginning with the largest unit, the axis tries to calculate the tick values for this unit.
