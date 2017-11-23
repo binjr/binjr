@@ -242,13 +242,14 @@ public class Version implements Comparable {
      *
      * @return The string representation of this version identifier.
      */
+    @Override
     public String toString() {
         String base = major + SEPARATOR + minor + SEPARATOR + micro;
         if (qualifier.length() == 0) { //$NON-NLS-1$
             return isSnapshot ? base + SNAPSHOT : base;
         }
         else {
-            return isSnapshot ? base + SEPARATOR + qualifier : base + SEPARATOR + qualifier + SNAPSHOT;
+            return isSnapshot ? base + SEPARATOR + qualifier + SNAPSHOT : base + SEPARATOR + qualifier;
         }
     }
 
@@ -258,8 +259,7 @@ public class Version implements Comparable {
      * @return An integer which is a hash code value for this object.
      */
     public int hashCode() {
-        return (major << 24) + (minor << 16) + (micro << 8)
-                + qualifier.hashCode();
+        return ((major << 24) + (minor << 16) + (micro << 8) + qualifier.hashCode()) * (isSnapshot ? -1 : 1);
     }
 
     /**

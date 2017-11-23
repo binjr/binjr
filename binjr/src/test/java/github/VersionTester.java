@@ -39,6 +39,13 @@ public class VersionTester {
                 new Version("1.0.1.b")
         };
 
+        System.out.println("\n==============[ Hash codes ]===============\n");
+
+        for (Version v : versions) {
+            System.out.println(String.format("%s:\t%d", v.toString(), v.hashCode()));
+
+        }
+        System.out.println("\n================[ Compare ]================\n");
 
         for (int i = 0; i < versions.length; i++) {
             for (int j = 0; j < versions.length; j++) {
