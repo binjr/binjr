@@ -20,49 +20,37 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.SimpleCachingDataAdapter;
+import eu.fthevenet.binjr.data.adapters.HttpDataAdapterBase;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.codec.CsvDecoder;
 import eu.fthevenet.binjr.data.exceptions.*;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.preferences.AppEnvironment;
-import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TreeItem;
 import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.auth.SPNegoSchemeFactory;
-import org.apache.http.impl.client.*;
-import org.apache.http.ssl.SSLContexts;
+import org.apache.http.impl.client.AbstractResponseHandler;
+import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.net.ssl.SSLContext;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.*;
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -76,7 +64,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder<Double>> {
+public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Double>> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
@@ -84,10 +72,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
     private final CloseableHttpClient httpClient;
     private String filter;
-    private String jrdsHost;
-    private int jrdsPort;
-    private String jrdsPath;
-    private String jrdsProtocol;
+
     private ZoneId zoneId;
     private String encoding;
     private JrdsTreeViewTab treeViewTab;
@@ -104,20 +89,16 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
     /**
      * Initializes a new instance of the {@link JrdsDataAdapter} class.
      *
-     * @param jrdsProtocol the URL scheme if the JRDS webapp.
-     * @param hostname     the host of the JRDS webapp.
-     * @param port         the port of the JRDS webapp.
-     * @param path         the url path of the JRDS webapp.
-     * @param zoneId       the id of the time zone used to record dates.
-     * @param encoding     the encoding used by the download servlet.
-     * @param treeViewTab  the filter to apply to the tree view
+     * @param zoneId      the id of the time zone used to record dates.
+     * @param encoding    the encoding used by the download servlet.
+     * @param treeViewTab the filter to apply to the tree view
      */
-    public JrdsDataAdapter(String jrdsProtocol, String hostname, int port, String path, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
-        super();
-        this.jrdsHost = hostname;
-        this.jrdsPort = port;
-        this.jrdsPath = path;
-        this.jrdsProtocol = jrdsProtocol;
+    public JrdsDataAdapter(URI baseURI, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
+        super(baseURI);
+//        this.jrdsHost = hostname;
+//        this.jrdsPort = port;
+//        this.jrdsPath = path;
+//        this.jrdsProtocol = jrdsProtocol;
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
@@ -133,9 +114,14 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
      * @param zoneId the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws MalformedURLException, CannotInitializeDataAdapterException {
-        URL u = new URL(url.replaceAll("/$", ""));
-        return new JrdsDataAdapter(u.getProtocol(), u.getHost(), u.getPort(), u.getPath(), zoneId, "utf-8", treeViewTab, filter);
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
+        try {
+            URI u = new URI(url.replaceAll("/$", ""));
+            return new JrdsDataAdapter(u, zoneId, "utf-8", treeViewTab, filter);
+
+        } catch (URISyntaxException e) {
+            throw new CannotInitializeDataAdapterException("Could not parse \"" + url + "\" as a valid URI", e);
+        }
     }
 
     //region [DataAdapter Members]
@@ -153,33 +139,29 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
             return tree;
         } catch (JsonParseException e) {
             throw new DataAdapterException("An error occurred while parsing the json response to getBindingTree request", e);
+        } catch (URISyntaxException e) {
+            throw new SourceCommunicationException("Error building URI for request", e);
         }
     }
 
     @Override
-    public InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/download")
-                .addParameter("id", path)
-                .addParameter("begin", Long.toString(begin.toEpochMilli()))
-                .addParameter("end", Long.toString(end.toEpochMilli()));
-
-        return doHttpGet(requestUrl, new AbstractResponseHandler<InputStream>() {
-            @Override
-            public InputStream handleEntity(HttpEntity entity) throws IOException {
-                return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
-            }
-        });
+    protected URI getFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
+        try {
+            return new URIBuilder(getBaseUri())
+                    .setPath(getBaseUri().getPath() + "/download")
+                    .addParameter("id", path)
+                    .addParameter("begin", Long.toString(begin.toEpochMilli()))
+                    .addParameter("end", Long.toString(end.toEpochMilli())).build();
+        } catch (URISyntaxException e) {
+            throw new SourceCommunicationException("Error building URI for request", e);
+        }
     }
 
     @Override
     public String getSourceName() {
         return new StringBuilder("[JRDS] ")
-                .append(jrdsHost != null ? jrdsHost : "???")
-                .append(jrdsPort > 0 ? ":" + jrdsPort : "")
+                .append(getBaseUri() != null ? getBaseUri().getHost() : "???")
+                .append(getBaseUri() != null ? ":" + getBaseUri().getPort() : "")
                 .append(" - ")
                 .append(treeViewTab != null ? treeViewTab : "???")
                 .append(filter != null ? filter : "")
@@ -190,11 +172,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
 
     @Override
     public Map<String, String> getParams() {
-        Map<String, String> params = new HashMap<>();
-        params.put("jrdsHost", jrdsHost);
-        params.put("jrdsPort", Integer.toString(jrdsPort));
-        params.put("jrdsProtocol", jrdsProtocol);
-        params.put("jrdsPath", jrdsPath);
+        Map<String, String> params = new HashMap<>(super.getParams());
         params.put("zoneId", zoneId.toString());
         params.put("encoding", encoding);
         params.put("treeViewTab", treeViewTab.name());
@@ -202,28 +180,16 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
         return params;
     }
 
+
     @Override
     public void initialize(Map<String, String> params) throws InvalidAdapterParameterException {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-        jrdsProtocol = validateParameterNullity(params, "jrdsProtocol");
-        jrdsHost = validateParameterNullity(params, "jrdsHost");
+        if (!legacyInitialize(params)) {
+            super.initialize(params);
+        }
         encoding = validateParameterNullity(params, "encoding");
-        jrdsPath = validateParameterNullity(params, "jrdsPath");
-        jrdsPort = validateParameter(params, "jrdsPort",
-                s -> {
-
-                    if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter jrdsPort is missing in adpater " + getSourceName());
-                    }
-                    int val = Integer.parseInt(s);
-                    if (val < 0 || val > 65535) {
-                        throw new InvalidAdapterParameterException("Value provided for parameter jrdsPort is not within the rang of valid IP ports in adpater " + getSourceName());
-                    }
-                    return val;
-
-                });
         zoneId = validateParameter(params, "zoneId",
                 s -> {
                     if (s == null) {
@@ -235,16 +201,40 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
         this.filter = params.get(JRDS_FILTER);
     }
 
+    private boolean legacyInitialize(Map<String, String> params) {
+        try {
+            String jrdsProtocol = validateParameterNullity(params, "jrdsProtocol");
+            String jrdsHost = validateParameterNullity(params, "jrdsHost");
+            String jrdsPath = validateParameterNullity(params, "jrdsPath");
+            int jrdsPort = validateParameter(params, "jrdsPort",
+                    s -> {
+                        if (s == null) {
+                            throw new InvalidAdapterParameterException("Parameter jrdsPort is missing in adpater " + getSourceName());
+                        }
+                        int val = Integer.parseInt(s);
+                        if (val < 0 || val > 65535) {
+                            throw new InvalidAdapterParameterException("Value provided for parameter jrdsPort is not within the rang of valid IP ports in adapter " + getSourceName());
+                        }
+                        return val;
+                    });
+            this.setBaseUri(new URIBuilder()
+                    .setScheme(jrdsProtocol)
+                    .setHost(jrdsHost)
+                    .setPort(jrdsPort)
+                    .setPath(jrdsPath)
+                    .build()
+            );
+        } catch (URISyntaxException | InvalidAdapterParameterException e) {
+            logger.debug(e.getMessage(), e);
+            return false;
+        }
+        return true;
+    }
 
     @Override
     public boolean ping() {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath);
         try {
-            return doHttpGet(requestUrl, new AbstractResponseHandler<Boolean>() {
+            return doHttpGet(buildRequestUri(""), new AbstractResponseHandler<Boolean>() {
                 @Override
                 public Boolean handleEntity(HttpEntity entity) throws IOException {
                     String entityString = EntityUtils.toString(entity);
@@ -292,57 +282,13 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
 
     //endregion
 
-    public Collection<String> discoverFilters() throws DataAdapterException {
+    public Collection<String> discoverFilters() throws DataAdapterException, URISyntaxException {
         Gson gson = new Gson();
         try {
             JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonTree.class);
             return Arrays.stream(t.items).filter(jsonItem -> JRDS_FILTER.equals(jsonItem.type)).map(i -> i.filter).collect(Collectors.toList());
         } catch (JsonParseException e) {
             throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
-        }
-    }
-
-    private <T> T doHttpGet(URIBuilder requestUrl, ResponseHandler<T> responseHandler) throws DataAdapterException {
-        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUrl.toString() + "]", logger::trace)) {
-            logger.debug(() -> "requestUrl = " + requestUrl);
-            HttpGet httpget = new HttpGet(requestUrl.build());
-            // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
-            T result = httpClient.execute(httpget, responseHandler);
-            if (result == null) {
-                throw new FetchingDataFromAdapterException("Response entity to \"" + requestUrl.toString() + "\" is null.");
-            }
-            return result;
-        } catch (HttpResponseException e) {
-            String msg;
-            switch (e.getStatusCode()) {
-                case 401:
-                    msg = "Authentication failed while trying to access \"" + requestUrl.toString() + "\"";
-                    break;
-                case 403:
-                    msg = "Access to the resource at \"" + requestUrl.toString() + "\" is denied.";
-                    break;
-                case 404:
-                    msg = "The resource at \"" + requestUrl.toString() + "\" could not be found.";
-                    break;
-                case 500:
-                    msg = "A server-side error has occurred while trying to access the resource at \"" + requestUrl.toString() + "\": " + e.getMessage();
-                    break;
-                default:
-                    msg = "Error executing HTTP request \"" + requestUrl.toString() + "\": " + e.getMessage();
-                    break;
-            }
-            throw new SourceCommunicationException(msg, e);
-        } catch (ConnectException e) {
-            throw new SourceCommunicationException(e.getMessage(), e);
-        } catch (UnknownHostException e) {
-            throw new SourceCommunicationException("Host \"" + jrdsHost + (jrdsPort > 0 ? ":" + jrdsPort : "") + "\" could not be found.", e);
-        } catch (IOException e) {
-            throw new SourceCommunicationException("IO error while communicating with host \"" + jrdsHost + (jrdsPort > 0 ? ":" + jrdsPort : "") + "\"", e);
-        } catch (URISyntaxException e) {
-            throw new SourceCommunicationException("Error building URI for request", e);
-        } catch (Exception e) {
-            throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
         }
     }
 
@@ -382,35 +328,26 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
         return data[data.length - 1];
     }
 
-    private String getJsonTree(String tabName, String argName) throws DataAdapterException {
+    private String getJsonTree(String tabName, String argName) throws DataAdapterException, URISyntaxException {
         return getJsonTree(tabName, argName, null);
     }
 
-    private String getJsonTree(String tabName, String argName, String argValue) throws DataAdapterException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/jsontree")
-                .addParameter("tab", tabName);
+    private String getJsonTree(String tabName, String argName, String argValue) throws DataAdapterException, URISyntaxException {
+        List<NameValuePair> params = new ArrayList<>();
+        params.add(new BasicNameValuePair("tab", tabName));
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
-            requestUrl.addParameter(argName, argValue);
+            params.add(new BasicNameValuePair(argName, argValue));
         }
-
-        String entityString = doHttpGet(requestUrl, new BasicResponseHandler());
+        String entityString = doHttpGet(buildRequestUri("/jsontree", params), new BasicResponseHandler());
         logger.trace(entityString);
         return entityString;
     }
 
-    private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(jrdsProtocol)
-                .setHost(jrdsHost)
-                .setPort(jrdsPort)
-                .setPath(jrdsPath + "/graphdesc")
-                .addParameter("id", id);
 
-        return doHttpGet(requestUrl, response -> {
+    private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
+        URI requestUri = buildRequestUri("/graphdesc", new BasicNameValuePair("id", id));
+
+        return doHttpGet(requestUri, response -> {
             StatusLine statusLine = response.getStatusLine();
             if (statusLine.getStatusCode() == 404) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,
@@ -443,7 +380,7 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            try (InputStream in = getRawData(id, now.minusSeconds(300), now, false)) {
+            try (InputStream in = fetchRawData(id, now.minusSeconds(300), now, false)) {
                 List<String> headers = getDecoder().getDataColumnHeaders(in);
                 Graphdesc desc = new Graphdesc();
                 desc.seriesDescList = new ArrayList<>();
@@ -456,64 +393,6 @@ public class JrdsDataAdapter extends SimpleCachingDataAdapter<Double, CsvDecoder
             }
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException(e);
-        }
-    }
-
-    private static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
-        // Load platform specific Trusted CA keystore
-        logger.trace(() -> Arrays.toString(Security.getProviders()));
-        KeyStore tks;
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            case WINDOWS:
-                tks = KeyStore.getInstance("Windows-ROOT", "SunMSCAPI");
-                tks.load(null, null);
-                break;
-            case OSX:
-                tks = KeyStore.getInstance("KeychainStore", "Apple");
-                tks.load(null, null);
-                break;
-            case LINUX:
-            case UNSUPPORTED:
-            default:
-                tks = null;
-                break;
-        }
-        return SSLContexts.custom()
-                .loadTrustMaterial(tks, null)
-                .build();
-    }
-
-    private CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
-        try {
-            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
-                    createSslCustomContext(),
-                    null,
-                    null,
-                    SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-            RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
-            schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(
-                    new AuthScope(null, -1, null),
-                    new Credentials() {
-                        @Override
-                        public Principal getUserPrincipal() {
-                            return null;
-                        }
-
-                        @Override
-                        public String getPassword() {
-                            return null;
-                        }
-                    });
-
-            return HttpClients.custom()
-                    .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
-                    .setDefaultCredentialsProvider(credsProvider)
-                    .setSSLSocketFactory(csf)
-                    .build();
-        } catch (IOException | UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException | KeyManagementException e) {
-            throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
         }
     }
 

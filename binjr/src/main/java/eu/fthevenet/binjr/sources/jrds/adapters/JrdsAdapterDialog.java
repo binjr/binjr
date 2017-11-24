@@ -32,8 +32,6 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
-import java.net.MalformedURLException;
-import java.time.DateTimeException;
 import java.time.ZoneId;
 
 
@@ -69,11 +67,12 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws MalformedURLException, DateTimeException, CannotInitializeDataAdapterException {
+    protected DataAdapter getDataAdapter() throws CannotInitializeDataAdapterException {
         return JrdsDataAdapter.fromUrl(
                 this.uriField.getText(),
                 ZoneId.of(this.timezoneField.getText()),
                 this.tabsChoiceBox.getValue(),
                 this.extraArgumentTextField.getText());
+
     }
 }
