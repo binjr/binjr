@@ -22,11 +22,8 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <modules>
-        <module>../binjrDemoAdapters</module>
-    </modules>
     <version>1.2.2-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
         <name>Frederic Thevenet</name>
