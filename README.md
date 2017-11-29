@@ -1,14 +1,13 @@
 # binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr)
 
 
+*binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
-*binjr* is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
-
-Its focus is on enabling end users to constitute their own custom sets of views for the data exposed by various sources, generally in ways that are not proposed by the front-ends these sources might already propose. 
+Its focus is on enabling end users to constitute their own custom sets of views for the data exposed by various sources, generally in ways that are not proposed by the front-ends these sources might already propose, and then let them navigate these views dynamically, by zooming or panning to a chosen time interval or value range.
 
 As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively.
 
-It is a client application, packaged as a single executable JAR file and has no other requirement than a compatible Java Runtime Environment.
+It is a Java based client application, packaged as a single executable JAR file and has no other requirement than a compatible Java Runtime Environment, and runs on multiple Desktop environnements (Windows, MacOS and Linux).
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
 
@@ -19,14 +18,12 @@ It is a client application, packaged as a single executable JAR file and has no 
 
 _binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime Environment version 1.8 with JavaFX version 8u40 or later.
 
-Using the latest available version is highly recommended, as JavaFX is still an area where bug fixes and performance improvements are routinely provided with each new version.
-
 The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is available in different forms:
 * _As a JAR_
 
   All dependencies are packaged inside a single, executable JAR file; to start the application simply run `java -jar binjr.jar` (or double-click the jar file, provided your environment is configured adequately).
   
-  You must have a compatible version of the Java Runtime Environment (see below) installed on your computer for this to work.
+  You must have a copy of a Java Runtime Environment version 1.8 installed on your computer for this to work.
 
 * _As a native application bundle_
 
