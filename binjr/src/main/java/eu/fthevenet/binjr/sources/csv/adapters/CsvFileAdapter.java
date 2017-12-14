@@ -112,7 +112,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> getDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
         Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
         Map<String, TimeSeriesInfo<Double>> rDict = new HashMap<>();
         for (TimeSeriesInfo<Double> info : seriesInfo) {
@@ -132,7 +132,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
+    public InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
         throw new UnsupportedOperationException("Recovery of raw data is not supported for this data source.");
     }
 

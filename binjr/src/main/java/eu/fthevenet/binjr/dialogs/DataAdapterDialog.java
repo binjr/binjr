@@ -36,7 +36,6 @@ import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.DateTimeException;
@@ -123,12 +122,6 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapter();
                 autoCompletionLearnWord(uriField);
-            } catch (FileNotFoundException e) {
-                Dialogs.notifyError("Invalid path", e.getMessage(), Pos.CENTER, uriField);
-                ae.consume();
-            } catch (MalformedURLException e) {
-                Dialogs.notifyError("Invalid URL", e.getMessage(), Pos.CENTER, uriField);
-                ae.consume();
             } catch (DateTimeException e) {
                 Dialogs.notifyError("Invalid Timezone", e.getMessage(), Pos.CENTER, timezoneField);
                 ae.consume();
@@ -162,7 +155,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * @throws MalformedURLException if the provided url is invalid
      * @throws DateTimeException     if the provided {@link ZoneId] is invalid
      */
-    protected abstract DataAdapter<?, ?> getDataAdapter() throws MalformedURLException, DateTimeException, DataAdapterException, FileNotFoundException;
+    protected abstract DataAdapter<?, ?> getDataAdapter() throws DataAdapterException;
 
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();

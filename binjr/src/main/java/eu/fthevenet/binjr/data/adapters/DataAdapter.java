@@ -59,10 +59,10 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    public abstract InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
+    public abstract InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
 
     /**
-     * Gets decoded data from the source as an map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.
+     * Gets decoded data from the source as a map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.
      *
      * @param path        the path of the data in the source
      * @param begin       the start of the time interval.
@@ -72,8 +72,8 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> getDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException {
-        try (InputStream in = this.getRawData(path, begin, end, bypassCache)) {
+    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+        try (InputStream in = this.fetchRawData(path, begin, end, bypassCache)) {
             // Parse raw data obtained from adapter
             return this.getDecoder().decode(in, seriesInfo);
         } catch (IOException e) {

@@ -434,6 +434,7 @@ public class MainViewController implements Initializable {
         if (!recentPath.isEmpty()) {
             menu.getItems().setAll(recentPath.stream().map(s -> {
                 MenuItem m = new MenuItem(s);
+                m.setMnemonicParsing(false);
                 m.setOnAction(e -> loadWorkspace(new File(((MenuItem) e.getSource()).getText())));
                 return m;
             }).collect(Collectors.toList()));

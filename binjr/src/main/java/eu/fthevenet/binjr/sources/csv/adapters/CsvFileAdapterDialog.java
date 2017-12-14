@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.sources.csv.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
@@ -34,10 +35,8 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.DateTimeException;
 import java.time.ZoneId;
 
 
@@ -84,9 +83,9 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws FileNotFoundException, DateTimeException, DataAdapterException {
+    protected DataAdapter getDataAdapter() throws DataAdapterException {
         if (!Files.exists(Paths.get(uriField.getText()))) {
-            throw new FileNotFoundException("Cannot find " + uriField.getText());
+            throw new CannotInitializeDataAdapterException("Cannot find " + uriField.getText());
         }
         return new CsvFileAdapter(
                 uriField.getText(),
