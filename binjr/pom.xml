@@ -325,8 +325,8 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>binjr v${project.version}</description>
-                    <releaseName>binjr v${project.version}</releaseName>
+                    <description>${project.name} v${project.version}</description>
+                    <releaseName>${project.name} v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
                     <prerelease>${github.deploy.prerelease}</prerelease>
                     <overwriteArtifact>true</overwriteArtifact>
@@ -337,7 +337,7 @@
                         <fileSet>
                             <directory>${project.build.directory}</directory>
                             <includes>
-                                <include>${project.artifactId}.jar</include>
+                                <include>${project.name}.jar</include>
                             </includes>
                         </fileSet>
                     </fileSets>
