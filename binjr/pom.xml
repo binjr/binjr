@@ -20,7 +20,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
-    <name>binjr(java9)</name>
+    <name>binjr.java9</name>
     <url>http://www.binjr.eu</url>
     <version>1.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -325,9 +325,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>Java 9 compatible version. Run with "java --add-modules java.xml.bind -jar binjr.jar"</description>
+                    <description>This version targets the Java Runtime Environment version 9.&#13;&#13;***NB***: JAXB is no longer implicitly declared in the JRE's classpath, so it is necessary to explicitly add the java.xml.bind module as a VM option:&#13;&#13; java --add-modules java.xml.bind -jar
+                        ${project.name}.jar
+                    </description>
                     <releaseName>${project.name} v${project.version}</releaseName>
-                    <tag>java9_v${project.version}</tag>
+                    <tag>${project.name}.v${project.version}</tag>
                     <prerelease>true</prerelease>
                     <overwriteArtifact>true</overwriteArtifact>
                     <!-- If your project has additional artifacts, such as ones produced by
