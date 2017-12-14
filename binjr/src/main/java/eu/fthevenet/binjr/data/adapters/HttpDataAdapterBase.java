@@ -74,14 +74,21 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     private URI baseUri;
 
     /**
-     * Default constructor
+     * Creates a new instance of the {@link HttpDataAdapterBase} class.
+     *
+     * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
     public HttpDataAdapterBase() throws CannotInitializeDataAdapterException {
         super();
         httpClient = httpClientFactory();
-
     }
 
+    /**
+     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base URI.
+     *
+     * @param baseURI the source's base URI
+     * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
+     */
     public HttpDataAdapterBase(URI baseURI) throws CannotInitializeDataAdapterException {
         super();
         this.baseUri = baseURI;
@@ -90,7 +97,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     @Override
     public InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        return doHttpGet(getFetchUri(path, begin, end), new AbstractResponseHandler<InputStream>() {
+        return doHttpGet(craftFetchUri(path, begin, end), new AbstractResponseHandler<InputStream>() {
             @Override
             public InputStream handleEntity(HttpEntity entity) throws IOException {
                 return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
@@ -134,8 +141,6 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         }
     }
     //endregion
-
-    protected abstract URI getFetchUri(String path, Instant begin, Instant end) throws DataAdapterException;
 
     protected <R> R doHttpGet(URI requestUri, ResponseHandler<R> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::trace)) {
@@ -198,9 +203,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
                 tks = null;
                 break;
         }
-        return SSLContexts.custom()
-                .loadTrustMaterial(tks, null)
-                .build();
+        return SSLContexts.custom().loadTrustMaterial(tks, null).build();
     }
 
     protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
@@ -237,7 +240,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         }
     }
 
-    protected URI buildRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
+    protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
         URIBuilder builder = new URIBuilder(getBaseUri()).setPath(getBaseUri().getPath() + path);
         if (params != null) {
             builder.addParameters(params);
@@ -249,14 +252,26 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         }
     }
 
-    protected URI buildRequestUri(String path, NameValuePair... params) throws SourceCommunicationException {
-        return buildRequestUri(path, params != null ? Arrays.asList(params) : null);
+    protected URI craftRequestUri(String path, NameValuePair... params) throws SourceCommunicationException {
+        return craftRequestUri(path, params != null ? Arrays.asList(params) : null);
     }
 
+    protected abstract URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException;
+
+    /**
+     * Returns the source's base URI
+     *
+     * @return the source's base URI
+     */
     public URI getBaseUri() {
         return baseUri;
     }
 
+    /**
+     * Sets the source's base URI
+     *
+     * @param baseUri the source's base URI
+     */
     public void setBaseUri(URI baseUri) {
         this.baseUri = baseUri;
     }

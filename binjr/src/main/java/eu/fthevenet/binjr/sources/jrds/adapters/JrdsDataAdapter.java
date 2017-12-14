@@ -95,10 +95,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      */
     public JrdsDataAdapter(URI baseURI, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
         super(baseURI);
-//        this.jrdsHost = hostname;
-//        this.jrdsPort = port;
-//        this.jrdsPath = path;
-//        this.jrdsProtocol = jrdsProtocol;
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
@@ -145,7 +141,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     }
 
     @Override
-    protected URI getFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
+    protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
         try {
             return new URIBuilder(getBaseUri())
                     .setPath(getBaseUri().getPath() + "/download")
@@ -234,7 +230,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     public boolean ping() {
         try {
-            return doHttpGet(buildRequestUri(""), new AbstractResponseHandler<Boolean>() {
+            return doHttpGet(craftRequestUri(""), new AbstractResponseHandler<Boolean>() {
                 @Override
                 public Boolean handleEntity(HttpEntity entity) throws IOException {
                     String entityString = EntityUtils.toString(entity);
@@ -338,14 +334,14 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
             params.add(new BasicNameValuePair(argName, argValue));
         }
-        String entityString = doHttpGet(buildRequestUri("/jsontree", params), new BasicResponseHandler());
+        String entityString = doHttpGet(craftRequestUri("/jsontree", params), new BasicResponseHandler());
         logger.trace(entityString);
         return entityString;
     }
 
 
     private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URI requestUri = buildRequestUri("/graphdesc", new BasicNameValuePair("id", id));
+        URI requestUri = craftRequestUri("/graphdesc", new BasicNameValuePair("id", id));
 
         return doHttpGet(requestUri, response -> {
             StatusLine statusLine = response.getStatusLine();
