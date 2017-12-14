@@ -27,7 +27,6 @@ addons:
     - fakeroot
     - rpm
 
-osx_image: xcode8.3
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
