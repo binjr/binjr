@@ -9,25 +9,19 @@ env:
 
 branches:
   only:
-  - master
+  - java9
 os:
     - linux
-    - osx
 
-matrix:
-  allow_failures:
-    - os: osx
+jdk: oraclejdk9
 
 sudo: false
 
 addons:
   apt:
     packages:
-    - oracle-java8-installer
-    - fakeroot
-    - rpm
+    - oracle-java9-installer
 
-osx_image: xcode8.3
 
 before_install: git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
