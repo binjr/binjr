@@ -325,7 +325,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>${project.name} v${project.version}\nRun with "java --add-modules java.xml.bind -jar binjr.jar"</description>
+                    <description>${project.name} v${project.version}. Run with "java --add-modules java.xml.bind -jar binjr.jar"</description>
                     <releaseName>${project.name} v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
                     <prerelease>true</prerelease>
@@ -337,7 +337,7 @@
                         <fileSet>
                             <directory>${project.build.directory}</directory>
                             <includes>
-                                <include>${project.artifactId}.jar</include>
+                                <include>${project.name}.jar</include>
                             </includes>
                         </fileSet>
                     </fileSets>
