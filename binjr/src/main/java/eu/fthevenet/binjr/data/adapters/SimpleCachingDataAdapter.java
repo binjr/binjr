@@ -55,7 +55,7 @@ public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends 
     }
 
     @Override
-    public InputStream getRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
+    public InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
         ByteArrayOutputStream cached = null;
         String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
         if (!bypassCache) {

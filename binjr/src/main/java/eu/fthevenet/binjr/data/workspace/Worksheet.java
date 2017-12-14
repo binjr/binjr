@@ -186,7 +186,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
             for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
                 // Get data for source
-                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.getDecodedData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
+                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.fetchDecodedData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
                 // Applying point reduction
                 data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
                 //Update timeSeries data
