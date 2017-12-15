@@ -325,8 +325,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>This version targets the Java Runtime Environment version 9.&#13;&#13;***NB***: JAXB is no longer implicitly declared in the JRE's classpath, so it is necessary to explicitly add the java.xml.bind module as a VM option:&#13;&#13; java --add-modules java.xml.bind -jar
-                        ${project.name}.jar
+                    <description>This version targets the Java Runtime Environment version 9.&#13;&#13;***NB***: JAXB is no longer implicitly declared in the JRE's classpath, so it is necessary to explicitly add the java.xml.bind module as a VM option:&#13;&#13;    java --add-modules java.xml.bind -jar ${project.name}.jar
                     </description>
                     <releaseName>${project.name} v${project.version}</releaseName>
                     <tag>${project.name}.v${project.version}</tag>
