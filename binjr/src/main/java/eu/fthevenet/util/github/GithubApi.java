@@ -44,8 +44,8 @@ import java.util.Optional;
  */
 public class GithubApi {
     private static final Logger logger = LogManager.getLogger(GithubApi.class);
-    public static final String API_GITHUB_COM = "api.github.com";
-    public static final String HTTPS = "https";
+    public static final String GITHUB_API_HOSTNAME = "api.github.com";
+    public static final String URL_PROTOCOL = "https";
     private final CloseableHttpClient httpClient;
     private Gson gson;
 
@@ -92,8 +92,8 @@ public class GithubApi {
      */
     public Optional<GithubRelease> getRelease(String owner, String repo, String id) throws IOException, URISyntaxException {
         URIBuilder requestUrl = new URIBuilder()
-                .setScheme(HTTPS)
-                .setHost(API_GITHUB_COM)
+                .setScheme(URL_PROTOCOL)
+                .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases/" + id);
 
         logger.debug(() -> "requestUrl = " + requestUrl);
@@ -115,10 +115,10 @@ public class GithubApi {
      * @throws IOException        if an IO error occurs while communicating with GitHub.
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
-    public List<GithubRelease> getReleases(String owner, String repo) throws IOException, URISyntaxException {
+    public List<GithubRelease> getAllReleases(String owner, String repo) throws IOException, URISyntaxException {
         URIBuilder requestUrl = new URIBuilder()
-                .setScheme(HTTPS)
-                .setHost(API_GITHUB_COM)
+                .setScheme(URL_PROTOCOL)
+                .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases");
 
         logger.debug(() -> "requestUrl = " + requestUrl);
