@@ -50,6 +50,10 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+/**
+ * A {@link DataAdapter} implementation used to {@link eu.fthevenet.binjr.data.workspace.Worksheet} instances
+ * with  data from a local CSV formatted file.
+ */
 public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     private static final Logger logger = LogManager.getLogger(CsvFileAdapter.class);
     private String dateTimePattern;
@@ -61,14 +65,36 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     private SortedMap<Long, DataSample<Double>> sortedDataStore;
     private List<String> headers;
 
+    /**
+     * Initializes a new instance of the {@link CsvFileAdapter} class with a set of default values.
+     *
+     * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
+     */
     public CsvFileAdapter() throws DataAdapterException {
         this("", ZoneId.systemDefault(), "utf-8", "yyyy-MM-dd HH:mm:ss", ',');
     }
 
+    /**
+     * Initializes a new instance of the {@link CsvFileAdapter} class for the provided file and time zone.
+     *
+     * @param csvPath the path to the csv file.
+     * @param zoneId  the time zone to used.
+     * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
+     */
     public CsvFileAdapter(String csvPath, ZoneId zoneId) throws DataAdapterException {
         this(csvPath, zoneId, "utf-8", "yyyy-MM-dd HH:mm:ss", ',');
     }
 
+    /**
+     * Initializes a new instance of the {@link CsvFileAdapter} class with the provided parameters.
+     *
+     * @param csvPath         the path to the csv file.
+     * @param zoneId          the time zone to used.
+     * @param encoding        the encoding for the csv file.
+     * @param dateTimePattern a pattern to decode time stamps.
+     * @param delimiter       the character used by the csv file to separate cells in csv records.
+     * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
+     */
     public CsvFileAdapter(String csvPath, ZoneId zoneId, String encoding, String dateTimePattern, char delimiter) throws DataAdapterException {
         super();
         this.csvPath = Paths.get(csvPath);
@@ -208,11 +234,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
         });
         encoding = validateParameterNullity(params, "encoding");
         dateTimePattern = validateParameterNullity(params, "dateTimePattern");
-
-
         this.csvPath = Paths.get(path);
-
-
     }
 
     @Override

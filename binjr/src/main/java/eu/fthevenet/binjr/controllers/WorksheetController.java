@@ -378,7 +378,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     @Override
     public void close() {
         if (refreshOnPreferenceListener != null) {
-            logger.debug(() -> "Unregistering listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
+            logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
             for (TimeSeriesInfo<Double> t : worksheet.getSeries()) {

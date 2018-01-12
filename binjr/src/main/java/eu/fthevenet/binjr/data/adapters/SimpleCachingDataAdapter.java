@@ -19,7 +19,7 @@ package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.data.codec.Decoder;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
-import eu.fthevenet.util.cache.LRUMap;
+import eu.fthevenet.util.cache.LRUMapCapacityBound;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Frederic Thevenet
  */
 public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends DataAdapter<T, A> {
-    public static final int DEFAULT_CACHE_SIZE = 32;
+    public static final int DEFAULT_CACHE_SIZE = 128;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<byte[]>> cache;
 
@@ -55,7 +55,7 @@ public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends 
      * @param maxCacheEntries the  maximum number of entries in the cache
      */
     public SimpleCachingDataAdapter(int maxCacheEntries) {
-        cache = new LRUMap<>(maxCacheEntries);
+        cache = new LRUMapCapacityBound<>(maxCacheEntries);
     }
 
     @Override

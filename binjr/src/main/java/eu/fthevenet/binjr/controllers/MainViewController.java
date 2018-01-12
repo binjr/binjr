@@ -156,6 +156,9 @@ public class MainViewController implements Initializable {
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
 
+    /**
+     * Initializes a new instance of the {@link MainViewController} class.
+     */
     public MainViewController() {
         super();
         this.workspace = new Workspace();
@@ -237,6 +240,11 @@ public class MainViewController implements Initializable {
     }
 
 
+    /**
+     * Sets parameters for the main controller view.
+     *
+     * @param parameters parameters for the main controller view.
+     */
     public void setParameters(Application.Parameters parameters) {
         // look for a .bjr file passed as a cmd line argument
         associatedFile = parameters.getUnnamed()
