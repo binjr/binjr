@@ -29,9 +29,6 @@ import org.apache.logging.log4j.Logger;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Manages the appearance of registered {@link Stage} instances.
- */
 public class StageAppearanceManager {
     /**
      * Defines a set of options that governs that what degree a the appearance of a registered {@link Stage} should be affected
@@ -41,17 +38,8 @@ public class StageAppearanceManager {
          * Indicates that no appearance option should be applied
          */
         SET_NONE,
-        /**
-         * Indicates that the icon should be changed on the registered {@link Stage}
-         */
         SET_ICON,
-        /**
-         * Indicates that the theme should be changed on the registered {@link Stage}
-         */
         SET_THEME,
-        /**
-         * Indicates that all appearance options should be applied
-         */
         SET_ALL;
 
         public long getValue() {
@@ -65,13 +53,13 @@ public class StageAppearanceManager {
         private final static StageAppearanceManager instance = new StageAppearanceManager();
     }
 
-    private final Map<Stage, Set<AppearanceOptions>> registeredStages;
+    private final Map<Stage, Set<Options>> registeredStages;
 
     private StageAppearanceManager() {
         registeredStages = new WeakHashMap<>();
         GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                for (Map.Entry<Stage, Set<AppearanceOptions>> e : registeredStages.entrySet()) {
+                for (Map.Entry<Stage, Set<Options>> e : registeredStages.entrySet()) {
                     setAppearance(e.getKey(), newValue, e.getValue());
                 }
             }
@@ -87,11 +75,6 @@ public class StageAppearanceManager {
         return Holder.instance;
     }
 
-    /**
-     * Unregister a {@link Stage} from the {@link StageAppearanceManager}
-     *
-     * @param stage the {@link Stage} to unregister.
-     */
     public void unregister(Stage stage) {
         if (stage == null) {
             logger.warn(() -> "Trying to unregister a stage with null reference");
@@ -105,26 +88,15 @@ public class StageAppearanceManager {
                         .collect(Collectors.joining(",")));
     }
 
-    /**
-     * Registers a {@link Stage} so that its appearance can be altered by the manager.
-     *
-     * @param stage the {@link Stage} to register in the {@link StageAppearanceManager}
-     */
     public void register(Stage stage) {
-        this.register(stage, AppearanceOptions.SET_ALL);
+        this.register(stage, Options.SET_ALL);
     }
 
-    /**
-     * Registers a {@link Stage} so that its appearance can be altered by the manager, according to the provided {@link AppearanceOptions}
-     *
-     * @param stage   the {@link Stage} to register in the {@link StageAppearanceManager}
-     * @param options Appearance {@link AppearanceOptions} to apply the the registered stage.
-     */
-    public void register(Stage stage, AppearanceOptions... options) {
+    public void register(Stage stage, Options... options) {
         if (stage == null) {
             throw new IllegalArgumentException("Stage cannot be null");
         }
-        Set<AppearanceOptions> optionsEnumSet = EnumSet.copyOf(Arrays.asList(options));
+        Set<Options> optionsEnumSet = EnumSet.copyOf(Arrays.asList(options));
         this.registeredStages.put(stage, optionsEnumSet);
         logger.trace(() -> registeredStages.size() + " registered stage(s): " +
                 registeredStages.keySet()
@@ -134,14 +106,14 @@ public class StageAppearanceManager {
         Platform.runLater(() -> setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
     }
 
-    private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {
-        if (options.contains(AppearanceOptions.SET_NONE)) {
+    private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<Options> options) {
+        if (options.contains(Options.SET_NONE)) {
             return;
         }
-        if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_THEME)) {
+        if (options.contains(Options.SET_ALL) || options.contains(Options.SET_THEME)) {
             setUiTheme(stage.getScene(), theme);
         }
-        if (options.contains(AppearanceOptions.SET_ALL) || options.contains(AppearanceOptions.SET_ICON)) {
+        if (options.contains(Options.SET_ALL) || options.contains(Options.SET_ICON)) {
             setIcon(stage);
         }
     }
