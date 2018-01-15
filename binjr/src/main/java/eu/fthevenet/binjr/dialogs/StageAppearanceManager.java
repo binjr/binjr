@@ -27,6 +27,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class StageAppearanceManager {
     public enum Options {
@@ -49,7 +50,7 @@ public class StageAppearanceManager {
     private final Map<Stage, Set<Options>> registeredStages;
 
     private StageAppearanceManager() {
-        registeredStages = new HashMap<>();
+        registeredStages = new WeakHashMap<>();
         GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 for (Map.Entry<Stage, Set<Options>> e : registeredStages.entrySet()) {
@@ -75,6 +76,11 @@ public class StageAppearanceManager {
             return;
         }
         registeredStages.remove(stage);
+        logger.trace(() -> registeredStages.size() + " registered stage(s): " +
+                registeredStages.keySet()
+                        .stream()
+                        .map(s -> s.getTitle() + "(" + s.getWidth() + "x" + s.getHeight() + ")")
+                        .collect(Collectors.joining(",")));
     }
 
     public void register(Stage stage) {
@@ -87,6 +93,11 @@ public class StageAppearanceManager {
         }
         Set<Options> optionsEnumSet = EnumSet.copyOf(Arrays.asList(options));
         this.registeredStages.put(stage, optionsEnumSet);
+        logger.trace(() -> registeredStages.size() + " registered stage(s): " +
+                registeredStages.keySet()
+                        .stream()
+                        .map(s -> s.getTitle() + "(" + s.getWidth() + "x" + s.getHeight() + ")")
+                        .collect(Collectors.joining(",")));
         Platform.runLater(() -> setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
     }
 

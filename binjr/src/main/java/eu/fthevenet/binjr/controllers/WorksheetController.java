@@ -24,6 +24,7 @@ import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
@@ -377,6 +378,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     @Override
     public void close() {
+        StageAppearanceManager.getInstance().unregister(Dialogs.getStage(root));
         if (refreshOnPreferenceListener != null) {
             logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
