@@ -46,17 +46,16 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * A TabPane container with a button to add a new tab
+ * A TabPane container with a button to add a new tab that also supports tearing away tabs into a separate window.
+ * <p>It relies on the {@link TabPaneManager} class to keep track of all tabs spread over many windows and {@link TabPane} instances</p>
  *
  * @author Frederic Thevenet
  */
 public class TearableTabPane extends TabPane {
     private static final Logger logger = LogManager.getLogger(TearableTabPane.class);
-
     private boolean tearable;
     private boolean reorderable;
     private Function<ActionEvent, Optional<Tab>> newTabFactory = (e) -> Optional.of(new Tab());
-
     private final Map<Tab, TabState> tearableTabMap = new HashMap<>();
     private final ObservableSet<Tab> tabsSet = FXCollections.observableSet(tearableTabMap.keySet());
     private final TabPaneManager manager;
@@ -64,14 +63,21 @@ public class TearableTabPane extends TabPane {
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
 
-    public ObservableSet<Tab> getTearableTabs() {
-        return tabsSet;
-    }
-
+    /**
+     * Initializes a new instance of the {@link TearableTabPane} class.
+     */
     public TearableTabPane() {
         this(new TabPaneManager(), false, false, (Tab[]) null);
     }
 
+    /**
+     * Initializes a new instance of the {@link TearableTabPane} class.
+     *
+     * @param manager     the {@link TabPaneManager} manager instance
+     * @param reorderable true if tabs can be reordered, false otherwise.
+     * @param tearable    true if tabs are teared away from the pane, false otherwise.
+     * @param tabs        tabs to attached to the TabPane.
+     */
     public TearableTabPane(TabPaneManager manager, boolean reorderable, boolean tearable, Tab... tabs) {
         super(tabs);
         this.manager = manager;
@@ -97,7 +103,10 @@ public class TearableTabPane extends TabPane {
                     }
                 }
             }
-            logger.trace("Tearable tabs in tab pane: " + tearableTabMap.keySet().stream().map(tab -> tab.getText() == null ? tab.toString() : tab.getText()).reduce((s, s2) -> s + " " + s2).orElse("null"));
+            logger.trace("Tearable tabs in tab pane: " +
+                    tearableTabMap.keySet().stream()
+                            .map(tab -> tab.getText() == null ? tab.toString() : tab.getText())
+                            .reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
         this.setOnDragDetected(
                 (MouseEvent event) -> {
@@ -199,6 +208,141 @@ public class TearableTabPane extends TabPane {
         });
     }
 
+    /**
+     * Returns the factory for creating new tabs
+     *
+     * @return the factory for creating new tabs
+     */
+    public Function<ActionEvent, Optional<Tab>> getNewTabFactory() {
+        return newTabFactory;
+    }
+
+    /**
+     * Sets the factory for creating new tabs
+     *
+     * @param newTabFactory the factory for creating new tabs
+     */
+    public void setNewTabFactory(Function<ActionEvent, Optional<Tab>> newTabFactory) {
+        this.newTabFactory = newTabFactory;
+    }
+
+    /**
+     * Sets the action that should be fired on the addition of a tab to the pane.
+     *
+     * @param onAddNewTab the actions that should be fired on the addition of a tab to the pane.
+     */
+    public void setOnAddNewTab(EventHandler<ActionEvent> onAddNewTab) {
+        this.onAddNewTab = onAddNewTab;
+    }
+
+    /**
+     * Returns true if tabs can be teared away from the pane, false otherwise.
+     *
+     * @return true true if tabs can be teared away from the pane, false otherwise.
+     */
+    public boolean isTearable() {
+        return tearable;
+    }
+
+    /**
+     * Set to true if tabs can be teared away from the pane, false otherwise.
+     *
+     * @param tearable true if tabs can be teared away from the pane, false otherwise.
+     */
+    public void setTearable(boolean tearable) {
+        this.tearable = tearable;
+    }
+
+    /**
+     * Returns true if tabs can be reordered, false otherwise.
+     *
+     * @return true if tabs can be reordered, false otherwise.
+     */
+    public boolean isReorderable() {
+        return reorderable;
+    }
+
+    /**
+     * Set to true if tabs can be reordered, false otherwise.
+     *
+     * @param reorderable true if tabs can be reordered, false otherwise.
+     */
+    public void setReorderable(boolean reorderable) {
+        this.reorderable = reorderable;
+    }
+
+    /**
+     * Returns the tab currently selected.
+     *
+     * @return the tab currently selected.
+     */
+    public Tab getSelectedTab() {
+        return manager.getSelectedTab();
+    }
+
+    /**
+     * Returns the pane containing the tab currently selected.
+     *
+     * @return the pane containing the tab currently selected.
+     */
+    public TabPane getSelectedTabPane() {
+        if (manager.getSelectedTab() == null || manager.tabToPaneMap.get(manager.getSelectedTab()) == null) {
+            return this;
+        }
+        return manager.tabToPaneMap.get(getSelectedTab());
+    }
+
+    /**
+     * Returns a list of all tabs, across of panes sharing the same {@link TabPaneManager}
+     *
+     * @return a list of all tabs, across of panes sharing the same {@link TabPaneManager}
+     */
+    public ObservableList<Tab> getGlobalTabs() {
+        return manager.getGlobalTabList();
+    }
+
+    /**
+     * Returns the set of tabs for this pane only.
+     *
+     * @return the set of tabs for this pane only.
+     */
+    public ObservableSet<Tab> getTearableTabs() {
+        return tabsSet;
+    }
+
+    /**
+     * Clears the list of tabs.
+     */
+    public void clearAllTabs() {
+        manager.clearAllTabs();
+    }
+
+    /**
+     * Sets the action to be fired on opening a new window to host tabs.
+     *
+     * @param action the action to be fired on opening a new window to host tabs.
+     */
+    public void setOnOpenNewWindow(EventHandler<WindowEvent> action) {
+        this.onOpenNewWindow = action;
+    }
+
+    /**
+     * Sets the action to be fired on closing a window hosting tabs.
+     *
+     * @param action the action to be fired on closing a window hosting tabs.
+     */
+    public void setOnClosingWindow(EventHandler<WindowEvent> action) {
+        this.onClosingWindow = action;
+    }
+
+    /**
+     * Returns the generated {@link DataFormat} used to identify drag and drop operations across panes sharing the same {@link TabPaneManager}
+     *
+     * @return the generated {@link DataFormat} used to identify drag and drop operations across panes sharing the same {@link TabPaneManager}
+     */
+    public DataFormat getDataFormat() {
+        return manager.dragAndDropFormat;
+    }
 
     private void positionNewTabButton() {
         Pane tabHeaderBg = (Pane) this.lookup(".tab-header-background");
@@ -313,69 +457,9 @@ public class TearableTabPane extends TabPane {
         });
     }
 
-    public Function<ActionEvent, Optional<Tab>> getNewTabFactory() {
-        return newTabFactory;
-    }
-
-    public void setNewTabFactory(Function<ActionEvent, Optional<Tab>> newTabFactory) {
-        this.newTabFactory = newTabFactory;
-    }
-
-    public EventHandler<ActionEvent> getOnAddNewTab() {
-        return onAddNewTab;
-    }
-
-    public void setOnAddNewTab(EventHandler<ActionEvent> onAddNewTab) {
-        this.onAddNewTab = onAddNewTab;
-    }
-
-    public boolean isTearable() {
-        return tearable;
-    }
-
-    public void setTearable(boolean tearable) {
-        this.tearable = tearable;
-    }
-
-    public boolean isReorderable() {
-        return reorderable;
-    }
-
-    public void setReorderable(boolean reorderable) {
-        this.reorderable = reorderable;
-    }
-
-    public Tab getSelectedTab() {
-        return manager.getSelectedTab();
-    }
-
-    public TabPane getSelectedTabPane() {
-        if (manager.getSelectedTab() == null || manager.tabToPaneMap.get(manager.getSelectedTab()) == null) {
-            return this;
-        }
-        return manager.tabToPaneMap.get(getSelectedTab());
-    }
-
-    public ObservableList<Tab> getGlobalTabs() {
-        return manager.getGlobalTabList();
-    }
-
-    public void clearAllTabs() {
-        manager.clearAllTabs();
-    }
-
-    public void setOnOpenNewWindow(EventHandler<WindowEvent> action) {
-        this.onOpenNewWindow = action;
-    }
-
-    public void setOnClosingWindow(EventHandler<WindowEvent> action) {
-        this.onClosingWindow = action;
-    }
-
-    public DataFormat getDataFormat() {
-        return manager.dragAndDropFormat;
-    }
-
+    /**
+     * Represents the state of a single tab
+     */
     private class TabState {
         private boolean attached;
 
@@ -387,12 +471,14 @@ public class TearableTabPane extends TabPane {
             this.attached = attached;
         }
 
-
         public TabState(boolean attached) {
             this.attached = attached;
         }
     }
 
+    /**
+     * A class that represents the state of the tabs across all TabPane windows
+     */
     protected static class TabPaneManager {
         private final ObservableMap<Tab, TabPane> tabToPaneMap;
         private final Map<String, Tab> idToTabMap;
