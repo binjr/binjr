@@ -56,7 +56,6 @@ public class StageAppearanceManager {
                 for (Map.Entry<Stage, Set<Options>> e : registeredStages.entrySet()) {
                     setAppearance(e.getKey(), newValue, e.getValue());
                 }
-                logger.trace(() -> "Registered stages=" + registeredStages.size());
             }
         });
     }
