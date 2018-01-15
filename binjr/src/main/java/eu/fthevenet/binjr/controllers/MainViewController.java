@@ -190,26 +190,26 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         worksheetTabPane.setTearable(true);
-        worksheetTabPane.setOnTearedTabsStageSetup(stage -> {
+        worksheetTabPane.setOnOpenNewWindow(event -> {
+            Stage stage = (Stage) event.getSource();
             stage.setTitle("binjr");
             StageAppearanceManager.getInstance().register(stage);
         });
+        worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
-        sourcesTabPane.setOnNewTabAction(this::handleAddSource);
+        sourcesTabPane.setOnAddNewTab(this::handleAddSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             invalidateSearchResults();
             if (newValue != null) {
                 findNext();
             }
         });
-
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
         });
-
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 invalidateSearchResults();
