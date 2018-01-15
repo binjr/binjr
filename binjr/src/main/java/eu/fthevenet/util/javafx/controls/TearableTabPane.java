@@ -298,13 +298,13 @@ public class TearableTabPane extends TabPane {
         detachedTabPane.getTabs().addListener((ListChangeListener<Tab>) c -> {
             if (c.getList().size() == 0) {
                 if (onClosingWindow != null) {
-                    onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
+                    onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
                 }
                 stage.close();
             }
         });
         if (onOpenNewWindow != null) {
-            onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
         }
         stage.show();
         detachedTabPane.getSelectionModel().select(tab);
