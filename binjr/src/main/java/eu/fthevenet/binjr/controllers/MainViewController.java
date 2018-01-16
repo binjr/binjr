@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
+import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
@@ -457,15 +458,15 @@ public class MainViewController implements Initializable {
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
         List<MenuItem> menuItems = new ArrayList<>();
-        for (DataAdapterFactory.DataAdapterInfo i : DataAdapterFactory.getInstance().getAdapterInfo()) {
-            MenuItem menuItem = new MenuItem(i.getName());
+        for (DataAdapterInfo adapterInfo : DataAdapterFactory.getInstance().getAdapterInfo()) {
+            MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(i.getKey(), root));
+                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
-                    Dialogs.notifyException("Could not find source adapter " + i.getName(), e);
+                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e);
                 } catch (CannotInitializeDataAdapterException e) {
-                    Dialogs.notifyException("Could not initialize source adapter " + i.getName(), e);
+                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e);
                 }
             });
             menuItems.add(menuItem);
@@ -926,7 +927,7 @@ public class MainViewController implements Initializable {
                 else {
                     return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
                 }
-            }, new ArrayList<>());
+            });
         }
         if (!searchResultSet.isEmpty()) {
             searchField.setStyle("");

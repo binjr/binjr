@@ -38,19 +38,19 @@ public class StageAppearanceManager {
      */
     public enum AppearanceOptions {
         /**
-         * Indicates that no appearance option should be applied
+         * Indicates that no appearance changes should be applied
          */
         SET_NONE,
         /**
-         * Indicates that the icon should be changed on the registered {@link Stage}
+         * Indicates that the icon should be changed.
          */
         SET_ICON,
         /**
-         * Indicates that the theme should be changed on the registered {@link Stage}
+         * Indicates that the theme should be changed.
          */
         SET_THEME,
         /**
-         * Indicates that all appearance options should be applied
+         * Indicates that all appearance changes should be applied
          */
         SET_ALL;
 
@@ -60,13 +60,14 @@ public class StageAppearanceManager {
     }
 
     private static final Logger logger = LogManager.getLogger(StageAppearanceManager.class);
-
     private static class Holder {
         private final static StageAppearanceManager instance = new StageAppearanceManager();
     }
-
     private final Map<Stage, Set<AppearanceOptions>> registeredStages;
 
+    /**
+     * Initializes a new instance of the {@link StageAppearanceManager} class.
+     */
     private StageAppearanceManager() {
         registeredStages = new WeakHashMap<>();
         GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
@@ -98,11 +99,7 @@ public class StageAppearanceManager {
             return;
         }
         registeredStages.remove(stage);
-        logger.trace(() -> registeredStages.size() + " registered stage(s): " +
-                registeredStages.keySet()
-                        .stream()
-                        .map(s -> s.getTitle() + "(" + s.getWidth() + "x" + s.getHeight() + ")")
-                        .collect(Collectors.joining(",")));
+        logger.trace(this::dumpRegisteredStages);
     }
 
     /**
@@ -126,12 +123,16 @@ public class StageAppearanceManager {
         }
         Set<AppearanceOptions> optionsEnumSet = EnumSet.copyOf(Arrays.asList(options));
         this.registeredStages.put(stage, optionsEnumSet);
-        logger.trace(() -> registeredStages.size() + " registered stage(s): " +
+        logger.trace(this::dumpRegisteredStages);
+        Platform.runLater(() -> setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
+    }
+
+    private String dumpRegisteredStages() {
+        return registeredStages.size() + " registered stage(s): " +
                 registeredStages.keySet()
                         .stream()
                         .map(s -> s.getTitle() + "(" + s.getWidth() + "x" + s.getHeight() + ")")
-                        .collect(Collectors.joining(",")));
-        Platform.runLater(() -> setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
+                        .collect(Collectors.joining(", "));
     }
 
     private void setAppearance(Stage stage, UserInterfaceThemes theme, Set<AppearanceOptions> options) {

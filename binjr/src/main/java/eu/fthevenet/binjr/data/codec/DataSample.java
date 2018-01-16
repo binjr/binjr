@@ -21,19 +21,39 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents a single sample/record from a csv file
+ *
+ * @param <T> the type for data contained in cells
+ */
 public class DataSample<T> {
     private final ZonedDateTime timeStamp;
     private final Map<String, T> cells;
 
+    /**
+     * Initializes a new instance of the {@link DataSample} class.
+     *
+     * @param timeStamp the time stamp for the sample.
+     */
     public DataSample(ZonedDateTime timeStamp) {
         this.timeStamp = timeStamp;
         this.cells = new HashMap<>();
     }
 
+    /**
+     * Returns the time stamp for the sample.
+     *
+     * @return time stamp for the sample.
+     */
     public ZonedDateTime getTimeStamp() {
         return timeStamp;
     }
 
+    /**
+     * Returns a map of cells for the sample
+     *
+     * @return a map of cells for the sample
+     */
     public Map<String, T> getCells() {
         return cells;
     }
