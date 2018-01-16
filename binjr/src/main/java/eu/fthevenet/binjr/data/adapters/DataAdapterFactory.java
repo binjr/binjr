@@ -46,32 +46,12 @@ public class DataAdapterFactory {
         private static final DataAdapterFactory instance = new DataAdapterFactory();
     }
 
+    /**
+     * Initializes a new instance if the {@link DataAdapterFactory} class.
+     */
     private DataAdapterFactory() {
         registeredAdapters = new HashMap<>();
         this.loadAdapters();
-    }
-
-    private void loadAdaptersFromJar(URI location) {
-        //TODO: Make it possible to load adapters from external jars
-    }
-
-    private void loadAdapters() {
-        //TODO: Use introspection to dynamically discover adapters
-        DataAdapterInfo[] info = new DataAdapterInfo[]{
-                new DataAdapterInfo("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, null, JrdsAdapterDialog.class),
-                new DataAdapterInfo("CSV File", "CSV File Data Adapter", CsvFileAdapter.class, null, CsvFileAdapterDialog.class)
-        };
-        for (DataAdapterInfo i : info) {
-            registeredAdapters.put(i.getKey(), i);
-        }
-    }
-
-    private DataAdapterInfo getInfo(String key) throws NoAdapterFoundException {
-        DataAdapterInfo info = registeredAdapters.get(Objects.requireNonNull(key, "The parameter 'key' cannot be null!"));
-        if (info == null) {
-            throw new NoAdapterFoundException("Could not find a registered adapter for key " + key);
-        }
-        return info;
     }
 
     /**
@@ -104,14 +84,21 @@ public class DataAdapterFactory {
         return newAdapter(info.getKey());
     }
 
+    /**
+     * Returns an instance of {@link DataAdapterDialog} used to gather source access parameters from the end user.
+     *
+     * @param key  a string that uniquely identify the type of the {@link DataAdapter}
+     * @param root the root node to act as the owner of the Dialog
+     * @return an instance of {@link DataAdapterDialog} used to gather source access parameters from the end user.
+     * @throws NoAdapterFoundException              if no adapter matching the provided key could be found
+     * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
+     */
     public DataAdapterDialog getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
-
         try {
-            return getInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
-
+            return retrieveAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
 
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new CannotInitializeDataAdapterException("Could not create instance of adapter " + key, e);
+            throw new CannotInitializeDataAdapterException("Could not create instance of DataAdapterDialog for " + key, e);
         }
     }
 
@@ -125,54 +112,33 @@ public class DataAdapterFactory {
      */
     public DataAdapter<?, ?> newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
-            return getInfo(key).getAdapterClass().newInstance();
+            return retrieveAdapterInfo(key).getAdapterClass().newInstance();
         } catch (InstantiationException | IllegalAccessException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of adapter " + key, e);
         }
     }
 
-    /**
-     * An immutable representation of a {@link DataAdapter}'s metadata
-     *
-     * @author Frederic Thevenet
-     */
-    public class DataAdapterInfo {
-        private final String name;
-        private final String description;
-        private final Class<? extends DataAdapter> adapterClass;
-        private final URI jarUri;
-        private final Class<? extends DataAdapterDialog> adapterDialog;
+    private void loadAdaptersFromJar(URI location) {
+        //TODO: Make it possible to load adapters from external jars
+    }
 
-        public DataAdapterInfo(String name, String description, Class<? extends DataAdapter> adapterClass, URI jarUri, Class<? extends DataAdapterDialog> dialogClass) {
-            this.name = name;
-            this.description = description;
-            this.adapterClass = adapterClass;
-            this.jarUri = jarUri;
-            this.adapterDialog = dialogClass;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public String getDescription() {
-            return description;
-        }
-
-        public URI getJarUri() {
-            return jarUri;
-        }
-
-        public Class<? extends DataAdapter> getAdapterClass() {
-            return adapterClass;
-        }
-
-        public String getKey() {
-            return adapterClass.getName();
-        }
-
-        public Class<? extends DataAdapterDialog> getAdapterDialog() {
-            return adapterDialog;
+    private void loadAdapters() {
+        //TODO: Use introspection to dynamically discover adapters
+        DataAdapterInfo[] info = new DataAdapterInfo[]{
+                new DataAdapterInfo("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, null, JrdsAdapterDialog.class),
+                new DataAdapterInfo("CSV File", "CSV File Data Adapter", CsvFileAdapter.class, null, CsvFileAdapterDialog.class)
+        };
+        for (DataAdapterInfo i : info) {
+            registeredAdapters.put(i.getKey(), i);
         }
     }
+
+    private DataAdapterInfo retrieveAdapterInfo(String key) throws NoAdapterFoundException {
+        DataAdapterInfo info = registeredAdapters.get(Objects.requireNonNull(key, "The parameter 'key' cannot be null!"));
+        if (info == null) {
+            throw new NoAdapterFoundException("Could not find a registered adapter for key " + key);
+        }
+        return info;
+    }
+
 }

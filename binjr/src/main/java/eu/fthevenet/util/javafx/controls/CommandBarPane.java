@@ -23,12 +23,13 @@ import javafx.css.PseudoClass;
 import javafx.scene.layout.AnchorPane;
 
 /**
+ * An {@link AnchorPane} that can slide in or out from a side of its attached window.
  * @author Frederic Thevenet
  */
 public class CommandBarPane extends AnchorPane {
     private static PseudoClass EXPANDED_PSEUDO_CLASS = PseudoClass.getPseudoClass("expanded");
 
-    BooleanProperty expanded = new BooleanPropertyBase(false) {
+    private BooleanProperty expanded = new BooleanPropertyBase(false) {
         public void invalidated() {
             pseudoClassStateChanged(EXPANDED_PSEUDO_CLASS, get());
         }

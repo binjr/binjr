@@ -19,6 +19,7 @@ package eu.fthevenet.util.javafx.controls;
 
 import javafx.scene.control.TreeItem;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -29,6 +30,14 @@ import java.util.function.Predicate;
  * @author Frederic Thevenet
  */
 public class TreeViewUtils {
+    /**
+     * Finds the first tree item that matches the provided predicate.
+     *
+     * @param currentTreeItem the node in the tree where to start searching.
+     * @param predicate       the predicate onto witch the search is based.
+     * @param <T>             the type for the tree item
+     * @return an {@link Optional} encapsulating the {@link TreeItem} instance matching the predicate.
+     */
     public static <T> Optional<TreeItem<T>> findFirstInTree(TreeItem<T> currentTreeItem, Predicate<TreeItem<T>> predicate) {
         if (predicate.test(currentTreeItem)) {
             return Optional.of(currentTreeItem);
@@ -44,7 +53,19 @@ public class TreeViewUtils {
         return Optional.empty();
     }
 
-    public static <T> List<TreeItem<T>> findAllInTree(TreeItem<T> currentTreeItem, Predicate<TreeItem<T>> predicate, List<TreeItem<T>> found) {
+    /**
+     * Finds all tree items that match the provided predicate.
+     *
+     * @param currentTreeItem the node in the tree where to start searching.
+     * @param predicate       the predicate onto witch the search is based.
+     * @param <T>             the type for the tree item
+     * @return a list of {@link Optional} encapsulating the {@link TreeItem} instances matching the predicate.
+     */
+    public static <T> List<TreeItem<T>> findAllInTree(TreeItem<T> currentTreeItem, Predicate<TreeItem<T>> predicate) {
+        return findAllInTree(currentTreeItem, predicate, new ArrayList<>());
+    }
+
+    private static <T> List<TreeItem<T>> findAllInTree(TreeItem<T> currentTreeItem, Predicate<TreeItem<T>> predicate, List<TreeItem<T>> found) {
         if (predicate.test(currentTreeItem)) {
             found.add(currentTreeItem);
         }

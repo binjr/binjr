@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
+import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
@@ -156,6 +157,9 @@ public class MainViewController implements Initializable {
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
 
+    /**
+     * Initializes a new instance of the {@link MainViewController} class.
+     */
     public MainViewController() {
         super();
         this.workspace = new Workspace();
@@ -187,26 +191,26 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         worksheetTabPane.setTearable(true);
-        worksheetTabPane.setOnTearedTabsStageSetup(stage -> {
+        worksheetTabPane.setOnOpenNewWindow(event -> {
+            Stage stage = (Stage) event.getSource();
             stage.setTitle("binjr");
             StageAppearanceManager.getInstance().register(stage);
         });
+        worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
         sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
-        sourcesTabPane.setOnNewTabAction(this::handleAddSource);
+        sourcesTabPane.setOnAddNewTab(this::handleAddSource);
         sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             invalidateSearchResults();
             if (newValue != null) {
                 findNext();
             }
         });
-
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
             doCommandBarResize(newValue.doubleValue());
         });
-
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 invalidateSearchResults();
@@ -237,6 +241,11 @@ public class MainViewController implements Initializable {
     }
 
 
+    /**
+     * Sets parameters for the main controller view.
+     *
+     * @param parameters parameters for the main controller view.
+     */
     public void setParameters(Application.Parameters parameters) {
         // look for a .bjr file passed as a cmd line argument
         associatedFile = parameters.getUnnamed()
@@ -449,15 +458,15 @@ public class MainViewController implements Initializable {
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
         List<MenuItem> menuItems = new ArrayList<>();
-        for (DataAdapterFactory.DataAdapterInfo i : DataAdapterFactory.getInstance().getAdapterInfo()) {
-            MenuItem menuItem = new MenuItem(i.getName());
+        for (DataAdapterInfo adapterInfo : DataAdapterFactory.getInstance().getAdapterInfo()) {
+            MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(i.getKey(), root));
+                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
-                    Dialogs.notifyException("Could not find source adapter " + i.getName(), e);
+                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e);
                 } catch (CannotInitializeDataAdapterException e) {
-                    Dialogs.notifyException("Could not initialize source adapter " + i.getName(), e);
+                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e);
                 }
             });
             menuItems.add(menuItem);
@@ -918,7 +927,7 @@ public class MainViewController implements Initializable {
                 else {
                     return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
                 }
-            }, new ArrayList<>());
+            });
         }
         if (!searchResultSet.isEmpty()) {
             searchField.setStyle("");

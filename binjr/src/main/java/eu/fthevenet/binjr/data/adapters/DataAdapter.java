@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Provides the means to access a data source to retrieve raw time series data, as well as properties needed to present them in the view.
+ * Provides the means to access a data source to retrieve raw time series data, as well as the properties required to decode and present the data.
  *
  * @author Frederic Thevenet
  */
@@ -123,21 +123,11 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
      */
     public abstract void initialize(Map<String, String> params) throws DataAdapterException;
 
-    protected String validateParameterNullity(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
-        return validateParameter(params, paramName, s -> {
-            if (s == null) {
-                throw new InvalidAdapterParameterException("Parameter " + paramName + " is missing for adapter " + this.getSourceName());
-            }
-            return s;
-        });
-    }
-
-    protected <R> R validateParameter(Map<String, String> params, String paramName, CheckedFunction<String, R, InvalidAdapterParameterException> validator) throws InvalidAdapterParameterException {
-        String paramValue = params.get(paramName);
-        return validator.apply(paramValue);
-    }
-
-
+    /**
+     * Pings the data source
+     *
+     * @return true if the data source responded to ping request, false otherwise.
+     */
     public abstract boolean ping();
 
     /**
@@ -157,4 +147,19 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
     public void setId(UUID id) {
         this.id = id;
     }
+
+    protected String validateParameterNullity(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
+        return validateParameter(params, paramName, s -> {
+            if (s == null) {
+                throw new InvalidAdapterParameterException("Parameter " + paramName + " is missing for adapter " + this.getSourceName());
+            }
+            return s;
+        });
+    }
+
+    protected <R> R validateParameter(Map<String, String> params, String paramName, CheckedFunction<String, R, InvalidAdapterParameterException> validator) throws InvalidAdapterParameterException {
+        String paramValue = params.get(paramName);
+        return validator.apply(paramValue);
+    }
+
 }
