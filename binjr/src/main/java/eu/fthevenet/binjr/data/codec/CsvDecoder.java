@@ -75,6 +75,14 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
         this.dateParser = dateParser;
     }
 
+    /**
+     * Returns the columns headers of the CSV file.
+     *
+     * @param in an input stream for the CSV file.
+     * @return the columns headers of the CSV file.
+     * @throws IOException                      in the event of an I/O error.
+     * @throws DecodingDataFromAdapterException if an error occurred while decoding the CSV file.
+     */
     public List<String> getDataColumnHeaders(InputStream in) throws IOException, DecodingDataFromAdapterException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
             CSVFormat csvFormat = CSVFormat.DEFAULT
@@ -82,20 +90,6 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                     .withDelimiter(delimiter);
             Iterable<CSVRecord> records = csvFormat.parse(reader);
             return this.parseColumnHeaders(records.iterator().next());
-        }
-    }
-
-
-    private List<String> parseColumnHeaders(CSVRecord record) throws IOException, DecodingDataFromAdapterException {
-        try (Profiler ignored = Profiler.start("Getting hearders from csv data", logger::trace)) {
-            if (record == null) {
-                throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
-            }
-            List<String> headerNames = new ArrayList<>();
-            for (int i = 1; i < record.size(); i++) {
-                headerNames.add(record.get(i));
-            }
-            return headerNames;
         }
     }
 
@@ -108,7 +102,6 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                         .withFirstRecordAsHeader()
                         .withSkipHeaderRecord()
                         .withDelimiter(delimiter);
-
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
                 Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
@@ -128,11 +121,18 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
         }
     }
 
+    /**
+     * Decodes data from the provided stream and invoke the provided {@link Consumer} for each decoded record.
+     *
+     * @param in          the {@link InputStream} for the CSV file
+     * @param headers     a list of the headers to keep from decoded records
+     * @param mapToResult the function to invoke for reach decoded record
+     * @throws IOException                      in the event of an I/O error.
+     * @throws DecodingDataFromAdapterException if an error occurred while decoding the CSV file.
+     */
     public void decode(InputStream in, List<String> headers, Consumer<DataSample<T>> mapToResult) throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
-
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-
                 CSVFormat csvFormat = CSVFormat.DEFAULT
                         .withAllowMissingColumnNames(false)
                         .withFirstRecordAsHeader()
@@ -146,30 +146,59 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                     for (String h : headers) {
                         tRecord.getCells().put(h, numberParser.apply(csvRecord.get(h)));
                     }
-//                    csvRecord.toMap().entrySet().stream()
-//
-//                            .forEach(CheckedLambdas.wrap((CheckedConsumer<Map.Entry<String, String>, DecodingDataFromAdapterException>)
-//                                    e ->);
                     mapToResult.accept(tRecord);
                 }
             }
         }
     }
 
+    /**
+     * Returns the encoding for the CSV file.
+     *
+     * @return the encoding for the CSV file.
+     */
     public String getEncoding() {
         return encoding;
     }
 
+    /**
+     * Returns the delimiter character used in the CSV file.
+     *
+     * @return the delimiter character used in the CSV file.
+     */
     public char getDelimiter() {
         return delimiter;
     }
 
+    /**
+     * Returns the function used to parse numeric fields.
+     *
+     * @return the function used to parse numeric fields.
+     */
     public CheckedFunction<String, T, DecodingDataFromAdapterException> getNumberParser() {
         return numberParser;
     }
 
+    /**
+     * Returns the function used to parse date fields.
+     *
+     * @return the function used to parse date fields.
+     */
     public CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> getDateParser() {
         return dateParser;
+    }
+
+    private List<String> parseColumnHeaders(CSVRecord record) throws IOException, DecodingDataFromAdapterException {
+        try (Profiler ignored = Profiler.start("Getting hearders from csv data", logger::trace)) {
+            if (record == null) {
+                throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
+            }
+            List<String> headerNames = new ArrayList<>();
+            for (int i = 1; i < record.size(); i++) {
+                headerNames.add(record.get(i));
+            }
+            return headerNames;
+        }
     }
 
     private TimeSeriesInfo<T> getBindingFromName(List<TimeSeriesInfo<T>> seriesInfo, String seriesName) {

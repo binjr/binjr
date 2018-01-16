@@ -47,7 +47,7 @@
                 </AnchorPane>
                 <AnchorPane>
                     <children>
-                        <Label styleClass="about-text" text="Copyright © 2017 Frederic Thevenet" textFill="#3a879a" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="10.0"
+                        <Label styleClass="about-text" text="Copyright © 2017-2018 Frederic Thevenet" textFill="#3a879a" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="10.0"
                                AnchorPane.topAnchor="0.0">
                             <font>
                                 <Font size="14.0"/>

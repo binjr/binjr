@@ -47,9 +47,7 @@ import org.apache.logging.log4j.Logger;
 import javax.net.ssl.SSLContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ConnectException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -96,11 +94,11 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     }
 
     @Override
-    public InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        return doHttpGet(craftFetchUri(path, begin, end), new AbstractResponseHandler<InputStream>() {
+    public byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
+        return doHttpGet(craftFetchUri(path, begin, end), new AbstractResponseHandler<byte[]>() {
             @Override
-            public InputStream handleEntity(HttpEntity entity) throws IOException {
-                return new ByteArrayInputStream(EntityUtils.toByteArray(entity));
+            public byte[] handleEntity(HttpEntity entity) throws IOException {
+                return EntityUtils.toByteArray(entity);
             }
         });
     }
@@ -121,12 +119,12 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         baseUri = validateParameter(params, "baseUri",
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter baseUri is missing in adpater " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter baseUri is missing in adapter " + getSourceName());
                     }
                     try {
                         return baseUri = new URI(s);
                     } catch (URISyntaxException e) {
-                        throw new InvalidAdapterParameterException("Value provided for parameter baseUri is not a valid URI in adpater " + getSourceName(), e);
+                        throw new InvalidAdapterParameterException("Value provided for parameter baseUri is not a valid URI in adapter " + getSourceName(), e);
                     }
                 });
     }

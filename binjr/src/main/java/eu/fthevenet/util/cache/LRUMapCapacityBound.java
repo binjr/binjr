@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017 Frederic Thevenet
+ *    Copyright 2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,26 +27,26 @@ import java.util.Map;
  * @param <V> type of values
  * @author Frederic Thevenet
  */
-public class LRUMap<K, V> extends LinkedHashMap<K, V> {
+public class LRUMapCapacityBound<K, V> extends LinkedHashMap<K, V> {
     private int cacheSize;
 
     /**
-     * Initializes a new instance of the {@link LRUMap} class with the specified capacity
+     * Initializes a new instance of the {@link LRUMapCapacityBound} class with the specified capacity
      *
-     * @param capacity the maximum capacity for the {@link LRUMap}
+     * @param capacity the maximum capacity for the {@link LRUMapCapacityBound}
      */
-    public LRUMap(int capacity) {
+    public LRUMapCapacityBound(int capacity) {
         super(16, 0.75f, true);
         this.cacheSize = capacity;
     }
 
     /**
-     * Initializes a new instance of the {@link LRUMap} class with the specified capacity and initial values
+     * Initializes a new instance of the {@link LRUMapCapacityBound} class with the specified capacity and initial values
      *
-     * @param capacity the maximum capacity for the {@link LRUMap}
-     * @param values   initial values to populate the {@link LRUMap}
+     * @param capacity the maximum capacity for the {@link LRUMapCapacityBound}
+     * @param values   initial values to populate the {@link LRUMapCapacityBound}
      */
-    public LRUMap(int capacity, Map<? extends K, ? extends V> values) {
+    public LRUMapCapacityBound(int capacity, Map<? extends K, ? extends V> values) {
         this(capacity);
         putAll(values);
     }

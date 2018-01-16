@@ -229,10 +229,29 @@ public class Dialogs {
         return confirmDialog(node, msg, "Save the changes?", icon, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
     }
 
-    public static ButtonType confirmDialog(Node node, String header, String message, ButtonType... buttons) {
-        return confirmDialog(node, header, message, null, buttons);
+    /**
+     * Displays a confirmation dialog box.
+     *
+     * @param node    a node attached to the stage to be used as the owner of the dialog.
+     * @param header  the header message for the dialog.
+     * @param content the main message for the dialog.
+     * @param buttons the {@link ButtonType} that should be displayed on the confirmation dialog.
+     * @return the {@link ButtonType} corresponding to user's choice.
+     */
+    public static ButtonType confirmDialog(Node node, String header, String content, ButtonType... buttons) {
+        return confirmDialog(node, header, content, null, buttons);
     }
 
+    /**
+     * Displays a confirmation dialog box.
+     *
+     * @param node    a node attached to the stage to be used as the owner of the dialog.
+     * @param header  the header message for the dialog.
+     * @param content the main message for the dialog.
+     * @param icon    the icon for the dialog.
+     * @param buttons the {@link ButtonType} that should be displayed on the confirmation dialog.
+     * @return the {@link ButtonType} corresponding to user's choice.
+     */
     public static ButtonType confirmDialog(Node node, String header, String content, Node icon, ButtonType... buttons) {
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.initOwner(Dialogs.getStage(node));
@@ -252,6 +271,11 @@ public class Dialogs {
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 
+    /**
+     * Ensures that the provided {@link Runnable} is executed on the JavaFX application thread.
+     *
+     * @param r the {@link Runnable} to execute on the JavaFX application thread
+     */
     public static void runOnFXThread(Runnable r) {
         if (Platform.isFxApplicationThread()) {
             r.run();
@@ -261,6 +285,11 @@ public class Dialogs {
         }
     }
 
+    /**
+     * Forces the provided {@link Dialog} to always appear on top of other windows.
+     *
+     * @param dialog the dialog to set always on top.
+     */
     public static void setAlwaysOnTop(Dialog dialog) {
         if (dialog == null) {
             throw new IllegalArgumentException("Dialog cannot be null");

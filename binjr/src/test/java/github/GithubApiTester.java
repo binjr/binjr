@@ -45,7 +45,7 @@ public class GithubApiTester {
             }
 
 
-            List<GithubRelease> releases = GithubApi.getInstance().getReleases("fthevenet", "binjr");
+            List<GithubRelease> releases = GithubApi.getInstance().getAllReleases("fthevenet", "binjr");
             releases.forEach(r -> logger.info("r = " + r));
 
 

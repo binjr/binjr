@@ -140,9 +140,7 @@ public class UpdateManager {
             AsyncTaskManager.getInstance().submit(getLatestTask);
         }
         else {
-            logger.debug(() -> "Available update check ignored as it already took place less than 1 hour ago.");
+            logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
         }
     }
-
-
 }

@@ -50,7 +50,7 @@ import java.util.List;
  * You also have the chance to specify fix lower and upper bounds, otherwise they are calculated by your data.
  * <p/>
  * <p>
- * This code is a pretty straight forward adaptation of the original DateTimeAxis by Christian Schudt and Diego Cirujano
+ * This code is a straight forward adaptation of the original DateTimeAxis by Christian Schudt and Diego Cirujano
  * to use JAVA 8 {@link java.time.ZonedDateTime} instead of {@link java.util.Date}
  * </p>
  *
@@ -264,14 +264,10 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         double range = length - getZeroPosition();
 
         if (getSide().isVertical()) {
-            // displayPosition = getHeight() - ((date - lowerBound) / diff) * range + getZero
-            // date = displayPosition - getZero - getHeight())/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition() - getHeight()) / -range * diff + currentLowerBound.get());
             return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
         }
         else {
-            // displayPosition = ((date - lowerBound) / diff) * range + getZero
-            // date = displayPosition - getZero)/range * diff + lowerBound
             long v = Math.round((displayPosition - getZeroPosition()) / range * diff + currentLowerBound.get());
             return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
         }

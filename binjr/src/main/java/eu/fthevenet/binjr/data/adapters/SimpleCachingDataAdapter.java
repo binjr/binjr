@@ -19,20 +19,15 @@ package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.data.codec.Decoder;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
-import eu.fthevenet.util.cache.LRUMap;
-import eu.fthevenet.util.io.IOUtils;
-import eu.fthevenet.util.logging.Profiler;
+import eu.fthevenet.util.cache.LRUMapCapacityBound;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.time.Instant;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * An abstract implementation of {@link DataAdapter} that manages a cache in between the adapter and the data source.
@@ -43,58 +38,48 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Frederic Thevenet
  */
 public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends DataAdapter<T, A> {
-    public static final int CACHE_SIZE = 32;
+    public static final int DEFAULT_CACHE_SIZE = 128;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
-    private final Map<String, SoftReference<ByteArrayOutputStream>> cache;
+    private final Map<String, SoftReference<byte[]>> cache;
 
     /**
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class
      */
     public SimpleCachingDataAdapter() {
-        cache = new LRUMap<>(CACHE_SIZE);
+        this(DEFAULT_CACHE_SIZE);
+    }
+
+    /**
+     * Initializes a new instance of the {@link SimpleCachingDataAdapter} class with the specified maximum number of entries
+     *
+     * @param maxCacheEntries the  maximum number of entries in the cache
+     */
+    public SimpleCachingDataAdapter(int maxCacheEntries) {
+        cache = new LRUMapCapacityBound<>(maxCacheEntries);
     }
 
     @Override
     public InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
-        ByteArrayOutputStream cached = null;
+        byte[] payload = null;
         String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
         if (!bypassCache) {
-            SoftReference<ByteArrayOutputStream> cacheHit = cache.get(cacheEntryKey);
-            cached = cacheHit != null ? cacheHit.get() : null;
+            SoftReference<byte[]> cacheHit = cache.get(cacheEntryKey);
+            payload = cacheHit != null ? cacheHit.get() : null;
         }
-        if (cached == null) {
+        if (payload == null) {
             logger.trace(() -> String.format(
                     "%s for entry %s %s %s",
                     bypassCache ? "Cache was explicitly bypassed" : "Cache miss",
                     path,
                     begin.toString(),
                     end.toString()));
-            InputStream in = onCacheMiss(path, begin, end);
-            try {
-                cached = new ByteArrayOutputStream();
-                AtomicLong copied = new AtomicLong(0);
-                try (Profiler p = Profiler.start(e -> logger.trace(() -> "Copied " + copied.get() + " bytes in " + e.getMicros() + "µs"))) {
-                    copied.set(IOUtils.copyStreams(in, cached));
-                }
-                cache.put(cacheEntryKey, new SoftReference<>(cached));
-            } catch (IOException e) {
-                logger.error("Error while committing source data to cache: " + e.getMessage());
-                logger.debug("Exception stack", e);
-                try {
-                    if (in != null) {
-                        in.close();
-                    }
-                } catch (IOException e1) {
-                    logger.debug("failed attempt to close stream", e1);
-                }
-                logger.warn("Attempting to return data from source without caching");
-                return onCacheMiss(path, begin, end);
-            }
+            payload = onCacheMiss(path, begin, end);
+            cache.put(cacheEntryKey, new SoftReference<>(payload));
         }
         else {
             logger.trace(() -> String.format("Data successfully retrieved from cache for %s %s %s", path, begin.toString(), end.toString()));
         }
-        return new ByteArrayInputStream(cached.toByteArray());
+        return new ByteArrayInputStream(payload);
     }
 
     /**
@@ -103,10 +88,10 @@ public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends 
      * @param path  the path of the data in the source
      * @param begin the start of the time interval.
      * @param end   the end of the time interval.
-     * @return the output stream in which to return data.
+     * @return the data to store in the cache.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    public abstract InputStream onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
+    public abstract byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
 
     @Override
     public void close() {

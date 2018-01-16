@@ -79,7 +79,7 @@ public abstract class TimeSeriesProcessor<T> {
      * @return An {@link Optional} instance that contains tthe value for the time position nearest to the one requested if process could complete and value is non-null.
      */
     public Optional<T> tryGetNearestValue(ZonedDateTime xValue) {
-        // If the lock is already acquired, just abandon the request
+        // If the lock is already acquired, just abandon the request and return Optional.empty
         return monitor.read().tryLock(this::unsafeGetNearestValue, xValue);
     }
 
