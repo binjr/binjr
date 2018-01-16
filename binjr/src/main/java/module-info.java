@@ -25,11 +25,13 @@ module eu.fthevenet.binjr {
     requires javafx.fxml;
     requires java.xml;
     requires javafx.swing;
-    requires log4j.api;
     requires controlsfx;
+    requires org.apache.logging.log4j;
     requires jfxutils;
     requires java.xml.bind;
-    requires jaxb.java.time.adapters;
+    requires java.base;
+
+    //requires jaxb.java.time.adapters;
     requires java.prefs;
     requires httpclient;
     requires gson;
@@ -40,4 +42,5 @@ module eu.fthevenet.binjr {
     exports eu.fthevenet.binjr.controllers;
     opens eu.fthevenet.binjr.controllers;
     exports eu.fthevenet.util.javafx.controls;
+    opens com.migesok.jaxb.adapter.javatime;
 }
