@@ -122,7 +122,6 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapter();
                 autoCompletionLearnWord(uriField);
-                throw new RuntimeException("booya!");
             } catch (DateTimeException e) {
                 Dialogs.notifyError("Invalid Timezone", e, Pos.CENTER, timezoneField);
                 ae.consume();
