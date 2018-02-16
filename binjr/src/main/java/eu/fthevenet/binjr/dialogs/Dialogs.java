@@ -122,6 +122,11 @@ public class Dialogs {
                 .owner(owner).showError());
     }
 
+    public static void notifyError(String title, Exception e, Pos position, Node owner) {
+        logger.debug(() -> title, e);
+        notifyError(title, e.getMessage(), position, owner);
+    }
+
     /**
      * Display an warning notification
      *
@@ -299,7 +304,7 @@ public class Dialogs {
             dlgStage.setAlwaysOnTop(true);
         }
         else {
-            logger.debug("Failed to retreive dialog's stage: cannot set dialog to be always on top");
+            logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
         }
     }
 }

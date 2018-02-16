@@ -184,7 +184,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     protected static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
         // Load platform specific Trusted CA keystore
-        logger.trace(() -> Arrays.toString(Security.getProviders()));
+        logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
         KeyStore tks;
         switch (AppEnvironment.getInstance().getOsFamily()) {
             case WINDOWS:
