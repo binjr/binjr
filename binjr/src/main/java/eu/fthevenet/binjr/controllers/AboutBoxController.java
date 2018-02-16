@@ -174,7 +174,8 @@ public class AboutBoxController implements Initializable {
         aboutStage.getScene().getStylesheets().clear();
     }
 
-    public void goTobinjrDotEu(ActionEvent actionEvent) {
+    @FXML
+    private void goTobinjrDotEu(ActionEvent actionEvent) {
         try {
             Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
         } catch (IOException | URISyntaxException e) {
