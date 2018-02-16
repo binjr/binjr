@@ -233,7 +233,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
                     .setDefaultCredentialsProvider(credsProvider)
                     .setSSLSocketFactory(csf)
                     .build();
-        } catch (IOException | UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException | KeyManagementException e) {
+        } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
         }
     }
