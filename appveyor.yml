@@ -31,6 +31,8 @@ build_script:
 
     java -version
 
+    echo %JAVA_HOME%
+
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
