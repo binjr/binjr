@@ -14,13 +14,10 @@ init:
 
 install:
   - cinst jdk8
-  - ps: >-
 
-    java -version
+  - refreshenv
 
-    refreshenv
 
-    java -version
 
 branches:
 
@@ -35,6 +32,10 @@ only_commits:
 build_script:
 
 - ps: >-
+
+    java -version
+
+    echo %JAVA_HOME%
 
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
