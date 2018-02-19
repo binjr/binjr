@@ -11,9 +11,6 @@ environment:
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-install:
-  - cinst jdk8
-
 branches:
 
   only:
@@ -27,11 +24,6 @@ only_commits:
 build_script:
 
 - ps: >-
-    refreshenv
-
-    java -version
-
-    echo %JAVA_HOME%
 
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 

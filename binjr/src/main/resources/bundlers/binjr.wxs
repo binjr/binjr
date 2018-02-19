@@ -74,22 +74,12 @@
 
         <?include bundle.wxi ?>
 
-        <DirectoryRef Name="app">
-            <!--<Component Id="RemoveRuntimeEntry" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes">-->
-            <!--<CreateFolder/>-->
-            <!--&lt;!&ndash;<Condition>&amp;Runtime=2</Condition>&ndash;&gt;-->
-            <!--<IniFile Id="IniRemoveRuntimeEntry"-->
-            <!--Action="removeLine"-->
-            <!--Directory="dirid7"-->
-            <!--Section="Application"-->
-            <!--Name="binjr.cfg"-->
-            <!--Key="app.runtime"/>-->
-            <!--</Component>-->
+        <DirectoryRef Id="binjrAppDir">
             <Component Id="AddRuntimeEntry" Guid="F00C41C2-AEF0-4F58-B28D-673A1F1D94D6" Win64="yes">
                 <CreateFolder/>
                 <IniFile Id="IniAddRuntimeEntry"
                          Action="addLine"
-                         Directory="dirid48"
+                         Directory="binjrAppDir"
                          Section="Application"
                          Name="binjr.cfg"
                          Key="app.runtime"
