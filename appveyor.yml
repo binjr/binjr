@@ -27,6 +27,7 @@ only_commits:
 build_script:
 
 - ps: >-
+    refreshenv
 
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
