@@ -13,11 +13,9 @@ init:
 
 
 install:
-  - cinst jdk8
-
-  - refreshenv
-
-
+  - cinst jdk8  -params 'installdir=C:\\latest_jdk8'
+  - SET JAVA_HOME=C:\latest_jdk8
+  - SET PATH=C:\latest_jdk8\bin;%PATH%
 
 branches:
 
@@ -34,8 +32,6 @@ build_script:
 - ps: >-
 
     java -version
-
-    echo %JAVA_HOME%
 
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
