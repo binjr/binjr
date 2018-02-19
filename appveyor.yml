@@ -11,6 +11,17 @@ environment:
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
+
+install:
+  - cinst jdk8
+  - ps: >-
+
+    java -version
+
+    refreshenv
+
+    java -version
+
 branches:
 
   only:
