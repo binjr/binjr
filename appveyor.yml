@@ -29,6 +29,8 @@ build_script:
 - ps: >-
     refreshenv
 
+    java -version
+
     $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin”
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER

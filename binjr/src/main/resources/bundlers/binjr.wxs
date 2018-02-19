@@ -74,7 +74,7 @@
 
         <?include bundle.wxi ?>
 
-        <DirectoryRef Id="dirid48">
+        <DirectoryRef Name="app">
             <!--<Component Id="RemoveRuntimeEntry" Guid="08CADF34-E417-4BA9-861B-19622EB1ACD8" Win64="yes">-->
             <!--<CreateFolder/>-->
             <!--&lt;!&ndash;<Condition>&amp;Runtime=2</Condition>&ndash;&gt;-->
@@ -148,7 +148,7 @@
                 <ComponentRef Id="comp18"/>
                 <ComponentRef Id="comp19"/>
                 <ComponentRef Id="comp20"/>
-                <ComponentRef Id="CleanupMainApplicationFolder"/>
+                <ComponentRef Id="AddRuntimeEntry"/>
             </Feature>
         </Feature>
 
