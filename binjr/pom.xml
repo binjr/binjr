@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr.java9</name>
     <url>http://www.binjr.eu</url>
-    <version>1.2.3-SNAPSHOT</version>
+    <version>1.2.4-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>
@@ -355,7 +355,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <version>4.5.4</version>
+            <version>4.5.5</version>
         </dependency>
         <dependency>
             <groupId>org.controlsfx</groupId>

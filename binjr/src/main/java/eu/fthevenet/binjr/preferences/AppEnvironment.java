@@ -57,7 +57,7 @@ public class AppEnvironment {
      *
      * @return the version information held in the containing jar's manifest
      */
-    public Version getManifestVersion() {
+    public Version getVersion() {
         if (manifest != null) {
             String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
             for (String key : keys) {
@@ -73,6 +73,10 @@ public class AppEnvironment {
             }
         }
         return Version.emptyVersion;
+    }
+
+    public String getAppDescription() {
+        return "binjr v" + getVersion() + " (build #" + getBuildNumber() + ")";
     }
 
     /**
@@ -92,7 +96,7 @@ public class AppEnvironment {
                 }
             }
         }
-        return -1L;
+        return 0L;
     }
 
     /**
@@ -106,7 +110,7 @@ public class AppEnvironment {
         double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
 
         List<SysInfoProperty> sysInfo = new ArrayList<>();
-        sysInfo.add(new SysInfoProperty("Version", getManifestVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
+        sysInfo.add(new SysInfoProperty("Version", getVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
         sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
         sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
         sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));

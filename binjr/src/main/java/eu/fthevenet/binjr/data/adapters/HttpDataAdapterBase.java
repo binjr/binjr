@@ -145,7 +145,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
             logger.debug(() -> "requestUrl = " + requestUri);
             HttpGet httpget = new HttpGet(requestUri);
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             R result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
                 throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() + "\" is null.");
@@ -184,7 +184,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     protected static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
         // Load platform specific Trusted CA keystore
-        logger.trace(() -> Arrays.toString(Security.getProviders()));
+        logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
         KeyStore tks;
         switch (AppEnvironment.getInstance().getOsFamily()) {
             case WINDOWS:
@@ -233,7 +233,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
                     .setDefaultCredentialsProvider(credsProvider)
                     .setSSLSocketFactory(csf)
                     .build();
-        } catch (IOException | UnrecoverableKeyException | CertificateException | NoSuchAlgorithmException | KeyStoreException | NoSuchProviderException | KeyManagementException e) {
+        } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
         }
     }

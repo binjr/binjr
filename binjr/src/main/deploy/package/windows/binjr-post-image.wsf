@@ -7,6 +7,8 @@
 
         Call PatchFile(".\binjr\app\binjr.cfg", "app.runtime=$APPDIR\runtime", "")
 
+        Call PatchFile("..\..\windows\bundle.wxi", "Directory Id=""[\w]+"" Name=""app""", "Directory Id=""binjrAppDir"" Name=""app""")
+
         Sub PatchFile( strFileName, strOldText, strNewText )
             Const ForReading = 1
             Const ForWriting = 2
@@ -14,11 +16,13 @@
             Set objFile = objFSO.OpenTextFile(strFileName, ForReading)
             strText = objFile.ReadAll
             objFile.Close
-            strNewText = Replace(strText, strOldText, strNewText)
+            Set regEx = New RegExp
+            regEx.Pattern = strOldText
+            regEx.IgnoreCase = True
+            strNewText = regEx.Replace(strText, strNewText)
             Set objFile = objFSO.OpenTextFile(strFileName, ForWriting)
             objFile.WriteLine strNewText
             objFile.Close
-
             If Err.Number <> 0 Then
                 Set fso = CreateObject ("Scripting.FileSystemObject")
                 Set stderr = fso.GetStandardStream (2)

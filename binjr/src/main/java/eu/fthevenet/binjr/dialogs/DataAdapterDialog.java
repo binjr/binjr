@@ -123,15 +123,16 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
                 result = getDataAdapter();
                 autoCompletionLearnWord(uriField);
             } catch (DateTimeException e) {
-                Dialogs.notifyError("Invalid Timezone", e.getMessage(), Pos.CENTER, timezoneField);
+                Dialogs.notifyError("Invalid Timezone", e, Pos.CENTER, timezoneField);
                 ae.consume();
             } catch (CannotInitializeDataAdapterException e) {
-                logger.debug(() -> "Stack trace", e);
-                Dialogs.notifyError("Error initializing adapter to source", e.getMessage(), Pos.CENTER, timezoneField);
+                Dialogs.notifyError("Error initializing adapter to source", e, Pos.CENTER, timezoneField);
                 ae.consume();
             } catch (DataAdapterException e) {
-                logger.debug(() -> "Stack trace", e);
-                Dialogs.notifyError("Error with the adapter to source", e.getMessage(), Pos.CENTER, timezoneField);
+                Dialogs.notifyError("Error with the adapter to source", e, Pos.CENTER, timezoneField);
+                ae.consume();
+            } catch (Exception e) {
+                Dialogs.notifyError("Unexpected error while retrieving data adapter", e, Pos.CENTER, timezoneField);
                 ae.consume();
             }
         });

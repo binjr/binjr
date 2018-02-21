@@ -37,7 +37,6 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.AbstractResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -70,7 +69,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     public static final String JRDS_FILTER = "filter";
     public static final String JRDS_TREE = "tree";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
-    private final CloseableHttpClient httpClient;
     private String filter;
 
     private ZoneId zoneId;
@@ -82,8 +80,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      */
     public JrdsDataAdapter() throws CannotInitializeDataAdapterException {
         super();
-        httpClient = httpClientFactory();
-
     }
 
     /**
@@ -99,8 +95,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
         this.filter = filter;
-        httpClient = httpClientFactory();
-
     }
 
     /**
@@ -114,7 +108,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         try {
             URI u = new URI(url.replaceAll("/$", ""));
             return new JrdsDataAdapter(u, zoneId, "utf-8", treeViewTab, filter);
-
         } catch (URISyntaxException e) {
             throw new CannotInitializeDataAdapterException("Could not parse \"" + url + "\" as a valid URI", e);
         }
@@ -269,11 +262,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     public void close() {
         super.close();
-        try {
-            this.httpClient.close();
-        } catch (IOException e) {
-            logger.error("Error closing JrdsDataAdapter", e);
-        }
     }
 
     //endregion
