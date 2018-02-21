@@ -145,7 +145,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
             logger.debug(() -> "requestUrl = " + requestUri);
             HttpGet httpget = new HttpGet(requestUri);
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+            httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             R result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
                 throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() + "\" is null.");

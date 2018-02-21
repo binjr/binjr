@@ -115,13 +115,13 @@ public class UpdateManager {
                 @Override
                 protected Optional<GithubRelease> call() throws Exception {
                     logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                    return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getManifestVersion()) > 0);
+                    return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
                 }
             };
             getLatestTask.setOnSucceeded(workerStateEvent -> {
                 logger.trace("UI update running on " + Thread.currentThread().getName());
                 Optional<GithubRelease> latest = getLatestTask.getValue();
-                Version current = AppEnvironment.getInstance().getManifestVersion();
+                Version current = AppEnvironment.getInstance().getVersion();
                 if (latest.isPresent()) {
                     newReleaseAvailable.accept(latest.get());
                 }

@@ -1020,7 +1020,7 @@ public class MainViewController implements Initializable {
     private void onAvailableUpdate(GithubRelease githubRelease) {
         Notifications n = Notifications.create()
                 .title("New release available!")
-                .text("You are currently running binjr version " + AppEnvironment.getInstance().getManifestVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
+                .text("You are currently running binjr version " + AppEnvironment.getInstance().getVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);

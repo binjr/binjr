@@ -170,7 +170,7 @@ public class ClientKerberosAuthentication {
 
         HttpUriRequest request = new HttpGet(targetUrl + "/jsontree?tab=hoststab");
         // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-        request.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getManifestVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+        request.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
         HttpResponse response = httpClient.execute(request);
         HttpEntity entity = response.getEntity();
 

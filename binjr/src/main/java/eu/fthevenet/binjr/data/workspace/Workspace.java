@@ -20,6 +20,7 @@ package eu.fthevenet.binjr.data.workspace;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
@@ -48,6 +49,7 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
+    public static final String WORKSPACE_SCHEMA_VERSION = "1.2";
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlElementWrapper(name = "Sources")
@@ -62,6 +64,10 @@ public class Workspace implements Dirtyable {
     private final ObservableList<Worksheet> worksheets;
     @XmlTransient
     private final ChangeWatcher status;
+    @XmlAttribute(name = "schemaVersion", required = false)
+    private final String schemaVersion = WORKSPACE_SCHEMA_VERSION;
+    @XmlAttribute(name = "producerInfo", required = false)
+    private final String producerInfo;
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -82,6 +88,7 @@ public class Workspace implements Dirtyable {
         this.sources = sources;
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
+        this.producerInfo = AppEnvironment.getInstance().getAppDescription();
     }
 
     /**
