@@ -168,7 +168,7 @@ public class GlobalPreferences {
      * @return true if the chart animation is enabled, false otherwise.
      */
     public Boolean getChartAnimationEnabled() {
-        return downSamplingEnabled.getValue();
+        return chartAnimationEnabled.getValue();
     }
 
     /**
