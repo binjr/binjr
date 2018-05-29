@@ -59,7 +59,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
-import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -105,8 +104,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private Button forwardButton;
     @FXML
     private Button refreshButton;
-    @FXML
-    private ToggleButton autoScaleYAxisToggle;
+    //    @FXML
+//    private ToggleButton autoScaleYAxisToggle;
     @FXML
     private Button snapshotButton;
     @FXML
@@ -140,6 +139,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ChartPropertiesController propertiesController;
     private ToggleButton chartPropertiesButton;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
+
     private XYChartViewState currentState;
     private XYChartSelection<ZonedDateTime, Double> previousState;
     private History backwardHistory = new History();
@@ -212,12 +212,12 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //region *** Nodes injection checks ***
         assert root != null : "fx:id\"root\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
-        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
-        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
+//        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
+//        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert seriesTable != null : "fx:id\"seriesTable\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
-        assert autoScaleYAxisToggle != null : "fx:id\"autoScaleYAxisToggle\" was not injected!";
+        //    assert autoScaleYAxisToggle != null : "fx:id\"autoScaleYAxisToggle\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
@@ -260,7 +260,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             yAxis = new MetricStableTicksAxis();
         }
         yAxis.setSide(Side.LEFT);
-        yAxis.autoRangingProperty().bindBidirectional(autoScaleYAxisToggle.selectedProperty());
+        yAxis.autoRangingProperty().bindBidirectional(worksheet.autoScaleYAxisProperty());
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
         yAxis.labelProperty().bind(worksheet.unitProperty());
@@ -285,7 +285,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
         snapshotButton.setOnAction(this::handleTakeSnapshot);
-        forwardButton.setOnAction(this::handleHistoryForward);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
         //endregion
@@ -303,7 +302,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;//  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
-        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
+
         crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
 
         crossHair.onSelectionDone(s -> {
@@ -316,8 +315,15 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
         crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
-        setAndBindTextFormatter(yMinRange, numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
-        setAndBindTextFormatter(yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+//        setAndBindTextFormatter(worksheet.yAxisMinValueProperty(), numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
+//        setAndBindTextFormatter(propertiesController.yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+
+        worksheet.yAxisMinValueProperty().bindBidirectional(currentState.startY);
+        ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
+
+        worksheet.yAxisMaxValueProperty().bindBidirectional(currentState.endY);
+        ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
+
         //endregion
     }
 
@@ -572,7 +578,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        textField.setOnKeyPressed(event -> autoScaleYAxisToggle.setSelected(false));
+        textField.setOnKeyPressed(event -> worksheet.setAutoScaleYAxis(false));
         formatter.valueProperty().bindBidirectional(stateProperty);
         axisBoundProperty.bindBidirectional(stateProperty);
         textField.setTextFormatter(formatter);
@@ -765,7 +771,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     endX.get(),
                     startY.get(),
                     endY.get(),
-                    autoScaleYAxisToggle.isSelected()
+                    worksheet.isAutoScaleYAxis()
             );
         }
 
@@ -788,11 +794,11 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     double r = (((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
                     logger.debug(() -> "Y selection - Y axis range = " + r);
                     if (r > 0.0001) {
-                        autoScaleYAxisToggle.setSelected(false);
+                        worksheet.setAutoScaleYAxis(false);
                     }
                 }
                 else {
-                    autoScaleYAxisToggle.setSelected(selection.isAutoRangeY());
+                    worksheet.setAutoScaleYAxis(selection.isAutoRangeY());
                 }
 
                 this.startY.set(roundYValue(selection.getStartY()));

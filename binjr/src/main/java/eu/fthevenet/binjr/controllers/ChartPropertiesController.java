@@ -22,6 +22,7 @@ import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
@@ -31,11 +32,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.net.URL;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -70,9 +73,16 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ChoiceBox<ChartType> chartTypeChoice;
     @FXML
     private TextField timezoneField;
+    @FXML
+    private TextField yMinRange;
+    @FXML
+    private TextField yMaxRange;
+    @FXML
+    private CheckBox autoScaleYAxis;
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
         this.worksheet = worksheet;
+        //     this.parentController = parentController;
     }
 
     private void show() {
@@ -104,7 +114,9 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         assert strokeWidthText != null : "fx:id\"strokeWidthText\" was not injected!";
         assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
+        assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
 
+        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
 
@@ -118,6 +130,15 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
             }
         });
         showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
+
+        autoScaleYAxis.selectedProperty().bindBidirectional(worksheet.autoScaleYAxisProperty());
+
+
+        setAndBindTextFormatter(yMinRange, numberFormatter, worksheet.yAxisMinValueProperty());
+        setAndBindTextFormatter(yMaxRange, numberFormatter, worksheet.yAxisMaxValueProperty());
+//        setAndBindTextFormatter(propertiesController.yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
+
+
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
         worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
@@ -149,6 +170,15 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
             }
         });
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
+
+    }
+
+
+    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty) {
+        final TextFormatter<T> formatter = new TextFormatter<>(converter);
+        textField.setOnKeyPressed(event -> autoScaleYAxis.setSelected(false));
+        formatter.valueProperty().bindBidirectional(stateProperty);
+        textField.setTextFormatter(formatter);
     }
 
     private void adaptToChartType(boolean disable) {

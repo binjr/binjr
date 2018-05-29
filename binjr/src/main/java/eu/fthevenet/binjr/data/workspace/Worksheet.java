@@ -80,6 +80,12 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private BooleanProperty showChartSymbols = new SimpleBooleanProperty(false);
     @IsDirtyable
     private DoubleProperty strokeWidth;
+    @IsDirtyable
+    private BooleanProperty autoScaleYAxis;
+    @IsDirtyable
+    private DoubleProperty yAxisMinValue;
+    @IsDirtyable
+    private DoubleProperty yAxisMaxValue;
 
     private final ChangeWatcher status;
 
@@ -95,7 +101,10 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
                 UnitPrefixes.METRIC,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
                 GlobalPreferences.getInstance().isShowAreaOutline(),
-                1.0);
+                1.0,
+                true,
+                0.0,
+                100.0);
     }
 
     /**
@@ -116,7 +125,10 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
                 prefix,
                 GlobalPreferences.getInstance().getDefaultGraphOpacity(),
                 GlobalPreferences.getInstance().isShowAreaOutline(),
-                1.0);
+                1.0,
+                true,
+                0.0,
+                100.0);
     }
 
     /**
@@ -137,7 +149,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
                 initWorksheet.getUnitPrefixes(),
                 initWorksheet.getGraphOpacity(),
                 initWorksheet.isShowAreaOutline(),
-                initWorksheet.getStrokeWidth());
+                initWorksheet.getStrokeWidth(),
+                initWorksheet.isAutoScaleYAxis(),
+                initWorksheet.getyAxisMinValue(),
+                initWorksheet.getyAxisMaxValue()
+        );
     }
 
     private Worksheet(String name,
@@ -150,7 +166,10 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
                       UnitPrefixes base,
                       double graphOpacity,
                       boolean showAreaOutline,
-                      double strokeWidth) {
+                      double strokeWidth,
+                      boolean autoScaleYAxis,
+                      double yAxisMinValue,
+                      double yAxisMaxValue) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -162,6 +181,9 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
         this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
+        this.autoScaleYAxis = new SimpleBooleanProperty(autoScaleYAxis);
+        this.yAxisMinValue = new SimpleDoubleProperty(yAxisMinValue);
+        this.yAxisMaxValue = new SimpleDoubleProperty(yAxisMaxValue);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -572,6 +594,42 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     @Override
     public void close() {
         series.clear();
+    }
+
+    public boolean isAutoScaleYAxis() {
+        return autoScaleYAxis.get();
+    }
+
+    public BooleanProperty autoScaleYAxisProperty() {
+        return autoScaleYAxis;
+    }
+
+    public void setAutoScaleYAxis(boolean autoScaleYAxis) {
+        this.autoScaleYAxis.set(autoScaleYAxis);
+    }
+
+    public double getyAxisMinValue() {
+        return yAxisMinValue.get();
+    }
+
+    public DoubleProperty yAxisMinValueProperty() {
+        return yAxisMinValue;
+    }
+
+    public void setyAxisMinValue(double yAxisMinValue) {
+        this.yAxisMinValue.set(yAxisMinValue);
+    }
+
+    public double getyAxisMaxValue() {
+        return yAxisMaxValue.get();
+    }
+
+    public DoubleProperty yAxisMaxValueProperty() {
+        return yAxisMaxValue;
+    }
+
+    public void setyAxisMaxValue(double yAxisMaxValue) {
+        this.yAxisMaxValue.set(yAxisMaxValue);
     }
 }
 
