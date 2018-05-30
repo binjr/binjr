@@ -33,7 +33,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -50,11 +49,10 @@ import static java.util.stream.Collectors.groupingBy;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlRootElement(name = "Worksheet")
+@XmlRootElement(name = "Chart")
 public class Chart<T> implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-
     @IsDirtyable
     private ObservableList<TimeSeriesInfo<T>> series;
     @IsDirtyable
@@ -69,8 +67,6 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     private DoubleProperty graphOpacity;
     @IsDirtyable
     private BooleanProperty showAreaOutline;
-    @IsDirtyable
-    private BooleanProperty showChartSymbols = new SimpleBooleanProperty(false);
     @IsDirtyable
     private DoubleProperty strokeWidth;
     @IsDirtyable
@@ -104,9 +100,9 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param name      the name for the new {@link Worksheet} instance
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
-     * @param timezone  the {@link ZoneId} for the new {@link Worksheet} instance
+
      */
-    public Chart(String name, ChartType chartType, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone, String unitName, UnitPrefixes prefix) {
+    public Chart(String name, ChartType chartType, String unitName, UnitPrefixes prefix) {
         this(name,
                 chartType,
                 FXCollections.observableList(new LinkedList<>()),
@@ -242,6 +238,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the name of the {@link Worksheet}
      */
+    @XmlAttribute
     public String getName() {
         return name.getValue();
     }
@@ -282,6 +279,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the type of chart hosted by the  {@link Worksheet}
      */
+    @XmlAttribute
     public ChartType getChartType() {
         return chartType.getValue();
     }
@@ -309,6 +307,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the unit for the {@link Worksheet}'s times series Y axis
      */
+    @XmlAttribute
     public String getUnit() {
         return unit.getValue();
     }
@@ -336,6 +335,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the unit prefix for the {@link Worksheet}'s times series Y axis
      */
+    @XmlAttribute
     public UnitPrefixes getUnitPrefixes() {
         return unitPrefixes.getValue();
     }
@@ -363,6 +363,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the opacity factor to apply the the graph
      */
+    @XmlAttribute
     public double getGraphOpacity() {
         return graphOpacity.get();
     }
@@ -390,6 +391,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return true if area charts should display an outline stroke, false otherwise
      */
+    @XmlAttribute
     public boolean isShowAreaOutline() {
         return showAreaOutline.get();
     }
@@ -413,34 +415,6 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Returns true if charts should display sample symbols, false otherwise
-     *
-     * @return true if charts should display sample symbols, false otherwise
-     */
-    public boolean isShowChartSymbols() {
-        return showChartSymbols.get();
-    }
-
-    /**
-     * Returns the showChartSymbols property
-     *
-     * @return the showChartSymbols property
-     */
-    public BooleanProperty showChartSymbolsProperty() {
-        return showChartSymbols;
-    }
-
-    /**
-     * Set to true if charts should display sample symbols, false otherwise
-     *
-     * @param showChartSymbols true if charts should display sample symbols, false otherwise
-     */
-    public void setShowChartSymbols(boolean showChartSymbols) {
-        this.showChartSymbols.set(showChartSymbols);
-    }
-
-
-    /**
      * The strokeWidth property.
      *
      * @return The strokewidth property.
@@ -454,6 +428,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @return the stroke width for line charts
      */
+    @XmlAttribute
     public double getStrokeWidth() {
         return strokeWidth.get();
     }
@@ -497,6 +472,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         series.clear();
     }
 
+    @XmlAttribute
     public boolean isAutoScaleYAxis() {
         return autoScaleYAxis.get();
     }
@@ -509,6 +485,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         this.autoScaleYAxis.set(autoScaleYAxis);
     }
 
+    @XmlAttribute
     public double getyAxisMinValue() {
         return yAxisMinValue.get();
     }
@@ -521,6 +498,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         this.yAxisMinValue.set(yAxisMinValue);
     }
 
+    @XmlAttribute
     public double getyAxisMaxValue() {
         return yAxisMaxValue.get();
     }

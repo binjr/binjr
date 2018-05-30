@@ -25,10 +25,7 @@ import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
-import eu.fthevenet.binjr.data.workspace.Source;
-import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.data.workspace.Workspace;
+import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
@@ -725,7 +722,7 @@ public class MainViewController implements Initializable {
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
             WorksheetController current;
-            switch (worksheet.getChartType()) {
+            switch (worksheet.getDefaultChart().getChartType()) {
                 case SCATTER:
                     current = new ScatterChartWorksheetController(worksheet);
                     break;
@@ -743,7 +740,7 @@ public class MainViewController implements Initializable {
             }
             try {
                 // Attach bindings
-                for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
+                for (TimeSeriesInfo<?> s : worksheet.getDefaultChart().getSeries()) {
                     UUID id = s.getBinding().getAdapterId();
                     DataAdapter<?, ?> da = sourcesAdapters.values()
                             .stream()
@@ -889,13 +886,19 @@ public class MainViewController implements Initializable {
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                     zoneId = ZoneId.systemDefault();
                 }
-                Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
+
+                List<Chart<Double>> chartList = new ArrayList<>();
+                chartList.add(new Chart<>(binding.getLegend(),
                         binding.getGraphType(),
-                        fromDateTime,
-                        toDateTime,
-                        zoneId,
                         binding.getUnitName(),
-                        binding.getUnitPrefix());
+                        binding.getUnitPrefix()
+                ));
+                Worksheet<Double> worksheet = new Worksheet<Double>(binding.getLegend(),
+                        chartList,
+                        zoneId,
+                        fromDateTime,
+                        toDateTime
+                );
 
                 if (editWorksheet(worksheet) && getSelectedWorksheetController() != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();

@@ -84,7 +84,7 @@ public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
             ZonedDateTimePicker fromDatePicker = (ZonedDateTimePicker) parent.lookup("#fromDatePicker");
             ZonedDateTimePicker toDatePicker = (ZonedDateTimePicker) parent.lookup("#toDatePicker");
 
-            unitNameField.textProperty().bindBidirectional(resultWorksheet.unitProperty());
+            unitNameField.textProperty().bindBidirectional(resultWorksheet.getDefaultChart().unitProperty());
             nameField.textProperty().bindBidirectional(resultWorksheet.nameProperty());
             TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
                 @Override
@@ -106,12 +106,12 @@ public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
             fromDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.fromDateTimeProperty());
             toDatePicker.dateTimeValueProperty().bindBidirectional(resultWorksheet.toDateTimeProperty());
             chartTypeChoice.getItems().setAll(Arrays.stream(ChartType.values()).collect(Collectors.toSet()));
-            chartTypeChoice.getSelectionModel().select(resultWorksheet.getChartType());
-            resultWorksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
+            chartTypeChoice.getSelectionModel().select(resultWorksheet.getDefaultChart().getChartType());
+            resultWorksheet.getDefaultChart().chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
             unitPrefixesChoice.getItems().setAll(UnitPrefixes.values());
-            unitPrefixesChoice.getSelectionModel().select(resultWorksheet.getUnitPrefixes());
-            resultWorksheet.unitPrefixesProperty().bind(unitPrefixesChoice.getSelectionModel().selectedItemProperty());
+            unitPrefixesChoice.getSelectionModel().select(resultWorksheet.getDefaultChart().getUnitPrefixes());
+            resultWorksheet.getDefaultChart().unitPrefixesProperty().bind(unitPrefixesChoice.getSelectionModel().selectedItemProperty());
 
             autoCompletionBinding = TextFields.bindAutoCompletion(unitNameField, suggestedUnits);
             final Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);

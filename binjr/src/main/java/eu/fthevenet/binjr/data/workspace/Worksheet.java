@@ -30,10 +30,7 @@ import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -53,7 +50,6 @@ import java.util.stream.Collectors;
 public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-
     @IsDirtyable
     private ObservableList<Chart<T>> charts;
     @IsDirtyable
@@ -72,9 +68,10 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     public Worksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
-                ZoneId.systemDefault(),
                 FXCollections.observableList(new LinkedList<>()),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now());
+                ZoneId.systemDefault(),
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS),
+                ZonedDateTime.now());
     }
 
     /**
@@ -85,8 +82,8 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     public Worksheet(String name, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone) {
         this(name,
-                timezone,
                 FXCollections.observableList(new LinkedList<>()),
+                timezone,
                 fromDateTime,
                 toDateTime
         );
@@ -99,22 +96,28 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     public Worksheet(Worksheet<T> initWorksheet) {
         this(initWorksheet.getName(),
-                initWorksheet.getTimeZone(),
                 initWorksheet.getCharts().stream()
                         .map(Chart::new)
                         .collect(Collectors.toCollection(() -> FXCollections.observableList(new LinkedList<>()))),
+                initWorksheet.getTimeZone(),
                 initWorksheet.getFromDateTime(),
                 initWorksheet.getToDateTime()
         );
     }
 
-    private Worksheet(String name,
+
+    public Worksheet(String name,
+                     List<Chart<T>> charts,
                       ZoneId timezone,
-                      List<Chart<T>> charts,
                       ZonedDateTime fromDateTime,
                       ZonedDateTime toDateTime) {
         this.name = new SimpleStringProperty(name);
         this.charts = FXCollections.observableList(new LinkedList<>(charts));
+        if (this.charts.isEmpty()) {
+            this.charts.add(new Chart<>());
+            this.charts.add(new Chart<>());
+            this.charts.add(new Chart<>());
+        }
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
@@ -136,11 +139,17 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         }
     }
 
+    @XmlTransient
+    public Chart<T> getDefaultChart() {
+        return charts.get(0);
+    }
+
     /**
      * The name of the {@link Worksheet}
      *
      * @return the name of the {@link Worksheet}
      */
+    @XmlAttribute()
     public String getName() {
         return name.getValue();
     }
@@ -168,6 +177,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @return the {@link ZoneId} used by the {@link Worksheet} time series
      */
+    @XmlAttribute
     public ZoneId getTimeZone() {
         return timeZone.getValue();
     }
@@ -195,6 +205,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @return the lower bound of the time interval of the {@link Worksheet}'s times series
      */
+    @XmlAttribute
     public ZonedDateTime getFromDateTime() {
         return fromDateTime.getValue();
     }
@@ -222,6 +233,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @return the upper bound of the time interval of the {@link Worksheet}'s times series
      */
+    @XmlAttribute
     public ZonedDateTime getToDateTime() {
         return toDateTime.getValue();
     }
@@ -244,6 +256,9 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime.setValue(toDateTime);
     }
 
+
+    @XmlElementWrapper(name = "Charts")
+    @XmlElements(@XmlElement(name = "Chart"))
     public ObservableList<Chart<T>> getCharts() {
         return charts;
     }

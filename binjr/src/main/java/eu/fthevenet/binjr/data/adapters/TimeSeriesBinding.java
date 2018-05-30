@@ -23,10 +23,7 @@ import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -74,15 +71,23 @@ public class TimeSeriesBinding<T> {
             Color.MEDIUMVIOLETRED,
             Color.MINTCREAM,
     };
-
+    @XmlAttribute(name = "sourceId")
     private final UUID adapterId;
+    @XmlAttribute
     private final String label;
+    @XmlAttribute
     private final String path;
+    @XmlAttribute
     private final Color color;
+    @XmlAttribute
     private final String legend;
+    @XmlAttribute
     private final UnitPrefixes prefix;
+    @XmlAttribute
     private final ChartType graphType;
+    @XmlAttribute
     private final String unitName;
+    @XmlAttribute
     private final String treeHierarchy;
     @XmlTransient
     private DataAdapter<T, ?> adapter;

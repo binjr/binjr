@@ -20,7 +20,6 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.util.javafx.charts.ZonedDateTimeAxis;
-import javafx.beans.property.BooleanProperty;
 import javafx.scene.chart.AreaChart;
 import javafx.scene.chart.ScatterChart;
 import javafx.scene.chart.ValueAxis;
@@ -51,9 +50,8 @@ public class ScatterChartWorksheetController extends WorksheetController {
     }
 
     @Override
-    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty) {
-        ScatterChart<ZonedDateTime, Double> newChart = new ScatterChart<ZonedDateTime, Double>(xAxis, yAxis);
-        return newChart;
+    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis) {
+        return new ScatterChart<ZonedDateTime, Double>(xAxis, yAxis);
     }
 
 }
