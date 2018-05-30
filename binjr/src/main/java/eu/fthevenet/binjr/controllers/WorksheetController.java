@@ -19,10 +19,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
-import eu.fthevenet.binjr.data.workspace.ChartType;
-import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
-import eu.fthevenet.binjr.data.workspace.Worksheet;
+import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
@@ -33,7 +30,10 @@ import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -150,7 +150,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
-        switch (this.worksheet.getUnitPrefixes()) {
+        switch (this.worksheet.getDefaultChart().getUnitPrefixes()) {
             case BINARY:
                 this.prefixFormatter = new BinaryPrefixFormatter();
                 break;
@@ -163,7 +163,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         }
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
-        propertiesController = new ChartPropertiesController<>(getWorksheet());
+        propertiesController = new ChartPropertiesController<>(getWorksheet().getDefaultChart());
         loader.setController(propertiesController);
         Parent p = loader.load();
         settingsPane = new StackPane(p);
@@ -252,18 +252,18 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
         StableTicksAxis yAxis;
-        if (worksheet.getUnitPrefixes() == UnitPrefixes.BINARY) {
+        if (worksheet.getDefaultChart().getUnitPrefixes() == UnitPrefixes.BINARY) {
             yAxis = new BinaryStableTicksAxis();
         }
         else {
             yAxis = new MetricStableTicksAxis();
         }
         yAxis.setSide(Side.LEFT);
-        yAxis.autoRangingProperty().bindBidirectional(worksheet.autoScaleYAxisProperty());
+        yAxis.autoRangingProperty().bindBidirectional(worksheet.getDefaultChart().autoScaleYAxisProperty());
         yAxis.setAnimated(false);
         yAxis.setTickSpacing(30);
-        yAxis.labelProperty().bind(worksheet.unitProperty());
-        chart = buildChart(xAxis, (ValueAxis) yAxis, worksheet.showChartSymbolsProperty());
+        yAxis.labelProperty().bind(worksheet.getDefaultChart().unitProperty());
+        chart = buildChart(xAxis, (ValueAxis) yAxis);
         chart.setCache(true);
         chart.setCacheHint(CacheHint.SPEED);
         chart.setCacheShape(true);
@@ -314,9 +314,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
         crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
-        worksheet.yAxisMinValueProperty().bindBidirectional(currentState.startY);
+        worksheet.getCharts().get(0).yAxisMinValueProperty().bindBidirectional(currentState.startY);
         ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
-        worksheet.yAxisMaxValueProperty().bindBidirectional(currentState.endY);
+        worksheet.getDefaultChart().yAxisMaxValueProperty().bindBidirectional(currentState.endY);
         ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
 
         //endregion
@@ -371,7 +371,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 removeSelectedBinding();
             }
         });
-        seriesTable.setItems(worksheet.getSeries());
+        seriesTable.setItems(worksheet.getDefaultChart().getSeries());
     }
 
     //endregion
@@ -382,7 +382,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
-            for (TimeSeriesInfo<Double> t : worksheet.getSeries()) {
+            for (TimeSeriesInfo<Double> t : worksheet.getDefaultChart().getSeries()) {
                 t.selectedProperty().removeListener(refreshOnSelectSeries);
             }
         }
@@ -394,7 +394,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         if (this.chartTypeListener != null) {
-            this.worksheet.chartTypeProperty().removeListener(this.chartTypeListener);
+            this.worksheet.getDefaultChart().chartTypeProperty().removeListener(this.chartTypeListener);
         }
         this.chartTypeListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -402,18 +402,18 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 action.accept(this);
             }
         };
-        this.worksheet.chartTypeProperty().addListener(this.chartTypeListener);
+        this.worksheet.getDefaultChart().chartTypeProperty().addListener(this.chartTypeListener);
     }
 
     //region *** protected members ***
 
-    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty);
+    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             newSeries.selectedProperty().addListener(refreshOnSelectSeries);
-            worksheet.addCharts(newSeries);
+            worksheet.getDefaultChart().addSeries(newSeries);
         }
         invalidate(false, false, false);
     }
@@ -480,7 +480,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             worksheetMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> {
                         getWorksheet().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
-                        return getWorksheet().getSeries()
+                        return getWorksheet().getDefaultChart().getSeries()
                                 .stream()
                                 .filter(series -> {
                                     if (series.getProcessor() == null) {
@@ -512,6 +512,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.getData().setAll(series.getProcessor().getData());
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
+                Chart<Double> currentChart = worksheet.getDefaultChart();
                 if (newNode != null) {
                     switch (getChartType()) {
                         case AREA:
@@ -521,13 +522,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                                 Path stroke = (Path) children.get(1);
                                 Path fill = (Path) children.get(0);
                                 logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                                stroke.visibleProperty().bind(worksheet.showAreaOutlineProperty());
-                                stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
+                                stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
+                                stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
                                 stroke.strokeProperty().bind(series.displayColorProperty());
                                 fill.fillProperty().bind(Bindings.createObjectBinding(
-                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, getWorksheet().getGraphOpacity()),
+                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
                                         series.displayColorProperty(),
-                                        getWorksheet().graphOpacityProperty()));
+                                        currentChart.graphOpacityProperty()));
                             }
                             break;
                         case SCATTER:
@@ -536,7 +537,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                         case LINE:
                             Path stroke = (Path) newNode;
                             logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                            stroke.strokeWidthProperty().bind(worksheet.strokeWidthProperty());
+                            stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
                             stroke.strokeProperty().bind(series.displayColorProperty());
                             break;
                         default:
@@ -758,7 +759,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     endX.get(),
                     startY.get(),
                     endY.get(),
-                    worksheet.isAutoScaleYAxis()
+                    worksheet.getDefaultChart().isAutoScaleYAxis()
             );
         }
 
@@ -781,11 +782,11 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     double r = (((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
                     logger.debug(() -> "Y selection - Y axis range = " + r);
                     if (r > 0.0001) {
-                        worksheet.setAutoScaleYAxis(false);
+                        worksheet.getDefaultChart().setAutoScaleYAxis(false);
                     }
                 }
                 else {
-                    worksheet.setAutoScaleYAxis(selection.isAutoRangeY());
+                    worksheet.getDefaultChart().setAutoScaleYAxis(selection.isAutoRangeY());
                 }
 
                 this.startY.set(roundYValue(selection.getStartY()));

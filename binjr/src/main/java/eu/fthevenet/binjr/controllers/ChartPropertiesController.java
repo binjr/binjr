@@ -17,8 +17,8 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
-import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -51,7 +51,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     public static final double SETTINGS_PANE_DISTANCE = -210;
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
-    private final Worksheet<T> worksheet;
+    private final Chart<T> chart;
     @FXML
     private AnchorPane root;
     @FXML
@@ -83,9 +83,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private HBox yAxisScaleSettings;
 
-    public ChartPropertiesController(Worksheet<T> worksheet) {
-        this.worksheet = worksheet;
-        //     this.parentController = parentController;
+    public ChartPropertiesController(Chart<T> chart) {
+        this.chart = chart;
     }
 
     private void show() {
@@ -120,47 +119,43 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
 
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
-        graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
+        graphOpacitySlider.valueProperty().bindBidirectional(chart.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
 
-        strokeWidthSlider.valueProperty().bindBidirectional(worksheet.strokeWidthProperty());
+        strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
         strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
 
-        adaptToChartType(worksheet.getChartType() == ChartType.LINE);
-        worksheet.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
+        adaptToChartType(chart.getChartType() == ChartType.LINE);
+        chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 adaptToChartType(newValue == ChartType.LINE);
             }
         });
-        showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
-
-        autoScaleYAxis.selectedProperty().bindBidirectional(worksheet.autoScaleYAxisProperty());
-
-
-        setAndBindTextFormatter(yMinRange, numberFormatter, worksheet.yAxisMinValueProperty());
-        setAndBindTextFormatter(yMaxRange, numberFormatter, worksheet.yAxisMaxValueProperty());
-//        setAndBindTextFormatter(propertiesController.yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
-
-
+        showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
+        autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
+        setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
+        setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
         chartTypeChoice.getItems().setAll(ChartType.values());
-        chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
-        worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
+        chartTypeChoice.getSelectionModel().select(chart.getChartType());
+        chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
 
-        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
-            @Override
-            public String toString(ZoneId object) {
-                return object.toString();
-            }
+//        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
+//            @Override
+//            public String toString(ZoneId object) {
+//                return object.toString();
+//            }
+//
+//            @Override
+//            public ZoneId fromString(String string) {
+//                return ZoneId.of(string);
+//            }
+//        });
 
-            @Override
-            public ZoneId fromString(String string) {
-                return ZoneId.of(string);
-            }
-        });
-        formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
-        timezoneField.setTextFormatter(formatter);
+        //formatter.valueProperty().bindBidirectional(chart.timeZoneProperty());
+
+        //  timezoneField.setTextFormatter(formatter);
 
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
 

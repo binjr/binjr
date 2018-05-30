@@ -20,7 +20,6 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import eu.fthevenet.util.javafx.charts.ZonedDateTimeAxis;
-import javafx.beans.property.BooleanProperty;
 import javafx.scene.chart.StackedAreaChart;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
@@ -50,10 +49,9 @@ public class StackedAreaChartWorksheetController extends WorksheetController {
     }
 
     @Override
-    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis, BooleanProperty showSymbolsProperty) {
+    protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis) {
         StackedAreaChart<ZonedDateTime, Double> newChart = new StackedAreaChart<>(xAxis, yAxis);
         newChart.setCreateSymbols(false);
-        newChart.createSymbolsProperty().bindBidirectional(showSymbolsProperty);
         return newChart;
     }
 }
