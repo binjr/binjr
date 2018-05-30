@@ -30,6 +30,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -78,7 +79,9 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private TextField yMaxRange;
     @FXML
-    private CheckBox autoScaleYAxis;
+    private ToggleSwitch autoScaleYAxis;
+    @FXML
+    private HBox yAxisScaleSettings;
 
     public ChartPropertiesController(Worksheet<T> worksheet) {
         this.worksheet = worksheet;
@@ -171,12 +174,12 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         });
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
 
-    }
+        yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
 
+    }
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty) {
         final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        textField.setOnKeyPressed(event -> autoScaleYAxis.setSelected(false));
         formatter.valueProperty().bindBidirectional(stateProperty);
         textField.setTextFormatter(formatter);
     }
@@ -202,7 +205,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     public boolean isHidden() {
         return hidden.getValue();
     }
-
 
     public boolean isVisible() {
         return visible.get();
