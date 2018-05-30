@@ -58,7 +58,6 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
-import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -315,12 +314,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
         crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
-//        setAndBindTextFormatter(worksheet.yAxisMinValueProperty(), numberFormatter, currentState.startY, ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty());
-//        setAndBindTextFormatter(propertiesController.yMaxRange, numberFormatter, currentState.endY, ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty());
-
         worksheet.yAxisMinValueProperty().bindBidirectional(currentState.startY);
         ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
-
         worksheet.yAxisMaxValueProperty().bindBidirectional(currentState.endY);
         ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
 
@@ -418,7 +413,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             newSeries.selectedProperty().addListener(refreshOnSelectSeries);
-            worksheet.addSeries(newSeries);
+            worksheet.addCharts(newSeries);
         }
         invalidate(false, false, false);
     }
@@ -574,14 +569,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 Dialogs.notifyException("Failed to save snapshot to disk", e, root);
             }
         }
-    }
-
-    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty, Property<T> axisBoundProperty) {
-        final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        textField.setOnKeyPressed(event -> worksheet.setAutoScaleYAxis(false));
-        formatter.valueProperty().bindBidirectional(stateProperty);
-        axisBoundProperty.bindBidirectional(stateProperty);
-        textField.setTextFormatter(formatter);
     }
 
     private void restoreSelectionFromHistory(History history, History toHistory) {

@@ -49,7 +49,7 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "1.2";
+    public static final String WORKSPACE_SCHEMA_VERSION = "2.0";
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlElementWrapper(name = "Sources")
