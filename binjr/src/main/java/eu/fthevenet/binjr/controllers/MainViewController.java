@@ -721,26 +721,11 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
-            WorksheetController current;
-            switch (worksheet.getDefaultChart().getChartType()) {
-                case SCATTER:
-                    current = new ScatterChartWorksheetController(worksheet);
-                    break;
-                case AREA:
-                    current = new AreaChartWorksheetController(worksheet);
-                    break;
-                case STACKED:
-                    current = new StackedAreaChartWorksheetController(worksheet);
-                    break;
-                case LINE:
-                    current = new LineChartWorksheetController(worksheet);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported chart type");
-            }
+            WorksheetController current = new WorksheetController(worksheet);
+
             try {
                 // Attach bindings
-                for (TimeSeriesInfo<?> s : worksheet.getDefaultChart().getSeries()) {
+                for (TimeSeriesInfo<?> s : worksheet.getCharts().stream().map(Chart::getSeries).flatMap(Collection::stream).collect(Collectors.toList())) {
                     UUID id = s.getBinding().getAdapterId();
                     DataAdapter<?, ?> da = sourcesAdapters.values()
                             .stream()

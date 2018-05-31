@@ -306,15 +306,18 @@
 
  .chart,
  .chart-plot-background{
-    -fx-background-color: white;
+    -fx-background-color: transparent;
     -fx-border-width:0;
  }
+
+  .chart-viewport-parent {
+   -fx-background-color: white;
+  }
 
  .skinnable-pane-border {
    -fx-border-color:  -binjr-window-background-color;
    -fx-border-width:0;
-      -fx-padding: -1;
-
+   -fx-padding: -1;
  }
 .table-view .column-header-background /*.nested-column-header .column-header*/  {
     -fx-border-width:1;
@@ -991,5 +994,3 @@
      -fx-padding: .25in;
      -fx-background-radius: .1in;
  }
-
-
