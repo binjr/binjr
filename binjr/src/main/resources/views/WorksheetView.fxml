@@ -163,7 +163,8 @@
                 <cursor>
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
-                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="0.0">
                     <children>
                         <!--<StackPane fx:id="chartPlaceHolder"/>-->
                         <!--<StackPane fx:id="crosshairPlaceHolder"/>-->

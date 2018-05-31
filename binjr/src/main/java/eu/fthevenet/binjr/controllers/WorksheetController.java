@@ -19,21 +19,22 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
+import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
-import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
@@ -41,18 +42,21 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.chart.ValueAxis;
-import javafx.scene.chart.XYChart;
+import javafx.scene.chart.*;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.*;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -78,19 +82,22 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public abstract class WorksheetController implements Initializable, AutoCloseable {
+public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final Worksheet<Double> worksheet;
-    private final PrefixFormatter prefixFormatter;
+
+    private static final double Y_AXIS_SEPARATION = 20;
+    private static final double Y_AXIS_WIDTH = 60;
+
 
     @FXML
     public AnchorPane root;
     @FXML
     public AnchorPane chartParent;
-    @FXML
-    protected XYChart<ZonedDateTime, Double> chart;
+
+    protected List<ChartViewPort<Double>> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
     @FXML
@@ -103,8 +110,6 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private Button forwardButton;
     @FXML
     private Button refreshButton;
-    //    @FXML
-//    private ToggleButton autoScaleYAxisToggle;
     @FXML
     private Button snapshotButton;
     @FXML
@@ -135,7 +140,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     private ContextMenu seriesListMenu;
 
     private StackPane settingsPane;
-    private ChartPropertiesController propertiesController;
+    // private ChartPropertiesController propertiesController;
     private ToggleButton chartPropertiesButton;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
 
@@ -150,20 +155,13 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
-        switch (this.worksheet.getDefaultChart().getUnitPrefixes()) {
-            case BINARY:
-                this.prefixFormatter = new BinaryPrefixFormatter();
-                break;
-            case METRIC:
-                this.prefixFormatter = new MetricPrefixFormatter();
-                break;
 
-            default:
-                throw new IllegalArgumentException("Unknown unit prefix");
-        }
 
+    }
+
+    private ChartPropertiesController buildChartPropertiesController(Chart<Double> chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
-        propertiesController = new ChartPropertiesController<>(getWorksheet().getDefaultChart());
+        ChartPropertiesController propertiesController = new ChartPropertiesController<>(chart);
         loader.setController(propertiesController);
         Parent p = loader.load();
         settingsPane = new StackPane(p);
@@ -173,6 +171,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         settingsPane.getStyleClass().add("toolPane");
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
+        return propertiesController;
     }
 
     //region [Properties]
@@ -184,15 +183,8 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         this.name = name;
     }
 
-    public XYChartCrosshair<ZonedDateTime, Double> getCrossHair() {
-        return crossHair;
-    }
 
-    public XYChart<ZonedDateTime, Double> getChart() {
-        return chart;
-    }
-
-    public abstract ChartType getChartType();
+    //public abstract ChartType getChartType();
 
     //endregion
 
@@ -233,9 +225,15 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //endregion
 
         //region Control initialization
-        initChartPane();
+
+        try {
+
+            initChartViewPorts();
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to handle IOException", e);
+        }
         initNavigationPane();
-        initChartSettingPane();
+        //    initChartSettingPane();
         initTableViewPane();
         //endregion
 
@@ -243,40 +241,108 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
         globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
         //endregion
+
+
     }
 
-    private void initChartPane() {
+    private void initChartViewPorts() throws IOException {
         //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
-        StableTicksAxis yAxis;
-        if (worksheet.getDefaultChart().getUnitPrefixes() == UnitPrefixes.BINARY) {
-            yAxis = new BinaryStableTicksAxis();
+
+        for (Chart<Double> currentChart : getWorksheet().getCharts()) {
+            StableTicksAxis yAxis;
+            if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
+                yAxis = new BinaryStableTicksAxis();
+            }
+            else {
+                yAxis = new MetricStableTicksAxis();
+            }
+
+            yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
+            yAxis.setAnimated(false);
+            yAxis.setTickSpacing(30);
+            yAxis.labelProperty().bind(Bindings.createStringBinding(
+                    () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
+                    currentChart.nameProperty(),
+                    currentChart.unitProperty()));
+
+            XYChart<ZonedDateTime, Double> viewPort;
+            switch (currentChart.getChartType()) {
+                case AREA:
+                    viewPort = new AreaChart<>(xAxis, (ValueAxis) yAxis);
+                    ((AreaChart) viewPort).setCreateSymbols(false);
+                    break;
+                case STACKED:
+                    viewPort = new StackedAreaChart<>(xAxis, (ValueAxis) yAxis);
+                    ((StackedAreaChart) viewPort).setCreateSymbols(false);
+                    break;
+                case SCATTER:
+                    viewPort = new ScatterChart<>(xAxis, (ValueAxis) yAxis);
+                    break;
+                case LINE:
+                default:
+                    viewPort = new LineChart<>(xAxis, (ValueAxis) yAxis);
+                    ((LineChart) viewPort).setCreateSymbols(false);
+            }
+            viewPort.setCache(true);
+            viewPort.setCacheHint(CacheHint.SPEED);
+            viewPort.setCacheShape(true);
+            viewPort.setFocusTraversable(true);
+            viewPort.setLegendVisible(false);
+            viewPort.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
+
+            viewPorts.add(new ChartViewPort<>(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
-        else {
-            yAxis = new MetricStableTicksAxis();
+
+        for (int i = 0; i < viewPorts.size(); i++) {
+            ChartViewPort<Double> v = viewPorts.get(i);
+            XYChart<ZonedDateTime, Double> chart = v.getChart();
+            int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
+
+
+            DoubleBinding n = Bindings.createDoubleBinding(
+                    () -> viewPorts.stream()
+                            .filter(c -> !c.getChart().equals(chart))
+                            .map(c -> c.getChart().getYAxis().getWidth())
+                            .reduce(Double::sum).orElse(0.0) + (Y_AXIS_SEPARATION * nbAdditionalCharts),
+                    viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)
+            );
+            HBox hBox = new HBox(chart);
+            hBox.setAlignment(Pos.CENTER_LEFT);
+            hBox.prefHeightProperty().bind(chartParent.heightProperty());
+            hBox.prefWidthProperty().bind(chartParent.widthProperty());
+            // hBox.setMouseTransparent(true);
+            chart.minWidthProperty().bind(chartParent.widthProperty().subtract(n));
+            chart.prefWidthProperty().bind(chartParent.widthProperty().subtract(n));
+            chart.maxWidthProperty().bind(chartParent.widthProperty().subtract(n));
+            if (i == 0) {
+                chart.getYAxis().setSide(Side.LEFT);
+            }
+            else {
+                //  hBox.setMouseTransparent(true);
+                chart.getYAxis().setSide(Side.RIGHT);
+                chart.setVerticalZeroLineVisible(false);
+                chart.setHorizontalZeroLineVisible(false);
+                chart.setVerticalGridLinesVisible(false);
+                chart.setHorizontalGridLinesVisible(false);
+                chart.translateXProperty().bind(viewPorts.get(0).getChart().getYAxis().widthProperty());
+                chart.getYAxis().translateXProperty().bind(Bindings.createDoubleBinding(
+                        () -> viewPorts.stream()
+                                .filter(c -> viewPorts.indexOf(c) != 0 && viewPorts.indexOf(c) < viewPorts.indexOf(v))
+                                .map(c -> c.getChart().getYAxis().getWidth())
+                                .reduce(Double::sum).orElse(0.0) + Y_AXIS_SEPARATION * (viewPorts.indexOf(v) - 1),
+                        viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)));
+            }
+            chartParent.getChildren().add(hBox);
         }
-        yAxis.setSide(Side.LEFT);
-        yAxis.autoRangingProperty().bindBidirectional(worksheet.getDefaultChart().autoScaleYAxisProperty());
-        yAxis.setAnimated(false);
-        yAxis.setTickSpacing(30);
-        yAxis.labelProperty().bind(worksheet.getDefaultChart().unitProperty());
-        chart = buildChart(xAxis, (ValueAxis) yAxis);
-        chart.setCache(true);
-        chart.setCacheHint(CacheHint.SPEED);
-        chart.setCacheShape(true);
-        chart.setFocusTraversable(true);
-        chart.setLegendVisible(false);
-        chart.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
-        chartParent.getChildren().add(chart);
-        AnchorPane.setBottomAnchor(chart, 0.0);
-        AnchorPane.setLeftAnchor(chart, 0.0);
-        AnchorPane.setRightAnchor(chart, 0.0);
-        AnchorPane.setTopAnchor(chart, 0.0);
-        //endregion
     }
+
+
+    //endregion
+
 
     private void initNavigationPane() {
         //region *** Buttons ***
@@ -289,7 +355,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //endregion
 
         //region *** Time pickers ***
-        this.currentState = new XYChartViewState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
+        this.currentState = new XYChartViewState(viewPorts.get(0), getWorksheet().getFromDateTime(), getWorksheet().getToDateTime(), 0, 100);
         getWorksheet().fromDateTimeProperty().bind(currentState.startX);
         getWorksheet().toDateTimeProperty().bind(currentState.endX);
         plotChart(currentState.asSelection(), true);
@@ -300,9 +366,9 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         //endregion
 
         //region *** Crosshair ***
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;//  DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM);
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
 
-        crossHair = new XYChartCrosshair<>(chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
+        crossHair = new XYChartCrosshair<>(viewPorts.get(viewPorts.size() - 1).chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
 
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -314,10 +380,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
         crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
-        worksheet.getCharts().get(0).yAxisMinValueProperty().bindBidirectional(currentState.startY);
-        ((ValueAxis<Double>) chart.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
-        worksheet.getDefaultChart().yAxisMaxValueProperty().bindBidirectional(currentState.endY);
-        ((ValueAxis<Double>) chart.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
+//        worksheet.getCharts().get(0).yAxisMinValueProperty().bindBidirectional(currentState.startY);
+//        ((ValueAxis<Double>) viewPorts.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
+//        worksheet.getDefaultChart().yAxisMaxValueProperty().bindBidirectional(currentState.endY);
+//        ((ValueAxis<Double>) viewPorts.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
 
         //endregion
     }
@@ -333,45 +399,45 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         chartPropertiesButton.getStyleClass().add("chart-properties-button");
         AnchorPane.setTopAnchor(chartPropertiesButton, 5.0);
         AnchorPane.setRightAnchor(chartPropertiesButton, 5.0);
-        chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
+        // chartPropertiesButton.selectedProperty().bindBidirectional(propertiesController.visibleProperty());
         chartParent.getChildren().add(chartPropertiesButton);
         chartParent.getChildren().add(settingsPane);
     }
 
     private void initTableViewPane() {
-        seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
-        pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
-        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
-        colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-        avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
-                p.getValue().processorProperty()));
-
-        minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
-                p.getValue().processorProperty()));
-
-        maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
-                p.getValue().processorProperty()));
-
-        currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-                () -> {
-                    if (p.getValue().getProcessor() == null) {
-                        return "NaN";
-                    }
-                    return prefixFormatter.format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
-                }, crossHair.currentXValueProperty()));
-
-        seriesTable.setRowFactory(this::seriesTableRowFactory);
-
-        seriesTable.setOnKeyReleased(event -> {
-            if (event.getCode().equals(KeyCode.DELETE)) {
-                removeSelectedBinding();
-            }
-        });
-        seriesTable.setItems(worksheet.getDefaultChart().getSeries());
+//        seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+//        visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
+//        pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
+//        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+//        colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
+//        avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
+//                p.getValue().processorProperty()));
+//
+//        minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
+//                p.getValue().processorProperty()));
+//
+//        maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
+//                p.getValue().processorProperty()));
+//
+//        currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+//                () -> {
+//                    if (p.getValue().getProcessor() == null) {
+//                        return "NaN";
+//                    }
+//                    return prefixFormatter.format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
+//                }, crossHair.currentXValueProperty()));
+//
+//        seriesTable.setRowFactory(this::seriesTableRowFactory);
+//
+//        seriesTable.setOnKeyReleased(event -> {
+//            if (event.getCode().equals(KeyCode.DELETE)) {
+//                removeSelectedBinding();
+//            }
+//        });
+//        seriesTable.setItems(worksheet.getDefaultChart().getSeries());
     }
 
     //endregion
@@ -382,8 +448,10 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
             logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
-            for (TimeSeriesInfo<Double> t : worksheet.getDefaultChart().getSeries()) {
-                t.selectedProperty().removeListener(refreshOnSelectSeries);
+            for (Chart<Double> chartData : getWorksheet().getCharts()) {
+                for (TimeSeriesInfo<Double> t : chartData.getSeries()) {
+                    t.selectedProperty().removeListener(refreshOnSelectSeries);
+                }
             }
         }
     }
@@ -407,7 +475,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     //region *** protected members ***
 
-    protected abstract XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
+    //protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
@@ -476,45 +544,47 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
 
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Adding series to chart " + getWorksheet().getName(), logger::trace)) {
-            worksheetMaskerPane.setVisible(true);
-            AsyncTaskManager.getInstance().submit(() -> {
-                        getWorksheet().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
-                        return getWorksheet().getDefaultChart().getSeries()
-                                .stream()
-                                .filter(series -> {
-                                    if (series.getProcessor() == null) {
-                                        logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
-                                        return false;
-                                    }
-                                    if (!series.isSelected()) {
-                                        logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
-                                        return false;
-                                    }
-                                    return true;
-                                })
-                                .map(this::makeXYChartSeries)
-                                .collect(Collectors.toList());
-                    },
-                    event -> {
-                        worksheetMaskerPane.setVisible(false);
-                        chart.getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                    },
-                    event -> {
-                        worksheetMaskerPane.setVisible(false);
-                        Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
-                    });
+
+        for (ChartViewPort<Double> viewPort : viewPorts) {
+            try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::trace)) {
+                worksheetMaskerPane.setVisible(true);
+                AsyncTaskManager.getInstance().submit(() -> {
+                            viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
+                            return viewPort.getDataStore().getSeries()
+                                    .stream()
+                                    .filter(series -> {
+                                        if (series.getProcessor() == null) {
+                                            logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
+                                            return false;
+                                        }
+                                        if (!series.isSelected()) {
+                                            logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
+                                            return false;
+                                        }
+                                        return true;
+                                    })
+                                    .map(ts -> makeXYChartSeries(viewPort.getDataStore(), ts))
+                                    .collect(Collectors.toList());
+                        },
+                        event -> {
+                            worksheetMaskerPane.setVisible(false);
+                            viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                        },
+                        event -> {
+                            worksheetMaskerPane.setVisible(false);
+                            Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                        });
+            }
         }
     }
 
-    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(TimeSeriesInfo<Double> series) {
+    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.getData().setAll(series.getProcessor().getData());
             newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
-                Chart<Double> currentChart = worksheet.getDefaultChart();
                 if (newNode != null) {
-                    switch (getChartType()) {
+                    switch (currentChart.getChartType()) {
                         case AREA:
                         case STACKED:
                             ObservableList<Node> children = ((Group) newNode).getChildren();
@@ -700,7 +770,50 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
     }
 
 
-    //endregion
+    private class ChartViewPort<T extends Number> {
+        private final Chart<T> dataStore;
+        private final XYChart<ZonedDateTime, T> chart;
+
+        private final ChartPropertiesController<T> propertiesController;
+        private final PrefixFormatter prefixFormatter;
+
+
+        private ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
+            this.dataStore = dataStore;
+            this.chart = chart;
+
+            this.propertiesController = propertiesController;
+            switch (dataStore.getUnitPrefixes()) {
+                case BINARY:
+                    this.prefixFormatter = new BinaryPrefixFormatter();
+                    break;
+                case METRIC:
+                    this.prefixFormatter = new MetricPrefixFormatter();
+                    break;
+
+                default:
+                    throw new IllegalArgumentException("Unknown unit prefix");
+            }
+        }
+
+        public ChartPropertiesController<T> getPropertiesController() {
+            return propertiesController;
+        }
+
+        public XYChart<ZonedDateTime, T> getChart() {
+            return chart;
+        }
+
+        public Chart<T> getDataStore() {
+            return dataStore;
+        }
+
+        public PrefixFormatter getPrefixFormatter() {
+            return prefixFormatter;
+        }
+    }
+
+//endregion
 
     /**
      * Represent the state of the time series view
@@ -711,16 +824,19 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
         private final SimpleDoubleProperty startY;
         private final SimpleDoubleProperty endY;
         private boolean frozen;
+        private final ChartViewPort<Double> chartViewPort;
 
         /**
          * Initializes a new instance of the {@link XYChartViewState} class.
          *
-         * @param startX the start of the time interval
-         * @param endX   the end of the time interval
-         * @param startY the lower bound of the Y axis
-         * @param endY   the upper bound of the Y axis
+         * @param chartViewPort
+         * @param startX        the start of the time interval
+         * @param endX          the end of the time interval
+         * @param startY        the lower bound of the Y axis
+         * @param endY          the upper bound of the Y axis
          */
-        public XYChartViewState(ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+        public XYChartViewState(ChartViewPort<Double> chartViewPort, ZonedDateTime startX, ZonedDateTime endX, double startY, double endY) {
+            this.chartViewPort = chartViewPort;
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
             this.startY = new SimpleDoubleProperty(roundYValue(startY));
@@ -759,7 +875,7 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                     endX.get(),
                     startY.get(),
                     endY.get(),
-                    worksheet.getDefaultChart().isAutoScaleYAxis()
+                    chartViewPort.getDataStore().isAutoScaleYAxis()
             );
         }
 
@@ -779,14 +895,14 @@ public abstract class WorksheetController implements Initializable, AutoCloseabl
                 this.endX.set(newEndX);
                 // Disable auto range on Y axis if zoomed in
                 if (toHistory) {
-                    double r = (((ValueAxis<Double>) chart.getYAxis()).getUpperBound() - ((ValueAxis<Double>) chart.getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
+                    double r = (((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getUpperBound() - ((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
                     logger.debug(() -> "Y selection - Y axis range = " + r);
                     if (r > 0.0001) {
-                        worksheet.getDefaultChart().setAutoScaleYAxis(false);
+                        chartViewPort.getDataStore().setAutoScaleYAxis(false);
                     }
                 }
                 else {
-                    worksheet.getDefaultChart().setAutoScaleYAxis(selection.isAutoRangeY());
+                    chartViewPort.getDataStore().setAutoScaleYAxis(selection.isAutoRangeY());
                 }
 
                 this.startY.set(roundYValue(selection.getStartY()));

@@ -20,7 +20,6 @@ package eu.fthevenet.binjr.data.workspace;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
-import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -126,20 +125,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.status = new ChangeWatcher(this);
     }
 
-    /**
-     * Fills up the backend for all {@link TimeSeriesInfo} in the worksheet with data from the adapter on the specified time interval
-     *
-     * @param startTime the start of the time interval
-     * @param endTime   the end of the time interval
-     * @throws DataAdapterException if an error occurs while retrieving data from the adapter
-     */
-    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
-        for (Chart<T> c : charts) {
-            c.fetchDataFromSources(startTime, endTime, bypassCache);
-        }
-    }
 
-    @XmlTransient
     public Chart<T> getDefaultChart() {
         return charts.get(0);
     }
