@@ -114,8 +114,6 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.charts = FXCollections.observableList(new LinkedList<>(charts));
         if (this.charts.isEmpty()) {
             this.charts.add(new Chart<>());
-            this.charts.add(new Chart<>());
-            this.charts.add(new Chart<>());
         }
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
