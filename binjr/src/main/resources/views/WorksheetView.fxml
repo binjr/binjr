@@ -17,10 +17,9 @@
   ~
   -->
 
-<?import eu.fthevenet.util.javafx.controls.*?>
+<?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
@@ -31,12 +30,10 @@
         <VBox alignment="CENTER_RIGHT">
             <AnchorPane>
                 <children>
-                    <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                    <HBox styleClass="worksheet-tool-bar" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
                                 textAlignment="CENTER">
-                            <HBox.margin>
-                                <Insets/>
-                            </HBox.margin>
+
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/backArrow_40.png"/>
@@ -155,7 +152,7 @@
                 </VBox.margin>
             </AnchorPane>
         </VBox>
-        <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0" VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
@@ -178,44 +175,52 @@
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
                 <children>
-                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <columns>
-                            <TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="selected"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">
-                            </TableColumn>
-                            <TableColumn prefWidth="160.0" sortable="false" text="Name">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="displayName"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" styleClass="column-bold-text" text="Current">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">
-                            </TableColumn>
-                        </columns>
-                    </TableView>
+                    <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <panes>
+                            <!--<TitledPane animated="false" text="untitled 1">-->
+                            <!--<content>-->
+                            <!--<TableView fx:id="seriesTable" editable="true" prefHeight="91.0" prefWidth="647.0" styleClass="skinnable-pane-border">-->
+                            <!--<columns>-->
+                            <!--<TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">-->
+                            <!--<cellValueFactory>-->
+                            <!--<PropertyValueFactory property="selected" />-->
+                            <!--</cellValueFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn prefWidth="160.0" sortable="false" text="Name">-->
+                            <!--<cellValueFactory>-->
+                            <!--<PropertyValueFactory property="displayName" />-->
+                            <!--</cellValueFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" styleClass="column-bold-text" text="Current">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">-->
+                            <!--</TableColumn>-->
+                            <!--</columns>-->
+                            <!--</TableView>-->
+                            <!--</content>-->
+                            <!--</TitledPane>-->
+                        </panes>
+                    </Accordion>
                 </children>
             </AnchorPane>
         </SplitPane>
