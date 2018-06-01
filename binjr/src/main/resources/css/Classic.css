@@ -218,3 +218,18 @@
     -fx-border-insets: 0;
     -fx-alignment: center;
 }
+ .chart,
+ .chart-plot-background{
+    -fx-background-color: transparent;
+    -fx-border-width:0;
+   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
+   /*    -fx-font-size: 10pt;*/
+ }
+
+  .chart-viewport-parent {
+   -fx-background-color: white;
+  }
+
+  .worksheet-tool-bar{
+       -fx-padding:5;
+  }

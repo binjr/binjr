@@ -15,6 +15,7 @@
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
+    -binjr-gray-border-color: #C8C8C8;
 }
 
 .column-bold-text{
@@ -301,13 +302,15 @@
     -fx-pref-width:1;
     -fx-background-color: transparent;
     -fx-border-width:1;
-    -fx-border-color:#C8C8C8;
+    -fx-border-color:-binjr-gray-border-color;
  }
 
  .chart,
  .chart-plot-background{
     -fx-background-color: transparent;
     -fx-border-width:0;
+   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
+   /*    -fx-font-size: 10pt;*/
  }
 
   .chart-viewport-parent {
@@ -321,7 +324,7 @@
  }
 .table-view .column-header-background /*.nested-column-header .column-header*/  {
     -fx-border-width:1;
-    -fx-border-color: #C8C8C8;
+    -fx-border-color: -binjr-gray-border-color;
  }
 
 .table-view,
@@ -536,7 +539,7 @@
 
  /* -fx-opacity:90%;*/
 /*  -fx-border-width:1;
-  -fx-border-color:#C8C8C8;*/
+  -fx-border-color:-binjr-gray-border-color;*/
 }
 
 
@@ -994,3 +997,65 @@
      -fx-padding: .25in;
      -fx-background-radius: .1in;
  }
+
+/*******************************************************************************
+ *                                                                             *
+ * Titled pane                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+
+.series-table .titled-pane
+{
+       -fx-border-color: -binjr-gray-border-color;
+
+       -fx-border-width:1;
+   /* -fx-text-fill: -fx-text-base-color;*/
+}
+.series-table .titled-pane:focused
+{
+    /*-fx-text-fill: white;*/
+}
+.series-table .titled-pane > .title
+{
+    -fx-graphic-text-gap:25;
+    -fx-background-color: -binjr-window-background-color;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
+}
+
+.series-table .titled-pane:focused > .title
+{
+    /*-fx-color: white;*/
+}
+
+.series-table .titled-pane > .title > .arrow-button
+{
+/*
+-fx-background-color:null;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0.0em 0.25em 0.0em 0.0em;*/
+}
+
+.series-table .titled-pane:focused > .title > .arrow-button .arrow
+{
+    -fx-effect:null;
+}
+
+.series-table .titled-pane > .title > .arrow-button .arrow
+{
+    -fx-background-color: -fx-text-base-color;
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0;/*1 0 -1 0, 0;*/
+    -fx-snap-to-pixel: true;
+    -fx-scale-shape: true;
+    -fx-border-width:0;
+    -fx-border-radius:0;
+}
+
+.series-table .titled-pane:collapsed > .title > .arrow-button .arrow
+{
+    -fx-rotate: -90;
+}
+

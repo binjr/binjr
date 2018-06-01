@@ -24,18 +24,18 @@ import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
+import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -50,11 +50,10 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -89,7 +88,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final Worksheet<Double> worksheet;
 
     private static final double Y_AXIS_SEPARATION = 20;
-    private static final double Y_AXIS_WIDTH = 60;
 
 
     @FXML
@@ -102,8 +100,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private TextField yMinRange;
     @FXML
     private TextField yMaxRange;
+
     @FXML
-    private TableView<TimeSeriesInfo<Double>> seriesTable;
+    private Accordion seriesTableContainer;
+
     @FXML
     private Button backButton;
     @FXML
@@ -116,6 +116,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ZonedDateTimePicker startDate;
     @FXML
     private ZonedDateTimePicker endDate;
+    /*
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, String> pathColumn;
     @FXML
@@ -130,6 +131,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private TableColumn<TimeSeriesInfo<Double>, String> avgColumn;
     @FXML
     private TableColumn<TimeSeriesInfo<Double>, String> currentColumn;
+    */
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -205,23 +207,24 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
 //        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
 //        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
-        assert seriesTable != null : "fx:id\"seriesTable\" was not injected!";
+        assert seriesTableContainer != null : "fx:id\"seriesTableContainer\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
         //    assert autoScaleYAxisToggle != null : "fx:id\"autoScaleYAxisToggle\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
-        assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
-        assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
+
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-        assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
-        assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
-        assert minColumn != null : "fx:id\"minColumn\" was not injected!";
-        assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
-        assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
+        //   assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
+//        assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
+//        assert minColumn != null : "fx:id\"minColumn\" was not injected!";
+//        assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
+//        assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
+//        assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
+//        assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
         //endregion
 
         //region Control initialization
@@ -378,8 +381,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
-        currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
-        crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
+
 //        worksheet.getCharts().get(0).yAxisMinValueProperty().bindBidirectional(currentState.startY);
 //        ((ValueAxis<Double>) viewPorts.getYAxis()).lowerBoundProperty().bindBidirectional(currentState.startY);
 //        worksheet.getDefaultChart().yAxisMaxValueProperty().bindBidirectional(currentState.endY);
@@ -405,39 +407,114 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void initTableViewPane() {
-//        seriesTable.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-//        visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
-//        pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
-//        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
-//        colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-//        avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getAverageValue()),
-//                p.getValue().processorProperty()));
-//
-//        minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMinValue()),
-//                p.getValue().processorProperty()));
-//
-//        maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                () -> p.getValue().getProcessor() == null ? "NaN" : prefixFormatter.format(p.getValue().getProcessor().getMaxValue()),
-//                p.getValue().processorProperty()));
-//
-//        currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                () -> {
-//                    if (p.getValue().getProcessor() == null) {
-//                        return "NaN";
-//                    }
-//                    return prefixFormatter.format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
-//                }, crossHair.currentXValueProperty()));
-//
-//        seriesTable.setRowFactory(this::seriesTableRowFactory);
-//
-//        seriesTable.setOnKeyReleased(event -> {
-//            if (event.getCode().equals(KeyCode.DELETE)) {
-//                removeSelectedBinding();
-//            }
-//        });
-//        seriesTable.setItems(worksheet.getDefaultChart().getSeries());
+
+        for (ChartViewPort<Double> currentViewPort : viewPorts) {
+            currentViewPort.getSeriesTable().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+            TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn = new TableColumn<>();
+            visibleColumn.setSortable(false);
+            visibleColumn.setResizable(false);
+            visibleColumn.setPrefWidth(32);
+            visibleColumn.setCellValueFactory(new PropertyValueFactory<>("selected"));
+
+            TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();
+            colorColumn.setSortable(false);
+            colorColumn.setResizable(false);
+            colorColumn.setPrefWidth(32);
+
+            TableColumn<TimeSeriesInfo<Double>, Boolean> nameColumn = new TableColumn<>("Name");
+            nameColumn.setSortable(false);
+            nameColumn.setPrefWidth(160);
+            nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+
+            TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
+            minColumn.setSortable(false);
+            minColumn.setPrefWidth(75);
+
+            TableColumn<TimeSeriesInfo<Double>, String> maxColumn = new TableColumn<>("Max.");
+            maxColumn.setSortable(false);
+            maxColumn.setPrefWidth(75);
+
+            TableColumn<TimeSeriesInfo<Double>, String> avgColumn = new TableColumn<>("Avg.");
+            avgColumn.setSortable(false);
+            avgColumn.setPrefWidth(75);
+
+            TableColumn<TimeSeriesInfo<Double>, String> currentColumn = new TableColumn<>("Current");
+            currentColumn.setSortable(false);
+            currentColumn.setPrefWidth(75);
+
+            TableColumn<TimeSeriesInfo<Double>, String> pathColumn = new TableColumn<>("Path");
+            pathColumn.setSortable(false);
+            pathColumn.setPrefWidth(400);
+
+            currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
+            crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
+
+            visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
+            pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
+            colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+            colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
+            avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getAverageValue()),
+                    p.getValue().processorProperty()));
+
+            minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMinValue()),
+                    p.getValue().processorProperty()));
+
+            maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMaxValue()),
+                    p.getValue().processorProperty()));
+
+            currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> {
+                        if (p.getValue().getProcessor() == null) {
+                            return "NaN";
+                        }
+                        return currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
+                    }, crossHair.currentXValueProperty()));
+
+            currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
+
+            currentViewPort.getSeriesTable().setOnKeyReleased(event -> {
+                if (event.getCode().equals(KeyCode.DELETE)) {
+                    removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) event.getSource());
+                }
+            });
+            currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
+
+            currentViewPort.getSeriesTable().getColumns().add(visibleColumn);
+            currentViewPort.getSeriesTable().getColumns().add(colorColumn);
+            currentViewPort.getSeriesTable().getColumns().add(nameColumn);
+            currentViewPort.getSeriesTable().getColumns().add(minColumn);
+            currentViewPort.getSeriesTable().getColumns().add(maxColumn);
+            currentViewPort.getSeriesTable().getColumns().add(avgColumn);
+            currentViewPort.getSeriesTable().getColumns().add(currentColumn);
+            currentViewPort.getSeriesTable().getColumns().add(pathColumn);
+
+            TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
+            newPane.setAnimated(false);
+
+            seriesTableContainer.getPanes().add(newPane);
+        }
+
+
+        Platform.runLater(() -> seriesTableContainer.getPanes().get(0).setExpanded(true));
+        /* Make sure the accordion can never be completely collapsed */
+        seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
+            Boolean expand = true; // This value will change to false if there's (at least) one pane that is in "expanded" state, so we don't have to expand anything manually
+            for (TitledPane pane : seriesTableContainer.getPanes()) {
+                if (pane.isExpanded()) {
+                    expand = false;
+                }
+            }
+            /* Here we already know whether we need to expand the old pane again */
+            if ((expand) && (oldPane != null)) {
+                Platform.runLater(() -> {
+                    seriesTableContainer.setExpandedPane(oldPane);
+                });
+            }
+        });
     }
 
     //endregion
@@ -486,7 +563,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         invalidate(false, false, false);
     }
 
-    protected void removeSelectedBinding() {
+    protected void removeSelectedBinding(TableView<TimeSeriesInfo<Double>> seriesTable) {
         List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
         seriesTable.getItems().removeAll(selected);
         seriesTable.getSelectionModel().clearSelection();
@@ -514,7 +591,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @FXML
     protected void handleRemoveSeries(ActionEvent actionEvent) {
-        removeSelectedBinding();
+        removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) actionEvent.getSource());
     }
 
     @FXML
@@ -678,17 +755,17 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                TimeSeriesInfo<Double> draggedseries = seriesTable.getItems().remove(draggedIndex);
+                TimeSeriesInfo<Double> draggedseries = tv.getItems().remove(draggedIndex);
                 int dropIndex;
                 if (row.isEmpty()) {
-                    dropIndex = seriesTable.getItems().size();
+                    dropIndex = tv.getItems().size();
                 }
                 else {
                     dropIndex = row.getIndex();
                 }
-                seriesTable.getItems().add(dropIndex, draggedseries);
+                tv.getItems().add(dropIndex, draggedseries);
                 event.setDropCompleted(true);
-                seriesTable.getSelectionModel().clearAndSelect(dropIndex);
+                tv.getSelectionModel().clearAndSelect(dropIndex);
                 invalidate(false, false, false);
                 event.consume();
             }
@@ -776,11 +853,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         private final ChartPropertiesController<T> propertiesController;
         private final PrefixFormatter prefixFormatter;
+        private final TableView<TimeSeriesInfo<Double>> seriesTable;
 
 
         private ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
             this.dataStore = dataStore;
             this.chart = chart;
+            this.seriesTable = new TableView<>();
+            this.seriesTable.getStyleClass().add("skinnable-pane-border");
+            this.seriesTable.setEditable(true);
 
             this.propertiesController = propertiesController;
             switch (dataStore.getUnitPrefixes()) {
@@ -810,6 +891,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         public PrefixFormatter getPrefixFormatter() {
             return prefixFormatter;
+        }
+
+        public TableView<TimeSeriesInfo<Double>> getSeriesTable() {
+            return seriesTable;
         }
     }
 
