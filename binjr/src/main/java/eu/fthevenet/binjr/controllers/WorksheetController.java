@@ -158,8 +158,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
-
-
     }
 
     private ChartPropertiesController buildChartPropertiesController(Chart<Double> chart) throws IOException {
@@ -419,7 +417,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             visibleColumn.setSortable(false);
             visibleColumn.setResizable(false);
             visibleColumn.setPrefWidth(32);
-            visibleColumn.setCellValueFactory(new PropertyValueFactory<>("selected"));
 
             InvalidationListener isVisibleListener = (observable) -> {
                 boolean andAll = true;
@@ -431,9 +428,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
                 showAllCheckBox.setSelected(andAll);
             };
-            currentViewPort.getDataStore().getSeries().forEach(t -> t.selectedProperty().addListener(isVisibleListener));
-            isVisibleListener.invalidated(null);
-
+            //TODO Make sure the following listeners do not prevent some object from being collected after a worksheet's been unloaded.
+            visibleColumn.setCellValueFactory(p -> {
+                p.getValue().selectedProperty().addListener(isVisibleListener);
+                // Explicitly call the listener to initialize the proper status of the checkbox
+                isVisibleListener.invalidated(null);
+                return p.getValue().selectedProperty();
+            });
             showAllCheckBox.setOnAction(event -> {
                 boolean b = ((CheckBox) event.getSource()).isSelected();
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
@@ -573,8 +574,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     //region *** protected members ***
-
-    //protected XYChart<ZonedDateTime, Double> buildChart(ZonedDateTimeAxis xAxis, ValueAxis<Double> yAxis);
 
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
         for (TimeSeriesBinding<Double> b : bindings) {
