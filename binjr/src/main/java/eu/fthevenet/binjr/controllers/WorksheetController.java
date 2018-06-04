@@ -31,6 +31,7 @@ import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
 import eu.fthevenet.util.text.PrefixFormatter;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
@@ -406,16 +407,37 @@ public class WorksheetController implements Initializable, AutoCloseable {
         chartParent.getChildren().add(settingsPane);
     }
 
+
     private void initTableViewPane() {
 
         for (ChartViewPort<Double> currentViewPort : viewPorts) {
             currentViewPort.getSeriesTable().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
+            CheckBox showAllCheckBox = new CheckBox();
             TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn = new TableColumn<>();
+            visibleColumn.setGraphic(showAllCheckBox);
             visibleColumn.setSortable(false);
             visibleColumn.setResizable(false);
             visibleColumn.setPrefWidth(32);
             visibleColumn.setCellValueFactory(new PropertyValueFactory<>("selected"));
+
+            InvalidationListener isVisibleListener = (observable) -> {
+                boolean andAll = true;
+                boolean orAll = false;
+                for (TimeSeriesInfo<?> t : currentViewPort.getDataStore().getSeries()) {
+                    andAll &= t.isSelected();
+                    orAll |= t.isSelected();
+                }
+                showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
+                showAllCheckBox.setSelected(andAll);
+            };
+            currentViewPort.getDataStore().getSeries().forEach(t -> t.selectedProperty().addListener(isVisibleListener));
+            isVisibleListener.invalidated(null);
+
+            showAllCheckBox.setOnAction(event -> {
+                boolean b = ((CheckBox) event.getSource()).isSelected();
+                currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
+            });
 
             TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();
             colorColumn.setSortable(false);
