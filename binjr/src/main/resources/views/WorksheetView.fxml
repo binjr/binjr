@@ -145,6 +145,20 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
+                        <Button fx:id="addChartButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Add Chart">
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <Region styleClass="addWorksheet-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Add a new chart to the current worksheet.">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
                     </HBox>
                 </children>
                 <VBox.margin>

@@ -251,8 +251,6 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.charts = charts;
     }
 
-
-
     @Override
     public String toString() {
         return String.format("%s - %s",
