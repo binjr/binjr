@@ -294,7 +294,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setCacheShape(true);
             viewPort.setFocusTraversable(true);
             viewPort.setLegendVisible(false);
-            viewPort.animatedProperty().bindBidirectional(globalPrefs.chartAnimationEnabledProperty());
+            viewPort.setAnimated(false);
 
             viewPorts.add(new ChartViewPort<>(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }

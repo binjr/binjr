@@ -55,8 +55,6 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
-    private ToggleSwitch enableChartAnimation;
-    @FXML
     private Label maxSampleLabel;
     @FXML
     private Accordion accordionPane;
@@ -83,7 +81,6 @@ public class PreferenceDialogController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
-        assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
@@ -101,7 +98,6 @@ public class PreferenceDialogController implements Initializable {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-        enableChartAnimation.selectedProperty().bindBidirectional(prefs.chartAnimationEnabledProperty());
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));

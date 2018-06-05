@@ -635,33 +635,53 @@
       visibility: visible;
 }
 .command-bar .arrow {
-  -fx-scale-shape: true;
-     -fx-background-color:white;
-     -fx-effect: null;
+    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
+   /* -fx-scale-shape: true;*/
+    -fx-background-color:white;
+    -fx-effect: null;
+}
+
+.command-bar .titled-pane > .title > .arrow-button .arrow {
+    -fx-padding: 3 4;
+}
+
+.command-bar .titled-pane > .title > .arrow-button .arrow {
+    -fx-padding: 3 4;
 }
 /*
 .command-bar .menu-button .arrow-button .arrow {
     -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z"
 
 }*/
-
-.arrow {
-    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
+.command-bar .menu-button  .arrow{
+    -fx-padding: 3.5 2.625;
 }
 
-.menu-item > .arrow{
 
+.command-bar .menu-item  .arrow{
+     -fx-padding: 4 3;
      -fx-scale-shape: true;
 }
 
- .command-bar .choice-box .arrow,
+
  .command-bar .titled-pane > .title > .arrow-button .arrow {
     -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
  }
-
-.command-bar .titled-pane:focused > .title > .arrow-button .arrow
-{
+/*
+.command-bar .titled-pane:focused > .title > .arrow-button .arrow {
     -fx-effect:null;
+    -fx-background-color:red;
+    -fx-padding: 3 4;
+}*/
+
+.command-bar .titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-effect: null;/* dropshadow(two-pass-box , -fx-focus-color, 5, 0.2 , 0, 0);*/
+}
+
+.command-bar .accordion > .first-titled-pane > .title {
+    -fx-background-insets: 0;/*, 1, 2;*/
 }
 
 /*
@@ -834,8 +854,6 @@
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-
-
 .command-bar .choice-box:hover {
     -fx-background-color:  -binjr-dark-blue-color;
      -fx-border-color: -binjr-blue-color;
@@ -844,7 +862,6 @@
 .command-bar .choice-box:disabled {
     -fx-opacity: .4;
 }
-
 
 .choice-box {
     -fx-background-color: -binjr-window-background-color; /*-binjr-button-background-color;*/
@@ -867,6 +884,14 @@
 .choice-box:disabled {
     -fx-opacity: .4;
 }
+
+.command-bar .choice-box .arrow {
+     -fx-padding: 2 4.5;
+ }
+
+.choice-box .arrow {
+     -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+ }
 
 /*****************************************************************/
 
@@ -1045,32 +1070,27 @@
  *                                                                             *
  ******************************************************************************/
 
-.series-table .titled-pane
-{
+.series-table .titled-pane {
        -fx-border-color: -binjr-gray-border-color;
-
        -fx-border-width:1;
    /* -fx-text-fill: -fx-text-base-color;*/
 }
-.series-table .titled-pane:focused
-{
+
+.series-table .titled-pane:focused {
     /*-fx-text-fill: white;*/
 }
-.series-table .titled-pane > .title
-{
+.series-table .titled-pane > .title {
     -fx-graphic-text-gap:25;
     -fx-background-color: -binjr-window-background-color;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
-.series-table .titled-pane:focused > .title
-{
+.series-table .titled-pane:focused > .title {
     /*-fx-color: white;*/
 }
 
-.series-table .titled-pane > .title > .arrow-button
-{
+.series-table .titled-pane > .title > .arrow-button {
 /*
 -fx-background-color:null;
     -fx-background-insets: 0;
@@ -1078,13 +1098,11 @@
     -fx-padding: 0.0em 0.25em 0.0em 0.0em;*/
 }
 
-.series-table .titled-pane:focused > .title > .arrow-button .arrow
-{
+.series-table .titled-pane:focused > .title > .arrow-button .arrow {
     -fx-effect:null;
 }
 
-.series-table .titled-pane > .title > .arrow-button .arrow
-{
+.series-table .titled-pane > .title > .arrow-button .arrow {
     -fx-background-color: -fx-text-base-color;
     -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
     -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
@@ -1095,8 +1113,7 @@
     -fx-border-radius:0;
 }
 
-.series-table .titled-pane:collapsed > .title > .arrow-button .arrow
-{
+.series-table .titled-pane:collapsed > .title > .arrow-button .arrow {
     -fx-rotate: -90;
 }
 
@@ -1183,3 +1200,35 @@
 {
     -fx-background-color: black;
 }
+
+
+/*******************************************************************************
+ *                                                                             *
+ * TreeView and TreeCell                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+.tree-cell {
+    -fx-padding: 1;/*0.05em; /* 3 */
+    -fx-indent: 1.3em;
+}
+.tree-cell .label {
+    -fx-padding: 0.0em 0.0em 0.0em 0.25em; /* 0 0 0 3 */
+}
+.tree-cell > .tree-disclosure-node,
+.tree-table-row-cell > .tree-disclosure-node {
+    -fx-padding: 4 6 4 8;
+    -fx-background-color: transparent;
+}
+.tree-cell > .tree-disclosure-node > .arrow,
+.tree-table-row-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: -binjr-color-gray;
+    -fx-padding: 0.333333em 0.229em 0.333333em 0.229em; /* 4 */
+    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
+}
+.tree-cell:expanded > .tree-disclosure-node > .arrow,
+.tree-table-row-cell:expanded > .tree-disclosure-node > .arrow {
+    -fx-background-color: -fx-text-background-color;
+    -fx-rotate: 90;
+}
+
