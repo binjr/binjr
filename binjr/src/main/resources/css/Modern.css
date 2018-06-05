@@ -886,7 +886,7 @@
 }
 
 .command-bar .choice-box .arrow {
-     -fx-padding: 2 4.5;
+     -fx--padding: 2 4.5;
  }
 
 .choice-box .arrow {

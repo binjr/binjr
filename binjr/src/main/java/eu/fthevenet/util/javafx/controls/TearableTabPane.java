@@ -19,6 +19,7 @@ package eu.fthevenet.util.javafx.controls;
 
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +33,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
@@ -363,6 +365,8 @@ public class TearableTabPane extends TabPane {
         newTabButton.setId("newTabButton");
         newTabButton.setFocusTraversable(false);
         Pane headersRegion = (Pane) this.lookup(".headers-region");
+        Region headerArea = (Region) this.lookup(".tab-header-area");
+
         logger.debug("headersRegion.getHeight() = " + headersRegion.getHeight());
         logger.debug("headersRegion.getPrefHeight = " + headersRegion.getPrefHeight());
         newTabButton.getStyleClass().add("add-tab-button");
@@ -386,27 +390,19 @@ public class TearableTabPane extends TabPane {
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
         switch (getSide()) {
             case TOP:
+            case BOTTOM:
                 newTabButton.translateXProperty().bind(
                         headersRegion.widthProperty()
+                                .add(Bindings.createDoubleBinding(() -> headerArea.getInsets().getLeft(), headerArea.insetsProperty()))
                 );
                 break;
             case LEFT:
-                newTabButton.translateXProperty().bind(
-                        tabHeaderBg.widthProperty()
-                                .subtract(headersRegion.widthProperty())
-                                .subtract(newTabButton.widthProperty())
-                );
-                break;
-            case BOTTOM:
-                newTabButton.translateXProperty().bind(
-                        tabHeaderBg.widthProperty()
-                                .subtract(headersRegion.widthProperty())
-                                .subtract(newTabButton.widthProperty())
-                );
-                break;
             case RIGHT:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty()
+                        tabHeaderBg.widthProperty()
+                                .subtract(headersRegion.widthProperty())
+                                .subtract(newTabButton.widthProperty())
+                                .subtract(Bindings.createDoubleBinding(() -> headerArea.getInsets().getTop(), headerArea.insetsProperty()))
                 );
                 break;
             default:
