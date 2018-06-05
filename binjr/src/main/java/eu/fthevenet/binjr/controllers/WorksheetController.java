@@ -37,6 +37,7 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
@@ -138,6 +139,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private ToggleButton hCrosshair;
     @FXML
+    private Button addChartButton;
+
+    @FXML
     private MaskerPane worksheetMaskerPane;
     @FXML
     private ContextMenu seriesListMenu;
@@ -155,6 +159,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
     private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidate(false, false, false);
     private ChangeListener<ChartType> chartTypeListener;
+    private ListChangeListener<Chart<Double>> chartListListener;
 
     public WorksheetController(Worksheet<Double> worksheet) throws IOException {
         this.worksheet = worksheet;
@@ -354,6 +359,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         snapshotButton.setOnAction(this::handleTakeSnapshot);
         backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
         forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
+        addChartButton.setOnAction(this::handleAddNewChart);
+
         //endregion
 
         //region *** Time pickers ***
@@ -387,6 +394,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
 //        ((ValueAxis<Double>) viewPorts.getYAxis()).upperBoundProperty().bindBidirectional(currentState.endY);
 
         //endregion
+    }
+
+    private void handleAddNewChart(ActionEvent actionEvent) {
+        worksheet.getCharts().add(new Chart<>());
     }
 
     private void initChartSettingPane() {
@@ -561,16 +572,32 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
-        if (this.chartTypeListener != null) {
-            this.worksheet.getDefaultChart().chartTypeProperty().removeListener(this.chartTypeListener);
+//        if (this.chartTypeListener != null) {
+//           this.worksheet.getDefaultChart().chartTypeProperty().removeListener(this.chartTypeListener);
+//
+//        }
+//        this.chartTypeListener = (observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                logger.debug("Reloading worksheet controller because chart type change from: " + oldValue + " to " + newValue);
+//                action.accept(this);
+//            }
+//        };
+//        this.worksheet.getDefaultChart().chartTypeProperty().addListener(this.chartTypeListener);
+
+        /////////////////////////////////////////////////////////////////////
+
+        if (this.chartListListener != null) {
+
+            worksheet.getCharts().removeListener(this.chartListListener);
         }
-        this.chartTypeListener = (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                logger.debug("Reloading worksheet controller because chart type change from: " + oldValue + " to " + newValue);
-                action.accept(this);
-            }
+        this.chartListListener = c -> {
+            action.accept(this);
+
         };
-        this.worksheet.getDefaultChart().chartTypeProperty().addListener(this.chartTypeListener);
+
+        worksheet.getCharts().addListener(this.chartListListener);
+
+
     }
 
     //region *** protected members ***
@@ -871,11 +898,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private class ChartViewPort<T extends Number> {
         private final Chart<T> dataStore;
         private final XYChart<ZonedDateTime, T> chart;
-
         private final ChartPropertiesController<T> propertiesController;
         private final PrefixFormatter prefixFormatter;
         private final TableView<TimeSeriesInfo<Double>> seriesTable;
-
 
         private ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
             this.dataStore = dataStore;

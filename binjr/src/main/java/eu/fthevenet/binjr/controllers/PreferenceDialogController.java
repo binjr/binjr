@@ -93,7 +93,6 @@ public class PreferenceDialogController implements Initializable {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
