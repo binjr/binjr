@@ -527,7 +527,53 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentViewPort.getSeriesTable().getColumns().add(pathColumn);
 
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
+
+            AnchorPane titleRegion = new AnchorPane();
+            //     titleRegion.setMinWidth(20.0);
+            //  titleRegion.prefWidthProperty().bind(newPane.widthProperty());
+            titleRegion.minWidthProperty().bind(newPane.widthProperty());
+            titleRegion.maxWidthProperty().bind(newPane.widthProperty());
+
+            // titleRegion.setAlignment(Pos.CENTER_LEFT);
+            //  StackPane titleRegion = (StackPane) newPane.lookup(".title");
+            Label label = new Label();
+            label.textProperty().bind(newPane.textProperty());
+
+
+            final double CLOSE_BUTTON_SIZE = 16;
+
+            Button closeButton = new Button("Close");
+            closeButton.setPrefHeight(CLOSE_BUTTON_SIZE);
+            closeButton.setMaxHeight(CLOSE_BUTTON_SIZE);
+            closeButton.setMinHeight(CLOSE_BUTTON_SIZE);
+            closeButton.setPrefWidth(CLOSE_BUTTON_SIZE);
+            closeButton.setMaxWidth(CLOSE_BUTTON_SIZE);
+            closeButton.setMinWidth(CLOSE_BUTTON_SIZE);
+            closeButton.getStyleClass().add("exit");
+
+            Region icon = new Region();
+
+            icon.getStyleClass().add("cross-icon");
+            icon.setStyle(" -icon-scale-x: 2;-icon-scale-y: 2");
+            closeButton.setGraphic(icon);
+            closeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+
+            closeButton.setOnAction(event -> worksheet.getCharts().remove(currentViewPort.dataStore));
+            closeButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
+
+            titleRegion.getChildren().addAll(label, closeButton);
+
+//            AnchorPane.setLeftAnchor(titleRegion, 0.0);
+//            AnchorPane.setRightAnchor(titleRegion, 0.0);
+
+            AnchorPane.setLeftAnchor(label, 0.0);
+            AnchorPane.setRightAnchor(closeButton, 40.0);
+
+
+            newPane.setGraphic(titleRegion);
+            newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             newPane.setAnimated(false);
+            //  newPane.
 
             seriesTableContainer.getPanes().add(newPane);
         }

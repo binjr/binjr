@@ -783,19 +783,20 @@
 
 }
 
-   .exit:hover,
-   .command-bar .exit:hover {
-       -fx-background-color: -binjr-color-red;
-   }
 
-  .exit:hover *{
-    -icon-color: white;
-  }
+.exit:hover,
+.command-bar .exit:hover {
+   -fx-background-color: -binjr-color-red;
+}
 
-  .command-bar .exit:hover:pressed,
-  .exit:hover:pressed{
-       -fx-background-color: -binjr-color-light-red;
-   }
+.exit:hover *{
+-icon-color: white;
+}
+
+.command-bar .exit:hover:pressed,
+.exit:hover:pressed{
+   -fx-background-color: -binjr-color-light-red;
+}
 
 
 /*** Menu ***/
