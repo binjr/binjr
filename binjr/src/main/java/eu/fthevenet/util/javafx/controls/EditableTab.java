@@ -18,7 +18,6 @@
 package eu.fthevenet.util.javafx.controls;
 
 import javafx.beans.property.Property;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
@@ -65,15 +64,17 @@ public class EditableTab extends Tab {
         });
 
         textField.setOnAction(event -> {
-            label.setText(textField.getText());
+            if (!textField.getText().isEmpty()) {
+                label.setText(textField.getText());
+            }
             setGraphic(label);
         });
 
-        Button b = new Button();
-
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
-                label.setText(textField.getText());
+                if (!textField.getText().isEmpty()) {
+                    label.setText(textField.getText());
+                }
                 setGraphic(label);
             }
         });

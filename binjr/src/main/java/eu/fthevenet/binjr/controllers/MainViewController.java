@@ -93,7 +93,7 @@ import java.util.stream.StreamSupport;
 public class MainViewController implements Initializable {
     public static final int SETTINGS_PANE_DISTANCE = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-    private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
@@ -471,7 +471,7 @@ public class MainViewController implements Initializable {
         return menuItems;
     }
 
-    private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
+    TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
         if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
             return null;
         }
@@ -721,7 +721,7 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
-            WorksheetController current = new WorksheetController(worksheet);
+            WorksheetController current = new WorksheetController(this, worksheet);
 
             try {
                 // Attach bindings
@@ -741,8 +741,8 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                p.setOnDragOver(MainViewController::handleDragOverWorksheetView);
-                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
+                p.setOnDragOver(this::handleDragOverWorksheetView);
+//                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
 
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
@@ -801,7 +801,7 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-    private <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {
+    <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {
         if (branch.getChildren().size() > 0) {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
@@ -845,7 +845,7 @@ public class MainViewController implements Initializable {
             if (getSelectedWorksheetController() != null && treeItem != null) {
                 List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(treeItem, bindings);
-                getSelectedWorksheetController().addBindings(bindings);
+                getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
             }
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to existing worksheet", e);
@@ -888,7 +888,7 @@ public class MainViewController implements Initializable {
                 if (editWorksheet(worksheet) && getSelectedWorksheetController() != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);
-                    getSelectedWorksheetController().addBindings(bindings);
+                    getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
                 }
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e);
@@ -1026,12 +1026,14 @@ public class MainViewController implements Initializable {
         n.showInformation();
     }
 
-    private static void handleDragOverWorksheetView(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-            event.consume();
-        }
+    private void handleDragOverWorksheetView(DragEvent event) {
+//        Dragboard db = event.getDragboard();
+//        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+//            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+//            event.consume();
+//        }
+        event.acceptTransferModes(TransferMode.NONE);
+        event.consume();
     }
 
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
