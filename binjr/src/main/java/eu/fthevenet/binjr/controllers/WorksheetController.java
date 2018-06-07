@@ -44,8 +44,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -56,13 +58,11 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -78,6 +78,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
+
 /**
  * The controller class for the time series view.
  *
@@ -88,24 +90,20 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final Worksheet<Double> worksheet;
-
-    private static final double Y_AXIS_SEPARATION = 20;
-
+    private static final double Y_AXIS_SEPARATION = 10;
+    private final MainViewController parentController;
 
     @FXML
     public AnchorPane root;
     @FXML
     public AnchorPane chartParent;
-
     protected List<ChartViewPort<Double>> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
     @FXML
     private TextField yMaxRange;
-
     @FXML
     private Accordion seriesTableContainer;
-
     @FXML
     private Button backButton;
     @FXML
@@ -118,29 +116,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ZonedDateTimePicker startDate;
     @FXML
     private ZonedDateTimePicker endDate;
-    /*
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> pathColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Color> colorColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> minColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> maxColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> avgColumn;
-    @FXML
-    private TableColumn<TimeSeriesInfo<Double>, String> currentColumn;
-    */
     @FXML
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
     @FXML
     private Button addChartButton;
-
     @FXML
     private MaskerPane worksheetMaskerPane;
     @FXML
@@ -161,7 +142,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ChangeListener<ChartType> chartTypeListener;
     private ListChangeListener<Chart<Double>> chartListListener;
 
-    public WorksheetController(Worksheet<Double> worksheet) throws IOException {
+
+    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet) throws IOException {
+        this.parentController = parentController;
         this.worksheet = worksheet;
     }
 
@@ -188,10 +171,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public void setName(String name) {
         this.name = name;
     }
-
-
-    //public abstract ChartType getChartType();
-
     //endregion
 
     /**
@@ -209,32 +188,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //region *** Nodes injection checks ***
         assert root != null : "fx:id\"root\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
-//        assert yMinRange != null : "fx:id\"yMinRange\" was not injected!";
-//        assert yMaxRange != null : "fx:id\"yMaxRange\" was not injected!";
         assert seriesTableContainer != null : "fx:id\"seriesTableContainer\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
-        //    assert autoScaleYAxisToggle != null : "fx:id\"autoScaleYAxisToggle\" was not injected!";
         assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
         assert endDate != null : "fx:id\"endDateTime\" was not injected!";
-
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-        //   assert visibleColumn != null : "fx:id\"visibleColumn\" was not injected!";
-//        assert avgColumn != null : "fx:id\"avgColumn\" was not injected!";
-//        assert minColumn != null : "fx:id\"minColumn\" was not injected!";
-//        assert maxColumn != null : "fx:id\"maxColumn\" was not injected!";
-//        assert currentColumn != null : "fx:id\"currentColumn\" was not injected!";
-//        assert pathColumn != null : "fx:id\"pathColumn\" was not injected!";
-//        assert colorColumn != null : "fx:id\"colorColumn\" was not injected!";
         //endregion
 
         //region Control initialization
-
         try {
-
             initChartViewPorts();
         } catch (IOException e) {
             throw new RuntimeException("Failed to handle IOException", e);
@@ -243,6 +209,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //    initChartSettingPane();
         initTableViewPane();
         //endregion
+        Platform.runLater(() -> invalidate(false, false, false));
 
         //region *** Global preferences ***
         globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
@@ -252,13 +219,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     }
 
+    //region *** XYChart ***
     private void initChartViewPorts() throws IOException {
-        //region *** XYChart ***
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
         xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         xAxis.setAnimated(false);
         xAxis.setSide(Side.BOTTOM);
-
         for (Chart<Double> currentChart : getWorksheet().getCharts()) {
             StableTicksAxis yAxis;
             if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
@@ -267,7 +233,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             else {
                 yAxis = new MetricStableTicksAxis();
             }
-
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);
             yAxis.setTickSpacing(30);
@@ -275,7 +240,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
                     currentChart.nameProperty(),
                     currentChart.unitProperty()));
-
             XYChart<ZonedDateTime, Double> viewPort;
             switch (currentChart.getChartType()) {
                 case AREA:
@@ -300,16 +264,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setFocusTraversable(true);
             viewPort.setLegendVisible(false);
             viewPort.setAnimated(false);
-
             viewPorts.add(new ChartViewPort<>(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
-
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort<Double> v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
             int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
-
-
             DoubleBinding n = Bindings.createDoubleBinding(
                     () -> viewPorts.stream()
                             .filter(c -> !c.getChart().equals(chart))
@@ -321,7 +281,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             hBox.setAlignment(Pos.CENTER_LEFT);
             hBox.prefHeightProperty().bind(chartParent.heightProperty());
             hBox.prefWidthProperty().bind(chartParent.widthProperty());
-            // hBox.setMouseTransparent(true);
             chart.minWidthProperty().bind(chartParent.widthProperty().subtract(n));
             chart.prefWidthProperty().bind(chartParent.widthProperty().subtract(n));
             chart.maxWidthProperty().bind(chartParent.widthProperty().subtract(n));
@@ -329,7 +288,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 chart.getYAxis().setSide(Side.LEFT);
             }
             else {
-                //  hBox.setMouseTransparent(true);
                 chart.getYAxis().setSide(Side.RIGHT);
                 chart.setVerticalZeroLineVisible(false);
                 chart.setHorizontalZeroLineVisible(false);
@@ -346,10 +304,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chartParent.getChildren().add(hBox);
         }
     }
-
-
     //endregion
-
 
     private void initNavigationPane() {
         //region *** Buttons ***
@@ -376,9 +331,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-
         crossHair = new XYChartCrosshair<>(viewPorts.get(viewPorts.size() - 1).chart, chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
-
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(s, true);
@@ -416,12 +369,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         chartParent.getChildren().add(settingsPane);
     }
 
-
     private void initTableViewPane() {
-
         for (ChartViewPort<Double> currentViewPort : viewPorts) {
             currentViewPort.getSeriesTable().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-
             CheckBox showAllCheckBox = new CheckBox();
             TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn = new TableColumn<>();
             visibleColumn.setGraphic(showAllCheckBox);
@@ -516,68 +466,101 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             });
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
-
-            currentViewPort.getSeriesTable().getColumns().add(visibleColumn);
-            currentViewPort.getSeriesTable().getColumns().add(colorColumn);
-            currentViewPort.getSeriesTable().getColumns().add(nameColumn);
-            currentViewPort.getSeriesTable().getColumns().add(minColumn);
-            currentViewPort.getSeriesTable().getColumns().add(maxColumn);
-            currentViewPort.getSeriesTable().getColumns().add(avgColumn);
-            currentViewPort.getSeriesTable().getColumns().add(currentColumn);
-            currentViewPort.getSeriesTable().getColumns().add(pathColumn);
-
+            currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
 
-            AnchorPane titleRegion = new AnchorPane();
-            //     titleRegion.setMinWidth(20.0);
-            //  titleRegion.prefWidthProperty().bind(newPane.widthProperty());
-            titleRegion.minWidthProperty().bind(newPane.widthProperty());
-            titleRegion.maxWidthProperty().bind(newPane.widthProperty());
+            newPane.setOnDragOver(this::handleDragOverWorksheetView);
+            newPane.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
+            newPane.setUserData(currentViewPort);
 
-            // titleRegion.setAlignment(Pos.CENTER_LEFT);
-            //  StackPane titleRegion = (StackPane) newPane.lookup(".title");
+            GridPane titleRegion = new GridPane();
+            titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+            titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+            titleRegion.minWidthProperty().bind(newPane.widthProperty().subtract(30));
+            titleRegion.maxWidthProperty().bind(newPane.widthProperty().subtract(30));
+            TextField textField = new TextField();
+            DoubleBinding db = Bindings.createDoubleBinding(() -> textField.isVisible() ? USE_COMPUTED_SIZE : 0.0, textField.visibleProperty());
+            textField.prefHeightProperty().bind(db);
+            textField.maxHeightProperty().bind(db);
+            textField.minHeightProperty().bind(db);
             Label label = new Label();
-            label.textProperty().bind(newPane.textProperty());
+            label.textProperty().bind(currentViewPort.getDataStore().nameProperty());
+            textField.visibleProperty().bind(label.visibleProperty().not());
+            titleRegion.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    textField.setText(currentViewPort.getDataStore().getName());
+                    label.setVisible(false);
+                    textField.selectAll();
+                    textField.requestFocus();
+                }
+            });
+            textField.setOnAction(event -> {
+                if (!textField.getText().isEmpty()) {
+                    currentViewPort.getDataStore().setName(textField.getText());
+                }
+                label.setVisible(true);
 
-
-            final double CLOSE_BUTTON_SIZE = 16;
-
+            });
+            textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+                if (!newValue) {
+                    if (!textField.getText().isEmpty()) {
+                        currentViewPort.getDataStore().setName(textField.getText());
+                    }
+                    label.setVisible(true);
+                }
+            });
+            HBox toolbar = new HBox();
+            toolbar.setSpacing(5);
+            toolbar.setAlignment(Pos.CENTER);
+            final double BUTTON_SIZE = 14;
             Button closeButton = new Button("Close");
-            closeButton.setPrefHeight(CLOSE_BUTTON_SIZE);
-            closeButton.setMaxHeight(CLOSE_BUTTON_SIZE);
-            closeButton.setMinHeight(CLOSE_BUTTON_SIZE);
-            closeButton.setPrefWidth(CLOSE_BUTTON_SIZE);
-            closeButton.setMaxWidth(CLOSE_BUTTON_SIZE);
-            closeButton.setMinWidth(CLOSE_BUTTON_SIZE);
+            closeButton.setPrefHeight(BUTTON_SIZE);
+            closeButton.setMaxHeight(BUTTON_SIZE);
+            closeButton.setMinHeight(BUTTON_SIZE);
+            closeButton.setPrefWidth(BUTTON_SIZE);
+            closeButton.setMaxWidth(BUTTON_SIZE);
+            closeButton.setMinWidth(BUTTON_SIZE);
             closeButton.getStyleClass().add("exit");
-
+            closeButton.setAlignment(Pos.CENTER);
             Region icon = new Region();
-
             icon.getStyleClass().add("cross-icon");
-            icon.setStyle(" -icon-scale-x: 2;-icon-scale-y: 2");
+            icon.setStyle(" -icon-scale-x: 1.5;-icon-scale-y: 1.5");
             closeButton.setGraphic(icon);
             closeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-
             closeButton.setOnAction(event -> worksheet.getCharts().remove(currentViewPort.dataStore));
-            closeButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
+            closeButton.disableProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
+            closeButton.setTooltip(new Tooltip("Remove this chart from the worksheet."));
 
-            titleRegion.getChildren().addAll(label, closeButton);
+            Button editButton = new Button("Settings");
+            editButton.setPrefHeight(BUTTON_SIZE);
+            editButton.setMaxHeight(BUTTON_SIZE);
+            editButton.setMinHeight(BUTTON_SIZE);
+            editButton.setPrefWidth(BUTTON_SIZE);
+            editButton.setMaxWidth(BUTTON_SIZE);
+            editButton.setMinWidth(BUTTON_SIZE);
+            editButton.getStyleClass().add("dialog-button");
+            editButton.setAlignment(Pos.CENTER);
+            Region editIcon = new Region();
+            editIcon.getStyleClass().add("settings-icon");
+            editIcon.setStyle(" -icon-scale-x: 1.5;-icon-scale-y: 1.5");
+            editButton.setGraphic(editIcon);
+            editButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            editButton.setTooltip(new Tooltip("Edit the chart's settings"));
 
-//            AnchorPane.setLeftAnchor(titleRegion, 0.0);
-//            AnchorPane.setRightAnchor(titleRegion, 0.0);
+            // editButton.setOnAction();
+            toolbar.getChildren().addAll(editButton, closeButton);
 
-            AnchorPane.setLeftAnchor(label, 0.0);
-            AnchorPane.setRightAnchor(closeButton, 40.0);
-
+            titleRegion.getChildren().addAll(label, textField, toolbar);
+            HBox hBox = new HBox();
+            hBox.setAlignment(Pos.CENTER);
+            GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+            GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
 
             newPane.setGraphic(titleRegion);
             newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             newPane.setAnimated(false);
-            //  newPane.
-
             seriesTableContainer.getPanes().add(newPane);
         }
-
 
         Platform.runLater(() -> seriesTableContainer.getPanes().get(0).setExpanded(true));
         /* Make sure the accordion can never be completely collapsed */
@@ -595,6 +578,54 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 });
             }
         });
+    }
+
+    private void handleDragOverWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+            event.acceptTransferModes(TransferMode.MOVE);
+            event.consume();
+        }
+    }
+
+    private void handleDragDroppedOnWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+            TreeView<TimeSeriesBinding<Double>> treeView = parentController.getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    if (targetStage != null) {
+                        targetStage.requestFocus();
+                    }
+                    if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
+                        //parentController.addToCurrentWorksheet(item);
+                        try {
+                            ChartViewPort<Double> viewPort = (ChartViewPort<Double>) ((Node) event.getSource()).getUserData();
+                            List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                            parentController.getAllBindingsFromBranch(item, bindings);
+                            addBindings(bindings, viewPort.getDataStore());
+
+                        } catch (Exception e) {
+                            Dialogs.notifyException("Error adding bindings to existing worksheet", e);
+                        }
+
+                        logger.debug("dropped to " + event.toString());
+                    }
+                    else {
+                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
+                    }
+                }
+                else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            }
+            else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
     }
 
     //endregion
@@ -640,19 +671,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
             action.accept(this);
 
         };
-
         worksheet.getCharts().addListener(this.chartListListener);
-
-
     }
 
     //region *** protected members ***
 
-    protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings) {
+    protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings, Chart<Double> targetChart) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             newSeries.selectedProperty().addListener(refreshOnSelectSeries);
-            worksheet.getDefaultChart().addSeries(newSeries);
+            targetChart.addSeries(newSeries);
         }
         invalidate(false, false, false);
     }
@@ -940,7 +968,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-
     private class ChartViewPort<T extends Number> {
         private final Chart<T> dataStore;
         private final XYChart<ZonedDateTime, T> chart;
@@ -954,7 +981,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             this.seriesTable = new TableView<>();
             this.seriesTable.getStyleClass().add("skinnable-pane-border");
             this.seriesTable.setEditable(true);
-
             this.propertiesController = propertiesController;
             switch (dataStore.getUnitPrefixes()) {
                 case BINARY:

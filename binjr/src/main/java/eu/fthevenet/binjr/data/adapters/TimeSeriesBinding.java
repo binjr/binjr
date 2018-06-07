@@ -126,7 +126,6 @@ public class TimeSeriesBinding<T> {
                 binding.adapterId);
     }
 
-
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class with the provided properties
      *
