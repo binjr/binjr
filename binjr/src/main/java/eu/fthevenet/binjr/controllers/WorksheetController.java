@@ -25,6 +25,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
+import eu.fthevenet.util.javafx.controls.DelayedAction;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
@@ -63,6 +64,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -219,6 +221,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     }
 
+    // private DoubleBinding n;
+
     //region *** XYChart ***
     private void initChartViewPorts() throws IOException {
         ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -302,6 +306,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)));
             }
             chartParent.getChildren().add(hBox);
+
         }
     }
     //endregion
@@ -562,7 +567,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
 
-        Platform.runLater(() -> seriesTableContainer.getPanes().get(0).setExpanded(true));
+        seriesTableContainer.expandedPaneProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(newValue));
+            }
+            else {
+                getWorksheet().setSelectedChart(0);
+            }
+        }));
+
+        Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         /* Make sure the accordion can never be completely collapsed */
         seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
             Boolean expand = true; // This value will change to false if there's (at least) one pane that is in "expanded" state, so we don't have to expand anything manually
@@ -602,7 +616,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                         //parentController.addToCurrentWorksheet(item);
                         try {
-                            ChartViewPort<Double> viewPort = (ChartViewPort<Double>) ((Node) event.getSource()).getUserData();
+
+                            TitledPane droppedPane = (TitledPane) event.getSource();
+                            droppedPane.setExpanded(true);
+                            ChartViewPort<Double> viewPort = (ChartViewPort<Double>) droppedPane.getUserData();
                             List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                             parentController.getAllBindingsFromBranch(item, bindings);
                             addBindings(bindings, viewPort.getDataStore());
@@ -632,6 +649,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @Override
     public void close() {
+        if (chartListListener != null) {
+            worksheet.getCharts().removeListener(chartListListener);
+        }
         if (refreshOnPreferenceListener != null) {
             logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
@@ -664,12 +684,34 @@ public class WorksheetController implements Initializable, AutoCloseable {
         /////////////////////////////////////////////////////////////////////
 
         if (this.chartListListener != null) {
-
             worksheet.getCharts().removeListener(this.chartListListener);
         }
         this.chartListListener = c -> {
-            action.accept(this);
+            while (c.next()) {
+                if (c.wasPermutated()) {
+                    for (int i = c.getFrom(); i < c.getTo(); ++i) {
+                        // nothingfor now
+                    }
+                }
+                else if (c.wasUpdated()) {
+                    // nothingfor now
+                }
+                else {
+                    if (c.wasAdded()) {
+                        List<? extends Chart<Double>> added = c.getAddedSubList();
+                        worksheet.setSelectedChart(worksheet.getCharts().indexOf(added.get(added.size() - 1)));
+                    }
+                    if (c.wasRemoved()) {
+                        //   List<? extends Chart<Double>> removed = c.getRemoved();
+                        if (worksheet.getSelectedChart() == c.getFrom()) {
+                            worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
+                        }
+                    }
+                    logger.debug(() -> "Observable list change=" + c.toString() + " in ctrler " + this.toString());
+                    action.accept(this);
+                }
 
+            }
         };
         worksheet.getCharts().addListener(this.chartListListener);
     }
@@ -775,6 +817,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         });
             }
         }
+        // This is a bit of a hack destined to force a redraw of the charts and their Y Axis considering their proper width.
+        // Ideally, this should be timed right after the width property of concerned controls are updated, instead of an
+        // arbitrary delay.
+        new DelayedAction(Duration.millis(50), () -> viewPorts.forEach(v -> v.getChart().resize(0.0, 0.0))).submit();
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {

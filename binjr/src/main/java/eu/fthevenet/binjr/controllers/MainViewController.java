@@ -297,7 +297,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-
     //region UI handlers
     @FXML
     protected void handleAboutAction(ActionEvent event) throws IOException {
@@ -711,12 +710,15 @@ public class MainViewController implements Initializable {
                 tab = entry.getKey();
             }
         }
-        if (tab == null) {
+        if (tab != null) {
+            Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
+            worksheetCtrl.close();
+            loadWorksheet(worksheet, tab);
+        }
+        else {
+            //  logger.debug(()->"cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
             throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
         }
-        Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
-        worksheetCtrl.close();
-        loadWorksheet(worksheet, tab);
     }
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
@@ -742,7 +744,7 @@ public class MainViewController implements Initializable {
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
                 p.setOnDragOver(this::handleDragOverWorksheetView);
-//                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
+                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
 
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
@@ -829,10 +831,27 @@ public class MainViewController implements Initializable {
         }
     }
 
+    private ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
+        ContextMenu contextMenu = new ContextMenu(getSelectedWorksheetController().getWorksheet().getCharts()
+                .stream()
+                .map(c -> {
+                    MenuItem m = new MenuItem(c.getName());
+                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), c));
+                    return m;
+                })
+                .toArray(MenuItem[]::new));
+
+        MenuItem newChart = new MenuItem("Add to new chart");
+        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
+        return contextMenu;
+    }
+
+
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
-        MenuItem addToCurrent = new MenuItem("Add to current worksheet");
+        Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
-        addToCurrent.setOnAction(event -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(treeView.getSelectionModel().getSelectedItem()));
         ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
@@ -840,12 +859,22 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+        try {
+            Chart<Double> c = new Chart<>();
+            addToCurrentWorksheet(treeItem, c);
+            getSelectedWorksheetController().getWorksheet().getCharts().add(c);
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to new chart", e);
+        }
+    }
+
+    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem, Chart<Double> targetChart) {
         try {
             if (getSelectedWorksheetController() != null && treeItem != null) {
                 List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(treeItem, bindings);
-                getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
+                getSelectedWorksheetController().addBindings(bindings, targetChart);
             }
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to existing worksheet", e);
@@ -1027,13 +1056,11 @@ public class MainViewController implements Initializable {
     }
 
     private void handleDragOverWorksheetView(DragEvent event) {
-//        Dragboard db = event.getDragboard();
-//        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-//            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-//            event.consume();
-//        }
-        event.acceptTransferModes(TransferMode.NONE);
-        event.consume();
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            event.consume();
+        }
     }
 
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
@@ -1048,10 +1075,16 @@ public class MainViewController implements Initializable {
                         targetStage.requestFocus();
                     }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
-                        addToNewWorksheet(item);
+                        addToNewChartInCurrentWorksheet(item);
+                        //addToNewWorksheet(item);
                     }
                     else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                        addToCurrentWorksheet(item);
+                        if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {
+                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                        }
+                        else {
+                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), getSelectedWorksheetController().getWorksheet().getDefaultChart());
+                        }
                     }
                     else {
                         logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
