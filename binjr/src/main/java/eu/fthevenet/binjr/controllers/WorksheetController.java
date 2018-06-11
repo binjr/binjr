@@ -567,26 +567,30 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
 
-        seriesTableContainer.expandedPaneProperty().addListener(((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(newValue));
-            }
-            else {
-                getWorksheet().setSelectedChart(0);
-            }
-        }));
+//        seriesTableContainer.expandedPaneProperty().addListener(((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                if (newValue.isExpanded()) {
+//                    getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(newValue));
+//                }
+//            }
+//            else {
+//            //    getWorksheet().setSelectedChart(0);
+//            }
+//        }));
 
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         /* Make sure the accordion can never be completely collapsed */
         seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-            Boolean expand = true; // This value will change to false if there's (at least) one pane that is in "expanded" state, so we don't have to expand anything manually
+            Boolean expandRequiered = true; // This value will change to false if there's (at least) one pane that is in "expanded" state, so we don't have to expand anything manually
             for (TitledPane pane : seriesTableContainer.getPanes()) {
                 if (pane.isExpanded()) {
-                    expand = false;
+                    expandRequiered = false;
+                    getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(pane));
                 }
             }
             /* Here we already know whether we need to expand the old pane again */
-            if ((expand) && (oldPane != null)) {
+            if ((expandRequiered) && (oldPane != null)) {
+                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
                 Platform.runLater(() -> {
                     seriesTableContainer.setExpandedPane(oldPane);
                 });
@@ -705,6 +709,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         //   List<? extends Chart<Double>> removed = c.getRemoved();
                         if (worksheet.getSelectedChart() == c.getFrom()) {
                             worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
+                        }
+                        else if (worksheet.getSelectedChart() > c.getFrom()) {
+                            worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
                         }
                     }
                     logger.debug(() -> "Observable list change=" + c.toString() + " in ctrler " + this.toString());
