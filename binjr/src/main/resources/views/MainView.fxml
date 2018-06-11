@@ -219,16 +219,6 @@
             </tooltip>
             <items>
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">-->
-                    <!--<accelerator>-->
-                    <!--<KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
-                    <!--</accelerator>-->
-                    <!--</MenuItem>-->
-                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddCsvSource" text="CSV File">-->
-                    <!--<accelerator>-->
-                    <!--<KeyCodeCombination alt="UP" code="V" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
-                    <!--</accelerator>-->
-                    <!--</MenuItem>-->
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addSource-icon"/>
@@ -269,17 +259,6 @@
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addWorksheet-icon"/>
-                        </HBox>
-                    </graphic>
-                </MenuItem>
-
-                <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
-                    </accelerator>
-                    <graphic>
-                        <HBox styleClass="icon-container">
-                            <Region styleClass="settings-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>

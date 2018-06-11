@@ -89,6 +89,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
 
     private void show() {
         if (hidden.getValue()) {
+
             slidePanel(-1, Duration.millis(0));
             hidden.setValue(false);
         }
@@ -103,6 +104,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
 
     private void slidePanel(int show, Duration delay) {
         Node n = root.getParent();
+        n.toFront();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
         openNav.setDelay(delay);
         openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
