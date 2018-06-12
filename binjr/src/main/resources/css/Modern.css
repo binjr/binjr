@@ -1233,3 +1233,16 @@
     -fx-rotate: 90;
 }
 
+.crosshair-axis-label {
+    -fx-text-fill: white  ;
+    -fx-font-size: 10;
+  /*  -fx-font-weight: bold;*/
+  /*      -fx-background-insets: 2;*/
+        -fx-background-radius: 4;
+   -fx-padding:4;
+   /* -fx-border-size: 2;
+   -fx-border-radius: 4;
+    -fx-border-color: darkgray  ;*/
+    -fx-background-color:  rgba(32,70,86,0.8);
+}
+

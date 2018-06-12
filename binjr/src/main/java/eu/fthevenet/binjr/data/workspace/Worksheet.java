@@ -244,7 +244,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime.setValue(toDateTime);
     }
 
-
+    @XmlAttribute
     public Integer getSelectedChart() {
         return selectedChart.getValue();
     }

@@ -263,3 +263,10 @@
        -fx-background-radius: .1in;
    }
 
+.crosshair-axis-label {
+    -fx-text-fill: white;
+    -fx-font-size: 10;
+    -fx-background-radius: 4;
+    -fx-padding:4;
+    -fx-background-color: rgba(10,10,10,0.7);
+}

@@ -75,6 +75,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     private DoubleProperty yAxisMinValue;
     @IsDirtyable
     private DoubleProperty yAxisMaxValue;
+    @IsDirtyable
+    private BooleanProperty showProperties;
 
     private final ChangeWatcher status;
 
@@ -163,6 +165,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         this.autoScaleYAxis = new SimpleBooleanProperty(autoScaleYAxis);
         this.yAxisMinValue = new SimpleDoubleProperty(yAxisMinValue);
         this.yAxisMaxValue = new SimpleDoubleProperty(yAxisMaxValue);
+        this.showProperties = new SimpleBooleanProperty(false);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -509,6 +512,19 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
 
     public void setyAxisMaxValue(double yAxisMaxValue) {
         this.yAxisMaxValue.set(yAxisMaxValue);
+    }
+
+    @XmlAttribute
+    public boolean isShowProperties() {
+        return showProperties.get();
+    }
+
+    public BooleanProperty showPropertiesProperty() {
+        return showProperties;
+    }
+
+    public void setShowProperties(boolean showProperties) {
+        this.showProperties.set(showProperties);
     }
 }
 

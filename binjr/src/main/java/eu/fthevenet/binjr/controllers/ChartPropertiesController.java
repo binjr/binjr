@@ -19,7 +19,9 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
+import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -30,7 +32,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -73,6 +75,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
     @FXML
+    private ChoiceBox<UnitPrefixes> unitPrefixChoiceBox;
+    @FXML
     private TextField timezoneField;
     @FXML
     private TextField yMinRange;
@@ -81,21 +85,26 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private ToggleSwitch autoScaleYAxis;
     @FXML
-    private HBox yAxisScaleSettings;
+    private GridPane yAxisScaleSettings;
+    @FXML
+    private TextField chartNameTextField;
+    @FXML
+    private TextField chartUnitTextField;
+
 
     public ChartPropertiesController(Chart<T> chart) {
         this.chart = chart;
+
     }
 
-    private void show() {
+    public void show() {
         if (hidden.getValue()) {
-
             slidePanel(-1, Duration.millis(0));
             hidden.setValue(false);
         }
     }
 
-    private void hide() {
+    public void hide() {
         if (!hidden.getValue()) {
             slidePanel(1, Duration.millis(0));
             hidden.setValue(true);
@@ -119,6 +128,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         assert strokeWidthText != null : "fx:id\"strokeWidthText\" was not injected!";
         assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
         assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
+        assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
 
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         graphOpacitySlider.valueProperty().bindBidirectional(chart.graphOpacityProperty());
@@ -135,44 +145,54 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         });
         showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
         autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
+
+        chartNameTextField.textProperty().bindBidirectional(chart.nameProperty());
+        chartUnitTextField.textProperty().bindBidirectional(chart.unitProperty());
+
         setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
+
+        unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
+        unitPrefixChoiceBox.getSelectionModel().select(chart.getUnitPrefixes());
+        chart.unitPrefixesProperty().bind(unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
+
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
-        strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
 
-//        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
-//            @Override
-//            public String toString(ZoneId object) {
-//                return object.toString();
-//            }
-//
-//            @Override
-//            public ZoneId fromString(String string) {
-//                return ZoneId.of(string);
-//            }
-//        });
+        //        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
+        //            @Override
+        //            public String toString(ZoneId object) {
+        //                return object.toString();
+        //            }
+        //
+        //            @Override
+        //            public ZoneId fromString(String string) {
+        //                return ZoneId.of(string);
+        //            }
+        //        });
 
         //formatter.valueProperty().bindBidirectional(chart.timeZoneProperty());
 
         //  timezoneField.setTextFormatter(formatter);
 
+        strokeWidthControlDisabled(!showAreaOutline.isSelected());
+        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
+        visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility(newValue));
+        this.visibleProperty().bindBidirectional(chart.showPropertiesProperty());
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
-
-        visibleProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                show();
-            }
-            else {
-                hide();
-            }
-        });
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
-
         yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
+        Platform.runLater(() -> setPanelVisibility(chart.isShowProperties()));
+    }
 
+    private void setPanelVisibility(boolean isVisible) {
+        if (isVisible) {
+            show();
+        }
+        else {
+            hide();
+        }
     }
 
     private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty) {

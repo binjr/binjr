@@ -179,8 +179,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         settingsPane.setMinWidth(200);
         chartParent.getChildren().add(settingsPane);
         Platform.runLater(() -> settingsPane.toFront());
-
-
         return propertiesController;
     }
 
@@ -230,7 +228,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         initTableViewPane();
         //endregion
         Platform.runLater(() -> invalidate(false, false, false));
-
         //region *** Global preferences ***
         globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
         globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
@@ -370,13 +367,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
-
-
         //endregion
     }
 
     private void handleAddNewChart(ActionEvent actionEvent) {
         worksheet.getCharts().add(new Chart<>());
+
     }
 
     private void initTableViewPane() {
@@ -522,7 +518,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             HBox toolbar = new HBox();
             toolbar.setSpacing(5);
             toolbar.setAlignment(Pos.CENTER);
-            final double BUTTON_SIZE = 14;
+            final double BUTTON_SIZE = 16;
             Button closeButton = new Button("Close");
             closeButton.setPrefHeight(BUTTON_SIZE);
             closeButton.setMaxHeight(BUTTON_SIZE);
@@ -556,7 +552,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             editButton.setGraphic(editIcon);
             editButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             editButton.setTooltip(new Tooltip("Edit the chart's settings"));
-            editButton.selectedProperty().bindBidirectional(currentViewPort.getPropertiesController().visibleProperty());
+            //    editButton.selectedProperty().bindBidirectional(currentViewPort.getPropertiesController().visibleProperty());
+            editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
             editButton.setOnAction(event -> newPane.setExpanded(true));
             toolbar.getChildren().addAll(editButton, closeButton);
             editButtonsGroup.getToggles().add(editButton);
@@ -612,7 +609,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                         //parentController.addToCurrentWorksheet(item);
                         try {
-
                             TitledPane droppedPane = (TitledPane) event.getSource();
                             droppedPane.setExpanded(true);
                             ChartViewPort<Double> viewPort = (ChartViewPort<Double>) droppedPane.getUserData();
@@ -662,9 +658,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         if (this.chartTypeListener != null) {
-
             this.worksheet.getCharts().forEach(c -> c.chartTypeProperty().removeListener(this.chartTypeListener));
-
         }
         this.chartTypeListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -692,10 +686,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 else {
                     if (c.wasAdded()) {
                         List<? extends Chart<Double>> added = c.getAddedSubList();
-                        worksheet.setSelectedChart(worksheet.getCharts().indexOf(added.get(added.size() - 1)));
+                        Chart<Double> chart = added.get(added.size() - 1);
+                        chart.setShowProperties(true);
+                        int chartIndex = worksheet.getCharts().indexOf(chart);
+                        worksheet.setSelectedChart(chartIndex);
                     }
                     if (c.wasRemoved()) {
-                        //   List<? extends Chart<Double>> removed = c.getRemoved();
                         if (worksheet.getSelectedChart() == c.getFrom()) {
                             worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
                         }

@@ -242,12 +242,16 @@ public class XYChartCrosshair<X, Y> {
         horizontalMarker.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
         horizontalMarker.setStartY(mousePosition.getY() + 0.5);
         horizontalMarker.setEndY(mousePosition.getY() + 0.5);
-        yAxisLabel.setLayoutX(Math.max(masterChart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
-        yAxisLabel.setLayoutY(Math.min(mousePosition.getY(), chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
+        //     yAxisLabel.setLayoutX(Math.max(masterChart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
+        yAxisLabel.setLayoutX(Math.min(parent.getWidth() - yAxisLabel.getWidth(), chartInfo.getPlotArea().getMaxX() + 5));
+        //yAxisLabel.setLayoutX(parent.getWidth()- yAxisLabel.getWidth());
+        yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
+
+
         charts.forEach(c -> currentYValues.computeIfAbsent(c, (k) -> new SimpleObjectProperty<Y>()).setValue(getValueFromYcoord(c, mousePosition.getY())));
 
         yAxisLabel.setText(currentYValues.entrySet().stream()
-                .map(e -> yValuesFormatter.apply(e.getValue().getValue()))
+                .map(e -> e.getKey().getYAxis().getLabel() + ": " + yValuesFormatter.apply(e.getValue().getValue()))
                 .collect(Collectors.joining("\n"))
         );
     }
@@ -320,9 +324,10 @@ public class XYChartCrosshair<X, Y> {
 
     private Label newAxisLabel() {
         Label label = new Label("");
-        label.getStyleClass().addAll("default-color3", "chart-line-symbol", "chart-series-line");
-        label.setStyle("-fx-font-size: 10; -fx-font-weight: bold;");
-        label.setTextFill(javafx.scene.paint.Color.DARKGRAY);
+        label.getStyleClass().add("crosshair-axis-label");
+//        label.getStyleClass().addAll("default-color3", "chart-line-symbol", "chart-series-line");
+//        label.setStyle("-fx-font-size: 10; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,0.6);");
+//        label.setTextFill(Color.BLACK);
         label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
         label.setMouseTransparent(true);
         label.setVisible(false);
