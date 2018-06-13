@@ -25,12 +25,12 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
             <AnchorPane>
                 <children>
-                    <HBox styleClass="worksheet-tool-bar" alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                    <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
                                 textAlignment="CENTER">
 
@@ -80,7 +80,7 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Label text="From:">
+                        <Label minWidth="-Infinity" text="From:">
                             <HBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </HBox.margin>
@@ -90,7 +90,7 @@
                                 <Tooltip text="Lower bound for the X axis"/>
                             </tooltip>
                         </ZonedDateTimePicker>
-                        <Label text="To:">
+                        <Label minWidth="-Infinity" text="To:">
                             <HBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </HBox.margin>

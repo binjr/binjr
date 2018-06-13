@@ -19,7 +19,6 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
-import eu.fthevenet.binjr.data.workspace.UnitPrefixes;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -32,7 +31,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -74,8 +73,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
-    @FXML
-    private ChoiceBox<UnitPrefixes> unitPrefixChoiceBox;
+    //    @FXML
+//    private ChoiceBox<UnitPrefixes> unitPrefixChoiceBox;
     @FXML
     private TextField timezoneField;
     @FXML
@@ -85,11 +84,11 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private ToggleSwitch autoScaleYAxis;
     @FXML
-    private GridPane yAxisScaleSettings;
-    @FXML
-    private TextField chartNameTextField;
-    @FXML
-    private TextField chartUnitTextField;
+    private HBox yAxisScaleSettings;
+//    @FXML
+//    private TextField chartNameTextField;
+//    @FXML
+//    private TextField chartUnitTextField;
 
 
     public ChartPropertiesController(Chart<T> chart) {
@@ -145,16 +144,16 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         });
         showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
         autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
-
-        chartNameTextField.textProperty().bindBidirectional(chart.nameProperty());
-        chartUnitTextField.textProperty().bindBidirectional(chart.unitProperty());
+//
+//        chartNameTextField.textProperty().bindBidirectional(chart.nameProperty());
+//        chartUnitTextField.textProperty().bindBidirectional(chart.unitProperty());
 
         setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
 
-        unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
-        unitPrefixChoiceBox.getSelectionModel().select(chart.getUnitPrefixes());
-        chart.unitPrefixesProperty().bind(unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
+//        unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
+//        unitPrefixChoiceBox.getSelectionModel().select(chart.getUnitPrefixes());
+//        chart.unitPrefixesProperty().bind(unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
 
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());

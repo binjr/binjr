@@ -28,7 +28,7 @@
             <Region styleClass="cross-icon"/>
         </graphic>
     </Button>
-    <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="30.0" styleClass="pane-title" text="Chart Properties" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="5.0">
+    <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="30.0" styleClass="pane-title" text="Chart Properties" AnchorPane.leftAnchor="2.0" AnchorPane.topAnchor="5.0">
         <font>
             <Font size="16.0"/>
         </font>
@@ -36,80 +36,81 @@
             <Insets left="5.0"/>
         </padding>
     </Label>
-    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="399.0" prefWidth="190.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="399.0" prefWidth="190.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
         <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
         </padding>
         <AnchorPane>
-            <VBox layoutX="14.0" layoutY="14.0" prefHeight="467.0" prefWidth="170.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <VBox spacing="5.0">
+            <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <VBox>
                     <children>
-                        <Label minWidth="-Infinity" text="Name"/>
-                        <TextField fx:id="chartNameTextField"/>
-                        <Label text="Unit"/>
-                        <HBox spacing="5.0">
-                            <children>
-                                <TextField fx:id="chartUnitTextField"/>
-                                <ChoiceBox fx:id="unitPrefixChoiceBox" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="80.0"/>
-                            </children>
-                        </HBox>
+                        <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                     </children>
                 </VBox>
+                <Label text="Show outline" wrapText="true"/>
+                <VBox fillWidth="false">
+                    <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
+                    </ToggleSwitch>
+                </VBox>
+                <Label fx:id="strokeWidthLabel" text="Stroke width" wrapText="true"/>
+                <VBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Slider fx:id="strokeWidthSlider" blockIncrement="0.5" majorTickUnit="10.0" max="10.0" min="0.0" minorTickCount="10" value="1.0"/>
+                        <Label fx:id="strokeWidthText" text="1.0"/>
+                    </HBox>
+                </VBox>
+                <Label fx:id="graphOpacityLabel" text="Area opacity" wrapText="true"/>
+                <VBox>
+                    <HBox alignment="CENTER_LEFT">
+                        <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                        <Label fx:id="opacityText" text="100%"/>
+                    </HBox>
+                </VBox>
                 <Separator prefWidth="200.0"/>
-                <ChoiceBox fx:id="chartTypeChoice" maxWidth="1.7976931348623157E308"/>
-                <ToggleSwitch fx:id="showAreaOutline" contentDisplay="CENTER" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" text="Show outline">
-                </ToggleSwitch>
-                <GridPane hgap="5.0" vgap="10.0">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity"/>
-                        <ColumnConstraints maxWidth="1.7976931348623157E308"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" valignment="CENTER"/>
-                        <RowConstraints maxHeight="-Infinity" minHeight="-Infinity" valignment="CENTER" vgrow="SOMETIMES"/>
-                    </rowConstraints>
+                <!--<CheckBox fx:id="autoScaleYAxis" mnemonicParsing="false" text="Auto Scale Y Axis"/>-->
+                <Label text="Auto Scale Y Axis" wrapText="true"/>
+                <VBox fillWidth="false">
+                    <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
+                </VBox>
+                <HBox fx:id="yAxisScaleSettings" alignment="CENTER_LEFT">
                     <children>
-                        <Label fx:id="strokeWidthLabel" minWidth="-Infinity" text="Width" wrapText="true"/>
-                        <Label fx:id="graphOpacityLabel" minWidth="-Infinity" text="Opacity" wrapText="true" GridPane.rowIndex="1"/>
-                        <Slider fx:id="strokeWidthSlider" blockIncrement="0.5" majorTickUnit="10.0" max="10.0" min="0.0" minorTickCount="10" value="1.0" GridPane.columnIndex="1"/>
-                        <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Label fx:id="strokeWidthText" minWidth="-Infinity" text="1.0" GridPane.columnIndex="2"/>
-                        <Label fx:id="opacityText" minWidth="-Infinity" text="100%" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="30.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                            </rowConstraints>
+                            <children>
+                                <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="2">
+                                    <tooltip>
+                                        <Tooltip text="Lower bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <tooltip>
+                                        <Tooltip text="Upper bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <Label text="Min:" GridPane.columnIndex="1"/>
+                                <Label text="Max:" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            </children>
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </GridPane>
                     </children>
-                    <opaqueInsets>
-                        <Insets/>
-                    </opaqueInsets>
-                </GridPane>
-                <Separator prefWidth="200.0"/>
-                <ToggleSwitch fx:id="autoScaleYAxis" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="20.0" text="Auto Scale Y Axis"/>
-                <GridPane fx:id="yAxisScaleSettings" hgap="5.0" vgap="10.0">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="-Infinity" minWidth="-Infinity"/>
-                        <ColumnConstraints hgrow="SOMETIMES" maxWidth="1.7976931348623157E308"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints vgrow="SOMETIMES"/>
-                        <RowConstraints vgrow="SOMETIMES"/>
-                    </rowConstraints>
-                    <children>
-                        <TextField fx:id="yMinRange" editable="true" GridPane.columnIndex="1">
-                            <tooltip>
-                                <Tooltip text="Lower bound for the Y axis"/>
-                            </tooltip>
-                        </TextField>
-                        <TextField fx:id="yMaxRange" editable="true" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                            <tooltip>
-                                <Tooltip text="Upper bound for the Y axis"/>
-                            </tooltip>
-                        </TextField>
-                        <Label minWidth="-Infinity" text="Min:" GridPane.columnIndex="0"/>
-                        <Label text="Max:" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
-                    </children>
-                </GridPane>
+                </HBox>
                 <Separator prefWidth="200.0"/>
                 <Label text="Timezone"/>
-                <TextField fx:id="timezoneField" maxWidth="1.7976931348623157E308"/>
+                <VBox>
+                    <children>
+                        <TextField fx:id="timezoneField"/>
+                    </children>
+                </VBox>
             </VBox>
         </AnchorPane>
     </ScrollPane>
