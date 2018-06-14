@@ -141,6 +141,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidateAll(false, false, false);
     private ChangeListener<ChartType> chartTypeListener;
     private ListChangeListener<Chart<Double>> chartListListener;
+    private ChangeListener<? super UnitPrefixes> unitPrefixListener;
+    private ChangeListener<Object> controllerReloadListener;
 
 
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet) throws IOException {
@@ -290,8 +292,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 chart.getYAxis().setSide(Side.LEFT);
             }
             else {
-                // chart.getXAxis().
-                //hBox.setMouseTransparent(true);
                 chart.getYAxis().setSide(Side.RIGHT);
                 chart.setVerticalZeroLineVisible(false);
                 chart.setHorizontalZeroLineVisible(false);
@@ -326,19 +326,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         currentState = new XYChartViewStateMap(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
 
-
-        //plotChart(viewPort, currentState.get(viewPort.getChart()).asSelection(), true);
+        for (ChartViewPort<Double> viewPort : viewPorts) {
+            plotChart(viewPort, currentState.get(viewPort.getChart()).asSelection(), true);
+        }
 
         endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startXProperty());
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endXProperty());
-
-//        for (int i = 1; i < viewPorts.size(); i++) {
-//            currentState.get(viewPorts.get(i).getChart()).startX.bind(currentState.get(viewPorts.get(0).getChart()).startX);
-//            currentState.get(viewPorts.get(i).getChart()).endX.bind(currentState.get(viewPorts.get(0).getChart()).endX);
-//        }
-        //endregion
 
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
@@ -355,8 +350,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void handleAddNewChart(ActionEvent actionEvent) {
-        worksheet.getCharts().add(new Chart<>());
-
+        Chart<Double> c = new Chart<>();
+        worksheet.getCharts().add(c);
+        // new DelayedAction(new Duration(100), ()->  c.setShowProperties(true)).submit();
     }
 
     private void initTableViewPane() {
@@ -462,11 +458,21 @@ public class WorksheetController implements Initializable, AutoCloseable {
             newPane.setOnDragOver(this::handleDragOverWorksheetView);
             newPane.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             newPane.setUserData(currentViewPort);
-            newPane.expandedProperty().addListener((observable, oldValue, newValue) -> {
-                if (!newValue) {
-                    currentViewPort.getDataStore().setShowProperties(false);
+
+            newPane.expandedProperty().addListener((observable) -> {
+
+//                  if ( editButtonsGroup.getSelectedToggle() != null){
+//                      currentViewPort.getDataStore().setShowProperties(true);
+//                  }
+                //    currentViewPort.getDataStore().setShowProperties(false);
+
+            });
+            worksheet.selectedChartProperty().addListener((observable, oldValue, newValue) -> {
+                if (editButtonsGroup.getSelectedToggle() != null) {
+                    viewPorts.get(newValue).getDataStore().setShowProperties(true);
                 }
             });
+
 
             GridPane titleRegion = new GridPane();
             titleRegion.setHgap(5);
@@ -512,13 +518,17 @@ public class WorksheetController implements Initializable, AutoCloseable {
             closeButton.getStyleClass().add("exit");
             closeButton.setAlignment(Pos.CENTER);
             Region icon = new Region();
-            icon.getStyleClass().addAll("trash-icon", "small-icon");
+            icon.getStyleClass().addAll("cross-icon", "small-icon");
             closeButton.setGraphic(icon);
             closeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            closeButton.setOnAction(event -> worksheet.getCharts().remove(currentViewPort.dataStore));
+            closeButton.setOnAction(event -> {
+                if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
+                        "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                    worksheet.getCharts().remove(currentViewPort.dataStore);
+                }
+            });
             closeButton.disableProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
             closeButton.setTooltip(new Tooltip("Remove this chart from the worksheet."));
-
             ToggleButton editButton = new ToggleButton("Settings");
             forceControlSize(editButton, BUTTON_SIZE, BUTTON_SIZE);
             editButton.getStyleClass().add("dialog-button");
@@ -539,12 +549,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             hBox.setAlignment(Pos.CENTER);
             GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
             GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
-
             newPane.setGraphic(titleRegion);
             newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             newPane.setAnimated(false);
             seriesTableContainer.getPanes().add(newPane);
-
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
@@ -584,7 +592,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         targetStage.requestFocus();
                     }
                     if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                        //parentController.addToCurrentWorksheet(item);
                         try {
                             TitledPane droppedPane = (TitledPane) event.getSource();
                             droppedPane.setExpanded(true);
@@ -641,18 +648,22 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
-        if (this.chartTypeListener != null) {
-            this.worksheet.getCharts().forEach(c -> c.chartTypeProperty().removeListener(this.chartTypeListener));
+        if (this.controllerReloadListener != null) {
+            this.worksheet.getCharts().forEach(c -> {
+                c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
+                c.chartTypeProperty().removeListener(this.controllerReloadListener);
+            });
         }
-        this.chartTypeListener = (observable, oldValue, newValue) -> {
+        this.controllerReloadListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
-                logger.debug("Reloading worksheet controller because chart type change from: " + oldValue + " to " + newValue);
+                logger.debug("Reloading worksheet controller because property changed from: " + oldValue + " to " + newValue);
                 action.accept(this);
             }
         };
-        this.worksheet.getCharts().forEach(c -> c.chartTypeProperty().addListener(this.chartTypeListener));
-
-        /////////////////////////////////////////////////////////////////////
+        this.worksheet.getCharts().forEach(c -> {
+            c.unitPrefixesProperty().addListener(this.controllerReloadListener);
+            c.chartTypeProperty().addListener(this.controllerReloadListener);
+        });
 
         if (this.chartListListener != null) {
             worksheet.getCharts().removeListener(this.chartListListener);
@@ -683,10 +694,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
                         }
                     }
-                    logger.debug(() -> "Observable list change=" + c.toString() + " in ctrler " + this.toString());
+                    logger.debug(() -> "Reloading worksheet controller because list changed: " + c.toString() + " in controller " + this.toString());
                     action.accept(this);
                 }
-
             }
         };
         worksheet.getCharts().addListener(this.chartListListener);
@@ -766,7 +776,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //TODO make sure this is only called if worksheet is visible/current
     private void plotChart(ChartViewPort<Double> viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
-        //   for (ChartViewPort<Double> viewPort : viewPorts) {
         try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::trace)) {
             worksheetMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> {
@@ -790,17 +799,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     event -> {
                         worksheetMaskerPane.setVisible(false);
                         viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                        // Force a redraw of the charts and their Y Axis considering their proper width.
+                        new DelayedAction(Duration.millis(50), () -> viewPort.getChart().resize(0.0, 0.0)).submit();
                     },
                     event -> {
                         worksheetMaskerPane.setVisible(false);
                         Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
                     });
         }
-        //  }
-        // This is a bit of a hack destined to force a redraw of the charts and their Y Axis considering their proper width.
-        // Ideally, this should be timed right after the width property of concerned controls are updated, instead of an
-        // arbitrary delay.
-        new DelayedAction(Duration.millis(50), () -> viewPort.getChart().resize(0.0, 0.0)).submit();
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {
@@ -919,6 +925,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         });
         return row;
+    }
+
+    public void toggleShowPropertiesPane() {
+        ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        if (currentViewport != null) {
+            currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
+        }
     }
 
     /**

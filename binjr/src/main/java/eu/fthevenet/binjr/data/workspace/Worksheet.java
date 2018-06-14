@@ -59,9 +59,8 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
-    @IsDirtyable
-    private Property<Integer> selectedChart;
 
+    private Property<Integer> selectedChart;
     private final ChangeWatcher status;
 
     /**
@@ -244,7 +243,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime.setValue(toDateTime);
     }
 
-    @XmlAttribute
+    @XmlTransient
     public Integer getSelectedChart() {
         return selectedChart.getValue();
     }

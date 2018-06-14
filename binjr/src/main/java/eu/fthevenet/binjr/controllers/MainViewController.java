@@ -423,7 +423,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleDisplayChartProperties(ActionEvent actionEvent) {
         if (getSelectedWorksheetController() != null) {
-            //  getSelectedWorksheetController().showPropertiesPane(true);
+            getSelectedWorksheetController().toggleShowPropertiesPane();
         }
     }
 
