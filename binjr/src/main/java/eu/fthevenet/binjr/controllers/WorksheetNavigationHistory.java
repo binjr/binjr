@@ -17,10 +17,10 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.util.javafx.charts.XYChartSelection;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,9 +34,9 @@ import java.util.stream.Collectors;
 /**
  * Wraps a stack to record user navigation steps.
  */
-class WorksheetNavigationHistory {
+public class WorksheetNavigationHistory {
     private static final Logger logger = LogManager.getLogger(WorksheetNavigationHistory.class);
-    private final Deque<Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>>> stack = new ArrayDeque<>();
+    private final Deque<Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>>> stack = new ArrayDeque<>();
     private final SimpleBooleanProperty empty = new SimpleBooleanProperty(true);
 
     /**
@@ -45,7 +45,7 @@ class WorksheetNavigationHistory {
      * @param state the provided {@link XYChartSelection}
      * @return the provided {@link XYChartSelection}
      */
-    void push(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> state) {
+    void push(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> state) {
         if (state == null) {
             logger.warn(() -> "Trying to push null state into backwardHistory");
             return;
@@ -67,8 +67,8 @@ class WorksheetNavigationHistory {
      *
      * @return the topmost {@link XYChartSelection} from the stack.
      */
-    Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> pop() {
-        Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> r = this.stack.pop();
+    Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> pop() {
+        Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> r = this.stack.pop();
         empty.set(stack.isEmpty());
         return r;
     }
@@ -103,7 +103,7 @@ class WorksheetNavigationHistory {
             sb.append(" { empty }");
         }
         else {
-            stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.entrySet().stream().map(e -> e.getKey().getYAxis().getLabel() + ": " + e.getValue().toString()).collect(Collectors.joining(" "))));
+            stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.entrySet().stream().map(e -> e.getKey().getName() + ": " + e.getValue().toString()).collect(Collectors.joining(" "))));
         }
         return sb.toString();
     }

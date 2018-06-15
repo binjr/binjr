@@ -17,9 +17,11 @@
 
 package eu.fthevenet.binjr.data.workspace;
 
+import eu.fthevenet.binjr.controllers.WorksheetNavigationHistory;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import eu.fthevenet.util.javafx.charts.XYChartSelection;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,6 +37,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -59,6 +62,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
+
+
+    private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
+    private final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
+    private final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
 
     private Property<Integer> selectedChart;
     private final ChangeWatcher status;
@@ -294,6 +302,25 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     @Override
     public void close() {
         charts.forEach(Chart::close);
+    }
+
+    @XmlTransient
+    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
+        return previousState;
+    }
+
+    public void setPreviousState(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState) {
+        this.previousState = previousState;
+    }
+
+    @XmlTransient
+    public WorksheetNavigationHistory getBackwardHistory() {
+        return backwardHistory;
+    }
+
+    @XmlTransient
+    public WorksheetNavigationHistory getForwardHistory() {
+        return forwardHistory;
     }
 }
 

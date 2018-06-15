@@ -134,9 +134,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private ChartViewportsState currentState;// = new ChartViewportsState();
-    private Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
-    private WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
-    private WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
+
     private String name;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
     private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidateAll(false, false, false);
@@ -317,8 +315,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
         snapshotButton.setOnAction(this::handleTakeSnapshot);
-        backButton.disableProperty().bind(backwardHistory.emptyProperty());
-        forwardButton.disableProperty().bind(forwardHistory.emptyProperty());
+        backButton.disableProperty().bind(getWorksheet().getBackwardHistory().emptyProperty());
+        forwardButton.disableProperty().bind(getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(this::handleAddNewChart);
 
         //endregion
@@ -328,7 +326,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         currentState = new ChartViewportsState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
 
         for (ChartViewPort<Double> viewPort : viewPorts) {
-            plotChart(viewPort, currentState.get(viewPort.getChart()).asSelection(), true);
+            plotChart(viewPort, currentState.get(viewPort.getDataStore()).asSelection(), true);
         }
 
         endDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
@@ -341,13 +339,21 @@ public class WorksheetController implements Initializable, AutoCloseable {
         crossHair = new XYChartCrosshair<>(viewPorts.stream().map(ChartViewPort::getChart).collect(Collectors.toList()), chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
-            currentState.setSelection(s, true);
+            currentState.setSelection(convertSelection(s), true);
         });
         hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         //endregion
+    }
+
+    private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
+        Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
+        selection.forEach((xyChart, xyChartSelection) -> {
+            viewPorts.stream().filter(v -> v.getChart().equals(xyChart)).findFirst().ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection));
+        });
+        return result;
     }
 
     private void handleAddNewChart(ActionEvent actionEvent) {
@@ -754,12 +760,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @FXML
     protected void handleHistoryBack(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(backwardHistory, forwardHistory);
+        restoreSelectionFromHistory(getWorksheet().getBackwardHistory(), getWorksheet().getForwardHistory());
     }
 
     @FXML
     protected void handleHistoryForward(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(forwardHistory, backwardHistory);
+        restoreSelectionFromHistory(getWorksheet().getForwardHistory(), getWorksheet().getBackwardHistory());
     }
 
     @FXML
@@ -782,11 +788,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     //region [Private Members]
     private void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         if (saveToHistory) {
-            this.backwardHistory.push(previousState);
-            this.forwardHistory.clear();
+            getWorksheet().getBackwardHistory().push(getWorksheet().getPreviousState());
+            getWorksheet().getForwardHistory().clear();
         }
-        previousState = currentState.asSelection();
-        logger.debug(() -> backwardHistory.dump());
+        getWorksheet().setPreviousState(currentState.asSelection());
+        logger.debug(() -> getWorksheet().getBackwardHistory().dump());
         for (ChartViewPort<Double> viewPort : viewPorts) {
             invalidate(viewPort, saveToHistory, dontPlotChart, forceRefresh);
         }
@@ -794,7 +800,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void invalidate(ChartViewPort<Double> viewPort, boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName(), logger::trace)) {
-            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getChart()).asSelection();
+            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).asSelection();
             logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
 
             if (!dontPlotChart) {
@@ -1018,7 +1024,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
      * Represent the state of the time series view
      */
     private class ChartViewportsState {
-        private HashMap<XYChart<ZonedDateTime, Double>, YAxisState> states = new HashMap<>();
+        private HashMap<Chart<Double>, YAxisState> states = new HashMap<>();
         private final SimpleObjectProperty<ZonedDateTime> startX;
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private boolean frozen;
@@ -1111,11 +1117,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             });
 
             for (ChartViewPort<Double> viewPort : viewPorts) {
-                this.put(viewPort.getChart(), new YAxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
-                viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(this.get(viewPort.getChart()).startY);
-                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).lowerBoundProperty().bindBidirectional(this.get(viewPort.getChart()).startY);
-                viewPort.getDataStore().yAxisMaxValueProperty().bindBidirectional(this.get(viewPort.getChart()).endY);
-                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).upperBoundProperty().bindBidirectional(this.get(viewPort.getChart()).endY);
+                this.put(viewPort.getDataStore(), new YAxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
+                viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(this.get(viewPort.getDataStore()).startY);
+                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).lowerBoundProperty().bindBidirectional(this.get(viewPort.getDataStore()).startY);
+                viewPort.getDataStore().yAxisMaxValueProperty().bindBidirectional(this.get(viewPort.getDataStore()).endY);
+                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).upperBoundProperty().bindBidirectional(this.get(viewPort.getDataStore()).endY);
             }
             getWorksheet().fromDateTimeProperty().bind(this.startX);
             getWorksheet().toDateTimeProperty().bind(this.endX);
@@ -1138,15 +1144,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
             return endX;
         }
 
-        public Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> asSelection() {
-            Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
-            for (Map.Entry<XYChart<ZonedDateTime, Double>, YAxisState> e : states.entrySet()) {
+        public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> asSelection() {
+            Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
+            for (Map.Entry<Chart<Double>, YAxisState> e : states.entrySet()) {
                 selection.put(e.getKey(), e.getValue().asSelection());
             }
             return selection;
         }
 
-        public void setSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selectionMap, boolean toHistory) {
+        public void setSelection(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selectionMap, boolean toHistory) {
             selectionMap.forEach((chart, xyChartSelection) -> states.get(chart).setSelection(xyChartSelection, toHistory));
             frozen = true;
             try {
@@ -1164,11 +1170,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         }
 
-        public YAxisState put(XYChart<ZonedDateTime, Double> chart, YAxisState xyChartViewState) {
+        public YAxisState put(Chart<Double> chart, YAxisState xyChartViewState) {
             return states.put(chart, xyChartViewState);
         }
 
-        public YAxisState get(XYChart<ZonedDateTime, Double> chart) {
+        public YAxisState get(Chart<Double> chart) {
             return states.get(chart);
         }
 
