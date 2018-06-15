@@ -35,7 +35,10 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -52,7 +55,6 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -76,7 +78,6 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -129,13 +130,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private ContextMenu seriesListMenu;
 
-    private StackPane settingsPane;
+    // private StackPane settingsPane;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
-    private XYChartViewStateMap currentState;// = new XYChartViewStateMap();
-    private XYChartSelection<ZonedDateTime, Double> previousState;
-    private History backwardHistory = new History();
-    private History forwardHistory = new History();
+    private ChartViewportsState currentState;// = new ChartViewportsState();
+    private Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
+    private WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
+    private WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
     private String name;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
     private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidateAll(false, false, false);
@@ -143,7 +144,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ListChangeListener<Chart<Double>> chartListListener;
     private ChangeListener<? super UnitPrefixes> unitPrefixListener;
     private ChangeListener<Object> controllerReloadListener;
-
 
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet) throws IOException {
         this.parentController = parentController;
@@ -154,8 +154,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
         ChartPropertiesController propertiesController = new ChartPropertiesController<>(chart);
         loader.setController(propertiesController);
-        Parent p = loader.load();
-        settingsPane = new StackPane(p);
+        Pane settingsPane = loader.load();
+        //  settingsPane = new StackPane(p);
         AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.SETTINGS_PANE_DISTANCE);
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
@@ -163,7 +163,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
         chartParent.getChildren().add(settingsPane);
-        Platform.runLater(() -> settingsPane.toFront());
+        //  settingsPane.toFront();
+        Platform.runLater(settingsPane::toFront);
         return propertiesController;
     }
 
@@ -316,15 +317,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
         snapshotButton.setOnAction(this::handleTakeSnapshot);
-        backButton.disableProperty().bind(backwardHistory.emptyStackProperty);
-        forwardButton.disableProperty().bind(forwardHistory.emptyStackProperty);
+        backButton.disableProperty().bind(backwardHistory.emptyProperty());
+        forwardButton.disableProperty().bind(forwardHistory.emptyProperty());
         addChartButton.setOnAction(this::handleAddNewChart);
 
         //endregion
 
         //region *** Time pickers ***
 
-        currentState = new XYChartViewStateMap(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
+        currentState = new ChartViewportsState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
 
         for (ChartViewPort<Double> viewPort : viewPorts) {
             plotChart(viewPort, currentState.get(viewPort.getChart()).asSelection(), true);
@@ -459,19 +460,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
             newPane.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             newPane.setUserData(currentViewPort);
 
-            newPane.expandedProperty().addListener((observable) -> {
-
+//            newPane.expandedProperty().addListener((observable) -> {
+//
 //                  if ( editButtonsGroup.getSelectedToggle() != null){
 //                      currentViewPort.getDataStore().setShowProperties(true);
 //                  }
-                //    currentViewPort.getDataStore().setShowProperties(false);
-
-            });
-            worksheet.selectedChartProperty().addListener((observable, oldValue, newValue) -> {
-                if (editButtonsGroup.getSelectedToggle() != null) {
-                    viewPorts.get(newValue).getDataStore().setShowProperties(true);
-                }
-            });
+//                    currentViewPort.getDataStore().setShowProperties(false);
+//
+//            });
 
 
             GridPane titleRegion = new GridPane();
@@ -524,7 +520,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             closeButton.setOnAction(event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
-                    worksheet.getCharts().remove(currentViewPort.dataStore);
+                    worksheet.getCharts().remove(currentViewPort.getDataStore());
                 }
             });
             closeButton.disableProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
@@ -556,20 +552,46 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-            Boolean expandRequiered = true;
-            for (TitledPane pane : seriesTableContainer.getPanes()) {
-                if (pane.isExpanded()) {
-                    expandRequiered = false;
-                    getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(pane));
+//            Boolean expandRequiered = true;
+//            for (TitledPane pane : seriesTableContainer.getPanes()) {
+//                if (pane.isExpanded()) {
+//                    expandRequiered = false;
+//
+//                }
+//            }
+
+            getAttachedViewport(newPane).ifPresent(nv -> {
+                getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
+                if (editButtonsGroup.getSelectedToggle() != null) {
+                    nv.getDataStore().setShowProperties(true);
                 }
-            }
-            if ((expandRequiered) && (oldPane != null)) {
-                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
-                Platform.runLater(() -> {
-                    seriesTableContainer.setExpandedPane(oldPane);
-                });
-            }
+
+            });
+
+
+//
+//            if ((expandRequiered) && (oldPane != null)) {
+//                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
+//                Platform.runLater(() -> {
+//                    seriesTableContainer.setExpandedPane(oldPane);
+//                });
+//            }
+
         });
+//        worksheet.selectedChartProperty().addListener((observable, oldValue, newValue) -> {
+//            if (oldValue != null) {
+//                if (viewPorts.get(oldValue).getDataStore().isShowProperties()) {
+//                    viewPorts.get(newValue).getDataStore().setShowProperties(true);
+//                }
+//            }
+//        });
+    }
+
+    Optional<ChartViewPort<?>> getAttachedViewport(TitledPane pane) {
+        if (pane != null && (pane.getUserData() instanceof ChartViewPort<?>)) {
+            return Optional.of((ChartViewPort<?>) pane.getUserData());
+        }
+        return Optional.empty();
     }
 
     private void handleDragOverWorksheetView(DragEvent event) {
@@ -635,6 +657,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         if (chartListListener != null) {
             worksheet.getCharts().removeListener(chartListListener);
         }
+        if (controllerReloadListener != null) {
+            this.worksheet.getCharts().forEach(c -> {
+                c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
+                c.chartTypeProperty().removeListener(this.controllerReloadListener);
+            });
+        }
         if (refreshOnPreferenceListener != null) {
             logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
             globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
@@ -682,9 +710,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (c.wasAdded()) {
                         List<? extends Chart<Double>> added = c.getAddedSubList();
                         Chart<Double> chart = added.get(added.size() - 1);
-                        chart.setShowProperties(true);
                         int chartIndex = worksheet.getCharts().indexOf(chart);
                         worksheet.setSelectedChart(chartIndex);
+                        chart.setShowProperties(true);
                     }
                     if (c.wasRemoved()) {
                         if (worksheet.getSelectedChart() == c.getFrom()) {
@@ -753,6 +781,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region [Private Members]
     private void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
+        if (saveToHistory) {
+            this.backwardHistory.push(previousState);
+            this.forwardHistory.clear();
+        }
+        previousState = currentState.asSelection();
+        logger.debug(() -> backwardHistory.dump());
         for (ChartViewPort<Double> viewPort : viewPorts) {
             invalidate(viewPort, saveToHistory, dontPlotChart, forceRefresh);
         }
@@ -762,12 +796,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName(), logger::trace)) {
             XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getChart()).asSelection();
             logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-//            if (saveToHistory) {
-//                this.backwardHistory.push(previousState);
-//                this.forwardHistory.clear();
-//            }
-//            previousState = currentState.asSelection();
-            logger.debug(() -> backwardHistory.dump());
+
             if (!dontPlotChart) {
                 plotChart(viewPort, currentSelection, forceRefresh);
             }
@@ -873,10 +902,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void restoreSelectionFromHistory(History history, History toHistory) {
+    private void restoreSelectionFromHistory(WorksheetNavigationHistory history, WorksheetNavigationHistory toHistory) {
         if (!history.isEmpty()) {
-//            toHistory.push(currentState.asSelection());
-//            currentState.setSelection(history.pop(), false);
+            toHistory.push(currentState.asSelection());
+            currentState.setSelection(history.pop(), false);
         }
         else {
             logger.debug(() -> "History is empty: nothing to go back to.");
@@ -934,79 +963,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    /**
-     * Wraps a stack to record user navigation steps.
-     */
-    private class History {
-        private final Deque<XYChartSelection<ZonedDateTime, Double>> stack = new ArrayDeque<>();
-        private final SimpleBooleanProperty emptyStackProperty = new SimpleBooleanProperty(true);
-
-        /**
-         * Put the provided {@link XYChartSelection} on the top of the stack.
-         *
-         * @param state the provided {@link XYChartSelection}
-         * @return the provided {@link XYChartSelection}
-         */
-        void push(XYChartSelection<ZonedDateTime, Double> state) {
-            if (state == null) {
-                logger.warn(() -> "Trying to push null state into backwardHistory");
-                return;
-            }
-            emptyStackProperty.set(false);
-            this.stack.push(state);
-        }
-
-        /**
-         * Clears the history
-         */
-        void clear() {
-            this.stack.clear();
-            emptyStackProperty.set(true);
-        }
-
-        /**
-         * Gets the topmost {@link XYChartSelection} from the stack.
-         *
-         * @return the topmost {@link XYChartSelection} from the stack.
-         */
-        XYChartSelection<ZonedDateTime, Double> pop() {
-            XYChartSelection<ZonedDateTime, Double> r = this.stack.pop();
-            emptyStackProperty.set(stack.isEmpty());
-            return r;
-        }
-
-        /**
-         * Returns true if the underlying stack is empty, false otherwise.
-         *
-         * @return true if the underlying stack is empty, false otherwise.
-         */
-        boolean isEmpty() {
-            return emptyStackProperty.get();
-        }
-
-        @Override
-        public String toString() {
-            return this.dump();
-        }
-
-        /**
-         * Dumps the content of the stack as a string
-         *
-         * @return the content of the stack as a string
-         */
-        private String dump() {
-            final StringBuilder sb = new StringBuilder("History:");
-            AtomicInteger pos = new AtomicInteger(0);
-            if (this.isEmpty()) {
-                sb.append(" { empty }");
-            }
-            else {
-                stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString()));
-            }
-            return sb.toString();
-        }
-    }
-
     private class ChartViewPort<T extends Number> {
         private final Chart<T> dataStore;
         private final XYChart<ZonedDateTime, T> chart;
@@ -1058,14 +1014,87 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
 //endregion
 
-    private class XYChartViewStateMap {
-        private HashMap<XYChart<ZonedDateTime, Double>, XYChartViewState> states = new HashMap<>();
+    /**
+     * Represent the state of the time series view
+     */
+    private class ChartViewportsState {
+        private HashMap<XYChart<ZonedDateTime, Double>, YAxisState> states = new HashMap<>();
         private final SimpleObjectProperty<ZonedDateTime> startX;
-
         private final SimpleObjectProperty<ZonedDateTime> endX;
         private boolean frozen;
 
-        public XYChartViewStateMap(ZonedDateTime startX, ZonedDateTime endX) {
+        private class YAxisState {
+            private final SimpleDoubleProperty startY;
+            private final SimpleDoubleProperty endY;
+            private final ChartViewPort<Double> chartViewPort;
+
+            /**
+             * Initializes a new instance of the {@link YAxisState} class.
+             *
+             * @param chartViewPort
+             * @param startY        the lower bound of the Y axis
+             * @param endY          the upper bound of the Y axis
+             */
+            public YAxisState(ChartViewPort<Double> chartViewPort, double startY, double endY) {
+                this.chartViewPort = chartViewPort;
+                this.startY = new SimpleDoubleProperty(roundYValue(startY));
+                this.endY = new SimpleDoubleProperty(roundYValue(endY));
+
+                this.startY.addListener((observable, oldValue, newValue) -> {
+                    if (!frozen) {
+                        invalidate(chartViewPort, false, true, false);
+                    }
+                });
+                this.endY.addListener((observable, oldValue, newValue) -> {
+                    if (!frozen) {
+                        invalidate(chartViewPort, false, true, false);
+                    }
+                });
+            }
+
+            /**
+             * Returns the current state as a {@link XYChartSelection}
+             *
+             * @return the current state as a {@link XYChartSelection}
+             */
+            XYChartSelection<ZonedDateTime, Double> asSelection() {
+                return new XYChartSelection<>(
+                        getStartX(),
+                        getEndX(),
+                        startY.get(),
+                        endY.get(),
+                        chartViewPort.getDataStore().isAutoScaleYAxis()
+                );
+            }
+
+            /**
+             * Sets the current state from a {@link XYChartSelection}
+             *
+             * @param selection the {@link XYChartSelection} to set as the current state
+             * @param toHistory true if the change in state should be recorded in the history
+             */
+            void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
+                if (toHistory) {
+                    double r = (((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getUpperBound() - ((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
+                    logger.debug(() -> "Y selection - Y axis range = " + r);
+                    if (r > 0.0001) {
+                        chartViewPort.getDataStore().setAutoScaleYAxis(false);
+                    }
+                }
+                else {
+                    // Disable auto range on Y axis if zoomed in
+                    chartViewPort.getDataStore().setAutoScaleYAxis(selection.isAutoRangeY());
+                }
+                this.startY.set(roundYValue(selection.getStartY()));
+                this.endY.set(roundYValue(selection.getEndY()));
+            }
+
+            private double roundYValue(double y) {
+                return y;
+            }
+        }
+
+        public ChartViewportsState(ZonedDateTime startX, ZonedDateTime endX) {
             this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
             this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
 
@@ -1082,7 +1111,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             });
 
             for (ChartViewPort<Double> viewPort : viewPorts) {
-                this.put(viewPort.getChart(), new XYChartViewState(this, viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
+                this.put(viewPort.getChart(), new YAxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
                 viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(this.get(viewPort.getChart()).startY);
                 ((ValueAxis<Double>) viewPort.getChart().getYAxis()).lowerBoundProperty().bindBidirectional(this.get(viewPort.getChart()).startY);
                 viewPort.getDataStore().yAxisMaxValueProperty().bindBidirectional(this.get(viewPort.getChart()).endY);
@@ -1111,7 +1140,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         public Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> asSelection() {
             Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
-            for (Map.Entry<XYChart<ZonedDateTime, Double>, XYChartViewState> e : states.entrySet()) {
+            for (Map.Entry<XYChart<ZonedDateTime, Double>, YAxisState> e : states.entrySet()) {
                 selection.put(e.getKey(), e.getValue().asSelection());
             }
             return selection;
@@ -1135,11 +1164,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         }
 
-        public XYChartViewState put(XYChart<ZonedDateTime, Double> chart, XYChartViewState xyChartViewState) {
+        public YAxisState put(XYChart<ZonedDateTime, Double> chart, YAxisState xyChartViewState) {
             return states.put(chart, xyChartViewState);
         }
 
-        public XYChartViewState get(XYChart<ZonedDateTime, Double> chart) {
+        public YAxisState get(XYChart<ZonedDateTime, Double> chart) {
             return states.get(chart);
         }
 
@@ -1157,98 +1186,5 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     }
 
-    /**
-     * Represent the state of the time series view
-     */
-    private class XYChartViewState {
-        private final SimpleDoubleProperty startY;
-        private final SimpleDoubleProperty endY;
-        private final XYChartViewStateMap parent;
-        // private boolean frozen;
-        private final ChartViewPort<Double> chartViewPort;
 
-        /**
-         * Initializes a new instance of the {@link XYChartViewState} class.
-         *
-         * @param chartViewPort
-         * @param startY        the lower bound of the Y axis
-         * @param endY          the upper bound of the Y axis
-         */
-        public XYChartViewState(XYChartViewStateMap parent, ChartViewPort<Double> chartViewPort, double startY, double endY) {
-            this.parent = parent;
-            this.chartViewPort = chartViewPort;
-            this.startY = new SimpleDoubleProperty(roundYValue(startY));
-            this.endY = new SimpleDoubleProperty(roundYValue(endY));
-
-
-            this.startY.addListener((observable, oldValue, newValue) -> {
-                if (!parent.frozen) {
-                    invalidate(chartViewPort, false, true, false);
-                }
-            });
-            this.endY.addListener((observable, oldValue, newValue) -> {
-                if (!parent.frozen) {
-                    invalidate(chartViewPort, false, true, false);
-                }
-            });
-        }
-
-        /**
-         * Returns the current state as a {@link XYChartSelection}
-         *
-         * @return the current state as a {@link XYChartSelection}
-         */
-        XYChartSelection<ZonedDateTime, Double> asSelection() {
-            return new XYChartSelection<>(
-                    parent.getStartX(),
-                    parent.getEndX(),
-                    startY.get(),
-                    endY.get(),
-                    chartViewPort.getDataStore().isAutoScaleYAxis()
-            );
-        }
-
-        /**
-         * Sets the current state from a {@link XYChartSelection}
-         *
-         * @param selection the {@link XYChartSelection} to set as the current state
-         * @param toHistory true if the change in state should be recorded in the history
-         */
-        void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
-            parent.frozen = true;
-            try {
-//                ZonedDateTime newStartX = roundDateTime(selection.getStartX());
-//                ZonedDateTime newEndX = roundDateTime(selection.getEndX());
-//                boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
-//                this.startX.set(newStartX);
-//                this.endX.set(newEndX);
-                if (toHistory) {
-                    double r = (((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getUpperBound() - ((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
-                    logger.debug(() -> "Y selection - Y axis range = " + r);
-                    if (r > 0.0001) {
-                        chartViewPort.getDataStore().setAutoScaleYAxis(false);
-                    }
-                }
-                else {
-                    // Disable auto range on Y axis if zoomed in
-                    chartViewPort.getDataStore().setAutoScaleYAxis(selection.isAutoRangeY());
-                }
-                this.startY.set(roundYValue(selection.getStartY()));
-                this.endY.set(roundYValue(selection.getEndY()));
-                //     invalidate(chartViewPort, toHistory, dontPlotChart, false);
-            } finally {
-                parent.frozen = false;
-            }
-        }
-
-        private double roundYValue(double y) {
-            return y;
-        }
-
-
-//        @Override
-//        public String toString() {
-//            return String.format("XYChartViewState{startX=%s, endX=%s, startY=%s, endY=%s}", startX.get().toString(), endX.get().toString(), startY.get(), endY.get());
-//        }
-    }
 }

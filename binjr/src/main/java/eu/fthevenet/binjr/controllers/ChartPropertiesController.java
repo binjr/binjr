@@ -20,7 +20,6 @@ package eu.fthevenet.binjr.controllers;
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import javafx.animation.TranslateTransition;
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -111,11 +110,12 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
     private void slidePanel(int show, Duration delay) {
-        Node n = root.getParent();
-        if (n != null) {
+        Node n;// = root.getParent();
+        if (show < 0 && ((n = root.getParent()) != null)) {
             n.toFront();
         }
-        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+        root.toFront();
+        TranslateTransition openNav = new TranslateTransition(new Duration(200), root);
         openNav.setDelay(delay);
         openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
         openNav.play();
@@ -179,16 +179,17 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
 
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
-        visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility(newValue));
+        visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility());
         this.visibleProperty().bindBidirectional(chart.showPropertiesProperty());
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
         yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
-        Platform.runLater(() -> setPanelVisibility(chart.isShowProperties()));
+        //  setPanelVisibility(chart.isShowProperties());
+        //  Platform.runLater(() -> setPanelVisibility(chart.isShowProperties()));
     }
 
-    private void setPanelVisibility(boolean isVisible) {
-        if (isVisible) {
+    void setPanelVisibility() {
+        if (isVisible()) {
             show();
         }
         else {
@@ -229,7 +230,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
     public BooleanProperty visibleProperty() {
-        return visible;
+        return this.visible;
     }
 
 
