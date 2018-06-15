@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
+import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
@@ -27,7 +28,6 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -52,6 +52,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
     private final Chart<T> chart;
+    private final Worksheet<T> worksheet;
     @FXML
     private AnchorPane root;
     @FXML
@@ -90,7 +91,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
 //    private TextField chartUnitTextField;
 
 
-    public ChartPropertiesController(Chart<T> chart) {
+    public ChartPropertiesController(Worksheet<T> worksheet, Chart<T> chart) {
+        this.worksheet = worksheet;
         this.chart = chart;
 
     }
@@ -110,10 +112,10 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
     private void slidePanel(int show, Duration delay) {
-        Node n;// = root.getParent();
-        if (show < 0 && ((n = root.getParent()) != null)) {
-            n.toFront();
-        }
+//        Node n;
+//        if (show < 0 && ((n = root.getParent()) != null)) {
+//            n.toFront();
+//        }
         root.toFront();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), root);
         openNav.setDelay(delay);
@@ -134,10 +136,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         graphOpacitySlider.valueProperty().bindBidirectional(chart.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-
         strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
         strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-
         adaptToChartType(chart.getChartType() == ChartType.LINE);
         chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -146,36 +146,27 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         });
         showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
         autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
-//
-//        chartNameTextField.textProperty().bindBidirectional(chart.nameProperty());
-//        chartUnitTextField.textProperty().bindBidirectional(chart.unitProperty());
-
         setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
-
-//        unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
-//        unitPrefixChoiceBox.getSelectionModel().select(chart.getUnitPrefixes());
-//        chart.unitPrefixesProperty().bind(unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
-
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
-        //        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
-        //            @Override
-        //            public String toString(ZoneId object) {
-        //                return object.toString();
-        //            }
-        //
-        //            @Override
-        //            public ZoneId fromString(String string) {
-        //                return ZoneId.of(string);
-        //            }
-        //        });
+        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
+            @Override
+            public String toString(ZoneId object) {
+                return object.toString();
+            }
 
-        //formatter.valueProperty().bindBidirectional(chart.timeZoneProperty());
+            @Override
+            public ZoneId fromString(String string) {
+                return ZoneId.of(string);
+            }
+        });
 
-        //  timezoneField.setTextFormatter(formatter);
+        formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
+
+        timezoneField.setTextFormatter(formatter);
 
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
@@ -184,8 +175,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
         yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
-        //  setPanelVisibility(chart.isShowProperties());
-        //  Platform.runLater(() -> setPanelVisibility(chart.isShowProperties()));
     }
 
     void setPanelVisibility() {

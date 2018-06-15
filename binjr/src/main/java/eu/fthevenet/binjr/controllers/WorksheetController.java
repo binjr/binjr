@@ -150,7 +150,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private ChartPropertiesController buildChartPropertiesController(Chart<Double> chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/ChartPropertiesView.fxml"));
-        ChartPropertiesController propertiesController = new ChartPropertiesController<>(chart);
+        ChartPropertiesController propertiesController = new ChartPropertiesController<>(getWorksheet(), chart);
         loader.setController(propertiesController);
         Pane settingsPane = loader.load();
         //  settingsPane = new StackPane(p);
