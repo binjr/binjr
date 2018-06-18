@@ -25,6 +25,7 @@ import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
+import eu.fthevenet.util.javafx.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.util.javafx.controls.DelayedAction;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.logging.Profiler;
@@ -64,6 +65,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Path;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -79,6 +81,7 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -336,7 +339,17 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-        crossHair = new XYChartCrosshair<>(viewPorts.stream().map(ChartViewPort::getChart).collect(Collectors.toList()), chartParent, dateTimeFormatter::format, n -> String.format("%,.2f", n.doubleValue()));
+        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
+//        viewPorts.stream()
+//                .map(ChartViewPort::getChart)
+//                .collect(Collectors.toMap()),
+        viewPorts.forEach(v -> {
+            map.put(v.chart, v.getPrefixFormatter()::format);
+        });
+
+        crossHair = new XYChartCrosshair<>(map,
+                chartParent,
+                dateTimeFormatter::format);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
@@ -357,9 +370,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void handleAddNewChart(ActionEvent actionEvent) {
-        Chart<Double> c = new Chart<>();
-        worksheet.getCharts().add(c);
-        // new DelayedAction(new Duration(100), ()->  c.setShowProperties(true)).submit();
+        worksheet.getCharts().add(new Chart<>());
     }
 
     private void initTableViewPane() {
@@ -394,6 +405,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
             });
 
+            DecimalFormatTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+            alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
+
             TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();
             colorColumn.setSortable(false);
             colorColumn.setResizable(false);
@@ -404,21 +418,27 @@ public class WorksheetController implements Initializable, AutoCloseable {
             nameColumn.setPrefWidth(160);
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
+
             TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
             minColumn.setPrefWidth(75);
+            minColumn.setCellFactory(alignRightCellFactory);
 
             TableColumn<TimeSeriesInfo<Double>, String> maxColumn = new TableColumn<>("Max.");
             maxColumn.setSortable(false);
             maxColumn.setPrefWidth(75);
+            maxColumn.setCellFactory(alignRightCellFactory);
 
             TableColumn<TimeSeriesInfo<Double>, String> avgColumn = new TableColumn<>("Avg.");
             avgColumn.setSortable(false);
             avgColumn.setPrefWidth(75);
+            avgColumn.setCellFactory(alignRightCellFactory);
 
             TableColumn<TimeSeriesInfo<Double>, String> currentColumn = new TableColumn<>("Current");
             currentColumn.setSortable(false);
             currentColumn.setPrefWidth(75);
+            currentColumn.setCellFactory(alignRightCellFactory);
+            currentColumn.getStyleClass().add("column-bold-text");
 
             TableColumn<TimeSeriesInfo<Double>, String> pathColumn = new TableColumn<>("Path");
             pathColumn.setSortable(false);

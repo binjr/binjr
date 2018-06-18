@@ -858,7 +858,12 @@ public class MainViewController implements Initializable {
 
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
         try {
-            Chart<Double> c = new Chart<>();
+            TimeSeriesBinding<Double> binding = treeItem.getValue();
+            Chart<Double> c = new Chart<>(binding.getLegend(),
+                    binding.getGraphType(),
+                    binding.getUnitName(),
+                    binding.getUnitPrefix()
+            );
             addToCurrentWorksheet(treeItem, c);
             getSelectedWorksheetController().getWorksheet().getCharts().add(c);
         } catch (Exception e) {

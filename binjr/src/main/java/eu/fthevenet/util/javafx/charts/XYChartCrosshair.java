@@ -37,11 +37,10 @@ import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static org.gillius.jfxutils.JFXUtil.getXShift;
 
@@ -58,9 +57,8 @@ public class XYChartCrosshair<X, Y> {
     private final Line verticalMarker = new Line();
     private final Label xAxisLabel;
     private final Label yAxisLabel;
-    private final List<XYChart<X, Y>> charts;
+    private final LinkedHashMap<XYChart<X, Y>, Function<Y, String>> charts;
     private final Function<X, String> xValuesFormatter;
-    private final Function<Y, String> yValuesFormatter;
     private final XYChartInfo chartInfo;
     private final BooleanProperty isSelecting = new SimpleBooleanProperty(false);
     private final Pane parent;
@@ -75,16 +73,14 @@ public class XYChartCrosshair<X, Y> {
     private final XYChart<X, Y> masterChart;
 
 
-
     /**
      * Initializes a new instance of the {@link XYChartCrosshair} class.
      *
      * @param charts           the {@link XYChart} to attach the crosshair to.
      * @param parent           the parent node of the chart
      * @param xValuesFormatter a function used to format the display of X values as strings
-     * @param yValuesFormatter a function used to format the display of Y values as strings
      */
-    public XYChartCrosshair(List<XYChart<X, Y>> charts, Pane parent, Function<X, String> xValuesFormatter, Function<Y, String> yValuesFormatter) {
+    public XYChartCrosshair(LinkedHashMap<XYChart<X, Y>, Function<Y, String>> charts, Pane parent, Function<X, String> xValuesFormatter) {
         this.charts = charts;
         applyStyle(this.verticalMarker);
         applyStyle(this.horizontalMarker);
@@ -94,8 +90,7 @@ public class XYChartCrosshair<X, Y> {
         this.parent = parent;
         parent.getChildren().addAll(xAxisLabel, yAxisLabel, verticalMarker, horizontalMarker, selection);
         this.xValuesFormatter = xValuesFormatter;
-        this.yValuesFormatter = yValuesFormatter;
-        masterChart = charts.get(charts.size() - 1);
+        masterChart = charts.keySet().stream().reduce((xyxyChart, xyxyChart2) -> xyxyChart2).orElseThrow(() -> new IllegalStateException("Could not identify last element in chart linked hash map."));// g entrySet().get(charts.size() - 1);
         this.chartInfo = new XYChartInfo(masterChart, parent);
 
 
@@ -222,7 +217,7 @@ public class XYChartCrosshair<X, Y> {
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             Map<XYChart<X, Y>, XYChartSelection<X, Y>> s = new HashMap<>();
-            charts.forEach(c -> s.put(
+            charts.forEach((c, f) -> s.put(
                     c,
                     new XYChartSelection<X, Y>(
                             getValueFromXcoord(selection.getX() - 0.5),
@@ -247,13 +242,19 @@ public class XYChartCrosshair<X, Y> {
         //yAxisLabel.setLayoutX(parent.getWidth()- yAxisLabel.getWidth());
         yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
 
-
-        charts.forEach(c -> currentYValues.computeIfAbsent(c, (k) -> new SimpleObjectProperty<Y>()).setValue(getValueFromYcoord(c, mousePosition.getY())));
-
-        yAxisLabel.setText(currentYValues.entrySet().stream()
-                .map(e -> e.getKey().getYAxis().getLabel() + ": " + yValuesFormatter.apply(e.getValue().getValue()))
-                .collect(Collectors.joining("\n"))
-        );
+        StringBuilder yAxisText = new StringBuilder();
+        charts.forEach((c, f) -> {
+            currentYValues.computeIfAbsent(c, (k) -> new SimpleObjectProperty<Y>()).setValue(getValueFromYcoord(c, mousePosition.getY()));
+            yAxisText.append(c.getYAxis().getLabel())
+                    .append(": ")
+                    .append(f.apply(currentYValues.get(c).getValue()))
+                    .append("\n");
+        });
+        yAxisLabel.setText(yAxisText.toString());
+//        yAxisLabel.setText(currentYValues.entrySet().stream()
+//                .map(e -> e.getKey().getYAxis().getLabel() + ": " + yValuesFormatters.get(e.getKey()).apply(e.getValue().getValue()))
+//                .collect(Collectors.joining("\n"))
+//        );
     }
 
     private Y getValueFromYcoord(XYChart<X, Y> chart, double yPosition) {
