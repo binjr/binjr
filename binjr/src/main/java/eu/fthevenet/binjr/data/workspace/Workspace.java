@@ -56,7 +56,6 @@ public class Workspace implements Dirtyable {
     public static final String WORKSPACE_SCHEMA_VERSION = "2.0";
     public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("2.0");
 
-
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlElementWrapper(name = "Sources")
@@ -328,6 +327,4 @@ public class Workspace implements Dirtyable {
         }
 
     }
-
-
 }
