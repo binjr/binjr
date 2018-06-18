@@ -340,9 +340,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-//        viewPorts.stream()
-//                .map(ChartViewPort::getChart)
-//                .collect(Collectors.toMap()),
         viewPorts.forEach(v -> {
             map.put(v.chart, v.getPrefixFormatter()::format);
         });

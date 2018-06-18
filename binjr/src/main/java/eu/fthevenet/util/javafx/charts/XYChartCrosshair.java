@@ -76,7 +76,7 @@ public class XYChartCrosshair<X, Y> {
     /**
      * Initializes a new instance of the {@link XYChartCrosshair} class.
      *
-     * @param charts           the {@link XYChart} to attach the crosshair to.
+     * @param charts           a map of the  {@link XYChart} to attach and their formatting function of the Y values.
      * @param parent           the parent node of the chart
      * @param xValuesFormatter a function used to format the display of X values as strings
      */
