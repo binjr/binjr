@@ -25,7 +25,10 @@
         @XmlJavaTypeAdapter(type = Instant.class,
                 value = InstantXmlAdapter.class),
         @XmlJavaTypeAdapter(type = Color.class,
-                value = ColorXmlAdapter.class)
+                value = ColorXmlAdapter.class),
+        @XmlJavaTypeAdapter(type = Version.class,
+                value = VersionXmlAdapter.class)
+
 })
 package eu.fthevenet.binjr.data.workspace;
 
@@ -33,6 +36,8 @@ import com.migesok.jaxb.adapter.javatime.InstantXmlAdapter;
 import com.migesok.jaxb.adapter.javatime.LocalDateTimeXmlAdapter;
 import com.migesok.jaxb.adapter.javatime.ZoneIdXmlAdapter;
 import com.migesok.jaxb.adapter.javatime.ZonedDateTimeXmlAdapter;
+import eu.fthevenet.util.version.Version;
+import eu.fthevenet.util.version.VersionXmlAdapter;
 import eu.fthevenet.util.xml.ColorXmlAdapter;
 import javafx.scene.paint.Color;
 

@@ -27,6 +27,9 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
@@ -39,6 +42,36 @@ import java.nio.file.Path;
  * @author Frederic Thevenet
  */
 public class XmlUtils {
+
+    private static class XMLInputFactoryHolder {
+        private final static XMLInputFactory instance = XMLInputFactory.newInstance();
+    }
+
+    public static String getFirstAttributeValue(File file, String attribute) throws IOException, XMLStreamException {
+        // Create stream reader
+        XMLStreamReader xmlr = XMLInputFactoryHolder.instance.createXMLStreamReader(new FileInputStream(file));
+        // Main event loop
+        while (xmlr.hasNext()) {
+            // Process single event
+            switch (xmlr.getEventType()) {
+                // Process start tags
+                case XMLStreamReader.START_ELEMENT:
+                    // Check attributes for first start tag
+                    for (int i = 0; i < xmlr.getAttributeCount(); i++) {
+                        // Get attribute name
+                        String localName = xmlr.getAttributeName(i).getLocalPart();
+                        if (localName.equals(attribute)) {
+                            // Return value
+                            return xmlr.getAttributeValue(i);
+                        }
+                    }
+                    return null;
+            }
+            // Move to next event
+            xmlr.next();
+        }
+        return null;
+    }
 
     public static <T> T deSerialize(Class<T> docClass, File file) throws JAXBException, IOException {
         try (FileInputStream fin = new FileInputStream(file)) {
