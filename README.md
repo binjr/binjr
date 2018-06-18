@@ -29,8 +29,8 @@ The latest release can be found [here](https://github.com/fthevenet/binjr/releas
 
   Plateform specific bundles are available, in the form of an MSI installer for Windows, RPM and DEB packages for Linux and DMG image for MacOS.
   
-  Those bundles contain the application and all of its dependencies, as well as a minimal copy of the Oracle JRE for the target platform. 
-  If using the bundle for your operating system, it doesn't matter what other version of Java, if any, is installed on your computer.
+  Those bundles contain the application and all of its dependencies, as well as a minimal copy of the Java Runtime Environment for the target platform. 
+  With the native application bundle for your operating system, it doesn't matter what other version of Java, if any, is installed on your computer.
 
 * _As source code_
 
