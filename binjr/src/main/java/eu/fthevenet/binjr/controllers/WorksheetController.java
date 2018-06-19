@@ -82,6 +82,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -145,6 +146,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ListChangeListener<Chart<Double>> chartListListener;
     private ChangeListener<? super UnitPrefixes> unitPrefixListener;
     private ChangeListener<Object> controllerReloadListener;
+    public static final double TOOL_BUTTON_SIZE = 20;
 
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet) throws IOException {
         this.parentController = parentController;
@@ -528,18 +530,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             });
             editFieldsGroup.getChildren().addAll(chartNameField, unitNameField, unitPrefixChoiceBox);
 
+            // *** Toolbar ***
             HBox toolbar = new HBox();
-            toolbar.setSpacing(5);
+            toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
-            final double BUTTON_SIZE = 20;
-            Button closeButton = new Button("Close");
-            forceControlSize(closeButton, BUTTON_SIZE, BUTTON_SIZE);
-            closeButton.getStyleClass().add("exit");
-            closeButton.setAlignment(Pos.CENTER);
-            Region icon = new Region();
-            icon.getStyleClass().addAll("cross-icon", "small-icon");
-            closeButton.setGraphic(icon);
-            closeButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
             closeButton.setOnAction(event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
@@ -547,21 +542,33 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             });
             closeButton.disableProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
-            closeButton.setTooltip(new Tooltip("Remove this chart from the worksheet."));
-            ToggleButton editButton = new ToggleButton("Settings");
-            forceControlSize(editButton, BUTTON_SIZE, BUTTON_SIZE);
-            editButton.getStyleClass().add("dialog-button");
-            editButton.setAlignment(Pos.CENTER);
-            Region editIcon = new Region();
-            editIcon.getStyleClass().addAll("settings-icon", "small-icon");
-            editButton.setGraphic(editIcon);
-            editButton.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-            editButton.setTooltip(new Tooltip("Edit the chart's settings"));
-            editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
 
+            ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+            editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
             editButton.setOnAction(event -> newPane.setExpanded(true));
-            toolbar.getChildren().addAll(editButton, closeButton);
+
             editButtonsGroup.getToggles().add(editButton);
+
+            Button moveUpButton = (Button) newToolBarButton(Button::new, "Up", "Move the chart up the list.", new String[]{"dialog-button"}, new String[]{"upArrow-icon", "small-icon"});
+            moveUpButton.disableProperty().bind(Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()));
+            moveUpButton.visibleProperty().bind(currentViewPort.getDataStore().showPropertiesProperty());
+            moveUpButton.setOnAction(event -> {
+                int idx = worksheet.getCharts().indexOf(currentViewPort.dataStore);
+                worksheet.getCharts().remove(currentViewPort.dataStore);
+                worksheet.getCharts().add(idx - 1, currentViewPort.dataStore);
+            });
+
+            Button moveDownButton = (Button) newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
+            moveDownButton.disableProperty().bind(Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()));
+            moveDownButton.visibleProperty().bind(currentViewPort.getDataStore().showPropertiesProperty());
+            moveDownButton.setOnAction(event -> {
+                int idx = worksheet.getCharts().indexOf(currentViewPort.dataStore);
+                worksheet.getCharts().remove(currentViewPort.dataStore);
+                worksheet.getCharts().add(idx + 1, currentViewPort.dataStore);
+            });
+
+
+            toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
 
             titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
             HBox hBox = new HBox();
@@ -575,14 +582,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         seriesTableContainer.expandedPaneProperty().addListener((ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-//            Boolean expandRequiered = true;
-//            for (TitledPane pane : seriesTableContainer.getPanes()) {
-//                if (pane.isExpanded()) {
-//                    expandRequiered = false;
-//
-//                }
-//            }
+            Boolean expandRequiered = true;
+            for (TitledPane pane : seriesTableContainer.getPanes()) {
+                if (pane.isExpanded()) {
+                    expandRequiered = false;
 
+                }
+            }
             getAttachedViewport(newPane).ifPresent(nv -> {
                 getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
                 if (editButtonsGroup.getSelectedToggle() != null) {
@@ -590,24 +596,32 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
 
             });
-
-
-//
-//            if ((expandRequiered) && (oldPane != null)) {
-//                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
-//                Platform.runLater(() -> {
-//                    seriesTableContainer.setExpandedPane(oldPane);
-//                });
-//            }
-
+            if ((expandRequiered) && (oldPane != null)) {
+                getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
+                Platform.runLater(() -> {
+                    seriesTableContainer.setExpandedPane(oldPane);
+                });
+            }
         });
-//        worksheet.selectedChartProperty().addListener((observable, oldValue, newValue) -> {
-//            if (oldValue != null) {
-//                if (viewPorts.get(oldValue).getDataStore().isShowProperties()) {
-//                    viewPorts.get(newValue).getDataStore().setShowProperties(true);
-//                }
-//            }
-//        });
+    }
+
+    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
+        ButtonBase btn = btnFactory.get();
+        btn.setText(text);
+        btn.setPrefHeight(TOOL_BUTTON_SIZE);
+        btn.setMaxHeight(TOOL_BUTTON_SIZE);
+        btn.setMinHeight(TOOL_BUTTON_SIZE);
+        btn.setPrefWidth(TOOL_BUTTON_SIZE);
+        btn.setMaxWidth(TOOL_BUTTON_SIZE);
+        btn.setMinWidth(TOOL_BUTTON_SIZE);
+        btn.getStyleClass().addAll(styleClass);
+        btn.setAlignment(Pos.CENTER);
+        Region icon = new Region();
+        icon.getStyleClass().addAll(iconStyleClass);
+        btn.setGraphic(icon);
+        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btn.setTooltip(new Tooltip(tooltipMsg));
+        return btn;
     }
 
     Optional<ChartViewPort<?>> getAttachedViewport(TitledPane pane) {
@@ -666,14 +680,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //endregion
 
-    private void forceControlSize(Control control, double height, double width) {
-        control.setPrefHeight(height);
-        control.setMaxHeight(height);
-        control.setMinHeight(height);
-        control.setPrefWidth(width);
-        control.setMaxWidth(width);
-        control.setMinWidth(width);
-    }
 
     @Override
     public void close() {
