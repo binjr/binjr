@@ -72,6 +72,7 @@ public class XYChartCrosshair<X, Y> {
     private final Map<XYChart<X, Y>, Property<Y>> currentYValues = new HashMap<>();
     private final Property<X> currentXValue = new SimpleObjectProperty<>();
     private final XYChart<X, Y> masterChart;
+    private final BooleanProperty isMouseOverChart = new SimpleBooleanProperty(false);
 
 
     /**
@@ -91,10 +92,8 @@ public class XYChartCrosshair<X, Y> {
         this.parent = parent;
         parent.getChildren().addAll(xAxisLabel, yAxisLabel, verticalMarker, horizontalMarker, selection);
         this.xValuesFormatter = xValuesFormatter;
-        masterChart = charts.keySet().stream().reduce((xyxyChart, xyxyChart2) -> xyxyChart2).orElseThrow(() -> new IllegalStateException("Could not identify last element in chart linked hash map."));// g entrySet().get(charts.size() - 1);
+        masterChart = charts.keySet().stream().reduce((p, n) -> n).orElseThrow(() -> new IllegalStateException("Could not identify last element in chart linked hash map."));
         this.chartInfo = new XYChartInfo(masterChart, parent);
-
-
         masterChart.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
         masterChart.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
         masterChart.setOnMouseReleased(e -> {
@@ -105,7 +104,6 @@ public class XYChartCrosshair<X, Y> {
             }
             isSelecting.set(false);
         });
-
         isSelecting.addListener((observable, oldValue, newValue) -> {
             logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
             if (!oldValue && newValue) {
@@ -114,26 +112,26 @@ public class XYChartCrosshair<X, Y> {
             drawSelection();
             selection.setVisible(newValue);
         });
-
         horizontalMarkerVisible.addListener((observable, oldValue, newValue) -> {
             drawHorizontalMarker();
-            horizontalMarker.setVisible(newValue);
-            yAxisLabel.setVisible(newValue);
             if (!newValue && !verticalMarkerVisible.get()) {
                 isSelecting.set(false);
                 currentYValues.forEach((key, value) -> value.setValue(null));
             }
         });
-
         verticalMarkerVisible.addListener((observable, oldValue, newValue) -> {
             drawVerticalMarker();
-            verticalMarker.setVisible(newValue);
-            xAxisLabel.setVisible(newValue);
             if (!newValue && !horizontalMarkerVisible.get()) {
                 isSelecting.set(false);
                 currentXValue.setValue(null);
             }
         });
+        masterChart.setOnMouseExited(event -> isMouseOverChart.set(false));
+        masterChart.setOnMouseEntered(event -> isMouseOverChart.set(true));
+        horizontalMarker.visibleProperty().bind(horizontalMarkerVisible.and(isMouseOverChart));
+        yAxisLabel.visibleProperty().bind(horizontalMarkerVisible.and(isMouseOverChart));
+        verticalMarker.visibleProperty().bind(verticalMarkerVisible.and(isMouseOverChart));
+        xAxisLabel.visibleProperty().bind(verticalMarkerVisible.and(isMouseOverChart));
     }
 
     /**
@@ -280,9 +278,9 @@ public class XYChartCrosshair<X, Y> {
 
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
-        double xShift = getXShift(masterChart, parent);
-        double yShift = getYShift(masterChart, parent);
-        mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX() + xShift)), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY() + yShift)));
+        double xPos = event.getX() + getXShift(masterChart, parent);
+        double yPos = event.getY() + getYShift(masterChart, parent);
+        mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), xPos)), Math.max(area.getMinY(), Math.min(area.getMaxY(), yPos)));
         if (horizontalMarkerVisible.get()) {
             drawHorizontalMarker();
         }
@@ -322,9 +320,6 @@ public class XYChartCrosshair<X, Y> {
     private Label newAxisLabel() {
         Label label = new Label("");
         label.getStyleClass().add("crosshair-axis-label");
-//        label.getStyleClass().addAll("default-color3", "chart-line-symbol", "chart-series-line");
-//        label.setStyle("-fx-font-size: 10; -fx-font-weight: bold; -fx-background-color: rgba(255,255,255,0.6);");
-//        label.setTextFill(Color.BLACK);
         label.setMinSize(Label.USE_PREF_SIZE, Label.USE_PREF_SIZE);
         label.setMouseTransparent(true);
         label.setVisible(false);

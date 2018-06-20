@@ -370,6 +370,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chart.maxHeight(Double.MAX_VALUE);
             VBox.setVgrow(chart, Priority.ALWAYS);
             chart.getYAxis().setSide(Side.LEFT);
+            chart.getYAxis().setPrefWidth(60.0);
+            chart.getYAxis().setMinWidth(60.0);
+            chart.getYAxis().setMaxWidth(60.0);
         }
         chartParent.getChildren().add(vBox);
         // setup crosshair
