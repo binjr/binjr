@@ -43,6 +43,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static org.gillius.jfxutils.JFXUtil.getXShift;
+import static org.gillius.jfxutils.JFXUtil.getYShift;
 
 /**
  * Draws a crosshair on top of an {@link XYChart} and handles selection of a portion of the chart view.
@@ -237,9 +238,7 @@ public class XYChartCrosshair<X, Y> {
         horizontalMarker.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
         horizontalMarker.setStartY(mousePosition.getY() + 0.5);
         horizontalMarker.setEndY(mousePosition.getY() + 0.5);
-        //     yAxisLabel.setLayoutX(Math.max(masterChart.getLayoutX(), chartInfo.getPlotArea().getMinX() - yAxisLabel.getWidth() - 2));
         yAxisLabel.setLayoutX(Math.min(parent.getWidth() - yAxisLabel.getWidth(), chartInfo.getPlotArea().getMaxX() + 5));
-        //yAxisLabel.setLayoutX(parent.getWidth()- yAxisLabel.getWidth());
         yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
 
         StringBuilder yAxisText = new StringBuilder();
@@ -251,15 +250,11 @@ public class XYChartCrosshair<X, Y> {
                     .append("\n");
         });
         yAxisLabel.setText(yAxisText.toString());
-//        yAxisLabel.setText(currentYValues.entrySet().stream()
-//                .map(e -> e.getKey().getYAxis().getLabel() + ": " + yValuesFormatters.get(e.getKey()).apply(e.getValue().getValue()))
-//                .collect(Collectors.joining("\n"))
-//        );
     }
 
     private Y getValueFromYcoord(XYChart<X, Y> chart, double yPosition) {
         double yStart = chart.getYAxis().getLocalToParentTransform().getTy();
-        double axisYRelativePosition = yPosition - yStart * 1.5;
+        double axisYRelativePosition = yPosition - getYShift(masterChart, parent) - (yStart * 1.5);
         return chart.getYAxis().getValueForDisplay(axisYRelativePosition);
     }
 
@@ -286,7 +281,8 @@ public class XYChartCrosshair<X, Y> {
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
         double xShift = getXShift(masterChart, parent);
-        mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX() + xShift)), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY())));
+        double yShift = getYShift(masterChart, parent);
+        mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), event.getX() + xShift)), Math.max(area.getMinY(), Math.min(area.getMaxY(), event.getY() + yShift)));
         if (horizontalMarkerVisible.get()) {
             drawHorizontalMarker();
         }

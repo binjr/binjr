@@ -285,7 +285,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 setupOverlayChartLayout();
                 break;
             case STACKED:
-                setupVerticalChartLayout();
+                setupStackedChartLayout();
                 break;
         }
     }
@@ -350,7 +350,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //endregion
     }
 
-    private void setupVerticalChartLayout() {
+    private void setupStackedChartLayout() {
         VBox vBox = new VBox();
         vBox.setAlignment(Pos.TOP_LEFT);
         vBox.prefHeightProperty().bind(chartParent.heightProperty());
@@ -553,16 +553,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             newPane.setOnDragOver(this::handleDragOverWorksheetView);
             newPane.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             newPane.setUserData(currentViewPort);
-
-//            newPane.expandedProperty().addListener((observable) -> {
-//
-//                  if ( editButtonsGroup.getSelectedToggle() != null){
-//                      currentViewPort.getDataStore().setShowProperties(true);
-//                  }
-//                    currentViewPort.getDataStore().setShowProperties(false);
-//
-//            });
-
 
             GridPane titleRegion = new GridPane();
             titleRegion.setHgap(5);
