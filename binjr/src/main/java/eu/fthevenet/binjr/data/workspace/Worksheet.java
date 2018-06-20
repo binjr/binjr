@@ -62,6 +62,8 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
+    @IsDirtyable
+    private Property<ChartLayout> chartLayout;
 
 
     private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
@@ -127,8 +129,8 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
-
         this.selectedChart = new SimpleObjectProperty<>(0);
+        this.chartLayout = new SimpleObjectProperty<>(ChartLayout.OVERLAID);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -321,6 +323,19 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     @XmlTransient
     public WorksheetNavigationHistory getForwardHistory() {
         return forwardHistory;
+    }
+
+    @XmlAttribute
+    public ChartLayout getChartLayout() {
+        return chartLayout.getValue();
+    }
+
+    public Property<ChartLayout> chartLayoutProperty() {
+        return chartLayout;
+    }
+
+    public void setChartLayout(ChartLayout chartLayout) {
+        this.chartLayout.setValue(chartLayout);
     }
 }
 

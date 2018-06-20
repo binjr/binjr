@@ -560,6 +560,9 @@
     -fx-border-width:0;
   }
 
+
+
+
  /****************************
   Command bar
   ***************************/
@@ -1252,3 +1255,7 @@
     -fx-background-color:  rgba(32,70,86,0.8);
 }
 
+ .worksheet-tool-bar .menu-button .arrow-button {
+      -fx-padding:-2;
+       visibility: hidden;
+   }

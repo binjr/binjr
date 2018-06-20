@@ -133,6 +133,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private MaskerPane worksheetMaskerPane;
     @FXML
     private ContextMenu seriesListMenu;
+    @FXML
+    private MenuButton selectChartLayout;
 
     // private StackPane settingsPane;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
@@ -210,30 +212,26 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //region Control initialization
         try {
             initChartViewPorts();
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to handle IOException", e);
+            initNavigationPane();
+            initTableViewPane();
+            Platform.runLater(() -> invalidateAll(false, false, false));
+            //region *** Global preferences ***
+            globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
+            globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
+
+        } catch (Exception e) {
+            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e));
         }
-        initNavigationPane();
-        initTableViewPane();
-        //endregion
-        Platform.runLater(() -> invalidateAll(false, false, false));
-        //region *** Global preferences ***
-        globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
-        globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
-        //endregion
-
-
     }
-
-    // private DoubleBinding n;
 
     //region *** XYChart ***
     private void initChartViewPorts() throws IOException {
-        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
-        xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
-        xAxis.setAnimated(false);
-        xAxis.setSide(Side.BOTTOM);
+
         for (Chart<Double> currentChart : getWorksheet().getCharts()) {
+            ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
+            xAxis.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
+            xAxis.setAnimated(false);
+            xAxis.setSide(Side.BOTTOM);
             StableTicksAxis yAxis;
             if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
                 yAxis = new BinaryStableTicksAxis();
@@ -274,6 +272,25 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort<>(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
+
+        selectChartLayout.visibleProperty().bind(Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
+        selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
+            MenuItem item = new MenuItem(chartLayout.toString());
+            item.setOnAction(event -> worksheet.setChartLayout(chartLayout));
+            return item;
+        }).collect(Collectors.toList()));
+
+        switch (worksheet.getChartLayout()) {
+            case OVERLAID:
+                setupOverlayChartLayout();
+                break;
+            case STACKED:
+                setupVerticalChartLayout();
+                break;
+        }
+    }
+
+    private void setupOverlayChartLayout() {
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort<Double> v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
@@ -311,6 +328,78 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
             chartParent.getChildren().add(hBox);
         }
+
+        //region *** Crosshair ***
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
+        viewPorts.forEach(v -> {
+            map.put(v.chart, v.getPrefixFormatter()::format);
+        });
+
+        crossHair = new XYChartCrosshair<>(map,
+                chartParent,
+                dateTimeFormatter::format);
+        crossHair.onSelectionDone(s -> {
+            logger.debug(() -> "Applying zoom selection: " + s.toString());
+            currentState.setSelection(convertSelection(s), true);
+        });
+        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
+        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
+        crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
+        crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        //endregion
+    }
+
+    private void setupVerticalChartLayout() {
+        VBox vBox = new VBox();
+        vBox.setAlignment(Pos.TOP_LEFT);
+        vBox.prefHeightProperty().bind(chartParent.heightProperty());
+        vBox.prefWidthProperty().bind(chartParent.widthProperty());
+        for (int i = 0; i < viewPorts.size(); i++) {
+            ChartViewPort<Double> v = viewPorts.get(i);
+            XYChart<ZonedDateTime, Double> chart = v.getChart();
+            int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
+            DoubleBinding n = Bindings.createDoubleBinding(
+                    () -> viewPorts.stream()
+                            .filter(c -> !c.getChart().equals(chart))
+                            .map(c -> c.getChart().getYAxis().getWidth())
+                            .reduce(Double::sum).orElse(0.0) + (Y_AXIS_SEPARATION * nbAdditionalCharts),
+                    viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)
+            );
+            vBox.getChildren().add(chart);
+            chart.maxHeight(Double.MAX_VALUE);
+            VBox.setVgrow(chart, Priority.ALWAYS);
+            chart.getYAxis().setSide(Side.LEFT);
+        }
+        chartParent.getChildren().add(vBox);
+        // setup crosshair
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
+        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
+        map.put(viewPorts.get(0).chart, viewPorts.get(0).getPrefixFormatter()::format);
+        crossHair = new XYChartCrosshair<>(map,
+                chartParent,
+                dateTimeFormatter::format);
+        crossHair.onSelectionDone(s -> {
+            logger.debug(() -> "Applying zoom selection: " + s.toString());
+            currentState.setSelection(convertSelection(s), true);
+        });
+        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
+        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
+        crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
+        crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        for (int i = 1; i < viewPorts.size(); i++) {
+            LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
+            m.put(viewPorts.get(i).chart, viewPorts.get(i).getPrefixFormatter()::format);
+            XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m,
+                    chartParent,
+                    dateTimeFormatter::format);
+            ch.onSelectionDone(s -> {
+                logger.debug(() -> "Applying zoom selection: " + s.toString());
+                currentState.setSelection(convertSelection(s), true);
+            });
+            ch.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
+            ch.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        }
     }
     //endregion
 
@@ -338,26 +427,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         startDate.zoneIdProperty().bind(getWorksheet().timeZoneProperty());
         startDate.dateTimeValueProperty().bindBidirectional(currentState.startXProperty());
         endDate.dateTimeValueProperty().bindBidirectional(currentState.endXProperty());
-
-        //region *** Crosshair ***
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
-        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-        viewPorts.forEach(v -> {
-            map.put(v.chart, v.getPrefixFormatter()::format);
-        });
-
-        crossHair = new XYChartCrosshair<>(map,
-                chartParent,
-                dateTimeFormatter::format);
-        crossHair.onSelectionDone(s -> {
-            logger.debug(() -> "Applying zoom selection: " + s.toString());
-            currentState.setSelection(convertSelection(s), true);
-        });
-        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
-        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
-        crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
-        crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
-        //endregion
     }
 
     private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
@@ -687,6 +756,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             worksheet.getCharts().removeListener(chartListListener);
         }
         if (controllerReloadListener != null) {
+            this.worksheet.chartLayoutProperty().removeListener(this.controllerReloadListener);
             this.worksheet.getCharts().forEach(c -> {
                 c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
                 c.chartTypeProperty().removeListener(this.controllerReloadListener);
@@ -706,6 +776,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         if (this.controllerReloadListener != null) {
+            worksheet.chartLayoutProperty().removeListener(this.controllerReloadListener);
             this.worksheet.getCharts().forEach(c -> {
                 c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
                 c.chartTypeProperty().removeListener(this.controllerReloadListener);
@@ -717,6 +788,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 action.accept(this);
             }
         };
+        worksheet.chartLayoutProperty().addListener(this.controllerReloadListener);
         this.worksheet.getCharts().forEach(c -> {
             c.unitPrefixesProperty().addListener(this.controllerReloadListener);
             c.chartTypeProperty().addListener(this.controllerReloadListener);

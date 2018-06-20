@@ -154,9 +154,6 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
         this.series = FXCollections.observableList(new LinkedList<>(bindings));
-//        this.timeZone = new SimpleObjectProperty<>(timezone);
-//        this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
-//        this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.unitPrefixes = new SimpleObjectProperty<>(base);
         this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
         this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);

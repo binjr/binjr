@@ -159,6 +159,21 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
+                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Chart layout">>
+                            <tooltip>
+                                <Tooltip text="Select chart layout">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <Region styleClass="layout-icon"/>
+                                </HBox>
+                            </graphic>
+                        </MenuButton>
                     </HBox>
                 </children>
                 <VBox.margin>
