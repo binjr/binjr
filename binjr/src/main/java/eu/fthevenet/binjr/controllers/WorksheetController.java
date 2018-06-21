@@ -374,7 +374,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chart.getYAxis().setMinWidth(60.0);
             chart.getYAxis().setMaxWidth(60.0);
         }
-        chartParent.getChildren().add(vBox);
+        chartParent.getChildren().add(new ScrollPane(vBox));
         // setup crosshair
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
