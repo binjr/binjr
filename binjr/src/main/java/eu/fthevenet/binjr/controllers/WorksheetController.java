@@ -136,11 +136,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private MenuButton selectChartLayout;
 
-    // private StackPane settingsPane;
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
-    private ChartViewportsState currentState;// = new ChartViewportsState();
-
+    private ChartViewportsState currentState;
     private String name;
     private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
     private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidateAll(false, false, false);
@@ -160,7 +158,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         ChartPropertiesController propertiesController = new ChartPropertiesController<>(getWorksheet(), chart);
         loader.setController(propertiesController);
         Pane settingsPane = loader.load();
-        //  settingsPane = new StackPane(p);
         AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.SETTINGS_PANE_DISTANCE);
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
@@ -168,7 +165,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         settingsPane.setPrefWidth(200);
         settingsPane.setMinWidth(200);
         chartParent.getChildren().add(settingsPane);
-        //  settingsPane.toFront();
         Platform.runLater(settingsPane::toFront);
         return propertiesController;
     }
@@ -195,7 +191,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     //region [Initializable Members]
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        //region *** Nodes injection checks ***
         assert root != null : "fx:id\"root\" was not injected!";
         assert chartParent != null : "fx:id\"chartParent\" was not injected!";
         assert seriesTableContainer != null : "fx:id\"seriesTableContainer\" was not injected!";
@@ -207,15 +202,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
-        //endregion
 
-        //region Control initialization
         try {
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidateAll(false, false, false));
-            //region *** Global preferences ***
             globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
             globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
 
@@ -224,7 +216,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    //region *** XYChart ***
     private void initChartViewPorts() throws IOException {
 
         for (Chart<Double> currentChart : getWorksheet().getCharts()) {
@@ -328,14 +319,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
             chartParent.getChildren().add(hBox);
         }
-
-        //region *** Crosshair ***
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         viewPorts.forEach(v -> {
             map.put(v.chart, v.getPrefixFormatter()::format);
         });
-
         crossHair = new XYChartCrosshair<>(map,
                 chartParent,
                 dateTimeFormatter::format);
@@ -347,7 +335,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         crossHair.horizontalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
         crossHair.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
-        //endregion
     }
 
     private void setupStackedChartLayout() {
@@ -404,10 +391,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             ch.verticalMarkerVisibleProperty().bind(Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
         }
     }
-    //endregion
 
     private void initNavigationPane() {
-        //region *** Buttons ***
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
@@ -415,11 +400,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         backButton.disableProperty().bind(getWorksheet().getBackwardHistory().emptyProperty());
         forwardButton.disableProperty().bind(getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(this::handleAddNewChart);
-
-        //endregion
-
-        //region *** Time pickers ***
-
         currentState = new ChartViewportsState(getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
 
         for (ChartViewPort<Double> viewPort : viewPorts) {
@@ -739,9 +719,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             event.consume();
         }
     }
-
-    //endregion
-
 
     @Override
     public void close() {
@@ -1277,8 +1254,5 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     zdt.getZone()
             );
         }
-
     }
-
-
 }
