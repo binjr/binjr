@@ -17,8 +17,10 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.async.AsyncTaskManager;
+import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.Dialogs;
@@ -28,6 +30,7 @@ import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.util.javafx.controls.DelayedAction;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
+import eu.fthevenet.util.javafx.listeners.ChangeListenerFactory;
 import eu.fthevenet.util.logging.Profiler;
 import eu.fthevenet.util.text.BinaryPrefixFormatter;
 import eu.fthevenet.util.text.MetricPrefixFormatter;
@@ -80,6 +83,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -95,10 +99,12 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
+    private static final long MIN_ELAPSE_MS_BETWEEN_REFRESH = 50;
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final Worksheet<Double> worksheet;
     private static final double Y_AXIS_SEPARATION = 10;
     private final MainViewController parentController;
+    private volatile boolean preventReload = false;
 
     @FXML
     public AnchorPane root;
@@ -140,17 +146,32 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private ChartViewportsState currentState;
     private String name;
-    private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
-    private ChangeListener<Object> refreshOnSelectSeries = (observable, oldValue, newValue) -> invalidateAll(false, false, false);
-    private ChangeListener<ChartType> chartTypeListener;
-    private ListChangeListener<Chart<Double>> chartListListener;
-    private ChangeListener<? super UnitPrefixes> unitPrefixListener;
-    private ChangeListener<Object> controllerReloadListener;
+    // private ChangeListener<Object> refreshOnPreferenceListener = (observable, oldValue, newValue) -> refresh();
+    private final Map<Chart<Double>, ChangeListener<Object>> listeners = new ConcurrentHashMap<>();
+    private final ChangeListenerFactory listenerFactory = new ChangeListenerFactory();
+
+    //  private ListChangeListener<Chart<Double>> chartListListener;
+    //  private ChangeListener<Object> controllerReloadListener;
     public static final double TOOL_BUTTON_SIZE = 20;
 
-    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet) throws IOException {
+
+    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Map<Tab, DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
+
+        // Attach bindings
+        for (Chart<Double> chart : worksheet.getCharts()) {
+            for (TimeSeriesInfo<?> s : chart.getSeries()) {
+                UUID id = s.getBinding().getAdapterId();
+                DataAdapter<?, ?> da = sourcesAdapters.values()
+                        .stream()
+                        .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+                        .findAny()
+                        .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
+                s.getBinding().setAdapter(da);
+                listenerFactory.attachListener(s.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(chart)).findFirst().ifPresent(v -> invalidate(v, false, false, false)));
+            }
+        }
     }
 
     private ChartPropertiesController buildChartPropertiesController(Chart<Double> chart) throws IOException {
@@ -208,8 +229,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidateAll(false, false, false));
-            globalPrefs.downSamplingEnabledProperty().addListener(refreshOnPreferenceListener);
-            globalPrefs.downSamplingThresholdProperty().addListener(refreshOnPreferenceListener);
+            listenerFactory.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
+            listenerFactory.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
 
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e));
@@ -444,9 +465,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
                 showAllCheckBox.setSelected(andAll);
             };
-            //TODO Make sure the following listeners do not prevent some object from being collected after a worksheet's been unloaded.
+
             visibleColumn.setCellValueFactory(p -> {
-                p.getValue().selectedProperty().addListener(isVisibleListener);
+                listenerFactory.attachListener(p.getValue().selectedProperty(), isVisibleListener);
                 // Explicitly call the listener to initialize the proper status of the checkbox
                 isVisibleListener.invalidated(null);
                 return p.getValue().selectedProperty();
@@ -596,7 +617,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             moveUpButton.visibleProperty().bind(currentViewPort.getDataStore().showPropertiesProperty());
             moveUpButton.setOnAction(event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.dataStore);
-                worksheet.getCharts().remove(currentViewPort.dataStore);
+                this.preventReload = true;
+                try {
+                    worksheet.getCharts().remove(currentViewPort.dataStore);
+                } finally {
+                    this.preventReload = false;
+                }
                 worksheet.getCharts().add(idx - 1, currentViewPort.dataStore);
             });
 
@@ -605,7 +631,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             moveDownButton.visibleProperty().bind(currentViewPort.getDataStore().showPropertiesProperty());
             moveDownButton.setOnAction(event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.dataStore);
-                worksheet.getCharts().remove(currentViewPort.dataStore);
+                this.preventReload = true;
+                try {
+                    worksheet.getCharts().remove(currentViewPort.dataStore);
+                } finally {
+                    this.preventReload = false;
+                }
                 worksheet.getCharts().add(idx + 1, currentViewPort.dataStore);
             });
 
@@ -722,52 +753,49 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @Override
     public void close() {
-        if (chartListListener != null) {
-            worksheet.getCharts().removeListener(chartListListener);
-        }
-        if (controllerReloadListener != null) {
-            this.worksheet.chartLayoutProperty().removeListener(this.controllerReloadListener);
-            this.worksheet.getCharts().forEach(c -> {
-                c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
-                c.chartTypeProperty().removeListener(this.controllerReloadListener);
-            });
-        }
-        if (refreshOnPreferenceListener != null) {
-            logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
-            globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
-            globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
-            for (Chart<Double> chartData : getWorksheet().getCharts()) {
-                for (TimeSeriesInfo<Double> t : chartData.getSeries()) {
-                    t.selectedProperty().removeListener(refreshOnSelectSeries);
-                }
-            }
-        }
+        logger.debug(() -> "Closing worksheetController " + this.toString());
+//        if (chartListListener != null) {
+//            worksheet.getCharts().removeListener(chartListListener);
+//        }
+//        if (controllerReloadListener != null) {
+//            this.worksheet.chartLayoutProperty().removeListener(this.controllerReloadListener);
+//            this.worksheet.getCharts().forEach(c -> {
+//                c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
+//                c.chartTypeProperty().removeListener(this.controllerReloadListener);
+//            });
+//        }
+//        if (refreshOnPreferenceListener != null) {
+//            logger.debug(() -> "Unregister listeners attached to global preferences from controller for worksheet " + getWorksheet().getName());
+//            globalPrefs.downSamplingEnabledProperty().removeListener(refreshOnPreferenceListener);
+//            globalPrefs.downSamplingThresholdProperty().removeListener(refreshOnPreferenceListener);
+//
+//
+//            for (Chart<Double> chartData : getWorksheet().getCharts()) {
+//                for (TimeSeriesInfo<Double> t : chartData.getSeries()) {
+//                    t.selectedProperty().removeListener(getRefreshChartListener(chartData));
+//                }
+//            }
+//        }
+        listenerFactory.close();
+        //  viewPorts = null;
     }
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
-        if (this.controllerReloadListener != null) {
-            worksheet.chartLayoutProperty().removeListener(this.controllerReloadListener);
-            this.worksheet.getCharts().forEach(c -> {
-                c.unitPrefixesProperty().removeListener(this.controllerReloadListener);
-                c.chartTypeProperty().removeListener(this.controllerReloadListener);
-            });
-        }
-        this.controllerReloadListener = (observable, oldValue, newValue) -> {
+        ChangeListener<Object> controllerReloadListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 logger.debug("Reloading worksheet controller because property changed from: " + oldValue + " to " + newValue);
                 action.accept(this);
             }
         };
-        worksheet.chartLayoutProperty().addListener(this.controllerReloadListener);
+        listenerFactory.attachListener(worksheet.chartLayoutProperty(), controllerReloadListener);
+
         this.worksheet.getCharts().forEach(c -> {
-            c.unitPrefixesProperty().addListener(this.controllerReloadListener);
-            c.chartTypeProperty().addListener(this.controllerReloadListener);
+            listenerFactory.attachListener(c.unitPrefixesProperty(), controllerReloadListener);
+            listenerFactory.attachListener(c.chartTypeProperty(), controllerReloadListener);
         });
 
-        if (this.chartListListener != null) {
-            worksheet.getCharts().removeListener(this.chartListListener);
-        }
-        this.chartListListener = c -> {
+
+        ListChangeListener<Chart<Double>> chartListListener = c -> {
             while (c.next()) {
                 if (c.wasPermutated()) {
                     for (int i = c.getFrom(); i < c.getTo(); ++i) {
@@ -778,27 +806,33 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     // nothingfor now
                 }
                 else {
-                    if (c.wasAdded()) {
-                        List<? extends Chart<Double>> added = c.getAddedSubList();
-                        Chart<Double> chart = added.get(added.size() - 1);
-                        int chartIndex = worksheet.getCharts().indexOf(chart);
-                        worksheet.setSelectedChart(chartIndex);
-                        chart.setShowProperties(true);
-                    }
-                    if (c.wasRemoved()) {
-                        if (worksheet.getSelectedChart() == c.getFrom()) {
-                            worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
+                    if (!preventReload) {
+                        if (c.wasAdded()) {
+                            List<? extends Chart<Double>> added = c.getAddedSubList();
+                            Chart<Double> chart = added.get(added.size() - 1);
+                            int chartIndex = worksheet.getCharts().indexOf(chart);
+                            worksheet.setSelectedChart(chartIndex);
+                            chart.setShowProperties(true);
                         }
-                        else if (worksheet.getSelectedChart() > c.getFrom()) {
-                            worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
+                        if (c.wasRemoved()) {
+                            if (worksheet.getSelectedChart() == c.getFrom()) {
+                                worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
+                            }
+                            else if (worksheet.getSelectedChart() > c.getFrom()) {
+                                worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
+                            }
                         }
+                        logger.debug(() -> "Reloading worksheet controller because list changed: " + c.toString() + " in controller " + this.toString());
+                        action.accept(this);
                     }
-                    logger.debug(() -> "Reloading worksheet controller because list changed: " + c.toString() + " in controller " + this.toString());
-                    action.accept(this);
+                    else {
+                        logger.debug(() -> "Reload explicitly prevented on change " + c.toString());
+                    }
                 }
             }
         };
-        worksheet.getCharts().addListener(this.chartListListener);
+        listenerFactory.attachListener(worksheet.getCharts(), chartListListener);
+
     }
 
     //region *** protected members ***
@@ -806,7 +840,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings, Chart<Double> targetChart) {
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
-            newSeries.selectedProperty().addListener(refreshOnSelectSeries);
+            listenerFactory.attachListener(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false, false)));
             targetChart.addSeries(newSeries);
         }
         invalidateAll(false, false, false);
@@ -822,6 +856,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void refresh() {
         invalidateAll(false, false, true);
     }
+
 
     @FXML
     protected void handleHistoryBack(ActionEvent actionEvent) {
@@ -863,14 +898,24 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void invalidate(ChartViewPort<Double> viewPort, boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName(), logger::trace)) {
-            XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).asSelection();
-            logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
 
-            if (!dontPlotChart) {
-                plotChart(viewPort, currentSelection, forceRefresh);
-            }
+    private void invalidate(ChartViewPort<Double> viewPort, boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
+        if (System.currentTimeMillis() - viewPort.lastRedrawTime > MIN_ELAPSE_MS_BETWEEN_REFRESH) {
+            DelayedAction.run(() -> {
+                try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName() + "\\" + viewPort.getDataStore().getName(), logger::trace)) {
+                    XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).asSelection();
+                    logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
+
+                    if (!dontPlotChart) {
+                        plotChart(viewPort, currentSelection, forceRefresh);
+                    }
+                } finally {
+                    viewPort.lastRedrawTime = System.currentTimeMillis();
+                }
+            }, new Duration(MIN_ELAPSE_MS_BETWEEN_REFRESH));
+        }
+        else {
+            logger.trace(() -> "Worksheet invalidation order ignored");
         }
     }
 
@@ -900,7 +945,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         worksheetMaskerPane.setVisible(false);
                         viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
                         // Force a redraw of the charts and their Y Axis considering their proper width.
-                        new DelayedAction(Duration.millis(50), () -> viewPort.getChart().resize(0.0, 0.0)).submit();
+                        logger.trace(" new DelayedAction(Duration.millis(50), () -> viewPort.getChart().resize(0.0, 0.0)).submit();");
+                        //     new DelayedAction(Duration.millis(50), () -> viewPort.getChart().resize(0.0, 0.0)).submit();
                     },
                     event -> {
                         worksheetMaskerPane.setVisible(false);
@@ -913,39 +959,43 @@ public class WorksheetController implements Initializable, AutoCloseable {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.getData().setAll(series.getProcessor().getData());
-            newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
-                if (newNode != null) {
-                    switch (currentChart.getChartType()) {
-                        case AREA:
-                        case STACKED:
-                            ObservableList<Node> children = ((Group) newNode).getChildren();
-                            if (children != null && children.size() >= 1) {
-                                Path stroke = (Path) children.get(1);
-                                Path fill = (Path) children.get(0);
-                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                                stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
-                                stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
-                                stroke.strokeProperty().bind(series.displayColorProperty());
-                                fill.fillProperty().bind(Bindings.createObjectBinding(
-                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
-                                        series.displayColorProperty(),
-                                        currentChart.graphOpacityProperty()));
+            listenerFactory.attachListener(
+                    newSeries.nodeProperty(),
+                    (node, oldNode, newNode) -> {
+                        if (newNode != null) {
+                            //  newNode.visibleProperty().bind(series.selectedProperty());
+                            switch (currentChart.getChartType()) {
+                                case AREA:
+                                case STACKED:
+                                    ObservableList<Node> children = ((Group) newNode).getChildren();
+                                    if (children != null && children.size() >= 1) {
+
+                                        Path stroke = (Path) children.get(1);
+                                        Path fill = (Path) children.get(0);
+                                        logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                        stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
+                                        stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
+                                        stroke.strokeProperty().bind(series.displayColorProperty());
+                                        fill.fillProperty().bind(Bindings.createObjectBinding(
+                                                () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
+                                                series.displayColorProperty(),
+                                                currentChart.graphOpacityProperty()));
+                                    }
+                                    break;
+                                case SCATTER:
+                                    //TODO set colors to points
+                                    break;
+                                case LINE:
+                                    Path stroke = (Path) newNode;
+                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                    stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
+                                    stroke.strokeProperty().bind(series.displayColorProperty());
+                                    break;
+                                default:
+                                    break;
                             }
-                            break;
-                        case SCATTER:
-                            //TODO set colors to points
-                            break;
-                        case LINE:
-                            Path stroke = (Path) newNode;
-                            logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                            stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
-                            stroke.strokeProperty().bind(series.displayColorProperty());
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
+                        }
+                    });
             return newSeries;
         }
     }
@@ -1040,6 +1090,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         private final ChartPropertiesController<T> propertiesController;
         private final PrefixFormatter prefixFormatter;
         private final TableView<TimeSeriesInfo<Double>> seriesTable;
+        private long lastRedrawTime = 0;
 
         private ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
             this.dataStore = dataStore;

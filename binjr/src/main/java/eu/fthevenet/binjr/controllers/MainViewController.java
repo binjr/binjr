@@ -25,7 +25,10 @@ import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
-import eu.fthevenet.binjr.data.workspace.*;
+import eu.fthevenet.binjr.data.workspace.Chart;
+import eu.fthevenet.binjr.data.workspace.Source;
+import eu.fthevenet.binjr.data.workspace.Worksheet;
+import eu.fthevenet.binjr.data.workspace.Workspace;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
@@ -484,7 +487,7 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(animationDuration);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), () -> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit());
+        showTimeline.setOnFinished(event -> new DelayedAction(() -> AnchorPane.setLeftAnchor(contentView, expandedWidth), Duration.millis(50)).submit());
         showTimeline.play();
         commandBar.setExpanded(true);
     }
@@ -720,20 +723,22 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
-            WorksheetController current = new WorksheetController(this, worksheet);
+            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
 
             try {
-                // Attach bindings
-                for (TimeSeriesInfo<?> s : worksheet.getCharts().stream().map(Chart::getSeries).flatMap(Collection::stream).collect(Collectors.toList())) {
-                    UUID id = s.getBinding().getAdapterId();
-                    DataAdapter<?, ?> da = sourcesAdapters.values()
-                            .stream()
-                            .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-                            .findAny()
-                            .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-                    s.getBinding().setAdapter(da);
-                    s.selectedProperty().addListener((observable, oldValue, newValue) -> getSelectedWorksheetController().refresh());
-                }
+//                // Attach bindings
+//                for (Chart<Double> chart : worksheet.getCharts()) {
+//                    for (TimeSeriesInfo<?> s : chart.getSeries()){// .flatMap(Collection::stream).collect(Collectors.toList())) {
+//                        UUID id = s.getBinding().getAdapterId();
+//                        DataAdapter<?, ?> da = sourcesAdapters.values()
+//                                .stream()
+//                                .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+//                                .findAny()
+//                                .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
+//                        s.getBinding().setAdapter(da);
+//                        s.selectedProperty().addListener(current.weakListener((observable, oldValue, newValue) -> getSelectedWorksheetController().refresh(chart)));
+//                    }
+//                }
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
                 FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
@@ -859,7 +864,8 @@ public class MainViewController implements Initializable {
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
         try {
             TimeSeriesBinding<Double> binding = treeItem.getValue();
-            Chart<Double> c = new Chart<>(binding.getLegend(),
+            Chart<Double> c = new Chart<>(
+                    binding.getLegend(),
                     binding.getGraphType(),
                     binding.getUnitName(),
                     binding.getUnitPrefix()
@@ -904,7 +910,8 @@ public class MainViewController implements Initializable {
                 }
 
                 List<Chart<Double>> chartList = new ArrayList<>();
-                chartList.add(new Chart<>(binding.getLegend(),
+                chartList.add(new Chart<>(
+                        binding.getLegend(),
                         binding.getGraphType(),
                         binding.getUnitName(),
                         binding.getUnitPrefix()

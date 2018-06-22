@@ -337,5 +337,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     public void setChartLayout(ChartLayout chartLayout) {
         this.chartLayout.setValue(chartLayout);
     }
+
+
 }
 

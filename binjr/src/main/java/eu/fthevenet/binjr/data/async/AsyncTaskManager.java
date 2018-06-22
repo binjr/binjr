@@ -67,7 +67,7 @@ public class AsyncTaskManager {
      * @return the result of the task
      */
     public <V> Future<?> submit(Task<V> task) {
-        logger.trace(() -> "Task " + task.getTitle() + " submitted");
+        logger.trace(() -> "Task " + task.toString() + " submitted");
         return threadPool.submit(task);
     }
 
@@ -89,7 +89,7 @@ public class AsyncTaskManager {
         };
         t.setOnSucceeded(onSucceeded);
         t.setOnFailed(onFailed);
-        logger.trace(() -> "Task " + t.getTitle() + " submitted");
+        logger.trace(() -> "Task " + t.toString() + " submitted");
         return threadPool.submit(t);
     }
 
