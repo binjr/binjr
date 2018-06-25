@@ -25,10 +25,7 @@ import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
-import eu.fthevenet.binjr.data.workspace.Chart;
-import eu.fthevenet.binjr.data.workspace.Source;
-import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.data.workspace.Workspace;
+import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
@@ -863,15 +860,21 @@ public class MainViewController implements Initializable {
 
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
         try {
+            Worksheet<Double> worksheet = getSelectedWorksheetController().getWorksheet();
             TimeSeriesBinding<Double> binding = treeItem.getValue();
-            Chart<Double> c = new Chart<>(
+            Chart<Double> chart = new Chart<>(
                     binding.getLegend(),
                     binding.getGraphType(),
                     binding.getUnitName(),
                     binding.getUnitPrefix()
             );
-            addToCurrentWorksheet(treeItem, c);
-            getSelectedWorksheetController().getWorksheet().getCharts().add(c);
+            //  addToCurrentWorksheet(treeItem, c);
+            List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+            getAllBindingsFromBranch(treeItem, bindings);
+            for (TimeSeriesBinding<Double> b : bindings) {
+                chart.addSeries(TimeSeriesInfo.fromBinding(b));
+            }
+            worksheet.getCharts().add(chart);
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e);
         }

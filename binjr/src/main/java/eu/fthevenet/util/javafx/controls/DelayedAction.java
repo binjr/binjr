@@ -39,6 +39,7 @@ public class DelayedAction {
             }
         };
         delayedTask.setOnSucceeded(event -> action.run());
+
     }
 
     public void submit() {
@@ -48,4 +49,5 @@ public class DelayedAction {
     public static void run(Runnable action, Duration delay) {
         new DelayedAction(action, delay).submit();
     }
+
 }
