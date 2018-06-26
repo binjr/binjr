@@ -130,7 +130,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.selectedChart = new SimpleObjectProperty<>(0);
-        this.chartLayout = new SimpleObjectProperty<>(ChartLayout.OVERLAID);
+        this.chartLayout = new SimpleObjectProperty<>(ChartLayout.STACKED);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);

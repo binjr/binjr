@@ -23,7 +23,7 @@ package eu.fthevenet.binjr.data.workspace;
  * @author Frederic Thevenet
  */
 public enum ChartLayout {
-    OVERLAID("Overlaid"),
+    OVERLAID("Overlay"),
     STACKED("Stacked");
 
     private String label;
