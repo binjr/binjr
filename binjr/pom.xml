@@ -147,10 +147,12 @@
                             <appName>${project.build.finalName}</appName>
                             <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
                             <additionalBundlerResources>${project.basedir}/src/main/deploy/bundlers</additionalBundlerResources>
-                            <jvmArgs>-splash:splashscreen.png</jvmArgs>
-                            <jvmArgs>-XX:+UseG1GC</jvmArgs>
-                            <jvmArgs>-XX:MaxGCPauseMillis=200</jvmArgs>
-                            <jvmArgs>-Xmx2048m</jvmArgs>
+                            <jvmArgs>
+                                <jvmArg>-splash:splashscreen.png</jvmArg>
+                                <jvmArg>-XX:+UseG1GC</jvmArg>
+                                <jvmArg>-XX:MaxGCPauseMillis=200</jvmArg>
+                                <jvmArg>-Xmx2048m</jvmArg>
+                            </jvmArgs>
                             <manifestAttributes>
                                 <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
                                 <Specification-Title>${project.name}</Specification-Title>
