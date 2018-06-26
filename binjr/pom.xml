@@ -228,12 +228,10 @@
                                 <fileSet>
                                     <directory>${project.build.directory}/jfx/native/</directory>
                                     <includes>
-                                        <!--<include>${project.artifactId}*.exe</include>-->
                                         <include>${project.artifactId}*.msi</include>
                                         <include>${project.artifactId}*.deb</include>
                                         <include>${project.artifactId}*.rpm</include>
                                         <include>${project.artifactId}*.dmg</include>
-                                        <!--<include>${project.artifactId}*.pkg</include>-->
                                     </includes>
                                 </fileSet>
                             </fileSets>
