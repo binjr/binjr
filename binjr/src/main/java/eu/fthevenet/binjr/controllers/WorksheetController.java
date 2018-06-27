@@ -490,11 +490,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 isVisibleListener.invalidated(null);
             });
 
-
             visibleColumn.setCellValueFactory(p -> p.getValue().selectedProperty());
-
             visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
-
 
             showAllCheckBox.setOnAction(event -> {
                 boolean b = ((CheckBox) event.getSource()).isSelected();
@@ -517,7 +514,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
-
 
             TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
