@@ -474,8 +474,17 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 showAllCheckBox.setSelected(andAll);
             };
 
+            ChangeListener<Boolean> refreshListener = (observable, oldValue, newValue) -> {
+                if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
+                    invalidateAll(false, false, false);
+                }
+                else {
+                    invalidate(currentViewPort, false, false);
+                }
+            };
+
             currentViewPort.getDataStore().getSeries().forEach(doubleTimeSeriesInfo -> {
-                listenerFactory.attachListener(doubleTimeSeriesInfo.selectedProperty(), (observable, oldValue, newValue) -> invalidate(currentViewPort, false, false));
+                listenerFactory.attachListener(doubleTimeSeriesInfo.selectedProperty(), refreshListener);
                 listenerFactory.attachListener(doubleTimeSeriesInfo.selectedProperty(), isVisibleListener);
                 // Explicitly call the listener to initialize the proper status of the checkbox
                 isVisibleListener.invalidated(null);
@@ -491,8 +500,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 boolean b = ((CheckBox) event.getSource()).isSelected();
                 currentViewPort.getDataStore().getSeries().forEach(s -> listenerFactory.detachAllChangeListeners(s.selectedProperty()));
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
-                invalidate(currentViewPort, false, false);
-                currentViewPort.getDataStore().getSeries().forEach(s -> listenerFactory.attachListener(s.selectedProperty(), (observable, oldValue, newValue) -> invalidate(currentViewPort, false, false)));
+                refreshListener.changed(null, null, null);
+                currentViewPort.getDataStore().getSeries().forEach(s -> listenerFactory.attachListener(s.selectedProperty(), refreshListener));
 
             });
 
@@ -537,7 +546,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
             crossHair.verticalMarkerVisibleProperty().addListener((observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
-
 
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
             colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
