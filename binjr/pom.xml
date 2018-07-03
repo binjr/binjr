@@ -20,11 +20,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>eu.fthevenet</groupId>
     <artifactId>binjr</artifactId>
-    <name>binjr</name>
+    <name>binjr.java9</name>
     <url>http://www.binjr.eu</url>
     <version>1.3.5-SNAPSHOT</version>
     <packaging>jar</packaging>
-    <description>Flexible Time Series Visualization</description>
+    <description>A time-series visualization tool</description>
     <organization>
         <name>Frederic Thevenet</name>
         <url>http://www.fthevenet.eu/</url>
@@ -51,196 +51,193 @@
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
-    <profiles>
-        <profile>
-            <pluginRepositories>
-                <pluginRepository>
-                    <id>oss-sonatype-snapshots</id>
-                    <url>https://oss.sonatype.org/content/groups/public/</url>
-                    <snapshots>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </pluginRepository>
-            </pluginRepositories>
-            <id>buildNativeBundles</id>
-            <activation>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>clean-version</id>
-                                <phase>validate</phase>
-                                <goals>
-                                    <goal>regex-property</goal>
-                                </goals>
-                                <configuration>
-                                    <name>bundle.version</name>
-                                    <value>${project.version}</value>
-                                    <regex>^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$</regex>
-                                    <replacement>$1.$2.$3</replacement>
-                                    <failIfNoMatch>true</failIfNoMatch>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <artifactId>maven-resources-plugin</artifactId>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <version>3.0.2</version>
-                        <executions>
-                            <execution>
-                                <id>installer-windows</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.basedir}/src/main/deploy/package/windows</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/bundlers</directory>
-                                            <includes>
-                                                <include>*.wxs</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                            <execution>
-                                <id>installer-linux</id>
-                                <phase>package</phase>
-                                <goals>
-                                    <goal>copy-resources</goal>
-                                </goals>
-                                <configuration>
-                                    <outputDirectory>${project.basedir}/src/main/deploy/package/linux</outputDirectory>
-                                    <resources>
-                                        <resource>
-                                            <directory>src/main/resources/bundlers</directory>
-                                            <includes>
-                                                <include>*.spec</include>
-                                                <include>control</include>
-                                                <include>copyright</include>
-                                            </includes>
-                                            <filtering>true</filtering>
-                                        </resource>
-                                    </resources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>com.zenjava</groupId>
-                        <artifactId>javafx-maven-plugin</artifactId>
-                        <version>8.8.3</version>
-                        <configuration>
-                            <mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>
-                            <vendor>${project.organization.name}</vendor>
-                            <bundler>all</bundler>
-                            <nativeReleaseVersion>${project.version}</nativeReleaseVersion>
-                            <appName>${project.build.finalName}</appName>
-                            <additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>
-                            <additionalBundlerResources>${project.basedir}/src/main/deploy/bundlers</additionalBundlerResources>
-                            <jvmArgs>
-                                <jvmArg>-splash:splashscreen.png</jvmArg>
-                                <jvmArg>-XX:+UseG1GC</jvmArg>
-                                <jvmArg>-XX:MaxGCPauseMillis=200</jvmArg>
-                                <jvmArg>-Xmx2048m</jvmArg>
-                            </jvmArgs>
-                            <manifestAttributes>
-                                <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
-                                <Specification-Title>${project.name}</Specification-Title>
-                                <Specification-Version>${project.version}</Specification-Version>
-                                <Specification-Vendor>${project.organization.name}</Specification-Vendor>
-                                <Implementation-Title>${project.name}</Implementation-Title>
-                                <Implementation-Version>${project.version}</Implementation-Version>
-                                <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
-                                <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
-                                <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
-                            </manifestAttributes>
-                            <verbose>true</verbose>
-                            <description>A time-series visualization studio</description>
-                            <title>binjr</title>
-                            <fileAssociations>
-                                <fileAssociation>
-                                    <extensions>bjr</extensions>
-                                    <description>binjr Workspace Files</description>
-                                    <contentType>bjr</contentType>
-                                    <icon>binjr.ico</icon>
-                                </fileAssociation>
-                            </fileAssociations>
-                            <bundleArguments>
-                                <!--<runtime />-->
-                                <licenseFile>LICENSE</licenseFile>
-                                <win.menuGroup>binjr</win.menuGroup>
-                            </bundleArguments>
-                            <skipJNLP>true</skipJNLP>
-                        </configuration>
-                        <executions>
-                            <execution>
-                                <!-- required before build-native -->
-                                <id>fromUrl-jfxjar</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>build-jar</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>fromUrl-native</id>
-                                <phase>install</phase>
-                                <goals>
-                                    <goal>build-native</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                    <plugin>
-                        <groupId>de.jutzig</groupId>
-                        <artifactId>github-release-plugin</artifactId>
-                        <version>1.2.0</version>
-                        <executions>
-                            <execution>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>release</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <description>binjr v${project.version}</description>
-                            <releaseName>binjr v${project.version}</releaseName>
-                            <tag>v${project.version}</tag>
-                            <prerelease>${github.deploy.prerelease}</prerelease>
-                            <overwriteArtifact>true</overwriteArtifact>
-                            <fileSets>
-                                <fileSet>
-                                    <directory>${project.build.directory}</directory>
-                                    <includes>
-                                        <include>${project.artifactId}.jar</include>
-                                    </includes>
-                                </fileSet>
-                                <fileSet>
-                                    <directory>${project.build.directory}/jfx/native/</directory>
-                                    <includes>
-                                        <include>${project.artifactId}*.msi</include>
-                                        <include>${project.artifactId}*.deb</include>
-                                        <include>${project.artifactId}*.rpm</include>
-                                        <include>${project.artifactId}*.dmg</include>
-                                    </includes>
-                                </fileSet>
-                            </fileSets>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+    <!--<profiles>-->
+    <!--<profile>-->
+    <!--<pluginRepositories>-->
+    <!--<pluginRepository>-->
+    <!--<id>oss-sonatype-snapshots</id>-->
+    <!--<url>https://oss.sonatype.org/content/groups/public/</url>-->
+    <!--<snapshots>-->
+    <!--<enabled>true</enabled>-->
+    <!--</snapshots>-->
+    <!--</pluginRepository>-->
+    <!--</pluginRepositories>-->
+    <!--<id>buildNativeBundles</id>-->
+    <!--<activation>-->
+    <!--</activation>-->
+    <!--<build>-->
+    <!--<plugins>-->
+    <!--<plugin>-->
+    <!--<groupId>org.codehaus.mojo</groupId>-->
+    <!--<artifactId>build-helper-maven-plugin</artifactId>-->
+    <!--<version>3.0.0</version>-->
+    <!--<executions>-->
+    <!--<execution>-->
+    <!--<id>clean-version</id>-->
+    <!--<phase>validate</phase>-->
+    <!--<goals>-->
+    <!--<goal>regex-property</goal>-->
+    <!--</goals>-->
+    <!--<configuration>-->
+    <!--<name>bundle.version</name>-->
+    <!--<value>${project.version}</value>-->
+    <!--<regex>^([0-9]+)\.([0-9]+)\.([0-9]+)(-SNAPSHOT)?$</regex>-->
+    <!--<replacement>$1.$2.$3</replacement>-->
+    <!--<failIfNoMatch>true</failIfNoMatch>-->
+    <!--</configuration>-->
+    <!--</execution>-->
+    <!--</executions>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<artifactId>maven-resources-plugin</artifactId>-->
+    <!--<groupId>org.apache.maven.plugins</groupId>-->
+    <!--<version>3.0.2</version>-->
+    <!--<executions>-->
+    <!--<execution>-->
+    <!--<id>installer-windows</id>-->
+    <!--<phase>package</phase>-->
+    <!--<goals>-->
+    <!--<goal>copy-resources</goal>-->
+    <!--</goals>-->
+    <!--<configuration>-->
+    <!--<outputDirectory>${project.basedir}/src/main/deploy/package/windows</outputDirectory>-->
+    <!--<resources>-->
+    <!--<resource>-->
+    <!--<directory>src/main/resources/bundlers</directory>-->
+    <!--<includes>-->
+    <!--<include>*.wxs</include>-->
+    <!--</includes>-->
+    <!--<filtering>true</filtering>-->
+    <!--</resource>-->
+    <!--</resources>-->
+    <!--</configuration>-->
+    <!--</execution>-->
+    <!--<execution>-->
+    <!--<id>installer-linux</id>-->
+    <!--<phase>package</phase>-->
+    <!--<goals>-->
+    <!--<goal>copy-resources</goal>-->
+    <!--</goals>-->
+    <!--<configuration>-->
+    <!--<outputDirectory>${project.basedir}/src/main/deploy/package/linux</outputDirectory>-->
+    <!--<resources>-->
+    <!--<resource>-->
+    <!--<directory>src/main/resources/bundlers</directory>-->
+    <!--<includes>-->
+    <!--<include>*.spec</include>-->
+    <!--<include>control</include>-->
+    <!--<include>copyright</include>-->
+    <!--</includes>-->
+    <!--<filtering>true</filtering>-->
+    <!--</resource>-->
+    <!--</resources>-->
+    <!--</configuration>-->
+    <!--</execution>-->
+    <!--</executions>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<groupId>com.zenjava</groupId>-->
+    <!--<artifactId>javafx-maven-plugin</artifactId>-->
+    <!--<version>9.0.0-SNAPSHOT</version>-->
+    <!--<configuration>-->
+    <!--<mainClass>eu.fthevenet.binjr.Bootstrap</mainClass>-->
+    <!--<vendor>${project.organization.name}</vendor>-->
+    <!--<bundler>all</bundler>-->
+    <!--<nativeReleaseVersion>${project.version}</nativeReleaseVersion>-->
+    <!--<appName>${project.build.finalName}</appName>-->
+    <!--<additionalAppResources>${project.basedir}/src/main/deploy/resources</additionalAppResources>-->
+    <!--<additionalBundlerResources>${project.basedir}/src/main/deploy/bundlers</additionalBundlerResources>-->
+    <!--<jvmArgs>-splash:splashscreen.png</jvmArgs>-->
+    <!--<manifestAttributes>-->
+    <!--<Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>-->
+    <!--<Specification-Title>${project.name}</Specification-Title>-->
+    <!--<Specification-Version>${project.version}</Specification-Version>-->
+    <!--<Specification-Vendor>${project.organization.name}</Specification-Vendor>-->
+    <!--<Implementation-Title>${project.name}</Implementation-Title>-->
+    <!--<Implementation-Version>${project.version}</Implementation-Version>-->
+    <!--<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>-->
+    <!--<SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>-->
+    <!--<Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>-->
+    <!--</manifestAttributes>-->
+    <!--<verbose>true</verbose>-->
+    <!--<description>A time-series visualization studio</description>-->
+    <!--<title>binjr</title>-->
+    <!--<fileAssociations>-->
+    <!--<fileAssociation>-->
+    <!--<extensions>bjr</extensions>-->
+    <!--<description>binjr Workspace Files</description>-->
+    <!--<contentType>bjr</contentType>-->
+    <!--<icon>binjr.ico</icon>-->
+    <!--</fileAssociation>-->
+    <!--</fileAssociations>-->
+    <!--<bundleArguments>-->
+    <!--&lt;!&ndash;<runtime />&ndash;&gt;-->
+    <!--<licenseFile>LICENSE</licenseFile>-->
+    <!--<win.menuGroup>binjr</win.menuGroup>-->
+    <!--</bundleArguments>-->
+    <!--<skipJNLP>true</skipJNLP>-->
+    <!--</configuration>-->
+    <!--<executions>-->
+    <!--<execution>-->
+    <!--&lt;!&ndash; required before build-native &ndash;&gt;-->
+    <!--<id>fromUrl-jfxjar</id>-->
+    <!--<phase>install</phase>-->
+    <!--<goals>-->
+    <!--<goal>build-jar</goal>-->
+    <!--</goals>-->
+    <!--</execution>-->
+    <!--<execution>-->
+    <!--<id>fromUrl-native</id>-->
+    <!--<phase>install</phase>-->
+    <!--<goals>-->
+    <!--<goal>build-native</goal>-->
+    <!--</goals>-->
+    <!--</execution>-->
+    <!--</executions>-->
+    <!--</plugin>-->
+    <!--<plugin>-->
+    <!--<groupId>de.jutzig</groupId>-->
+    <!--<artifactId>github-release-plugin</artifactId>-->
+    <!--<version>1.2.0</version>-->
+    <!--<executions>-->
+    <!--<execution>-->
+    <!--<phase>deploy</phase>-->
+    <!--<goals>-->
+    <!--<goal>release</goal>-->
+    <!--</goals>-->
+    <!--</execution>-->
+    <!--</executions>-->
+    <!--<configuration>-->
+    <!--<description>binjr v${project.version}</description>-->
+    <!--<releaseName>binjr v${project.version}</releaseName>-->
+    <!--<tag>v${project.version}</tag>-->
+    <!--<prerelease>${github.deploy.prerelease}</prerelease>-->
+    <!--<overwriteArtifact>true</overwriteArtifact>-->
+    <!--<fileSets>-->
+    <!--<fileSet>-->
+    <!--<directory>${project.build.directory}</directory>-->
+    <!--<includes>-->
+    <!--<include>${project.artifactId}.jar</include>-->
+    <!--</includes>-->
+    <!--</fileSet>-->
+    <!--<fileSet>-->
+    <!--<directory>${project.build.directory}/jfx/native/</directory>-->
+    <!--<includes>-->
+    <!--&lt;!&ndash;<include>${project.artifactId}*.exe</include>&ndash;&gt;-->
+    <!--<include>${project.artifactId}*.msi</include>-->
+    <!--<include>${project.artifactId}*.deb</include>-->
+    <!--<include>${project.artifactId}*.rpm</include>-->
+    <!--<include>${project.artifactId}*.dmg</include>-->
+    <!--&lt;!&ndash;<include>${project.artifactId}*.pkg</include>&ndash;&gt;-->
+    <!--</includes>-->
+    <!--</fileSet>-->
+    <!--</fileSets>-->
+    <!--</configuration>-->
+    <!--</plugin>-->
+    <!--</plugins>-->
+    <!--</build>-->
+    <!--</profile>-->
+    <!--</profiles>-->
     <build>
         <finalName>${project.name}</finalName>
         <plugins>
@@ -251,8 +248,8 @@
                 <version>3.6.2</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>1.9</source>
+                    <target>1.9</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -328,10 +325,11 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>${project.name} v${project.version}</description>
+                    <description>This version targets the Java Runtime Environment version 9.&#13;&#13;***NB***: JAXB is no longer implicitly declared in the JRE's classpath, so it is necessary to explicitly add the java.xml.bind module as a VM option:&#13;&#13;    java --add-modules java.xml.bind -jar ${project.name}.jar
+                    </description>
                     <releaseName>${project.name} v${project.version}</releaseName>
-                    <tag>v${project.version}</tag>
-                    <prerelease>${github.deploy.prerelease}</prerelease>
+                    <tag>${project.name}.v${project.version}</tag>
+                    <prerelease>true</prerelease>
                     <overwriteArtifact>true</overwriteArtifact>
                     <!-- If your project has additional artifacts, such as ones produced by
                     the maven-assembly-plugin, you can define the following
@@ -362,7 +360,7 @@
         <dependency>
             <groupId>org.controlsfx</groupId>
             <artifactId>controlsfx</artifactId>
-            <version>8.40.14</version>
+            <version>9.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.gillius</groupId>
@@ -374,11 +372,11 @@
             <artifactId>gson</artifactId>
             <version>2.8.2</version>
         </dependency>
-        <dependency>
-            <groupId>com.migesok</groupId>
-            <artifactId>jaxb-java-time-adapters</artifactId>
-            <version>1.1.3</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.migesok</groupId>-->
+            <!--<artifactId>jaxb-java-time-adapters</artifactId>-->
+            <!--<version>1.1.3</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
