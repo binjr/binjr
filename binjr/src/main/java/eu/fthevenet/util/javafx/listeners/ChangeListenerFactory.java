@@ -18,45 +18,46 @@
 package eu.fthevenet.util.javafx.listeners;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ChangeListenerFactory implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(ChangeListenerFactory.class);
-    private final Map<Property, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
-    private final Map<Property, List<InvalidationListener>> invalidationListeners = new ConcurrentHashMap<>();
+    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
+    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new ConcurrentHashMap<>();
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new ConcurrentHashMap<>();
+    private Hashtable<String, String> h;
 
-    public void attachListener(Property<?> property, ChangeListener listener) {
+    @SuppressWarnings("unchecked")
+    public void attachListener(ObservableValue<?> property, ChangeListener listener) {
         changeListeners.computeIfAbsent(property, p -> new ArrayList<>()).add(listener);
         logger.trace(() -> "Attaching ChangeListener " + listener.toString() + " to property " + property.toString());
         property.addListener(listener);
     }
 
-    public void attachListener(Property<?> property, InvalidationListener listener) {
+    public void attachListener(ObservableValue<?> property, InvalidationListener listener) {
         invalidationListeners.computeIfAbsent(property, p -> new ArrayList<>()).add(listener);
         logger.trace(() -> "Attaching InvalidationListener " + listener.toString() + " to property " + property.toString());
         property.addListener(listener);
 
     }
 
+    @SuppressWarnings("unchecked")
     public void attachListener(ObservableList<?> list, ListChangeListener listener) {
         listChangeListeners.computeIfAbsent(list, p -> new ArrayList<>()).add(listener);
         logger.trace(() -> "Attaching ListChangeListener " + listener.toString() + " to list " + list.toString());
         list.addListener(listener);
     }
 
-    public void detachListener(Property<?> property, ChangeListener<Object> listener) {
+    @SuppressWarnings("unchecked")
+    public void detachListener(ObservableValue<?> property, ChangeListener listener) {
         property.removeListener(listener);
         if (changeListeners.get(property) != null) {
             Optional<ChangeListener> found = changeListeners.get(property).stream().filter(l -> l.equals(listener)).findFirst();
@@ -66,7 +67,8 @@ public class ChangeListenerFactory implements AutoCloseable {
         }
     }
 
-    public void detachListener(Property<?> property, InvalidationListener listener) {
+    @SuppressWarnings("unchecked")
+    public void detachListener(ObservableValue<?> property, InvalidationListener listener) {
         property.removeListener(listener);
         if (invalidationListeners.get(property) != null) {
             Optional<InvalidationListener> found = invalidationListeners.get(property).stream().filter(l -> l.equals(listener)).findFirst();
@@ -76,6 +78,7 @@ public class ChangeListenerFactory implements AutoCloseable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void detachListener(ObservableList<?> list, ListChangeListener<Object> listener) {
         list.removeListener(listener);
         if (listChangeListeners.get(list) != null) {
@@ -86,7 +89,7 @@ public class ChangeListenerFactory implements AutoCloseable {
         }
     }
 
-    public void detachAllInvalidationListeners(Property<?> property) {
+    public void detachAllInvalidationListeners(ObservableValue<?> property) {
         invalidationListeners.get(property).forEach(listener -> {
             property.removeListener(listener);
             logger.trace(() -> "Removing InvalidationListener " + listener.toString() + " to property " + property.toString());
@@ -94,7 +97,8 @@ public class ChangeListenerFactory implements AutoCloseable {
         invalidationListeners.remove(property);
     }
 
-    public void detachAllChangeListeners(Property<?> property) {
+    @SuppressWarnings("unchecked")
+    public void detachAllChangeListeners(ObservableValue<?> property) {
         changeListeners.get(property).forEach(listener -> {
             property.removeListener(listener);
             logger.trace(() -> "Removing ChangeListener " + listener.toString() + " to property " + property.toString());
@@ -102,6 +106,7 @@ public class ChangeListenerFactory implements AutoCloseable {
         changeListeners.remove(property);
     }
 
+    @SuppressWarnings("unchecked")
     public void detachAllListChangeListeners(ObservableList<?> list) {
         listChangeListeners.get(list).forEach(listener -> {
             list.removeListener(listener);
@@ -111,15 +116,16 @@ public class ChangeListenerFactory implements AutoCloseable {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public void close() {
-        invalidationListeners.keySet().forEach(this::detachAllChangeListeners);
-        invalidationListeners.clear();
-        changeListeners.keySet().forEach(this::detachAllChangeListeners);
-        changeListeners.clear();
         listChangeListeners.forEach((list, set) -> set.forEach((listener -> {
             list.removeListener(listener);
             logger.trace(() -> "Removing ListChangeListener " + listener.toString() + " to property " + list.toString());
         })));
         listChangeListeners.clear();
+        invalidationListeners.forEach((k, v) -> v.forEach(k::removeListener));
+        invalidationListeners.clear();
+        changeListeners.forEach((k, v) -> v.forEach(k::removeListener));
+        changeListeners.clear();
     }
 }

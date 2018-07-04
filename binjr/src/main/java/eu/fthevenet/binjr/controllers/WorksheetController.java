@@ -28,7 +28,6 @@ import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.DecimalFormatTableCellFactory;
-import eu.fthevenet.util.javafx.controls.DelayedAction;
 import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
 import eu.fthevenet.util.javafx.listeners.ChangeListenerFactory;
 import eu.fthevenet.util.logging.Profiler;
@@ -71,7 +70,6 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -83,6 +81,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -103,6 +102,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final double Y_AXIS_SEPARATION = 10;
     private final MainViewController parentController;
     private volatile boolean preventReload = false;
+    AtomicBoolean closed = new AtomicBoolean(false);
 
     @FXML
     public AnchorPane root;
@@ -663,9 +663,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 worksheet.getCharts().add(idx + 1, currentViewPort.dataStore);
             });
 
-
             toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
-
             titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
             HBox hBox = new HBox();
             hBox.setAlignment(Pos.CENTER);
@@ -776,11 +774,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @Override
     public void close() {
-        logger.debug(() -> "Closing worksheetController " + this.toString());
-        listenerFactory.close();
-        currentState.close();
-        ;
-        //  viewPorts = null;
+        if (closed.compareAndSet(false, true)) {
+            logger.debug(() -> "Closing worksheetController " + this.toString());
+            listenerFactory.close();
+            currentState.close();
+            viewPorts = null;
+        }
     }
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
@@ -956,16 +955,24 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                 .collect(Collectors.toList());
                     },
                     event -> {
-                        worksheetMaskerPane.setVisible(false);
-                        viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                        // Force a redraw of the charts and their Y Axis considering their proper width.
-                        new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                        if (!closed.get()) {
+                            worksheetMaskerPane.setVisible(false);
+                            viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                            // Force a redraw of the charts and their Y Axis considering their proper width.
+//                            new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                        }
                     },
                     event -> {
-                        worksheetMaskerPane.setVisible(false);
-                        Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                        if (!closed.get()) {
+                            worksheetMaskerPane.setVisible(false);
+                            Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                        }
                     });
         }
+    }
+
+    private void abortIfClosed() {
+
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {
@@ -979,7 +986,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         case STACKED:
                             ObservableList<Node> children = ((Group) newNode).getChildren();
                             if (children != null && children.size() >= 1) {
-
                                 Path stroke = (Path) children.get(1);
                                 Path fill = (Path) children.get(0);
                                 logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
@@ -1095,12 +1101,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private class ChartViewPort<T extends Number> {
-        private final Chart<T> dataStore;
-        private final XYChart<ZonedDateTime, T> chart;
-        private final ChartPropertiesController<T> propertiesController;
-        private final PrefixFormatter prefixFormatter;
-        private final TableView<TimeSeriesInfo<Double>> seriesTable;
-        private long lastRedrawTime = 0;
+        private Chart<T> dataStore;
+        private XYChart<ZonedDateTime, T> chart;
+        private ChartPropertiesController<T> propertiesController;
+        private PrefixFormatter prefixFormatter;
+        private TableView<TimeSeriesInfo<Double>> seriesTable;
 
         private ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
             this.dataStore = dataStore;

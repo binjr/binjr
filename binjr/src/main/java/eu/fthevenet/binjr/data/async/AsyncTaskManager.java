@@ -90,6 +90,7 @@ public class AsyncTaskManager {
         t.setOnSucceeded(onSucceeded);
         t.setOnFailed(onFailed);
         logger.trace(() -> "Task " + t.toString() + " submitted");
+
         return threadPool.submit(t);
     }
 

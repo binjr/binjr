@@ -53,7 +53,7 @@ public class Dialogs {
      * @param e the exception to display
      */
     public static void notifyException(Throwable e) {
-        notifyException(e.getLocalizedMessage(), e, null);
+        notifyException(e.getMessage(), e, null);
     }
 
     /**

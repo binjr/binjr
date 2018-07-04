@@ -5,6 +5,7 @@
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
+    -binjr-warning-color:tomato;
 }
 
 /********************************
@@ -13,13 +14,13 @@
 {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-    -icon-color:black;
+    /*-icon-color:black;*/
 }
 
 .command-bar *{
     -icon-scale-x: 2.5;
     -icon-scale-y: 2.5;
-    -icon-color: black;
+   /* -icon-color: black;*/
 }
 
 .command-bar .context-menu * {
@@ -276,3 +277,5 @@
     -fx-padding:4;
     -fx-background-color: rgba(10,10,10,0.7);
 }
+
+

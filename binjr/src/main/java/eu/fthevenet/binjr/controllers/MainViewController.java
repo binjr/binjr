@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.Binjr;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
@@ -33,6 +34,8 @@ import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
+import eu.fthevenet.util.diagnositic.DiagnosticCommand;
+import eu.fthevenet.util.diagnositic.DiagnosticException;
 import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
@@ -97,10 +100,11 @@ public class MainViewController implements Initializable {
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
-    private final Map<EditableTab, WorksheetController> seriesControllers = new HashMap<>();
+    private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+    public MenuButton debugMenuButton;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
@@ -177,6 +181,7 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
+        debugMenuButton.setVisible(Binjr.runtimeDebuggingFeatures.isDebugEnabled());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -550,8 +555,11 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
+        logger.trace(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
         sourcesTabPane.clearAllTabs();
+        seriesControllers.clear();
+        sourcesAdapters.clear();
         workspace.clear();
     }
 
@@ -723,19 +731,6 @@ public class MainViewController implements Initializable {
             WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
 
             try {
-//                // Attach bindings
-//                for (Chart<Double> chart : worksheet.getCharts()) {
-//                    for (TimeSeriesInfo<?> s : chart.getSeries()){// .flatMap(Collection::stream).collect(Collectors.toList())) {
-//                        UUID id = s.getBinding().getAdapterId();
-//                        DataAdapter<?, ?> da = sourcesAdapters.values()
-//                                .stream()
-//                                .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-//                                .findAny()
-//                                .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-//                        s.getBinding().setAdapter(da);
-//                        s.selectedProperty().addListener(current.weakListener((observable, oldValue, newValue) -> getSelectedWorksheetController().refresh(chart)));
-//                    }
-//                }
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
                 FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
@@ -1119,6 +1114,80 @@ public class MainViewController implements Initializable {
             return null;
         }
         return seriesControllers.get(selectedTab);
+    }
+
+    public void handleDebugForceGC(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
+        System.gc();
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+
+    }
+
+    public void handleDebugRunFinalization(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
+        System.runFinalization();
+    }
+
+    public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+    }
+
+    public void handleDebugDumpThreadsStacks(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpVmSystemProperties(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpClassHistogram(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    private String getJvmHeapStats() {
+        Runtime rt = Runtime.getRuntime();
+        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
+        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
+        double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
+        double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
+
+        return String.format(
+                "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
+                maxMB,
+                committedMB,
+                usedMB,
+                percentCommitted,
+                percentMax
+        );
+    }
+
+    public void handleDebugDumpVmFlags(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpVmCommandLine(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
     }
     //endregion
 }

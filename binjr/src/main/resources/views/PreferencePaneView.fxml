@@ -22,7 +22,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.ToggleSwitch?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
     <children>
         <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
             <graphic>

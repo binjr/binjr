@@ -52,6 +52,7 @@ public class PreferenceDialogController implements Initializable {
     private static final Logger logger = LogManager.getLogger(PreferenceDialogController.class);
     @FXML
     public TextField downSamplingThreshold;
+    //public TitledPane debugTitledPane;
     @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
@@ -90,6 +91,7 @@ public class PreferenceDialogController implements Initializable {
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));

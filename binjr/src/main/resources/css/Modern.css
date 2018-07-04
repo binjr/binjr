@@ -16,6 +16,8 @@
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
     -binjr-gray-border-color: #C8C8C8;
+    -binjr-warning-color:TOMATO;
+
 }
 
 .column-bold-text{
@@ -27,10 +29,16 @@
 *      button icons
 ********************************/
 
+
 .command-bar * {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-    -icon-color: white;
+  -icon-color: white;
+}
+
+
+.command-bar .icon-container {
+     -icon-color: white;
 }
 
 .command-bar .menu-icon {
@@ -46,6 +54,7 @@
 
 .context-menu .icon-container {
     -fx-padding: 0 14 0 8;
+
 }
 
 .command-bar .context-menu * {
@@ -678,8 +687,9 @@
 }*/
 
 .command-bar .titled-pane:focused > .title > .arrow-button > .arrow {
-    -fx-background-color: white;
     -fx-background-insets: 0;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0;
     -fx-effect: null;/* dropshadow(two-pass-box , -fx-focus-color, 5, 0.2 , 0, 0);*/
 }
 
@@ -1122,7 +1132,7 @@
 }
 
 .title-pane-tool-bar{
-   -fx-spacing:3;
+    -fx-spacing:3;
     -fx-padding:3;
 }
 
@@ -1259,3 +1269,16 @@
       -fx-padding:-2;
        visibility: hidden;
    }
+
+
+.debug .text,
+.debug .arrow{
+    -fx-effect:null;
+    -fx-fill:-binjr-warning-color;
+    -fx-text-fill:-binjr-warning-color;
+}
+.debug .arrow,
+.debug-icon
+ {
+    -fx-background-color:-binjr-warning-color;
+}
