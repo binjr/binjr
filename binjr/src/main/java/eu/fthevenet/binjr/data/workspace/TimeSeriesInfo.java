@@ -114,6 +114,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @return the display name fo the series
      */
+    @XmlAttribute
     public String getDisplayName() {
         return displayName.get();
     }
@@ -141,6 +142,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @return true if the series is selected, false otherwise
      */
+    @XmlAttribute
     public boolean isSelected() {
         return selected.get();
     }
@@ -168,6 +170,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @return the display color for the series
      */
+    @XmlAttribute
     public Color getDisplayColor() {
         return displayColor.getValue();
     }

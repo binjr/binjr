@@ -24,6 +24,7 @@ import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import javafx.beans.property.BooleanProperty;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.Map;
 import java.util.UUID;
 
@@ -35,17 +36,19 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Source")
 public class Source implements Dirtyable {
+    @XmlAttribute(name = "id")
     private UUID adapterId;
-    @XmlElement(name = "Name")
+    @XmlAttribute(name = "name")
     @IsDirtyable
     private String name;
-    @XmlElement(name = "Adapter")
+    @XmlAttribute(name = "adapter")
     private String adapterClassName;
-    @XmlElementWrapper(name = "Parameters")
-    @XmlElements(@XmlElement(name = "Parameter"))
+    @XmlJavaTypeAdapter(ParameterMapAdapter.class)
+    @XmlElement(name = "AdapterParameters")
     private Map<String, String> adapterParams;
     @XmlTransient
     private final ChangeWatcher status;
+
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}

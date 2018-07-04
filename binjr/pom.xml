@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr.java9</name>
     <url>http://www.binjr.eu</url>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.3.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>A time-series visualization tool</description>
     <organization>

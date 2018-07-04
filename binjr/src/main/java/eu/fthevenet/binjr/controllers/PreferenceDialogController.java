@@ -52,10 +52,9 @@ public class PreferenceDialogController implements Initializable {
     private static final Logger logger = LogManager.getLogger(PreferenceDialogController.class);
     @FXML
     public TextField downSamplingThreshold;
+    //public TitledPane debugTitledPane;
     @FXML
     private ToggleSwitch enableDownSampling;
-    @FXML
-    private ToggleSwitch enableChartAnimation;
     @FXML
     private Label maxSampleLabel;
     @FXML
@@ -83,7 +82,6 @@ public class PreferenceDialogController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert downSamplingThreshold != null : "fx:id\"RDPEpsilon\" was not injected!";
-        assert enableChartAnimation != null : "fx:id\"enableChartAnimation\" was not injected!";
         assert enableDownSampling != null : "fx:id\"enableDownSampling\" was not injected!";
         assert maxSampleLabel != null : "fx:id\"maxSampleLabel\" was not injected!";
         assert accordionPane != null : "fx:id\"accordionPane\" was not injected!";
@@ -93,15 +91,14 @@ public class PreferenceDialogController implements Initializable {
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-        enableChartAnimation.selectedProperty().bindBidirectional(prefs.chartAnimationEnabledProperty());
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));

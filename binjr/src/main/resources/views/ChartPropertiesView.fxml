@@ -22,7 +22,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="349.0" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" focusTraversable="true" prefHeight="459.0" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
         <graphic>
             <Region styleClass="cross-icon"/>
@@ -36,7 +36,7 @@
             <Insets left="5.0"/>
         </padding>
     </Label>
-    <ScrollPane fitToHeight="true" fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
+    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="399.0" prefWidth="190.0" AnchorPane.bottomAnchor="25.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
         <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
         </padding>
@@ -66,6 +66,44 @@
                         <Label fx:id="opacityText" text="100%"/>
                     </HBox>
                 </VBox>
+                <Separator prefWidth="200.0"/>
+                <!--<CheckBox fx:id="autoScaleYAxis" mnemonicParsing="false" text="Auto Scale Y Axis"/>-->
+                <Label text="Auto Scale Y Axis" wrapText="true"/>
+                <VBox fillWidth="false">
+                    <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
+                </VBox>
+                <HBox fx:id="yAxisScaleSettings" alignment="CENTER_LEFT">
+                    <children>
+                        <GridPane hgap="5.0" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" vgap="10.0">
+                            <columnConstraints>
+                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="-Infinity"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="30.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                                <RowConstraints vgrow="SOMETIMES"/>
+                            </rowConstraints>
+                            <children>
+                                <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="2">
+                                    <tooltip>
+                                        <Tooltip text="Lower bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+                                    <tooltip>
+                                        <Tooltip text="Upper bound for the Y axis"/>
+                                    </tooltip>
+                                </TextField>
+                                <Label text="Min:" GridPane.columnIndex="1"/>
+                                <Label text="Max:" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                            </children>
+                            <HBox.margin>
+                                <Insets/>
+                            </HBox.margin>
+                        </GridPane>
+                    </children>
+                </HBox>
                 <Separator prefWidth="200.0"/>
                 <Label text="Timezone"/>
                 <VBox>

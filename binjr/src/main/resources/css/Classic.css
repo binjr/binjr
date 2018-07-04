@@ -5,6 +5,7 @@
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
+    -binjr-warning-color:tomato;
 }
 
 /********************************
@@ -13,13 +14,13 @@
 {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-    -icon-color:black;
+    /*-icon-color:black;*/
 }
 
 .command-bar *{
     -icon-scale-x: 2.5;
     -icon-scale-y: 2.5;
-    -icon-color: black;
+   /* -icon-color: black;*/
 }
 
 .command-bar .context-menu * {
@@ -218,3 +219,63 @@
     -fx-border-insets: 0;
     -fx-alignment: center;
 }
+ .chart,
+ .chart-plot-background{
+    -fx-background-color: transparent;
+    -fx-border-width:0;
+   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
+   /*    -fx-font-size: 10pt;*/
+ }
+
+  .chart-viewport-parent {
+   -fx-background-color: white;
+  }
+
+  .worksheet-tool-bar{
+       -fx-padding:5;
+       -fx-spacing:5;
+  }
+
+.title-pane-tool-bar{
+   -fx-spacing:3;
+}
+
+
+  /*******************************************************************************
+   *                                                                             *
+   * MaskerPane                                                                  *
+   *                                                                             *
+   ******************************************************************************/
+   .masker-pane {}
+
+   .masker-pane .masker-glass {
+      /* -fx-background-color: rgba(0, 0, 0, .3);*/
+       -fx-background-color: rgba(255, 255, 255, .6);
+      /* -fx-background-color: transparent;*/
+   }
+
+   .masker-pane .masker-text {
+      -visibility:false;
+       -fx-text-fill: white;
+       -fx-font-weight: bold;
+   }
+
+   .masker-pane .masker-center {
+       -fx-background-color:transparent;
+      /*  -fx-background-color: rgba(255, 255, 255, .6);
+     /*  -fx-background-color: rgba(0, 0, 0, .6);*/
+
+       -fx-max-height: 1.50in;
+       -fx-padding: .25in;
+       -fx-background-radius: .1in;
+   }
+
+.crosshair-axis-label {
+    -fx-text-fill: white;
+    -fx-font-size: 10;
+    -fx-background-radius: 4;
+    -fx-padding:4;
+    -fx-background-color: rgba(10,10,10,0.7);
+}
+
+

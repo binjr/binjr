@@ -21,8 +21,8 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import org.controlsfx.control.*?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+<?import org.controlsfx.control.ToggleSwitch?>
+<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
     <children>
         <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
             <graphic>
@@ -31,7 +31,7 @@
         </Button>
         <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
             <panes>
-                <TitledPane animated="true" text="Appearance &amp; Behavior">
+                <TitledPane animated="false" text="Appearance &amp; Behavior">
                     <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                             <content>
@@ -62,7 +62,7 @@
                         </ScrollPane>
                     </content>
                 </TitledPane>
-                <TitledPane fx:id="chartPrefsPane" animated="true" text="Charts Default">
+                <TitledPane fx:id="chartPrefsPane" animated="false" text="Charts Default">
                     <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                             <content>
@@ -71,16 +71,6 @@
                                     <children>
                                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <Label text="Enable animation" wrapText="true"/>
-                                                <VBox fillWidth="false">
-                                                    <children>
-                                                        <ToggleSwitch fx:id="enableChartAnimation" prefWidth="1.0">
-                                                            <font>
-                                                                <Font size="10.0"/>
-                                                            </font>
-                                                        </ToggleSwitch>
-                                                    </children>
-                                                </VBox>
                                                 <Label text="Show outline on area charts" wrapText="true"/>
                                                 <VBox fillWidth="false">
                                                     <children>
@@ -146,7 +136,7 @@
                         </ScrollPane>
                     </content>
                 </TitledPane>
-                <TitledPane animated="true" text="Updates">
+                <TitledPane animated="false" text="Updates">
                     <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                             <content>

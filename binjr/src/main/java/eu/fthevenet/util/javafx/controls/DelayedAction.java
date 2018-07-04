@@ -29,7 +29,7 @@ import javafx.util.Duration;
 public class DelayedAction {
     private Task<Object> delayedTask;
 
-    public DelayedAction(Duration delay, Runnable action) {
+    public DelayedAction(Runnable action, Duration delay) {
 
         delayedTask = new Task<Object>() {
             @Override
@@ -39,9 +39,15 @@ public class DelayedAction {
             }
         };
         delayedTask.setOnSucceeded(event -> action.run());
+
     }
 
     public void submit() {
         AsyncTaskManager.getInstance().submit(delayedTask);
     }
+
+    public static void run(Runnable action, Duration delay) {
+        new DelayedAction(action, delay).submit();
+    }
+
 }

@@ -17,30 +17,23 @@
   ~
   -->
 
-<?import eu.fthevenet.util.javafx.controls.*?>
+<?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.shape.Polyline?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<?import java.lang.*?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111"
-            xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
-            <AnchorPane prefHeight="70.0" prefWidth="666.0">
+            <AnchorPane>
                 <children>
-                    <HBox alignment="CENTER_LEFT" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="back" textAlignment="CENTER">
-                            <HBox.margin>
-                                <Insets left="5.0"/>
-                            </HBox.margin>
+                    <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
+                                textAlignment="CENTER">
+
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/backArrow_40.png"/>
@@ -54,9 +47,8 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="forward" textAlignment="CENTER">
+                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
+                                textAlignment="CENTER">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/forwardArrow_40.png"/>
@@ -70,9 +62,8 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="refresh" textAlignment="CENTER">
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
+                                textAlignment="CENTER">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/refresh_40.png"/>
@@ -89,98 +80,30 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <GridPane hgap="10.0" vgap="10.0">
-                            <columnConstraints>
-                                <ColumnConstraints hgrow="SOMETIMES"/>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0"/>
-                                <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES"/>
-                                <ColumnConstraints hgrow="SOMETIMES"/>
-                                <ColumnConstraints hgrow="SOMETIMES" minWidth="50.0"/>
-                            </columnConstraints>
-                            <rowConstraints>
-                                <RowConstraints vgrow="SOMETIMES"/>
-                                <RowConstraints vgrow="SOMETIMES"/>
-                            </rowConstraints>
-                            <children>
-                                <ZonedDateTimePicker fx:id="startDate" minWidth="50.0" GridPane.columnIndex="1">
-                                    <tooltip>
-                                        <Tooltip text="Lower bound for the X axis"/>
-                                    </tooltip>
-                                </ZonedDateTimePicker>
-                                <ZonedDateTimePicker fx:id="endDate" minWidth="50.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
-                                    <tooltip>
-                                        <Tooltip text="Upper bound for the X axis"/>
-                                    </tooltip>
-                                </ZonedDateTimePicker>
-                                <Label text="From:"/>
-                                <Label text="To:" GridPane.rowIndex="1"/>
-                                <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="4">
-                                    <tooltip>
-                                        <Tooltip text="Lower bound for the Y axis"/>
-                                    </tooltip>
-                                </TextField>
-                                <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="4" GridPane.rowIndex="1">
-                                    <tooltip>
-                                        <Tooltip text="Upper bound for the Y axis"/>
-                                    </tooltip>
-                                </TextField>
-                                <Label text="Min:" GridPane.columnIndex="3"/>
-                                <Label text="Max:" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                            </children>
+                        <Label minWidth="-Infinity" text="From:">
                             <HBox.margin>
-                                <Insets bottom="5.0" left="10.0" top="5.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </HBox.margin>
-                        </GridPane>
-                        <VBox alignment="CENTER_LEFT" HBox.hgrow="NEVER">
-                            <Polyline stroke="#b5b5b5" strokeType="INSIDE">
-                                <points>
-                                    <Double fx:value="0.0"/>
-                                    <Double fx:value="0.0"/>
-                                    <Double fx:value="0.0"/>
-                                    <Double fx:value="-7.0"/>
-                                    <Double fx:value="-15.0"/>
-                                    <Double fx:value="-7.0"/>
-                                </points>
-                            </Polyline>
-                            <ToggleButton fx:id="autoScaleYAxisToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="21.0" maxWidth="21.0" minHeight="21.0" minWidth="21.0" mnemonicParsing="false"
-                                          prefHeight="21.0"
-                                          prefWidth="21.0" selected="true" textOverrun="CLIP">
-                                <graphic>
-                                    <ImageView fitHeight="15" fitWidth="11">
-                                        <Image url="@/images/autoScale.png"/>
-                                    </ImageView>
-                                </graphic>
-                                <font>
-                                    <Font size="1.0"/>
-                                </font>
-                                <VBox.margin>
-                                    <Insets bottom="2.0" left="4.0" right="10.0" top="2.0"/>
-                                </VBox.margin>
-                                <tooltip>
-                                    <Tooltip text="Automatically set the range for the Y axis">
-                                        <font>
-                                            <Font size="10.0"/>
-                                        </font>
-                                    </Tooltip>
-                                </tooltip>
-                            </ToggleButton>
-                            <Polyline stroke="#b5b5b5" strokeType="INSIDE">
-                                <points>
-                                    <Double fx:value="0.0"/>
-                                    <Double fx:value="7.0"/>
-                                    <Double fx:value="15.0"/>
-                                    <Double fx:value="7.0"/>
-                                    <Double fx:value="15.0"/>
-                                    <Double fx:value="0.0"/>
-                                </points>
-                            </Polyline>
+                        </Label>
+                        <ZonedDateTimePicker fx:id="startDate" minWidth="50.0">
+                            <tooltip>
+                                <Tooltip text="Lower bound for the X axis"/>
+                            </tooltip>
+                        </ZonedDateTimePicker>
+                        <Label minWidth="-Infinity" text="To:">
                             <HBox.margin>
-                                <Insets left="2.0"/>
+                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </HBox.margin>
-                        </VBox>
-                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" styleClass="dialog-button" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false"
-                                prefHeight="40.0" prefWidth="40.0" text="Snapshot">
+                        </Label>
+                        <ZonedDateTimePicker fx:id="endDate" minWidth="50.0">
+                            <tooltip>
+                                <Tooltip text="Upper bound for the X axis"/>
+                            </tooltip>
+                            <HBox.margin>
+                                <Insets right="5.0"/>
+                            </HBox.margin>
+                        </ZonedDateTimePicker>
+                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/snapshot_40.png"/>
@@ -194,8 +117,7 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                      prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/lockCrosshairVertical_40.png"/>
@@ -209,8 +131,7 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                      prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                        <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
                                 <ImageView fitHeight="20.0" fitWidth="20.0">
                                     <Image url="@/images/lockCrosshairHorizontal_40.png"/>
@@ -224,11 +145,43 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
+                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Add Chart">
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <Region styleClass="addWorksheet-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Add a new chart to the current worksheet.">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Chart layout">>
+                            <tooltip>
+                                <Tooltip text="Select chart layout">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <Region styleClass="layout-icon"/>
+                                </HBox>
+                            </graphic>
+                        </MenuButton>
                     </HBox>
                 </children>
+                <VBox.margin>
+                    <Insets top="1.0"/>
+                </VBox.margin>
             </AnchorPane>
         </VBox>
-        <SplitPane dividerPositions="0.6949" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0" VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
@@ -236,8 +189,8 @@
                 <cursor>
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
-                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
-                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="0.0">
                     <children>
                         <!--<StackPane fx:id="chartPlaceHolder"/>-->
                         <!--<StackPane fx:id="crosshairPlaceHolder"/>-->
@@ -246,50 +199,57 @@
                         <!--</StackPane>-->
                     </children>
                 </AnchorPane>
-                <MaskerPane text="" fx:id="worksheetMaskerPane" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
                 <children>
-                    <TableView fx:id="seriesTable" editable="true" layoutX="125.0" layoutY="-22.0" prefHeight="200.0" prefWidth="200.0" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
-                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <columns>
-                            <TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="selected"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">
-                            </TableColumn>
-                            <TableColumn prefWidth="160.0" sortable="false" text="Name">
-                                <cellValueFactory>
-                                    <PropertyValueFactory property="displayName"/>
-                                </cellValueFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" text="Current" styleClass="column-bold-text">
-                                <cellFactory>
-                                    <DecimalFormatTableCellFactory alignment="RIGHT"/>
-                                </cellFactory>
-                            </TableColumn>
-                            <TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">
-                            </TableColumn>
-                        </columns>
-                    </TableView>
+                    <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <panes>
+                            <!--<TitledPane animated="false" text="untitled 1">-->
+                            <!--<content>-->
+                            <!--<TableView fx:id="seriesTable" editable="true" prefHeight="91.0" prefWidth="647.0" styleClass="skinnable-pane-border">-->
+                            <!--<columns>-->
+                            <!--<TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">-->
+                            <!--<cellValueFactory>-->
+                            <!--<PropertyValueFactory property="selected" />-->
+                            <!--</cellValueFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn prefWidth="160.0" sortable="false" text="Name">-->
+                            <!--<cellValueFactory>-->
+                            <!--<PropertyValueFactory property="displayName" />-->
+                            <!--</cellValueFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" styleClass="column-bold-text" text="Current">-->
+                            <!--<cellFactory>-->
+                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
+                            <!--</cellFactory>-->
+                            <!--</TableColumn>-->
+                            <!--<TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">-->
+                            <!--</TableColumn>-->
+                            <!--</columns>-->
+                            <!--</TableView>-->
+                            <!--</content>-->
+                            <!--</TitledPane>-->
+                        </panes>
+                    </Accordion>
                 </children>
             </AnchorPane>
         </SplitPane>

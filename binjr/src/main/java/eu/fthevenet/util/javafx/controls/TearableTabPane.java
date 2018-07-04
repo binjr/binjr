@@ -18,7 +18,10 @@
 package eu.fthevenet.util.javafx.controls;
 
 
+import eu.fthevenet.util.javafx.listeners.ChangeListenerFactory;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -32,6 +35,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
@@ -52,7 +56,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class TearableTabPane extends TabPane {
+public class TearableTabPane extends TabPane implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(TearableTabPane.class);
     private boolean tearable;
     private boolean reorderable;
@@ -63,6 +67,7 @@ public class TearableTabPane extends TabPane {
     private EventHandler<ActionEvent> onAddNewTab;
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
+    private ChangeListenerFactory listenerFactory = new ChangeListenerFactory();
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -84,11 +89,8 @@ public class TearableTabPane extends TabPane {
         this.manager = manager;
         this.tearable = tearable;
         this.reorderable = reorderable;
-        this.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                this.manager.setSelectedTab(newValue);
-            }
-        });
+
+        listenerFactory.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
         this.getTabs().addListener((ListChangeListener<Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -104,7 +106,7 @@ public class TearableTabPane extends TabPane {
                     }
                 }
             }
-            logger.trace("Tearable tabs in tab pane: " +
+            logger.trace(() -> "Tearable tabs in tab pane: " +
                     tearableTabMap.keySet().stream()
                             .map(tab -> tab.getText() == null ? tab.toString() : tab.getText())
                             .reduce((s, s2) -> s + " " + s2).orElse("null"));
@@ -363,6 +365,8 @@ public class TearableTabPane extends TabPane {
         newTabButton.setId("newTabButton");
         newTabButton.setFocusTraversable(false);
         Pane headersRegion = (Pane) this.lookup(".headers-region");
+        Region headerArea = (Region) this.lookup(".tab-header-area");
+
         logger.debug("headersRegion.getHeight() = " + headersRegion.getHeight());
         logger.debug("headersRegion.getPrefHeight = " + headersRegion.getPrefHeight());
         newTabButton.getStyleClass().add("add-tab-button");
@@ -386,27 +390,19 @@ public class TearableTabPane extends TabPane {
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
         switch (getSide()) {
             case TOP:
+            case BOTTOM:
                 newTabButton.translateXProperty().bind(
                         headersRegion.widthProperty()
+                                .add(Bindings.createDoubleBinding(() -> headerArea.getInsets().getLeft(), headerArea.insetsProperty()))
                 );
                 break;
             case LEFT:
-                newTabButton.translateXProperty().bind(
-                        tabHeaderBg.widthProperty()
-                                .subtract(headersRegion.widthProperty())
-                                .subtract(newTabButton.widthProperty())
-                );
-                break;
-            case BOTTOM:
-                newTabButton.translateXProperty().bind(
-                        tabHeaderBg.widthProperty()
-                                .subtract(headersRegion.widthProperty())
-                                .subtract(newTabButton.widthProperty())
-                );
-                break;
             case RIGHT:
                 newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty()
+                        tabHeaderBg.widthProperty()
+                                .subtract(headersRegion.widthProperty())
+                                .subtract(newTabButton.widthProperty())
+                                .subtract(Bindings.createDoubleBinding(() -> headerArea.getInsets().getTop(), headerArea.insetsProperty()))
                 );
                 break;
             default:
@@ -446,6 +442,7 @@ public class TearableTabPane extends TabPane {
                     onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
                 }
                 stage.close();
+                this.close();
             }
         });
         if (onOpenNewWindow != null) {
@@ -456,6 +453,11 @@ public class TearableTabPane extends TabPane {
         stage.setOnCloseRequest(event -> {
             detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
         });
+    }
+
+    public void close() {
+        logger.trace(() -> "Closing down TearableTabPane instance");
+        listenerFactory.close();
     }
 
     /**
@@ -547,12 +549,7 @@ public class TearableTabPane extends TabPane {
 
         public void setSelectedTab(Tab selectedTab) {
             this.selectedTab = selectedTab;
-            logger.trace(() -> {
-                if (selectedTab == null) {
-                    return "Selected tab: null)";
-                }
-                return "Selected Tab: " + selectedTab.toString() + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab);
-            });
+            logger.trace(() -> "Selected Tab: " + ((selectedTab == null) ? "null" : selectedTab.toString() + " " + getId(selectedTab) + " " + tabToPaneMap.get(selectedTab)));
         }
 
         public void setMovingTab(boolean movingTab) {

@@ -45,6 +45,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
      * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
      */
     private static final int NUM_MINOR_TICKS = 3;
+    public static final int BTN_WITDTH = 21;
 
     private final Timeline animationTimeline = new Timeline();
     private final WritableValue<Double> scaleValue = new WritableValue<Double>() {
@@ -58,6 +59,9 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
             setScale(value);
         }
     };
+//    private final Button minAxisButton = new Button();
+//    private final Button maxAxisButton = new Button();
+//    private final ToggleButton centerAxisButton = new ToggleButton();
 
     private AxisTickFormatter axisTickFormatter;
     private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
@@ -75,6 +79,16 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     private BooleanProperty forceZeroInRange = new SimpleBooleanProperty(true);
 
     public StableTicksAxis(PrefixFormatter prefixFormatter) {
+        super();
+        getStyleClass().setAll("axis");
+
+//        minAxisButton.setPrefHeight(10);
+//        minAxisButton.setPrefWidth(10);
+//        centerAxisButton.setGraphic(new ImageView(this.getClass().getResource("/images/autoScale.png").toString()));
+//        maxAxisButton.setPrefHeight(10);
+//        maxAxisButton.setPrefWidth(10);
+//        getChildren().addAll(maxAxisButton, minAxisButton, centerAxisButton);
+
         this.axisTickFormatter = new AxisTickFormatter() {
             @Override
             public void setRange(double v, double v1, double v2) {
@@ -322,4 +336,57 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
                     '}';
         }
     }
+//
+//
+//    @Override
+//    protected double computePrefWidth(double height) {
+//        final Side side = getSide();
+//        if (side.isVertical()) {
+//            return super.computePrefWidth(height) + BTN_WITDTH +2;
+//        }
+//        else { // HORIZONTAL
+//            // TODO for now we have no hard and fast answer here, I guess it should work
+//            // TODO out the minimum size needed to display min, max and zero tick mark labels.
+//            return 100;
+//        }
+//    }
+//
+//    @Override
+//    protected double computePrefHeight(double width) {
+//        final Side side = getSide();
+//        if (side.isVertical()) {
+//            // TODO for now we have no hard and fast answer here, I guess it should work
+//            // TODO out the minimum size needed to display min, max and zero tick mark labels.
+//            return 100;
+//        }
+//        else { // HORIZONTAL
+//
+//            return super.computePrefHeight(width) + BTN_WITDTH + 2;
+//        }
+//    }
+//
+//    @Override
+//    protected void layoutChildren() {
+//        super.layoutChildren();
+//
+//        Side side = this.getSide();
+//        final double width = getWidth();
+//        final double height = getHeight();
+//
+//         maxAxisButton.setLayoutX(20);
+//        maxAxisButton.setLayoutY(-(BTN_WITDTH/2));
+//
+//
+//
+//        maxAxisButton.resize(BTN_WITDTH, BTN_WITDTH); //Math.ceil(maxAxisButton.prefHeight(width)));
+//
+//        minAxisButton.setLayoutX(20);
+//        minAxisButton.setLayoutY(height - (BTN_WITDTH/2));
+//        minAxisButton.resize(BTN_WITDTH, BTN_WITDTH);
+//
+//        centerAxisButton.setLayoutX(20);
+//        centerAxisButton.setLayoutY((int)(height/2) -(BTN_WITDTH/2));
+//        centerAxisButton.resize(BTN_WITDTH, BTN_WITDTH);
+//
+//    }
 }

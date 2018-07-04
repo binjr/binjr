@@ -20,8 +20,10 @@ package eu.fthevenet.binjr.data.workspace;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import eu.fthevenet.binjr.data.exceptions.CannotLoadWorkspaceException;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.version.Version;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
@@ -33,7 +35,9 @@ import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,7 +53,9 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "1.2";
+    public static final String WORKSPACE_SCHEMA_VERSION = "2.0";
+    public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("2.0");
+
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
     @XmlElementWrapper(name = "Sources")
@@ -65,7 +71,7 @@ public class Workspace implements Dirtyable {
     @XmlTransient
     private final ChangeWatcher status;
     @XmlAttribute(name = "schemaVersion", required = false)
-    private final String schemaVersion = WORKSPACE_SCHEMA_VERSION;
+    private final Version schemaVersion = new Version(WORKSPACE_SCHEMA_VERSION);
     @XmlAttribute(name = "producerInfo", required = false)
     private final String producerInfo;
 
@@ -267,10 +273,8 @@ public class Workspace implements Dirtyable {
      * @throws IOException   if an IO error occurs when accessing the file
      * @throws JAXBException if an error occurs while deserializing the file
      */
-    public static Workspace from(File file) throws IOException, JAXBException {
-        if (file == null) {
-            throw new IllegalArgumentException("File cannot be null");
-        }
+    public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
+        sanityCheck(file);
         Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
@@ -291,5 +295,36 @@ public class Workspace implements Dirtyable {
     @Override
     public void cleanUp() {
         this.status.cleanUp();
+    }
+
+    private static void sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        if (!file.exists()) {
+            throw new FileNotFoundException("Could not find specified workspace file " + file.getPath());
+        }
+
+        try {
+            String verStr = XmlUtils.getFirstAttributeValue(file, "schemaVersion");
+            if (verStr == null) {
+                throw new CannotLoadWorkspaceException(
+                        "Could not determine the workspace's schema version: it was probably produced with an older, incompatible version of binjr." +
+                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
+            }
+            Version foundVersion = new Version(verStr);
+
+            if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
+                throw new CannotLoadWorkspaceException(
+                        "This workspace is not compatible with the current version of binjr. (Minimum supported schema version="
+                                + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString()
+                                + ", found="
+                                + foundVersion.toString() + ")");
+
+            }
+        } catch (XMLStreamException e) {
+            throw new CannotLoadWorkspaceException("Error retrieving bjr schema version", e);
+        }
+
     }
 }

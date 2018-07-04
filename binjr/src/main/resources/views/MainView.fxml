@@ -219,16 +219,6 @@
             </tooltip>
             <items>
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
-                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddJrdsSource" text="JRDS">-->
-                    <!--<accelerator>-->
-                    <!--<KeyCodeCombination alt="UP" code="J" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
-                    <!--</accelerator>-->
-                    <!--</MenuItem>-->
-                    <!--<MenuItem mnemonicParsing="false" onAction="#handleAddCsvSource" text="CSV File">-->
-                    <!--<accelerator>-->
-                    <!--<KeyCodeCombination alt="UP" code="V" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
-                    <!--</accelerator>-->
-                    <!--</MenuItem>-->
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addSource-icon"/>
@@ -272,10 +262,9 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-
                 <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
@@ -325,6 +314,79 @@
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="about-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+            </items>
+        </MenuButton>
+        <MenuButton fx:id="debugMenuButton" visible="false" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" text="Debug" popupSide="RIGHT" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0">
+            <graphic>
+                <HBox styleClass="icon-container">
+                    <Region styleClass="debug-high-icon"/>
+                </HBox>
+            </graphic>
+            <tooltip>
+                <Tooltip text="Debugging options">
+                    <font>
+                        <Font size="11.0"/>
+                    </font>
+                </Tooltip>
+            </tooltip>
+            <items>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpHeapStats" text="Dump Heap Stats">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-low-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmFlags" text="Dump VM Flags">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-low-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmCommandLine" text="Dump VM Command Line">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-low-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmSystemProperties" text="Dump VM System Properties">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-low-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugForceGC" text="Run GC">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-med-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugRunFinalization" text="Run Finalization">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-med-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpThreadsStacks" text="Dump Threads Stacks">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-med-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpClassHistogram" text="Dump GC Class Histogram">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="debug-high-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>

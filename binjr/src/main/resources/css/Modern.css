@@ -15,6 +15,9 @@
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
+    -binjr-gray-border-color: #C8C8C8;
+    -binjr-warning-color:TOMATO;
+
 }
 
 .column-bold-text{
@@ -26,10 +29,16 @@
 *      button icons
 ********************************/
 
+
 .command-bar * {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-    -icon-color: white;
+  -icon-color: white;
+}
+
+
+.command-bar .icon-container {
+     -icon-color: white;
 }
 
 .command-bar .menu-icon {
@@ -45,6 +54,7 @@
 
 .context-menu .icon-container {
     -fx-padding: 0 14 0 8;
+
 }
 
 .command-bar .context-menu * {
@@ -301,24 +311,29 @@
     -fx-pref-width:1;
     -fx-background-color: transparent;
     -fx-border-width:1;
-    -fx-border-color:#C8C8C8;
+    -fx-border-color:-binjr-gray-border-color;
  }
 
  .chart,
  .chart-plot-background{
-    -fx-background-color: white;
+    -fx-background-color: transparent;
     -fx-border-width:0;
+   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
+   /*    -fx-font-size: 10pt;*/
  }
+
+  .chart-viewport-parent {
+   -fx-background-color: white;
+  }
 
  .skinnable-pane-border {
    -fx-border-color:  -binjr-window-background-color;
    -fx-border-width:0;
-      -fx-padding: -1;
-
+   -fx-padding: -1;
  }
 .table-view .column-header-background /*.nested-column-header .column-header*/  {
     -fx-border-width:1;
-    -fx-border-color: #C8C8C8;
+    -fx-border-color: -binjr-gray-border-color;
  }
 
 .table-view,
@@ -533,7 +548,7 @@
 
  /* -fx-opacity:90%;*/
 /*  -fx-border-width:1;
-  -fx-border-color:#C8C8C8;*/
+  -fx-border-color:-binjr-gray-border-color;*/
 }
 
 
@@ -554,6 +569,9 @@
     -fx-border-width:0;
   }
 
+
+
+
  /****************************
   Command bar
   ***************************/
@@ -569,6 +587,8 @@
 -fx-max-width: 200;
 */
 }
+
+
 .command-bar .button,
 .command-bar .toggle-button,
 .command-bar .menu-button {
@@ -627,8 +647,70 @@
       visibility: visible;
 }
 .command-bar .arrow {
-     -fx-background-color:white;
+    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
+   /* -fx-scale-shape: true;*/
+    -fx-background-color:white;
+    -fx-effect: null;
 }
+
+.command-bar .titled-pane > .title > .arrow-button .arrow {
+    -fx-padding: 3 4;
+}
+
+.command-bar .titled-pane > .title > .arrow-button .arrow {
+    -fx-padding: 3 4;
+}
+/*
+.command-bar .menu-button .arrow-button .arrow {
+    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z"
+
+}*/
+.command-bar .menu-button  .arrow{
+    -fx-padding: 3.5 2.625;
+}
+
+
+.command-bar .menu-item  .arrow{
+     -fx-padding: 4 3;
+     -fx-scale-shape: true;
+}
+
+
+ .command-bar .titled-pane > .title > .arrow-button .arrow {
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+ }
+/*
+.command-bar .titled-pane:focused > .title > .arrow-button .arrow {
+    -fx-effect:null;
+    -fx-background-color:red;
+    -fx-padding: 3 4;
+}*/
+
+.command-bar .titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-insets: 0;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0;
+    -fx-effect: null;/* dropshadow(two-pass-box , -fx-focus-color, 5, 0.2 , 0, 0);*/
+}
+
+.command-bar .accordion > .first-titled-pane > .title {
+    -fx-background-insets: 0;/*, 1, 2;*/
+}
+
+/*
+ .titled-pane > .title > .arrow-button .arrow
+{
+    -fx-background-color: -fx-text-base-color;
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0;
+    -fx-snap-to-pixel: true;
+    -fx-scale-shape: true;
+    -fx-border-width:0;
+    -fx-border-radius:0;
+}*/
+
+
 .command-bar .titled-pane:focused .arrow {
     -fx-effect:null;
 }
@@ -700,9 +782,7 @@
     -fx-background-color:transparent;
 }
 
-.command-bar .arrow {
-    -fx-fill-color: red;
-}
+
 
 .command-bar .content,
 .command-bar .scroll-pane .viewport,
@@ -716,19 +796,20 @@
 
 }
 
-   .exit:hover,
-   .command-bar .exit:hover {
-       -fx-background-color: -binjr-color-red;
-   }
 
-  .exit:hover *{
-    -icon-color: white;
-  }
+.exit:hover,
+.command-bar .exit:hover {
+   -fx-background-color: -binjr-color-red;
+}
 
-  .command-bar .exit:hover:pressed,
-  .exit:hover:pressed{
-       -fx-background-color: -binjr-color-light-red;
-   }
+.exit:hover *{
+-icon-color: white;
+}
+
+.command-bar .exit:hover:pressed,
+.exit:hover:pressed{
+   -fx-background-color: -binjr-color-light-red;
+}
 
 
 /*** Menu ***/
@@ -747,7 +828,7 @@
 }
 
 .command-bar .menu-item{
-    -fx-padding: 10 10 10 10 ;
+   -fx-padding: 10 10 10 10 ;
 }
 
 .menu-item {
@@ -787,8 +868,6 @@
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
-
-
 .command-bar .choice-box:hover {
     -fx-background-color:  -binjr-dark-blue-color;
      -fx-border-color: -binjr-blue-color;
@@ -797,7 +876,6 @@
 .command-bar .choice-box:disabled {
     -fx-opacity: .4;
 }
-
 
 .choice-box {
     -fx-background-color: -binjr-window-background-color; /*-binjr-button-background-color;*/
@@ -820,6 +898,14 @@
 .choice-box:disabled {
     -fx-opacity: .4;
 }
+
+.command-bar .choice-box .arrow {
+     -fx--padding: 2 4.5;
+ }
+
+.choice-box .arrow {
+     -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+ }
 
 /*****************************************************************/
 
@@ -992,4 +1078,207 @@
      -fx-background-radius: .1in;
  }
 
+/*******************************************************************************
+ *                                                                             *
+ * Titled pane                                                                  *
+ *                                                                             *
+ ******************************************************************************/
 
+.series-table .titled-pane {
+       -fx-border-color: -binjr-gray-border-color;
+       -fx-border-width:1;
+   /* -fx-text-fill: -fx-text-base-color;*/
+}
+
+.series-table .titled-pane:focused {
+    /*-fx-text-fill: white;*/
+}
+.series-table .titled-pane > .title {
+    -fx-graphic-text-gap:25;
+    -fx-background-color: -binjr-window-background-color;
+    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-size: 10pt;
+}
+
+.series-table .titled-pane:focused > .title {
+    /*-fx-color: white;*/
+}
+
+.series-table .titled-pane > .title > .arrow-button {
+/*
+-fx-background-color:null;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0.0em 0.25em 0.0em 0.0em;*/
+}
+
+.series-table .titled-pane:focused > .title > .arrow-button .arrow {
+    -fx-effect:null;
+}
+
+.series-table .titled-pane > .title > .arrow-button .arrow {
+    -fx-background-color: -fx-text-base-color;
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+    -fx-background-color: -fx-mark-highlight-color, -fx-mark-color;
+    -fx-background-insets: 0;/*1 0 -1 0, 0;*/
+    -fx-snap-to-pixel: true;
+    -fx-scale-shape: true;
+    -fx-border-width:0;
+    -fx-border-radius:0;
+}
+
+.series-table .titled-pane:collapsed > .title > .arrow-button .arrow {
+    -fx-rotate: -90;
+}
+
+.title-pane-tool-bar{
+    -fx-spacing:3;
+    -fx-padding:3;
+}
+
+
+
+/*******************************************************************************
+ *                                                                             *
+ * Check Box                                                                   *
+ *                                                                             *
+ ******************************************************************************/
+
+.check-box {
+    -fx-text-fill: black;
+}
+
+/* unselected */
+.check-box > .box {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-border-color: #bababa;
+    -fx-border-width: 1px;
+    -fx-border-style: solid;
+    -fx-padding: 1;
+}
+
+
+.check-box > .box > .mark {
+    -fx-background-insets: 0;
+
+    -fx-padding:4.5px;
+    -fx-shape: "M9.005,17.766l13.759,14.739h1.716L49.02,0l10.298,8.488L25.997,50.453h-3.629L0,26.897L9.005,17.766z"
+}
+
+.check-box:hover > .box {
+    -fx-border-color: #919191;
+}
+
+/* focused */
+
+.check-box:focused > .box{
+    -fx-border-color: black;
+}
+
+.check-box:focused:hover > .box{
+    -fx-border-color: black;
+}
+
+.check-box:indeterminate > .box > .mark {
+    -fx-background-color: black;
+    -fx-background-insets: 1;
+    -fx-padding:4.5px;
+    -fx-shape: null;
+}
+
+.check-box:selected > .box > .mark{
+    -fx-background-color: black;
+}
+
+.check-box:disabled
+{
+    -fx-opacity: 0.4;
+}
+
+.check-box:disabled > .box
+{
+    -fx-background-color: #cdcdcd;
+    -fx-border-color: #aaa;
+}
+
+.check-box:armed > .box
+{
+    -fx-background-color: white, black;
+    -fx-background-insets: -1, 2;
+    -fx-background-radius: 0, 0;
+    -fx-border-color: black;
+}
+
+.check-box:pressed:selected > .box > .mark
+{
+    -fx-background-color: white;
+}
+
+.check-box:armed > .box > .mark
+{
+    -fx-background-color: black;
+}
+
+
+/*******************************************************************************
+ *                                                                             *
+ * TreeView and TreeCell                                                       *
+ *                                                                             *
+ ******************************************************************************/
+
+.tree-cell {
+    -fx-padding: 1;/*0.05em; /* 3 */
+    -fx-indent: 1.3em;
+}
+.tree-cell .label {
+    -fx-padding: 0.0em 0.0em 0.0em 0.25em; /* 0 0 0 3 */
+}
+.tree-cell > .tree-disclosure-node,
+.tree-table-row-cell > .tree-disclosure-node {
+    -fx-padding: 4 6 4 8;
+    -fx-background-color: transparent;
+}
+.tree-cell > .tree-disclosure-node > .arrow,
+.tree-table-row-cell > .tree-disclosure-node > .arrow {
+    -fx-background-color: -binjr-color-gray;
+    -fx-padding: 0.333333em 0.229em 0.333333em 0.229em; /* 4 */
+    -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
+}
+.tree-cell:expanded > .tree-disclosure-node > .arrow,
+.tree-table-row-cell:expanded > .tree-disclosure-node > .arrow {
+    -fx-background-color: -fx-text-background-color;
+    -fx-rotate: 90;
+}
+
+.crosshair-axis-label {
+    -fx-text-fill: white  ;
+    -fx-font-size: 10;
+  /*  -fx-font-weight: bold;*/
+  /*      -fx-background-insets: 2;*/
+        -fx-background-radius: 4;
+   -fx-padding:4;
+   /* -fx-border-size: 2;
+   -fx-border-radius: 4;
+    -fx-border-color: darkgray  ;*/
+    -fx-background-color:  rgba(32,70,86,0.8);
+}
+
+ .worksheet-tool-bar .menu-button .arrow-button {
+      -fx-padding:-2;
+       visibility: hidden;
+   }
+
+
+.debug .text,
+.debug .arrow{
+    -fx-effect:null;
+    -fx-fill:-binjr-warning-color;
+    -fx-text-fill:-binjr-warning-color;
+}
+.debug .arrow,
+.debug-icon
+ {
+    -fx-background-color:-binjr-warning-color;
+}

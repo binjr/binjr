@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.Binjr;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
 import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
@@ -25,10 +26,7 @@ import eu.fthevenet.binjr.data.async.AsyncTaskManager;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
-import eu.fthevenet.binjr.data.workspace.Source;
-import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.data.workspace.Worksheet;
-import eu.fthevenet.binjr.data.workspace.Workspace;
+import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
@@ -36,6 +34,8 @@ import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
+import eu.fthevenet.util.diagnositic.DiagnosticCommand;
+import eu.fthevenet.util.diagnositic.DiagnosticException;
 import eu.fthevenet.util.github.GithubRelease;
 import eu.fthevenet.util.javafx.controls.*;
 import javafx.animation.*;
@@ -96,14 +96,15 @@ import java.util.stream.StreamSupport;
 public class MainViewController implements Initializable {
     public static final int SETTINGS_PANE_DISTANCE = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-    private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
-    private final Map<EditableTab, WorksheetController> seriesControllers = new HashMap<>();
+    private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+    public MenuButton debugMenuButton;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
@@ -111,8 +112,6 @@ public class MainViewController implements Initializable {
     public AnchorPane root;
     @FXML
     public Label addWorksheetLabel;
-    @FXML
-    public MenuItem chartPropertiesMenuItem;
     @FXML
     public MaskerPane sourceMaskerPane;
     @FXML
@@ -182,10 +181,10 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
+        debugMenuButton.setVisible(Binjr.runtimeDebuggingFeatures.isDebugEnabled());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
-        chartPropertiesMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
@@ -299,7 +298,6 @@ public class MainViewController implements Initializable {
             );
         }
     }
-
 
     //region UI handlers
     @FXML
@@ -430,7 +428,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleDisplayChartProperties(ActionEvent actionEvent) {
         if (getSelectedWorksheetController() != null) {
-            getSelectedWorksheetController().showPropertiesPane(true);
+            getSelectedWorksheetController().toggleShowPropertiesPane();
         }
     }
 
@@ -474,7 +472,7 @@ public class MainViewController implements Initializable {
         return menuItems;
     }
 
-    private TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
+    TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
         if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
             return null;
         }
@@ -491,7 +489,7 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(animationDuration);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(Duration.millis(50), () -> AnchorPane.setLeftAnchor(contentView, expandedWidth)).submit());
+        showTimeline.setOnFinished(event -> new DelayedAction(() -> AnchorPane.setLeftAnchor(contentView, expandedWidth), Duration.millis(50)).submit());
         showTimeline.play();
         commandBar.setExpanded(true);
     }
@@ -557,8 +555,11 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
+        logger.trace(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
         sourcesTabPane.clearAllTabs();
+        seriesControllers.clear();
+        sourcesAdapters.clear();
         workspace.clear();
     }
 
@@ -714,52 +715,29 @@ public class MainViewController implements Initializable {
                 tab = entry.getKey();
             }
         }
-        if (tab == null) {
+        if (tab != null) {
+            Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
+            worksheetCtrl.close();
+            loadWorksheet(worksheet, tab);
+        }
+        else {
+            //  logger.debug(()->"cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
             throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
         }
-        Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
-        worksheetCtrl.close();
-        loadWorksheet(worksheet, tab);
     }
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
-            WorksheetController current;
-            switch (worksheet.getChartType()) {
-                case SCATTER:
-                    current = new ScatterChartWorksheetController(worksheet);
-                    break;
-                case AREA:
-                    current = new AreaChartWorksheetController(worksheet);
-                    break;
-                case STACKED:
-                    current = new StackedAreaChartWorksheetController(worksheet);
-                    break;
-                case LINE:
-                    current = new LineChartWorksheetController(worksheet);
-                    break;
-                default:
-                    throw new UnsupportedOperationException("Unsupported chart type");
-            }
+            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
+
             try {
-                // Attach bindings
-                for (TimeSeriesInfo<?> s : worksheet.getSeries()) {
-                    UUID id = s.getBinding().getAdapterId();
-                    DataAdapter<?, ?> da = sourcesAdapters.values()
-                            .stream()
-                            .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-                            .findAny()
-                            .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-                    s.getBinding().setAdapter(da);
-                    s.selectedProperty().addListener((observable, oldValue, newValue) -> getSelectedWorksheetController().refresh());
-                }
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
                 FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/views/WorksheetView.fxml"));
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                p.setOnDragOver(MainViewController::handleDragOverWorksheetView);
+                p.setOnDragOver(this::handleDragOverWorksheetView);
                 p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
 
             } catch (IOException ex) {
@@ -819,7 +797,7 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-    private <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {
+    <T> void getAllBindingsFromBranch(TreeItem<T> branch, List<T> bindings) {
         if (branch.getChildren().size() > 0) {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
@@ -847,10 +825,27 @@ public class MainViewController implements Initializable {
         }
     }
 
+    private ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
+        ContextMenu contextMenu = new ContextMenu(getSelectedWorksheetController().getWorksheet().getCharts()
+                .stream()
+                .map(c -> {
+                    MenuItem m = new MenuItem(c.getName());
+                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), c));
+                    return m;
+                })
+                .toArray(MenuItem[]::new));
+
+        MenuItem newChart = new MenuItem("Add to new chart");
+        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
+        return contextMenu;
+    }
+
+
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
-        MenuItem addToCurrent = new MenuItem("Add to current worksheet");
+        Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
-        addToCurrent.setOnAction(event -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(treeView.getSelectionModel().getSelectedItem()));
         ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
@@ -858,12 +853,34 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+        try {
+            Worksheet<Double> worksheet = getSelectedWorksheetController().getWorksheet();
+            TimeSeriesBinding<Double> binding = treeItem.getValue();
+            Chart<Double> chart = new Chart<>(
+                    binding.getLegend(),
+                    binding.getGraphType(),
+                    binding.getUnitName(),
+                    binding.getUnitPrefix()
+            );
+            //  addToCurrentWorksheet(treeItem, c);
+            List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+            getAllBindingsFromBranch(treeItem, bindings);
+            for (TimeSeriesBinding<Double> b : bindings) {
+                chart.addSeries(TimeSeriesInfo.fromBinding(b));
+            }
+            worksheet.getCharts().add(chart);
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to new chart", e);
+        }
+    }
+
+    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem, Chart<Double> targetChart) {
         try {
             if (getSelectedWorksheetController() != null && treeItem != null) {
                 List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(treeItem, bindings);
-                getSelectedWorksheetController().addBindings(bindings);
+                getSelectedWorksheetController().addBindings(bindings, targetChart);
             }
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to existing worksheet", e);
@@ -889,18 +906,25 @@ public class MainViewController implements Initializable {
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                     zoneId = ZoneId.systemDefault();
                 }
-                Worksheet<Double> worksheet = new Worksheet<>(binding.getLegend(),
+
+                List<Chart<Double>> chartList = new ArrayList<>();
+                chartList.add(new Chart<>(
+                        binding.getLegend(),
                         binding.getGraphType(),
-                        fromDateTime,
-                        toDateTime,
-                        zoneId,
                         binding.getUnitName(),
-                        binding.getUnitPrefix());
+                        binding.getUnitPrefix()
+                ));
+                Worksheet<Double> worksheet = new Worksheet<Double>(binding.getLegend(),
+                        chartList,
+                        zoneId,
+                        fromDateTime,
+                        toDateTime
+                );
 
                 if (editWorksheet(worksheet) && getSelectedWorksheetController() != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);
-                    getSelectedWorksheetController().addBindings(bindings);
+                    getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
                 }
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e);
@@ -1038,7 +1062,7 @@ public class MainViewController implements Initializable {
         n.showInformation();
     }
 
-    private static void handleDragOverWorksheetView(DragEvent event) {
+    private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
             event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
@@ -1058,10 +1082,16 @@ public class MainViewController implements Initializable {
                         targetStage.requestFocus();
                     }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
-                        addToNewWorksheet(item);
+                        addToNewChartInCurrentWorksheet(item);
+                        //addToNewWorksheet(item);
                     }
                     else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                        addToCurrentWorksheet(item);
+                        if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {
+                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                        }
+                        else {
+                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), getSelectedWorksheetController().getWorksheet().getDefaultChart());
+                        }
                     }
                     else {
                         logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
@@ -1084,6 +1114,80 @@ public class MainViewController implements Initializable {
             return null;
         }
         return seriesControllers.get(selectedTab);
+    }
+
+    public void handleDebugForceGC(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
+        System.gc();
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+
+    }
+
+    public void handleDebugRunFinalization(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
+        System.runFinalization();
+    }
+
+    public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+    }
+
+    public void handleDebugDumpThreadsStacks(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpVmSystemProperties(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpClassHistogram(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    private String getJvmHeapStats() {
+        Runtime rt = Runtime.getRuntime();
+        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
+        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
+        double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
+        double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
+
+        return String.format(
+                "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
+                maxMB,
+                committedMB,
+                usedMB,
+                percentCommitted,
+                percentMax
+        );
+    }
+
+    public void handleDebugDumpVmFlags(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void handleDebugDumpVmCommandLine(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e);
+        }
     }
     //endregion
 }

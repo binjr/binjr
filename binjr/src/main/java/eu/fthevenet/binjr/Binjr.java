@@ -36,6 +36,7 @@ import java.awt.*;
  * @author Frederic Thevenet
  */
 public class Binjr extends Application {
+    public static final Logger runtimeDebuggingFeatures = LogManager.getLogger("runtimeDebuggingFeatures");
     private static final Logger logger = LogManager.getLogger(Binjr.class);
 
     @Override

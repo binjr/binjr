@@ -44,7 +44,6 @@ public class GlobalPreferences {
 
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String BINJR_GLOBAL = "binjr/global";
-    private static final String CHART_ANIMATION_ENABLED = "enableChartAnimation";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
     private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
@@ -62,7 +61,6 @@ public class GlobalPreferences {
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
     private final IntegerProperty downSamplingThreshold = new SimpleIntegerProperty();
-    private final BooleanProperty chartAnimationEnabled = new SimpleBooleanProperty();
     private final StringProperty mostRecentSaveFolder = new SimpleStringProperty();
     private final Property<Path> mostRecentSavedWorkspace = new SimpleObjectProperty<>();
     private final BooleanProperty checkForUpdateOnStartUp = new SimpleBooleanProperty();
@@ -115,7 +113,6 @@ public class GlobalPreferences {
         });
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
-        chartAnimationEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHART_ANIMATION_ENABLED, newValue));
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
@@ -137,7 +134,6 @@ public class GlobalPreferences {
         userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
         loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
         mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
-        chartAnimationEnabled.setValue(prefs.getBoolean(CHART_ANIMATION_ENABLED, false));
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
@@ -161,34 +157,7 @@ public class GlobalPreferences {
     public static GlobalPreferences getInstance() {
         return GlobalPreferencesHolder.instance;
     }
-
-    /**
-     * Returns true if the chart animation is enabled, false otherwise.
-     *
-     * @return true if the chart animation is enabled, false otherwise.
-     */
-    public Boolean getChartAnimationEnabled() {
-        return downSamplingEnabled.getValue();
-    }
-
-    /**
-     * Returns the chart animation property
-     *
-     * @return the chart animation property
-     */
-    public BooleanProperty chartAnimationEnabledProperty() {
-        return chartAnimationEnabled;
-    }
-
-    /**
-     * Enables or disables the chart animation
-     *
-     * @param chartAnimationEnabled true to enable the chart animation, false otherwise.
-     */
-    public void setChartAnimationEnabled(boolean chartAnimationEnabled) {
-        this.chartAnimationEnabled.setValue(chartAnimationEnabled);
-    }
-
+    
     /**
      * Returns true if series down-sampling is enabled, false otherwise.
      *

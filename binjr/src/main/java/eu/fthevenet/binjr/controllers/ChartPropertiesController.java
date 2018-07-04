@@ -17,25 +17,29 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.binjr.data.workspace.ChartType;
 import eu.fthevenet.binjr.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.ToggleSwitch;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.net.URL;
 import java.time.ZoneId;
+import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
@@ -47,6 +51,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     public static final double SETTINGS_PANE_DISTANCE = -210;
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
+    private final Chart<T> chart;
     private final Worksheet<T> worksheet;
     @FXML
     private AnchorPane root;
@@ -68,21 +73,38 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
+    //    @FXML
+//    private ChoiceBox<UnitPrefixes> unitPrefixChoiceBox;
     @FXML
     private TextField timezoneField;
+    @FXML
+    private TextField yMinRange;
+    @FXML
+    private TextField yMaxRange;
+    @FXML
+    private ToggleSwitch autoScaleYAxis;
+    @FXML
+    private HBox yAxisScaleSettings;
+//    @FXML
+//    private TextField chartNameTextField;
+//    @FXML
+//    private TextField chartUnitTextField;
 
-    public ChartPropertiesController(Worksheet<T> worksheet) {
+
+    public ChartPropertiesController(Worksheet<T> worksheet, Chart<T> chart) {
         this.worksheet = worksheet;
+        this.chart = chart;
+
     }
 
-    private void show() {
+    public void show() {
         if (hidden.getValue()) {
             slidePanel(-1, Duration.millis(0));
             hidden.setValue(false);
         }
     }
 
-    private void hide() {
+    public void hide() {
         if (!hidden.getValue()) {
             slidePanel(1, Duration.millis(0));
             hidden.setValue(true);
@@ -90,8 +112,12 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
     private void slidePanel(int show, Duration delay) {
-        Node n = root.getParent();
-        TranslateTransition openNav = new TranslateTransition(new Duration(200), n);
+//        Node n;
+//        if (show < 0 && ((n = root.getParent()) != null)) {
+//            n.toFront();
+//        }
+        root.toFront();
+        TranslateTransition openNav = new TranslateTransition(new Duration(200), root);
         openNav.setDelay(delay);
         openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
         openNav.play();
@@ -104,25 +130,27 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         assert strokeWidthText != null : "fx:id\"strokeWidthText\" was not injected!";
         assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
+        assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
+        assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
 
-        graphOpacitySlider.valueProperty().bindBidirectional(worksheet.graphOpacityProperty());
+        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
+        graphOpacitySlider.valueProperty().bindBidirectional(chart.graphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-
-        strokeWidthSlider.valueProperty().bindBidirectional(worksheet.strokeWidthProperty());
+        strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
         strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-
-        adaptToChartType(worksheet.getChartType() == ChartType.LINE);
-        worksheet.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
+        adaptToChartType(chart.getChartType() == ChartType.LINE);
+        chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 adaptToChartType(newValue == ChartType.LINE);
             }
         });
-        showAreaOutline.selectedProperty().bindBidirectional(worksheet.showAreaOutlineProperty());
+        showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
+        autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
+        setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
+        setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
         chartTypeChoice.getItems().setAll(ChartType.values());
-        chartTypeChoice.getSelectionModel().select(worksheet.getChartType());
-        worksheet.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
-        strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
+        chartTypeChoice.getSelectionModel().select(chart.getChartType());
+        chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
         TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
             @Override
@@ -135,20 +163,33 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
                 return ZoneId.of(string);
             }
         });
+
         formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
+
         timezoneField.setTextFormatter(formatter);
 
+        strokeWidthControlDisabled(!showAreaOutline.isSelected());
+        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
+        visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility());
+        this.visibleProperty().bindBidirectional(chart.showPropertiesProperty());
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
-
-        visibleProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                show();
-            }
-            else {
-                hide();
-            }
-        });
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
+        yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
+    }
+
+    void setPanelVisibility() {
+        if (isVisible()) {
+            show();
+        }
+        else {
+            hide();
+        }
+    }
+
+    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty) {
+        final TextFormatter<T> formatter = new TextFormatter<>(converter);
+        formatter.valueProperty().bindBidirectional(stateProperty);
+        textField.setTextFormatter(formatter);
     }
 
     private void adaptToChartType(boolean disable) {
@@ -173,13 +214,12 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         return hidden.getValue();
     }
 
-
     public boolean isVisible() {
         return visible.get();
     }
 
     public BooleanProperty visibleProperty() {
-        return visible;
+        return this.visible;
     }
 
 

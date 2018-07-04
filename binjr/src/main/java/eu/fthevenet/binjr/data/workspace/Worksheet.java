@@ -17,16 +17,15 @@
 
 package eu.fthevenet.binjr.data.workspace;
 
-import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.controllers.WorksheetNavigationHistory;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
-import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
-import eu.fthevenet.binjr.data.timeseries.transform.DecimationTransform;
-import eu.fthevenet.binjr.data.timeseries.transform.TimeSeriesTransform;
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
-import javafx.beans.property.*;
+import eu.fthevenet.util.javafx.charts.XYChartSelection;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
@@ -36,14 +35,11 @@ import javax.xml.bind.annotation.*;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
-
-import static java.util.stream.Collectors.groupingBy;
 
 
 /**
@@ -57,30 +53,24 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
-    private ObservableList<TimeSeriesInfo<T>> series;
+    private ObservableList<Chart<T>> charts;
     @IsDirtyable
     private Property<String> name;
     @IsDirtyable
     private Property<ZoneId> timeZone;
     @IsDirtyable
-    private Property<String> unit;
-    @IsDirtyable
-    private Property<UnitPrefixes> unitPrefixes;
-    @IsDirtyable
-    private Property<ChartType> chartType;
-    @IsDirtyable
     private Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
     private Property<ZonedDateTime> toDateTime;
     @IsDirtyable
-    private DoubleProperty graphOpacity;
-    @IsDirtyable
-    private BooleanProperty showAreaOutline;
-    @IsDirtyable
-    private BooleanProperty showChartSymbols = new SimpleBooleanProperty(false);
-    @IsDirtyable
-    private DoubleProperty strokeWidth;
+    private Property<ChartLayout> chartLayout;
 
+
+    private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
+    private final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
+    private final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
+
+    private Property<Integer> selectedChart;
     private final ChangeWatcher status;
 
     /**
@@ -88,35 +78,25 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     public Worksheet() {
         this("New Worksheet (" + globalCounter.getAndIncrement() + ")",
-                ChartType.STACKED,
-                ZoneId.systemDefault(),
                 FXCollections.observableList(new LinkedList<>()),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS), ZonedDateTime.now(), "-",
-                UnitPrefixes.METRIC,
-                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
-                1.0);
+                ZoneId.systemDefault(),
+                ZonedDateTime.now().minus(24, ChronoUnit.HOURS),
+                ZonedDateTime.now());
     }
 
     /**
      * Initializes a new instance of the {@link Worksheet} class with the provided name, chart type and zoneid
      *
      * @param name      the name for the new {@link Worksheet} instance
-     * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
      * @param timezone  the {@link ZoneId} for the new {@link Worksheet} instance
      */
-    public Worksheet(String name, ChartType chartType, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone, String unitName, UnitPrefixes prefix) {
+    public Worksheet(String name, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone) {
         this(name,
-                chartType,
-                timezone,
                 FXCollections.observableList(new LinkedList<>()),
+                timezone,
                 fromDateTime,
-                toDateTime,
-                unitName,
-                prefix,
-                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
-                1.0);
+                toDateTime
+        );
     }
 
     /**
@@ -126,117 +106,47 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     public Worksheet(Worksheet<T> initWorksheet) {
         this(initWorksheet.getName(),
-                initWorksheet.getChartType(),
-                initWorksheet.getTimeZone(),
-                initWorksheet.getSeries().stream()
-                        .map(TimeSeriesInfo::new)
+                initWorksheet.getCharts().stream()
+                        .map(Chart::new)
                         .collect(Collectors.toCollection(() -> FXCollections.observableList(new LinkedList<>()))),
+                initWorksheet.getTimeZone(),
                 initWorksheet.getFromDateTime(),
-                initWorksheet.getToDateTime(),
-                initWorksheet.getUnit(),
-                initWorksheet.getUnitPrefixes(),
-                initWorksheet.getGraphOpacity(),
-                initWorksheet.isShowAreaOutline(),
-                initWorksheet.getStrokeWidth());
+                initWorksheet.getToDateTime()
+        );
     }
 
-    private Worksheet(String name,
-                      ChartType chartType,
+
+    public Worksheet(String name,
+                     List<Chart<T>> charts,
                       ZoneId timezone,
-                      List<TimeSeriesInfo<T>> bindings,
                       ZonedDateTime fromDateTime,
-                      ZonedDateTime toDateTime,
-                      String unitName,
-                      UnitPrefixes base,
-                      double graphOpacity,
-                      boolean showAreaOutline,
-                      double strokeWidth) {
+                      ZonedDateTime toDateTime) {
         this.name = new SimpleStringProperty(name);
-        this.unit = new SimpleStringProperty(unitName);
-        this.chartType = new SimpleObjectProperty<>(chartType);
-        this.series = FXCollections.observableList(new LinkedList<>(bindings));
+        this.charts = FXCollections.observableList(new LinkedList<>(charts));
+        if (this.charts.isEmpty()) {
+            this.charts.add(new Chart<>());
+        }
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
-        this.unitPrefixes = new SimpleObjectProperty<>(base);
-        this.graphOpacity = new SimpleDoubleProperty(graphOpacity);
-        this.showAreaOutline = new SimpleBooleanProperty(showAreaOutline);
-        this.strokeWidth = new SimpleDoubleProperty(strokeWidth);
+        this.selectedChart = new SimpleObjectProperty<>(0);
+        this.chartLayout = new SimpleObjectProperty<>(ChartLayout.STACKED);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
 
-    /**
-     * Fills up the backend for all {@link TimeSeriesInfo} in the worksheet with data from the adapter on the specified time interval
-     *
-     * @param startTime the start of the time interval
-     * @param endTime   the end of the time interval
-     * @throws DataAdapterException if an error occurs while retrieving data from the adapter
-     */
-    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
-        // Define the reduction transform to apply
-        TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
-        // Group all bindings by common adapters
-        Map<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
-        for (Map.Entry<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
-            DataAdapter<T, ?> adapter = byAdapterEntry.getKey();
-            // Group all bindings-by-adapters by path
-            Map<String, List<TimeSeriesInfo<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
-                String path = byPathEntry.getKey();
-                // Get data for source
-                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.fetchDecodedData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
-                // Applying point reduction
-                data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                //Update timeSeries data
-                for (TimeSeriesInfo<T> seriesInfo : data.keySet()) {
-                    seriesInfo.setProcessor(data.get(seriesInfo));
-                }
-            }
-        }
-    }
 
-    /**
-     * Adds a {@link TimeSeriesInfo} to the worksheet
-     *
-     * @param seriesInfo the {@link TimeSeriesInfo} to add
-     */
-    public void addSeries(TimeSeriesInfo<T> seriesInfo) {
-        series.add(seriesInfo);
+    public Chart<T> getDefaultChart() {
+        return charts.get(0);
     }
-
-    /**
-     * Adds a collection of  {@link TimeSeriesInfo} to the worksheet
-     *
-     * @param seriesInfo the collection {@link TimeSeriesInfo} to add
-     */
-    public void addSeries(Collection<TimeSeriesInfo<T>> seriesInfo) {
-        this.series.addAll(seriesInfo);
-    }
-
-    /**
-     * Remove all the elements in the provided collection from the list of {@link Worksheet} instances
-     *
-     * @param seriesInfo the list of {@link Worksheet} instances to remove
-     */
-    public void removeSeries(Collection<TimeSeriesInfo> seriesInfo) {
-        series.removeAll(seriesInfo);
-    }
-
-    /**
-     * Clear the {@link Worksheet} list
-     */
-    public void clearSeries() {
-        series.clear();
-    }
-
 
     /**
      * The name of the {@link Worksheet}
      *
      * @return the name of the {@link Worksheet}
      */
+    @XmlAttribute()
     public String getName() {
         return name.getValue();
     }
@@ -260,23 +170,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The time series of the {@link Worksheet}
-     *
-     * @return the time series of the {@link Worksheet}
-     */
-
-    //   @XmlTransient
-    @XmlElementWrapper(name = "SeriesList")
-    @XmlElements(@XmlElement(name = "Timeseries"))
-    public ObservableList<TimeSeriesInfo<T>> getSeries() {
-        return series;
-    }
-
-    /**
      * The {@link ZoneId} used by the {@link Worksheet} time series
      *
      * @return the {@link ZoneId} used by the {@link Worksheet} time series
      */
+    @XmlAttribute
     public ZoneId getTimeZone() {
         return timeZone.getValue();
     }
@@ -300,37 +198,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The type of chart hosted by the  {@link Worksheet}
-     *
-     * @return the type of chart hosted by the  {@link Worksheet}
-     */
-    public ChartType getChartType() {
-        return chartType.getValue();
-    }
-
-    /**
-     * The type of chart hosted by the  {@link Worksheet}
-     *
-     * @return An instance of {@link Property} for the type of chart hosted by the  {@link Worksheet}
-     */
-    public Property<ChartType> chartTypeProperty() {
-        return chartType;
-    }
-
-    /**
-     * The type of chart hosted by the  {@link Worksheet}
-     *
-     * @param chartType the type of chart hosted by the {@link Worksheet}
-     */
-    public void setChartType(ChartType chartType) {
-        this.chartType.setValue(chartType);
-    }
-
-    /**
      * The lower bound of the time interval of the {@link Worksheet}'s times series
      *
      * @return the lower bound of the time interval of the {@link Worksheet}'s times series
      */
+    @XmlAttribute
     public ZonedDateTime getFromDateTime() {
         return fromDateTime.getValue();
     }
@@ -358,6 +230,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @return the upper bound of the time interval of the {@link Worksheet}'s times series
      */
+    @XmlAttribute
     public ZonedDateTime getToDateTime() {
         return toDateTime.getValue();
     }
@@ -380,176 +253,35 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime.setValue(toDateTime);
     }
 
-    /**
-     * The unit for the {@link Worksheet}'s times series Y axis
-     *
-     * @return the unit for the {@link Worksheet}'s times series Y axis
-     */
-    public String getUnit() {
-        return unit.getValue();
+    @XmlTransient
+    public Integer getSelectedChart() {
+        return selectedChart.getValue();
     }
 
-    /**
-     * The unit for the {@link Worksheet}'s times series Y axis
-     *
-     * @return An instance of {@link Property} for the unit for the {@link Worksheet}'s times series Y axis
-     */
-    public Property<String> unitProperty() {
-        return unit;
+    public Property<Integer> selectedChartProperty() {
+        return selectedChart;
     }
 
-    /**
-     * The unit for the {@link Worksheet}'s times series Y axis
-     *
-     * @param unit the unit for the {@link Worksheet}'s times series Y axis
-     */
-    public void setUnit(String unit) {
-        this.unit.setValue(unit);
-    }
-
-    /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
-     *
-     * @return the unit prefix for the {@link Worksheet}'s times series Y axis
-     */
-    public UnitPrefixes getUnitPrefixes() {
-        return unitPrefixes.getValue();
-    }
-
-    /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
-     *
-     * @return An instance of {@link Property} for the unit prefix for the {@link Worksheet}'s times series Y axis
-     */
-    public Property<UnitPrefixes> unitPrefixesProperty() {
-        return unitPrefixes;
-    }
-
-    /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
-     *
-     * @param unitPrefixes the unit prefix for the {@link Worksheet}'s times series Y axis
-     */
-    public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
-        this.unitPrefixes.setValue(unitPrefixes);
-    }
-
-    /**
-     * Gets the opacity factor to apply the the graph
-     *
-     * @return the opacity factor to apply the the graph
-     */
-    public double getGraphOpacity() {
-        return graphOpacity.get();
-    }
-
-    /**
-     * The graphOpacity property
-     *
-     * @return the graphOpacity property
-     */
-    public DoubleProperty graphOpacityProperty() {
-        return graphOpacity;
-    }
-
-    /**
-     * Sets the opacity factor to apply the the graph
-     *
-     * @param graphOpacity the opacity factor to apply the the graph
-     */
-    public void setGraphOpacity(double graphOpacity) {
-        this.graphOpacity.set(graphOpacity);
-    }
-
-    /**
-     * Returns true if area charts should display an outline stroke, false otherwise
-     *
-     * @return true if area charts should display an outline stroke, false otherwise
-     */
-    public boolean isShowAreaOutline() {
-        return showAreaOutline.get();
-    }
-
-    /**
-     * The showAreaOutline property
-     *
-     * @return The showAreaOutline property
-     */
-    public BooleanProperty showAreaOutlineProperty() {
-        return showAreaOutline;
-    }
-
-    /**
-     * Set to true if area charts should display an outline stroke, false otherwise
-     *
-     * @param showAreaOutline true if area charts should display an outline stroke, false otherwise
-     */
-    public void setShowAreaOutline(boolean showAreaOutline) {
-        this.showAreaOutline.set(showAreaOutline);
-    }
-
-    /**
-     * Returns true if charts should display sample symbols, false otherwise
-     *
-     * @return true if charts should display sample symbols, false otherwise
-     */
-    public boolean isShowChartSymbols() {
-        return showChartSymbols.get();
-    }
-
-    /**
-     * Returns the showChartSymbols property
-     *
-     * @return the showChartSymbols property
-     */
-    public BooleanProperty showChartSymbolsProperty() {
-        return showChartSymbols;
-    }
-
-    /**
-     * Set to true if charts should display sample symbols, false otherwise
-     *
-     * @param showChartSymbols true if charts should display sample symbols, false otherwise
-     */
-    public void setShowChartSymbols(boolean showChartSymbols) {
-        this.showChartSymbols.set(showChartSymbols);
+    public void setSelectedChart(Integer selectedChart) {
+        this.selectedChart.setValue(selectedChart);
     }
 
 
-    /**
-     * The strokeWidth property.
-     *
-     * @return The strokewidth property.
-     */
-    public DoubleProperty strokeWidthProperty() {
-        return strokeWidth;
+    @XmlElementWrapper(name = "Charts")
+    @XmlElements(@XmlElement(name = "Chart"))
+    public ObservableList<Chart<T>> getCharts() {
+        return charts;
     }
 
-    /**
-     * Return the stroke width for line charts
-     *
-     * @return the stroke width for line charts
-     */
-    public double getStrokeWidth() {
-        return strokeWidth.get();
+    public void setCharts(ObservableList<Chart<T>> charts) {
+        this.charts = charts;
     }
-
-    /**
-     * Sets the stroke width for line charts.
-     *
-     * @param value the stroke width for line charts.
-     */
-    public void setStrokeWidth(double value) {
-        strokeWidth.setValue(value);
-    }
-
 
     @Override
     public String toString() {
-        return String.format("%s - %s - %s",
+        return String.format("%s - %s",
                 getName(),
-                getTimeZone().toString(),
-                getChartType().toString()
+                getTimeZone().toString()
         );
     }
 
@@ -571,7 +303,41 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
 
     @Override
     public void close() {
-        series.clear();
+        charts.forEach(Chart::close);
     }
+
+    @XmlTransient
+    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
+        return previousState;
+    }
+
+    public void setPreviousState(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState) {
+        this.previousState = previousState;
+    }
+
+    @XmlTransient
+    public WorksheetNavigationHistory getBackwardHistory() {
+        return backwardHistory;
+    }
+
+    @XmlTransient
+    public WorksheetNavigationHistory getForwardHistory() {
+        return forwardHistory;
+    }
+
+    @XmlAttribute
+    public ChartLayout getChartLayout() {
+        return chartLayout.getValue();
+    }
+
+    public Property<ChartLayout> chartLayoutProperty() {
+        return chartLayout;
+    }
+
+    public void setChartLayout(ChartLayout chartLayout) {
+        this.chartLayout.setValue(chartLayout);
+    }
+
+
 }
 
