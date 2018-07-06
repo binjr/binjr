@@ -715,21 +715,17 @@ public class MainViewController implements Initializable {
                 tab = entry.getKey();
             }
         }
-        if (tab != null) {
-            Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
-            worksheetCtrl.close();
-            loadWorksheet(worksheet, tab);
-        }
-        else {
-            //  logger.debug(()->"cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
+        if (tab == null) {
             throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
         }
+        Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
+        worksheetCtrl.close();
+        loadWorksheet(worksheet, tab);
     }
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
             WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
-
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
@@ -739,7 +735,6 @@ public class MainViewController implements Initializable {
                 newTab.setContent(p);
                 p.setOnDragOver(this::handleDragOverWorksheetView);
                 p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
-
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }

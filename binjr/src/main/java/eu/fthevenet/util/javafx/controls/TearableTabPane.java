@@ -18,7 +18,7 @@
 package eu.fthevenet.util.javafx.controls;
 
 
-import eu.fthevenet.util.javafx.listeners.ChangeListenerFactory;
+import eu.fthevenet.util.javafx.listeners.BindingManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -62,12 +62,12 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private boolean reorderable;
     private Function<ActionEvent, Optional<Tab>> newTabFactory = (e) -> Optional.of(new Tab());
     private final Map<Tab, TabState> tearableTabMap = new HashMap<>();
-    private final ObservableSet<Tab> tabsSet = FXCollections.observableSet(tearableTabMap.keySet());
+    //private final ObservableSet<Tab> tabsSet = FXCollections.observableSet(tearableTabMap.keySet());
     private final TabPaneManager manager;
     private EventHandler<ActionEvent> onAddNewTab;
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
-    private ChangeListenerFactory listenerFactory = new ChangeListenerFactory();
+    private BindingManager bindingManager = new BindingManager();
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -90,7 +90,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.tearable = tearable;
         this.reorderable = reorderable;
 
-        listenerFactory.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
+        bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
         this.getTabs().addListener((ListChangeListener<Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -309,9 +309,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      *
      * @return the set of tabs for this pane only.
      */
-    public ObservableSet<Tab> getTearableTabs() {
-        return tabsSet;
-    }
+//    public ObservableSet<Tab> getTearableTabs() {
+//        return tabsSet;
+//    }
 
     /**
      * Clears the list of tabs.
@@ -457,7 +457,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
     public void close() {
         logger.trace(() -> "Closing down TearableTabPane instance");
-        listenerFactory.close();
+        bindingManager.close();
     }
 
     /**
