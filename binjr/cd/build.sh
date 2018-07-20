@@ -9,7 +9,7 @@ if git show -s HEAD | grep -F -q "[maven-release-plugin]" ; then
         echo "skip maven-release-plugin commit"
     fi
 else
-    openssl aes-256-cbc -K $encrypted_f20546f8e814_key -iv $encrypted_f20546f8e814_iv -in ./binjr/cd/codesigning.asc.enc -out ./binjr/cd/codesigning.asc -d
+    #openssl aes-256-cbc -K $encrypted_f20546f8e814_key -iv $encrypted_f20546f8e814_iv -in ./binjr/cd/codesigning.asc.enc -out ./binjr/cd/codesigning.asc -d
     gpg --fast-import ./binjr/cd/codesigning.asc
     if [[ -z "$TRAVIS_TAG" &&  "$TRAVIS_OS_NAME" == "linux" && $TRAVIS_COMMIT_MESSAGE == *"[ci release]"* ]]; then
         echo "*** RELEASE ***"
