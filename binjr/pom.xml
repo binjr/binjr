@@ -82,6 +82,10 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
+                                <configuration>
+                                    <doclint>none</doclint>
+                                    <!--<additionalOptions>-Xdoclint:none</additionalOptions>-->
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
