@@ -14,7 +14,7 @@ branches:
   - master
 os:
 - linux
-- osx
+#- osx
 matrix:
   allow_failures:
   - os: osx
@@ -25,12 +25,9 @@ addons:
     - oracle-java8-installer
     - fakeroot
     - rpm
-before_install:
-- git clone -b travis `git config --get remote.origin.url` binjr/target/travis
+#before_install:
+#- git clone -b travis `git config --get remote.origin.url` binjr/target/travis
 
-script: "./binjr/scripts/build.sh"
+script: "./binjr/cd/build.sh"
 
-after_success:
-- openssl aes-256-cbc -K $encrypted_f20546f8e814_key -iv $encrypted_f20546f8e814_iv -in ./cd/codesigning.asc.enc -out ./cd/codesigning.asc -d
-- gpg --fast-import ./cd/codesigning.asc
-- mvn deploy -P sign,build-extras --settings ./cd/ossrh_deploy_settings.xml
+
