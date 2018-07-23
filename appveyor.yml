@@ -35,8 +35,6 @@ build_script:
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
-    git clone -b travis https://github.com/fthevenet/binjr.git ".\binjr\target\travis"
-
     cd binjr
 
-    mvn clean deploy --settings "./target/travis/settings.xml" -P buildNativeBundles
+    mvn clean deploy --settings "./cd/maven_settings.xml" -P buildNativeBundles
