@@ -108,17 +108,14 @@
                                     <goal>sign</goal>
                                 </goals>
                                 <configuration>
-                                    <gpgArguments>
-                                        <arg>--no-use-agent</arg>
-                                        <arg>--batch</arg>
-                                        <arg>--no-tty</arg>
-                                        <arg>--yes</arg>
-                                    </gpgArguments>
+                                    <useAgent>false</useAgent>
+                                    <!--<gpgArguments>-->
+                                    <!--&lt;!&ndash;<arg>&#45;&#45;pinentry-mode loopback</arg>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<arg>&#45;&#45;batch</arg>&ndash;&gt;-->
+                                    <!--&lt;!&ndash;<arg>&#45;&#45;no-tty</arg>&ndash;&gt;-->
+                                    <!--<arg>&#45;&#45;yes</arg>-->
+                                    <!--</gpgArguments>-->
                                 </configuration>
-                                <!--<gpgArguments>-->
-                                <!--<arg>&#45;&#45;batch</arg>-->
-                                <!--<arg>&#45;&#45;yes</arg>-->
-                                <!--</gpgArguments>-->
                             </execution>
                         </executions>
                     </plugin>
