@@ -57,6 +57,7 @@ public class GlobalPreferences {
     private static final String SHOW_AREA_OUTLINE = "showAreaOutline";
     private static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
     private static final int MAX_RECENT_FILES = 20;
+    private static final String PLUGINS_LOCATION = "pluginsLocation";
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
@@ -72,32 +73,12 @@ public class GlobalPreferences {
     private final DoubleProperty defaultGraphOpacity = new SimpleDoubleProperty();
     private final BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
     private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
+    private final Property<Path> pluginsLocation = new SimpleObjectProperty<>();
     private final Preferences prefs;
     private Deque<String> recentFiles;
 
-    public Boolean isShiftPressed() {
-        return shiftPressed.get();
-    }
 
-    public void setShiftPressed(Boolean shiftPressed) {
-        this.shiftPressed.set(shiftPressed);
-    }
 
-    public BooleanProperty shiftPressedProperty() {
-        return shiftPressed;
-    }
-
-    public Boolean isCtrlPressed() {
-        return ctrlPressed.getValue();
-    }
-
-    public void setCtrlPressed(Boolean ctrlPressed) {
-        this.ctrlPressed.set(ctrlPressed);
-    }
-
-    public BooleanProperty ctrlPressedProperty() {
-        return ctrlPressed;
-    }
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
@@ -121,7 +102,7 @@ public class GlobalPreferences {
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
-
+        pluginsLocation.addListener((observable, oldValue, newValue) -> prefs.put(PLUGINS_LOCATION, newValue.toString()));
     }
 
     private void load() {
@@ -137,6 +118,7 @@ public class GlobalPreferences {
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
+        pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, System.getProperty("user.home") + "/.binjr/plugins/")));
     }
 
     /**
@@ -432,6 +414,43 @@ public class GlobalPreferences {
     public void setDefaultGraphOpacity(double defaultGraphOpacity) {
         this.defaultGraphOpacity.set(defaultGraphOpacity);
     }
+
+    public Boolean isShiftPressed() {
+        return shiftPressed.get();
+    }
+
+    public void setShiftPressed(Boolean shiftPressed) {
+        this.shiftPressed.set(shiftPressed);
+    }
+
+    public BooleanProperty shiftPressedProperty() {
+        return shiftPressed;
+    }
+
+    public Boolean isCtrlPressed() {
+        return ctrlPressed.getValue();
+    }
+
+    public void setCtrlPressed(Boolean ctrlPressed) {
+        this.ctrlPressed.set(ctrlPressed);
+    }
+
+    public BooleanProperty ctrlPressedProperty() {
+        return ctrlPressed;
+    }
+
+    public Path getPluginsLocation() {
+        return pluginsLocation.getValue();
+    }
+
+    public void setPluginsLocation(Path pluginsLocation) {
+        this.pluginsLocation.setValue(pluginsLocation);
+    }
+
+    public Property<Path> pluginsLocationProperty() {
+        return pluginsLocation;
+    }
+
 
 
 }

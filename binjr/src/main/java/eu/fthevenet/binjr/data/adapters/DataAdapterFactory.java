@@ -21,10 +21,18 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
+import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.scene.Node;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 /**
@@ -33,8 +41,9 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 public class DataAdapterFactory {
+    private static final Logger logger = LogManager.getLogger(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters;
-    private final ServiceLoader<DataAdapterInfo> loader;
+
 
     private static class DataAdapterFactoryHolder {
         private static final DataAdapterFactory instance = new DataAdapterFactory();
@@ -44,9 +53,13 @@ public class DataAdapterFactory {
      * Initializes a new instance if the {@link DataAdapterFactory} class.
      */
     private DataAdapterFactory() {
-        this.loader = ServiceLoader.load(DataAdapterInfo.class);
         registeredAdapters = new HashMap<>();
-        this.loadAdapters();
+
+        try {
+            this.loadAdapters();
+        } catch (IOException e) {
+            Dialogs.notifyException("Fail to load plugin", e);
+        }
     }
 
     /**
@@ -113,14 +126,38 @@ public class DataAdapterFactory {
         }
     }
 
-    private void loadAdaptersFromJar(URI location) {
-        //TODO: Make it possible to load adapters from external jars
-    }
+    private void loadAdapters() throws IOException {
+//        // Load local adapters
+//        for (DataAdapterInfo i : ServiceLoader.load(DataAdapterInfo.class)) {
+//            registeredAdapters.put(i.getKey(), i);
+//            logger.debug(() -> "Successfully registered DataAdapterInfo " + i.toString());
+//        }
+        // Load adapters from plugins
 
-    private void loadAdapters() {
-        for (DataAdapterInfo i : loader) {
-            registeredAdapters.put(i.getKey(), i);
+        List<URL> urls = new ArrayList<>();
+
+        if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
+            logger.debug(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
+            PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
+            Files.walkFileTree(GlobalPreferences.getInstance().getPluginsLocation(), new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                    if (jarMatcher.matches(file)) {
+                        logger.debug(() -> "Inspecting " + file.getFileName() + " for DataAdapter service implementations");
+                        urls.add(file.toUri().toURL());
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
         }
+        else {
+            logger.debug("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
+        }
+        for (DataAdapterInfo i : ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0])))) {
+            registeredAdapters.put(i.getKey(), i);
+            logger.debug(() -> "Successfully registered DataAdapterInfo " + i.toString() + " from external JAR.");
+        }
+
     }
 
     private DataAdapterInfo retrieveAdapterInfo(String key) throws NoAdapterFoundException {

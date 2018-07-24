@@ -78,7 +78,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     /**
      * Default constructor
      */
-    public JrdsDataAdapter() throws CannotInitializeDataAdapterException {
+    public JrdsDataAdapter() throws DataAdapterException {
         super();
     }
 
@@ -89,7 +89,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      * @param encoding    the encoding used by the download servlet.
      * @param treeViewTab the filter to apply to the tree view
      */
-    public JrdsDataAdapter(URI baseURI, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
+    public JrdsDataAdapter(URI baseURI, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         super(baseURI);
         this.zoneId = zoneId;
         this.encoding = encoding;
@@ -104,7 +104,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      * @param zoneId the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws CannotInitializeDataAdapterException {
+    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         try {
             URI u = new URI(url.replaceAll("/$", ""));
             return new JrdsDataAdapter(u, zoneId, "utf-8", treeViewTab, filter);
@@ -171,7 +171,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
 
 
     @Override
-    public void initialize(Map<String, String> params) throws InvalidAdapterParameterException {
+    public void initialize(Map<String, String> params) throws DataAdapterException {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
