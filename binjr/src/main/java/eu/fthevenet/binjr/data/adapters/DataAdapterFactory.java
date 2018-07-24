@@ -21,18 +21,11 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
-import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapter;
-import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapterDialog;
-import eu.fthevenet.binjr.sources.jrds.adapters.JrdsAdapterDialog;
-import eu.fthevenet.binjr.sources.jrds.adapters.JrdsDataAdapter;
 import javafx.scene.Node;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Defines methods to discover and create new instances of available {@link DataAdapter} classes
@@ -41,6 +34,7 @@ import java.util.Objects;
  */
 public class DataAdapterFactory {
     private final Map<String, DataAdapterInfo> registeredAdapters;
+    private final ServiceLoader<DataAdapterInfo> loader;
 
     private static class DataAdapterFactoryHolder {
         private static final DataAdapterFactory instance = new DataAdapterFactory();
@@ -50,6 +44,7 @@ public class DataAdapterFactory {
      * Initializes a new instance if the {@link DataAdapterFactory} class.
      */
     private DataAdapterFactory() {
+        this.loader = ServiceLoader.load(DataAdapterInfo.class);
         registeredAdapters = new HashMap<>();
         this.loadAdapters();
     }
@@ -123,12 +118,7 @@ public class DataAdapterFactory {
     }
 
     private void loadAdapters() {
-        //TODO: Use introspection to dynamically discover adapters
-        DataAdapterInfo[] info = new DataAdapterInfo[]{
-                new DataAdapterInfo("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, null, JrdsAdapterDialog.class),
-                new DataAdapterInfo("CSV File", "CSV File Data Adapter", CsvFileAdapter.class, null, CsvFileAdapterDialog.class)
-        };
-        for (DataAdapterInfo i : info) {
+        for (DataAdapterInfo i : loader) {
             registeredAdapters.put(i.getKey(), i);
         }
     }
