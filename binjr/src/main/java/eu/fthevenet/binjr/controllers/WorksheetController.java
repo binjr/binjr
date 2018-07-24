@@ -397,11 +397,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
         crossHair = new XYChartCrosshair<>(map,
                 chartParent,
                 dateTimeFormatter::format);
-        //TODO put it back!
-//        crossHair.onSelectionDone(s -> {
-//            logger.debug(() -> "Applying zoom selection: " + s.toString());
-//            currentState.setSelection(convertSelection(s), true);
-//        });
+        crossHair.onSelectionDone(s -> {
+            logger.debug(() -> "Applying zoom selection: " + s.toString());
+            currentState.setSelection(convertSelection(s), true);
+        });
         hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
@@ -553,34 +552,33 @@ public class WorksheetController implements Initializable, AutoCloseable {
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
             colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
             colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
-            //TODO Put it back!
-//            avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getAverageValue()),
-//                    p.getValue().processorProperty()));
-//
-//            minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMinValue()),
-//                    p.getValue().processorProperty()));
-//
-//            maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMaxValue()),
-//                    p.getValue().processorProperty()));
-//
-//            currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-//                    () -> {
-//                        if (p.getValue().getProcessor() == null) {
-//                            return "NaN";
-//                        }
-//                        return currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
-//                    }, crossHair.currentXValueProperty()));
-//
-//            currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
+            avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getAverageValue()),
+                    p.getValue().processorProperty()));
 
-//            currentViewPort.getSeriesTable().setOnKeyReleased(event -> {
-//                if (event.getCode().equals(KeyCode.DELETE)) {
-//                    removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) event.getSource());
-//                }
-//            });
+            minColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMinValue()),
+                    p.getValue().processorProperty()));
+
+            maxColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getMaxValue()),
+                    p.getValue().processorProperty()));
+
+            currentColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                    () -> {
+                        if (p.getValue().getProcessor() == null) {
+                            return "NaN";
+                        }
+                        return currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
+                    }, crossHair.currentXValueProperty()));
+
+            currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
+
+            currentViewPort.getSeriesTable().setOnKeyReleased(event -> {
+                if (event.getCode().equals(KeyCode.DELETE)) {
+                    removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) event.getSource());
+                }
+            });
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
