@@ -127,15 +127,7 @@ public class DataAdapterFactory {
     }
 
     private void loadAdapters() throws IOException {
-//        // Load local adapters
-//        for (DataAdapterInfo i : ServiceLoader.load(DataAdapterInfo.class)) {
-//            registeredAdapters.put(i.getKey(), i);
-//            logger.debug(() -> "Successfully registered DataAdapterInfo " + i.toString());
-//        }
-        // Load adapters from plugins
-
         List<URL> urls = new ArrayList<>();
-
         if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
             logger.debug(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
             PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
@@ -153,11 +145,18 @@ public class DataAdapterFactory {
         else {
             logger.debug("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
         }
-        for (DataAdapterInfo i : ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0])))) {
-            registeredAdapters.put(i.getKey(), i);
-            logger.debug(() -> "Successfully registered DataAdapterInfo " + i.toString() + " from external JAR.");
+        Iterator<DataAdapterInfo> adapterInfoIterator = ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0]))).iterator();
+        while (adapterInfoIterator.hasNext()) {
+            try {
+                DataAdapterInfo adapterInfo = adapterInfoIterator.next();
+                registeredAdapters.put(adapterInfo.getKey(), adapterInfo);
+                logger.debug(() -> "Successfully registered DataAdapterInfo " + adapterInfo.toString() + " from external JAR.");
+            } catch (ServiceConfigurationError sce) {
+                logger.error("Failed to load DataAdapter", sce);
+            } catch (Exception e) {
+                logger.error("Unexpected error while loading DataAdapter", e);
+            }
         }
-
     }
 
     private DataAdapterInfo retrieveAdapterInfo(String key) throws NoAdapterFoundException {
