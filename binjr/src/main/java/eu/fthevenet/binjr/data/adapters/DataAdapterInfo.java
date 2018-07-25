@@ -18,8 +18,7 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
-
-import java.net.URI;
+import javafx.beans.property.BooleanProperty;
 
 /**
  * An immutable representation of a {@link DataAdapter}'s metadata
@@ -43,13 +42,6 @@ public interface DataAdapterInfo {
     public String getDescription();
 
     /**
-     * Returns the URI for the JAR that contains the adapter's class.
-     *
-     * @return the URI for the JAR that contains the adapter's class.
-     */
-    public URI getJarUri();
-
-    /**
      * Returns the class that implements the data adapter.
      *
      * @return the class that implements the data adapter.
@@ -68,4 +60,10 @@ public interface DataAdapterInfo {
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
     public Class<? extends DataAdapterDialog> getAdapterDialog();
+
+    public BooleanProperty enabledProperty();
+
+    public boolean isEnabled();
+
+    public void setEnabled(boolean enabled);
 }

@@ -22,6 +22,6 @@ import eu.fthevenet.binjr.data.adapters.BaseDataAdapterInfo;
 public class CsvFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     public CsvFileDataAdapterInfo() {
-        super("CSV File", "CSV File Data Adapter", CsvFileAdapter.class, null, CsvFileAdapterDialog.class);
+        super("CSV File", "CSV File Data Adapter", CsvFileAdapter.class, CsvFileAdapterDialog.class);
     }
 }

@@ -22,6 +22,6 @@ import eu.fthevenet.binjr.data.adapters.BaseDataAdapterInfo;
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
     public JrdsDataAdapterInfo() {
-        super("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, null, JrdsAdapterDialog.class);
+        super("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, JrdsAdapterDialog.class);
     }
 }

@@ -18,20 +18,20 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
-
-import java.net.URI;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 
 /**
  * An immutable representation of a {@link DataAdapter}'s metadata
  *
  * @author Frederic Thevenet
  */
-public class BaseDataAdapterInfo implements DataAdapterInfo {
+public abstract class BaseDataAdapterInfo implements DataAdapterInfo {
     private final String name;
     private final String description;
     private final Class<? extends DataAdapter> adapterClass;
-    private final URI jarUri;
     private final Class<? extends DataAdapterDialog> adapterDialog;
+    private BooleanProperty enabled = new SimpleBooleanProperty(true);
 
     /**
      * Initializes a new instance of the DataAdapterInfo class.
@@ -39,14 +39,12 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @param name         the name of the data adapter.
      * @param description  the description associated to the data adapter.
      * @param adapterClass the class that implements the data adapter.
-     * @param jarUri       the URI for the JAR that contains the adapter's class.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    protected BaseDataAdapterInfo(String name, String description, Class<? extends DataAdapter> adapterClass, URI jarUri, Class<? extends DataAdapterDialog> dialogClass) {
+    protected BaseDataAdapterInfo(String name, String description, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
         this.name = name;
         this.description = description;
         this.adapterClass = adapterClass;
-        this.jarUri = jarUri;
         this.adapterDialog = dialogClass;
     }
 
@@ -55,6 +53,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      *
      * @return the name of the data adapter.
      */
+    @Override
     public String getName() {
         return name;
     }
@@ -64,24 +63,18 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      *
      * @return the description associated to the data adapter.
      */
+    @Override
     public String getDescription() {
         return description;
     }
 
-    /**
-     * Returns the URI for the JAR that contains the adapter's class.
-     *
-     * @return the URI for the JAR that contains the adapter's class.
-     */
-    public URI getJarUri() {
-        return jarUri;
-    }
 
     /**
      * Returns the class that implements the data adapter.
      *
      * @return the class that implements the data adapter.
      */
+    @Override
     public Class<? extends DataAdapter> getAdapterClass() {
         return adapterClass;
     }
@@ -91,6 +84,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      *
      * @return a key to uniquely identify the adapter.
      */
+    @Override
     public String getKey() {
         return adapterClass.getName();
     }
@@ -100,7 +94,23 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      *
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
+    @Override
     public Class<? extends DataAdapterDialog> getAdapterDialog() {
         return adapterDialog;
+    }
+
+    @Override
+    public BooleanProperty enabledProperty() {
+        return enabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return enabled.get();
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+        this.enabled.set(enabled);
     }
 }
