@@ -17,6 +17,8 @@
 
 package eu.fthevenet.binjr.controllers;
 
+import eu.fthevenet.binjr.data.adapters.DataAdapterFactory;
+import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
@@ -28,9 +30,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,6 +43,8 @@ import org.controlsfx.control.ToggleSwitch;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.prefs.BackingStoreException;
@@ -52,6 +58,12 @@ public class PreferenceDialogController implements Initializable {
     private static final Logger logger = LogManager.getLogger(PreferenceDialogController.class);
     @FXML
     public TextField downSamplingThreshold;
+    public TextField pluginLocTextfield;
+    public Button browsePluginLocButton;
+    //public CheckListView<DataAdapterInfo> availableAdpaterListview;
+
+    public TableView<DataAdapterInfo> availableAdapterTable;
+    public TableColumn enabledColumn;
     //public TitledPane debugTitledPane;
     @FXML
     private ToggleSwitch enableDownSampling;
@@ -100,6 +112,26 @@ public class PreferenceDialogController implements Initializable {
             maxSampleLabel.setDisable(!newValue);
         });
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
+
+        final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<Path>() {
+            @Override
+            public String toString(Path object) {
+                return object.toString();
+            }
+
+            @Override
+            public Path fromString(String string) {
+                return Paths.get(string);
+            }
+        });
+        pathFormatter.valueProperty().bindBidirectional(prefs.pluginsLocationProperty());
+        pluginLocTextfield.setTextFormatter(pathFormatter);
+
+        enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
+
+        availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
+
+
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);

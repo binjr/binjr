@@ -19,6 +19,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.ToggleSwitch?>
@@ -114,6 +115,40 @@
                             </padding>
                         </ScrollPane>
 
+                    </content>
+                </TitledPane>
+                <TitledPane animated="false" text="Data Adapters">
+                    <content>
+                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                            <children>
+                                <VBox layoutX="-11.0" layoutY="9.600000381469727" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                    <children>
+                                        <Label maxWidth="1.7976931348623157E308" text="Plugins location"/>
+                                        <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
+                                            <children>
+                                                <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
+                                                <Button fx:id="browsePluginLocButton" mnemonicParsing="false" prefWidth="25.0" text="..."/>
+                                            </children>
+                                        </HBox>
+                                        <Label maxWidth="1.7976931348623157E308" text="Available adapters"/>
+                                        <TableView fx:id="availableAdapterTable" editable="true">
+                                            <columns>
+                                                <TableColumn fx:id="enabledColumn" prefWidth="32.0" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="enabled"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn prefWidth="120" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="name"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                            </columns>
+                                        </TableView>
+                                    </children>
+                                </VBox>
+                            </children>
+                        </AnchorPane>
                     </content>
                 </TitledPane>
                 <TitledPane animated="false" text="Manage Settings">

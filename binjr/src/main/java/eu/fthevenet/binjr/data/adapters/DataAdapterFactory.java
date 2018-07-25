@@ -34,6 +34,7 @@ import java.net.URLClassLoader;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Defines methods to discover and create new instances of available {@link DataAdapter} classes
@@ -43,7 +44,6 @@ import java.util.*;
 public class DataAdapterFactory {
     private static final Logger logger = LogManager.getLogger(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters;
-
 
     private static class DataAdapterFactoryHolder {
         private static final DataAdapterFactory instance = new DataAdapterFactory();
@@ -72,11 +72,20 @@ public class DataAdapterFactory {
     }
 
     /**
+     * Gets a collection of {@link DataAdapterInfo} for all active (enabled) {@link DataAdapter}
+     *
+     * @return a collection of {@link DataAdapterInfo} for all active (enabled) {@link DataAdapter}
+     */
+    public Collection<DataAdapterInfo> getActiveAdapters() {
+        return registeredAdapters.values().stream().filter(DataAdapterInfo::isEnabled).collect(Collectors.toList());
+    }
+
+    /**
      * Gets a collection of {@link DataAdapterInfo} for all registered {@link DataAdapter}
      *
      * @return a collection of {@link DataAdapterInfo} for all registered {@link DataAdapter}
      */
-    public Collection<DataAdapterInfo> getAdapterInfo() {
+    public Collection<DataAdapterInfo> getAllAdapters() {
         return registeredAdapters.values();
     }
 

@@ -456,7 +456,7 @@ public class MainViewController implements Initializable {
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
         List<MenuItem> menuItems = new ArrayList<>();
-        for (DataAdapterInfo adapterInfo : DataAdapterFactory.getInstance().getAdapterInfo()) {
+        for (DataAdapterInfo adapterInfo : DataAdapterFactory.getInstance().getActiveAdapters()) {
             MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
