@@ -26,6 +26,8 @@ import eu.fthevenet.binjr.data.codec.CsvDecoder;
 import eu.fthevenet.binjr.data.exceptions.*;
 import eu.fthevenet.binjr.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.sources.jrds.adapters.json.JsonJrdsItem;
+import eu.fthevenet.binjr.sources.jrds.adapters.json.JsonJrdsTree;
 import eu.fthevenet.util.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -119,10 +121,10 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         try {
-            JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonTree.class);
-            Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+            JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
+            Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
-            for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> JRDS_TREE.equals(jsonItem.type) || JRDS_FILTER.equals(jsonItem.type)).collect(Collectors.toList())) {
+            for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
             return tree;
@@ -269,15 +271,15 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     public Collection<String> discoverFilters() throws DataAdapterException, URISyntaxException {
         Gson gson = new Gson();
         try {
-            JsonTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonTree.class);
-            return Arrays.stream(t.items).filter(jsonItem -> JRDS_FILTER.equals(jsonItem.type)).map(i -> i.filter).collect(Collectors.toList());
+            JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonJrdsTree.class);
+            return Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_FILTER.equals(jsonJrdsItem.type)).map(i -> i.filter).collect(Collectors.toList());
         } catch (JsonParseException e) {
             throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
         }
     }
 
-    private void attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonTree.JsonItem> nodes) throws DataAdapterException {
-        JsonTree.JsonItem n = nodes.get(id);
+    private void attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
+        JsonJrdsItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
         TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
@@ -289,7 +291,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         }
         else {
             if (n.children != null) {
-                for (JsonTree.JsonItem.JsonTreeRef ref : n.children) {
+                for (JsonJrdsItem.JsonTreeRef ref : n.children) {
                     attachNode(newBranch, ref._reference, nodes);
                 }
             }
@@ -380,27 +382,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         }
     }
 
-    /**
-     * POJO definition used to decode JSON message.
-     */
-    private static class JsonTree {
-        String identifier;
-        String label;
-        JsonItem[] items;
-
-        static class JsonItem {
-            String name;
-            String id;
-            String type;
-            String filter;
-            JsonTreeRef[] children;
-
-            static class JsonTreeRef {
-                String _reference;
-            }
-        }
-    }
-
     private class GraphDescListener implements ChangeListener<Boolean> {
         private final String currentPath;
         private final TreeItem<TimeSeriesBinding<Double>> newBranch;
@@ -436,10 +417,10 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     }
 
     private class FilteredViewListener implements ChangeListener<Boolean> {
-        private final JsonTree.JsonItem n;
+        private final JsonJrdsItem n;
         private final TreeItem<TimeSeriesBinding<Double>> newBranch;
 
-        public FilteredViewListener(JsonTree.JsonItem n, TreeItem<TimeSeriesBinding<Double>> newBranch) {
+        public FilteredViewListener(JsonJrdsItem n, TreeItem<TimeSeriesBinding<Double>> newBranch) {
             this.n = n;
             this.newBranch = newBranch;
         }
@@ -448,9 +429,9 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
             if (newValue) {
                 try {
-                    JsonTree t = new Gson().fromJson(getJsonTree(treeViewTab.getCommand(), JRDS_FILTER, n.name), JsonTree.class);
-                    Map<String, JsonTree.JsonItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-                    for (JsonTree.JsonItem branch : Arrays.stream(t.items).filter(jsonItem -> JRDS_TREE.equals(jsonItem.type) || JRDS_FILTER.equals(jsonItem.type)).collect(Collectors.toList())) {
+                    JsonJrdsTree t = new Gson().fromJson(getJsonTree(treeViewTab.getCommand(), JRDS_FILTER, n.name), JsonJrdsTree.class);
+                    Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
+                    for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
                         attachNode(newBranch, branch.id, m);
                     }
                     //remove dummy node
