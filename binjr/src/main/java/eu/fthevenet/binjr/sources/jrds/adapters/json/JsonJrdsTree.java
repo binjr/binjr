@@ -17,6 +17,8 @@
 
 package eu.fthevenet.binjr.sources.jrds.adapters.json;
 
+import java.util.Arrays;
+
 /**
  * POJO definition used to decode JSON message.
  */
@@ -25,4 +27,12 @@ public class JsonJrdsTree {
     public String label;
     public JsonJrdsItem[] items;
 
+    @Override
+    public String toString() {
+        return "JsonJrdsTree{" +
+                "identifier='" + identifier + '\'' +
+                ", label='" + label + '\'' +
+                ", items=" + Arrays.toString(items) +
+                '}';
+    }
 }

@@ -17,6 +17,8 @@
 
 package eu.fthevenet.binjr.sources.jrds.adapters.json;
 
+import java.util.Arrays;
+
 public class JsonJrdsItem {
     public String name;
     public String id;
@@ -26,5 +28,16 @@ public class JsonJrdsItem {
 
     public static class JsonTreeRef {
         public String _reference;
+    }
+
+    @Override
+    public String toString() {
+        return "JsonJrdsItem{" +
+                "name='" + name + '\'' +
+                ", id='" + id + '\'' +
+                ", type='" + type + '\'' +
+                ", filter='" + filter + '\'' +
+                ", children=" + Arrays.toString(children) +
+                '}';
     }
 }

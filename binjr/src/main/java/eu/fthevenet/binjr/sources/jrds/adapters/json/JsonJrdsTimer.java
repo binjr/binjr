@@ -21,4 +21,13 @@ public class JsonJrdsTimer {
     public String name;
     public int lastCollect;
     public int lastDuration;
+
+    @Override
+    public String toString() {
+        return "JsonJrdsTimer{" +
+                "name='" + name + '\'' +
+                ", lastCollect=" + lastCollect +
+                ", lastDuration=" + lastDuration +
+                '}';
+    }
 }

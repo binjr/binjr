@@ -17,10 +17,21 @@
 
 package eu.fthevenet.binjr.sources.jrds.adapters.json;
 
+import java.util.Arrays;
+
 public class JsonJrdsStatus {
-    public String hosts;
+    public int hosts;
     public int probes;
-    public JsonJrdsTimer[] times;
+    public JsonJrdsTimer[] timers;
     public int generation;
 
+    @Override
+    public String toString() {
+        return "JsonJrdsStatus{" +
+                "hosts='" + hosts + '\'' +
+                ", probes=" + probes +
+                ", timers=" + Arrays.toString(timers) +
+                ", generation=" + generation +
+                '}';
+    }
 }
