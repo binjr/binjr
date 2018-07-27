@@ -31,6 +31,13 @@ import java.util.jar.Manifest;
  * Provides access to the application's environmental properties
  */
 public class AppEnvironment {
+    public static final String HTTP_GITHUB_REPO = "https://github.com/fthevenet/binjr";
+    public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
+    public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
+    public static final String COPYRIGHT_NOTICE = "Copyright (c) 2017-2018 Frederic Thevenet";
+    public static final String LICENSE = "Apache-2.0";
+
+
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -58,6 +65,23 @@ public class AppEnvironment {
      * @return the version information held in the containing jar's manifest
      */
     public Version getVersion() {
+        return getVersion(this.manifest);
+    }
+
+    /**
+     * Returns a version number extracted from the specified manifest.
+     * <p>The version number is extracted according to the following rules:
+     * <ul>
+     * <li>If the key {@code Specification-Version} is present and can be formatted as valid {@link Version} instance then it is returned, else</li>
+     * <li>If the key {@code Implementation-Version} is present and can be formatted as valid {@link Version} instance then it is returned, else</li>
+     * <li> {@code Version.emptyVersion} is returned</li>
+     * </ul>
+     * </p>
+     *
+     * @param manifest the {@link Manifest} from which a version number should be extracted.
+     * @return a version number extracted from the specified manifest.
+     */
+    public Version getVersion(Manifest manifest) {
         if (manifest != null) {
             String[] keys = new String[]{"Specification-Version", "Implementation-Version"};
             for (String key : keys) {
@@ -75,6 +99,41 @@ public class AppEnvironment {
         return Version.emptyVersion;
     }
 
+    public Version getVersion(Class aClass) {
+        return this.getVersion(this.getManifest(aClass));
+    }
+
+    public Manifest getManifest() {
+        return getManifest(this.getClass());
+    }
+
+    /**
+     * Returns the manifest for the JAR which packages the specified class.
+     *
+     * @param aClass
+     * @return the manifest for the JAR which packages the specified class.
+     */
+    public Manifest getManifest(Class<?> aClass) {
+        String className = aClass.getSimpleName() + ".class";
+        String classPath = aClass.getResource(className).toString();
+        if (classPath.startsWith("jar")) {
+            String manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
+            try {
+                return new Manifest(new URL(manifestPath).openStream());
+            } catch (IOException e) {
+                logger.error("Error extracting manifest from jar: " + e.getMessage());
+                logger.debug(() -> "Full stack", e);
+            }
+        }
+        logger.warn("Could not extract MANIFEST from jar!");
+        return null;
+    }
+
+    /**
+     * Returns a short description for the application.
+     *
+     * @return a short description for the application.
+     */
     public String getAppDescription() {
         return "binjr v" + getVersion() + " (build #" + getBuildNumber() + ")";
     }
@@ -142,20 +201,5 @@ public class AppEnvironment {
         }
     }
 
-    private Manifest getManifest() {
-        String className = this.getClass().getSimpleName() + ".class";
-        String classPath = this.getClass().getResource(className).toString();
-        if (classPath.startsWith("jar")) {
-            String manifestPath = classPath.substring(0, classPath.lastIndexOf('!') + 1) + "/META-INF/MANIFEST.MF";
-            try {
-                return new Manifest(new URL(manifestPath).openStream());
-            } catch (IOException e) {
-                logger.error("Error extracting manifest from jar: " + e.getMessage());
-                logger.debug(() -> "Full stack", e);
-            }
-        }
-        logger.warn("Could not extract MANIFEST from jar!");
-        return null;
-    }
 
 }

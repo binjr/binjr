@@ -20,7 +20,6 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
-import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.SysInfoProperty;
 import eu.fthevenet.binjr.preferences.UpdateManager;
 import javafx.application.Platform;
@@ -177,7 +176,7 @@ public class AboutBoxController implements Initializable {
     @FXML
     private void goTobinjrDotEu(ActionEvent actionEvent) {
         try {
-            Dialogs.launchUrlInExternalBrowser(GlobalPreferences.HTTP_WWW_BINJR_EU);
+            Dialogs.launchUrlInExternalBrowser(AppEnvironment.HTTP_WWW_BINJR_EU);
         } catch (IOException | URISyntaxException e) {
             logger.error(e);
         }

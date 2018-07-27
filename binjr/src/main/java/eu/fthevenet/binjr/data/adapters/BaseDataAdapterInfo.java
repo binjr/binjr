@@ -18,34 +18,71 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
+import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+
+import java.util.Objects;
 
 /**
  * An immutable representation of a {@link DataAdapter}'s metadata
  *
  * @author Frederic Thevenet
  */
-public abstract class BaseDataAdapterInfo implements DataAdapterInfo {
+public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final String name;
     private final String description;
+    private final Version version;
+    private final String copyright;
+    private final String license;
+    private final String jarLocation;
+    private final String siteUrl;
     private final Class<? extends DataAdapter> adapterClass;
     private final Class<? extends DataAdapterDialog> adapterDialog;
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
+
+    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass);
+    }
+
 
     /**
      * Initializes a new instance of the DataAdapterInfo class.
      *
      * @param name         the name of the data adapter.
      * @param description  the description associated to the data adapter.
+     * @param version
+     * @param copyright
+     * @param license
+     * @param siteUrl
      * @param adapterClass the class that implements the data adapter.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    protected BaseDataAdapterInfo(String name, String description, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
+    protected BaseDataAdapterInfo(String name, String description, Version version, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
+        Objects.requireNonNull(name);
+        Objects.requireNonNull(description);
+        Objects.requireNonNull(copyright);
+        Objects.requireNonNull(license);
+        Objects.requireNonNull(siteUrl);
+        Objects.requireNonNull(adapterClass);
+        Objects.requireNonNull(dialogClass);
+
         this.name = name;
         this.description = description;
+        this.copyright = copyright;
+        this.license = license;
+        this.siteUrl = siteUrl;
         this.adapterClass = adapterClass;
         this.adapterDialog = dialogClass;
+
+        if (version ==null){
+            this.version = AppEnvironment.getInstance().getVersion(adapterClass);
+        }
+        else {
+            this.version = version;
+        }
+        this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
     }
 
     /**
@@ -112,5 +149,30 @@ public abstract class BaseDataAdapterInfo implements DataAdapterInfo {
     @Override
     public void setEnabled(boolean enabled) {
         this.enabled.set(enabled);
+    }
+
+    @Override
+    public Version getVersion() {
+        return version;
+    }
+
+    @Override
+    public String getCopyright() {
+        return copyright;
+    }
+
+    @Override
+    public String getLicense() {
+        return license;
+    }
+
+    @Override
+    public String getJarLocation() {
+        return jarLocation;
+    }
+
+    @Override
+    public String getSiteUrl() {
+        return siteUrl;
     }
 }

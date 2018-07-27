@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.data.adapters;
 
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
+import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 
 /**
@@ -42,6 +43,41 @@ public interface DataAdapterInfo {
     public String getDescription();
 
     /**
+     * Returns the version of the adapter.
+     *
+     * @return the version of the adapter.
+     */
+    public Version getVersion();
+
+    /**
+     * Returns the url of the website associated with the adapter.
+     *
+     * @return the url of the website associated with the adapter.
+     */
+    public String getSiteUrl();
+
+    /**
+     * Returns the name of license under which the adapter is distributed.
+     *
+     * @return the name of license under which the adapter is distributed.
+     */
+    public String getLicense();
+
+    /**
+     * Returns the copyright notice associated with the adapter.
+     *
+     * @return the copyright notice associated with the adapter.
+     */
+    public String getCopyright();
+
+    /**
+     * Returns the location of the JAR in which the adapter is packaged.
+     *
+     * @return the location of the JAR in which the adapter is packaged.
+     */
+    public String getJarLocation();
+
+    /**
      * Returns the class that implements the data adapter.
      *
      * @return the class that implements the data adapter.
@@ -54,6 +90,7 @@ public interface DataAdapterInfo {
      * @return a key to uniquely identify the adapter.
      */
     public String getKey();
+
     /**
      * Returns the class that implements the dialog box used to gather the adapter's parameters from the end user.
      *
@@ -61,9 +98,24 @@ public interface DataAdapterInfo {
      */
     public Class<? extends DataAdapterDialog> getAdapterDialog();
 
+    /**
+     * The enabled property.
+     *
+     * @return The enabled property.
+     */
     public BooleanProperty enabledProperty();
 
+    /**
+     * Returns true if the adapter is enabled, false otherwise.
+     *
+     * @return true if the adapter is enabled, false otherwise.
+     */
     public boolean isEnabled();
 
+    /**
+     * Set to true to enable the adapter, false otherwise.
+     *
+     * @param enabled true to enable the adapter, false otherwise.
+     */
     public void setEnabled(boolean enabled);
 }

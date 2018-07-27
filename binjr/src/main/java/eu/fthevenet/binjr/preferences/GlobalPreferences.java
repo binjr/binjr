@@ -38,9 +38,6 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
-    public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
-    public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
-    public static final String HTTP_GITHUB_REPO = "https://github.com/fthevenet/binjr";
 
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String BINJR_GLOBAL = "binjr/global";

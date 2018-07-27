@@ -18,10 +18,17 @@
 package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import eu.fthevenet.binjr.data.adapters.BaseDataAdapterInfo;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
     public JrdsDataAdapterInfo() {
-        super("JRDS", "JRDS Data Adapter", JrdsDataAdapter.class, JrdsAdapterDialog.class);
+        super("JRDS",
+                "JRDS Data Adapter",
+                AppEnvironment.COPYRIGHT_NOTICE,
+                AppEnvironment.LICENSE,
+                AppEnvironment.HTTP_WWW_BINJR_EU,
+                JrdsDataAdapter.class,
+                JrdsAdapterDialog.class);
     }
 }

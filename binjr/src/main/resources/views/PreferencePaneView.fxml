@@ -19,7 +19,7 @@
 
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
-<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.ToggleSwitch?>
@@ -119,9 +119,9 @@
                 </TitledPane>
                 <TitledPane animated="false" text="Data Adapters">
                     <content>
-                        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                        <AnchorPane minHeight="0.0" minWidth="0.0">
                             <children>
-                                <VBox layoutX="-11.0" layoutY="9.600000381469727" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                     <children>
                                         <Label maxWidth="1.7976931348623157E308" text="Plugins location"/>
                                         <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
@@ -133,14 +133,45 @@
                                         <Label maxWidth="1.7976931348623157E308" text="Available adapters"/>
                                         <TableView fx:id="availableAdapterTable" editable="true">
                                             <columns>
-                                                <TableColumn fx:id="enabledColumn" prefWidth="32.0" sortable="false">
+                                                <TableColumn fx:id="enabledColumn" prefWidth="24.0" resizable="false" sortable="false">
                                                     <cellValueFactory>
                                                         <PropertyValueFactory property="enabled"/>
                                                     </cellValueFactory>
                                                 </TableColumn>
-                                                <TableColumn prefWidth="120" sortable="false">
+                                                <TableColumn text="Name" sortable="false">
                                                     <cellValueFactory>
                                                         <PropertyValueFactory property="name"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn text="Version" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="version"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn text="Description" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="description"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+
+                                                <TableColumn text="Copyright" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="copyright"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn text="License" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="license"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn text="Version" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="siteUrl"/>
+                                                    </cellValueFactory>
+                                                </TableColumn>
+                                                <TableColumn text="JAR" sortable="false">
+                                                    <cellValueFactory>
+                                                        <PropertyValueFactory property="jarLocation"/>
                                                     </cellValueFactory>
                                                 </TableColumn>
                                             </columns>
