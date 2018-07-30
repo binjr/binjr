@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.util.javafx.listeners;
+package eu.fthevenet.util.javafx.bindings;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
@@ -30,6 +30,15 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
+/**
+ * A class that provide methods to centralize and register the attachment of listeners
+ * and bindings onto {@link javafx.beans.Observable} instances.
+ * <p>
+ * This makes it possible to remove all listeners and bindings attached to to
+ * registered {@link Observable} instances in a determinist fashion (on invoking {@code close()})
+ * and helps alleviate the potential for references leaks in some scenarios.
+ * </p>
+ */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);
     private final Map<ObservableValue, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
@@ -37,7 +46,14 @@ public class BindingManager implements AutoCloseable {
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new ConcurrentHashMap<>();
     private final Set<Property<?>> boundProperties = Collections.newSetFromMap(new WeakHashMap<>());
 
-    public<T> void bind(Property<T> property, ObservableValue<T> binding){
+    /**
+     * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
+     *
+     * @param property the {@link Property} to bind
+     * @param binding  the {@link ObservableValue} to bind to the {@link Property}
+     * @param <T>      the type common to both {@link Property} and {@link ObservableValue}
+     */
+    public <T> void bind(Property<T> property, ObservableValue<T> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
         logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
@@ -45,45 +61,99 @@ public class BindingManager implements AutoCloseable {
         boundProperties.add(property);
     }
 
-    public<T> void unbindAll(){
-      boundProperties.forEach(property -> {
-          logger.trace(() -> "Unbinding property " + property.toString());
-          property.unbind();
-      });
+    /**
+     * Unbinds all registered bindings
+     */
+    public void unbindAll() {
+        boundProperties.forEach(property -> {
+            logger.trace(() -> "Unbinding property " + property.toString());
+            property.unbind();
+        });
     }
 
+    /**
+     * Attach a {@link ChangeListener} to an {@link ObservableValue} and registers the resulting binding.
+     *
+     * @param observable the {@link ObservableValue} to attach the listener to.
+     * @param listener   the {@link ChangeListener} to attach
+     */
     public void attachListener(ObservableValue<?> observable, ChangeListener<?> listener) {
         attachListener(observable, listener, changeListeners, ObservableValue::addListener);
     }
 
+    /**
+     * Attach a {@link InvalidationListener} to an {@link ObservableValue} and registers the resulting binding.
+     *
+     * @param observable the {@link ObservableValue} to attach the listener to.
+     * @param listener   the {@link InvalidationListener} to attach
+     */
     public void attachListener(ObservableValue<?> observable, InvalidationListener listener) {
         attachListener(observable, listener, invalidationListeners, ObservableValue::addListener);
     }
 
+    /**
+     * Attach a {@link ListChangeListener} to an {@link ObservableList} and registers the resulting binding.
+     *
+     * @param observable the {@link ObservableList} to attach the listener to.
+     * @param listener   the {@link ListChangeListener} to attach
+     */
     public void attachListener(ObservableList<?> observable, ListChangeListener listener) {
         attachListener(observable, listener, listChangeListeners, ObservableList::addListener);
     }
 
+    /**
+     * Remove a specific {@link ChangeListener} from an {@link ObservableValue}.
+     *
+     * @param observable the {@link ObservableValue} to remove the listener from.
+     * @param listener   the {@link ChangeListener} to remove
+     */
     public void detachListener(ObservableValue<?> observable, ChangeListener listener) {
-        detachListener(observable, listener, changeListeners,ObservableValue::removeListener);
+        detachListener(observable, listener, changeListeners, ObservableValue::removeListener);
     }
 
+    /**
+     * Remove a specific {@link InvalidationListener} from an {@link ObservableValue}.
+     *
+     * @param observable the {@link ObservableValue} to remove the listener from.
+     * @param listener   the {@link InvalidationListener} to remove
+     */
     public void detachListener(ObservableValue<?> observable, InvalidationListener listener) {
         detachListener(observable, listener, invalidationListeners, ObservableValue::removeListener);
     }
 
+    /**
+     * Remove a specific {@link ListChangeListener} from an {@link ObservableList}.
+     *
+     * @param observable the {@link ObservableList} to remove the listener from.
+     * @param listener   the {@link ListChangeListener} to remove
+     */
     public void detachListener(ObservableList<?> observable, ListChangeListener<?> listener) {
         detachListener(observable, listener, listChangeListeners, ObservableList::removeListener);
     }
 
+    /**
+     * Remove <u>all</u> {@link InvalidationListener} from an {@link ObservableValue}.
+     *
+     * @param observable the {@link ObservableValue} to remove all listeners from.
+     */
     public void detachAllInvalidationListeners(ObservableValue<?> observable) {
         detachAllListener(observable, invalidationListeners, ObservableValue::removeListener);
     }
 
+    /**
+     * Remove <u>all</u> {@link ChangeListener} from an {@link ObservableValue}.
+     *
+     * @param observable the {@link ObservableValue} to remove all listeners from.
+     */
     public void detachAllChangeListeners(ObservableValue<?> observable) {
         detachAllListener(observable, changeListeners, ObservableValue::removeListener);
     }
 
+    /**
+     * Remove <u>all</u> {@link ListChangeListener} from an {@link ObservableList}.
+     *
+     * @param observable the {@link ObservableList} to remove all listeners from.
+     */
     public void detachAllListChangeListeners(ObservableList<?> observable) {
         detachAllListener(observable, listChangeListeners, ObservableList::removeListener);
     }
@@ -103,7 +173,7 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(attachAction, "attachAction parameter cannot be null");
         map.computeIfAbsent(observable, p -> new ArrayList<>()).add(listener);
         logger.trace(() -> "Attaching listener " + listener.toString() + " to observable " + observable.toString());
-        attachAction.accept(observable,listener);
+        attachAction.accept(observable, listener);
     }
 
     private <T, U> void detachListener(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
@@ -120,7 +190,7 @@ public class BindingManager implements AutoCloseable {
         detachAction.accept(observable, listener);
     }
 
-    private <T, U> void detachAllListener(T observable,  Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
+    private <T, U> void detachAllListener(T observable, Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
         Objects.requireNonNull(observable, "observable paramater cannot be null");
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(detachAction, "attachAction parameter cannot be null");
