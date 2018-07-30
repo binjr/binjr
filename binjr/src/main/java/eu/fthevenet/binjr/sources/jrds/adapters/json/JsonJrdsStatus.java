@@ -20,18 +20,18 @@ package eu.fthevenet.binjr.sources.jrds.adapters.json;
 import java.util.Arrays;
 
 public class JsonJrdsStatus {
-    public int hosts;
-    public int probes;
-    public JsonJrdsTimer[] timers;
-    public int generation;
+    public int Hosts;
+    public int Probes;
+    public JsonJrdsTimer[] Timers;
+    public int Generation;
 
     @Override
     public String toString() {
         return "JsonJrdsStatus{" +
-                "hosts='" + hosts + '\'' +
-                ", probes=" + probes +
-                ", timers=" + Arrays.toString(timers) +
-                ", generation=" + generation +
+                "Hosts=" + Hosts +
+                ", Probes=" + Probes +
+                ", Timers=" + Arrays.toString(Timers) +
+                ", Generation=" + Generation +
                 '}';
     }
 }

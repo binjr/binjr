@@ -18,16 +18,16 @@
 package eu.fthevenet.binjr.sources.jrds.adapters.json;
 
 public class JsonJrdsTimer {
-    public String name;
-    public int lastCollect;
-    public int lastDuration;
+    public String Name;
+    public long LastCollect;
+    public long LastDuration;
 
     @Override
     public String toString() {
         return "JsonJrdsTimer{" +
-                "name='" + name + '\'' +
-                ", lastCollect=" + lastCollect +
-                ", lastDuration=" + lastDuration +
+                "Name='" + Name + '\'' +
+                ", LastCollect=" + LastCollect +
+                ", LastDuration=" + LastDuration +
                 '}';
     }
 }
