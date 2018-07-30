@@ -581,7 +581,7 @@ public class MainViewController implements Initializable {
                         Workspace wsFromfile = Workspace.from(file);
                         for (Source source : wsFromfile.getSources()) {
                             DataAdapter da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
-                            da.initialize(source.getAdapterParams());
+                            da.loadParams(source.getAdapterParams());
                             da.setId(source.getAdapterId());
                             loadAdapters(da);
                         }
@@ -782,6 +782,7 @@ public class MainViewController implements Initializable {
         };
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
+            dp.onStart();
             TreeItem<TimeSeriesBinding<Double>> bindingTree = dp.getBindingTree();
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);

@@ -121,8 +121,16 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
      *
      * @param params the parameters required to establish a connection to the underlying data source
      */
-    public abstract void initialize(Map<String, String> params) throws DataAdapterException;
+    public abstract void loadParams(Map<String, String> params) throws DataAdapterException;
 
+    /**
+     * An api hook that is executed once, after parameters have been loaded and before any other call to the {@link DataAdapter} is made.
+     * <p>Used to initialize resources and  start-up external components.</p>
+     * <p>The default implementation does nothing.</p>
+     */
+    public void onStart() throws DataAdapterException {
+        //noop
+    }
     /**
      * Pings the data source
      *

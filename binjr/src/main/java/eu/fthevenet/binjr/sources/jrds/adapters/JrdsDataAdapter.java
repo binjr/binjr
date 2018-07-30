@@ -173,12 +173,12 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
 
 
     @Override
-    public void initialize(Map<String, String> params) throws DataAdapterException {
+    public void loadParams(Map<String, String> params) throws DataAdapterException {
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
         if (!legacyInitialize(params)) {
-            super.initialize(params);
+            super.loadParams(params);
         }
         encoding = validateParameterNullity(params, "encoding");
         zoneId = validateParameter(params, "zoneId",
