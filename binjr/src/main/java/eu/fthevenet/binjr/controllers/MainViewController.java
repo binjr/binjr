@@ -559,6 +559,13 @@ public class MainViewController implements Initializable {
         worksheetTabPane.clearAllTabs();
         sourcesTabPane.clearAllTabs();
         seriesControllers.clear();
+        sourcesAdapters.values().stream().distinct().forEach(dataAdapter -> {
+            try {
+                dataAdapter.close();
+            } catch (Exception e) {
+                Dialogs.notifyException("Error closing DataAdapter", e);
+            }
+        });
         sourcesAdapters.clear();
         workspace.clear();
     }
