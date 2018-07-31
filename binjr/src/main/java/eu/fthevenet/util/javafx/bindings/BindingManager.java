@@ -38,6 +38,8 @@ import java.util.function.BiConsumer;
  * registered {@link Observable} instances in a determinist fashion (on invoking {@code close()})
  * and helps alleviate the potential for references leaks in some scenarios.
  * </p>
+ *
+ * @author Frederic Thevenet
  */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);

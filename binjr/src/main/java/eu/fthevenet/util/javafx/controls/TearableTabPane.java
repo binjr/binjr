@@ -91,7 +91,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.manager = manager;
         this.tearable = tearable;
         this.reorderable = reorderable;
-        bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
+        bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(),
+                (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
         this.getTabs().addListener((ListChangeListener<Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
@@ -197,19 +198,21 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         Platform.runLater(() -> {
             positionNewTabButton();
             Stage stage = (Stage) this.getScene().getWindow();
-            stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-                if (newValue) {
-                    manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
-                }
-            });
+            bindingManager.attachListener(stage.focusedProperty(),
+                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                        if (newValue) {
+                            manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
+                        }
+                    });
         });
 
         // Prepare to change the button on screen position if the tearableTabMap side changes
-        sideProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                positionNewTabButton();
-            }
-        });
+        bindingManager.attachListener(sideProperty(),
+                (observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        positionNewTabButton();
+                    }
+                });
     }
 
     /**

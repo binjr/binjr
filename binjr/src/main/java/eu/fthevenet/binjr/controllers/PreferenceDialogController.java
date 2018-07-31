@@ -24,15 +24,18 @@ import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.binjr.preferences.UpdateManager;
 import javafx.animation.TranslateTransition;
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
+import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -40,9 +43,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.ToggleSwitch;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
@@ -127,6 +132,23 @@ public class PreferenceDialogController implements Initializable {
         pathFormatter.valueProperty().bindBidirectional(prefs.pluginsLocationProperty());
         pluginLocTextfield.setTextFormatter(pathFormatter);
 
+        prefs.pluginsLocationProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null && !Files.exists(newValue)) {
+                Dialogs.notifyError("Invalid Plugins Folder Location",
+                        "The selected path for the plugins folder location does not exists",
+                        Pos.BOTTOM_RIGHT,
+                        root);
+                Platform.runLater(() -> prefs.setPluginsLocation(oldValue));
+            }
+            else {
+                Dialogs.notifyInfo(
+                        "Plugins Folder Location Changed",
+                        "Changes to the plugins folder location will take effect the next time binjr is started",
+                        Pos.BOTTOM_RIGHT,
+                        root);
+            }
+        });
+
         enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
 
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
@@ -209,12 +231,21 @@ public class PreferenceDialogController implements Initializable {
 
     public void handleResetSettings(ActionEvent actionEvent) {
         try {
-
             if (Dialogs.confirmDialog(root, "Restore all settings to their default value.", "Are you sure?") == ButtonType.YES) {
                 GlobalPreferences.getInstance().reset();
             }
         } catch (BackingStoreException e) {
             Dialogs.notifyException("Could not restore settings to default", e, root);
+        }
+    }
+
+    public void handleBrowsePluginsFolder(ActionEvent actionEvent) {
+        DirectoryChooser fileChooser = new DirectoryChooser();
+        fileChooser.setTitle("Select binjr plugins location");
+        fileChooser.setInitialDirectory(new File(pluginLocTextfield.getText()));
+        File newPluginLocation = fileChooser.showDialog(Dialogs.getStage(root));
+        if (newPluginLocation != null) {
+            pluginLocTextfield.setText(newPluginLocation.getPath());
         }
     }
 }

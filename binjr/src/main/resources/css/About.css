@@ -27,6 +27,7 @@
 .table-view:focused:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:focused,
 .table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:focused {
     -fx-background-color: -binjr-blue-color;
+    -fx-text-fill: white;
 }
 
 .arrow {

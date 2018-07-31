@@ -12,6 +12,8 @@
     -binjr-color-light-red: #F1707A;
     -binjr-dark-blue-color: #336F87;
     -binjr-blue-color: #4BACC6;
+    -binjr-command-bar-title-color: #285668;
+    -binjr-command-bar-border-color: #152E38;
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
@@ -331,7 +333,8 @@
    -fx-border-width:0;
    -fx-padding: -1;
  }
-.table-view .column-header-background /*.nested-column-header .column-header*/  {
+
+.table-view .column-header-background {
     -fx-border-width:1;
     -fx-border-color: -binjr-gray-border-color;
  }
@@ -588,7 +591,6 @@
 */
 }
 
-
 .command-bar .button,
 .command-bar .toggle-button,
 .command-bar .menu-button {
@@ -791,6 +793,54 @@
     -fx-border-width:0;
   }
 
+.command-bar .table-view,
+.command-bar .text-input   {
+    -fx-border-width: 1;
+    -fx-border-color: -binjr-gray-border-color;
+
+}
+
+
+.command-bar .table-view .column-header-background{
+    -fx-border-width:0;
+    -fx-border-color: -binjr-gray-border-color;
+ }
+
+.command-bar .table-view,
+.command-bar .table-view .column-header-background,
+.command-bar .table-view .column-header-background .filler ,
+.command-bar .table-view .column-header-background .nested-column-header,
+.command-bar .table-view .column-header-background .nested-column-header .column-header {
+    -fx-background-color: -binjr-command-bar-title-color;
+    -fx-font-size:9pt;
+ }
+
+.command-bar .table-row-cell{
+  -fx-text-fill:white;
+  -fx-background-color: -binjr-dark-blue-color;/*-binjr-command-bar-title-color;*/
+}
+
+ .command-bar .table-view .virtual-flow .clipped-container .sheet .cell{
+    -fx-text-fill:white;
+ }
+
+
+  .command-bar .table-view .virtual-flow .clipped-container .sheet .cell:selected{
+           -fx-background-color: -binjr-blue-color;
+  }
+
+  /* TextField */
+ .command-bar .text-input {
+    -fx-text-fill:white;
+    -fx-background-radius: 0, 0;
+    -fx-border-color:#bababa;
+    -fx-background-color:  -binjr-dark-blue-color;
+    -fx-highlight-fill: -binjr-blue-color;
+    -fx-highlight-text-fill: white;
+    -fx-font-size:10pt;
+  }
+
+
 
 .icon-button{
 
@@ -983,6 +1033,11 @@
     -fx-text-fill: white;
 }
 
+.command-bar .toggle-switch:selected .thumb-area{
+    -fx-background-color:  -binjr-dark-blue-color;
+    -fx-background-insets: 0, 1;
+}
+
 .toggle-switch .thumb-area{
     -fx-background-radius: 1em;
     -fx-background-color: -binjr-button-background-color;
@@ -998,8 +1053,6 @@
 
 .toggle-switch:selected .thumb-area{
     -fx-background-color:  -binjr-blue-color;
-     /*linear-gradient(to bottom, derive(-fx-text-box-border, -20%), derive(-fx-text-box-border, -30%)),
-                            linear-gradient(to bottom, derive(#0b99c9, 30%), #0b99c9);*/
     -fx-background-insets: 0, 1;
 }
 
