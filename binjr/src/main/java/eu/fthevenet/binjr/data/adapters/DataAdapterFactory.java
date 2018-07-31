@@ -21,7 +21,6 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
-import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.scene.Node;
 import org.apache.logging.log4j.LogManager;
@@ -58,7 +57,7 @@ public class DataAdapterFactory {
         try {
             this.loadAdapters();
         } catch (IOException e) {
-            Dialogs.notifyException("Fail to load plugin", e);
+            logger.error("Fail to load plugin", e);
         }
     }
 
