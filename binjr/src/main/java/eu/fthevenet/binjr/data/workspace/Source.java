@@ -49,7 +49,6 @@ public class Source implements Dirtyable {
     @XmlTransient
     private final ChangeWatcher status;
 
-
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
      *
