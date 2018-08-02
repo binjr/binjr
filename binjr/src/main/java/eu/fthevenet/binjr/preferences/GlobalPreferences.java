@@ -64,7 +64,6 @@ public class GlobalPreferences {
     private final Property<Path> mostRecentSavedWorkspace = new SimpleObjectProperty<>();
     private final BooleanProperty checkForUpdateOnStartUp = new SimpleBooleanProperty();
     private final Property<UserInterfaceThemes> userInterfaceTheme = new SimpleObjectProperty<>();
-    ;
     private final BooleanProperty horizontalMarkerOn = new SimpleBooleanProperty();
     private final BooleanProperty verticalMarkerOn = new SimpleBooleanProperty();
     private final BooleanProperty showAreaOutline = new SimpleBooleanProperty();
@@ -74,9 +73,6 @@ public class GlobalPreferences {
     private final Property<Path> pluginsLocation = new SimpleObjectProperty<>();
     private final Preferences prefs;
     private Deque<String> recentFiles;
-
-
-
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
