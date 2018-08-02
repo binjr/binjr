@@ -116,7 +116,7 @@ public class GlobalPreferences {
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
-        pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, System.getProperty("user.home") + DEFAULT_PLUGINS_LOCATION)));
+        pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
     }
 
     /**
