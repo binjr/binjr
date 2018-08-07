@@ -177,9 +177,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-        if (!legacyInitialize(params)) {
-            super.loadParams(params);
-        }
+        super.loadParams(params);
         encoding = validateParameterNullity(params, "encoding");
         zoneId = validateParameter(params, "zoneId",
                 s -> {
@@ -192,35 +190,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         this.filter = params.get(JRDS_FILTER);
     }
 
-    private boolean legacyInitialize(Map<String, String> params) {
-        try {
-            String jrdsProtocol = validateParameterNullity(params, "jrdsProtocol");
-            String jrdsHost = validateParameterNullity(params, "jrdsHost");
-            String jrdsPath = validateParameterNullity(params, "jrdsPath");
-            int jrdsPort = validateParameter(params, "jrdsPort",
-                    s -> {
-                        if (s == null) {
-                            throw new InvalidAdapterParameterException("Parameter jrdsPort is missing in adpater " + getSourceName());
-                        }
-                        int val = Integer.parseInt(s);
-                        if (val < 0 || val > 65535) {
-                            throw new InvalidAdapterParameterException("Value provided for parameter jrdsPort is not within the rang of valid IP ports in adapter " + getSourceName());
-                        }
-                        return val;
-                    });
-            this.setBaseUri(new URIBuilder()
-                    .setScheme(jrdsProtocol)
-                    .setHost(jrdsHost)
-                    .setPort(jrdsPort)
-                    .setPath(jrdsPath)
-                    .build()
-            );
-        } catch (URISyntaxException | InvalidAdapterParameterException e) {
-            logger.debug(e.getMessage(), e);
-            return false;
-        }
-        return true;
-    }
 
     @Override
     public boolean ping() {
