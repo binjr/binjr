@@ -108,7 +108,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         }
 
         this.browseButton.setOnAction(event -> {
-            File selectedFile = displayFileChooser(owner);
+            File selectedFile = displayFileChooser((Node) event.getSource());
             if (selectedFile != null) {
                 uriField.setText(selectedFile.getPath());
             }
