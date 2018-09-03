@@ -72,6 +72,10 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
     public static final String JRDS_TREE = "tree";
+
+    protected static final String ENCODING_PARAM_NAME = "encoding";
+    protected static final String ZONE_ID_PARAM_NAME = "zoneId";
+    protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
     private String filter;
 
@@ -104,14 +108,13 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
      *
-     * @param urlString    the URL to the JRDS webapp.
-     * @param zoneId the id of the time zone used to record dates.
+     * @param address the URL to the JRDS webapp.
+     * @param zoneId  the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String urlString, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
+    public static JrdsDataAdapter fromUrl(String address, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         try {
-            URL url = new URL(urlString);
-            logger.trace(() -> "URL=" + url);
+            URL url = new URL(address);
             if (url.getHost().trim().isEmpty()) {
                 throw new CannotInitializeDataAdapterException("Malformed URL: no host");
             }
@@ -144,8 +147,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
         try {
-            return new URIBuilder(getBaseUrl().toURI())
-                    .setPath(getBaseUrl().getPath() + "/download")
+            return new URIBuilder(getBaseAddress().toURI())
+                    .setPath(getBaseAddress().getPath() + "/download")
                     .addParameter("id", path)
                     .addParameter("begin", Long.toString(begin.toEpochMilli()))
                     .addParameter("end", Long.toString(end.toEpochMilli())).build();
@@ -157,8 +160,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     public String getSourceName() {
         return new StringBuilder("[JRDS] ")
-                .append(getBaseUrl() != null ? getBaseUrl().getHost() : "???")
-                .append((getBaseUrl() != null && getBaseUrl().getPort() > 0) ? ":" + getBaseUrl().getPort() : "")
+                .append(getBaseAddress() != null ? getBaseAddress().getHost() : "???")
+                .append((getBaseAddress() != null && getBaseAddress().getPort() > 0) ? ":" + getBaseAddress().getPort() : "")
                 .append(" - ")
                 .append(treeViewTab != null ? treeViewTab : "???")
                 .append(filter != null ? filter : "")
@@ -170,9 +173,9 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>(super.getParams());
-        params.put("zoneId", zoneId.toString());
-        params.put("encoding", encoding);
-        params.put("treeViewTab", treeViewTab.name());
+        params.put(ZONE_ID_PARAM_NAME, zoneId.toString());
+        params.put(ENCODING_PARAM_NAME, encoding);
+        params.put(TREE_VIEW_TAB_PARAM_NAME, treeViewTab.name());
         params.put(JRDS_FILTER, this.filter);
         return params;
     }
@@ -184,15 +187,15 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
         super.loadParams(params);
-        encoding = validateParameterNullity(params, "encoding");
-        zoneId = validateParameter(params, "zoneId",
+        encoding = validateParameterNullity(params, ENCODING_PARAM_NAME);
+        zoneId = validateParameter(params, ZONE_ID_PARAM_NAME,
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter " + ZONE_ID_PARAM_NAME + " is missing in adapter " + getSourceName());
                     }
                     return ZoneId.of(s);
                 });
-        treeViewTab = validateParameter(params, "treeViewTab", s -> s == null ? JrdsTreeViewTab.valueOf(params.get("treeViewTab")) : JrdsTreeViewTab.HOSTS_TAB);
+        treeViewTab = validateParameter(params, TREE_VIEW_TAB_PARAM_NAME, s -> s == null ? JrdsTreeViewTab.valueOf(params.get(TREE_VIEW_TAB_PARAM_NAME)) : JrdsTreeViewTab.HOSTS_TAB);
         this.filter = params.get(JRDS_FILTER);
     }
 

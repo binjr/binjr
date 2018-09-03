@@ -65,8 +65,9 @@ import java.util.Map;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends SimpleCachingDataAdapter<T, A> {
     private static final Logger logger = LogManager.getLogger(HttpDataAdapterBase.class);
+    protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final CloseableHttpClient httpClient;
-    private URL baseUrl;
+    private URL baseAddress;
 
     /**
      * Creates a new instance of the {@link HttpDataAdapterBase} class.
@@ -79,14 +80,14 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     }
 
     /**
-     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base URL.
+     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base address.
      *
-     * @param baseUrl the source's base URL
+     * @param baseAddress the source's base address
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
-    public HttpDataAdapterBase(URL baseUrl) throws CannotInitializeDataAdapterException {
+    public HttpDataAdapterBase(URL baseAddress) throws CannotInitializeDataAdapterException {
         super();
-        this.baseUrl = baseUrl;
+        this.baseAddress = baseAddress;
         httpClient = httpClientFactory();
     }
 
@@ -103,7 +104,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
-        params.put("baseUrl", baseUrl.toString());
+        params.put(BASE_ADDRESS_PARAM_NAME, baseAddress.toString());
         return params;
     }
 
@@ -113,15 +114,15 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
 
-        baseUrl = validateParameter(params, "baseUrl",
+        baseAddress = validateParameter(params, BASE_ADDRESS_PARAM_NAME,
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter baseUrl is missing in adapter " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter " + BASE_ADDRESS_PARAM_NAME + " is missing in adapter " + getSourceName());
                     }
                     try {
-                        return baseUrl = new URL(s);
+                        return baseAddress = new URL(s);
                     } catch (MalformedURLException e) {
-                        throw new InvalidAdapterParameterException("Value provided for parameter baseUrl is not a valid URL in adapter " + getSourceName(), e);
+                        throw new InvalidAdapterParameterException("Value provided for parameter " + BASE_ADDRESS_PARAM_NAME + " is not valid in adapter " + getSourceName(), e);
                     }
                 });
     }
@@ -171,9 +172,9 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
-            throw new SourceCommunicationException("Host \"" + baseUrl.getHost() + (baseUrl.getPort() > 0 ? ":" + baseUrl.getPort() : "") + "\" could not be found.", e);
+            throw new SourceCommunicationException("Host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\" could not be found.", e);
         } catch (IOException e) {
-            throw new SourceCommunicationException("IO error while communicating with host \"" + baseUrl.getHost() + (baseUrl.getPort() > 0 ? ":" + baseUrl.getPort() : "") + "\"", e);
+            throw new SourceCommunicationException("IO error while communicating with host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\"", e);
         } catch (Exception e) {
             throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
         }
@@ -237,7 +238,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
         try {
-            URIBuilder builder = new URIBuilder(getBaseUrl().toURI()).setPath(getBaseUrl().getPath() + path);
+            URIBuilder builder = new URIBuilder(getBaseAddress().toURI()).setPath(getBaseAddress().getPath() + path);
             if (params != null) {
                 builder.addParameters(params);
             }
@@ -254,20 +255,20 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     protected abstract URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException;
 
     /**
-     * Returns the source's base URL
+     * Returns the source's base address
      *
-     * @return the source's base URL
+     * @return the source's base address
      */
-    public URL getBaseUrl() {
-        return baseUrl;
+    public URL getBaseAddress() {
+        return baseAddress;
     }
 
     /**
-     * Sets the source's base URL
+     * Sets the source's base address
      *
-     * @param baseUrl the source's base URL
+     * @param baseAddress the source's base address
      */
-    public void setBaseUrl(URL baseUrl) {
-        this.baseUrl = baseUrl;
+    public void setBaseAddress(URL baseAddress) {
+        this.baseAddress = baseAddress;
     }
 }
