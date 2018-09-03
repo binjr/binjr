@@ -48,10 +48,7 @@ import javax.net.ssl.SSLContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.IOException;
-import java.net.ConnectException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.security.*;
 import java.security.cert.CertificateException;
 import java.time.Instant;
@@ -69,7 +66,7 @@ import java.util.Map;
 public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends SimpleCachingDataAdapter<T, A> {
     private static final Logger logger = LogManager.getLogger(HttpDataAdapterBase.class);
     private final CloseableHttpClient httpClient;
-    private URI baseUri;
+    private URL baseUrl;
 
     /**
      * Creates a new instance of the {@link HttpDataAdapterBase} class.
@@ -82,14 +79,14 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     }
 
     /**
-     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base URI.
+     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base URL.
      *
-     * @param baseURI the source's base URI
+     * @param baseUrl the source's base URL
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
-    public HttpDataAdapterBase(URI baseURI) throws CannotInitializeDataAdapterException {
+    public HttpDataAdapterBase(URL baseUrl) throws CannotInitializeDataAdapterException {
         super();
-        this.baseUri = baseURI;
+        this.baseUrl = baseUrl;
         httpClient = httpClientFactory();
     }
 
@@ -106,7 +103,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
-        params.put("baseUri", baseUri.toString());
+        params.put("baseUrl", baseUrl.toString());
         return params;
     }
 
@@ -116,15 +113,15 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
 
-        baseUri = validateParameter(params, "baseUri",
+        baseUrl = validateParameter(params, "baseUrl",
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter baseUri is missing in adapter " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter baseUrl is missing in adapter " + getSourceName());
                     }
                     try {
-                        return baseUri = new URI(s);
-                    } catch (URISyntaxException e) {
-                        throw new InvalidAdapterParameterException("Value provided for parameter baseUri is not a valid URI in adapter " + getSourceName(), e);
+                        return baseUrl = new URL(s);
+                    } catch (MalformedURLException e) {
+                        throw new InvalidAdapterParameterException("Value provided for parameter baseUrl is not a valid URL in adapter " + getSourceName(), e);
                     }
                 });
     }
@@ -142,7 +139,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     protected <R> R doHttpGet(URI requestUri, ResponseHandler<R> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::trace)) {
-            logger.debug(() -> "requestUrl = " + requestUri);
+            logger.debug(() -> "requestUri = " + requestUri);
             HttpGet httpget = new HttpGet(requestUri);
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
             httpget.setHeader("User-Agent", "binjr/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
@@ -174,9 +171,9 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
-            throw new SourceCommunicationException("Host \"" + baseUri.getHost() + ":" + baseUri.getPort() + "\" could not be found.", e);
+            throw new SourceCommunicationException("Host \"" + baseUrl.getHost() + (baseUrl.getPort() > 0 ? ":" + baseUrl.getPort() : "") + "\" could not be found.", e);
         } catch (IOException e) {
-            throw new SourceCommunicationException("IO error while communicating with host \"" + baseUri.getHost() + ":" + baseUri.getPort() + "\"", e);
+            throw new SourceCommunicationException("IO error while communicating with host \"" + baseUrl.getHost() + (baseUrl.getPort() > 0 ? ":" + baseUrl.getPort() : "") + "\"", e);
         } catch (Exception e) {
             throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
         }
@@ -239,11 +236,11 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     }
 
     protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
-        URIBuilder builder = new URIBuilder(getBaseUri()).setPath(getBaseUri().getPath() + path);
-        if (params != null) {
-            builder.addParameters(params);
-        }
         try {
+            URIBuilder builder = new URIBuilder(getBaseUrl().toURI()).setPath(getBaseUrl().getPath() + path);
+            if (params != null) {
+                builder.addParameters(params);
+            }
             return builder.build();
         } catch (URISyntaxException e) {
             throw new SourceCommunicationException("Error building URI for request", e);
@@ -257,20 +254,20 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     protected abstract URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException;
 
     /**
-     * Returns the source's base URI
+     * Returns the source's base URL
      *
-     * @return the source's base URI
+     * @return the source's base URL
      */
-    public URI getBaseUri() {
-        return baseUri;
+    public URL getBaseUrl() {
+        return baseUrl;
     }
 
     /**
-     * Sets the source's base URI
+     * Sets the source's base URL
      *
-     * @param baseUri the source's base URI
+     * @param baseUrl the source's base URL
      */
-    public void setBaseUri(URI baseUri) {
-        this.baseUri = baseUri;
+    public void setBaseUrl(URL baseUrl) {
+        this.baseUrl = baseUrl;
     }
 }

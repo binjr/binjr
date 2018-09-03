@@ -37,7 +37,6 @@ import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.Arrays;
@@ -153,7 +152,6 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * Returns an instance of {@link DataAdapter}
      *
      * @return an instance of {@link DataAdapter}
-     * @throws MalformedURLException if the provided url is invalid
      * @throws DateTimeException     if the provided {@link ZoneId] is invalid
      */
     protected abstract DataAdapter<?, ?> getDataAdapter() throws DataAdapterException;

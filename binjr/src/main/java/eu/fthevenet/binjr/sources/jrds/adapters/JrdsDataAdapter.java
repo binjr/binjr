@@ -50,8 +50,10 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -91,8 +93,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      * @param encoding    the encoding used by the download servlet.
      * @param treeViewTab the filter to apply to the tree view
      */
-    public JrdsDataAdapter(URI baseURI, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
-        super(baseURI);
+    public JrdsDataAdapter(URL baseURL, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
+        super(baseURL);
         this.zoneId = zoneId;
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
@@ -102,16 +104,20 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
      *
-     * @param url    the URL to the JRDS webapp.
+     * @param urlString    the URL to the JRDS webapp.
      * @param zoneId the id of the time zone used to record dates.
      * @return a new instance of the {@link JrdsDataAdapter} class.
      */
-    public static JrdsDataAdapter fromUrl(String url, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
+    public static JrdsDataAdapter fromUrl(String urlString, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         try {
-            URI u = new URI(url.replaceAll("/$", ""));
-            return new JrdsDataAdapter(u, zoneId, "utf-8", treeViewTab, filter);
-        } catch (URISyntaxException e) {
-            throw new CannotInitializeDataAdapterException("Could not parse \"" + url + "\" as a valid URI", e);
+            URL url = new URL(urlString);
+            logger.trace(() -> "URL=" + url);
+            if (url.getHost().trim().isEmpty()) {
+                throw new CannotInitializeDataAdapterException("Malformed URL: no host");
+            }
+            return new JrdsDataAdapter(url, zoneId, "utf-8", treeViewTab, filter);
+        } catch (MalformedURLException e) {
+            throw new CannotInitializeDataAdapterException("Malformed URL: " + e.getMessage(), e);
         }
     }
 
@@ -138,8 +144,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
         try {
-            return new URIBuilder(getBaseUri())
-                    .setPath(getBaseUri().getPath() + "/download")
+            return new URIBuilder(getBaseUrl().toURI())
+                    .setPath(getBaseUrl().getPath() + "/download")
                     .addParameter("id", path)
                     .addParameter("begin", Long.toString(begin.toEpochMilli()))
                     .addParameter("end", Long.toString(end.toEpochMilli())).build();
@@ -151,8 +157,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     @Override
     public String getSourceName() {
         return new StringBuilder("[JRDS] ")
-                .append(getBaseUri() != null ? getBaseUri().getHost() : "???")
-                .append(getBaseUri() != null ? ":" + getBaseUri().getPort() : "")
+                .append(getBaseUrl() != null ? getBaseUrl().getHost() : "???")
+                .append((getBaseUrl() != null && getBaseUrl().getPort() > 0) ? ":" + getBaseUrl().getPort() : "")
                 .append(" - ")
                 .append(treeViewTab != null ? treeViewTab : "???")
                 .append(filter != null ? filter : "")
@@ -182,7 +188,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         zoneId = validateParameter(params, "zoneId",
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adpater " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
                     }
                     return ZoneId.of(s);
                 });
@@ -243,7 +249,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonJrdsTree.class);
             return Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_FILTER.equals(jsonJrdsItem.type)).map(i -> i.filter).collect(Collectors.toList());
         } catch (JsonParseException e) {
-            throw new DataAdapterException("An error occured while parsing the json response to getBindingTree request", e);
+            throw new DataAdapterException("An error occurred while parsing the json response to getBindingTree request", e);
         }
     }
 
