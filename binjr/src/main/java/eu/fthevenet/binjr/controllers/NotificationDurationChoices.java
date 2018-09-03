@@ -21,6 +21,11 @@ import javafx.util.Duration;
 
 import java.util.Arrays;
 
+/**
+ * Choices for the notification popup duration preference
+ *
+ * @author Frederic Thevenet
+ */
 public enum NotificationDurationChoices {
     FIVE_SECONDS("5 seconds", Duration.seconds(5)),
     TEN_SECONDS("10 seconds", Duration.seconds(10)),
@@ -35,10 +40,20 @@ public enum NotificationDurationChoices {
         this.duration = duration;
     }
 
+    /**
+     * Returns the name for the enum entry.
+     *
+     * @return the name for the enum entry.
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Returns the {@link Duration} value for the enum entry.
+     *
+     * @return the {@link Duration} value for the enum entry.
+     */
     public Duration getDuration() {
         return duration;
     }
@@ -48,7 +63,16 @@ public enum NotificationDurationChoices {
         return name;
     }
 
+    /**
+     * Returns the {@link NotificationDurationChoices} value corresponding to the provided duration or {@code NotificationDurationChoices.NEVER} if there isn't one.
+     *
+     * @param duration the {@link Duration} corresponding to a {@link NotificationDurationChoices} entry.
+     * @return the {@link NotificationDurationChoices} value corresponding to the provided duration or {@code NotificationDurationChoices.NEVER} if there isn't one.
+     */
     public static NotificationDurationChoices valueOf(Duration duration) {
-        return Arrays.stream(values()).filter(notificationDurationChoices -> notificationDurationChoices.getDuration().equals(duration)).findFirst().orElse(NEVER);
+        return Arrays.stream(values())
+                .filter(notificationDurationChoices -> notificationDurationChoices.getDuration().equals(duration))
+                .findFirst()
+                .orElse(NEVER);
     }
 }
