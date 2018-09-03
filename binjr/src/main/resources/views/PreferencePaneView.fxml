@@ -52,6 +52,8 @@
                                                         </ToggleSwitch>
                                                     </children>
                                                 </VBox>
+                                                <Label text="Discard notifications after:"/>
+                                                <ChoiceBox fx:id="notifcationDurationChoiceBox"/>
                                             </children>
                                         </VBox>
                                     </children>
@@ -128,7 +130,7 @@
                                                 <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
                                                     <children>
                                                         <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
-                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false" prefWidth="25.0" text="..." onAction="#handleBrowsePluginsFolder"/>
+                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false" onAction="#handleBrowsePluginsFolder" prefWidth="25.0" text="..."/>
                                                     </children>
                                                 </HBox>
                                                 <Label maxWidth="1.7976931348623157E308" text="Available adapters"/>

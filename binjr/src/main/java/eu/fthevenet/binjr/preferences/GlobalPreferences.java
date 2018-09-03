@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.preferences;
 
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import javafx.beans.property.*;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,6 +57,8 @@ public class GlobalPreferences {
     private static final int MAX_RECENT_FILES = 20;
     private static final String PLUGINS_LOCATION = "pluginsLocation";
     private static final String DEFAULT_PLUGINS_LOCATION = ".";
+    private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
+    private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
@@ -71,6 +74,8 @@ public class GlobalPreferences {
     private final BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
     private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
     private final Property<Path> pluginsLocation = new SimpleObjectProperty<>();
+    private final Property<Duration> notificationPopupDuration = new SimpleObjectProperty<>();
+
     private final Preferences prefs;
     private Deque<String> recentFiles;
 
@@ -97,6 +102,7 @@ public class GlobalPreferences {
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
         pluginsLocation.addListener((observable, oldValue, newValue) -> prefs.put(PLUGINS_LOCATION, newValue.toString()));
+        notificationPopupDuration.addListener((observable, oldValue, newValue) -> prefs.putDouble(NOTIFICATION_POPUP_DURATION, newValue.toSeconds()));
     }
 
     private void load() {
@@ -113,6 +119,7 @@ public class GlobalPreferences {
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
         pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
+        notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
     }
 
     /**
@@ -133,7 +140,7 @@ public class GlobalPreferences {
     public static GlobalPreferences getInstance() {
         return GlobalPreferencesHolder.instance;
     }
-    
+
     /**
      * Returns true if series down-sampling is enabled, false otherwise.
      *
@@ -445,6 +452,15 @@ public class GlobalPreferences {
         return pluginsLocation;
     }
 
+    public Duration getNotificationPopupDuration() {
+        return notificationPopupDuration.getValue();
+    }
 
+    public Property<Duration> notificationPopupDurationProperty() {
+        return notificationPopupDuration;
+    }
 
+    public void setNotificationPopupDuration(Duration notificationPopupDuration) {
+        this.notificationPopupDuration.setValue(notificationPopupDuration);
+    }
 }

@@ -42,14 +42,6 @@
                             </font>
                         </Tooltip>
                     </tooltip>
-                    <!--<contextMenu>-->
-                    <!--<ContextMenu>-->
-                    <!--<items>-->
-                    <!--<MenuItem mnemonicParsing="false" text="Add JRDS source" onAction="#handleAddJrdsSource"/>-->
-                    <!--<MenuItem mnemonicParsing="false" text="Add CSV file" onAction="#handleAddCsvSource"/>-->
-                    <!--</items>-->
-                    <!--</ContextMenu>-->
-                    <!--</contextMenu>-->
                 </Label>
                 <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <tabs>

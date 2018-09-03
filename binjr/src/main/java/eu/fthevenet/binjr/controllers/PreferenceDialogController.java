@@ -65,11 +65,10 @@ public class PreferenceDialogController implements Initializable {
     public TextField downSamplingThreshold;
     public TextField pluginLocTextfield;
     public Button browsePluginLocButton;
-    //public CheckListView<DataAdapterInfo> availableAdpaterListview;
-
     public TableView<DataAdapterInfo> availableAdapterTable;
     public TableColumn enabledColumn;
-    //public TitledPane debugTitledPane;
+    public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+
     @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
@@ -84,17 +83,14 @@ public class PreferenceDialogController implements Initializable {
     private TextFlow updateFlow;
     @FXML
     private ToggleSwitch updateCheckBox;
-
     @FXML
     private ToggleSwitch showOutline;
-
     @FXML
     private AnchorPane root;
     @FXML
     private Slider graphOpacitySlider = new Slider();
     @FXML
     private Label opacityText = new Label();
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -108,7 +104,6 @@ public class PreferenceDialogController implements Initializable {
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
-
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
@@ -117,7 +112,6 @@ public class PreferenceDialogController implements Initializable {
             maxSampleLabel.setDisable(!newValue);
         });
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
-
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<Path>() {
             @Override
             public String toString(Path object) {
@@ -131,7 +125,6 @@ public class PreferenceDialogController implements Initializable {
         });
         pathFormatter.valueProperty().bindBidirectional(prefs.pluginsLocationProperty());
         pluginLocTextfield.setTextFormatter(pathFormatter);
-
         prefs.pluginsLocationProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !Files.exists(newValue)) {
                 Dialogs.notifyError("Invalid Plugins Folder Location",
@@ -148,12 +141,8 @@ public class PreferenceDialogController implements Initializable {
                         root);
             }
         });
-
         enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
-
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
-
-
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
@@ -168,6 +157,18 @@ public class PreferenceDialogController implements Initializable {
         uiThemeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.setUserInterfaceTheme(newValue);
+            }
+        });
+        notifcationDurationChoiceBox.getItems().setAll(NotificationDurationChoices.values());
+        notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(prefs.getNotificationPopupDuration()));
+        prefs.notificationPopupDurationProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(newValue));
+            }
+        });
+        notifcationDurationChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                prefs.setNotificationPopupDuration(newValue.getDuration());
             }
         });
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());

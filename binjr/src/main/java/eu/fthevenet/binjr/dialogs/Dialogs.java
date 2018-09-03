@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.dialogs;
 
 import eu.fthevenet.binjr.preferences.AppEnvironment;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -26,7 +27,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.Notifications;
@@ -44,7 +44,6 @@ import java.net.URISyntaxException;
  * @author Frederic Thevenet
  */
 public class Dialogs {
-    public static final int NOTIFICATION_DURATION = 8;
     private static final Logger logger = LogManager.getLogger(Dialogs.class);
 
     /**
@@ -81,7 +80,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(e.getMessage())
-                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
+                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .action(new Action("Details", ae -> displayException(title, e, owner)))
                 .owner(owner).showError());
@@ -117,7 +116,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
+                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
                 .position(position)
                 .owner(owner).showError());
     }
@@ -139,7 +138,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
+                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
                 .position(position)
                 .owner(owner).showWarning());
     }
@@ -156,7 +155,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(Duration.seconds(NOTIFICATION_DURATION))
+                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
                 .position(position)
                 .owner(owner).showInformation());
     }
