@@ -191,66 +191,14 @@
                 </cursor>
                 <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
-                    <children>
-                        <!--<StackPane fx:id="chartPlaceHolder"/>-->
-                        <!--<StackPane fx:id="crosshairPlaceHolder"/>-->
-                        <!--<StackPane fx:id="settingsPane" maxWidth="200" prefWidth="200" styleClass="toolPane" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="-210" AnchorPane.topAnchor="0">-->
-                        <!--<fx:include source="ChartPropertiesView.fxml"/>-->
-                        <!--</StackPane>-->
-                    </children>
                 </AnchorPane>
                 <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
-
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
-                <children>
-                    <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <panes>
-                            <!--<TitledPane animated="false" text="untitled 1">-->
-                            <!--<content>-->
-                            <!--<TableView fx:id="seriesTable" editable="true" prefHeight="91.0" prefWidth="647.0" styleClass="skinnable-pane-border">-->
-                            <!--<columns>-->
-                            <!--<TableColumn fx:id="visibleColumn" prefWidth="32.0" sortable="false">-->
-                            <!--<cellValueFactory>-->
-                            <!--<PropertyValueFactory property="selected" />-->
-                            <!--</cellValueFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="colorColumn" minWidth="-Infinity" prefWidth="32.0" resizable="false" sortable="false">-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn prefWidth="160.0" sortable="false" text="Name">-->
-                            <!--<cellValueFactory>-->
-                            <!--<PropertyValueFactory property="displayName" />-->
-                            <!--</cellValueFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="minColumn" prefWidth="75.0" sortable="false" text="Min.">-->
-                            <!--<cellFactory>-->
-                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
-                            <!--</cellFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="avgColumn" prefWidth="75.0" sortable="false" text="Avg.">-->
-                            <!--<cellFactory>-->
-                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
-                            <!--</cellFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="maxColumn" prefWidth="75.0" sortable="false" text="Max.">-->
-                            <!--<cellFactory>-->
-                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
-                            <!--</cellFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="currentColumn" prefWidth="75.0" sortable="false" styleClass="column-bold-text" text="Current">-->
-                            <!--<cellFactory>-->
-                            <!--<DecimalFormatTableCellFactory alignment="RIGHT" />-->
-                            <!--</cellFactory>-->
-                            <!--</TableColumn>-->
-                            <!--<TableColumn fx:id="pathColumn" prefWidth="400" sortable="false" text="Path">-->
-                            <!--</TableColumn>-->
-                            <!--</columns>-->
-                            <!--</TableView>-->
-                            <!--</content>-->
-                            <!--</TitledPane>-->
-                        </panes>
-                    </Accordion>
-                </children>
+                <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <panes>
+                    </panes>
+                </Accordion>
             </AnchorPane>
         </SplitPane>
     </VBox>

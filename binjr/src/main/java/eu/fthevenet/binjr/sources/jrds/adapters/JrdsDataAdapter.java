@@ -125,7 +125,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
             }
             return new JrdsDataAdapter(url, zoneId, "utf-8", treeViewTab, filter);
         } catch (MalformedURLException e) {
-
             throw new CannotInitializeDataAdapterException("Malformed URL: " + e.getMessage(), e);
         }
     }
