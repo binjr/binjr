@@ -59,6 +59,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -77,8 +78,8 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     protected static final String ZONE_ID_PARAM_NAME = "zoneId";
     protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
+    private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private String filter;
-
     private ZoneId zoneId;
     private String encoding;
     private JrdsTreeViewTab treeViewTab;
@@ -114,12 +115,17 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
      */
     public static JrdsDataAdapter fromUrl(String address, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         try {
+            // Detect if URL protocol is present. If not, assume http.
+            if (!uriSchemePattern.matcher(address).find()) {
+                address = "http://" + address;
+            }
             URL url = new URL(address);
             if (url.getHost().trim().isEmpty()) {
                 throw new CannotInitializeDataAdapterException("Malformed URL: no host");
             }
             return new JrdsDataAdapter(url, zoneId, "utf-8", treeViewTab, filter);
         } catch (MalformedURLException e) {
+
             throw new CannotInitializeDataAdapterException("Malformed URL: " + e.getMessage(), e);
         }
     }
