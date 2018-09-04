@@ -783,12 +783,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Closing worksheetController " + this.toString());
             bindingManager.close();
             currentState.close();
-
-
             hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());
             vCrosshair.selectedProperty().unbindBidirectional(globalPrefs.verticalMarkerOnProperty());
-
-
             currentState = null;
             this.worksheet = null;
             this.seriesTableContainer = null;
@@ -817,7 +813,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             while (c.next()) {
                 if (c.wasPermutated()) {
                     for (int i = c.getFrom(); i < c.getTo(); ++i) {
-                        // nothingfor now
+                        // nothing for now
                     }
                 }
                 else if (c.wasUpdated()) {
