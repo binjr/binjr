@@ -242,7 +242,14 @@ public class PreferenceDialogController implements Initializable {
     public void handleBrowsePluginsFolder(ActionEvent actionEvent) {
         DirectoryChooser fileChooser = new DirectoryChooser();
         fileChooser.setTitle("Select binjr plugins location");
-        fileChooser.setInitialDirectory(new File(pluginLocTextfield.getText()));
+        try {
+            Path pluginPath = Paths.get(pluginLocTextfield.getText()).toRealPath();
+            if (Files.isDirectory(pluginPath)) {
+                fileChooser.setInitialDirectory(pluginPath.toFile());
+            }
+        } catch (Exception e) {
+            logger.debug("Could not initialize working dir for DirectoryChooser", e);
+        }
         File newPluginLocation = fileChooser.showDialog(Dialogs.getStage(root));
         if (newPluginLocation != null) {
             pluginLocTextfield.setText(newPluginLocation.getPath());

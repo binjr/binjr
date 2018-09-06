@@ -56,7 +56,7 @@ public class GlobalPreferences {
     private static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
     private static final int MAX_RECENT_FILES = 20;
     private static final String PLUGINS_LOCATION = "pluginsLocation";
-    private static final String DEFAULT_PLUGINS_LOCATION = ".";
+    private static final String DEFAULT_PLUGINS_LOCATION = "none";
     private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
@@ -118,7 +118,13 @@ public class GlobalPreferences {
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
-        pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
+        Path pluginDirPath = Paths.get(DEFAULT_PLUGINS_LOCATION);
+        try {
+            Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION));
+        } catch (Exception e) {
+            logger.debug("Invalid plugin folder path", e);
+        }
+        pluginsLocation.setValue(pluginDirPath);
         notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
     }
 
