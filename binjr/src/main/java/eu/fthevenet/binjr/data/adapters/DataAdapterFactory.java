@@ -53,12 +53,7 @@ public class DataAdapterFactory {
      */
     private DataAdapterFactory() {
         registeredAdapters = new HashMap<>();
-
-        try {
-            this.loadAdapters();
-        } catch (IOException e) {
-            logger.error("Fail to load plugin", e);
-        }
+        this.loadAdapters();
     }
 
     /**
@@ -134,24 +129,34 @@ public class DataAdapterFactory {
         }
     }
 
-    private void loadAdapters() throws IOException {
+    private void loadAdapters() {
         List<URL> urls = new ArrayList<>();
         if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
-            logger.debug(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
+            logger.info(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
             PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
-            Files.walkFileTree(GlobalPreferences.getInstance().getPluginsLocation(), new SimpleFileVisitor<Path>() {
-                @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    if (jarMatcher.matches(file)) {
-                        logger.debug(() -> "Inspecting " + file.getFileName() + " for DataAdapter service implementations");
-                        urls.add(file.toUri().toURL());
-                    }
-                    return FileVisitResult.CONTINUE;
+            try {
+                Files.walkFileTree(GlobalPreferences.getInstance().getPluginsLocation(),
+                        EnumSet.noneOf(FileVisitOption.class),
+                        1,
+                        new SimpleFileVisitor<Path>() {
+                            @Override
+                            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                                if (jarMatcher.matches(file)) {
+                                    logger.debug(() -> "Inspecting " + file.getFileName() + " for DataAdapter service implementations");
+                                    urls.add(file.toUri().toURL());
+                                }
+                                return FileVisitResult.CONTINUE;
+                            }
+                        });
+            } catch (IOException e) {
+                logger.error("Error while scanning for plugins: " + e.getMessage());
+                if (logger.isDebugEnabled()) {
+                    logger.debug("Error stack", e);
                 }
-            });
+            }
         }
         else {
-            logger.debug("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
+            logger.warn("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
         }
         Iterator<DataAdapterInfo> adapterInfoIterator = ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0]))).iterator();
         while (adapterInfoIterator.hasNext()) {
