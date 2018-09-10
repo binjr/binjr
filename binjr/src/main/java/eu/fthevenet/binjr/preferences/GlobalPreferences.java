@@ -120,7 +120,7 @@ public class GlobalPreferences {
         mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
         Path pluginDirPath = Paths.get(DEFAULT_PLUGINS_LOCATION);
         try {
-            Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION));
+            pluginDirPath = Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION));
         } catch (Exception e) {
             logger.debug("Invalid plugin folder path", e);
         }
