@@ -303,7 +303,6 @@
     <build>
         <finalName>${project.name}</finalName>
         <plugins>
-            <!-- Maven compiler -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
