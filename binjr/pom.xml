@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>1.4.4-SNAPSHOT</version>
+    <version>1.4.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Flexible Time Series Visualization</description>
     <organization>
