@@ -119,7 +119,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
             if (!uriSchemePattern.matcher(address).find()) {
                 address = "http://" + address;
             }
-            URL url = new URL(address);
+            URL url = new URL(address.replaceAll("/$", ""));
             if (url.getHost().trim().isEmpty()) {
                 throw new CannotInitializeDataAdapterException("Malformed URL: no host");
             }
