@@ -23,7 +23,8 @@ package eu.fthevenet.binjr.dialogs;
  * @author Frederic Thevenet
  */
 public enum UserInterfaceThemes {
-    MODERN("Modern", "/css/Modern.css"),
+    MODERN("Light", "/css/Light.css"),
+    DARK("Dark", "/css/Dark.css"),
     CLASSIC("Classic", "/css/Classic.css");
 
     private final String cssPath;
