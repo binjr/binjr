@@ -120,14 +120,16 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     }
                     if (event.getSource() instanceof TabPane) {
                         Tab currentTab = this.getSelectionModel().getSelectedItem();
-                        SnapshotParameters snapshotParams = new SnapshotParameters();
-                        WritableImage snapshot = currentTab.getContent().snapshot(snapshotParams, null);
-                        Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
-                        ClipboardContent clipboardContent = new ClipboardContent();
-                        clipboardContent.put(manager.getDragAndDropFormat(), manager.getId(currentTab));
-                        db.setDragView(snapshot, -5, -5);
-                        db.setContent(clipboardContent);
-                        manager.startDragAndDrop();
+                        if (currentTab != null) {
+                            SnapshotParameters snapshotParams = new SnapshotParameters();
+                            WritableImage snapshot = currentTab.getContent().snapshot(snapshotParams, null);
+                            Dragboard db = this.startDragAndDrop(TransferMode.MOVE);
+                            ClipboardContent clipboardContent = new ClipboardContent();
+                            clipboardContent.put(manager.getDragAndDropFormat(), manager.getId(currentTab));
+                            db.setDragView(snapshot, -5, -5);
+                            db.setContent(clipboardContent);
+                            manager.startDragAndDrop();
+                        }
                     }
                     event.consume();
                 }
