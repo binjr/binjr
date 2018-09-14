@@ -104,6 +104,7 @@ public class MainViewController implements Initializable {
     private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+
     public MenuButton debugMenuButton;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
@@ -181,7 +182,7 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-        debugMenuButton.setVisible(Binjr.runtimeDebuggingFeatures.isDebugEnabled());
+        debugMenuButton.visibleProperty().bind(AppEnvironment.getInstance().debugModeProperty());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -1190,6 +1191,13 @@ public class MainViewController implements Initializable {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
         } catch (DiagnosticException e) {
             Dialogs.notifyException("Error running diagnostic command", e);
+        }
+    }
+
+    public void toggleDebugMode(ActionEvent actionEvent) {
+        AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
+        if (AppEnvironment.getInstance().isDebugMode()) {
+            Dialogs.notifyWarning("Warning", "Entering debug mode", Pos.BOTTOM_RIGHT, root);
         }
     }
     //endregion

@@ -382,6 +382,12 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
+                <SeparatorMenuItem/>
+                <MenuItem mnemonicParsing="false" onAction="#toggleDebugMode" text="Exit Debug Mode" visible="true">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="D" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                    </accelerator>
+                </MenuItem>
             </items>
         </MenuButton>
         <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

@@ -18,8 +18,12 @@
 package eu.fthevenet.binjr.preferences;
 
 import eu.fthevenet.util.version.Version;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.IOException;
 import java.net.URL;
@@ -37,10 +41,12 @@ public class AppEnvironment {
     public static final String COPYRIGHT_NOTICE = "Copyright (c) 2017-2018 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
-
+    private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
+    private final BooleanProperty debugMode = new SimpleBooleanProperty(LogManager.getRootLogger().isDebugEnabled());
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -48,6 +54,14 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
+        debugMode.addListener((observable, oldValue, newValue) -> {
+            Level newLevel = configuredRootLevel;
+            if (newValue) {
+                newLevel = Level.TRACE;
+            }
+            Configurator.setRootLevel(newLevel);
+            logger.log(newLevel, "Root logger level set to " + newLevel);
+        });
     }
 
     /**
@@ -201,5 +215,16 @@ public class AppEnvironment {
         }
     }
 
+    public void setDebugMode(boolean value) {
+        debugMode.setValue(value);
+    }
+
+    public boolean isDebugMode() {
+        return debugMode.get();
+    }
+
+    public BooleanProperty debugModeProperty() {
+        return debugMode;
+    }
 
 }
