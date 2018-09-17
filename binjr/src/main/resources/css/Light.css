@@ -1089,6 +1089,14 @@
     -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */
 }
 
+.command-bar .slider .track {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */
+}
+
+
 .slider .fill {
     -fx-background-color: #00828b;
     -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */

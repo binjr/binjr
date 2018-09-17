@@ -1,15 +1,18 @@
 {
     -binjr-background-color: #204656;
-    -binjr-window-background-color: #262626;
-    -binjr-control-background-color: #262626;
+    -binjr-window-background-color: black;
+    -binjr-pane-background-color:   #262626;
+    -binjr-control-background-color: transparent;/*#262626;*/
 
     -binjr-button-background-color: #404040;
     -binjr-button-border-color: transparent;
     -binjr-tool-button-background-color: transparent;
     -binjr-icon-background-color: #505050;
 
+    -binjr-control-hover-color: -binjr-dark-blue-color;
     -binjr-control-hilite-color: -binjr-blue-color;
     -binjr-control-border-color: #808080;
+
     -binjr-color-dark-gray: white;
     -binjr-color-darker-gray: white;
     -binjr-color-red: #E81123;
@@ -23,13 +26,17 @@
     -binjr-foreground-color: #DAEEF3;
     -binjr-gray-border-color: #C8C8C8;
     -binjr-warning-color:TOMATO;
-     -fx-text-background-color: white;
+    -fx-text-background-color: #ebebeb;
+    -icon-color:white;
 
-    /*    -fx-background: #1d1d1d;*/
+    SCROLL_BAR_THUMB: #494949;
+    SCROLL_BAR_TRACK: #1B1B1B;
+
     -fx-base:black;
-
+/****/
 
 }
+
 
 /********************************
 *      button icons
@@ -39,8 +46,13 @@
 .command-bar * {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-  -icon-color: white;
+    -icon-color: white;
+    SCROLL_BAR_THUMB: -binjr-dark-blue-color;
+    SCROLL_BAR_TRACK: -binjr-blue-color ;
 }
+
+
+
 
 
 .command-bar .icon-container {
@@ -96,7 +108,7 @@
 }
 /*
 .choice-box {
-    -fx-background-color: -binjr-window-background-color;
+    -fx-background-color: -binjr-pane-background-color;
     -fx-border-color: -binjr-control-border-color;
     -fx-border-width:1;
     -fx-background-radius: 0, 0, 0, 0;
@@ -135,7 +147,7 @@
 .dialog-button:hover,
 .toggle-button:hover,
 .menu-button:hover {
-    -fx-background-color: -binjr-dark-blue-color;
+    -fx-background-color: -binjr-control-hover-color;
 }
 
 .choice-box:pressed:hover,
@@ -143,8 +155,8 @@
 .button:hover:pressed,
 .menu-button:hover:pressed {
   -fx-opacity: 100%;
-  -fx-background-color: -binjr-blue-color;
-  -fx-text-fill: white;
+  -fx-background-color:  -binjr-control-hilite-color;
+  -fx-text-fill: -fx-text-background-color;
 }
 
 
@@ -152,22 +164,22 @@
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
 .toggle-button:selected:hover:pressed {
-  -fx-background-color: -binjr-dark-blue-color;
-  -fx-text-fill: white;
+  -fx-background-color: -binjr-control-hover-color;
+  -fx-text-fill: -fx-text-background-color;
 }
 
 .toggle-button:selected,
 .menu-button:selected {
-    -fx-background-color: -binjr-blue-color;
-    -fx-text-fill: white;
+    -fx-background-color:  -binjr-control-hilite-color;
+    -fx-text-fill: -fx-text-background-color;
 }
 
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
-    -fx-background-color: -binjr-blue-color;
+    -fx-background-color:  -binjr-control-hilite-color;
     -fx-border-color: -binjr-control-border-color;
     -fx-border-width:1;
-    -fx-text-fill: white;
+    -fx-text-fill: -fx-text-background-color;
 }
 
  .no-arrow-menu-button .arrow-button {
@@ -185,7 +197,7 @@
 
 .chart-properties-button {
      -fx-opacity: 50%;
-     -fx-background-color: -binjr-window-background-color;
+     -fx-background-color: -binjr-pane-background-color;
      -fx-scale-x: 0.75;
      -fx-scale-y: 0.75;
 }
@@ -205,11 +217,11 @@
          -fx-border-color:-binjr-control-border-color;
      -fx-background-color: -binjr-button-background-color;
      -fx-background-insets: 0, 1;
-    -fx-text-fill:white;
+    -fx-text-fill:-fx-text-background-color;
     /* -fx-prompt-text-fill: -binjr-blue-color;*/
 
      /* -fx-highlight-fill: #008287; TODO: this probably is the "active" color" */
-     -fx-highlight-text-fill: white;
+     -fx-highlight-text-fill: -fx-text-background-color;
  }
 
  .text-input:hover, .date-picker .text-input:hover {
@@ -249,7 +261,7 @@
  .date-picker .text-input{
      -fx-background-radius: 0, 0;
 
-     -fx-background-color: -binjr-tool-button-background-color, white;
+     -fx-background-color: -binjr-tool-button-background-color, -fx-text-background-color;
      -fx-background-insets: 2, 2;
  }*/
   .date-picker > .arrow-button {
@@ -282,7 +294,7 @@
  }
 
  .date-picker-popup > .month-year-pane {
-     -fx-background-color: -binjr-window-background-color;
+     -fx-background-color: -binjr-pane-background-color;
      -fx-background-insets: 0;
  }
 
@@ -292,12 +304,12 @@
  }
 
  .date-picker-popup > * > .spinner > .button {
-     -fx-background-color: -binjr-window-background-color;
+     -fx-background-color: -binjr-pane-background-color;
      -fx-background-insets: 0;
  }
 
  .date-picker-popup > * > .spinner {
-     -fx-background-color: -binjr-window-background-color;
+     -fx-background-color: -binjr-pane-background-color;
      -fx-background-insets: 0;
  }
 
@@ -324,7 +336,7 @@
 
  .date-picker-popup > .calendar-grid {
      -fx-background-color: -binjr-button-background-color;
-     -fx-text-fill:white;
+     -fx-text-fill:-fx-text-background-color;
      /*-fx-background-insets: 1 0 0 0;*/
      -fx-padding: 0;
  }
@@ -353,22 +365,39 @@
  .chart-plot-background{
     -fx-background-color: transparent;
     -fx-border-width:0;
-   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
-   /*    -fx-font-size: 10pt;*/
  }
-
-  .chart-viewport-parent {
-     -fx-background-color: -binjr-window-background-color;
+  .axis {
+    AXIS_COLOR: -binjr-control-border-color;
   }
 
+
+ .chart-horizontal-grid-lines,
+ .chart-vertical-grid-lines,
+ .chart-vertical-zero-line,
+ .chart-horizontal-zero-line{
+    -fx-stroke: derive( -binjr-control-border-color, -50%);
+  }
+
+
+  .chart-viewport-parent {
+     -fx-background-color:-binjr-pane-background-color;
+
+  }
+
+.binjr-content-view {
+   -fx-border-color:  red;
+   -fx-border-width:0;
+}
+
+
  .skinnable-pane-border {
-   -fx-border-color:  -binjr-window-background-color;
+   -fx-border-color:  -binjr-pane-background-color;
    -fx-border-width:0;
    -fx-padding: -1;
  }
 
 .table-view .column-header-background {
-    -fx-border-width:1;
+    -fx-border-width:0;
     -fx-border-color: -binjr-gray-border-color;
  }
 
@@ -394,18 +423,21 @@
 
 .tab-pane .tab-header-area .tab-header-background{
    /* visibility:false;*/
-       -fx-background-color:#CCCCCC;
-  /*  -fx-border-width:0;
-   -fx-border-color:green;*/
+       -fx-background-color: -binjr-button-background-color;
+    -fx-border-width:1 0 0 0;
+   -fx-border-color:-binjr-pane-background-color;
 }
-.tab-pane .tab-header-area .headers-region .tab:hover{
-    -fx-border-color:blue;
-    -fx-background-color:E6E6E6;
+.tab-pane .tab-header-area .headers-region .tab:hover,
+.tab-pane .tab-header-area .headers-region .tab:selected:hover{
+    -fx-border-color:-binjr-control-border-color;
+    -fx-background-color: -binjr-control-hover-color;
+
 }
 
 .tab-pane .tab-header-area .headers-region .tab:selected{
-    -fx-border-color:F4F4F4;
-    -fx-background-color:F4F4F4;
+    -fx-border-color:-binjr-control-border-color;
+    -fx-background-color: -binjr-window-background-color;
+    -fx-border-width:0 1 0 1;
 }
 
 
@@ -414,7 +446,7 @@
 }
 
 .tab-pane:focused .tab-header-area .headers-region .tab .tab-container  .focus-indicator {
-    -fx-border-color:BABABA;
+    -fx-border-color:-binjr-control-border-color;
     -fx-border-width:0;
     -fx-border-radius:0;
 }
@@ -422,7 +454,7 @@
 .tab-pane .tab-header-area .headers-region .tab{
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color: -binjr-color-dark-gray;
+    -fx-border-color: -binjr-control-border-color;
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-background-color:transparent;
@@ -430,12 +462,12 @@
 
 
 .add-tab-button:hover {
-    -fx-background-color:#BABABA;
+    -fx-background-color:-binjr-control-hover-color;
 }
 
 .add-tab-button:pressed {
-  -fx-background-color:#8b8b8b ;
-  -fx-text-fill: white;
+  -fx-background-color:-binjr-control-hilite-color ;
+  -fx-text-fill: -fx-text-background-color;
 }
 
 .add-tab-button {
@@ -448,10 +480,10 @@
 }
 
 .add-tab-button-icon {
-    -fx-background-color:black;
+    -fx-background-color: -icon-color;
     -fx-shape: "m 31.25,54.09375 0,2.4375 -2.46875,0 0,0.375 2.46875,0 0,2.46875 0.375,0 0,-2.46875 2.46875,0 0,-0.375 -2.46875,0 0,-2.4375 -0.375,0 z";
   /*  -fx-smooth: false;*/
-    -fx-fill: black;
+    -fx-fill: -icon-color;
     -fx-scale-x: 2;
     -fx-scale-y: 2;
 
@@ -462,34 +494,53 @@
   * ScrollBar                                                                   *
   *                                                                             *
   ******************************************************************************/
+/*.scroll-pane,*/
+.split-pane,
+.list-view,
+.tree-view,
+.table-view,
+.tree-table-view,
+.html-editor {
+   /* -fx-background-color: -fx-box-border, -fx-control-inner-background;*/
+   /* -fx-background-insets: 0, 1;*/
+    -fx-padding: 0;
+}
+
+.scroll-bar:vertical,
+.scroll-bar:horizontal {
+    -fx-background-color: SCROLL_BAR_TRACK;
+}
+
 
  .scroll-bar > .thumb{
-     -fx-background-color: #BABABA;
+     -fx-background-color: SCROLL_BAR_THUMB;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
  }
 
  .scroll-bar > .thumb:hover {
-     -fx-background-color: #8B8B8B;
+     -fx-background-color: derive(SCROLL_BAR_THUMB, 20%);
  }
 
  .scroll-bar > .thumb:pressed {
-     -fx-background-color: #606060;
+     -fx-background-color: derive(SCROLL_BAR_THUMB, 40%);
  }
 
  .scroll-bar > .track {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color: SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
+     -fx-border-width: 0;
  }
  .scroll-bar > .track-background {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color: SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
+      -fx-border-width: 0;
  }
 
  .scroll-bar > .increment-button,
  .scroll-bar > .decrement-button {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color:  SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
 
@@ -498,7 +549,7 @@
 
  .scroll-bar > .increment-button:hover,
  .scroll-bar > .decrement-button:hover  {
-     -fx-background-color: #CECECE;
+     -fx-background-color: SCROLL_BAR_THUMB;
  }
 
  .scroll-bar > .increment-button:pressed,
@@ -509,13 +560,13 @@
  .scroll-bar > .decrement-button > .decrement-arrow,
  .scroll-bar > .increment-button > .increment-arrow{
      -fx-background-insets: 1 0 -1 0, 0;
-     -fx-background-color: -binjr-tool-button-background-color, #606060;
+     -fx-background-color: transparent, -fx-text-background-color;
      -fx-effect: null;
  }
 
  .scroll-bar > .decrement-button:pressed > .decrement-arrow,
  .scroll-bar > .increment-button:pressed > .increment-arrow {
-     -fx-background-color: -binjr-tool-button-background-color, white;
+     -fx-background-color: transparent, -fx-text-background-color;
      -fx-effect: null;
  }
 
@@ -580,7 +631,7 @@
 }
 
 .toolPane {
-  -fx-background-color: white;
+  -fx-background-color: -binjr-window-background-color;
 
  /* -fx-opacity:90%;*/
 /*  -fx-border-width:1;
@@ -646,7 +697,7 @@
 .command-bar .button:hover:pressed,
 .command-bar .menu-button:hover:pressed {
     -fx-background-color: -binjr-blue-color;
-    -fx-text-fill: white;
+    -fx-text-fill: -fx-text-background-color;
 }
 
 .command-bar .toggle-button:pressed,
@@ -848,9 +899,13 @@
     -fx-font-size:9pt;
  }
 
-.command-bar .table-row-cell{
+.command-bar .table-row-cell {
   -fx-text-fill:white;
-  -fx-background-color: -binjr-dark-blue-color;/*-binjr-command-bar-title-color;*/
+  -fx-background-color: -binjr-dark-blue-color;
+}
+
+.command-bar .table-row-cell:odd {
+    -fx-background: -binjr-blue-color;
 }
 
  .command-bar .table-view .virtual-flow .clipped-container .sheet .cell{
@@ -873,12 +928,9 @@
     -fx-font-size:10pt;
   }
 
-
-
 .icon-button{
 
 }
-
 
 .exit:hover,
 .command-bar .exit:hover {
@@ -886,7 +938,7 @@
 }
 
 .exit:hover *{
--icon-color: white;
+    -icon-color: white;
 }
 
 .command-bar .exit:hover:pressed,
@@ -894,8 +946,22 @@
    -fx-background-color: -binjr-color-light-red;
 }
 
+.separator:horizontal .line {
+    -fx-border-color: -binjr-control-border-color;
+    -fx-border-width: 1 0 0 0;
+}
 
 /*** Menu ***/
+
+.context-menu {
+    -fx-background-color:-binjr-window-background-color;
+    -fx-border-color:  -binjr-control-border-color;
+}
+
+.command-bar .context-menu .separator:horizontal .line {
+    -fx-border-color:  white;
+     -fx-border-width: 1 0 0 0;
+}
 
 .command-bar .context-menu {
     -fx-background-color: -binjr-background-color;
@@ -986,7 +1052,7 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color: red;
+    -fx-border-color: -binjr-control-background-color;
     -fx-border-width:0;
     -fx-border-radius:0;
     -fx-alignment: center;
@@ -1053,19 +1119,24 @@
 
 .toggle-switch .thumb-area{
     -fx-background-radius: 1em;
-    -fx-background-color: -binjr-tool-button-background-color;
+    -fx-background-color: -binjr-control-background-color;/*-binjr-tool-button-background-color;*/
     -fx-background-insets: 0, 1;
-    -fx-border-color:black;
+    -fx-border-color:-fx-text-background-color;
     -fx-border-radius:1em;
     -fx-border-width:2;
 }
 
-.toggle-switch:hover .thumb {
-    -fx-color: -fx-hover-base
+.toggle-switch .thumb {
+    -fx-background-color: -fx-text-background-color;
+}
+
+.toggle-switch:selected:hover .thumb-area{
+    -fx-background-color:  -binjr-control-hilite-color;
+    -fx-background-insets: 0, 1;
 }
 
 .toggle-switch:selected .thumb-area{
-    -fx-background-color:  -binjr-blue-color;
+    -fx-background-color:  -binjr-control-hover-color;
     -fx-background-insets: 0, 1;
 }
 
@@ -1084,23 +1155,36 @@
  ******************************************************************************/
 
 .slider .thumb {
-    -fx-background-color: black;
+    -fx-background-color:  -binjr-control-hover-color;
     -fx-background-insets: 0;
     -fx-background-radius: 0em;
     -fx-padding: 0.333333em; /* 4 */
-
     -fx-effect: null;
 }
+
+.slider:hover .thumb {
+    -fx-background-color: -binjr-control-hilite-color;
+}
+
+
 .slider:focused .thumb {
     -fx-background-radius: 0em;
 }
 
 .slider .track {
-    -fx-background-color: #c6c6c6;
+    -fx-background-color: -binjr-button-background-color;
     -fx-background-insets: 0;
     -fx-background-radius: 0;
     -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */
 }
+
+.command-bar .slider .track {
+    -fx-background-color: white;
+    -fx-background-insets: 0;
+    -fx-background-radius: 0;
+    -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */
+}
+
 
 .slider .fill {
     -fx-background-color: #00828b;
@@ -1124,7 +1208,7 @@
 
  .masker-pane .masker-glass {
     /* -fx-background-color: rgba(0, 0, 0, .3);*/
-     -fx-background-color: rgba(255, 255, 255, .6);
+     -fx-background-color: rgba(0, 0, 0, .6);
     /* -fx-background-color: transparent;*/
  }
 
@@ -1151,8 +1235,8 @@
  ******************************************************************************/
 
 .series-table .titled-pane {
-       -fx-border-color: -binjr-gray-border-color;
-       -fx-border-width:1;
+       -fx-border-color:  -binjr-control-border-color;
+       -fx-border-width:0;
    /* -fx-text-fill: -fx-text-base-color;*/
 }
 
@@ -1211,15 +1295,15 @@
  ******************************************************************************/
 
 .check-box {
-    -fx-text-fill: black;
+    -fx-text-fill: -fx-text-background-color;
 }
 
 /* unselected */
 .check-box > .box {
-    -fx-background-color: white;
+    -fx-background-color:  -binjr-tool-button-background-color;
     -fx-background-insets: 0;
     -fx-background-radius: 0;
-    -fx-border-color: #bababa;
+    -fx-border-color:   -binjr-control-border-color ;
     -fx-border-width: 1px;
     -fx-border-style: solid;
     -fx-padding: 1;
@@ -1234,28 +1318,28 @@
 }
 
 .check-box:hover > .box {
-    -fx-border-color: #919191;
+    -fx-border-color: -binjr-control-hilite-color;
 }
 
 /* focused */
 
 .check-box:focused > .box{
-    -fx-border-color: black;
+    -fx-border-color:  -binjr-control-border-color;
 }
 
 .check-box:focused:hover > .box{
-    -fx-border-color: black;
+    -fx-border-color:  -binjr-control-hilite-color;
 }
 
 .check-box:indeterminate > .box > .mark {
-    -fx-background-color: black;
+    -fx-background-color: -fx-text-background-color;
     -fx-background-insets: 1;
     -fx-padding:4.5px;
     -fx-shape: null;
 }
 
 .check-box:selected > .box > .mark{
-    -fx-background-color: black;
+    -fx-background-color: -fx-text-background-color;
 }
 
 .check-box:disabled
@@ -1271,19 +1355,19 @@
 
 .check-box:armed > .box
 {
-    -fx-background-color: white, black;
+    -fx-background-color: -fx-text-background-color, -fx-text-background-color;
     -fx-background-insets: -1, 2;
     -fx-background-radius: 0, 0;
     -fx-border-color: black;
 }
 
 .check-box:pressed:selected > .box > .mark {
-    -fx-background-color: -binjr-window-background-color;
+    -fx-background-color: transparent;
 }
 
 .check-box:armed > .box > .mark
 {
-    -fx-background-color: black;
+    -fx-background-color: -fx-text-background-color;
 }
 
 
@@ -1292,11 +1376,23 @@
  * TreeView and TreeCell                                                       *
  *                                                                             *
  ******************************************************************************/
-
+.table-row-cell,
 .tree-cell {
     -fx-padding: 1;/*0.05em; /* 3 */
     -fx-indent: 1.3em;
-    -fx-background-color: -binjr-window-background-color;
+    -fx-background-color: -binjr-pane-background-color;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: derive(-binjr-pane-background-color, 10%);
+}
+
+
+.table-row-cell:selected,
+.tree-cell:selected {
+    -fx-padding: 1;/*0.05em; /* 3 */
+    -fx-indent: 1.3em;
+    -fx-background-color: -binjr-control-hilite-color;
 }
 .tree-cell .label {
     -fx-padding: 0.0em 0.0em 0.0em 0.25em; /* 0 0 0 3 */
@@ -1304,17 +1400,19 @@
 .tree-cell > .tree-disclosure-node,
 .tree-table-row-cell > .tree-disclosure-node {
     -fx-padding: 4 6 4 8;
-    -fx-background-color: -binjr-window-background-color;
+    -fx-background-color: transparent;
 }
+
+.tree-cell:expanded:selected > .tree-disclosure-node > .arrow,
 .tree-cell > .tree-disclosure-node > .arrow,
 .tree-table-row-cell > .tree-disclosure-node > .arrow {
-    -fx-background-color:-binjr-control-hilite-color;
+    -fx-background-color: -fx-text-background-color;
     -fx-padding: 0.333333em 0.229em 0.333333em 0.229em; /* 4 */
     -fx-shape:"m 105.1807,80.186391 c -0.1151,0.0084 -0.15449,0.132376 -0.22239,0.207487 -0.10177,0.103799 -0.1199,0.28091 -0.022,0.393751 0.33133,0.458106 0.66266,0.916212 0.994,1.374318 -0.34148,0.472928 -0.68449,0.944781 -1.025,1.418378 -0.0683,0.118336 -0.0286,0.267775 0.0635,0.360886 0.0687,0.0755 0.11889,0.209815 0.24402,0.183758 0.0986,-0.03934 0.1379,-0.149059 0.20442,-0.225431 0.39215,-0.54052 0.78885,-1.077962 1.17814,-1.620415 0.0752,-0.120693 0.005,-0.257181 -0.0772,-0.352654 -0.41189,-0.564171 -0.8217,-1.129953 -1.2349,-1.693113 -0.0256,-0.02918 -0.0635,-0.04774 -0.10266,-0.04697 z";
 }
 .tree-cell:expanded > .tree-disclosure-node > .arrow,
 .tree-table-row-cell:expanded > .tree-disclosure-node > .arrow {
-    -fx-background-color: -fx-text-background-color;
+    -fx-background-color: -binjr-control-hilite-color;
     -fx-rotate: 90;
 }
 
@@ -1329,6 +1427,13 @@
    -fx-border-radius: 4;
     -fx-border-color: darkgray  ;*/
     -fx-background-color:  rgba(32,70,86,0.8);
+}
+
+.worksheet-tool-bar {
+     -fx-background-color: -binjr-window-background-color;
+      -fx-border-color: -fx-text-background-color;
+      -fx-border-width: 0 0 0 0;
+
 }
 
  .worksheet-tool-bar .menu-button .arrow-button {
@@ -1347,4 +1452,38 @@
 .debug-icon
  {
     -fx-background-color:-binjr-warning-color;
+}
+
+
+
+.notification-bar > .pane {
+    -fx-border-color: -binjr-control-border-color;
+    -fx-background-color: -binjr-window-background-color;/* -fx-outer-border, -fx-inner-border, linear-gradient(#595959, #474747 37%, #343434);*/
+}
+
+.notification-bar > .pane .title,
+.notification-bar > .pane .label {
+    -fx-text-fill: -fx-text-background-color;
+}
+
+
+.notification-pane .notification-bar > .pane {
+    -fx-background-color: -binjr-window-background-color;/* linear-gradient(#595959, #474747 37%, #343434);*/
+}
+
+.notification-pane .notification-bar > .pane .label {
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.dialog-pane .header-panel {
+    -fx-background-color: -binjr-pane-background-color;
+
+}
+.dialog-pane .header-panel .graphic-container .dialog-icon {
+    -icon-color:  -fx-text-background-color;
+}
+
+.dialog-pane {
+    -fx-background-color: -binjr-window-background-color;
+    -fx-padding: 0;
 }

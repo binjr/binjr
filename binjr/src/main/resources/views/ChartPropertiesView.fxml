@@ -22,7 +22,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="459.0" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" focusTraversable="true" prefHeight="459.0" styleClass="skinnable-pane-border" prefWidth="190.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
         <graphic>
             <Region styleClass="cross-icon"/>

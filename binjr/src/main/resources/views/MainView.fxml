@@ -27,7 +27,8 @@
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
-    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"
+    <SplitPane fx:id="contentView" cache="true" styleClass="binjr-content-view" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0"
+               AnchorPane.topAnchor="0"
                HBox.hgrow="ALWAYS">
         <AnchorPane SplitPane.resizableWithParent="false">
             <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
