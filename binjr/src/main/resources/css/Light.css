@@ -867,7 +867,7 @@
     -fx-text-fill:white;
     -fx-border-color: white;
     -fx-border-style: solid;
-    -fx-content-display:left;
+    -fx-content-display: left;
 }
 
 .context-menu .label{

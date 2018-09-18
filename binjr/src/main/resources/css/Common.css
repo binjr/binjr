@@ -1,0 +1,7 @@
+.command-bar .command-bar-pinned-item {
+    -fx-content-display: graphic-only;
+}
+
+.command-bar:expanded .command-bar-pinned-item {
+    -fx-content-display: left;
+}

@@ -131,7 +131,8 @@
                 </HBox>
             </graphic>
         </Button>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
+        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="45.0">
             <tooltip>
                 <Tooltip text="Workspaces">
                     <font>
@@ -196,7 +197,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
+        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="90.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -230,7 +231,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -274,7 +275,8 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
+        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="180.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="help-icon"/>
@@ -312,7 +314,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton fx:id="debugMenuButton" visible="false" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" text="Debug" popupSide="RIGHT" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="0.0"
+        <MenuButton fx:id="debugMenuButton" visible="false" styleClass="command-bar-pinned-item" mnemonicParsing="false" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" text="Debug" popupSide="RIGHT" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -391,7 +393,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button styleClass="command-bar-pinned-item" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="settings-icon"/>
@@ -405,7 +407,7 @@
                 </Tooltip>
             </tooltip>
         </Button>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" styleClass="exit" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" styleClass="command-bar-pinned-item,exit" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="quit-icon"/>
