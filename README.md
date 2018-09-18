@@ -13,7 +13,7 @@ It is a Java based client application, packaged as a single executable JAR file 
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot05.png)
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
+![Screenshot](http://www.binjr.eu/assets/images/screenshot04.png)
 
 ## Getting started
 
