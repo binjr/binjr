@@ -82,13 +82,6 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         super();
         getStyleClass().setAll("axis");
 
-//        minAxisButton.setPrefHeight(10);
-//        minAxisButton.setPrefWidth(10);
-//        centerAxisButton.setGraphic(new ImageView(this.getClass().getResource("/images/autoScale.png").toString()));
-//        maxAxisButton.setPrefHeight(10);
-//        maxAxisButton.setPrefWidth(10);
-//        getChildren().addAll(maxAxisButton, minAxisButton, centerAxisButton);
-
         this.axisTickFormatter = new AxisTickFormatter() {
             @Override
             public void setRange(double v, double v1, double v2) {

@@ -41,6 +41,7 @@
 
 .command-bar .icon-container {
      -icon-color: white;
+       -fx-padding: 0 0 0 14;
 }
 
 .command-bar .menu-icon {
@@ -50,9 +51,6 @@
     -fx-smooth: false;
 }
 
-.icon-container {
-    -fx-padding: 0 0 0 14;
-}
 
 .context-menu .icon-container {
     -fx-padding: 0 14 0 8;

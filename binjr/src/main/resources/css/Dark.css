@@ -57,6 +57,7 @@
 
 .command-bar .icon-container {
      -icon-color: white;
+      -fx-padding: 0 0 0 14;
 }
 
 .command-bar .menu-icon {
@@ -66,11 +67,7 @@
     -fx-smooth: false;
 }
 
-.icon-container {
-    -fx-padding: 0 0 0 14;
-}
-
-.context-menu .icon-container {
+.command-bar .context-menu .icon-container {
     -fx-padding: 0 14 0 8;
 
 }
@@ -501,8 +498,6 @@
 .table-view,
 .tree-table-view,
 .html-editor {
-   /* -fx-background-color: -fx-box-border, -fx-control-inner-background;*/
-   /* -fx-background-insets: 0, 1;*/
     -fx-padding: 0;
 }
 
@@ -1431,8 +1426,8 @@
 
 .worksheet-tool-bar {
      -fx-background-color: -binjr-window-background-color;
-      -fx-border-color: -fx-text-background-color;
-      -fx-border-width: 0 0 0 0;
+      -fx-border-color:  -binjr-button-background-color;
+      -fx-border-width: 0 0 1 0;
 
 }
 

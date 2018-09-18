@@ -21,7 +21,6 @@
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
-<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
@@ -33,11 +32,10 @@
                     <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
                                 textAlignment="CENTER">
-
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/backArrow_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="backArrow-icon"/>
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Go back">
@@ -50,9 +48,9 @@
                         <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
                                 textAlignment="CENTER">
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/forwardArrow_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="forwardArrow-icon"/>
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Go forward">
@@ -65,9 +63,9 @@
                         <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
                                 textAlignment="CENTER">
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/refresh_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="refresh-icon"/>
+                                </HBox>
                             </graphic>
                             <font>
                                 <Font size="10.0"/>
@@ -103,11 +101,15 @@
                                 <Insets right="5.0"/>
                             </HBox.margin>
                         </ZonedDateTimePicker>
-                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
+                        <Button fx:id="snapshotButton"
+                                contentDisplay="GRAPHIC_ONLY"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                styleClass="dialog-button" text="Snapshot">
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/snapshot_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="camera-icon"/>
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Take a snapshot of the worksheet">
@@ -119,9 +121,9 @@
                         </Button>
                         <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/lockCrosshairVertical_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="vertical-crosshair-icon"/>
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Toggle vertical crosshair marker">
@@ -131,11 +133,16 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <ToggleButton fx:id="hCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                      maxHeight="-Infinity" maxWidth="-Infinity"
+                                      minHeight="-Infinity" minWidth="-Infinity"
+                                      mnemonicParsing="false" prefHeight="40.0"
+                                      prefWidth="40.0"
+                                      text="ToggleButton">
                             <graphic>
-                                <ImageView fitHeight="20.0" fitWidth="20.0">
-                                    <Image url="@/images/lockCrosshairHorizontal_40.png"/>
-                                </ImageView>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="horizontal-crosshair-icon"/>
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Toggle horizontal crosshair marker">
@@ -145,9 +152,15 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Add Chart">
+                        <Button fx:id="addChartButton"
+                                alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                maxHeight="-Infinity" maxWidth="-Infinity"
+                                minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0"
+                                prefWidth="40.0"
+                                styleClass="dialog-button" text="Add Chart">
                             <graphic>
-                                <HBox styleClass="icon-container">
+                                <HBox styleClass="icon-container" alignment="CENTER">
                                     <Region styleClass="addWorksheet-icon"/>
                                 </HBox>
                             </graphic>
@@ -169,7 +182,7 @@
                                 </Tooltip>
                             </tooltip>
                             <graphic>
-                                <HBox styleClass="icon-container">
+                                <HBox styleClass="icon-container" alignment="CENTER">
                                     <Region styleClass="layout-icon"/>
                                 </HBox>
                             </graphic>

@@ -28,8 +28,8 @@
   -icon-scale-y: 2.5;
 }
 
-.context-menu .icon-container {
-  -fx-padding: 0 14 0 8;
+.command-bar  .icon-container {
+  -fx-padding: 10;
 }
 
  .menu-button .arrow-button {
