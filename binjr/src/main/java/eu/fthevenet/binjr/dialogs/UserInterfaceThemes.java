@@ -17,13 +17,15 @@
 
 package eu.fthevenet.binjr.dialogs;
 
+import java.util.Objects;
+
 /**
  * An enumeration of supported user interface themes
  *
  * @author Frederic Thevenet
  */
 public enum UserInterfaceThemes {
-    MODERN("Light", "/css/Light.css"),
+    LIGHT("Light", "/css/Light.css"),
     DARK("Dark", "/css/Dark.css"),
     CLASSIC("Classic", "/css/Classic.css");
 
@@ -49,5 +51,12 @@ public enum UserInterfaceThemes {
         return label;
     }
 
-
+    public static UserInterfaceThemes valueOf(String name, UserInterfaceThemes defaultValue) {
+        Objects.requireNonNull(defaultValue, "Default value cannot be null.");
+        try {
+            return UserInterfaceThemes.valueOf(name);
+        } catch (IllegalArgumentException e) {
+            return defaultValue;
+        }
+    }
 }

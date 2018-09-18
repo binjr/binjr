@@ -48,7 +48,7 @@ public class GlobalPreferences {
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
     private static final String LOAD_LAST_WORKSPACE_ON_STARTUP = "loadLastWorkspaceOnStartup";
     private static final String CHECK_FOR_UPDATE_ON_START_UP = "checkForUpdateOnStartUp";
-    private static final String UI_THEME_NAME = "userInterfaceTheme";
+    private static final String UI_THEME_NAME = "userInterfaceTheme_v2";
     private static final String RECENT_FILES = "recentFiles";
     private static final String HORIZONTAL_MARKER_ON = "horizontalMarkerOn";
     private static final String VERTICAL_MARKER_ON = "verticalMarkerOn";
@@ -112,7 +112,7 @@ public class GlobalPreferences {
         verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
         horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
         checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
-        userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, UserInterfaceThemes.MODERN.name())));
+        userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, ""), UserInterfaceThemes.LIGHT));
         loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
         mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
