@@ -1,4 +1,4 @@
-# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr) [![Maven Central](https://img.shields.io/maven-central/v/eu.fthevenet/binjr.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.fthevenet%22%20AND%20a:%22binjr%22)
+# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr) [![Maven Central](https://img.shields.io/maven-central/v/eu.fthevenet/binjr.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:eu.fthevenet%20AND%20a:binjr)
 
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
