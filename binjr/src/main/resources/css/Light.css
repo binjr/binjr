@@ -19,6 +19,9 @@
     -binjr-foreground-color: #DAEEF3;
     -binjr-gray-border-color: #C8C8C8;
     -binjr-warning-color:TOMATO;
+    -icon-color: black;
+    SCROLL_BAR_THUMB: #BABABA;
+    SCROLL_BAR_TRACK: #f0f0f0;
     -fx-accent: -binjr-dark-blue-color;
 }
 
@@ -35,7 +38,9 @@
 .command-bar * {
     -icon-scale-x: 3;
     -icon-scale-y: 3;
-  -icon-color: white;
+    -icon-color: white;
+    SCROLL_BAR_THUMB: -binjr-dark-blue-color;
+    SCROLL_BAR_TRACK: -binjr-blue-color ;
 }
 
 
@@ -419,7 +424,6 @@
     -fx-fill: black;
     -fx-scale-x: 2;
     -fx-scale-y: 2;
-
 }
 
  /*******************************************************************************
@@ -428,33 +432,38 @@
   *                                                                             *
   ******************************************************************************/
 
+ .command-bar .scroll-bar:vertical,
+ .command-bar .scroll-bar:horizontal {
+    -fx-background-color: SCROLL_BAR_TRACK;
+}
+
  .scroll-bar > .thumb{
-     -fx-background-color: #BABABA;
+     -fx-background-color: SCROLL_BAR_THUMB;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
  }
 
  .scroll-bar > .thumb:hover {
-     -fx-background-color: #8B8B8B;
+     -fx-background-color: derive(SCROLL_BAR_THUMB, 20%);
  }
 
  .scroll-bar > .thumb:pressed {
-     -fx-background-color: #606060;
+     -fx-background-color: derive(SCROLL_BAR_THUMB, 40%);
  }
 
  .scroll-bar > .track {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color: SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
  }
  .scroll-bar > .track-background {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color: SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
  }
 
  .scroll-bar > .increment-button,
  .scroll-bar > .decrement-button {
-     -fx-background-color: #f0f0f0;
+     -fx-background-color:  SCROLL_BAR_TRACK;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
 
@@ -463,7 +472,7 @@
 
  .scroll-bar > .increment-button:hover,
  .scroll-bar > .decrement-button:hover  {
-     -fx-background-color: #CECECE;
+     -fx-background-color: SCROLL_BAR_THUMB;
  }
 
  .scroll-bar > .increment-button:pressed,
@@ -477,6 +486,13 @@
      -fx-background-color: -binjr-button-background-color, #606060;
      -fx-effect: null;
  }
+
+ .command-bar .scroll-bar > .decrement-button > .decrement-arrow,
+ .command-bar .scroll-bar > .increment-button > .increment-arrow{
+      -fx-background-insets: 1 0 -1 0, 0;
+      -fx-background-color: white;
+      -fx-effect: null;
+  }
 
  .scroll-bar > .decrement-button:pressed > .decrement-arrow,
  .scroll-bar > .increment-button:pressed > .increment-arrow {
@@ -1087,7 +1103,6 @@
  * Slider                                                                      *
  *                                                                             *
  ******************************************************************************/
-
 .slider .thumb {
     -fx-background-color: black;
     -fx-background-insets: 0;
@@ -1112,6 +1127,14 @@
     -fx-background-insets: 0;
     -fx-background-radius: 0;
     -fx-padding: 0.333333em; /* This value must be equal to ".slider .thumb" padding */
+}
+
+.command-bar .slider .thumb {
+    -fx-background-color:  -fx-accent;
+}
+
+.command-bar .slider:hover .thumb {
+    -fx-background-color: derive(-fx-accent, 40%);
 }
 
 
