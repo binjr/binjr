@@ -32,8 +32,9 @@
     SCROLL_BAR_THUMB: #494949;
     SCROLL_BAR_TRACK: #1B1B1B;
 
-    -fx-base:black;
-/****/
+    -fx-base: black;
+    -fx-accent: -binjr-dark-blue-color;
+    /****/
 
 }
 
@@ -272,13 +273,13 @@
   }
 
  .date-picker > .arrow-button:hover {
-     -fx-background-color: #d9d9d9;
-     -fx-background-insets: 3 3 3 3;
+     -fx-background-color:  -binjr-control-hover-color;
+   /*  -fx-background-insets: 3 3 3 3;*/
      -fx-background-radius: 0;
  }
 
  .date-picker > .arrow-button:pressed {
-     -fx-background-color: black;
+     -fx-background-color: -binjr-control-hilite-color;
  }
 
  .date-picker > .arrow-button:pressed > .arrow {
@@ -286,13 +287,15 @@
  }
 
  .date-picker-popup {
-     -fx-background-color: -binjr-control-border-color;
+ -fx-border-color: -binjr-control-border-color;
+     -fx-background-color: -binjr-window-background-color;
      -fx-background-insets: 0;
  }
 
  .date-picker-popup > .month-year-pane {
      -fx-background-color: -binjr-pane-background-color;
      -fx-background-insets: 0;
+
  }
 
  .date-picker-popup > * > .spinner > .button {
@@ -315,24 +318,31 @@
  }
 
  .date-picker-popup > * > .spinner > .button:armed {
-     -fx-background-color: #606060;
+     -fx-background-color:  -binjr-control-border-color;
  }
 
  .date-picker-popup > * > .spinner > .button > .left-arrow,
  .date-picker-popup > * > .spinner > .button > .right-arrow {
-     -fx-background-color: #606060;
+     -fx-background-color:  -binjr-control-border-color;
      -fx-background-insets: 0;
      -fx-effect: null;
  }
 
  .date-picker-popup > * > .spinner > .button:pressed > .left-arrow,
  .date-picker-popup > * > .spinner > .button:pressed > .right-arrow {
-     /*-fx-background-color: white;*/
+     -fx-background-color: -fx-text-background-color;
      -fx-background-insets: 0;
  }
 
+  .date-picker-popup > * > .spinner > .button:hover > .left-arrow,
+  .date-picker-popup > * > .spinner > .button:hover > .right-arrow {
+      -fx-background-color: -fx-text-background-color;
+      -fx-background-insets: 0;
+  }
+
+
  .date-picker-popup > .calendar-grid {
-     -fx-background-color: -binjr-button-background-color;
+     -fx-background-color: -binjr-pane-background-color;
      -fx-text-fill:-fx-text-background-color;
      /*-fx-background-insets: 1 0 0 0;*/
      -fx-padding: 0;
@@ -348,7 +358,42 @@
  .date-picker-popup > * > .week-number-cell {
      -fx-font-size: 0.75em;
      -fx-font-family: "Segoe UI Semibold", "Segoe UI", Helvetica, Arial, sans-serif;
+      /*  -fx-background-color: -binjr-button-background-color;*/
+     -fx-text-fill: -fx-text-background-color;
+
  }
+
+  .date-picker-popup > * > .week-number-cell{
+    -fx-background-color: -binjr-button-background-color;
+      -fx-border-color: -binjr-button-background-color;
+
+  }
+
+  .date-picker-popup > * > .day-cell {
+       -fx-border-color: black;
+      -fx-background:  -binjr-button-background-color;
+  }
+
+
+  .date-picker-popup > * > .day-cell:hover {
+      -fx-background-color:  -binjr-control-border-color;
+  }
+
+  .date-picker-popup > * > .today {
+      -fx-background-color: -binjr-button-background-color, -binjr-control-border-color,-binjr-button-background-color;
+      -fx-background-insets: 1, 2, 3;
+  }
+
+  .date-picker-popup > * > .previous-month:hover,
+  .date-picker-popup > * > .next-month:hover{
+     -fx-background-color:  -binjr-button-background-color;
+  }
+
+    .date-picker-popup > * > .today:hover {
+     -fx-background-color: -binjr-control-border-color,  -fx-text-background-color,-binjr-control-border-color;
+    }
+
+
 
  /***********************************/
  .split-pane .split-pane-divider{
@@ -1065,6 +1110,25 @@
     -fx-padding:-2;
      visibility: hidden;
  }
+
+ .borderless-color-picker .color-palette {
+    -fx-spacing: 0.833333em; /* 10px */
+    -fx-background-color: -binjr-pane-background-color;
+    -fx-border-color: -binjr-control-border-color;
+    -fx-background-insets: 0;
+    -fx-background-radius:0;
+    -fx-padding: 1em; /* 12 */
+}
+
+ .borderless-color-picker .color-palette > .color-picker-grid {
+    -fx-padding: 0.5px;
+    -fx-snap-to-pixel: true;
+}
+ .borderless-color-picker .color-palette > .color-picker-grid > .color-square {
+    -fx-background-color: transparent;
+    -fx-padding: 0.5px;
+}
+
 
 /*******************************************************************************
  *                                                                             *

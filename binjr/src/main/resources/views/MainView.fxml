@@ -304,7 +304,6 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <SeparatorMenuItem mnemonicParsing="false"/>
                 <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
                     <graphic>
                         <HBox styleClass="icon-container">
@@ -385,11 +384,15 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <SeparatorMenuItem/>
                 <MenuItem mnemonicParsing="false" onAction="#toggleDebugMode" text="Exit Debug Mode" visible="true">
                     <accelerator>
                         <KeyCodeCombination alt="UP" code="D" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
                     </accelerator>
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="cross-icon"/>
+                        </HBox>
+                    </graphic>
                 </MenuItem>
             </items>
         </MenuButton>

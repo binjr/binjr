@@ -19,7 +19,7 @@
     -binjr-foreground-color: #DAEEF3;
     -binjr-gray-border-color: #C8C8C8;
     -binjr-warning-color:TOMATO;
-
+    -fx-accent: -binjr-dark-blue-color;
 }
 
 .column-bold-text{
@@ -991,6 +991,26 @@
     -fx-padding:-2;
      visibility: hidden;
  }
+
+
+ .borderless-color-picker .color-palette {
+    -fx-spacing: 0.833333em; /* 10px */
+    -fx-background-color: -binjr-control-background-color;
+    -fx-border-color: -binjr-color-gray;
+    -fx-background-insets: 0;
+    -fx-background-radius:0;
+    -fx-padding: 1em; /* 12 */
+
+}
+
+ .borderless-color-picker .color-palette > .color-picker-grid {
+    -fx-padding: 0.5px;
+    -fx-snap-to-pixel: true;
+}
+ .borderless-color-picker .color-palette > .color-picker-grid > .color-square {
+    -fx-background-color: transparent;
+    -fx-padding: 0.5px;
+}
 
 /*******************************************************************************
  *                                                                             *
