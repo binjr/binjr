@@ -1114,9 +1114,4 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //endregion
 
-    @Override
-    protected void finalize() throws Throwable {
-        logger.trace(() -> "Finalizing worksheet controller: " + this.toString());
-        super.finalize();
-    }
 }

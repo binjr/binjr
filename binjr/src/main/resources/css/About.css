@@ -5,10 +5,12 @@
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
+    -fx-background-color:  transparent;
 }
 
 .content,
-.web-view,
+.about-text-view,
+.scroll-pane,
 .titled-pane,
 .title,
 .web-view,
@@ -19,8 +21,9 @@
 /*
 .table-row-cell:odd{
     -fx-background-color: -binjr-lighter-blue-color;
-}*/
+}
 
+/*
 .table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
 .table-row-cell:filled:selected,
 .table-row-cell:filled > .table-cell:selected,
@@ -28,6 +31,15 @@
 .table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:focused {
     -fx-background-color: -binjr-blue-color;
     -fx-text-fill: white;
+}
+*/
+.table-row-cell:selected {
+    -fx-background-color: -binjr-blue-color;
+}
+
+.table-row-cell:selected * {
+    -fx-text-fill: white;
+
 }
 
 .arrow {
@@ -41,6 +53,7 @@
     -fx-font-size: 11pt;
 }
 
+
 .titled-pane {
     -fx-border-size:0;
     -fx-text-fill:-binjr-background-color;
@@ -48,16 +61,19 @@
     -fx-font-size: 14pt;
 }
 
+
+.about-text-view,
 .web-view,
 .table-view,
 .cell,
 .content {
     -fx-border-size:0;
-    -fx-text-fill:-binjr-background-color;
+    -fx-text-fill: -binjr-background-color;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 9pt;
     -fx-font-weight:normal;
   }
+
 
 /*******************************************************************************
   *                                                                             *
@@ -70,6 +86,8 @@
      -fx-background-insets: 0;
      -fx-background-radius: 0;
  }
+
+
 
 /*
 .scroll-bar .thumb:hover {

@@ -53,7 +53,13 @@ public class DataAdapterFactory {
      */
     private DataAdapterFactory() {
         registeredAdapters = new HashMap<>();
-        this.loadAdapters();
+        // An exception here could present the app from  starting
+        try {
+            this.loadAdapters();
+        } catch (Throwable e) {
+            logger.error(e);
+
+        }
     }
 
     /**

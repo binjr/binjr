@@ -33,16 +33,21 @@ import javafx.scene.effect.Bloom;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+
+//import javafx.scene.web.WebView;
 
 /**
  * The controller for the about dialog
@@ -51,12 +56,14 @@ import java.util.ResourceBundle;
  */
 public class AboutBoxController implements Initializable {
     private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
+    public TextFlow licenseView;
+    public TextFlow acknowledgementView;
 
-    @FXML
-    public WebView licenseView;
-
-    @FXML
-    public WebView acknowledgementView;
+//    @FXML
+//    public WebView licenseView;
+//
+//    @FXML
+//    public WebView acknowledgementView;
 
     @FXML
     private DialogPane aboutRoot;
@@ -97,8 +104,8 @@ public class AboutBoxController implements Initializable {
         assert acknowledgementPane != null : "fx:id\"thirdPartiesPane\" was not injected!";
         assert versionCheckFlow != null : "fx:id\"versionCheckFlow\" was not injected!";
 
-        acknowledgementView.getEngine().load(getClass().getResource("/text/about_Acknowledgements.html").toExternalForm());
-        licenseView.getEngine().load(getClass().getResource("/text/about_license.html").toExternalForm());
+        fillTextFlow(licenseView, getClass().getResource("/text/about_license.txt"));
+        fillTextFlow(acknowledgementView, getClass().getResource("/text/about_acknowledgements.txt"));
 
         aboutRoot.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
@@ -127,9 +134,6 @@ public class AboutBoxController implements Initializable {
                 header.setPrefHeight(0);
                 header.setVisible(false);
             }
-
-            licenseView.setContextMenuEnabled(false);
-            acknowledgementView.setContextMenuEnabled(false);
         });
 
         versionCheckFlow.getChildren().clear();
@@ -162,6 +166,19 @@ public class AboutBoxController implements Initializable {
         Node closeButton = aboutRoot.lookupButton(ButtonType.CLOSE);
         closeButton.managedProperty().bind(closeButton.visibleProperty());
         closeButton.setVisible(false);
+    }
+
+    private void fillTextFlow(TextFlow textFlow, URL sourceUrl) {
+        try {
+            String license = new BufferedReader(new InputStreamReader(sourceUrl.openStream())).lines().collect(Collectors.joining("\n"));
+            Text licText = new Text(license);
+            licText.setFill(Color.valueOf("#204656"));
+            textFlow.getChildren().add(licText);
+
+        } catch (IOException e) {
+            logger.error("Cannot display content of URL " + sourceUrl + ": " + e.getMessage());
+            logger.debug(() -> "Exception stack", e);
+        }
     }
 
     private void overrideCss() {

@@ -140,9 +140,7 @@ public class ChangeWatcher implements Dirtyable {
         if (field == null) {
             throw new IllegalArgumentException("The field must not be null");
         }
-        if (!field.isAccessible()) {
-            field.setAccessible(true);
-        }
+        field.trySetAccessible();
         return field.get(target);
     }
 
