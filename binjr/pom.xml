@@ -103,7 +103,7 @@
                                     <url>${binjr.deploy.openjfx.jmods.url}</url>
                                     <unpack>true</unpack>
                                     <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
-                                    <outputFileName>javafx-11-jmods.${binjr.deploy.format}</outputFileName>
+                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
                                 </configuration>
                             </execution>
                         </executions>
