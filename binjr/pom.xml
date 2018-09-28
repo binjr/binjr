@@ -22,7 +22,7 @@
     <artifactId>binjr</artifactId>
     <name>binjr</name>
     <url>http://www.binjr.eu</url>
-    <version>2.0.0.beta</version>
+    <version>2.0.0.beta-SNAPSHOT</version>
     <packaging>jar</packaging>
     <description>Flexible Time Series Visualization</description>
     <organization>
@@ -254,18 +254,18 @@
             <!--</dependency>-->
             <!--</dependencies>-->
             <!--</plugin>-->
-            <!--<plugin>-->
-            <!--<groupId>org.sonatype.plugins</groupId>-->
-            <!--<artifactId>nexus-staging-maven-plugin</artifactId>-->
-            <!--<version>1.6.8</version>-->
-            <!--<extensions>true</extensions>-->
-            <!--<configuration>-->
-            <!--<skipNexusStagingDeployMojo>${skipDeploy}</skipNexusStagingDeployMojo>-->
-            <!--<serverId>ossrh</serverId>-->
-            <!--<nexusUrl>https://oss.sonatype.org/</nexusUrl>-->
-            <!--<autoReleaseAfterClose>true</autoReleaseAfterClose>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
+            <plugin>
+                <groupId>org.sonatype.plugins</groupId>
+                <artifactId>nexus-staging-maven-plugin</artifactId>
+                <version>1.6.8</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                    <serverId>ossrh</serverId>
+                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>de.jutzig</groupId>
                 <artifactId>github-release-plugin</artifactId>
@@ -355,14 +355,14 @@
             <version>11</version>
         </dependency>
     </dependencies>
-    <!--<distributionManagement>-->
-    <!--<repository>-->
-    <!--<id>ossrh</id>-->
-    <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
-    <!--</repository>-->
-    <!--<snapshotRepository>-->
-    <!--<id>ossrh</id>-->
-    <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
-    <!--</snapshotRepository>-->
-    <!--</distributionManagement>-->
+    <distributionManagement>
+        <repository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
 </project>
