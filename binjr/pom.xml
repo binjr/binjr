@@ -43,7 +43,11 @@
         </license>
     </licenses>
     <properties>
-        <detailedDescription>binjr is a Java based, open source, time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.</detailedDescription>
+        <detailedDescription>
+            binjr is a Java based, open source, time series visualization tool.
+            It can plot time series data from multiple sources as a set of charts,
+            which end users can navigate or zoom in and out.
+        </detailedDescription>
         <license.name>Apache Software License 2.0</license.name>
         <License.url>http://www.apache.org/licenses/LICENSE-2.0</License.url>
         <license.shortName>ASL 2.0</license.shortName>
@@ -52,6 +56,7 @@
         <github.global.server>github</github.global.server>
         <project.scm.id>${github.global.server}</project.scm.id>
         <skipDeploy>true</skipDeploy>
+
     </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
@@ -59,6 +64,111 @@
         <developerConnection>scm:git:https://github.com/fthevenet/binjr.git</developerConnection>
         <tag>HEAD</tag>
     </scm>
+    <profiles>
+        <profile>
+            <id>bundle-windows</id>
+            <properties>
+                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/windows/binjr.exe</binjr.deploy.launcher>
+                <binjr.deploy.jdk>jdk-11_windows-x64</binjr.deploy.jdk>
+                <binjr.deploy.format>zip</binjr.deploy.format>
+                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-windows/</binjr.deploy.openjfx.jmods.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>bundle-linux</id>
+            <properties>
+                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/linux/binjr</binjr.deploy.launcher>
+                <binjr.deploy.jdk>jdk-11_linux-x64</binjr.deploy.jdk>
+                <binjr.deploy.format>tar.gz</binjr.deploy.format>
+                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-linux/</binjr.deploy.openjfx.jmods.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>build-native-bundle</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${binjr.deploy.openjfx.jmods.url}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
+                                    <outputFileName>javafx-11-jmods.${binjr.deploy.format}</outputFileName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <version>1.0.0.Beta1</version>
+                        <executions>
+                            <execution>
+                                <id>create-dependency-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>create-runtime-image</goal>
+                                </goals>
+                                <configuration>
+                                    <!--<baseJdk>id=${binjr.deploy.jdk}</baseJdk>-->
+                                    <modulePath>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                    </modulePath>
+                                    <modules>
+                                        <module>javafx.controls</module>
+                                        <module>javafx.fxml</module>
+                                        <module>javafx.swing</module>
+                                        <module>java.base</module>
+                                        <module>java.prefs</module>
+                                        <module>java.sql</module>
+                                        <module>java.xml</module>
+                                        <module>jdk.security.auth</module>
+                                    </modules>
+                                    <compression>2</compression>
+                                    <stripDebug>true</stripDebug>
+                                    <excludedResources>
+                                    </excludedResources>
+                                    <outputDirectory>${project.build.directory}/${binjr.deploy.jdk}-image</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>package</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/assembly-dist.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+
+    </profiles>
 
     <build>
         <finalName>${project.name}</finalName>
@@ -74,6 +184,39 @@
                     <target>11</target>
                 </configuration>
             </plugin>
+            <!--<plugin>-->
+            <!--<groupId>org.apache.maven.plugins</groupId>-->
+            <!--<artifactId>maven-jar-plugin</artifactId>-->
+            <!--<version>3.1.0</version>-->
+            <!--</plugin>-->
+
+            <!--<plugin>-->
+            <!--<groupId>org.moditect</groupId>-->
+            <!--<artifactId>moditect-maven-plugin</artifactId>-->
+            <!--<version>1.0.0.Beta1</version>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<id>add-module-infos</id>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>add-module-info</goal>-->
+            <!--</goals>-->
+            <!--<configuration>-->
+            <!--<jvmVersion>11</jvmVersion>-->
+            <!--<module>-->
+            <!--<mainClass>eu.fthevenet.binjr.Binjr</mainClass>-->
+            <!--<moduleInfo>-->
+            <!--<name>eu.fthevenet.binjr</name>-->
+            <!--<exports>-->
+            <!--*;-->
+            <!--</exports>-->
+            <!--</moduleInfo>-->
+            <!--</module>-->
+            <!--</configuration>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -87,7 +230,7 @@
                         <configuration>
                             <artifactSet>
                                 <excludes>
-                                    <!--<exclude>org.openjfx:*</exclude>-->
+                                    <exclude>org.openjfx:*</exclude>
                                 </excludes>
                             </artifactSet>
                             <transformers>
@@ -110,6 +253,7 @@
                 </executions>
             </plugin>
 
+
             <!--<plugin>-->
             <!--<groupId>org.apache.maven.plugins</groupId>-->
             <!--<artifactId>maven-jar-plugin</artifactId>-->
@@ -130,26 +274,7 @@
             <!--</archive>-->
             <!--</configuration>-->
             <!--</plugin>-->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>package</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                        <configuration>
-                            <appendAssemblyId>false</appendAssemblyId>
-                            <descriptors>
-                                <descriptor>src/main/assembly/assembly-dist.xml</descriptor>
-                            </descriptors>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
