@@ -69,7 +69,7 @@
             <id>bundle-windows</id>
             <properties>
                 <binjr.deploy.launcher>${project.basedir}/src/main/deploy/windows/binjr.exe</binjr.deploy.launcher>
-                <binjr.deploy.jdk>jdk-11_windows-x64</binjr.deploy.jdk>
+                <binjr.deploy.jdk>openjdk-11_windows-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>zip</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
                 <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-windows/</binjr.deploy.openjfx.jmods.url>
@@ -79,7 +79,7 @@
             <id>bundle-linux</id>
             <properties>
                 <binjr.deploy.launcher>${project.basedir}/src/main/deploy/linux/binjr</binjr.deploy.launcher>
-                <binjr.deploy.jdk>jdk-11_linux-x64</binjr.deploy.jdk>
+                <binjr.deploy.jdk>openjdk-11_linux-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>tar.gz</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
                 <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-linux/</binjr.deploy.openjfx.jmods.url>
@@ -155,6 +155,7 @@
                                     <goal>single</goal>
                                 </goals>
                                 <configuration>
+                                    <finalName>binjr-${binjr.deploy.jdk}</finalName>
                                     <appendAssemblyId>false</appendAssemblyId>
                                     <descriptors>
                                         <descriptor>src/main/assembly/assembly-dist.xml</descriptor>
@@ -166,10 +167,7 @@
                 </plugins>
             </build>
         </profile>
-
-
     </profiles>
-
     <build>
         <finalName>${project.name}</finalName>
         <plugins>
@@ -184,39 +182,6 @@
                     <target>11</target>
                 </configuration>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-jar-plugin</artifactId>-->
-            <!--<version>3.1.0</version>-->
-            <!--</plugin>-->
-
-            <!--<plugin>-->
-            <!--<groupId>org.moditect</groupId>-->
-            <!--<artifactId>moditect-maven-plugin</artifactId>-->
-            <!--<version>1.0.0.Beta1</version>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<id>add-module-infos</id>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>add-module-info</goal>-->
-            <!--</goals>-->
-            <!--<configuration>-->
-            <!--<jvmVersion>11</jvmVersion>-->
-            <!--<module>-->
-            <!--<mainClass>eu.fthevenet.binjr.Binjr</mainClass>-->
-            <!--<moduleInfo>-->
-            <!--<name>eu.fthevenet.binjr</name>-->
-            <!--<exports>-->
-            <!--*;-->
-            <!--</exports>-->
-            <!--</moduleInfo>-->
-            <!--</module>-->
-            <!--</configuration>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
-
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -252,29 +217,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-
-            <!--<plugin>-->
-            <!--<groupId>org.apache.maven.plugins</groupId>-->
-            <!--<artifactId>maven-jar-plugin</artifactId>-->
-            <!--<version>3.1.0</version>-->
-            <!--<configuration>-->
-            <!--<archive>-->
-            <!--<manifestEntries>-->
-            <!--&lt;!&ndash;<Main-Class>eu.fthevenet.binjr.Binjr</Main-Class>&ndash;&gt;-->
-            <!--<Specification-Title>${project.name}</Specification-Title>-->
-            <!--<Specification-Version>${project.version}</Specification-Version>-->
-            <!--<Specification-Vendor>${project.organization.name}</Specification-Vendor>-->
-            <!--<Implementation-Title>${project.name}</Implementation-Title>-->
-            <!--<Implementation-Version>${project.version}</Implementation-Version>-->
-            <!--<Implementation-Vendor>${project.organization.name}</Implementation-Vendor>-->
-            <!--<SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>-->
-            <!--<Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>-->
-            <!--</manifestEntries>-->
-            <!--</archive>-->
-            <!--</configuration>-->
-            <!--</plugin>-->
-
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>exec-maven-plugin</artifactId>
@@ -347,6 +289,8 @@
                             <directory>${project.build.directory}</directory>
                             <includes>
                                 <include>${project.name}.jar</include>
+                                <include>*.zip</include>
+                                <include>*.tar.gz</include>
                             </includes>
                         </fileSet>
                     </fileSets>
@@ -395,27 +339,6 @@
             <artifactId>jaxb-api</artifactId>
             <version>2.4.0-b180830.0359</version>
         </dependency>
-        <!-- JavaFX -->
-        <!--<dependency>-->
-        <!--<groupId>org.openjfx</groupId>-->
-        <!--<artifactId>javafx</artifactId>-->
-        <!--<version>11</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.openjfx</groupId>-->
-        <!--<artifactId>javafx-base</artifactId>-->
-        <!--<version>11</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.openjfx</groupId>-->
-        <!--<artifactId>javafx-graphics</artifactId>-->
-        <!--<version>11</version>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-        <!--<groupId>org.openjfx</groupId>-->
-        <!--<artifactId>javafx-media</artifactId>-->
-        <!--<version>11</version>-->
-        <!--</dependency>-->
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
@@ -431,20 +354,15 @@
             <artifactId>javafx-swing</artifactId>
             <version>11</version>
         </dependency>
-        <!--<dependency>-->
-        <!--<groupId>org.openjfx</groupId>-->
-        <!--<artifactId>javafx-web</artifactId>-->
-        <!--<version>11</version>-->
-        <!--</dependency>-->
     </dependencies>
-    <distributionManagement>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
+    <!--<distributionManagement>-->
+    <!--<repository>-->
+    <!--<id>ossrh</id>-->
+    <!--<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>-->
+    <!--</repository>-->
+    <!--<snapshotRepository>-->
+    <!--<id>ossrh</id>-->
+    <!--<url>https://oss.sonatype.org/content/repositories/snapshots</url>-->
+    <!--</snapshotRepository>-->
+    <!--</distributionManagement>-->
 </project>
