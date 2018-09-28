@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -ev
-  mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot, build-native-bundle, bundle-linux
+cd binjr
+mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot, build-native-bundle, bundle-linux
 
 
 ##Skip Maven release plugin commits
