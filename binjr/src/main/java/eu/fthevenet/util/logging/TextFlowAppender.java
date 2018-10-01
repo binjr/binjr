@@ -57,18 +57,19 @@ public final class TextFlowAppender extends AbstractAppender {
         lock.lock();
         try {
             final String message = new String(getLayout().toByteArray(event));
-            Text log = new Text(message);
-            log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
             // append log text to TextArea
-            Platform.runLater(() -> {
-                try {
-                    if (textArea != null) {
+            if (textArea != null) {
+                Text log = new Text(message);
+                log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
+                Platform.runLater(() -> {
+                    try {
                         textArea.getChildren().add(log);
+
+                    } catch (final Throwable t) {
+                        System.out.println("Error while append to TextFlow: " + t.getMessage());
                     }
-                } catch (final Throwable t) {
-                    System.out.println("Error while append to TextFlow: " + t.getMessage());
-                }
-            });
+                });
+            }
         } catch (final IllegalStateException ex) {
             ex.printStackTrace();
         } finally {
