@@ -43,7 +43,7 @@ public class AppEnvironment {
     public static final String LICENSE = "Apache-2.0";
 
     private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
-    private final BooleanProperty debugMode = new SimpleBooleanProperty(LogManager.getRootLogger().isDebugEnabled());
+    private final BooleanProperty debugMode = new SimpleBooleanProperty();
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -64,11 +64,10 @@ public class AppEnvironment {
             else {
                 ConsoleStage.hide();
             }
-
-
             Configurator.setRootLevel(newLevel);
             logger.log(newLevel, "Root logger level set to " + newLevel);
         });
+        debugMode.setValue(LogManager.getRootLogger().isDebugEnabled());
     }
 
     /**
