@@ -1544,3 +1544,32 @@
     -fx-background-color: -binjr-window-background-color;
     -fx-padding: 0;
 }
+
+.console-pane  .content {
+  -fx-background-color: -binjr-window-pane-color;
+}
+
+.log-trace {
+    -fx-fill: GRAY;
+}
+
+.log-debug {
+ -fx-fill: LIGHTBLUE;
+}
+
+.log-info {
+ -fx-fill: -fx-text-background-color;
+}
+
+.log-warn {
+ -fx-fill: GOLD;
+}
+
+.log-error {
+ -fx-fill: TOMATO;
+}
+
+.log-fatal {
+ -fx-fill: RED;
+}
+

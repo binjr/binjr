@@ -24,6 +24,9 @@
         <Console name="STDOUT" target="SYSTEM_OUT">
             <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
         </Console>
+        <TextFlowAppender name="InternalConsole">
+            <PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>
+        </TextFlowAppender>
         <!--<File name="File" fileName="${filename}">-->
         <!--<PatternLayout pattern="[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n"/>-->
         <!--</File>-->
@@ -31,6 +34,7 @@
     <Loggers>
         <Root level="info">
             <AppenderRef ref="STDOUT"/>
+            <AppenderRef ref="InternalConsole"/>
             <!--<AppenderRef ref="File"/>-->
         </Root>
     </Loggers>

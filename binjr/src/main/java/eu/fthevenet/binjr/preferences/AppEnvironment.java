@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr.preferences;
 
+import eu.fthevenet.binjr.controllers.ConsoleStage;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -58,7 +59,13 @@ public class AppEnvironment {
             Level newLevel = configuredRootLevel;
             if (newValue) {
                 newLevel = Level.TRACE;
+                ConsoleStage.show();
             }
+            else {
+                ConsoleStage.hide();
+            }
+
+
             Configurator.setRootLevel(newLevel);
             logger.log(newLevel, "Root logger level set to " + newLevel);
         });

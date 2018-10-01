@@ -1384,3 +1384,31 @@
  {
     -fx-background-color:-binjr-warning-color;
 }
+
+.console-pane content {
+  -fx-background-color: -binjr-control-background-color;
+}
+
+.log-trace {
+    -fx-fill: GRAY;
+}
+
+.log-debug {
+ -fx-fill: STEELBLUE;
+}
+
+.log-info {
+ -fx-fill: black;
+}
+
+.log-warn {
+ -fx-fill: DARKORANGE;
+}
+
+.log-error {
+ -fx-fill: RED;
+}
+
+.log-fatal {
+ -fx-fill: DARKRED;
+}
