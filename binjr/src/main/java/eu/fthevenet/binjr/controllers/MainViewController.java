@@ -1197,8 +1197,7 @@ public class MainViewController implements Initializable {
     public void toggleDebugMode(ActionEvent actionEvent) {
         AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
         if (AppEnvironment.getInstance().isDebugMode()) {
-            Dialogs.notifyWarning("Warning", "Entering debug mode", Pos.BOTTOM_RIGHT, root);
-
+            logger.warn("Warning", "Entering debug mode", Pos.BOTTOM_RIGHT, root);
         }
     }
     //endregion
