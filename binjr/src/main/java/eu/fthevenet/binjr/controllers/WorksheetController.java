@@ -223,7 +223,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
 
         } catch (Exception e) {
-            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e));
+            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
 
@@ -758,7 +758,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             parentController.getAllBindingsFromBranch(item, bindings);
                             addBindings(bindings, viewPort.getDataStore());
                         } catch (Exception e) {
-                            Dialogs.notifyException("Error adding bindings to existing worksheet", e);
+                            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                         }
                         logger.debug("dropped to " + event.toString());
                     }

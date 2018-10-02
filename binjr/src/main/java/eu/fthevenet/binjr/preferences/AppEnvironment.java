@@ -48,7 +48,6 @@ public class AppEnvironment {
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
 
-
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
     }
@@ -58,7 +57,7 @@ public class AppEnvironment {
         debugMode.addListener((observable, oldValue, newValue) -> {
             Level newLevel = configuredRootLevel;
             if (newValue) {
-                newLevel = Level.TRACE;
+                newLevel = Level.DEBUG;
                 ConsoleStage.show();
             }
             else {

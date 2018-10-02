@@ -46,7 +46,7 @@ public class ConsoleStage {
             logger.debug(() -> "Exception stack", e);
         }
         OutputConsoleController controller = loader.getController();
-        final Scene scene = new Scene(root, 800, 300);
+        final Scene scene = new Scene(root);
         stage = new Stage();
         stage.setScene(scene);
         stage.setTitle("binjr console output");

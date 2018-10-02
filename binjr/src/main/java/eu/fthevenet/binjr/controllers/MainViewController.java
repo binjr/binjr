@@ -463,9 +463,9 @@ public class MainViewController implements Initializable {
                 try {
                     showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
-                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e);
+                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
-                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e);
+                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e, root);
                 }
             });
             menuItems.add(menuItem);
@@ -564,7 +564,7 @@ public class MainViewController implements Initializable {
             try {
                 dataAdapter.close();
             } catch (Exception e) {
-                Dialogs.notifyException("Error closing DataAdapter", e);
+                Dialogs.notifyException("Error closing DataAdapter", e, root);
             }
         });
         sourcesAdapters.clear();
@@ -749,7 +749,7 @@ public class MainViewController implements Initializable {
             seriesControllers.put(newTab, current);
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
         } catch (Exception e) {
-            Dialogs.notifyException("Error loading worksheet into new tab", e);
+            Dialogs.notifyException("Error loading worksheet into new tab", e, root);
         }
     }
 
@@ -875,7 +875,7 @@ public class MainViewController implements Initializable {
             }
             worksheet.getCharts().add(chart);
         } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to new chart", e);
+            Dialogs.notifyException("Error adding bindings to new chart", e, root);
         }
     }
 
@@ -887,7 +887,7 @@ public class MainViewController implements Initializable {
                 getSelectedWorksheetController().addBindings(bindings, targetChart);
             }
         } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to existing worksheet", e);
+            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
         }
     }
 
@@ -931,7 +931,7 @@ public class MainViewController implements Initializable {
                     getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
                 }
             } catch (Exception e) {
-                Dialogs.notifyException("Error adding bindings to new worksheet", e);
+                Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }
         });
     }
@@ -1140,7 +1140,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1148,7 +1148,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1156,7 +1156,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1182,7 +1182,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1190,7 +1190,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 

@@ -906,8 +906,6 @@
     -fx-background-color:transparent;
 }
 
-
-
 .command-bar .content,
 .command-bar .scroll-pane .viewport,
 .command-bar .title {
@@ -1511,8 +1509,6 @@
     -fx-background-color:-binjr-warning-color;
 }
 
-
-
 .notification-bar > .pane {
     -fx-border-color: -binjr-control-border-color;
     -fx-background-color: -binjr-window-background-color;/* -fx-outer-border, -fx-inner-border, linear-gradient(#595959, #474747 37%, #343434);*/
@@ -1534,8 +1530,8 @@
 
 .dialog-pane .header-panel {
     -fx-background-color: -binjr-pane-background-color;
-
 }
+
 .dialog-pane .header-panel .graphic-container .dialog-icon {
     -icon-color:  -fx-text-background-color;
 }
@@ -1545,31 +1541,38 @@
     -fx-padding: 0;
 }
 
-.console-pane  .content {
-  -fx-background-color: -binjr-window-pane-color;
+.console-pane .viewport,
+.console-pane .scroll-pane{
+  -fx-background-color: -binjr-pane-background-color;
 }
 
 .log-trace {
+    -fx-font-family: Consolas,  Monospace;
     -fx-fill: GRAY;
 }
 
 .log-debug {
- -fx-fill: LIGHTBLUE;
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: LIGHTBLUE;
 }
 
 .log-info {
- -fx-fill: -fx-text-background-color;
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: -fx-text-background-color;
 }
 
 .log-warn {
- -fx-fill: GOLD;
-}
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: GOLD;
+ }
 
 .log-error {
- -fx-fill: TOMATO;
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: TOMATO;
 }
 
 .log-fatal {
- -fx-fill: RED;
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: RED;
 }
 
