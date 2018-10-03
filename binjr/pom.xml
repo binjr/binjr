@@ -324,7 +324,7 @@
         </profile>
     </profiles>
     <build>
-        <finalName>${project.name}</finalName>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -340,6 +340,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.1.1</version>
+
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -347,6 +348,8 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <finalName>${project.name}</finalName>
                             <transformers>
                                 <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
@@ -373,6 +376,30 @@
                         <version>2.1</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.1.0</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <!--<manifest>-->
+                        <!--<addClasspath>true</addClasspath>-->
+                        <!--</manifest>-->
+                        <manifestEntries>
+                            <Main-Class>eu.fthevenet.binjr.Bootstrap</Main-Class>
+                            <Specification-Title>${project.name}</Specification-Title>
+                            <Specification-Version>${project.version}</Specification-Version>
+                            <Specification-Vendor>${project.organization.name}</Specification-Vendor>
+                            <Implementation-Title>${project.name}</Implementation-Title>
+                            <Implementation-Version>${project.version}</Implementation-Version>
+                            <Implementation-Vendor>${project.organization.name}</Implementation-Vendor>
+                            <SplashScreen-Image>images/splashscreen.png</SplashScreen-Image>
+                            <Build-Number>${env.BINJR_BUILD_NUMBER}</Build-Number>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
             </plugin>
             <!-- Release -->
             <plugin>
