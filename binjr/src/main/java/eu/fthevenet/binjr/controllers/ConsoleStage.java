@@ -18,6 +18,7 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -55,6 +56,7 @@ public class ConsoleStage {
         stage.initStyle(StageStyle.UTILITY);
         stage.show();
         stage.setOnCloseRequest(event -> {
+            AppEnvironment.getInstance().setConsoleVisible(false);
             StageAppearanceManager.getInstance().unregister(stage);
         });
     }

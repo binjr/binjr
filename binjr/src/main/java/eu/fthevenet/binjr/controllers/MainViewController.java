@@ -67,8 +67,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.Duration;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.controlsfx.control.MaskerPane;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
@@ -106,6 +108,8 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
 
     public MenuButton debugMenuButton;
+    public MenuItem consoleMenuItem;
+    public Menu debugLevelMenu;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
@@ -206,6 +210,10 @@ public class MainViewController implements Initializable {
             }
         });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
+        AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
+            consoleMenuItem.setText((newValue ? "Hide":"Show") + " Console");
+        });
+
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
@@ -1197,8 +1205,20 @@ public class MainViewController implements Initializable {
     public void toggleDebugMode(ActionEvent actionEvent) {
         AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
         if (AppEnvironment.getInstance().isDebugMode()) {
-            logger.warn("Warning", "Entering debug mode", Pos.BOTTOM_RIGHT, root);
+            logger.warn("Entering debug mode");
         }
+    }
+
+    public void toggleConsoleVisibility(ActionEvent actionEvent) {
+        AppEnvironment.getInstance().setConsoleVisible(!AppEnvironment.getInstance().isConsoleVisible());
+    }
+
+    public void populateDebugLevelMenu(Event event) {
+//        logLevelChoice.getItems().setAll(Level.values());
+//        logLevelChoice.getSelectionModel().select(Level.DEBUG);
+//        logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            Configurator.setRootLevel(newValue);
+//        });
     }
     //endregion
 }

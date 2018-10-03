@@ -59,7 +59,6 @@ public class OutputConsoleController implements Initializable {
         logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             Configurator.setRootLevel(newValue);
         });
-        //   chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
     }
 
     public void handleClearConsole(ActionEvent actionEvent) {

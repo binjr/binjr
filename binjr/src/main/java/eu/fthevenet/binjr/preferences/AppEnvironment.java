@@ -44,6 +44,7 @@ public class AppEnvironment {
 
     private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
     private final BooleanProperty debugMode = new SimpleBooleanProperty();
+    private final BooleanProperty consoleVisible = new SimpleBooleanProperty();
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -54,15 +55,20 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
-        debugMode.addListener((observable, oldValue, newValue) -> {
-            Level newLevel = configuredRootLevel;
+        consoleVisible.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
-                newLevel = Level.DEBUG;
                 ConsoleStage.show();
             }
             else {
                 ConsoleStage.hide();
             }
+        });
+        debugMode.addListener((observable, oldValue, newValue) -> {
+            Level newLevel = configuredRootLevel;
+            if (newValue) {
+                newLevel = Level.DEBUG;
+            }
+           consoleVisible.setValue(newValue);
             Configurator.setRootLevel(newLevel);
             logger.log(newLevel, "Root logger level set to " + newLevel);
         });
@@ -232,4 +238,15 @@ public class AppEnvironment {
         return debugMode;
     }
 
+    public boolean isConsoleVisible() {
+        return consoleVisible.get();
+    }
+
+    public BooleanProperty consoleVisibleProperty() {
+        return consoleVisible;
+    }
+
+    public void setConsoleVisible(boolean consoleVisible) {
+        this.consoleVisible.set(consoleVisible);
+    }
 }
