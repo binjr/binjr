@@ -52,13 +52,18 @@ public class ConsoleStage {
         stage.setScene(scene);
         stage.setTitle("binjr console output");
         StageAppearanceManager.getInstance().register(stage);
-        stage.setAlwaysOnTop(true);
         stage.initStyle(StageStyle.UTILITY);
         stage.show();
         stage.setOnCloseRequest(event -> {
             AppEnvironment.getInstance().setConsoleVisible(false);
             StageAppearanceManager.getInstance().unregister(stage);
         });
+
+        controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
+            stage.setAlwaysOnTop(newValue);
+        });
+
+        controller.getAlwaysOnTopToggle().setSelected(true);
     }
 
 

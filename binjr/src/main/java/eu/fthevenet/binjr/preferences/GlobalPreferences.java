@@ -23,6 +23,7 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayDeque;
@@ -63,7 +64,7 @@ public class GlobalPreferences {
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
     private final IntegerProperty downSamplingThreshold = new SimpleIntegerProperty();
-    private final StringProperty mostRecentSaveFolder = new SimpleStringProperty();
+    private final Property<Path> mostRecentSaveFolder = new SimpleObjectProperty<>();
     private final Property<Path> mostRecentSavedWorkspace = new SimpleObjectProperty<>();
     private final BooleanProperty checkForUpdateOnStartUp = new SimpleBooleanProperty();
     private final Property<UserInterfaceThemes> userInterfaceTheme = new SimpleObjectProperty<>();
@@ -86,11 +87,7 @@ public class GlobalPreferences {
     private GlobalPreferences() {
         this.prefs = Preferences.userRoot().node(BINJR_GLOBAL);
         this.load();
-        mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                prefs.put(MOST_RECENT_SAVE_FOLDER, newValue);
-            }
-        });
+        mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVE_FOLDER, newValue.toString()));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
@@ -117,7 +114,7 @@ public class GlobalPreferences {
         mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
         downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
         downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
-        mostRecentSaveFolder.setValue(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home")));
+        mostRecentSaveFolder.setValue(Paths.get(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home"))));
         Path pluginDirPath = Paths.get(DEFAULT_PLUGINS_LOCATION);
         try {
             pluginDirPath = Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION));
@@ -206,12 +203,21 @@ public class GlobalPreferences {
      *
      * @return the path of the folder of the most recently saved item
      */
-    public String getMostRecentSaveFolder() {
-        String recentPath = mostRecentSaveFolder.getValue();
-        if (recentPath == null || recentPath.trim().length() == 0) {
-            recentPath = System.getProperty("user.home");
+    public Path getMostRecentSaveFolder() {
+        Path validatedPath = Paths.get(System.getProperty("user.home"));
+        try {
+            if (mostRecentSaveFolder.getValue() != null
+                    && mostRecentSaveFolder.getValue().toRealPath(LinkOption.NOFOLLOW_LINKS) != null
+                    && mostRecentSaveFolder.getValue().toFile().isDirectory()) {
+                validatedPath = mostRecentSaveFolder.getValue();
+            }
+            else {
+                logger.error("MostRecentSaveFolder property does not point to a valid directory");
+            }
+        } catch (Exception e) {
+            logger.error("MostRecentSaveFolder property does not point to a valid directory", e);
         }
-        return recentPath;
+        return validatedPath;
     }
 
     /**
@@ -219,7 +225,7 @@ public class GlobalPreferences {
      *
      * @return the mostRecentSaveFolder property
      */
-    public StringProperty mostRecentSaveFolderProperty() {
+    public Property<Path> mostRecentSaveFolderProperty() {
         return mostRecentSaveFolder;
     }
 
@@ -228,9 +234,15 @@ public class GlobalPreferences {
      *
      * @param mostRecentSaveFolder the path of the folder of the most recently saved item
      */
-    public void setMostRecentSaveFolder(String mostRecentSaveFolder) {
+    public void setMostRecentSaveFolder(Path mostRecentSaveFolder) {
         if (mostRecentSaveFolder == null) {
             throw new IllegalArgumentException("mostRecentSaveFolder parameter cannot be null");
+        }
+        if (!mostRecentSaveFolder.toFile().isDirectory()) {
+            mostRecentSaveFolder = mostRecentSaveFolder.getParent();
+            if (mostRecentSaveFolder == null) {
+                throw new IllegalArgumentException("mostRecentSaveFolder is not a directory");
+            }
         }
         this.mostRecentSaveFolder.setValue(mostRecentSaveFolder);
     }

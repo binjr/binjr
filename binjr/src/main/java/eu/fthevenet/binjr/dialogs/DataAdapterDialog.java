@@ -159,7 +159,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open");
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 

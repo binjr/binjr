@@ -78,7 +78,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
         fileChooser.setTitle("Open CSV file");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 

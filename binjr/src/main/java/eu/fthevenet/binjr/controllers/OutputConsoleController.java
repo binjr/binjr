@@ -18,31 +18,42 @@
 package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.dialogs.Dialogs;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
+import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.util.function.CheckedLambdas;
 import eu.fthevenet.util.logging.TextFlowAppender;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
+import javafx.stage.FileChooser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
 
+import java.io.*;
 import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
-    public TextFlow textOutput;
-    public ScrollPane scrollPane;
-    public ChoiceBox<Level> logLevelChoice;
+    @FXML
+    private TextFlow textOutput;
+    @FXML
+    private ScrollPane scrollPane;
+    @FXML
+    private ChoiceBox<Level> logLevelChoice;
+    @FXML
+    private ToggleButton alwaysOnTopToggle;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -53,11 +64,13 @@ public class OutputConsoleController implements Initializable {
                     scrollPane.setVvalue(1.0f);
                 }));
         TextFlowAppender.setTextFlow(textOutput);
-
         logLevelChoice.getItems().setAll(Level.values());
-        logLevelChoice.getSelectionModel().select(Level.DEBUG);
+        logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
+        AppEnvironment.getInstance().logLevelProperty().addListener((observable, oldValue, newValue) -> {
+            logLevelChoice.getSelectionModel().select(newValue);
+        });
         logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            Configurator.setRootLevel(newValue);
+            AppEnvironment.getInstance().setLogLevel(newValue);
         });
     }
 
@@ -67,7 +80,21 @@ public class OutputConsoleController implements Initializable {
 
     public void handleSaveConsoleOutput(ActionEvent actionEvent) {
         try {
-            throw new UnsupportedOperationException();
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Save console ouptut");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
+            fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
+            fileChooser.setInitialFileName("binjr_console_output.txt");
+            File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(scrollPane));
+            if (selectedFile != null) {
+                try (Writer writer = new BufferedWriter(new FileWriter(selectedFile))) {
+                    textOutput.getChildren().stream().map(node -> ((Text) node).getText()).forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
+                } catch (IOException e) {
+                    Dialogs.notifyException("Error writing log message to file", e, scrollPane);
+                }
+                GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.toPath());
+
+            }
         } catch (Exception e) {
             Dialogs.notifyException("Failed to save console output to file", e, scrollPane);
         }
@@ -81,5 +108,9 @@ public class OutputConsoleController implements Initializable {
         } catch (Exception e) {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, scrollPane);
         }
+    }
+
+    public ToggleButton getAlwaysOnTopToggle() {
+        return alwaysOnTopToggle;
     }
 }
