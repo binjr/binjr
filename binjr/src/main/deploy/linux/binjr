@@ -18,7 +18,7 @@ BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 
 JAVACMD=
 
-exec"./runtime/bin/java" $JAVA_OPTS  \
+exec "./runtime/bin/java" $JAVA_OPTS  \
   -jar "./app/binjr.jar" \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
