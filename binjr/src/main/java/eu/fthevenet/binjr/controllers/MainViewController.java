@@ -209,7 +209,7 @@ public class MainViewController implements Initializable {
         });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
-            consoleMenuItem.setText((newValue ? "Hide":"Show") + " Console");
+            consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
         });
 
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
@@ -290,13 +290,15 @@ public class MainViewController implements Initializable {
             loadWorkspace(new File(associatedFile.get()));
         }
         else if (prefs.isLoadLastWorkspaceOnStartup()) {
-            File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
-            if (latestWorkspace.exists()) {
-                loadWorkspace(latestWorkspace);
-            }
-            else {
-                logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
-            }
+            prefs.getMostRecentSavedWorkspace().ifPresent(path -> {
+                File latestWorkspace = path.toFile();
+                if (latestWorkspace.exists()) {
+                    loadWorkspace(latestWorkspace);
+                }
+                else {
+                    logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
+                }
+            });
         }
 
         if (prefs.isCheckForUpdateOnStartUp()) {

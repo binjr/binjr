@@ -26,10 +26,7 @@ import org.apache.logging.log4j.Logger;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Deque;
+import java.util.*;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -57,8 +54,9 @@ public class GlobalPreferences {
     private static final String DEFAULT_GRAPH_OPACITY = "defaultGraphOpacity";
     private static final int MAX_RECENT_FILES = 20;
     private static final String PLUGINS_LOCATION = "pluginsLocation";
-    private static final String DEFAULT_PLUGINS_LOCATION = "none";
+    private static final String DEFAULT_PLUGINS_LOCATION = System.getProperty("user.home");
     private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
+    private static final String LOAD_PLUGINS_FROM_EXTERNAL_LOCATION = "loadPluginsFromExternalLocation";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -76,6 +74,7 @@ public class GlobalPreferences {
     private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
     private final Property<Path> pluginsLocation = new SimpleObjectProperty<>();
     private final Property<Duration> notificationPopupDuration = new SimpleObjectProperty<>();
+    private final BooleanProperty loadPluginsFromExternalLocation = new SimpleBooleanProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -93,36 +92,36 @@ public class GlobalPreferences {
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
-        checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
+
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
         defaultGraphOpacity.addListener((observable, oldValue, newValue) -> prefs.putDouble(DEFAULT_GRAPH_OPACITY, newValue.doubleValue()));
         pluginsLocation.addListener((observable, oldValue, newValue) -> prefs.put(PLUGINS_LOCATION, newValue.toString()));
         notificationPopupDuration.addListener((observable, oldValue, newValue) -> prefs.putDouble(NOTIFICATION_POPUP_DURATION, newValue.toSeconds()));
+        loadPluginsFromExternalLocation.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, newValue));
     }
 
     private void load() {
-        recentFiles = new ArrayDeque<>(Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
-        showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, false));
-        defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
-        verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
-        horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
-        checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
-        userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, ""), UserInterfaceThemes.LIGHT));
-        loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
-        mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
-        downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
-        downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
-        mostRecentSaveFolder.setValue(Paths.get(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home"))));
-        Path pluginDirPath = Paths.get(DEFAULT_PLUGINS_LOCATION);
         try {
-            pluginDirPath = Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION));
+            recentFiles = new ArrayDeque<>(Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
+            showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, false));
+            defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
+            verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
+            horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
+            checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
+            userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, ""), UserInterfaceThemes.LIGHT));
+            loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
+            mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
+            downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
+            downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
+            mostRecentSaveFolder.setValue(Paths.get(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home"))));
+            notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
+            pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
+            loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
         } catch (Exception e) {
-            logger.debug("Invalid plugin folder path", e);
+            logger.error("Error while loading application preferences", e);
         }
-        pluginsLocation.setValue(pluginDirPath);
-        notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
     }
 
     /**
@@ -252,8 +251,8 @@ public class GlobalPreferences {
      *
      * @return the path from the most recently saved workspace
      */
-    public Path getMostRecentSavedWorkspace() {
-        return mostRecentSavedWorkspace.getValue() == null ? Paths.get("untitled") : mostRecentSavedWorkspace.getValue();
+    public Optional<Path> getMostRecentSavedWorkspace() {
+        return Paths.get("Untitled").equals(mostRecentSavedWorkspace.getValue()) ? Optional.empty() : Optional.of(mostRecentSavedWorkspace.getValue());
     }
 
     /**
@@ -480,5 +479,17 @@ public class GlobalPreferences {
 
     public void setNotificationPopupDuration(Duration notificationPopupDuration) {
         this.notificationPopupDuration.setValue(notificationPopupDuration);
+    }
+
+    public boolean isLoadPluginsFromExternalLocation() {
+        return loadPluginsFromExternalLocation.get();
+    }
+
+    public BooleanProperty loadPluginsFromExternalLocationProperty() {
+        return loadPluginsFromExternalLocation;
+    }
+
+    public void setLoadPluginsFromExternalLocation(boolean loadPluginsFromExternalLocation) {
+        this.loadPluginsFromExternalLocation.set(loadPluginsFromExternalLocation);
     }
 }

@@ -77,7 +77,6 @@ public class OutputConsoleController implements Initializable {
                 AppEnvironment.getInstance().setLogLevel(newValue);
             });
         });
-
     }
 
     private synchronized void initTextFlowAppender() {
