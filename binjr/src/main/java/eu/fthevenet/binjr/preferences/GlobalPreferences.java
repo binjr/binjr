@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class GlobalPreferences {
-
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String BINJR_GLOBAL = "binjr/global";
     private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
