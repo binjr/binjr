@@ -17,6 +17,7 @@
 
 package eu.fthevenet.binjr;
 
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,16 +35,41 @@ public final class Bootstrap {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        if (checkForJavaFX()) {
-            try {
-                Binjr.main(args);
-            } catch (Exception e) {
-                logger.fatal("Failed to load binjr", e);
+        boolean forceStart = false;
+        for (String arg : args) {
+            if (arg.equalsIgnoreCase("--forcestart") || arg.equalsIgnoreCase("-f")) {
+                forceStart = true;
             }
         }
-        else {
-            logger.fatal("The JavaFX runtime must be present in order to run binjr. Please check with your Java vendor to see is JavaFX is available on your platform and how to install it.");
+        if (!checkForJavaVersion()) {
+            logger.log(forceStart ? Level.WARN : Level.FATAL, "This version on binjr only supports Java 8 and will likely fail on the version you're currently running. Please check 'https://github.com/fthevenet/binjr' for a version that runs on more recent versions of Java.");
+            if (!forceStart) {
+                System.exit(1);
+            }
         }
+        if (!checkForJavaFX()) {
+            logger.log(forceStart ? Level.WARN : Level.FATAL, "The JavaFX runtime must be present in order to run binjr. Please check with your Java vendor to see is JavaFX is available on your platform and how to install it.");
+            if (!forceStart) {
+                System.exit(1);
+            }
+        }
+        try {
+            Binjr.main(args);
+        } catch (Exception e) {
+            logger.fatal("Failed to load binjr", e);
+            System.exit(1);
+        }
+    }
+
+    private static boolean checkForJavaVersion() {
+        try {
+            if (System.getProperty("java.runtime.version").startsWith("1.8")) {
+                return true;
+            }
+        } catch (Exception e) {
+            logger.error(e);
+        }
+        return false;
     }
 
     private static boolean checkForJavaFX() {
