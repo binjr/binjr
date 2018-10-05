@@ -22,6 +22,7 @@ import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import eu.fthevenet.util.function.CheckedLambdas;
 import eu.fthevenet.util.logging.TextFlowAppender;
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -38,6 +39,8 @@ import javafx.stage.FileChooser;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.*;
 import java.net.URL;
@@ -63,15 +66,32 @@ public class OutputConsoleController implements Initializable {
                     scrollPane.layout();
                     scrollPane.setVvalue(1.0f);
                 }));
+        initTextFlowAppender();
+        Platform.runLater(() -> {
+            logLevelChoice.getItems().setAll(Level.values());
+            logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
+            AppEnvironment.getInstance().logLevelProperty().addListener((observable, oldValue, newValue) -> {
+                logLevelChoice.getSelectionModel().select(newValue);
+            });
+            logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+                AppEnvironment.getInstance().setLogLevel(newValue);
+            });
+        });
+
+    }
+
+    private synchronized void initTextFlowAppender() {
+        LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+        TextFlowAppender appender = TextFlowAppender.createAppender(
+                "InternalConsole",
+                PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),
+                null
+        );
         TextFlowAppender.setTextFlow(textOutput);
-        logLevelChoice.getItems().setAll(Level.values());
-        logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
-        AppEnvironment.getInstance().logLevelProperty().addListener((observable, oldValue, newValue) -> {
-            logLevelChoice.getSelectionModel().select(newValue);
-        });
-        logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            AppEnvironment.getInstance().setLogLevel(newValue);
-        });
+        appender.start();
+        lc.getConfiguration().addAppender(appender);
+        lc.getRootLogger().addAppender(lc.getConfiguration().getAppender(appender.getName()));
+        lc.updateLoggers();
     }
 
     public void handleClearConsole(ActionEvent actionEvent) {
