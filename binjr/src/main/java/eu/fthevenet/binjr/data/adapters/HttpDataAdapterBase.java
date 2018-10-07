@@ -183,22 +183,26 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     protected static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
         // Load platform specific Trusted CA keystore
         logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
-        KeyStore tks;
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            case WINDOWS:
-                tks = KeyStore.getInstance("Windows-ROOT", "SunMSCAPI");
-                tks.load(null, null);
-                break;
-            case OSX:
-                tks = KeyStore.getInstance("KeychainStore", "Apple");
-                tks.load(null, null);
-                break;
-            case LINUX:
-            case UNSUPPORTED:
-            default:
-                tks = null;
-                break;
+        KeyStore tks = null;
+        try {
+            switch (AppEnvironment.getInstance().getOsFamily()) {
+                case WINDOWS:
+                    tks = KeyStore.getInstance("Windows-ROOT", "SunMSCAPI");
+                    tks.load(null, null);
+                    break;
+                case OSX:
+                    tks = KeyStore.getInstance("KeychainStore", "Apple");
+                    tks.load(null, null);
+                    break;
+                case LINUX:
+                case UNSUPPORTED:
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            logger.debug("Error locating OS specific keystore", e);
         }
+
         return SSLContexts.custom().loadTrustMaterial(tks, null).build();
     }
 
