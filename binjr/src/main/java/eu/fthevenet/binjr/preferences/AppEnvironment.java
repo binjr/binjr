@@ -77,7 +77,9 @@ public class AppEnvironment {
         debugMode.addListener((observable, oldValue, newValue) -> {
             Level newLevel = configuredRootLevel;
             if (newValue) {
-                newLevel = Level.DEBUG;
+                if (newLevel.compareTo(Level.DEBUG) < 0) {
+                    newLevel = Level.DEBUG;
+                }
             }
             logLevel.setValue(newLevel);
             consoleVisible.setValue(newValue);
