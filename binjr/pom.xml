@@ -279,7 +279,18 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <description>${project.name} v${project.version}</description>
+                    <description>${project.name} v${project.version}&#10;
+                        This is a beta version of binjr built to run on Java 11 and beyond.&#10;
+                        &#10;
+                        ___Please note that it does not run on previous version of Java.___&#10;
+                        &#10;
+                        Also note that as of Java 11, the JavaFX runtime, which binjr relies on,
+                        is no longer supplied as part of the JDK.&#10;
+                        &#10;
+                        As such, the simplest way to run this version of binjr is to use the full distribution package
+                        (choose the right one for your OS), which contains a modular runtime image of Java 11
+                        that includes the JavaFX runtime modules and all other dependencies.
+                    </description>
                     <releaseName>${project.name} v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
                     <prerelease>true</prerelease>
