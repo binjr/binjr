@@ -100,6 +100,7 @@ public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends 
         } catch (Exception e) {
             logger.error("Error closing SimpleCacheAdapter", e);
         }
+        super.close();
     }
 
 }

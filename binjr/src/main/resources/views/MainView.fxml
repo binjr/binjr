@@ -142,7 +142,7 @@
             </tooltip>
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="workspace-icon"/>
+                    <Region styleClass="folder-icon"/>
                 </HBox>
             </graphic>
             <items>

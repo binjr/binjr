@@ -1015,11 +1015,33 @@ public class MainViewController implements Initializable {
 
     private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
         workspace.clearSources();
-        workspace.addSources(c.getList()
-                .stream()
-                .filter(t -> sourcesAdapters.get(t) != null)
-                .map(t -> Source.of(sourcesAdapters.get(t)))
-                .collect(Collectors.toList()));
+        while (c.next()) {
+            if (c.wasPermutated()) {
+                for (int i = c.getFrom(); i < c.getTo(); ++i) {
+                    //permutate
+                }
+            }
+            else if (c.wasUpdated()) {
+                //update item
+            }
+            else {
+                c.getRemoved().forEach(t -> {
+                    try {
+                        DataAdapter removedAdapter = sourcesAdapters.remove(t);
+                        logger.trace("Closing DataAdapter " + removedAdapter.toString());
+                        removedAdapter.close();
+                    } catch (Exception e) {
+                        Dialogs.notifyException("On error occurred while closing DataAdapter", e);
+                    }
+                });
+
+            }
+            workspace.addSources(c.getList()
+                    .stream()
+                    .filter(t -> sourcesAdapters.get(t) != null)
+                    .map(t -> Source.of(sourcesAdapters.get(t)))
+                    .collect(Collectors.toList()));
+        }
         logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
 
