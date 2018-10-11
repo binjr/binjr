@@ -1034,7 +1034,6 @@ public class MainViewController implements Initializable {
                         Dialogs.notifyException("On error occurred while closing DataAdapter", e);
                     }
                 });
-
             }
             workspace.addSources(c.getList()
                     .stream()
@@ -1042,7 +1041,11 @@ public class MainViewController implements Initializable {
                     .map(t -> Source.of(sourcesAdapters.get(t)))
                     .collect(Collectors.toList()));
         }
-        logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+        logger.debug(() -> "Sources in current workspace: " +
+                StreamSupport.stream(workspace.getSources().spliterator(), false)
+                        .map(Source::getName)
+                        .reduce((s, s2) -> s + " " + s2)
+                        .orElse("null"));
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
@@ -1197,7 +1200,6 @@ public class MainViewController implements Initializable {
         double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
         double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
         double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
-
         return String.format(
                 "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
                 maxMB,
