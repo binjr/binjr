@@ -56,7 +56,7 @@ public class ConsoleStage {
         stage.show();
         stage.setOnCloseRequest(event -> {
             AppEnvironment.getInstance().setConsoleVisible(false);
-            StageAppearanceManager.getInstance().unregister(stage);
+            event.consume();
         });
 
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
