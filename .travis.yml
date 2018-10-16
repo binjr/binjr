@@ -14,7 +14,7 @@ branches:
   - binjr2
 os:
 - linux
-#- osx
+- osx
 jdk:
 - openjdk11
 matrix:

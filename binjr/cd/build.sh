@@ -1,7 +1,17 @@
 #!/usr/bin/env bash
 set -ev
 cd binjr
-mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,build-native-bundle,bundle-linux
+if [ "$TRAVIS_OS_NAME" == "linux" ]; then
+    BUNDLE_OS_PROFILE = "bundle-linux"
+else
+    if [ "$TRAVIS_OS_NAME" == "osx" ]; then
+        BUNDLE_OS_PROFILE = "bundle-macos"
+    else
+         BUNDLE_OS_PROFILE = ""
+    fi
+fi
+
+mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,build-native-bundle,$BUNDLE_OS_PROFILE
 
 
 ##Skip Maven release plugin commits

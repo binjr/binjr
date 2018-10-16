@@ -69,7 +69,7 @@
             <properties>
                 <binjr.deploy.launcher>${project.basedir}/src/main/deploy/windows/binjr.exe</binjr.deploy.launcher>
                 <binjr.deploy.jdk>openjdk-11_windows-x64</binjr.deploy.jdk>
-                <binjr.deploy.format>dir</binjr.deploy.format>
+                <binjr.deploy.format>zip</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
                 <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-windows/</binjr.deploy.openjfx.jmods.url>
             </properties>
@@ -315,7 +315,7 @@ As such, the simplest way to run this version of binjr is to use the full distri
                         <fileSet>
                             <directory>${project.build.directory}</directory>
                             <includes>
-                                <include>${project.name}.jar</include>
+                                <!--<include>${project.build.finalName}.jar</include>-->
                                 <include>*.zip</include>
                                 <include>*.tar.gz</include>
                             </includes>
