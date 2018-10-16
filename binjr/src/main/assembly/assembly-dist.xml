@@ -53,4 +53,11 @@
             <outputDirectory>/runtime</outputDirectory>
         </fileSet>
     </fileSets>
+    <dependencySets>
+        <dependencySet>
+            <!--<outputFileNameMapping>${artifact.name}.${artifact.extension}</outputFileNameMapping>-->
+            <unpack>false</unpack>
+            <outputDirectory>/app</outputDirectory>
+        </dependencySet>
+    </dependencySets>
 </assembly>

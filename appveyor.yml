@@ -14,7 +14,7 @@ init:
 
 install:
   - choco install openjdk
-  - SET PATH=%JAVA_HOME%\bin;%PATH%
+#  - SET PATH=%JAVA_HOME%\bin;%PATH%
 
 branches:
 
@@ -30,6 +30,8 @@ build_script:
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
+    java -version
+
     cd binjr
 
-    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,build-native-bundle,bundle-windows
+    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,build-native-bundle,bundle-windows -V
