@@ -7,7 +7,7 @@ else
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
         BUNDLE_OS_PROFILE="build-native-bundle,bundle-macos"
     else
-         BUNDLE_OS_PROFILE=""
+         BUNDLE_OS_PROFILE=
     fi
 fi
 
