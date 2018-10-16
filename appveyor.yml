@@ -22,10 +22,6 @@ branches:
 
   - binjr2
 
-only_commits:
-
-  message: /\[maven-release-plugin\] prepare release/
-
 build_script:
 
 - ps: >-
