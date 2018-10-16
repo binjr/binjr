@@ -142,7 +142,7 @@
             </tooltip>
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="fileNew-icon"/>
+                    <Region styleClass="folder-icon"/>
                 </HBox>
             </graphic>
             <items>
@@ -381,6 +381,16 @@
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="debug-high-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem fx:id="consoleMenuItem" mnemonicParsing="false" onAction="#toggleConsoleVisibility" text="Show/Hide Console" visible="true">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="C" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                    </accelerator>
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="screen-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>

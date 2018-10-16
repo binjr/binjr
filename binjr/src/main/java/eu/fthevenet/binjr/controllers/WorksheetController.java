@@ -223,7 +223,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
 
         } catch (Exception e) {
-            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e));
+            Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
 
@@ -758,7 +758,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             parentController.getAllBindingsFromBranch(item, bindings);
                             addBindings(bindings, viewPort.getDataStore());
                         } catch (Exception e) {
-                            Dialogs.notifyException("Error adding bindings to existing worksheet", e);
+                            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                         }
                         logger.debug("dropped to " + event.toString());
                     }
@@ -1033,13 +1033,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        fileChooser.setInitialDirectory(new File(globalPrefs.getMostRecentSaveFolder()));
+        fileChooser.setInitialDirectory(globalPrefs.getMostRecentSaveFolder().toFile());
         fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
                 if (selectedFile.getParent() != null) {
-                    globalPrefs.setMostRecentSaveFolder(selectedFile.getParent());
+                    globalPrefs.setMostRecentSaveFolder(selectedFile.toPath());
                 }
                 ImageIO.write(
                         SwingFXUtils.fromFXImage(snapImg, null),

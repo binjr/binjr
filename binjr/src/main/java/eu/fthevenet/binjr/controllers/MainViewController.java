@@ -106,6 +106,8 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
 
     public MenuButton debugMenuButton;
+    public MenuItem consoleMenuItem;
+    public Menu debugLevelMenu;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
@@ -206,6 +208,10 @@ public class MainViewController implements Initializable {
             }
         });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
+        AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
+            consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
+        });
+
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
         commandBarWidth.addListener((observable, oldValue, newValue) -> {
@@ -284,13 +290,15 @@ public class MainViewController implements Initializable {
             loadWorkspace(new File(associatedFile.get()));
         }
         else if (prefs.isLoadLastWorkspaceOnStartup()) {
-            File latestWorkspace = prefs.getMostRecentSavedWorkspace().toFile();
-            if (latestWorkspace.exists()) {
-                loadWorkspace(latestWorkspace);
-            }
-            else {
-                logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
-            }
+            prefs.getMostRecentSavedWorkspace().ifPresent(path -> {
+                File latestWorkspace = path.toFile();
+                if (latestWorkspace.exists()) {
+                    loadWorkspace(latestWorkspace);
+                }
+                else {
+                    logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
+                }
+            });
         }
 
         if (prefs.isCheckForUpdateOnStartUp()) {
@@ -463,9 +471,9 @@ public class MainViewController implements Initializable {
                 try {
                     showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
-                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e);
+                    Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
-                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e);
+                    Dialogs.notifyException("Could not initialize source adapter " + adapterInfo.getName(), e, root);
                 }
             });
             menuItems.add(menuItem);
@@ -564,7 +572,7 @@ public class MainViewController implements Initializable {
             try {
                 dataAdapter.close();
             } catch (Exception e) {
-                Dialogs.notifyException("Error closing DataAdapter", e);
+                Dialogs.notifyException("Error closing DataAdapter", e, root);
             }
         });
         sourcesAdapters.clear();
@@ -575,7 +583,7 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             loadWorkspace(selectedFile);
@@ -643,7 +651,7 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        fileChooser.setInitialDirectory(new File(GlobalPreferences.getInstance().getMostRecentSaveFolder()));
+        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         fileChooser.setInitialFileName(BINJR_FILE_PATTERN);
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
@@ -749,7 +757,7 @@ public class MainViewController implements Initializable {
             seriesControllers.put(newTab, current);
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
         } catch (Exception e) {
-            Dialogs.notifyException("Error loading worksheet into new tab", e);
+            Dialogs.notifyException("Error loading worksheet into new tab", e, root);
         }
     }
 
@@ -875,7 +883,7 @@ public class MainViewController implements Initializable {
             }
             worksheet.getCharts().add(chart);
         } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to new chart", e);
+            Dialogs.notifyException("Error adding bindings to new chart", e, root);
         }
     }
 
@@ -887,7 +895,7 @@ public class MainViewController implements Initializable {
                 getSelectedWorksheetController().addBindings(bindings, targetChart);
             }
         } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to existing worksheet", e);
+            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
         }
     }
 
@@ -931,7 +939,7 @@ public class MainViewController implements Initializable {
                     getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
                 }
             } catch (Exception e) {
-                Dialogs.notifyException("Error adding bindings to new worksheet", e);
+                Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }
         });
     }
@@ -1007,12 +1015,37 @@ public class MainViewController implements Initializable {
 
     private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
         workspace.clearSources();
-        workspace.addSources(c.getList()
-                .stream()
-                .filter(t -> sourcesAdapters.get(t) != null)
-                .map(t -> Source.of(sourcesAdapters.get(t)))
-                .collect(Collectors.toList()));
-        logger.debug(() -> "Sources in current workspace: " + StreamSupport.stream(workspace.getSources().spliterator(), false).map(Source::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+        while (c.next()) {
+            if (c.wasPermutated()) {
+                for (int i = c.getFrom(); i < c.getTo(); ++i) {
+                    //permutate
+                }
+            }
+            else if (c.wasUpdated()) {
+                //update item
+            }
+            else {
+                c.getRemoved().forEach(t -> {
+                    try {
+                        DataAdapter removedAdapter = sourcesAdapters.remove(t);
+                        logger.trace("Closing DataAdapter " + removedAdapter.toString());
+                        removedAdapter.close();
+                    } catch (Exception e) {
+                        Dialogs.notifyException("On error occurred while closing DataAdapter", e);
+                    }
+                });
+            }
+            workspace.addSources(c.getList()
+                    .stream()
+                    .filter(t -> sourcesAdapters.get(t) != null)
+                    .map(t -> Source.of(sourcesAdapters.get(t)))
+                    .collect(Collectors.toList()));
+        }
+        logger.debug(() -> "Sources in current workspace: " +
+                StreamSupport.stream(workspace.getSources().spliterator(), false)
+                        .map(Source::getName)
+                        .reduce((s, s2) -> s + " " + s2)
+                        .orElse("null"));
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
@@ -1140,7 +1173,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1148,7 +1181,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1156,7 +1189,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1167,7 +1200,6 @@ public class MainViewController implements Initializable {
         double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
         double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
         double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
-
         return String.format(
                 "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
                 maxMB,
@@ -1182,7 +1214,7 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
@@ -1190,15 +1222,20 @@ public class MainViewController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
         } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e);
+            Dialogs.notifyException("Error running diagnostic command", e, root);
         }
     }
 
     public void toggleDebugMode(ActionEvent actionEvent) {
         AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
         if (AppEnvironment.getInstance().isDebugMode()) {
-            Dialogs.notifyWarning("Warning", "Entering debug mode", Pos.BOTTOM_RIGHT, root);
+            logger.warn("Entering debug mode");
         }
     }
+
+    public void toggleConsoleVisibility(ActionEvent actionEvent) {
+        AppEnvironment.getInstance().setConsoleVisible(!AppEnvironment.getInstance().isConsoleVisible());
+    }
+
     //endregion
 }

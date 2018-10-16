@@ -17,9 +17,12 @@
 
 package eu.fthevenet.binjr.preferences;
 
+import eu.fthevenet.binjr.controllers.ConsoleStage;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,11 +45,13 @@ public class AppEnvironment {
     public static final String LICENSE = "Apache-2.0";
 
     private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
-    private final BooleanProperty debugMode = new SimpleBooleanProperty(LogManager.getRootLogger().isDebugEnabled());
+    private final BooleanProperty debugMode = new SimpleBooleanProperty();
+    private final BooleanProperty consoleVisible = new SimpleBooleanProperty();
+    private final Property<Level> logLevel = new SimpleObjectProperty<>();
+
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
-
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -54,14 +59,32 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
+        consoleVisible.addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                ConsoleStage.show();
+            }
+            else {
+                ConsoleStage.hide();
+            }
+        });
+
+        logLevel.setValue(LogManager.getRootLogger().getLevel());
+        logLevel.addListener((observable, oldLevel, newLevel) -> {
+            Configurator.setRootLevel(newLevel);
+            logger.info("Root logger level set to " + newLevel);
+        });
+
         debugMode.addListener((observable, oldValue, newValue) -> {
             Level newLevel = configuredRootLevel;
             if (newValue) {
-                newLevel = Level.TRACE;
+                if (newLevel.compareTo(Level.DEBUG) < 0) {
+                    newLevel = Level.DEBUG;
+                }
             }
-            Configurator.setRootLevel(newLevel);
-            logger.log(newLevel, "Root logger level set to " + newLevel);
+            logLevel.setValue(newLevel);
+            consoleVisible.setValue(newValue);
         });
+        debugMode.setValue(LogManager.getRootLogger().isDebugEnabled());
     }
 
     /**
@@ -227,4 +250,27 @@ public class AppEnvironment {
         return debugMode;
     }
 
+    public boolean isConsoleVisible() {
+        return consoleVisible.get();
+    }
+
+    public BooleanProperty consoleVisibleProperty() {
+        return consoleVisible;
+    }
+
+    public void setConsoleVisible(boolean consoleVisible) {
+        this.consoleVisible.set(consoleVisible);
+    }
+
+    public Level getLogLevel() {
+        return logLevel.getValue();
+    }
+
+    public Property<Level> logLevelProperty() {
+        return logLevel;
+    }
+
+    public void setLogLevel(Level logLevel) {
+        this.logLevel.setValue(logLevel);
+    }
 }

@@ -40,6 +40,7 @@ import java.util.UUID;
  */
 public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoCloseable {
     private UUID id = UUID.randomUUID();
+    private volatile boolean closed = false;
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -73,6 +74,9 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
     public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+        if (closed) {
+            throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
+        }
         try (InputStream in = this.fetchRawData(path, begin, end, bypassCache)) {
             // Parse raw data obtained from adapter
             return this.getDecoder().decode(in, seriesInfo);
@@ -131,6 +135,7 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
     public void onStart() throws DataAdapterException {
         //noop
     }
+
     /**
      * Pings the data source
      *
@@ -170,4 +175,16 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
         return validator.apply(paramValue);
     }
 
+    @Override
+    public void close() {
+        closed = true;
+    }
+
+    @Override
+    public String toString() {
+        return "DataAdapter{" +
+                "id=" + id +
+                "sourceName" + getSourceName() +
+                '}';
+    }
 }

@@ -278,4 +278,33 @@
     -fx-background-color: rgba(10,10,10,0.7);
 }
 
+.log-trace {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: GRAY;
+}
+
+.log-debug {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: STEELBLUE;
+}
+
+.log-info {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: black;
+}
+
+.log-warn {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: DARKORANGE;
+}
+
+.log-error {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: RED;
+}
+
+.log-fatal {
+    -fx-font-family: Consolas,  Monospace;
+    -fx-fill: DARKRED;
+}
 

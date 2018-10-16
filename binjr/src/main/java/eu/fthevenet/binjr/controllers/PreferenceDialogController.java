@@ -68,6 +68,8 @@ public class PreferenceDialogController implements Initializable {
     public TableView<DataAdapterInfo> availableAdapterTable;
     public TableColumn enabledColumn;
     public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+    @FXML
+    private ToggleSwitch loadExternalToggle;
 
     @FXML
     private ToggleSwitch enableDownSampling;
@@ -141,6 +143,10 @@ public class PreferenceDialogController implements Initializable {
                         root);
             }
         });
+        loadExternalToggle.selectedProperty().bindBidirectional(prefs.loadPluginsFromExternalLocationProperty());
+        browsePluginLocButton.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
+        pluginLocTextfield.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
+
         enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());

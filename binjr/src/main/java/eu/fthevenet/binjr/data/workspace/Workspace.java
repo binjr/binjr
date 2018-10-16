@@ -262,7 +262,7 @@ public class Workspace implements Dirtyable {
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
         cleanUp();
-        GlobalPreferences.getInstance().setMostRecentSaveFolder(file.getParent());
+        GlobalPreferences.getInstance().setMostRecentSaveFolder(file.toPath());
     }
 
     /**

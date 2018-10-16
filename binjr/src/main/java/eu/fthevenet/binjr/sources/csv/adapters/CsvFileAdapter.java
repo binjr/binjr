@@ -243,8 +243,8 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public void close() throws Exception {
-
+    public void close() {
+        super.close();
     }
 
     protected SortedMap<Long, DataSample<Double>> getDataStore() throws DataAdapterException {

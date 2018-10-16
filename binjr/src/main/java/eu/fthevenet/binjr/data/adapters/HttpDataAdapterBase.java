@@ -113,7 +113,6 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         if (params == null) {
             throw new InvalidAdapterParameterException("Could not find parameter list for adapter " + getSourceName());
         }
-
         baseAddress = validateParameter(params, BASE_ADDRESS_PARAM_NAME,
                 s -> {
                     if (s == null) {
@@ -129,12 +128,12 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
 
     @Override
     public void close() {
-        super.close();
         try {
             this.httpClient.close();
         } catch (IOException e) {
             logger.error("Error closing HttpDataAdapterBase", e);
         }
+        super.close();
     }
     //endregion
 

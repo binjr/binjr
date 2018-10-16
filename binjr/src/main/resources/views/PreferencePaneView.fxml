@@ -22,7 +22,7 @@
 <?import javafx.scene.control.cell.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<?import org.controlsfx.control.ToggleSwitch?>
+<?import org.controlsfx.control.*?>
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
     <children>
         <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
@@ -126,14 +126,7 @@
                                     <children>
                                         <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <Label maxWidth="1.7976931348623157E308" text="Plugins location"/>
-                                                <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
-                                                    <children>
-                                                        <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
-                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false" onAction="#handleBrowsePluginsFolder" prefWidth="25.0" text="..."/>
-                                                    </children>
-                                                </HBox>
-                                                <Label maxWidth="1.7976931348623157E308" text="Available adapters"/>
+                                                <Label text="Available Data Adapters"/>
                                                 <TableView fx:id="availableAdapterTable" editable="true" maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                                                     <columns>
                                                         <TableColumn fx:id="enabledColumn" prefWidth="24.0" resizable="false" sortable="false">
@@ -179,6 +172,14 @@
                                                         </TableColumn>
                                                     </columns>
                                                 </TableView>
+                                                <Label text="Load from external location"/>
+                                                <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" prefHeight="18.0" prefWidth="0.0"/>
+                                                <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
+                                                    <children>
+                                                        <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
+                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false" onAction="#handleBrowsePluginsFolder" prefWidth="25.0" text="..."/>
+                                                    </children>
+                                                </HBox>
                                             </children>
                                         </VBox>
                                     </children>

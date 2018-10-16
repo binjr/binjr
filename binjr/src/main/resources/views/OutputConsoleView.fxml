@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~    Copyright 2018 Frederic Thevenet
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  ~
+  -->
+
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<VBox styleClass="console-pane" minHeight="100.0" minWidth="300.0" prefHeight="300.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.OutputConsoleController">
+    <children>
+        <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+            <content>
+                <TextFlow fx:id="textOutput" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"/>
+            </content>
+        </ScrollPane>
+        <AnchorPane styleClass="worksheet-tool-bar" prefHeight="40.0" VBox.vgrow="NEVER">
+            <children>
+                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <Label text="Set log level to: "/>
+                        <ChoiceBox fx:id="logLevelChoice"/>
+                    </children>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <children>
+                        <ToggleButton fx:id="alwaysOnTopToggle" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Always on top">
+                            <graphic>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="pin-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Always on top">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </ToggleButton>
+                        <Button styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY" onAction="#handleClearConsole" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Clear">
+                            <graphic>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="trash-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Clear console output">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY" onAction="#handleSaveConsoleOutput" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Save">
+                            <graphic>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region styleClass="fileSave-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Save console output to file">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY" onAction="#handleCopyConsoleOutput" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" text="Copy">
+                            <graphic>
+                                <HBox styleClass="icon-container" alignment="CENTER">
+                                    <Region maxHeight="20" styleClass="copy-icon" style=" -icon-scale-x: 2.5; -icon-scale-y: 2.5"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Copy console output to clipboard">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                    </children>
+                </HBox>
+            </children>
+            <padding>
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+            </padding>
+        </AnchorPane>
+    </children>
+</VBox>
