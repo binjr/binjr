@@ -15,8 +15,8 @@ init:
 
 
 install:
-  - choco install openjdk -params '$targetDir=%JDK_PATH%'
-
+  - choco install openjdk -params 'targetDir=%JDK_PATH%'
+  - SET JAVA_HOME=%JDK_PATH%
   - SET PATH=%JDK_PATH%\bin;%PATH%
 
 branches:
