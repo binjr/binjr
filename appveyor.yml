@@ -7,14 +7,17 @@ environment:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
   APPVEYOR_RDP_PASSWORD:
     secure: 4amxfxphFUcpp60d9Q6gJg==
+  JDK_PATH: C:\\jdk_11
+
 
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 
 install:
-  - choco install openjdk
-#  - SET PATH=%JAVA_HOME%\bin;%PATH%
+  - choco install openjdk -params '$targetDir=%JDK_PATH%'
+
+  - SET PATH=%JDK_PATH%\bin;%PATH%
 
 branches:
 
