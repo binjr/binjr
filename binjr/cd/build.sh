@@ -2,12 +2,12 @@
 set -ev
 cd binjr
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    BUNDLE_OS_PROFILE = "bundle-linux"
+    BUNDLE_OS_PROFILE="bundle-linux"
 else
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-        BUNDLE_OS_PROFILE = "bundle-macos"
-    else
-         BUNDLE_OS_PROFILE = ""
+        BUNDLE_OS_PROFILE="bundle-macos"
+    elsechmo
+         BUNDLE_OS_PROFILE=""
     fi
 fi
 
