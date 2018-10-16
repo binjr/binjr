@@ -13,15 +13,14 @@ init:
 
 
 install:
-  - cinst jdk8  -params 'installdir=C:\\latest_jdk8'
-  - SET JAVA_HOME=C:\latest_jdk8
-  - SET PATH=C:\latest_jdk8\bin;%PATH%
+  - choco install openjdk
+  - SET PATH=%JAVA_HOME%\bin;%PATH%
 
 branches:
 
   only:
 
-  - master
+  - binjr2
 
 only_commits:
 
@@ -37,4 +36,4 @@ build_script:
 
     cd binjr
 
-    mvn clean deploy --settings "./cd/maven_settings.xml" -P buildNativeBundles
+    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,build-native-bundle,bundle-windows
