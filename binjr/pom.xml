@@ -87,7 +87,7 @@
         <profile>
             <id>bundle-macos</id>
             <properties>
-                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/linux/binjr</binjr.deploy.launcher>
+                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/macos/binjr</binjr.deploy.launcher>
                 <binjr.deploy.jdk>openjdk-11_macos-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>tar.gz</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
