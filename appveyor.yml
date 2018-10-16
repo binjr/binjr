@@ -7,7 +7,6 @@ environment:
     secure: 8BjoFIdSfcFM5UNtivbS5w==
   APPVEYOR_RDP_PASSWORD:
     secure: 4amxfxphFUcpp60d9Q6gJg==
-  JDK_PATH: C:\\jdk_11
 
 
 init:
@@ -15,9 +14,8 @@ init:
 
 
 install:
-  - choco install openjdk -params 'targetDir=%JDK_PATH%'
-  - SET JAVA_HOME=%JDK_PATH%
-  - SET PATH=%JDK_PATH%\bin;%PATH%
+  - choco install openjdk
+  - refreshenv
 
 branches:
 
