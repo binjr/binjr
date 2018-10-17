@@ -45,12 +45,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLHandshakeException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.IOException;
 import java.net.*;
-import java.security.*;
-import java.security.cert.CertificateException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.Principal;
+import java.security.Security;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -172,37 +175,42 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
             throw new SourceCommunicationException("Host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\" could not be found.", e);
+        } catch (SSLHandshakeException e) {
+            throw new SourceCommunicationException("An error occurred while negotiating connection security: " + e.getMessage(), e);
         } catch (IOException e) {
-            throw new SourceCommunicationException("IO error while communicating with host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\"", e);
+            throw new SourceCommunicationException("IO error while communicating with host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\": " + e.getMessage(), e);
         } catch (Exception e) {
-            throw new SourceCommunicationException("Unexpected error in HTTP GET", e);
+            throw new SourceCommunicationException("Unexpected error in HTTP GET: " + e.getMessage(), e);
         }
     }
 
-    protected static SSLContext createSslCustomContext() throws KeyStoreException, IOException, NoSuchAlgorithmException, CertificateException, KeyManagementException, UnrecoverableKeyException, NoSuchProviderException {
+    protected static SSLContext createSslCustomContext() {
         // Load platform specific Trusted CA keystore
-        logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
-        KeyStore tks = null;
-        try {
-            switch (AppEnvironment.getInstance().getOsFamily()) {
-                case WINDOWS:
-                    tks = KeyStore.getInstance("Windows-ROOT", "SunMSCAPI");
-                    tks.load(null, null);
-                    break;
-                case OSX:
-                    tks = KeyStore.getInstance("KeychainStore", "Apple");
-                    tks.load(null, null);
-                    break;
-                case LINUX:
-                case UNSUPPORTED:
-                default:
-                    break;
-            }
-        } catch (Exception e) {
-            logger.debug("Error locating OS specific keystore", e);
+        String keystoreType;
+        switch (AppEnvironment.getInstance().getOsFamily()) {
+            case WINDOWS:
+                keystoreType = "Windows-ROOT";
+                break;
+            case OSX:
+                keystoreType = "KeychainStore";
+                break;
+            case LINUX:
+            case UNSUPPORTED:
+            default:
+                logger.trace("No attempt to load system keystore on OS=" + AppEnvironment.getInstance().getOsFamily());
+                return SSLContexts.createSystemDefault();
         }
-
-        return SSLContexts.custom().loadTrustMaterial(tks, null).build();
+        try {
+            logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
+            KeyStore tks = KeyStore.getInstance(keystoreType);
+            tks.load(null, null);
+            return SSLContexts.custom().loadTrustMaterial(tks, null).build();
+        } catch (KeyStoreException e) {
+            logger.debug("Could not find the requested OS specific keystore", e);
+        } catch (Exception e) {
+            logger.debug("Error loading OS specific keystore", e);
+        }
+        return SSLContexts.createSystemDefault();
     }
 
     protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {

@@ -140,8 +140,10 @@
                                         <module>java.prefs</module>
                                         <module>java.sql</module>
                                         <module>java.xml</module>
-                                        <module>jdk.security.auth</module>
                                         <module>java.management</module>
+                                        <module>jdk.security.auth</module>
+                                        <module>jdk.management</module>
+                                        <module>jdk.crypto.mscapi</module>
                                     </modules>
                                     <compression>2</compression>
                                     <stripDebug>true</stripDebug>
@@ -321,19 +323,19 @@ As such, the simplest way to run this version of binjr is to use the full distri
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>11</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>11</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <version>11</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     <distributionManagement>
