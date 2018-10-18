@@ -2,10 +2,10 @@
 set -ev
 cd binjr
 if [ "$TRAVIS_OS_NAME" == "linux" ]; then
-    BUNDLE_OS_PROFILE="build-native-bundle,bundle-linux"
+    BUNDLE_OS_PROFILE="create-runtime-image-linux-x64,package-runtime-image"
 else
     if [ "$TRAVIS_OS_NAME" == "osx" ]; then
-        BUNDLE_OS_PROFILE="build-native-bundle,bundle-macos"
+        BUNDLE_OS_PROFILE="create-runtime-image-macos-x64,package-runtime-image"
     else
          BUNDLE_OS_PROFILE=
     fi

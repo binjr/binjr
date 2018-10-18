@@ -65,7 +65,7 @@
     </scm>
     <profiles>
         <profile>
-            <id>bundle-windows</id>
+            <id>create-runtime-image-windows-x64</id>
             <properties>
                 <binjr.deploy.launcher>${project.basedir}/src/main/deploy/windows/binjr.exe</binjr.deploy.launcher>
                 <binjr.deploy.jdk>openjdk-11_windows-x64</binjr.deploy.jdk>
@@ -73,29 +73,6 @@
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
                 <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-windows/</binjr.deploy.openjfx.jmods.url>
             </properties>
-        </profile>
-        <profile>
-            <id>bundle-linux</id>
-            <properties>
-                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/linux/binjr</binjr.deploy.launcher>
-                <binjr.deploy.jdk>openjdk-11_linux-x64</binjr.deploy.jdk>
-                <binjr.deploy.format>tar.gz</binjr.deploy.format>
-                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
-                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-linux/</binjr.deploy.openjfx.jmods.url>
-            </properties>
-        </profile>
-        <profile>
-            <id>bundle-macos</id>
-            <properties>
-                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/macos/binjr</binjr.deploy.launcher>
-                <binjr.deploy.jdk>openjdk-11_macos-x64</binjr.deploy.jdk>
-                <binjr.deploy.format>tar.gz</binjr.deploy.format>
-                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
-                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-mac/</binjr.deploy.openjfx.jmods.url>
-            </properties>
-        </profile>
-        <profile>
-            <id>build-native-bundle</id>
             <build>
                 <plugins>
                     <plugin>
@@ -154,6 +131,151 @@
                             </execution>
                         </executions>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>create-runtime-image-linux-x64</id>
+            <properties>
+                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/linux/binjr</binjr.deploy.launcher>
+                <binjr.deploy.jdk>openjdk-11_linux-x64</binjr.deploy.jdk>
+                <binjr.deploy.format>tar.gz</binjr.deploy.format>
+                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-linux/</binjr.deploy.openjfx.jmods.url>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${binjr.deploy.openjfx.jmods.url}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
+                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <version>1.0.0.Beta1</version>
+                        <executions>
+                            <execution>
+                                <id>create-dependency-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>create-runtime-image</goal>
+                                </goals>
+                                <configuration>
+                                    <modulePath>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                    </modulePath>
+                                    <modules>
+                                        <module>javafx.controls</module>
+                                        <module>javafx.fxml</module>
+                                        <module>javafx.swing</module>
+                                        <module>java.base</module>
+                                        <module>java.prefs</module>
+                                        <module>java.sql</module>
+                                        <module>java.xml</module>
+                                        <module>java.management</module>
+                                        <module>jdk.security.auth</module>
+                                        <module>jdk.management</module>
+                                    </modules>
+                                    <compression>2</compression>
+                                    <stripDebug>true</stripDebug>
+                                    <excludedResources>
+                                    </excludedResources>
+                                    <outputDirectory>${project.build.directory}/${binjr.deploy.jdk}-image</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>create-runtime-image-macos-x64</id>
+            <properties>
+                <binjr.deploy.launcher>${project.basedir}/src/main/deploy/macos/binjr</binjr.deploy.launcher>
+                <binjr.deploy.jdk>openjdk-11_macos-x64</binjr.deploy.jdk>
+                <binjr.deploy.format>tar.gz</binjr.deploy.format>
+                <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-mac/</binjr.deploy.openjfx.jmods.url>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.googlecode.maven-download-plugin</groupId>
+                        <artifactId>download-maven-plugin</artifactId>
+                        <version>1.3.0</version>
+                        <executions>
+                            <execution>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>wget</goal>
+                                </goals>
+                                <configuration>
+                                    <url>${binjr.deploy.openjfx.jmods.url}</url>
+                                    <unpack>true</unpack>
+                                    <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
+                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.moditect</groupId>
+                        <artifactId>moditect-maven-plugin</artifactId>
+                        <version>1.0.0.Beta1</version>
+                        <executions>
+                            <execution>
+                                <id>create-dependency-image</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>create-runtime-image</goal>
+                                </goals>
+                                <configuration>
+                                    <modulePath>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                    </modulePath>
+                                    <modules>
+                                        <module>javafx.controls</module>
+                                        <module>javafx.fxml</module>
+                                        <module>javafx.swing</module>
+                                        <module>java.base</module>
+                                        <module>java.prefs</module>
+                                        <module>java.sql</module>
+                                        <module>java.xml</module>
+                                        <module>java.management</module>
+                                        <module>jdk.security.auth</module>
+                                        <module>jdk.management</module>
+                                    </modules>
+                                    <compression>2</compression>
+                                    <stripDebug>true</stripDebug>
+                                    <excludedResources>
+                                    </excludedResources>
+                                    <outputDirectory>${project.build.directory}/${binjr.deploy.jdk}-image</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>package-runtime-image</id>
+            <build>
+                <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
@@ -256,11 +378,12 @@
                 <configuration>
                     <description>This is a beta version of binjr built to run on Java 11 and beyond.
 
-___Please note that it does not run on previous version of Java.___
+                        ___Please note that it does not run on previous version of Java.___
 
-Also note that as of Java 11, the JavaFX runtime, which binjr relies on, is no longer supplied as part of the JDK.
+                        Also note that as of Java 11, the JavaFX runtime, which binjr relies on, is no longer supplied as part of the JDK.
 
-As such, the simplest way to run this version of binjr is to use the full distribution package (choose the right one for your OS), which contains a modular runtime image of Java 11 that includes the JavaFX runtime modules and all other dependencies.</description>
+                        As such, the simplest way to run this version of binjr is to use the full distribution package (choose the right one for your OS), which contains a modular runtime image of Java 11 that includes the JavaFX runtime modules and all other dependencies.
+                    </description>
                     <releaseName>${project.name} v${project.version}</releaseName>
                     <tag>v${project.version}</tag>
                     <prerelease>true</prerelease>
