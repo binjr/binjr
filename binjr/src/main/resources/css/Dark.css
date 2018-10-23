@@ -286,10 +286,12 @@
    /*  -fx-background-color: white;*/
  }
 
- .date-picker-popup {
- -fx-border-color: -binjr-control-border-color;
-     -fx-background-color: -binjr-window-background-color;
-     -fx-background-insets: 0;
+.interval-picker-popup,
+.date-picker-popup {
+    -fx-border-color: -binjr-control-border-color;
+    -fx-background-color: -binjr-window-background-color;
+    -fx-background-insets: 0;
+    -fx-effect: null;
  }
 
  .date-picker-popup > .month-year-pane {
@@ -1535,6 +1537,8 @@
 .dialog-pane .header-panel .graphic-container .dialog-icon {
     -icon-color:  -fx-text-background-color;
 }
+
+
 
 .dialog-pane {
     -fx-background-color: -binjr-window-background-color;

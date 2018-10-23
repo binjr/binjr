@@ -17,6 +17,7 @@
   ~
   -->
 
+<?import eu.fthevenet.util.javafx.controls.TimeRangePicker?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
@@ -77,10 +78,10 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="showIntervalSelectorButton" alignment="CENTER" graphicTextGap="16.0" maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false" styleClass="dialog-button" text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
+                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0" maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false" styleClass="dialog-button" text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" styleClass="icon-container">
-                                    <Region styleClass="fileRecent-icon"/>
+                                    <Region styleClass="time-icon"/>
                                 </HBox>
                             </graphic>
                             <tooltip>
@@ -90,7 +91,7 @@
                                     </font>
                                 </Tooltip>
                             </tooltip>
-                        </Button>
+                        </TimeRangePicker>
                         <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">

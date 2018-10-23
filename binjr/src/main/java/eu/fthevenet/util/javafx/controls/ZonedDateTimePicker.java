@@ -117,7 +117,7 @@ public class ZonedDateTimePicker extends DatePicker {
         });
     }
 
-    private DateTimeFormatter getFormatter() {
+    DateTimeFormatter getFormatter() {
         return DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT, FormatStyle.MEDIUM).withZone(getZoneId());
     }
 

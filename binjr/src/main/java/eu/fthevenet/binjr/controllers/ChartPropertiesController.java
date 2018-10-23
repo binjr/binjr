@@ -35,10 +35,8 @@ import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.ToggleSwitch;
-import org.controlsfx.control.textfield.TextFields;
 
 import java.net.URL;
-import java.time.ZoneId;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -73,10 +71,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch showAreaOutline = new ToggleSwitch();
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
-    //    @FXML
-//    private ChoiceBox<UnitPrefixes> unitPrefixChoiceBox;
-    @FXML
-    private TextField timezoneField;
     @FXML
     private TextField yMinRange;
     @FXML
@@ -85,10 +79,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     private ToggleSwitch autoScaleYAxis;
     @FXML
     private HBox yAxisScaleSettings;
-//    @FXML
-//    private TextField chartNameTextField;
-//    @FXML
-//    private TextField chartUnitTextField;
 
 
     public ChartPropertiesController(Worksheet<T> worksheet, Chart<T> chart) {
@@ -112,10 +102,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
     private void slidePanel(int show, Duration delay) {
-//        Node n;
-//        if (show < 0 && ((n = root.getParent()) != null)) {
-//            n.toFront();
-//        }
         root.toFront();
         TranslateTransition openNav = new TranslateTransition(new Duration(200), root);
         openNav.setDelay(delay);
@@ -152,27 +138,13 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
-        TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
-            @Override
-            public String toString(ZoneId object) {
-                return object.toString();
-            }
 
-            @Override
-            public ZoneId fromString(String string) {
-                return ZoneId.of(string);
-            }
-        });
-
-        formatter.valueProperty().bindBidirectional(worksheet.timeZoneProperty());
-
-        timezoneField.setTextFormatter(formatter);
 
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
         visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility());
         this.visibleProperty().bindBidirectional(chart.showPropertiesProperty());
-        TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
+
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
         yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
     }

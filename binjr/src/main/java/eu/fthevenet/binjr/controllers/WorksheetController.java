@@ -30,7 +30,7 @@ import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.util.javafx.controls.DelayedAction;
-import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
+import eu.fthevenet.util.javafx.controls.TimeRangePicker;
 import eu.fthevenet.util.logging.Profiler;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -120,10 +120,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private Button refreshButton;
     @FXML
     private Button snapshotButton;
-    //    @FXML
-////    private ZonedDateTimePicker startDate;
-////    @FXML
-////    private ZonedDateTimePicker endDate;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -137,7 +133,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private MenuButton selectChartLayout;
     @FXML
-    private Button showIntervalSelectorButton;
+    private TimeRangePicker timeRangePicker;
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
@@ -145,15 +141,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private String name;
     private final BindingManager bindingManager = new BindingManager();
     public static final double TOOL_BUTTON_SIZE = 20;
-    private final IntervalSelector intervalSelector;
-
-
 
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Map<Tab, DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
-        this.intervalSelector = new IntervalSelector();
-
         // Attach bindings
         for (Chart<Double> chart : worksheet.getCharts()) {
             for (TimeSeriesInfo<?> s : chart.getSeries()) {
@@ -164,7 +155,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         .findAny()
                         .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
                 s.getBinding().setAdapter(da);
-
             }
         }
     }
@@ -185,34 +175,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return propertiesController;
     }
 
-    public class IntervalSelector extends PopupControl {
-        private final Pane intervalSelectionPane;
-        private final IntervalSelectionController intervalSelectionController;
-
-        public IntervalSelector() throws IOException {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/IntervalSelectionView.fxml"));
-            this.intervalSelectionController = new IntervalSelectionController();
-            loader.setController(intervalSelectionController);
-            this.intervalSelectionPane = loader.load();
-            getScene().setRoot(intervalSelectionPane);
-            // this.getContent().add(intervalSelectionPane);
-        }
-
-        public ZonedDateTimePicker getStartDate() {
-            return intervalSelectionController.startDate;
-        }
-
-        public ZonedDateTimePicker getEndDate() {
-            return intervalSelectionController.endDate;
-        }
-    }
-
-    private void showIntervalSelectionPopup(ActionEvent actionEvent) {
-
-        this.intervalSelector.show(Dialogs.getStage(root));
-
-
-    }
 
     //region [Properties]
     public String getName() {
@@ -241,8 +203,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert seriesTableContainer != null : "fx:id\"seriesTableContainer\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
-//        assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
-//        assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
@@ -255,12 +215,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Platform.runLater(() -> invalidateAll(false, false, false));
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
-
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
-
 
     private ZonedDateTimeAxis buildTimeAxis() {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -300,7 +258,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
                             currentChart.nameProperty(),
                             currentChart.unitProperty()));
-
             XYChart<ZonedDateTime, Double> viewPort;
             switch (currentChart.getChartType()) {
                 case AREA:
@@ -452,7 +409,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void initNavigationPane() {
-        showIntervalSelectorButton.setOnAction(this::showIntervalSelectionPopup);
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
@@ -464,10 +420,32 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (ChartViewPort<Double> viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
-        bindingManager.bind(intervalSelector.getEndDate().zoneIdProperty(), getWorksheet().timeZoneProperty());
-        bindingManager.bind(intervalSelector.getStartDate().zoneIdProperty(), getWorksheet().timeZoneProperty());
-        intervalSelector.getStartDate().dateTimeValueProperty().bindBidirectional(currentState.startXProperty());
-        intervalSelector.getEndDate().dateTimeValueProperty().bindBidirectional(currentState.endXProperty());
+        timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
+        timeRangePicker.startDateProperty().bindBidirectional(currentState.startXProperty());
+        timeRangePicker.endDateProperty().bindBidirectional(currentState.endXProperty());
+
+//        bindingManager.attachListener(timeRangePicker.endDateProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                currentState.endXProperty().set(newValue);
+//            }
+//        });
+//        bindingManager.attachListener(currentState.endXProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                timeRangePicker.endDateProperty().setValue(newValue);
+//            }
+//        });
+//        bindingManager.attachListener(timeRangePicker.startDateProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                currentState.startXProperty().set(newValue);
+//            }
+//        });
+//        bindingManager.attachListener(currentState.startXProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                timeRangePicker.startDateProperty().setValue(newValue);
+//            }
+//        });
+//        timeRangePicker.startDateProperty().setValue(currentState.startXProperty().getValue());
+//        timeRangePicker.endDateProperty().setValue(currentState.endXProperty().getValue());
     }
 
 
