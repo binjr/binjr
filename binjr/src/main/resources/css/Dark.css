@@ -291,7 +291,7 @@
     -fx-border-color: -binjr-control-border-color;
     -fx-background-color: -binjr-window-background-color;
     -fx-background-insets: 0;
-    -fx-effect: null;
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 10, 0.0 , 0 , 0.5 );
  }
 
  .date-picker-popup > .month-year-pane {

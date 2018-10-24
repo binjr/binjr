@@ -15,9 +15,9 @@
  *
  */
 
-package eu.fthevenet.binjr.controllers;
+package eu.fthevenet.binjr.dialogs;
 
-import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
+import eu.fthevenet.binjr.controllers.OutputConsoleController;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -62,7 +62,6 @@ public class ConsoleStage {
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
             stage.setAlwaysOnTop(newValue);
         });
-
         controller.getAlwaysOnTopToggle().setSelected(true);
     }
 
@@ -74,4 +73,5 @@ public class ConsoleStage {
     public static void hide() {
         ConsoleStageHolder.instance.stage.hide();
     }
+
 }

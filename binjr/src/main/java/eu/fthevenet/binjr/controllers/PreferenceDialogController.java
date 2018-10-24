@@ -22,6 +22,7 @@ import eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.dialogs.UserInterfaceThemes;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import eu.fthevenet.binjr.preferences.NotificationDurationChoices;
 import eu.fthevenet.binjr.preferences.UpdateManager;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;

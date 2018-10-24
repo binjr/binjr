@@ -249,7 +249,8 @@
 
  .date-picker-popup,
  .interval-picker-popup {
-    -fx-effect: null;
+   /* -fx-effect: null;*/
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 10, 0.0 , 0 , 0.5 );
     -fx-background-color: white;
     -fx-background-insets: 0;
     -fx-border-color: -binjr-color-light-gray;

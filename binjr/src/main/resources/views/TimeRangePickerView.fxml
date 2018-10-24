@@ -58,6 +58,7 @@
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
                     </columnConstraints>
                     <rowConstraints>
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
@@ -66,18 +67,22 @@
                         <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
                     </rowConstraints>
                     <children>
-                        <Button fx:id="interval6Hours" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 6 Hours" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Button fx:id="interval3Hours" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 3 Hours" GridPane.columnIndex="1"/>
-                        <Button fx:id="interval24Hours" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 24 Hours" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                        <Button fx:id="interval7Days" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 7 Days" GridPane.columnIndex="2"/>
-                        <Button fx:id="interval15Days" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 15 Days" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                        <Button fx:id="interval30Days" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 30 Days" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                        <Button fx:id="interval90Days" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 90 Days" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                        <Button fx:id="last15Minutes" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 15 Minutes"/>
-                        <Button fx:id="last30Minutes" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 30 Minutes" GridPane.rowIndex="1"/>
-                        <Button fx:id="last60Minutes" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 60 Minutes" GridPane.rowIndex="2"/>
-                        <Button fx:id="interval12Hours" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 12 Hours" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                        <Button fx:id="last90Minutesbutton" styleClass="dialog-button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" text="Last 90 minutes" GridPane.rowIndex="3"/>
+                        <Button fx:id="last6Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 6 Hours" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                        <Button fx:id="last3Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 3 Hours" GridPane.columnIndex="1"/>
+                        <Button fx:id="last24Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 24 Hours" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                        <Button fx:id="last7Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 7 Days" GridPane.columnIndex="2"/>
+                        <Button fx:id="last15Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 15 Days" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                        <Button fx:id="last30Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 30 Days" GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                        <Button fx:id="last90Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 90 Days" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                        <Button fx:id="last15Minutes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 15 Minutes"/>
+                        <Button fx:id="last30Minutes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 30 Minutes" GridPane.rowIndex="1"/>
+                        <Button fx:id="last60Minutes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 60 Minutes" GridPane.rowIndex="2"/>
+                        <Button fx:id="last12Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 12 Hours" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                        <Button fx:id="last90Minutes" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 90 minutes" GridPane.rowIndex="3"/>
+                        <Button fx:id="today" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Today" GridPane.columnIndex="3"/>
+                        <Button fx:id="yesterday" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Yesterday" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                        <Button fx:id="thisWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="This Week" GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                        <Button fx:id="lastWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last Week" GridPane.columnIndex="3" GridPane.rowIndex="3"/>
                     </children>
                 </GridPane>
             </children>

@@ -423,29 +423,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
         timeRangePicker.startDateProperty().bindBidirectional(currentState.startXProperty());
         timeRangePicker.endDateProperty().bindBidirectional(currentState.endXProperty());
+        timeRangePicker.setApplyNewTimeRange((beginning, end) -> currentState.setSelection(currentState.selectTimeRange(beginning, end), true));
 
-//        bindingManager.attachListener(timeRangePicker.endDateProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                currentState.endXProperty().set(newValue);
-//            }
-//        });
-//        bindingManager.attachListener(currentState.endXProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                timeRangePicker.endDateProperty().setValue(newValue);
-//            }
-//        });
-//        bindingManager.attachListener(timeRangePicker.startDateProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                currentState.startXProperty().set(newValue);
-//            }
-//        });
-//        bindingManager.attachListener(currentState.startXProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                timeRangePicker.startDateProperty().setValue(newValue);
-//            }
-//        });
-//        timeRangePicker.startDateProperty().setValue(currentState.startXProperty().getValue());
-//        timeRangePicker.endDateProperty().setValue(currentState.endXProperty().getValue());
     }
 
 

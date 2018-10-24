@@ -17,7 +17,7 @@
 
 package eu.fthevenet.binjr.preferences;
 
-import eu.fthevenet.binjr.controllers.ConsoleStage;
+import eu.fthevenet.binjr.dialogs.ConsoleStage;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
