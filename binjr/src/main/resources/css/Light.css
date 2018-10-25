@@ -938,7 +938,10 @@
     -fx-padding: 0em 0.166667em 0em 0.166667em;
     -fx-background-insets: -1.4, 0, 1, 2;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
-    -fx-text-fill: white;
+}
+
+.command-bar .choice-box .text {
+    -fx-fill: white;
 }
 
 .check-menu-item:checked > .left-container > .check {
@@ -1015,6 +1018,7 @@
 .command-bar  .radio-menu-item:checked > .left-container > .radio {
      -fx-background-color: white;
 }
+
 
 /*** Color picker ***/
 
