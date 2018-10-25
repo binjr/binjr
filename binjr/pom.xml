@@ -304,7 +304,7 @@
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
                                     <includes>
-                                        <include>*.jar</include>
+                                        <include>${project.name}-shaded.jar</include>
                                     </includes>
                                 </fileSet>
                                 <fileSet>
@@ -347,6 +347,7 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
+                            <finalName>${project.name}-shaded</finalName>
                             <shadedArtifactAttached>true</shadedArtifactAttached>
                             <transformers>
                                 <transformer implementation="com.github.edwgiz.mavenShadePlugin.log4j2CacheTransformer.PluginsCacheFileTransformer"/>
@@ -455,7 +456,7 @@
                         <fileSet>
                             <directory>${project.build.directory}</directory>
                             <includes>
-                                <include>*.jar</include>
+                                <include>${project.name}-shaded.jar</include>
                             </includes>
                         </fileSet>
                     </fileSets>
