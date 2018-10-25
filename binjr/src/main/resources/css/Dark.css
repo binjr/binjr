@@ -297,7 +297,6 @@
  .date-picker-popup > .month-year-pane {
      -fx-background-color: -binjr-pane-background-color;
      -fx-background-insets: 0;
-
  }
 
  .date-picker-popup > * > .spinner > .button {

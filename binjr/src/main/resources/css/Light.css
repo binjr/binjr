@@ -22,7 +22,7 @@
     -icon-color: black;
     SCROLL_BAR_THUMB: #BABABA;
     SCROLL_BAR_TRACK: #f0f0f0;
-    -fx-accent: -binjr-dark-blue-color;
+    -fx-accent: -binjr-foreground-color; /*-binjr-dark-blue-color;*/
 }
 
 .column-bold-text{
@@ -88,7 +88,8 @@
     -fx-alignment: center;
 }
 .button:hover{
-    -fx-border-color: -binjr-color-dark-gray;
+    -fx-border-color: -binjr-dark-blue-color;
+    -fx-background-color: -fx-accent;
 }
 
 .exit,
@@ -108,38 +109,41 @@
 .dialog-button:hover,
 .toggle-button:hover,
 .menu-button:hover {
-    -fx-background-color:-binjr-color-lighter-gray;
+    -fx-background-color:   -fx-accent;/*-binjr-color-lighter-gray;*/
+    -fx-border-color:-binjr-dark-blue-color;
 }
+
+
 
 .dialog-button:hover:pressed,
 .button:hover:pressed,
 .menu-button:hover:pressed {
   -fx-opacity: 100%;
-  -fx-background-color:-binjr-color-light-gray ;
+  -fx-background-color: -binjr-dark-blue-color;
   -fx-text-fill: white;
+   -fx-border-color:-binjr-dark-blue-color;
 }
 
 
-
+.menu-button:pressed,
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
 .toggle-button:selected:hover:pressed {
-  -fx-background-color:-binjr-color-gray ;
-  -fx-text-fill: white;
+  -fx-background-color: -binjr-dark-blue-color ;
+
 }
 
 .toggle-button:selected,
 .menu-button:selected {
-    -fx-background-color: -binjr-color-light-gray;
-    -fx-text-fill: white;
+    -fx-background-color: -binjr-lighter-blue-color;
 }
 
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
-    -fx-background-color: -binjr-color-light-gray;
-    -fx-border-color:-binjr-color-dark-gray;
+    -fx-background-color:-binjr-lighter-blue-color;
+    -fx-border-color: -binjr-dark-blue-color;
     -fx-border-width:1;
-    -fx-text-fill: white;
+  /*  -fx-text-fill: white;*/
 }
 
  .no-arrow-menu-button .arrow-button {
@@ -234,17 +238,17 @@
   }
 
  .date-picker > .arrow-button:hover {
-     -fx-background-color: #d9d9d9;
-     -fx-background-insets: 3 3 3 3;
+     -fx-background-color: -fx-accent;
+
      -fx-background-radius: 0;
  }
 
  .date-picker > .arrow-button:pressed {
-     -fx-background-color: black;
+     -fx-background-color: -binjr-dark-blue-color;
  }
 
  .date-picker > .arrow-button:pressed > .arrow {
-   /*  -fx-background-color: white;*/
+     -fx-background-color: white;
  }
 
  .date-picker-popup,
@@ -934,6 +938,18 @@
     -fx-padding: 0em 0.166667em 0em 0.166667em;
     -fx-background-insets: -1.4, 0, 1, 2;
     -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-text-fill: white;
+}
+
+.check-menu-item:checked > .left-container > .check {
+    -fx-background-color: red;
+    -fx-shape: "M0,5H2L4,8L8,0H10L5,10H3Z";
+    -fx-scale-shape: false;
+}
+
+.command-bar .toggle-button,
+ .command-bar .menu-button{
+     -fx-text-fill: white;
 }
 
 .command-bar .choice-box:hover {
@@ -945,6 +961,7 @@
     -fx-opacity: .4;
 }
 
+
 .choice-box {
     -fx-background-color: -binjr-window-background-color; /*-binjr-button-background-color;*/
     -fx-border-color: -binjr-color-gray;
@@ -955,13 +972,25 @@
 }
 
 .choice-box:hover {
-    -fx-border-color: -binjr-color-dark-gray;
+    -fx-effect: null;
+    -fx-background-color: -fx-accent;
+    -fx-border-color: -binjr-dark-blue-color;
 }
 
 .choice-box:pressed:hover {
-    -fx-background-color: -binjr-color-lighter-gray;
-    -fx-border-color: -binjr-color-gray;
+    -fx-background-color: -binjr-dark-blue-color;
+    -fx-border-color: -binjr-dark-blue-color;
+    -fx-text-fill:white;
 }
+
+ .choice-box:pressed:hover  .arrow {
+     -fx-background-color: white;
+ }
+
+.choice-box:pressed:hover .text {
+    -fx-fill: white;
+}
+
 
 .choice-box:disabled {
     -fx-opacity: .4;
@@ -981,6 +1010,10 @@
     -fx-shape: "M9.005,17.766l13.759,14.739h1.716L49.02,0l10.298,8.488L25.997,50.453h-3.629L0,26.897L9.005,17.766z";
     -fx-padding:7px;
     -fx-scale-shape: true;
+}
+
+.command-bar  .radio-menu-item:checked > .left-container > .radio {
+     -fx-background-color: white;
 }
 
 /*** Color picker ***/
@@ -1090,7 +1123,7 @@
 }
 
 .toggle-switch:selected .thumb-area{
-    -fx-background-color:  -binjr-blue-color;
+    -fx-background-color:  -binjr-lighter-blue-color;
     -fx-background-insets: 0, 1;
 }
 
@@ -1134,11 +1167,11 @@
 }
 
 .command-bar .slider .thumb {
-    -fx-background-color:  -fx-accent;
+    -fx-background-color:  -binjr-dark-blue-color;
 }
 
 .command-bar .slider:hover .thumb {
-    -fx-background-color: derive(-fx-accent, 40%);
+    -fx-background-color: derive(-binjr-dark-blue-color, 40%);
 }
 
 
