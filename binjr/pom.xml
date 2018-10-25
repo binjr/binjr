@@ -304,7 +304,7 @@
                                 <fileSet>
                                     <directory>${project.build.directory}</directory>
                                     <includes>
-                                        <include>${project.artifactId}.jar</include>
+                                        <include>*.jar</include>
                                     </includes>
                                 </fileSet>
                                 <fileSet>
@@ -455,7 +455,7 @@
                         <fileSet>
                             <directory>${project.build.directory}</directory>
                             <includes>
-                                <include>${project.name}.jar</include>
+                                <include>*.jar</include>
                             </includes>
                         </fileSet>
                     </fileSets>
