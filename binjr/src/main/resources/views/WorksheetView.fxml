@@ -17,14 +17,14 @@
   ~
   -->
 
-<?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
-<?import javafx.geometry.*?>
+<?import eu.fthevenet.util.javafx.controls.TimeRangePicker?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
             <AnchorPane>
@@ -33,7 +33,7 @@
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
                                 textAlignment="CENTER">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="backArrow-icon"/>
                                 </HBox>
                             </graphic>
@@ -48,7 +48,7 @@
                         <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
                                 textAlignment="CENTER">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="forwardArrow-icon"/>
                                 </HBox>
                             </graphic>
@@ -63,7 +63,7 @@
                         <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
                                 textAlignment="CENTER">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="refresh-icon"/>
                                 </HBox>
                             </graphic>
@@ -78,36 +78,23 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Label minWidth="-Infinity" text="From:">
-                            <HBox.margin>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <ZonedDateTimePicker fx:id="startDate" minWidth="50.0">
-                            <tooltip>
-                                <Tooltip text="Lower bound for the X axis"/>
-                            </tooltip>
-                        </ZonedDateTimePicker>
-                        <Label minWidth="-Infinity" text="To:">
-                            <HBox.margin>
-                                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                            </HBox.margin>
-                        </Label>
-                        <ZonedDateTimePicker fx:id="endDate" minWidth="50.0">
-                            <tooltip>
-                                <Tooltip text="Upper bound for the X axis"/>
-                            </tooltip>
-                            <HBox.margin>
-                                <Insets right="5.0"/>
-                            </HBox.margin>
-                        </ZonedDateTimePicker>
-                        <Button fx:id="snapshotButton"
-                                contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                styleClass="dialog-button" text="Snapshot">
+                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0" maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false" styleClass="dialog-button" text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER_LEFT" styleClass="icon-container">
+                                    <Region styleClass="time-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Take a snapshot of the worksheet">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </TimeRangePicker>
+                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="camera-icon"/>
                                 </HBox>
                             </graphic>
@@ -121,7 +108,7 @@
                         </Button>
                         <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="vertical-crosshair-icon"/>
                                 </HBox>
                             </graphic>
@@ -133,14 +120,9 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                      maxHeight="-Infinity" maxWidth="-Infinity"
-                                      minHeight="-Infinity" minWidth="-Infinity"
-                                      mnemonicParsing="false" prefHeight="40.0"
-                                      prefWidth="40.0"
-                                      text="ToggleButton">
+                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="horizontal-crosshair-icon"/>
                                 </HBox>
                             </graphic>
@@ -152,15 +134,9 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <Button fx:id="addChartButton"
-                                alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="-Infinity" maxWidth="-Infinity"
-                                minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0"
-                                prefWidth="40.0"
-                                styleClass="dialog-button" text="Add Chart">
+                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Add Chart">
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="addWorksheet-icon"/>
                                 </HBox>
                             </graphic>
@@ -172,8 +148,8 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                    mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Chart layout">>
+                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                    text="Chart layout">>
                             <tooltip>
                                 <Tooltip text="Select chart layout">
                                     <font>
@@ -182,7 +158,7 @@
                                 </Tooltip>
                             </tooltip>
                             <graphic>
-                                <HBox styleClass="icon-container" alignment="CENTER">
+                                <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="layout-icon"/>
                                 </HBox>
                             </graphic>

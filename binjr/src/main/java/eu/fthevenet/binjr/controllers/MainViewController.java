@@ -1028,8 +1028,13 @@ public class MainViewController implements Initializable {
                 c.getRemoved().forEach(t -> {
                     try {
                         DataAdapter removedAdapter = sourcesAdapters.remove(t);
-                        logger.trace("Closing DataAdapter " + removedAdapter.toString());
-                        removedAdapter.close();
+                        if (removedAdapter != null) {
+                            logger.trace("Closing DataAdapter " + removedAdapter.toString());
+                            removedAdapter.close();
+                        }
+                        else {
+                            logger.trace("No DataAdapter to close attached to tab " + t.getText());
+                        }
                     } catch (Exception e) {
                         Dialogs.notifyException("On error occurred while closing DataAdapter", e);
                     }

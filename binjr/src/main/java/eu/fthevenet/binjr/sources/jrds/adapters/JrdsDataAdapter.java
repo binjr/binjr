@@ -36,7 +36,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.AbstractResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
@@ -119,7 +118,7 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
             if (!uriSchemePattern.matcher(address).find()) {
                 address = "http://" + address;
             }
-            URL url = new URL(address.replaceAll("/$", ""));
+            URL url = new URL(address.trim());
             if (url.getHost().trim().isEmpty()) {
                 throw new CannotInitializeDataAdapterException("Malformed URL: no host");
             }
@@ -151,15 +150,11 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
 
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
-        try {
-            return new URIBuilder(getBaseAddress().toURI())
-                    .setPath(getBaseAddress().getPath() + "/download")
-                    .addParameter("id", path)
-                    .addParameter("begin", Long.toString(begin.toEpochMilli()))
-                    .addParameter("end", Long.toString(end.toEpochMilli())).build();
-        } catch (URISyntaxException e) {
-            throw new SourceCommunicationException("Error building URI for request", e);
-        }
+        return craftRequestUri("download",
+                new BasicNameValuePair("id", path),
+                new BasicNameValuePair("begin", Long.toString(begin.toEpochMilli())),
+                new BasicNameValuePair("end", Long.toString(end.toEpochMilli()))
+        );
     }
 
     @Override
@@ -185,7 +180,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         return params;
     }
 
-
     @Override
     public void loadParams(Map<String, String> params) throws DataAdapterException {
         if (params == null) {
@@ -203,7 +197,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         treeViewTab = validateParameter(params, TREE_VIEW_TAB_PARAM_NAME, s -> s == null ? JrdsTreeViewTab.valueOf(params.get(TREE_VIEW_TAB_PARAM_NAME)) : JrdsTreeViewTab.HOSTS_TAB);
         this.filter = params.get(JRDS_FILTER);
     }
-
 
     @Override
     public boolean ping() {
@@ -307,14 +300,14 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
             params.add(new BasicNameValuePair(argName, argValue));
         }
-        String entityString = doHttpGet(craftRequestUri("/jsontree", params), new BasicResponseHandler());
+        String entityString = doHttpGet(craftRequestUri("jsontree", params), new BasicResponseHandler());
         logger.trace(entityString);
         return entityString;
     }
 
 
     private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
-        URI requestUri = craftRequestUri("/graphdesc", new BasicNameValuePair("id", id));
+        URI requestUri = craftRequestUri("graphdesc", new BasicNameValuePair("id", id));
 
         return doHttpGet(requestUri, response -> {
             StatusLine statusLine = response.getStatusLine();

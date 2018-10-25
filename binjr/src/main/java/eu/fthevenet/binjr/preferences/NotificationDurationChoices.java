@@ -15,7 +15,7 @@
  *
  */
 
-package eu.fthevenet.binjr.controllers;
+package eu.fthevenet.binjr.preferences;
 
 import javafx.util.Duration;
 

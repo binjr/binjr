@@ -41,6 +41,9 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
+    private ChangeListener<ZonedDateTime> onStartXChanged;
+    private ChangeListener<ZonedDateTime> onEndXChanged;
+
 
     @Override
     public void close() {
@@ -54,6 +57,7 @@ public class ChartViewportsState implements AutoCloseable {
         private final SimpleDoubleProperty endY;
         private final ChartViewPort<Double> chartViewPort;
         private final ChangeListener<Number> onRefreshViewportRequired;
+
 
         /**
          * Initializes a new instance of the {@link AxisState} class.
@@ -69,6 +73,7 @@ public class ChartViewportsState implements AutoCloseable {
             this.endY = new SimpleDoubleProperty(roundYValue(endY));
             this.addListeners();
         }
+
 
         public void removeListeners() {
             this.startY.removeListener(onRefreshViewportRequired);
@@ -89,6 +94,16 @@ public class ChartViewportsState implements AutoCloseable {
             return new XYChartSelection<>(
                     getStartX(),
                     getEndX(),
+                    startY.get(),
+                    endY.get(),
+                    chartViewPort.getDataStore().isAutoScaleYAxis()
+            );
+        }
+
+        public XYChartSelection<ZonedDateTime, Double> selectTimeRange(ZonedDateTime beginning, ZonedDateTime end) {
+            return new XYChartSelection<>(
+                    beginning,
+                    end,
                     startY.get(),
                     endY.get(),
                     chartViewPort.getDataStore().isAutoScaleYAxis()
@@ -180,6 +195,15 @@ public class ChartViewportsState implements AutoCloseable {
         Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
         for (Map.Entry<Chart<Double>, AxisState> e : axisStates.entrySet()) {
             selection.put(e.getKey(), e.getValue().asSelection());
+        }
+        return selection;
+    }
+
+    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selectTimeRange(ZonedDateTime start, ZonedDateTime end) {
+        Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
+
+        for (Map.Entry<Chart<Double>, AxisState> e : axisStates.entrySet()) {
+            selection.put(e.getKey(), e.getValue().selectTimeRange(start, end));
         }
         return selection;
     }

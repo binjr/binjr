@@ -160,7 +160,7 @@
                                                                 <PropertyValueFactory property="license"/>
                                                             </cellValueFactory>
                                                         </TableColumn>
-                                                        <TableColumn sortable="false" text="Version">
+                                                        <TableColumn sortable="false" text="Url">
                                                             <cellValueFactory>
                                                                 <PropertyValueFactory property="siteUrl"/>
                                                             </cellValueFactory>

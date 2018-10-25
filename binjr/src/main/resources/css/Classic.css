@@ -81,27 +81,6 @@
     -fx-background-color: transparent;
   }
 
-/*
-.add-source-background-icon,
-.add-worksheet-background-icon{
-   -fx-text-fill:  #DADADA;
-}
-
-.add-source-background-icon SVGPath,
-.add-worksheet-background-icon SVGPath{
-   -fx-fill:  #DADADA;
-}
-
-.add-source-background-icon:hover,
-.add-worksheet-background-icon:hover{
-   -fx-text-fill:  #C2C2C2;
-}
-
-.add-source-background-icon:hover SVGPath,
-.add-worksheet-background-icon:hover SVGPath {
-   -fx-fill:  #969696;
-}*/
-
  .add-source-background-icon,
  .add-worksheet-background-icon{
     -fx-text-fill:  #DADADA;
@@ -227,6 +206,12 @@
    /*    -fx-font-size: 10pt;*/
  }
 
+
+.popup-control-parent {
+  -fx-background-color: white;
+    -fx-border-width:1;
+}
+
   .chart-viewport-parent {
    -fx-background-color: white;
   }
@@ -308,3 +293,17 @@
     -fx-fill: DARKRED;
 }
 
+.interval-picker-popup {
+     -fx-background-color:
+        linear-gradient(to bottom,
+            derive(-fx-color,-17%),
+            derive(-fx-color,-30%)
+        ),
+        -fx-control-inner-background;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 0;
+    -fx-alignment: CENTER; /* VBox */
+    -fx-spacing: 0; /* VBox */
+    -fx-padding: 0.083333em; /* 1 1 1 1 */
+    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 12, 0.0 , 0 , 8 );
+}

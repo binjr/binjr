@@ -30,7 +30,7 @@ import eu.fthevenet.util.javafx.charts.*;
 import eu.fthevenet.util.javafx.controls.ColorTableCell;
 import eu.fthevenet.util.javafx.controls.DecimalFormatTableCellFactory;
 import eu.fthevenet.util.javafx.controls.DelayedAction;
-import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker;
+import eu.fthevenet.util.javafx.controls.TimeRangePicker;
 import eu.fthevenet.util.logging.Profiler;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -121,10 +121,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private Button snapshotButton;
     @FXML
-    private ZonedDateTimePicker startDate;
-    @FXML
-    private ZonedDateTimePicker endDate;
-    @FXML
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
@@ -136,6 +132,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ContextMenu seriesListMenu;
     @FXML
     private MenuButton selectChartLayout;
+    @FXML
+    private TimeRangePicker timeRangePicker;
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
@@ -144,11 +142,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     public static final double TOOL_BUTTON_SIZE = 20;
 
-
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Map<Tab, DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
-
         // Attach bindings
         for (Chart<Double> chart : worksheet.getCharts()) {
             for (TimeSeriesInfo<?> s : chart.getSeries()) {
@@ -159,7 +155,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         .findAny()
                         .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
                 s.getBinding().setAdapter(da);
-
             }
         }
     }
@@ -179,6 +174,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         Platform.runLater(settingsPane::toFront);
         return propertiesController;
     }
+
 
     //region [Properties]
     public String getName() {
@@ -207,8 +203,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert seriesTableContainer != null : "fx:id\"seriesTableContainer\" was not injected!";
         assert backButton != null : "fx:id\"backButton\" was not injected!";
         assert forwardButton != null : "fx:id\"forwardButton\" was not injected!";
-        assert startDate != null : "fx:id\"beginDateTime\" was not injected!";
-        assert endDate != null : "fx:id\"endDateTime\" was not injected!";
         assert refreshButton != null : "fx:id\"refreshButton\" was not injected!";
         assert vCrosshair != null : "fx:id\"vCrosshair\" was not injected!";
         assert hCrosshair != null : "fx:id\"hCrosshair\" was not injected!";
@@ -221,12 +215,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Platform.runLater(() -> invalidateAll(false, false, false));
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
-
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
-
 
     private ZonedDateTimeAxis buildTimeAxis() {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -266,7 +258,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
                             currentChart.nameProperty(),
                             currentChart.unitProperty()));
-
             XYChart<ZonedDateTime, Double> viewPort;
             switch (currentChart.getChartType()) {
                 case AREA:
@@ -429,11 +420,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (ChartViewPort<Double> viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
-        bindingManager.bind(endDate.zoneIdProperty(), getWorksheet().timeZoneProperty());
-        bindingManager.bind(startDate.zoneIdProperty(), getWorksheet().timeZoneProperty());
-        startDate.dateTimeValueProperty().bindBidirectional(currentState.startXProperty());
-        endDate.dateTimeValueProperty().bindBidirectional(currentState.endXProperty());
+        timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
+        timeRangePicker.setSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
+        timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {
+            currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
+        });
+        currentState.startXProperty().addListener((observable, oldValue, newValue) -> {
+            timeRangePicker.updateRangeBeginning(newValue);
+        });
+        currentState.endXProperty().addListener((observable, oldValue, newValue) -> {
+            timeRangePicker.updateRangeEnd(newValue);
+        });
     }
+
 
     private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();

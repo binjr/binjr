@@ -55,10 +55,7 @@ import java.security.KeyStoreException;
 import java.security.Principal;
 import java.security.Security;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class provides a base on which to implement {@link DataAdapter} instances that communicate with sources via the HTTP protocol.
@@ -248,8 +245,12 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
     }
 
     protected URI craftRequestUri(String path, List<NameValuePair> params) throws SourceCommunicationException {
+        Objects.requireNonNull(path);
         try {
-            URIBuilder builder = new URIBuilder(getBaseAddress().toURI()).setPath(getBaseAddress().getPath() + path);
+            List<String> res = new ArrayList<>(Arrays.asList(getBaseAddress().getPath().split("/")));
+            res.addAll(Arrays.asList(path.split("/")));
+            String sanitizedPath = res.stream().filter(s -> !s.isEmpty()).reduce("", (p, e) -> p + "/" + e);
+            URIBuilder builder = new URIBuilder(getBaseAddress().toURI().resolve(sanitizedPath));
             if (params != null) {
                 builder.addParameters(params);
             }
