@@ -17,9 +17,9 @@
 
 package eu.fthevenet.util.javafx.controls;
 
-import javafx.beans.Observable;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -28,6 +28,8 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.IOException;
@@ -38,9 +40,37 @@ import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 
 public class TimeRangePicker extends ToggleButton {
-    private final TimeRangePickerController timeRangePickerController;
+    private static final Logger logger = LogManager.getLogger(TimeRangePicker.class);
+    private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
     private final Property<ZoneId> zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
+    private final Property<TimeRange> selectedRange = new SimpleObjectProperty<>(new TimeRange(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
+
+    private ChangeListener<ZonedDateTime> onStartDateChanged = (observable, oldValue, newValue) -> {
+        if (newValue != null) {
+            TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
+            if (newRange.isNegative()) {
+                TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
+                this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.duration)));
+            }
+            else {
+                this.selectedRange.setValue(newRange);
+            }
+        }
+    };
+
+    private ChangeListener<ZonedDateTime> onEndDateChanged = (observable, oldValue, newValue) -> {
+        if (newValue != null) {
+            TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
+            if (newRange.isNegative()) {
+                TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
+                this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.duration), newValue));
+            }
+            else {
+                this.selectedRange.setValue(newRange);
+            }
+        }
+    };
 
     public TimeRangePicker() throws IOException {
         super();
@@ -56,44 +86,47 @@ public class TimeRangePicker extends ToggleButton {
         });
         timeRangePickerController.startDate.zoneIdProperty().bind(zoneId);
         timeRangePickerController.endDate.zoneIdProperty().bind(zoneId);
-        timeRangePickerController.startDate.dateTimeValueProperty().addListener(this::intervalDescriptionChanged);
-        timeRangePickerController.endDate.dateTimeValueProperty().addListener(this::intervalDescriptionChanged);
-        zoneId.addListener(this::intervalDescriptionChanged);
+        zoneId.addListener((observable, oldValue, newValue) -> updateText());
         timeRangePickerController.zoneIdProperty().bindBidirectional(zoneId);
+
         this.setOnAction(actionEvent -> {
             Node owner = (Node) actionEvent.getSource();
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
             this.popup.show(owner.getScene().getWindow(), bounds.getMinX(), bounds.getMaxY());
         });
+
+        timeRangePickerController.applyNewTimeRange = (beginning, end) -> {
+            this.selectedRange.setValue(TimeRange.of(beginning, end));
+        };
+
+        selectedRange.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                suspendDateListeners();
+                try {
+                    timeRangePickerController.startDate.setDateTimeValue(newValue.getBeginning());
+                    timeRangePickerController.endDate.setDateTimeValue(newValue.getEnd());
+                } finally {
+                    resumeDateListeners();
+                    updateText();
+                }
+            }
+        });
+
+        timeRangePickerController.startDate.setDateTimeValue(selectedRange.getValue().getBeginning());
+        timeRangePickerController.endDate.setDateTimeValue(selectedRange.getValue().getEnd());
+        resumeDateListeners();
     }
 
-    public void setApplyNewTimeRange(BiConsumer<ZonedDateTime, ZonedDateTime> applyNewTimeRange) {
-        timeRangePickerController.applyNewTimeRange = applyNewTimeRange;
+    private void resumeDateListeners() {
+        timeRangePickerController.startDate.dateTimeValueProperty().addListener(onStartDateChanged);
+        timeRangePickerController.endDate.dateTimeValueProperty().addListener(onEndDateChanged);
     }
 
-    public ZonedDateTime getStartDate() {
-        return timeRangePickerController.startDate.getDateTimeValue();
+    private void suspendDateListeners() {
+        timeRangePickerController.startDate.dateTimeValueProperty().removeListener(onStartDateChanged);
+        timeRangePickerController.endDate.dateTimeValueProperty().removeListener(onEndDateChanged);
     }
 
-    public void setStartDate(ZonedDateTime value) {
-        timeRangePickerController.startDate.setDateTimeValue(value);
-    }
-
-    public Property<ZonedDateTime> startDateProperty() {
-        return timeRangePickerController.startDate.dateTimeValueProperty();
-    }
-
-    public ZonedDateTime getEndDate() {
-        return timeRangePickerController.startDate.getDateTimeValue();
-    }
-
-    public void setEndDate(ZonedDateTime value) {
-        timeRangePickerController.endDate.setDateTimeValue(value);
-    }
-
-    public Property<ZonedDateTime> endDateProperty() {
-        return timeRangePickerController.endDate.dateTimeValueProperty();
-    }
 
     public ZoneId getZoneId() {
         return zoneId.getValue();
@@ -103,11 +136,43 @@ public class TimeRangePicker extends ToggleButton {
         return zoneId;
     }
 
-    private void intervalDescriptionChanged(Observable observable) {
+    private void updateText() {
         setText(String.format("From %s to %s (%s)",
                 timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
                 timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
                 getZoneId().toString()));
+    }
+
+    public TimeRange getSelectedRange() {
+        return selectedRange.getValue();
+    }
+
+    public Property<TimeRange> selectedRangeProperty() {
+        return selectedRange;
+    }
+
+    public void setSelectedRange(TimeRange selectedRange) {
+        this.selectedRange.setValue(selectedRange);
+    }
+
+    public void updateRangeBeginning(ZonedDateTime newValue) {
+        suspendDateListeners();
+        try {
+            timeRangePickerController.startDate.setDateTimeValue(newValue);
+            updateText();
+        } finally {
+            resumeDateListeners();
+        }
+    }
+
+    public void updateRangeEnd(ZonedDateTime newValue) {
+        suspendDateListeners();
+        try {
+            timeRangePickerController.endDate.setDateTimeValue(newValue);
+            updateText();
+        } finally {
+            resumeDateListeners();
+        }
     }
 
     private class TimeRangePickerController {
@@ -170,7 +235,6 @@ public class TimeRangePicker extends ToggleButton {
         @FXML
         private Button lastWeek;
 
-
         private TextFormatter<ZoneId> formatter;
 
         private BiConsumer<ZonedDateTime, ZonedDateTime> applyNewTimeRange = (start, end) -> {
@@ -223,25 +287,27 @@ public class TimeRangePicker extends ToggleButton {
             last30Minutes.setOnAction(event -> last(Duration.of(30, ChronoUnit.MINUTES)));
             last60Minutes.setOnAction(event -> last(Duration.of(60, ChronoUnit.MINUTES)));
             last90Minutes.setOnAction(event -> last(Duration.of(90, ChronoUnit.MINUTES)));
-
             today.setOnAction(event -> {
-                LocalDate today = ZonedDateTime.now(zoneId.getValue()).toLocalDate();
-                applyNewTimeRange.accept(ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()), ZonedDateTime.of(today.plusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()));
+                LocalDate today = LocalDate.now(zoneId.getValue());
+                applyNewTimeRange.accept(
+                        ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()),
+                        ZonedDateTime.of(today.plusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()));
             });
             yesterday.setOnAction(event -> {
-                LocalDate today = ZonedDateTime.now(zoneId.getValue()).toLocalDate();
-                applyNewTimeRange.accept(ZonedDateTime.of(today.minusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()), ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()));
+                LocalDate today = LocalDate.now(zoneId.getValue());
+                applyNewTimeRange.accept(
+                        ZonedDateTime.of(today.minusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()),
+                        ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()));
             });
-
             thisWeek.setOnAction(event -> {
-                LocalDate refDay = ZonedDateTime.now(zoneId.getValue()).toLocalDate();
+                LocalDate refDay = LocalDate.now(zoneId.getValue());
                 int n = refDay.getDayOfWeek().getValue();
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(refDay.minusDays(n - 1), LocalTime.MIDNIGHT, zoneId.getValue()),
                         ZonedDateTime.of(refDay.plusDays(8 - n), LocalTime.MIDNIGHT, zoneId.getValue()));
             });
             lastWeek.setOnAction(event -> {
-                LocalDate refDay = ZonedDateTime.now(zoneId.getValue()).minusWeeks(1).toLocalDate();
+                LocalDate refDay = LocalDate.now(zoneId.getValue()).minusWeeks(1);
                 int n = refDay.getDayOfWeek().getValue();
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(refDay.minusDays(n - 1), LocalTime.MIDNIGHT, zoneId.getValue()),
@@ -251,6 +317,38 @@ public class TimeRangePicker extends ToggleButton {
 
         Property<ZoneId> zoneIdProperty() {
             return formatter.valueProperty();
+        }
+    }
+
+    public static class TimeRange {
+        private final ZonedDateTime beginning;
+        private final ZonedDateTime end;
+        private final Duration duration;
+
+        public static TimeRange of(ZonedDateTime beginning, ZonedDateTime end) {
+            return new TimeRange(beginning, end);
+        }
+
+        private TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
+            this.beginning = beginning;
+            this.end = end;
+            this.duration = Duration.between(beginning, end);
+        }
+
+        public ZonedDateTime getBeginning() {
+            return beginning;
+        }
+
+        public ZonedDateTime getEnd() {
+            return end;
+        }
+
+        public Duration getDuration() {
+            return duration;
+        }
+
+        public boolean isNegative() {
+            return duration.isNegative();
         }
     }
 }

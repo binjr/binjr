@@ -41,6 +41,9 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
+    private ChangeListener<ZonedDateTime> onStartXChanged;
+    private ChangeListener<ZonedDateTime> onEndXChanged;
+
 
     @Override
     public void close() {
@@ -54,6 +57,7 @@ public class ChartViewportsState implements AutoCloseable {
         private final SimpleDoubleProperty endY;
         private final ChartViewPort<Double> chartViewPort;
         private final ChangeListener<Number> onRefreshViewportRequired;
+
 
         /**
          * Initializes a new instance of the {@link AxisState} class.
@@ -69,6 +73,7 @@ public class ChartViewportsState implements AutoCloseable {
             this.endY = new SimpleDoubleProperty(roundYValue(endY));
             this.addListeners();
         }
+
 
         public void removeListeners() {
             this.startY.removeListener(onRefreshViewportRequired);
@@ -202,29 +207,6 @@ public class ChartViewportsState implements AutoCloseable {
         }
         return selection;
     }
-
-//    public void set(ZonedDateTime start, ZonedDateTime end){
-//        this.suspendAxisListeners();
-//        try {
-//            for (Map.Entry<Chart<Double>, AxisState> e : axisStates.entrySet()) {
-//                selection.put(e.getKey(), e.getValue().asSelection());
-//            }
-//
-//            selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
-//            selectionMap.entrySet().stream().findFirst().ifPresent(entry -> {
-//                ZonedDateTime newStartX = roundDateTime(entry.getValue().getStartX());
-//                ZonedDateTime newEndX = roundDateTime(entry.getValue().getEndX());
-//                boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
-//                this.startX.set(newStartX);
-//                this.endX.set(newEndX);
-//                selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
-//                parent.invalidateAll(toHistory, dontPlotChart, false);
-//            });
-//        } finally {
-//            this.resumeAxisListeners();
-//        }
-//    }
-
 
     public void setSelection(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selectionMap, boolean toHistory) {
         this.suspendAxisListeners();

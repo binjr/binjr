@@ -421,10 +421,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
-        timeRangePicker.startDateProperty().bindBidirectional(currentState.startXProperty());
-        timeRangePicker.endDateProperty().bindBidirectional(currentState.endXProperty());
-        timeRangePicker.setApplyNewTimeRange((beginning, end) -> currentState.setSelection(currentState.selectTimeRange(beginning, end), true));
-
+        timeRangePicker.setSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
+        timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {
+            currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
+        });
+        currentState.startXProperty().addListener((observable, oldValue, newValue) -> {
+            timeRangePicker.updateRangeBeginning(newValue);
+        });
+        currentState.endXProperty().addListener((observable, oldValue, newValue) -> {
+            timeRangePicker.updateRangeEnd(newValue);
+        });
     }
 
 
