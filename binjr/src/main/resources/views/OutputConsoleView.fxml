@@ -22,7 +22,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
-<VBox styleClass="console-pane" minHeight="100.0" minWidth="300.0" prefHeight="300.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.dialogs.ConsoleStage.OutputConsoleController">
+<VBox styleClass="console-pane" minHeight="100.0" minWidth="300.0" prefHeight="300.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.OutputConsoleController">
     <children>
         <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
             <content>
