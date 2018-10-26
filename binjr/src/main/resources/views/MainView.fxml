@@ -44,10 +44,9 @@
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <TearableTabPane fx:id="sourcesTabPane" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" side="LEFT" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                    <tabs>
-                    </tabs>
-                </TearableTabPane>
+                <Accordion fx:id="sourcesPane" styleClass="series-table" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+
+                </Accordion>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
             </StackPane>
             <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">

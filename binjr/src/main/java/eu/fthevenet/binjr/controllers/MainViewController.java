@@ -47,6 +47,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -101,7 +102,7 @@ public class MainViewController implements Initializable {
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
-    private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
+    private final Map<TitledPane, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
 
@@ -136,7 +137,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
-    private TearableTabPane sourcesTabPane;
+    private Accordion sourcesPane;
     @FXML
     private TearableTabPane worksheetTabPane;
     @FXML
@@ -179,16 +180,40 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
         assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
-        assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
+        assert sourcesPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
         debugMenuButton.visibleProperty().bind(AppEnvironment.getInstance().debugModeProperty());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
-        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
+        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
-        sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
+        sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
+
+        sourcesPane.expandedPaneProperty().addListener(
+                (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
+                    Boolean expandRequiered = true;
+                    for (TitledPane pane : sourcesPane.getPanes()) {
+                        if (pane.isExpanded()) {
+                            expandRequiered = false;
+
+                        }
+                    }
+//                    getAttachedViewport(newPane).ifPresent(nv -> {
+//                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
+//                        if (editButtonsGroup.getSelectedToggle() != null) {
+//                            nv.getDataStore().setShowProperties(true);
+//                        }
+//
+//                    });
+                    if ((expandRequiered) && (oldPane != null)) {
+                        Platform.runLater(() -> {
+                            sourcesPane.setExpandedPane(oldPane);
+                        });
+                    }
+                });
+
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
@@ -199,14 +224,14 @@ public class MainViewController implements Initializable {
             StageAppearanceManager.getInstance().register(stage);
         });
         worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
-        sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
-        sourcesTabPane.setOnAddNewTab(this::handleAddSource);
-        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            invalidateSearchResults();
-            if (newValue != null) {
-                findNext();
-            }
-        });
+      //  sourcesPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
+      //  sourcesPane.setOnAddNewTab(this::handleAddSource);
+//        sourcesPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            invalidateSearchResults();
+//            if (newValue != null) {
+//                findNext();
+//            }
+//        });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
             consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
@@ -462,6 +487,14 @@ public class MainViewController implements Initializable {
         }
     }
 
+
+    private TitledPane newSourcePane(){
+        TitledPane sourcePane = new TitledPane();
+
+        sourcePane.setAnimated(false);
+        return sourcePane;
+    }
+
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
         List<MenuItem> menuItems = new ArrayList<>();
@@ -469,7 +502,7 @@ public class MainViewController implements Initializable {
             MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
+                    showAdapterDialog(newSourcePane(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
                     Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
@@ -482,10 +515,10 @@ public class MainViewController implements Initializable {
     }
 
     TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
-        if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
+        if (sourcesPane == null || sourcesPane.getExpandedPane() == null) {
             return null;
         }
-        return (TreeView<TimeSeriesBinding<Double>>) sourcesTabPane.getSelectionModel().getSelectedItem().getContent();
+        return (TreeView<TimeSeriesBinding<Double>>) sourcesPane.getExpandedPane().getContent();
     }
 
     private void showCommandBar() {
@@ -566,7 +599,7 @@ public class MainViewController implements Initializable {
     private void clearWorkspace() {
         logger.trace(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
-        sourcesTabPane.clearAllTabs();
+        sourcesPane.getPanes().clear();
         seriesControllers.clear();
         sourcesAdapters.values().stream().distinct().forEach(dataAdapter -> {
             try {
@@ -668,19 +701,20 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void showAdapterDialog(Tab newTab, DataAdapterDialog dlg) {
+    private void showAdapterDialog(TitledPane newSourcePane, DataAdapterDialog dlg) {
         dlg.showAndWait().ifPresent(da -> {
-            newTab.setText(da.getSourceName());
+            newSourcePane.setText(da.getSourceName());
             sourceMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
                         Optional<TreeView<TimeSeriesBinding<Double>>> treeView = (Optional<TreeView<TimeSeriesBinding<Double>>>) event.getSource().getValue();
                         if (treeView.isPresent()) {
-                            newTab.setContent(treeView.get());
-                            sourcesAdapters.put(newTab, da);
-                            sourcesTabPane.getTabs().add(newTab);
-                            sourcesTabPane.getSelectionModel().select(newTab);
+                            newSourcePane.setContent(treeView.get());
+                            sourcesAdapters.put(newSourcePane, da);
+                            sourcesPane.getPanes().add(newSourcePane);
+                            newSourcePane.setExpanded(true);
+                         //   sourcesPane.getPanes().get.select(newSourcePane);
                         }
                     },
                     event -> {
@@ -691,13 +725,13 @@ public class MainViewController implements Initializable {
     }
 
     private void loadAdapters(DataAdapter da) throws DataAdapterException {
-        Tab newTab = new Tab();
-        newTab.setText(da.getSourceName());
+        TitledPane newSourcePane = newSourcePane();
+        newSourcePane.setText(da.getSourceName());
         Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
         treeView = buildTreeViewForTarget(da);
         if (treeView.isPresent()) {
-            newTab.setContent(treeView.get());
-            sourcesAdapters.put(newTab, da);
+            newSourcePane.setContent(treeView.get());
+            sourcesAdapters.put(newSourcePane, da);
         }
         else {
             TreeItem<TimeSeriesBinding<Double>> i = new TreeItem<>();
@@ -705,11 +739,12 @@ public class MainViewController implements Initializable {
             Label l = new Label("<Failed to connect to \"" + da.getSourceName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
-            newTab.setContent(new TreeView<>(i));
+            newSourcePane.setContent(new TreeView<>(i));
         }
         Platform.runLater(() -> {
-            sourcesTabPane.getTabs().add(newTab);
-            sourcesTabPane.getSelectionModel().select(newTab);
+            sourcesPane.getPanes().add(newSourcePane);
+            newSourcePane.setExpanded(true);
+           // sourcesPane.getSelectionModel().select(newSourcePane);
         });
     }
 
@@ -741,7 +776,7 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
         try {
-            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
+            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters.values());
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
