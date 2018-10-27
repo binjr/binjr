@@ -54,14 +54,15 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -86,8 +87,11 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
 /**
  * The controller class for the main view
@@ -105,6 +109,7 @@ public class MainViewController implements Initializable {
     private final Map<TitledPane, DataAdapter> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+    public static final double TOOL_BUTTON_SIZE = 20;
 
     public MenuButton debugMenuButton;
     public MenuItem consoleMenuItem;
@@ -224,7 +229,7 @@ public class MainViewController implements Initializable {
             StageAppearanceManager.getInstance().register(stage);
         });
         worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
-      //  sourcesPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
+        sourcesPane.getPanes().addListener(this::onSourceTabChanged);
       //  sourcesPane.setOnAddNewTab(this::handleAddSource);
 //        sourcesPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 //            invalidateSearchResults();
@@ -487,12 +492,75 @@ public class MainViewController implements Initializable {
         }
     }
 
+    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
+        ButtonBase btn = btnFactory.get();
+        btn.setText(text);
+        btn.setPrefHeight(TOOL_BUTTON_SIZE);
+        btn.setMaxHeight(TOOL_BUTTON_SIZE);
+        btn.setMinHeight(TOOL_BUTTON_SIZE);
+        btn.setPrefWidth(TOOL_BUTTON_SIZE);
+        btn.setMaxWidth(TOOL_BUTTON_SIZE);
+        btn.setMinWidth(TOOL_BUTTON_SIZE);
+        btn.getStyleClass().addAll(styleClass);
+        btn.setAlignment(Pos.CENTER);
+        Region icon = new Region();
+        icon.getStyleClass().addAll(iconStyleClass);
+        btn.setGraphic(icon);
+        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btn.setTooltip(new Tooltip(tooltipMsg));
+        return btn;
+    }
 
-    private TitledPane newSourcePane(){
-        TitledPane sourcePane = new TitledPane();
+    private TitledPane newSourcePane(DataAdapter da){
+        TitledPane newPane = new TitledPane();
+        Label label = new Label();
+        da.getBindingManager().bind(label.textProperty(), newPane.textProperty());
+      //  da.getBindingManager().bind(label.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty().not());
 
-        sourcePane.setAnimated(false);
-        return sourcePane;
+        newPane.setAnimated(false);
+        GridPane titleRegion = new GridPane();
+        titleRegion.setHgap(5);
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+        da.getBindingManager().bind( titleRegion.minWidthProperty(),newPane.widthProperty().subtract(30));
+        da.getBindingManager().bind( titleRegion.maxWidthProperty(),newPane.widthProperty().subtract(30));
+
+        // *** Toolbar ***
+        HBox toolbar = new HBox();
+        toolbar.getStyleClass().add("title-pane-tool-bar");
+        toolbar.setAlignment(Pos.CENTER);
+        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
+        closeButton.setOnAction(event -> {
+            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + "{CURRENT SOURCE NAME}" + "\"?",
+                    "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+             //   worksheet.getCharts().remove(currentViewPort.getDataStore());
+            }
+        });
+      //  bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
+
+        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+     //   editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
+       // editButton.setOnAction(event -> newPane.setExpanded(true));
+
+       // editButtonsGroup.getToggles().add(editButton);
+        toolbar.getChildren().addAll(editButton, closeButton);
+        titleRegion.getChildren().addAll(label,  toolbar);
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.CENTER);
+       GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
+        newPane.setGraphic(titleRegion);
+        newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        newPane.setAnimated(false);
+
+        titleRegion.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+            //    chartNameField.selectAll();
+              //  chartNameField.requestFocus();
+              //  currentViewPort.getDataStore().setShowProperties(true);
+            }
+        });
+        return newPane;
     }
 
     //region private members
@@ -502,7 +570,7 @@ public class MainViewController implements Initializable {
             MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(newSourcePane(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
+                    showAdapterDialog(DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
                     Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
@@ -701,9 +769,10 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void showAdapterDialog(TitledPane newSourcePane, DataAdapterDialog dlg) {
+    private void showAdapterDialog( DataAdapterDialog dlg) {
         dlg.showAndWait().ifPresent(da -> {
-            newSourcePane.setText(da.getSourceName());
+            TitledPane newSourcePane = newSourcePane(da);
+           // newSourcePane.setText(da.getSourceName());
             sourceMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
@@ -725,7 +794,7 @@ public class MainViewController implements Initializable {
     }
 
     private void loadAdapters(DataAdapter da) throws DataAdapterException {
-        TitledPane newSourcePane = newSourcePane();
+        TitledPane newSourcePane = newSourcePane(da);
         newSourcePane.setText(da.getSourceName());
         Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
         treeView = buildTreeViewForTarget(da);
@@ -812,6 +881,7 @@ public class MainViewController implements Initializable {
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
+        treeView.setShowRoot(false);
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
             final TreeCell<TimeSeriesBinding<Double>> cell = new TreeCell<>();
             cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
@@ -1048,7 +1118,7 @@ public class MainViewController implements Initializable {
         logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
 
-    private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
+    private void onSourceTabChanged(ListChangeListener.Change<? extends TitledPane> c) {
         workspace.clearSources();
         while (c.next()) {
             if (c.wasPermutated()) {

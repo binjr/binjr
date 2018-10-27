@@ -23,6 +23,7 @@ import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.util.function.CheckedFunction;
+import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.scene.control.TreeItem;
 
 import java.io.IOException;
@@ -41,6 +42,7 @@ import java.util.UUID;
 public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoCloseable {
     private UUID id = UUID.randomUUID();
     private volatile boolean closed = false;
+    private final BindingManager bindingManager = new BindingManager();
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -177,6 +179,7 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
 
     @Override
     public void close() {
+        bindingManager.close();
         closed = true;
     }
 
@@ -186,5 +189,9 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
                 "id=" + id +
                 "sourceName" + getSourceName() +
                 '}';
+    }
+
+    public BindingManager getBindingManager() {
+        return bindingManager;
     }
 }
