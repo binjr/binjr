@@ -428,7 +428,7 @@
   }
 
 .binjr-content-view {
-   -fx-border-color:  red;
+   /*-fx-border-color:  red;*/
    -fx-border-width:0;
 }
 
@@ -1291,8 +1291,8 @@
  ******************************************************************************/
 
 .series-table .titled-pane {
-       -fx-border-color:  -binjr-control-border-color;
-       -fx-border-width:0;
+       -fx-border-color:  -binjr-button-background-color;/*-binjr-pane-background-color;*/
+       -fx-border-width: 1 0 1 0;
    /* -fx-text-fill: -fx-text-base-color;*/
 }
 
@@ -1320,6 +1320,11 @@
 
 .series-table .titled-pane:focused > .title > .arrow-button .arrow {
     -fx-effect:null;
+   /* -fx-background-color:-binjr-control-hilite-color;*/
+}
+
+.series-table .titled-pane:expanded > .title > .arrow-button .arrow {
+   -fx-background-color:-binjr-control-hilite-color;
 }
 
 .series-table .titled-pane > .title > .arrow-button .arrow {

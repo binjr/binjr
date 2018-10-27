@@ -517,7 +517,6 @@ public class MainViewController implements Initializable {
         da.getBindingManager().bind(label.textProperty(), newPane.textProperty());
       //  da.getBindingManager().bind(label.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty().not());
 
-        newPane.setAnimated(false);
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
         titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
@@ -531,8 +530,9 @@ public class MainViewController implements Initializable {
         toolbar.setAlignment(Pos.CENTER);
         Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
         closeButton.setOnAction(event -> {
-            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + "{CURRENT SOURCE NAME}" + "\"?",
+            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + newPane.getText() + "\"?",
                     "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                sourcesPane.getPanes().remove(newPane);
              //   worksheet.getCharts().remove(currentViewPort.getDataStore());
             }
         });
@@ -551,7 +551,7 @@ public class MainViewController implements Initializable {
         GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        newPane.setAnimated(false);
+      //  newPane.setAnimated(false);
 
         titleRegion.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
