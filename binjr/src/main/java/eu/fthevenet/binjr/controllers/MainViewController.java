@@ -43,10 +43,12 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
@@ -195,28 +197,28 @@ public class MainViewController implements Initializable {
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
 
-//        sourcesPane.expandedPaneProperty().addListener(
-//                (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-//                    Boolean expandRequiered = true;
-//                    for (TitledPane pane : sourcesPane.getPanes()) {
-//                        if (pane.isExpanded()) {
-//                            expandRequiered = false;
-//
+        sourcesPane.expandedPaneProperty().addListener(
+                (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
+                    Boolean expandRequiered = true;
+                    for (TitledPane pane : sourcesPane.getPanes()) {
+                        if (pane.isExpanded()) {
+                            expandRequiered = false;
+
+                        }
+                    }
+//                    getAttachedViewport(newPane).ifPresent(nv -> {
+//                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
+//                        if (editButtonsGroup.getSelectedToggle() != null) {
+//                            nv.getDataStore().setShowProperties(true);
 //                        }
-//                    }
-////                    getAttachedViewport(newPane).ifPresent(nv -> {
-////                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
-////                        if (editButtonsGroup.getSelectedToggle() != null) {
-////                            nv.getDataStore().setShowProperties(true);
-////                        }
-////
-////                    });
-//                    if ((expandRequiered) && (oldPane != null)) {
-//                        Platform.runLater(() -> {
-//                            sourcesPane.setExpandedPane(oldPane);
-//                        });
-//                    }
-//                });
+//
+//                    });
+                    if ((expandRequiered) && (oldPane != null)) {
+                        Platform.runLater(() -> {
+                            sourcesPane.setExpandedPane(oldPane);
+                        });
+                    }
+                });
 
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
@@ -508,7 +510,7 @@ public class MainViewController implements Initializable {
         TitledPane newPane = new TitledPane();
         Label label = new Label();
         source.getBindingManager().bind(label.textProperty(), source.nameProperty());
-        //  da.getBindingManager().bind(label.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty().not());
+//        source.getBindingManager().bind(label.visibleProperty(), source.editableProperty());
 
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
@@ -523,7 +525,7 @@ public class MainViewController implements Initializable {
         toolbar.setAlignment(Pos.CENTER);
         Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
         closeButton.setOnAction(event -> {
-            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + newPane.getText() + "\"?",
+            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
                     "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 sourcesPane.getPanes().remove(newPane);
                 //   worksheet.getCharts().remove(currentViewPort.getDataStore());
@@ -532,12 +534,10 @@ public class MainViewController implements Initializable {
         //  bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
 
         ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
-        //   editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
+        editButton.selectedProperty().bindBidirectional(source.editableProperty());
         // editButton.setOnAction(event -> newPane.setExpanded(true));
 
-        // editButtonsGroup.getToggles().add(editButton);
-        toolbar.getChildren().addAll(editButton, closeButton);
-        titleRegion.getChildren().addAll(label, toolbar);
+
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
@@ -546,13 +546,36 @@ public class MainViewController implements Initializable {
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
 
-        titleRegion.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
-                //    chartNameField.selectAll();
-                //  chartNameField.requestFocus();
-                //  currentViewPort.getDataStore().setShowProperties(true);
+        HBox editFieldsGroup = new HBox();
+        DoubleBinding db = Bindings.createDoubleBinding(() -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
+        source.getBindingManager().bind(editFieldsGroup.prefHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.maxHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.minHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.visibleProperty(), source.editableProperty());
+        editFieldsGroup.setSpacing(5);
+        TextField sourceNameField = new TextField();
+        sourceNameField.textProperty().bindBidirectional(source.nameProperty());
+        editFieldsGroup.getChildren().add(sourceNameField);
+        sourceNameField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                source.setEditable(false);
             }
         });
+
+        HBox.setHgrow(sourceNameField, Priority.ALWAYS);
+        // editButtonsGroup.getToggles().add(editButton);
+        toolbar.getChildren().addAll(editButton, closeButton);
+        titleRegion.getChildren().addAll(label,editFieldsGroup, toolbar);
+
+        titleRegion.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                source.setEditable(true);
+                sourceNameField.selectAll();
+                sourceNameField.requestFocus();
+            }
+        });
+
+
         return newPane;
     }
 

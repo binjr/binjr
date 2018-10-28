@@ -24,6 +24,7 @@ import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
 import javax.xml.bind.annotation.*;
@@ -49,6 +50,7 @@ public class Source implements Dirtyable, Closeable {
     private final ChangeWatcher status;
     private DataAdapter adapter;
     private final BindingManager bindingManager = new BindingManager();
+    private Property<Boolean>  editable = new SimpleBooleanProperty();
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
@@ -182,5 +184,18 @@ public class Source implements Dirtyable, Closeable {
 
     public void setAdapter(DataAdapter adapter) {
         this.adapter = adapter;
+    }
+
+    @XmlTransient
+    public Boolean getEditable() {
+        return editable.getValue();
+    }
+
+    public Property<Boolean> editableProperty() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable.setValue(editable);
     }
 }
