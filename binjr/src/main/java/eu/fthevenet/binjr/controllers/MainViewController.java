@@ -523,7 +523,7 @@ public class MainViewController implements Initializable {
         HBox toolbar = new HBox();
         toolbar.getStyleClass().add("title-pane-tool-bar");
         toolbar.setAlignment(Pos.CENTER);
-        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
+        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
         closeButton.setOnAction(event -> {
             if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
                     "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
@@ -533,9 +533,9 @@ public class MainViewController implements Initializable {
         });
         //  bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
 
-        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
-        editButton.selectedProperty().bindBidirectional(source.editableProperty());
-        // editButton.setOnAction(event -> newPane.setExpanded(true));
+//        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+//        editButton.selectedProperty().bindBidirectional(source.editableProperty());
+//
 
 
         HBox hBox = new HBox();
@@ -564,7 +564,7 @@ public class MainViewController implements Initializable {
 
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
         // editButtonsGroup.getToggles().add(editButton);
-        toolbar.getChildren().addAll(editButton, closeButton);
+        toolbar.getChildren().addAll(closeButton);
         titleRegion.getChildren().addAll(label,editFieldsGroup, toolbar);
 
         titleRegion.setOnMouseClicked(event -> {
