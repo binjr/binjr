@@ -21,10 +21,16 @@ import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
+import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import java.io.Closeable;
+import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,21 +39,18 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-@XmlAccessorType(XmlAccessType.FIELD)
+@XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Source")
-public class Source implements Dirtyable {
-    @XmlAttribute(name = "id")
+public class Source implements Dirtyable, Closeable {
     private UUID adapterId;
-    @XmlAttribute(name = "name")
     @IsDirtyable
-    private String name;
-    @XmlAttribute(name = "adapter")
+    private Property<String> name = new SimpleStringProperty();
     private String adapterClassName;
-    @XmlJavaTypeAdapter(ParameterMapAdapter.class)
-    @XmlElement(name = "AdapterParameters")
     private Map<String, String> adapterParams;
-    @XmlTransient
     private final ChangeWatcher status;
+    private DataAdapter adapter;
+    private final BindingManager bindingManager = new BindingManager();
+    private Property<Boolean>  editable = new SimpleBooleanProperty();
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
@@ -61,6 +64,7 @@ public class Source implements Dirtyable {
             throw new IllegalArgumentException("adapter cannot be null");
         }
         Source newSource = new Source();
+        newSource.setAdapter(adapter);
         newSource.setName(adapter.getSourceName());
         newSource.setAdapterClassName(adapter.getClass().getName());
         newSource.setAdapterParams(adapter.getParams());
@@ -80,8 +84,9 @@ public class Source implements Dirtyable {
      *
      * @return the name of the {@link Source}
      */
+    @XmlAttribute(name = "name")
     public String getName() {
-        return name;
+        return name.getValue();
     }
 
     /**
@@ -90,7 +95,11 @@ public class Source implements Dirtyable {
      * @param name the name of the {@link Source}
      */
     public void setName(String name) {
-        this.name = name;
+        this.name.setValue(name);
+    }
+
+    public Property<String> nameProperty() {
+        return this.name;
     }
 
     /**
@@ -98,6 +107,7 @@ public class Source implements Dirtyable {
      *
      * @return the name of the class that implements the {@link DataAdapter} for the {@link Source}
      */
+    @XmlAttribute(name = "adapter")
     public String getAdapterClassName() {
         return adapterClassName;
     }
@@ -107,6 +117,8 @@ public class Source implements Dirtyable {
      *
      * @return a map of the parameters required to establish a connection to the data source
      */
+    @XmlJavaTypeAdapter(ParameterMapAdapter.class)
+    @XmlElement(name = "AdapterParameters")
     public Map<String, String> getAdapterParams() {
         return adapterParams;
     }
@@ -116,6 +128,7 @@ public class Source implements Dirtyable {
      *
      * @return the id of the {@link DataAdapter} attached to the source
      */
+    @XmlAttribute(name = "id")
     public UUID getAdapterId() {
         return adapterId;
     }
@@ -151,5 +164,38 @@ public class Source implements Dirtyable {
 
     private void setAdapterParams(Map<String, String> adapterParams) {
         this.adapterParams = adapterParams;
+    }
+
+    @XmlTransient
+    public DataAdapter getAdapter() {
+        return adapter;
+    }
+
+    @XmlTransient
+    public BindingManager getBindingManager() {
+        return bindingManager;
+    }
+
+    @Override
+    public void close() {
+        bindingManager.close();
+        adapter.close();
+    }
+
+    public void setAdapter(DataAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    @XmlTransient
+    public Boolean getEditable() {
+        return editable.getValue();
+    }
+
+    public Property<Boolean> editableProperty() {
+        return editable;
+    }
+
+    public void setEditable(Boolean editable) {
+        this.editable.setValue(editable);
     }
 }

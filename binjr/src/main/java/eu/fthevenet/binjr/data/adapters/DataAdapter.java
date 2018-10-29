@@ -22,8 +22,12 @@ import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
+import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapter;
 import eu.fthevenet.util.function.CheckedFunction;
+import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.scene.control.TreeItem;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,8 +43,9 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoCloseable {
+    private static final Logger logger = LogManager.getLogger(DataAdapter.class);
     private UUID id = UUID.randomUUID();
-    private volatile boolean closed = false;
+    protected volatile boolean closed = false;
 
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
@@ -177,6 +182,7 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
 
     @Override
     public void close() {
+        logger.trace("Closing DataAdapter " + getId());
         closed = true;
     }
 
@@ -187,4 +193,5 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
                 "sourceName" + getSourceName() +
                 '}';
     }
+
 }
