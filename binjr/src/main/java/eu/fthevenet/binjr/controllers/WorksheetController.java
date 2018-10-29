@@ -1111,6 +1111,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
+    public void setShowPropertiesPane(boolean value) {
+        ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        if (currentViewport != null) {
+            currentViewport.getDataStore().setShowProperties(value);
+        }
+    }
+
     //endregion
 
     @Override
