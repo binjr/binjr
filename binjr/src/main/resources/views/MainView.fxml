@@ -27,9 +27,8 @@
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.MainViewController">
-    <SplitPane fx:id="contentView" cache="true" styleClass="binjr-content-view" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0"
-               AnchorPane.topAnchor="0"
-               HBox.hgrow="ALWAYS">
+    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" styleClass="binjr-content-view" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0"
+               AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
         <AnchorPane SplitPane.resizableWithParent="false">
             <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
                 <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddSource" styleClass="add-source-background-icon" wrapText="true">
@@ -44,7 +43,7 @@
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <Accordion fx:id="sourcesPane" styleClass="series-table" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <Accordion fx:id="sourcesPane" minWidth="20" mouseTransparent="true" prefHeight="200.0" prefWidth="200.0" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 
                 </Accordion>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
@@ -130,7 +129,7 @@
                 </HBox>
             </graphic>
         </Button>
-        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="45.0">
             <tooltip>
                 <Tooltip text="Workspaces">
@@ -196,7 +195,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" styleClass="command-bar-pinned-item" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="90.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -230,7 +229,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" styleClass="command-bar-pinned-item" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -274,7 +273,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton styleClass="command-bar-pinned-item" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="180.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -312,7 +311,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton fx:id="debugMenuButton" visible="false" styleClass="command-bar-pinned-item" mnemonicParsing="false" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="40.0" text="Debug" popupSide="RIGHT" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="0.0"
+        <MenuButton fx:id="debugMenuButton" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Debug" visible="false" AnchorPane.bottomAnchor="90.0" AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
@@ -405,7 +404,7 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <Button styleClass="command-bar-pinned-item" mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="settings-icon"/>

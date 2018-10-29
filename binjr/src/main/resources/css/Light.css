@@ -119,9 +119,9 @@
 .button:hover:pressed,
 .menu-button:hover:pressed {
   -fx-opacity: 100%;
-  -fx-background-color: -binjr-dark-blue-color;
+  -fx-background-color: -binjr-blue-color;
   -fx-text-fill: white;
-   -fx-border-color:-binjr-dark-blue-color;
+   -fx-border-color:-binjr-blue-color;
 }
 
 
@@ -129,7 +129,7 @@
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
 .toggle-button:selected:hover:pressed {
-  -fx-background-color: -binjr-dark-blue-color ;
+  -fx-background-color: -binjr-blue-color ;
 
 }
 
@@ -184,7 +184,7 @@
 
      -fx-prompt-text-fill: #9f9f9f;
 
-     /* -fx-highlight-fill: #008287; TODO: this probably is the "active" color" */
+      -fx-highlight-fill:-binjr-blue-color;/* TODO: this probably is the "active" color" */
      -fx-highlight-text-fill: white;
  }
 
@@ -1384,7 +1384,7 @@
  ******************************************************************************/
 
 .tree-cell {
-    -fx-padding: 1;/*0.05em; /* 3 */
+    -fx-padding: 1 1 1 15;;/*0.05em; /* 3 */
     -fx-indent: 1.3em;
 }
 .tree-cell .label {

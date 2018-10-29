@@ -514,8 +514,8 @@ public class MainViewController implements Initializable {
 
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
-        titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
-        titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
         source.getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
         source.getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
 
@@ -536,8 +536,6 @@ public class MainViewController implements Initializable {
 //        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
 //        editButton.selectedProperty().bindBidirectional(source.editableProperty());
 //
-
-
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
@@ -574,8 +572,6 @@ public class MainViewController implements Initializable {
                 sourceNameField.requestFocus();
             }
         });
-
-
         return newPane;
     }
 
