@@ -22,9 +22,7 @@ import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
-import eu.fthevenet.binjr.sources.csv.adapters.CsvFileAdapter;
 import eu.fthevenet.util.function.CheckedFunction;
-import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -194,4 +192,7 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
                 '}';
     }
 
+    public boolean isClosed() {
+        return closed;
+    }
 }

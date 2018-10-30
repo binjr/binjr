@@ -931,9 +931,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     void invalidate(ChartViewPort<Double> viewPort, boolean dontPlot, boolean forceRefresh) {
-
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
-            //logger.trace(() -> Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n")));
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {
                 XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
                 logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));

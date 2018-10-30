@@ -86,6 +86,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -1134,11 +1135,13 @@ public class MainViewController implements Initializable {
     }
 
     private void onSourceTabChanged(ListChangeListener.Change<? extends TitledPane> c) {
+        AtomicBoolean removed = new AtomicBoolean(false);
         while (c.next()) {
             c.getAddedSubList().forEach(t -> {
                 workspace.addSource(sourcesAdapters.get(t));
             });
             c.getRemoved().forEach(t -> {
+                removed.set(true);
                 try {
                     Source removedSource = sourcesAdapters.remove(t);
                     if (removedSource != null) {
@@ -1153,6 +1156,9 @@ public class MainViewController implements Initializable {
                     Dialogs.notifyException("On error occurred while closing Source", e);
                 }
             });
+        }
+        if (removed.get()) {
+            refreshAllWorksheets();
         }
         logger.debug(() -> "Sources in current workspace: " +
                 StreamSupport.stream(workspace.getSources().spliterator(), false)
@@ -1260,6 +1266,10 @@ public class MainViewController implements Initializable {
             return null;
         }
         return seriesControllers.get(selectedTab);
+    }
+
+    public void refreshAllWorksheets() {
+        seriesControllers.values().forEach(WorksheetController::refresh);
     }
 
     public void handleDebugForceGC(ActionEvent actionEvent) {
