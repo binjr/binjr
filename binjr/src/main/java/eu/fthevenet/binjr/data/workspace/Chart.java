@@ -175,7 +175,13 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      */
     public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
         // prune series from closed adapters
-        series.removeIf(seriesInfo -> seriesInfo.getBinding().getAdapter().isClosed());
+        series.removeIf(seriesInfo -> {
+            if (seriesInfo.getBinding().getAdapter().isClosed()) {
+                logger.debug(() -> seriesInfo.getDisplayName() + " will be pruned because attached adapter " + seriesInfo.getBinding().getAdapter().getId() + " is closed.");
+                return true;
+            }
+            return false;
+        });
         // Define the reduction transform to apply
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters
