@@ -139,7 +139,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
 
     @Override
     public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
-        if (closed) {
+        if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
         Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
