@@ -131,7 +131,7 @@
                                                     <columns>
                                                         <TableColumn fx:id="enabledColumn" prefWidth="24.0" resizable="false" sortable="false">
                                                             <cellValueFactory>
-                                                                <PropertyValueFactory property="disabled"/>
+                                                                <PropertyValueFactory property="enabled"/>
                                                             </cellValueFactory>
                                                         </TableColumn>
                                                         <TableColumn sortable="false" text="Name">
