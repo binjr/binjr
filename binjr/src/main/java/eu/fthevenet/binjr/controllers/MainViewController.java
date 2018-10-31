@@ -531,16 +531,11 @@ public class MainViewController implements Initializable {
         Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
         closeButton.setOnAction(event -> {
             if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
-                    "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                    "WARNING: This will remove all associated series from existing worksheets.", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 sourcesPane.getPanes().remove(newPane);
-                //   worksheet.getCharts().remove(currentViewPort.getDataStore());
             }
         });
-        //  bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
 
-//        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
-//        editButton.selectedProperty().bindBidirectional(source.editableProperty());
-//
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
@@ -682,7 +677,7 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
-        logger.trace(() -> "Clearing workspace");
+        logger.debug(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
         sourcesPane.getPanes().clear();
         seriesControllers.clear();
@@ -1146,7 +1141,7 @@ public class MainViewController implements Initializable {
                     Source removedSource = sourcesAdapters.remove(t);
                     if (removedSource != null) {
                         workspace.removeSource(removedSource);
-                        logger.trace("Closing Source " + removedSource.getName());
+                        logger.debug("Closing Source " + removedSource.getName());
                         removedSource.close();
                     }
                     else {
