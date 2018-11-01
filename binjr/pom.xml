@@ -110,6 +110,7 @@
                                         <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
                                     </modulePath>
                                     <modules>
+                                        <!-- Common modules for all platforms -->
                                         <module>javafx.controls</module>
                                         <module>javafx.fxml</module>
                                         <module>javafx.swing</module>
@@ -118,8 +119,12 @@
                                         <module>java.sql</module>
                                         <module>java.xml</module>
                                         <module>java.management</module>
+                                        <module>java.rmi</module>
+                                        <module>java.management.rmi</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
+                                        <module>jdk.zipfs</module>
+                                        <!-- Platform specific -->
                                         <module>jdk.crypto.mscapi</module>
                                     </modules>
                                     <compression>2</compression>
@@ -180,6 +185,7 @@
                                         <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
                                     </modulePath>
                                     <modules>
+                                        <!-- Common modules for all platforms -->
                                         <module>javafx.controls</module>
                                         <module>javafx.fxml</module>
                                         <module>javafx.swing</module>
@@ -188,8 +194,12 @@
                                         <module>java.sql</module>
                                         <module>java.xml</module>
                                         <module>java.management</module>
+                                        <module>java.rmi</module>
+                                        <module>java.management.rmi</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
+                                        <module>jdk.zipfs</module>
+                                        <!-- Platform specific -->
                                     </modules>
                                     <compression>2</compression>
                                     <stripDebug>true</stripDebug>
@@ -249,6 +259,7 @@
                                         <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
                                     </modulePath>
                                     <modules>
+                                        <!-- Common modules for all platforms -->
                                         <module>javafx.controls</module>
                                         <module>javafx.fxml</module>
                                         <module>javafx.swing</module>
@@ -257,8 +268,12 @@
                                         <module>java.sql</module>
                                         <module>java.xml</module>
                                         <module>java.management</module>
+                                        <module>java.rmi</module>
+                                        <module>java.management.rmi</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
+                                        <module>jdk.zipfs</module>
+                                        <!-- Platform specific -->
                                     </modules>
                                     <compression>2</compression>
                                     <stripDebug>true</stripDebug>

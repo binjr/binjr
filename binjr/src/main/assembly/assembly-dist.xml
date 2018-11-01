@@ -28,32 +28,39 @@
     <files>
         <file>
             <source>${project.build.directory}/${project.build.finalName}.jar</source>
-            <outputDirectory>/app</outputDirectory>
+            <outputDirectory>app</outputDirectory>
         </file>
         <file>
             <source>${binjr.deploy.launcher}</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/src/main/deploy/resources/LICENSE</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </file>
         <file>
             <source>${project.basedir}/src/main/deploy/resources/NOTICE</source>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </file>
     </files>
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/${binjr.deploy.jdk}-image</directory>
-            <outputDirectory>/runtime</outputDirectory>
+            <outputDirectory>runtime</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>.</directory>
+            <outputDirectory>plugins</outputDirectory>
+            <excludes>
+                <exclude>*/**</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <!--<outputFileNameMapping>${artifact.name}.${artifact.extension}</outputFileNameMapping>-->
             <unpack>false</unpack>
-            <outputDirectory>/app</outputDirectory>
+            <outputDirectory>app</outputDirectory>
         </dependencySet>
     </dependencySets>
 </assembly>

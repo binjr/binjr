@@ -29,7 +29,6 @@ import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.data.workspace.*;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
-import eu.fthevenet.binjr.dialogs.EditWorksheetDialog;
 import eu.fthevenet.binjr.dialogs.StageAppearanceManager;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
@@ -43,24 +42,27 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -85,8 +87,11 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 
 /**
  * The controller class for the main view
@@ -101,9 +106,10 @@ public class MainViewController implements Initializable {
     private static double searchBarPaneDistance = 40;
     private final Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
-    private final Map<Tab, DataAdapter> sourcesAdapters = new HashMap<>();
+    private final Map<TitledPane, Source> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+    public static final double TOOL_BUTTON_SIZE = 20;
 
     public MenuButton debugMenuButton;
     public MenuItem consoleMenuItem;
@@ -136,7 +142,7 @@ public class MainViewController implements Initializable {
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
-    private TearableTabPane sourcesTabPane;
+    private Accordion sourcesPane;
     @FXML
     private TearableTabPane worksheetTabPane;
     @FXML
@@ -179,16 +185,40 @@ public class MainViewController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
         assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
-        assert sourcesTabPane != null : "fx:id\"sourceTabPane\" was not injected!";
+        assert sourcesPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
         debugMenuButton.visibleProperty().bind(AppEnvironment.getInstance().debugModeProperty());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
-        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesTabPane.getTabs()).isEqualTo(0);
+        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
-        sourcesTabPane.mouseTransparentProperty().bind(selectedSourcePresent);
+        sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
+
+        sourcesPane.expandedPaneProperty().addListener(
+                (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
+                    Boolean expandRequiered = true;
+                    for (TitledPane pane : sourcesPane.getPanes()) {
+                        if (pane.isExpanded()) {
+                            expandRequiered = false;
+
+                        }
+                    }
+//                    getAttachedViewport(newPane).ifPresent(nv -> {
+//                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
+//                        if (editButtonsGroup.getSelectedToggle() != null) {
+//                            nv.getDataStore().setShowProperties(true);
+//                        }
+//
+//                    });
+                    if ((expandRequiered) && (oldPane != null)) {
+                        Platform.runLater(() -> {
+                            sourcesPane.setExpandedPane(oldPane);
+                        });
+                    }
+                });
+
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
@@ -199,14 +229,14 @@ public class MainViewController implements Initializable {
             StageAppearanceManager.getInstance().register(stage);
         });
         worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
-        sourcesTabPane.getTabs().addListener((ListChangeListener<? super Tab>) this::onSourceTabChanged);
-        sourcesTabPane.setOnAddNewTab(this::handleAddSource);
-        sourcesTabPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            invalidateSearchResults();
-            if (newValue != null) {
-                findNext();
-            }
-        });
+        sourcesPane.getPanes().addListener(this::onSourceTabChanged);
+        //  sourcesPane.setOnAddNewTab(this::handleAddSource);
+//        sourcesPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+//            invalidateSearchResults();
+//            if (newValue != null) {
+//                findNext();
+//            }
+//        });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
             consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
@@ -462,6 +492,89 @@ public class MainViewController implements Initializable {
         }
     }
 
+    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
+        ButtonBase btn = btnFactory.get();
+        btn.setText(text);
+        btn.setPrefHeight(TOOL_BUTTON_SIZE);
+        btn.setMaxHeight(TOOL_BUTTON_SIZE);
+        btn.setMinHeight(TOOL_BUTTON_SIZE);
+        btn.setPrefWidth(TOOL_BUTTON_SIZE);
+        btn.setMaxWidth(TOOL_BUTTON_SIZE);
+        btn.setMinWidth(TOOL_BUTTON_SIZE);
+        btn.getStyleClass().addAll(styleClass);
+        btn.setAlignment(Pos.CENTER);
+        Region icon = new Region();
+        icon.getStyleClass().addAll(iconStyleClass);
+        btn.setGraphic(icon);
+        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btn.setTooltip(new Tooltip(tooltipMsg));
+        return btn;
+    }
+
+    private TitledPane newSourcePane(Source source) {
+        TitledPane newPane = new TitledPane();
+        Label label = new Label();
+        source.getBindingManager().bind(label.textProperty(), source.nameProperty());
+//        source.getBindingManager().bind(label.visibleProperty(), source.editableProperty());
+
+        GridPane titleRegion = new GridPane();
+        titleRegion.setHgap(5);
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+        source.getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
+        source.getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
+
+        // *** Toolbar ***
+        HBox toolbar = new HBox();
+        toolbar.getStyleClass().add("title-pane-tool-bar");
+        toolbar.setAlignment(Pos.CENTER);
+        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
+        closeButton.setOnAction(event -> {
+            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
+                    "WARNING: This will remove all associated series from existing worksheets.", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                sourcesPane.getPanes().remove(newPane);
+            }
+        });
+
+        HBox hBox = new HBox();
+        hBox.setAlignment(Pos.CENTER);
+        GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+        GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
+        newPane.setGraphic(titleRegion);
+        newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        newPane.setAnimated(false);
+
+        HBox editFieldsGroup = new HBox();
+        DoubleBinding db = Bindings.createDoubleBinding(() -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
+        source.getBindingManager().bind(editFieldsGroup.prefHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.maxHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.minHeightProperty(), db);
+        source.getBindingManager().bind(editFieldsGroup.visibleProperty(), source.editableProperty());
+        editFieldsGroup.setSpacing(5);
+        TextField sourceNameField = new TextField();
+        sourceNameField.textProperty().bindBidirectional(source.nameProperty());
+        editFieldsGroup.getChildren().add(sourceNameField);
+        sourceNameField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                source.setEditable(false);
+            }
+        });
+
+        HBox.setHgrow(sourceNameField, Priority.ALWAYS);
+        // editButtonsGroup.getToggles().add(editButton);
+        toolbar.getChildren().addAll(closeButton);
+        titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
+
+        titleRegion.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                source.setEditable(true);
+                sourceNameField.selectAll();
+                sourceNameField.requestFocus();
+            }
+        });
+        return newPane;
+    }
+
     //region private members
     private Collection<MenuItem> populateSourceMenu() {
         List<MenuItem> menuItems = new ArrayList<>();
@@ -469,7 +582,7 @@ public class MainViewController implements Initializable {
             MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(new Tab(), DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
+                    showAdapterDialog(DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
                 } catch (NoAdapterFoundException e) {
                     Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
@@ -482,10 +595,10 @@ public class MainViewController implements Initializable {
     }
 
     TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
-        if (sourcesTabPane == null || sourcesTabPane.getSelectionModel() == null || sourcesTabPane.getSelectionModel().getSelectedItem() == null) {
+        if (sourcesPane == null || sourcesPane.getExpandedPane() == null) {
             return null;
         }
-        return (TreeView<TimeSeriesBinding<Double>>) sourcesTabPane.getSelectionModel().getSelectedItem().getContent();
+        return (TreeView<TimeSeriesBinding<Double>>) sourcesPane.getExpandedPane().getContent();
     }
 
     private void showCommandBar() {
@@ -564,15 +677,15 @@ public class MainViewController implements Initializable {
     }
 
     private void clearWorkspace() {
-        logger.trace(() -> "Clearing workspace");
+        logger.debug(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
-        sourcesTabPane.clearAllTabs();
+        sourcesPane.getPanes().clear();
         seriesControllers.clear();
-        sourcesAdapters.values().stream().distinct().forEach(dataAdapter -> {
+        sourcesAdapters.values().forEach(source -> {
             try {
-                dataAdapter.close();
+                source.close();
             } catch (Exception e) {
-                Dialogs.notifyException("Error closing DataAdapter", e, root);
+                Dialogs.notifyException("Error closing Source", e, root);
             }
         });
         sourcesAdapters.clear();
@@ -599,7 +712,8 @@ public class MainViewController implements Initializable {
                             DataAdapter da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
                             da.loadParams(source.getAdapterParams());
                             da.setId(source.getAdapterId());
-                            loadAdapters(da);
+                            source.setAdapter(da);
+                            loadSource(source);
                         }
                         return wsFromfile;
                     },
@@ -668,19 +782,22 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void showAdapterDialog(Tab newTab, DataAdapterDialog dlg) {
+    private void showAdapterDialog(DataAdapterDialog dlg) {
         dlg.showAndWait().ifPresent(da -> {
-            newTab.setText(da.getSourceName());
+            Source newSource = Source.of(da);
+            TitledPane newSourcePane = newSourcePane(newSource);
+            // newSourcePane.setText(da.getSourceName());
             sourceMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
                         Optional<TreeView<TimeSeriesBinding<Double>>> treeView = (Optional<TreeView<TimeSeriesBinding<Double>>>) event.getSource().getValue();
                         if (treeView.isPresent()) {
-                            newTab.setContent(treeView.get());
-                            sourcesAdapters.put(newTab, da);
-                            sourcesTabPane.getTabs().add(newTab);
-                            sourcesTabPane.getSelectionModel().select(newTab);
+                            newSourcePane.setContent(treeView.get());
+                            sourcesAdapters.put(newSourcePane, newSource);
+                            sourcesPane.getPanes().add(newSourcePane);
+                            newSourcePane.setExpanded(true);
+                            //   sourcesPane.getPanes().get.select(newSourcePane);
                         }
                     },
                     event -> {
@@ -690,32 +807,33 @@ public class MainViewController implements Initializable {
         });
     }
 
-    private void loadAdapters(DataAdapter da) throws DataAdapterException {
-        Tab newTab = new Tab();
-        newTab.setText(da.getSourceName());
+    private void loadSource(Source source) throws DataAdapterException {
+        TitledPane newSourcePane = newSourcePane(source);
+        //  newSourcePane.setText(source.getSourceName());
         Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
-        treeView = buildTreeViewForTarget(da);
+        treeView = buildTreeViewForTarget(source.getAdapter());
         if (treeView.isPresent()) {
-            newTab.setContent(treeView.get());
-            sourcesAdapters.put(newTab, da);
+            newSourcePane.setContent(treeView.get());
+            sourcesAdapters.put(newSourcePane, source);
         }
         else {
             TreeItem<TimeSeriesBinding<Double>> i = new TreeItem<>();
             i.setValue(new TimeSeriesBinding<>());
-            Label l = new Label("<Failed to connect to \"" + da.getSourceName() + "\">");
+            Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
-            newTab.setContent(new TreeView<>(i));
+            newSourcePane.setContent(new TreeView<>(i));
         }
         Platform.runLater(() -> {
-            sourcesTabPane.getTabs().add(newTab);
-            sourcesTabPane.getSelectionModel().select(newTab);
+            sourcesPane.getPanes().add(newSourcePane);
+            newSourcePane.setExpanded(true);
+            // sourcesPane.getSelectionModel().select(newSourcePane);
         });
     }
 
     private boolean loadWorksheet(Worksheet<Double> worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
-        loadWorksheet(worksheet, newTab);
+        loadWorksheet(worksheet, newTab, false);
         worksheetTabPane.getTabs().add(newTab);
         worksheetTabPane.getSelectionModel().select(newTab);
         return false;
@@ -736,12 +854,12 @@ public class MainViewController implements Initializable {
         }
         Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
         worksheetCtrl.close();
-        loadWorksheet(worksheet, tab);
+        loadWorksheet(worksheet, tab, false);
     }
 
-    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab) {
+    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters);
+            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
@@ -756,27 +874,27 @@ public class MainViewController implements Initializable {
             }
             seriesControllers.put(newTab, current);
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
+            if (setToEditMode) {
+                logger.trace("Toggle edit mode for worksheet");
+                current.setShowPropertiesPane(true);
+            }
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
         }
     }
 
     private boolean editWorksheet(Worksheet<Double> worksheet) {
-        AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
-        EditWorksheetDialog<Double> dlg = new EditWorksheetDialog<>(worksheet, targetTabPane);
-        dlg.showAndWait().ifPresent(w -> {
-            EditableTab newTab = new EditableTab("");
-            loadWorksheet(w, newTab);
-            targetTabPane.getTabs().add(newTab);
-            targetTabPane.getSelectionModel().select(newTab);
-            wasNewTabCreated.set(true);
-        });
-        return wasNewTabCreated.get();
+        EditableTab newTab = new EditableTab("");
+        loadWorksheet(worksheet, newTab, true);
+        targetTabPane.getTabs().add(newTab);
+        targetTabPane.getSelectionModel().select(newTab);
+        return true;
     }
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
+        treeView.setShowRoot(false);
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
             final TreeCell<TimeSeriesBinding<Double>> cell = new TreeCell<>();
             cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
@@ -875,7 +993,6 @@ public class MainViewController implements Initializable {
                     binding.getUnitName(),
                     binding.getUnitPrefix()
             );
-            //  addToCurrentWorksheet(treeItem, c);
             List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
             getAllBindingsFromBranch(treeItem, bindings);
             for (TimeSeriesBinding<Double> b : bindings) {
@@ -932,7 +1049,6 @@ public class MainViewController implements Initializable {
                         fromDateTime,
                         toDateTime
                 );
-
                 if (editWorksheet(worksheet) && getSelectedWorksheetController() != null) {
                     List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);
@@ -1013,38 +1129,31 @@ public class MainViewController implements Initializable {
         logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
     }
 
-    private void onSourceTabChanged(ListChangeListener.Change<? extends Tab> c) {
-        workspace.clearSources();
+    private void onSourceTabChanged(ListChangeListener.Change<? extends TitledPane> c) {
+        AtomicBoolean removed = new AtomicBoolean(false);
         while (c.next()) {
-            if (c.wasPermutated()) {
-                for (int i = c.getFrom(); i < c.getTo(); ++i) {
-                    //permutate
-                }
-            }
-            else if (c.wasUpdated()) {
-                //update item
-            }
-            else {
-                c.getRemoved().forEach(t -> {
-                    try {
-                        DataAdapter removedAdapter = sourcesAdapters.remove(t);
-                        if (removedAdapter != null) {
-                            logger.trace("Closing DataAdapter " + removedAdapter.toString());
-                            removedAdapter.close();
-                        }
-                        else {
-                            logger.trace("No DataAdapter to close attached to tab " + t.getText());
-                        }
-                    } catch (Exception e) {
-                        Dialogs.notifyException("On error occurred while closing DataAdapter", e);
+            c.getAddedSubList().forEach(t -> {
+                workspace.addSource(sourcesAdapters.get(t));
+            });
+            c.getRemoved().forEach(t -> {
+                removed.set(true);
+                try {
+                    Source removedSource = sourcesAdapters.remove(t);
+                    if (removedSource != null) {
+                        workspace.removeSource(removedSource);
+                        logger.debug("Closing Source " + removedSource.getName());
+                        removedSource.close();
                     }
-                });
-            }
-            workspace.addSources(c.getList()
-                    .stream()
-                    .filter(t -> sourcesAdapters.get(t) != null)
-                    .map(t -> Source.of(sourcesAdapters.get(t)))
-                    .collect(Collectors.toList()));
+                    else {
+                        logger.trace("No Source to close attached to tab " + t.getText());
+                    }
+                } catch (Exception e) {
+                    Dialogs.notifyException("On error occurred while closing Source", e);
+                }
+            });
+        }
+        if (removed.get()) {
+            refreshAllWorksheets();
         }
         logger.debug(() -> "Sources in current workspace: " +
                 StreamSupport.stream(workspace.getSources().spliterator(), false)
@@ -1054,13 +1163,9 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
-        AtomicBoolean wasNewTabCreated = new AtomicBoolean(false);
         EditableTab newTab = new EditableTab("");
-        new EditWorksheetDialog<>(new Worksheet<>(), (Node) event.getSource()).showAndWait().ifPresent(w -> {
-            loadWorksheet(w, newTab);
-            wasNewTabCreated.set(true);
-        });
-        return wasNewTabCreated.get() ? Optional.of(newTab) : Optional.empty();
+        loadWorksheet(new Worksheet<>(), newTab, true);
+        return Optional.of(newTab);
     }
 
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
@@ -1156,6 +1261,10 @@ public class MainViewController implements Initializable {
             return null;
         }
         return seriesControllers.get(selectedTab);
+    }
+
+    public void refreshAllWorksheets() {
+        seriesControllers.values().forEach(WorksheetController::refresh);
     }
 
     public void handleDebugForceGC(ActionEvent actionEvent) {

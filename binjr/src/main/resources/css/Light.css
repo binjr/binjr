@@ -119,9 +119,9 @@
 .button:hover:pressed,
 .menu-button:hover:pressed {
   -fx-opacity: 100%;
-  -fx-background-color: -binjr-dark-blue-color;
+  -fx-background-color: -binjr-blue-color;
   -fx-text-fill: white;
-   -fx-border-color:-binjr-dark-blue-color;
+   -fx-border-color:-binjr-blue-color;
 }
 
 
@@ -129,7 +129,7 @@
 .toggle-button:pressed,
 .toggle-button:default:hover:pressed,
 .toggle-button:selected:hover:pressed {
-  -fx-background-color: -binjr-dark-blue-color ;
+  -fx-background-color: -binjr-blue-color ;
 
 }
 
@@ -184,7 +184,7 @@
 
      -fx-prompt-text-fill: #9f9f9f;
 
-     /* -fx-highlight-fill: #008287; TODO: this probably is the "active" color" */
+      -fx-highlight-fill:-binjr-blue-color;/* TODO: this probably is the "active" color" */
      -fx-highlight-text-fill: white;
  }
 
@@ -338,17 +338,28 @@
   .chart-viewport-parent {
    -fx-background-color: white;
   }
+.binjr-content-view {
+   /*-fx-border-color:  red;*/
+   -fx-border-width:0;
+ /*  -fx-padding: 0;*/
+}
 
  .skinnable-pane-border {
-   -fx-border-color:  -binjr-window-background-color;
+   -fx-border-color: red;/*  -binjr-window-background-color;*/
    -fx-border-width:0;
    -fx-padding: -1;
  }
 
 .table-view .column-header-background {
-    -fx-border-width:1;
+    -fx-border-width:0;
     -fx-border-color: -binjr-gray-border-color;
  }
+
+.tree-view {
+    -fx-padding: 0 -1 -1 -1;
+    -fx-border-width: 0 0 0 0;
+    -fx-border-color: -binjr-gray-border-color;
+}
 
 .table-view,
 .table-view .column-header-background,
@@ -439,6 +450,7 @@
   * ScrollBar                                                                   *
   *                                                                             *
   ******************************************************************************/
+
 
  .command-bar .scroll-bar:vertical,
  .command-bar .scroll-bar:horizontal {
@@ -1229,7 +1241,7 @@
 
 .series-table .titled-pane {
        -fx-border-color: -binjr-gray-border-color;
-       -fx-border-width:1;
+       -fx-border-width: 1 0 1 0;
    /* -fx-text-fill: -fx-text-base-color;*/
 }
 
@@ -1372,7 +1384,7 @@
  ******************************************************************************/
 
 .tree-cell {
-    -fx-padding: 1;/*0.05em; /* 3 */
+    -fx-padding: 1 1 1 15;;/*0.05em; /* 3 */
     -fx-indent: 1.3em;
 }
 .tree-cell .label {

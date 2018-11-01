@@ -143,6 +143,10 @@ public class Workspace implements Dirtyable {
         this.sources.addAll(sourcesToAdd);
     }
 
+    public void addSource(Source sourceToAdd) {
+        this.sources.add(sourceToAdd);
+    }
+
     /**
      * Remove all the elements in the provided collection from the list of {@link Source} instances
      *
@@ -152,6 +156,9 @@ public class Workspace implements Dirtyable {
         this.sources.removeAll(sourcesToRemove);
     }
 
+    public void removeSource(Source sourceToRemove) {
+        this.sources.remove(sourceToRemove);
+    }
     /**
      * Returns all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      *

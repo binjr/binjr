@@ -101,7 +101,6 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param name      the name for the new {@link Worksheet} instance
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
-
      */
     public Chart(String name, ChartType chartType, String unitName, UnitPrefixes prefix) {
         this(name,
@@ -175,6 +174,14 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
     public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
+        // prune series from closed adapters
+        series.removeIf(seriesInfo -> {
+            if (seriesInfo.getBinding().getAdapter().isClosed()) {
+                logger.debug(() -> seriesInfo.getDisplayName() + " will be pruned because attached adapter " + seriesInfo.getBinding().getAdapter().getId() + " is closed.");
+                return true;
+            }
+            return false;
+        });
         // Define the reduction transform to apply
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters

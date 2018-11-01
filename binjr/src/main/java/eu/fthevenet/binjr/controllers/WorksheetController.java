@@ -142,14 +142,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     public static final double TOOL_BUTTON_SIZE = 20;
 
-    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Map<Tab, DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
+    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Collection<DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
         // Attach bindings
         for (Chart<Double> chart : worksheet.getCharts()) {
             for (TimeSeriesInfo<?> s : chart.getSeries()) {
                 UUID id = s.getBinding().getAdapterId();
-                DataAdapter<?, ?> da = sourcesAdapters.values()
+                DataAdapter<?, ?> da = sourcesAdapters
                         .stream()
                         .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                         .findAny()
@@ -931,9 +931,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     void invalidate(ChartViewPort<Double> viewPort, boolean dontPlot, boolean forceRefresh) {
-
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
-            //logger.trace(() -> Arrays.stream(Thread.currentThread().getStackTrace()).map(StackTraceElement::toString).collect(Collectors.joining("\n")));
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {
                 XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
                 logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
@@ -1108,6 +1106,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
+        }
+    }
+
+    public void setShowPropertiesPane(boolean value) {
+        ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        if (currentViewport != null) {
+            currentViewport.getDataStore().setShowProperties(value);
         }
     }
 
