@@ -56,6 +56,7 @@
         <github.global.server>github</github.global.server>
         <project.scm.id>${github.global.server}</project.scm.id>
         <skipDeploy>true</skipDeploy>
+        <openjfx.scope>compile</openjfx.scope>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
@@ -289,6 +290,9 @@
         </profile>
         <profile>
             <id>package-runtime-image</id>
+            <properties>
+                <openjfx.scope>provided</openjfx.scope>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -461,19 +465,19 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
             <version>11</version>
-            <scope>compile</scope>
+            <scope>${openjfx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>11</version>
-            <scope>compile</scope>
+            <scope>${openjfx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
             <version>11</version>
-            <scope>compile</scope>
+            <scope>${openjfx.scope}</scope>
         </dependency>
     </dependencies>
     <distributionManagement>
