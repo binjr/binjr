@@ -71,9 +71,6 @@ public class Binjr extends Application {
             System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        // Disabling accessibility support to work around hanging issue on Windows 10
-        // see "https://bugs.openjdk.java.net/browse/JDK-8132897"
-        System.setProperty("glass.accessible.force", "false");
         launch(args);
     }
 }
