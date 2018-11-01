@@ -73,10 +73,10 @@ public class Binjr extends Application {
             System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        // Revert to GTK-2 on Linux and OSX as the new GTK-3 default in jfx 11 is the cause of many issue.
+        // Revert to GTK-2 on Linux as the new GTK-3 default in jfx 11 is the cause of many issue.
         // see https://bugs.openjdk.java.net/browse/JDK-8210411
-        if (AppEnvironment.getInstance().getOsFamily()== OsFamily.LINUX || AppEnvironment.getInstance().getOsFamily()== OsFamily.OSX){
-            System.setProperty("jdk.gtk.version","2");
+        if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX) {
+            System.setProperty("jdk.gtk.version", "2");
         }
         launch(args);
     }
