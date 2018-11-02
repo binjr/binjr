@@ -19,9 +19,7 @@ It is a Java based client application and runs on multiple Desktop environnement
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot05.png)
-
-![Screenshot](http://www.binjr.eu/assets/images/screenshot04.png)
+![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
 
 
 ## Getting help
