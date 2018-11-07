@@ -53,8 +53,9 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "2.0";
+    public static final String WORKSPACE_SCHEMA_VERSION = "2.1";
     public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("2.0");
+    public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
 
     @XmlTransient
     private static final Logger logger = LogManager.getLogger(Workspace.class);
@@ -159,6 +160,7 @@ public class Workspace implements Dirtyable {
     public void removeSource(Source sourceToRemove) {
         this.sources.remove(sourceToRemove);
     }
+
     /**
      * Returns all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      *
@@ -320,6 +322,21 @@ public class Workspace implements Dirtyable {
                                 "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
             }
             Version foundVersion = new Version(verStr);
+
+            if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
+                if (foundVersion.getMajor() != SUPPORTED_SCHEMA_VERSION.getMajor()) {
+                    // Only throw if major version is different, only warn otherwise.
+                    throw new CannotLoadWorkspaceException(
+                            "This workspace is not compatible with the current version of binjr. (Supported schema version="
+                                    + SUPPORTED_SCHEMA_VERSION.toString()
+                                    + ", found="
+                                    + foundVersion.toString() + ")");
+                }
+                logger.warn("This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
+                        + SUPPORTED_SCHEMA_VERSION.toString()
+                        + ", found="
+                        + foundVersion.toString() + ")");
+            }
 
             if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
                 throw new CannotLoadWorkspaceException(

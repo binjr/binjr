@@ -44,6 +44,7 @@ public class TimeRangePicker extends ToggleButton {
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
     private final Property<ZoneId> zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
+
     private final Property<TimeRange> selectedRange = new SimpleObjectProperty<>(new TimeRange(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
 
     private ChangeListener<ZonedDateTime> onStartDateChanged = (observable, oldValue, newValue) -> {
@@ -175,6 +176,18 @@ public class TimeRangePicker extends ToggleButton {
         }
     }
 
+    public Boolean isTimeRangeLinked() {
+        return timeRangePickerController.linkTimeRangeButton.isSelected();
+    }
+
+    public Property<Boolean> timeRangeLinkedProperty() {
+        return timeRangePickerController.linkTimeRangeButton.selectedProperty();
+    }
+
+    public void setTimeRangeLinked(Boolean timeRangeLinked) {
+        timeRangePickerController.linkTimeRangeButton.setSelected(timeRangeLinked);
+    }
+
     private class TimeRangePickerController {
 
         @FXML
@@ -234,6 +247,8 @@ public class TimeRangePicker extends ToggleButton {
         private Button thisWeek;
         @FXML
         private Button lastWeek;
+        @FXML
+        private ToggleButton linkTimeRangeButton;
 
         private TextFormatter<ZoneId> formatter;
 
@@ -314,7 +329,6 @@ public class TimeRangePicker extends ToggleButton {
                         ZonedDateTime.of(refDay.plusDays(8 - n), LocalTime.MIDNIGHT, zoneId.getValue()));
             });
         }
-
         Property<ZoneId> zoneIdProperty() {
             return formatter.valueProperty();
         }
