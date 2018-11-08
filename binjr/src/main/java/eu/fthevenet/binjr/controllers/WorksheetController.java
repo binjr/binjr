@@ -36,7 +36,9 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyDoubleProperty;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -342,9 +344,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-        viewPorts.forEach(v -> {
-            map.put(v.getChart(), v.getPrefixFormatter()::format);
-        });
+        viewPorts.forEach(v -> map.put(v.getChart(), v.getPrefixFormatter()::format));
         crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -408,6 +408,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
+    Property<TimeRangePicker.TimeRange> selectedRangeProperty() {
+        return this.timeRangePicker.selectedRangeProperty();
+    }
+
+    ReadOnlyProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
+        return this.timeRangePicker.timeRangeProperty();
+    }
+
     private void initNavigationPane() {
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
@@ -420,7 +428,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (ChartViewPort<Double> viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
-        timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
         timeRangePicker.setSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
         timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {

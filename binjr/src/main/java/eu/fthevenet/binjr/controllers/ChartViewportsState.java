@@ -41,9 +41,6 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
-    private ChangeListener<ZonedDateTime> onStartXChanged;
-    private ChangeListener<ZonedDateTime> onEndXChanged;
-
 
     @Override
     public void close() {

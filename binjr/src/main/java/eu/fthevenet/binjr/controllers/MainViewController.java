@@ -43,10 +43,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -99,17 +96,30 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  * @author Frederic Thevenet
  */
 public class MainViewController implements Initializable {
-    public static final int SETTINGS_PANE_DISTANCE = 250;
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
+    static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final String BINJR_FILE_PATTERN = "*.bjr";
-    private static double searchBarPaneDistance = 40;
+    private static final double SEARCH_BAR_PANE_DISTANCE = 40;
+    private static final double TOOL_BUTTON_SIZE = 20;
+    private static final double COLLAPSED_WIDTH = 48;
+    private static final double EXPANDED_WIDTH = 200;
+    private static final int ANIMATION_DURATION = 50;
+
     private final Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
-    public static final double TOOL_BUTTON_SIZE = 20;
+
+    //private final Set<WorksheetController> linkedWorksheet = new HashSet<>();
+
+    private Timeline showTimeline;
+    private Timeline hideTimeline;
+    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+    private Property<TimeRangePicker.TimeRange> linkedTimeRange = new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
+//    private Property<ZonedDateTime> linkedRangeBeginning = new SimpleObjectProperty<>(ZonedDateTime.now());
+//    private Property<ZonedDateTime> linkedRangeEnd = new SimpleObjectProperty<>(ZonedDateTime.now());
 
     public MenuButton debugMenuButton;
     public MenuItem consoleMenuItem;
@@ -158,12 +168,6 @@ public class MainViewController implements Initializable {
     @FXML
     private Menu addSourceMenu;
 
-    private double collapsedWidth = 48;
-    private double expandedWidth = 200;
-    private int animationDuration = 50;
-    private Timeline showTimeline;
-    private Timeline hideTimeline;
-    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -205,13 +209,6 @@ public class MainViewController implements Initializable {
 
                         }
                     }
-//                    getAttachedViewport(newPane).ifPresent(nv -> {
-//                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
-//                        if (editButtonsGroup.getSelectedToggle() != null) {
-//                            nv.getDataStore().setShowProperties(true);
-//                        }
-//
-//                    });
                     if ((expandRequiered) && (oldPane != null)) {
                         Platform.runLater(() -> {
                             sourcesPane.setExpandedPane(oldPane);
@@ -230,13 +227,6 @@ public class MainViewController implements Initializable {
         });
         worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
-        //  sourcesPane.setOnAddNewTab(this::handleAddSource);
-//        sourcesPane.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//            invalidateSearchResults();
-//            if (newValue != null) {
-//                findNext();
-//            }
-//        });
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
             consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
@@ -515,8 +505,6 @@ public class MainViewController implements Initializable {
         TitledPane newPane = new TitledPane();
         Label label = new Label();
         source.getBindingManager().bind(label.textProperty(), source.nameProperty());
-//        source.getBindingManager().bind(label.visibleProperty(), source.editableProperty());
-
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
         titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
@@ -608,10 +596,10 @@ public class MainViewController implements Initializable {
         if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
             return;
         }
-        Duration duration = Duration.millis(animationDuration);
-        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, expandedWidth));
+        Duration duration = Duration.millis(ANIMATION_DURATION);
+        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, EXPANDED_WIDTH));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(() -> AnchorPane.setLeftAnchor(contentView, expandedWidth), Duration.millis(50)).submit());
+        showTimeline.setOnFinished(event -> new DelayedAction(() -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH), Duration.millis(50)).submit());
         showTimeline.play();
         commandBar.setExpanded(true);
     }
@@ -623,12 +611,12 @@ public class MainViewController implements Initializable {
         if (hideTimeline != null && hideTimeline.getStatus() == Animation.Status.RUNNING) {
             return;
         }
-        if (commandBarWidth.get() <= collapsedWidth) {
+        if (commandBarWidth.get() <= COLLAPSED_WIDTH) {
             return;
         }
-        Duration duration = Duration.millis(animationDuration);
-        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, collapsedWidth)));
-        AnchorPane.setLeftAnchor(contentView, collapsedWidth);
+        Duration duration = Duration.millis(ANIMATION_DURATION);
+        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, COLLAPSED_WIDTH)));
+        AnchorPane.setLeftAnchor(contentView, COLLAPSED_WIDTH);
         hideTimeline.play();
         commandBar.setExpanded(false);
     }
@@ -636,9 +624,9 @@ public class MainViewController implements Initializable {
     private void slidePanel(int show, Duration delay) {
         TranslateTransition openNav = new TranslateTransition(new Duration(200), searchBarRoot);
         openNav.setDelay(delay);
-        openNav.setToY(show * -searchBarPaneDistance);
+        openNav.setToY(show * -SEARCH_BAR_PANE_DISTANCE);
         openNav.play();
-        openNav.setOnFinished(event -> AnchorPane.setBottomAnchor(sourceArea, show > 0 ? searchBarPaneDistance : 0));
+        openNav.setOnFinished(event -> AnchorPane.setBottomAnchor(sourceArea, show > 0 ? SEARCH_BAR_PANE_DISTANCE : 0));
     }
 
     private void doCommandBarResize(double v) {
@@ -797,7 +785,6 @@ public class MainViewController implements Initializable {
                             sourcesAdapters.put(newSourcePane, newSource);
                             sourcesPane.getPanes().add(newSourcePane);
                             newSourcePane.setExpanded(true);
-                            //   sourcesPane.getPanes().get.select(newSourcePane);
                         }
                     },
                     event -> {
@@ -809,7 +796,6 @@ public class MainViewController implements Initializable {
 
     private void loadSource(Source source) throws DataAdapterException {
         TitledPane newSourcePane = newSourcePane(source);
-        //  newSourcePane.setText(source.getSourceName());
         Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
         treeView = buildTreeViewForTarget(source.getAdapter());
         if (treeView.isPresent()) {
@@ -827,7 +813,6 @@ public class MainViewController implements Initializable {
         Platform.runLater(() -> {
             sourcesPane.getPanes().add(newSourcePane);
             newSourcePane.setExpanded(true);
-            // sourcesPane.getSelectionModel().select(newSourcePane);
         });
     }
 
@@ -1230,7 +1215,6 @@ public class MainViewController implements Initializable {
                     }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
                         addToNewChartInCurrentWorksheet(item);
-                        //addToNewWorksheet(item);
                     }
                     else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                         if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {

@@ -17,9 +17,12 @@
 
 package eu.fthevenet.util.javafx.controls;
 
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -48,8 +51,10 @@ public class TimeRangePicker extends ToggleButton {
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
     private final Property<ZoneId> zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
+    private final Property<TimeRange> timeRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
 
-    private final Property<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
+
+    private final ObjectProperty<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
 
     private ChangeListener<ZonedDateTime> onStartDateChanged = (observable, oldValue, newValue) -> {
         if (newValue != null) {
@@ -89,10 +94,6 @@ public class TimeRangePicker extends ToggleButton {
         popup.showingProperty().addListener((observable, oldValue, newValue) -> {
             setSelected(newValue);
         });
-        timeRangePickerController.startDate.zoneIdProperty().bind(zoneId);
-        timeRangePickerController.endDate.zoneIdProperty().bind(zoneId);
-        zoneId.addListener((observable, oldValue, newValue) -> updateText());
-        timeRangePickerController.zoneIdProperty().bindBidirectional(zoneId);
 
         this.setOnAction(actionEvent -> {
             Node owner = (Node) actionEvent.getSource();
@@ -108,6 +109,7 @@ public class TimeRangePicker extends ToggleButton {
             if (newValue != null) {
                 suspendDateListeners();
                 try {
+                    zoneId.setValue(newValue.zoneId);
                     timeRangePickerController.startDate.setDateTimeValue(newValue.getBeginning());
                     timeRangePickerController.endDate.setDateTimeValue(newValue.getEnd());
                 } finally {
@@ -125,11 +127,20 @@ public class TimeRangePicker extends ToggleButton {
     private void resumeDateListeners() {
         timeRangePickerController.startDate.dateTimeValueProperty().addListener(onStartDateChanged);
         timeRangePickerController.endDate.dateTimeValueProperty().addListener(onEndDateChanged);
+        timeRangePickerController.startDate.zoneIdProperty().bind(zoneId);
+        timeRangePickerController.endDate.zoneIdProperty().bind(zoneId);
+        zoneId.addListener(this::onZoneIdChanged);
+        timeRangePickerController.zoneIdProperty().bindBidirectional(zoneId);
     }
 
     private void suspendDateListeners() {
         timeRangePickerController.startDate.dateTimeValueProperty().removeListener(onStartDateChanged);
         timeRangePickerController.endDate.dateTimeValueProperty().removeListener(onEndDateChanged);
+        timeRangePickerController.startDate.zoneIdProperty().unbind();
+        timeRangePickerController.endDate.zoneIdProperty().unbind();
+        zoneId.addListener(this::onZoneIdChanged);
+        timeRangePickerController.zoneIdProperty().unbindBidirectional(zoneId);
+
     }
 
 
@@ -142,6 +153,7 @@ public class TimeRangePicker extends ToggleButton {
     }
 
     private void updateText() {
+        this.timeRange.setValue(TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), timeRangePickerController.endDate.getDateTimeValue()));
         setText(String.format("From %s to %s (%s)",
                 timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
                 timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
@@ -163,7 +175,9 @@ public class TimeRangePicker extends ToggleButton {
     public void updateRangeBeginning(ZonedDateTime newValue) {
         suspendDateListeners();
         try {
+            logger.trace(() -> "updateRangeBeginning -> " + newValue.toString());
             timeRangePickerController.startDate.setDateTimeValue(newValue);
+            //zoneId.setValue(newValue.getZone());
             updateText();
         } finally {
             resumeDateListeners();
@@ -173,23 +187,25 @@ public class TimeRangePicker extends ToggleButton {
     public void updateRangeEnd(ZonedDateTime newValue) {
         suspendDateListeners();
         try {
+            logger.trace(() -> "updateRangeEnd -> " + newValue.toString());
             timeRangePickerController.endDate.setDateTimeValue(newValue);
+            //  zoneId.setValue(newValue.getZone());
             updateText();
         } finally {
             resumeDateListeners();
         }
     }
 
-    public Boolean isTimeRangeLinked() {
-        return timeRangePickerController.linkTimeRangeButton.isSelected();
+    public TimeRange getTimeRange() {
+        return timeRange.getValue();
     }
 
-    public Property<Boolean> timeRangeLinkedProperty() {
-        return timeRangePickerController.linkTimeRangeButton.selectedProperty();
+    public ReadOnlyProperty<TimeRange> timeRangeProperty() {
+        return timeRange;
     }
 
-    public void setTimeRangeLinked(Boolean timeRangeLinked) {
-        timeRangePickerController.linkTimeRangeButton.setSelected(timeRangeLinked);
+    private void onZoneIdChanged(ObservableValue<? extends ZoneId> observable, ZoneId oldValue, ZoneId newValue) {
+        updateText();
     }
 
     private class TimeRangePickerController {
@@ -242,7 +258,6 @@ public class TimeRangePicker extends ToggleButton {
         private Button last12Hours;
         @FXML
         private Button last90Minutes;
-
         @FXML
         private Button today;
         @FXML
@@ -252,12 +267,9 @@ public class TimeRangePicker extends ToggleButton {
         @FXML
         private Button lastWeek;
         @FXML
-        private ToggleButton linkTimeRangeButton;
-        @FXML
         private Button pasteTimeRangeButton;
         @FXML
         private Button copyTimeRangeButton;
-
 
         private TextFormatter<ZoneId> formatter;
 
@@ -340,7 +352,7 @@ public class TimeRangePicker extends ToggleButton {
             copyTimeRangeButton.setOnAction(event -> {
                 try {
                     final ClipboardContent content = new ClipboardContent();
-                    content.put(TimeRange.TIME_RANGE_DATA_FORMAT, getSelectedRange().serialize());
+                    content.put(TimeRange.TIME_RANGE_DATA_FORMAT, timeRange.getValue().serialize());
                     Clipboard.getSystemClipboard().setContent(content);
                 } catch (Exception e) {
                     logger.error("Failed to copy time range to clipboard", e);
@@ -371,14 +383,16 @@ public class TimeRangePicker extends ToggleButton {
         private final ZonedDateTime beginning;
         private final ZonedDateTime end;
         private final Duration duration;
+        private final ZoneId zoneId;
 
         public static TimeRange of(ZonedDateTime beginning, ZonedDateTime end) {
             return new TimeRange(beginning, end);
         }
 
         TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
+            this.zoneId = beginning.getZone();
             this.beginning = beginning;
-            this.end = end;
+            this.end = end.withZoneSameInstant(zoneId);
             this.duration = Duration.between(beginning, end);
         }
 
@@ -392,6 +406,10 @@ public class TimeRangePicker extends ToggleButton {
 
         public Duration getDuration() {
             return duration;
+        }
+
+        public ZoneId getZoneId() {
+            return zoneId;
         }
 
         public boolean isNegative() {
@@ -410,4 +428,23 @@ public class TimeRangePicker extends ToggleButton {
             return TimeRange.of(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[0], ZonedDateTime::from), DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[1], ZonedDateTime::from));
         }
     }
+
+
+//    class ForceObjectProperty<T> extends SimpleObjectProperty<T> {
+//
+//        public ForceObjectProperty(T initialValue) {
+//            super(initialValue);
+//        }
+//
+//        @Override
+//        public void fireValueChangedEvent(){
+//            super.fireValueChangedEvent();
+//        }
+//
+//        @Override
+//        public void invalidated() {
+//
+//            super.invalidated();
+//        }
+//    }
 }
