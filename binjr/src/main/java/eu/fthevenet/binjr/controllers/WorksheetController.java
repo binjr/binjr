@@ -434,7 +434,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         });
     }
 
-
     private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
         selection.forEach((xyChart, xyChartSelection) -> {
@@ -808,7 +807,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(c.chartTypeProperty(), controllerReloadListener);
         });
 
-
         ListChangeListener<Chart<Double>> chartListListener = c -> {
             while (c.next()) {
                 if (c.wasPermutated()) {
@@ -846,11 +844,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         };
         bindingManager.attachListener(worksheet.getCharts(), chartListListener);
-
     }
 
     //region *** protected members ***
-
     protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings, Chart<Double> targetChart) {
         InvalidationListener isVisibleListener = (observable) -> {
             viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
@@ -865,7 +861,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 showAllCheckBox.setSelected(andAll);
             });
         };
-
         for (TimeSeriesBinding<Double> b : bindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             bindingManager.attachListener(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false)));
@@ -887,7 +882,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void refresh() {
         invalidateAll(false, false, true);
     }
-
 
     @FXML
     protected void handleHistoryBack(ActionEvent actionEvent) {
@@ -913,12 +907,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
     }
-
     //endregion
 
     //region [Private Members]
-
-
     void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         if (saveToHistory) {
             getWorksheet().getBackwardHistory().push(getWorksheet().getPreviousState());

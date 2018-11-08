@@ -313,7 +313,6 @@ public class Workspace implements Dirtyable {
         if (!file.exists()) {
             throw new FileNotFoundException("Could not find specified workspace file " + file.getPath());
         }
-
         try {
             String verStr = XmlUtils.getFirstAttributeValue(file, "schemaVersion");
             if (verStr == null) {
@@ -322,7 +321,6 @@ public class Workspace implements Dirtyable {
                                 "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
             }
             Version foundVersion = new Version(verStr);
-
             if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
                 if (foundVersion.getMajor() != SUPPORTED_SCHEMA_VERSION.getMajor()) {
                     // Only throw if major version is different, only warn otherwise.
@@ -337,18 +335,15 @@ public class Workspace implements Dirtyable {
                         + ", found="
                         + foundVersion.toString() + ")");
             }
-
             if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
                 throw new CannotLoadWorkspaceException(
                         "This workspace is not compatible with the current version of binjr. (Minimum supported schema version="
                                 + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString()
                                 + ", found="
                                 + foundVersion.toString() + ")");
-
             }
         } catch (XMLStreamException e) {
             throw new CannotLoadWorkspaceException("Error retrieving bjr schema version", e);
         }
-
     }
 }
