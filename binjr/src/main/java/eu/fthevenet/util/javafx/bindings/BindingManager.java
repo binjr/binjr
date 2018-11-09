@@ -46,7 +46,8 @@ public class BindingManager implements AutoCloseable {
     private final Map<ObservableValue, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
     private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new ConcurrentHashMap<>();
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new ConcurrentHashMap<>();
-    private final Set<Property<?>> boundProperties = Collections.newSetFromMap(new WeakHashMap<>());
+    private final Map<Property<?>, ObservableValue> boundProperties = new ConcurrentHashMap<>();
+    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new ConcurrentHashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -60,17 +61,41 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(binding, "binding parameter cannot be null");
         logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
         property.bind(binding);
-        boundProperties.add(property);
+        boundProperties.put(property, binding);
     }
 
     /**
      * Unbinds all registered bindings
      */
     public void unbindAll() {
-        boundProperties.forEach(property -> {
+        boundProperties.forEach((property, binding) -> {
             logger.trace(() -> "Unbinding property " + property.toString());
             property.unbind();
         });
+        boundProperties.clear();
+
+        bidirectionallyBoundProperties.forEach((property, binding) -> {
+            logger.trace(() -> "Unbinding property " + property.toString());
+            property.unbindBidirectional(binding);
+        });
+        bidirectionallyBoundProperties.clear();
+    }
+
+
+    public <T> void bindBidirectionnal(Property<T> property, Property<T> binding) {
+        Objects.requireNonNull(property, "property parameter cannot be null");
+        Objects.requireNonNull(binding, "binding parameter cannot be null");
+        logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
+        property.bindBidirectional(binding);
+        bidirectionallyBoundProperties.put(property, binding);
+    }
+
+    public <T> void unbindBidirectionnal(Property<T> property, Property<T> binding) {
+        Objects.requireNonNull(property, "property parameter cannot be null");
+        Objects.requireNonNull(binding, "binding parameter cannot be null");
+        logger.trace(() -> "Unbinding " + binding.toString() + " from " + property.toString());
+        property.unbindBidirectional(binding);
+        bidirectionallyBoundProperties.remove(property, binding);
     }
 
     /**
@@ -161,12 +186,30 @@ public class BindingManager implements AutoCloseable {
     }
 
     @Override
-    public void close() {
-        closeMap(listChangeListeners, ObservableList::removeListener);
-        closeMap(invalidationListeners, ObservableValue::removeListener);
-        closeMap(changeListeners, ObservableValue::removeListener);
+    public synchronized void close() {
+        visitMap(listChangeListeners, ObservableList::removeListener);
+        listChangeListeners.clear();
+        visitMap(invalidationListeners, ObservableValue::removeListener);
+        invalidationListeners.clear();
+        visitMap(changeListeners, ObservableValue::removeListener);
+        changeListeners.clear();
         unbindAll();
     }
+
+    public synchronized void suspend() {
+        visitMap(listChangeListeners, ObservableList::removeListener);
+        visitMap(invalidationListeners, ObservableValue::removeListener);
+        visitMap(changeListeners, ObservableValue::removeListener);
+        boundProperties.keySet().forEach(Property::unbind);
+    }
+
+    public synchronized void resume() {
+        visitMap(listChangeListeners, ObservableList::addListener);
+        visitMap(invalidationListeners, ObservableValue::addListener);
+        visitMap(changeListeners, ObservableValue::addListener);
+        boundProperties.forEach(Property::bind);
+    }
+
 
     private <T, U> void attachListener(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> attachAction) {
         Objects.requireNonNull(observable, "observable parameter cannot be null");
@@ -207,13 +250,14 @@ public class BindingManager implements AutoCloseable {
         map.remove(observable);
     }
 
-    private <T, U> void closeMap(Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
+    private <T, U> void visitMap(Map<T, List<U>> map, BiConsumer<T, U> action) {
         Objects.requireNonNull(map, "map parameter cannot be null");
-        Objects.requireNonNull(detachAction, "attachAction parameter cannot be null");
+        Objects.requireNonNull(action, "attachAction parameter cannot be null");
         map.forEach((observable, listeners) -> listeners.forEach(listener -> {
             logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());
-            detachAction.accept(observable, listener);
+            action.accept(observable, listener);
         }));
-        map.clear();
     }
+
+
 }

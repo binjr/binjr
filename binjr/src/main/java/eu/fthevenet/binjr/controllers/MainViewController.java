@@ -112,7 +112,6 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
 
-    //private final Set<WorksheetController> linkedWorksheet = new HashSet<>();
 
     private Timeline showTimeline;
     private Timeline hideTimeline;
@@ -858,6 +857,9 @@ public class MainViewController implements Initializable {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
+            linkedTimeRange.bindBidirectional(current.selectedRangeProperty());
+
+
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");

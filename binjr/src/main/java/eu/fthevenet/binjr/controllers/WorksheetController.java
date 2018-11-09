@@ -38,7 +38,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -412,9 +411,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return this.timeRangePicker.selectedRangeProperty();
     }
 
-    ReadOnlyProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
-        return this.timeRangePicker.timeRangeProperty();
-    }
+//    ReadOnlyProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
+//        return this.timeRangePicker.timeRangeProperty();
+//    }
 
     private void initNavigationPane() {
         backButton.setOnAction(this::handleHistoryBack);
@@ -429,15 +428,24 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
-        timeRangePicker.setSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
-        timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {
+        timeRangePicker.initSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
+        timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
         });
-        currentState.startXProperty().addListener((observable, oldValue, newValue) -> {
-            timeRangePicker.updateRangeBeginning(newValue);
-        });
-        currentState.endXProperty().addListener((observable, oldValue, newValue) -> {
-            timeRangePicker.updateRangeEnd(newValue);
+//        timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {
+//            currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
+//        });
+//        currentState.startXProperty().addListener((observable, oldValue, newValue) -> {
+//            timeRangePicker.updateRangeBeginning(newValue);
+//        });
+//        currentState.endXProperty().addListener((observable, oldValue, newValue) -> {
+//            timeRangePicker.updateRangeEnd(newValue);
+//        });
+
+        currentState.timeRangeProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                timeRangePicker.updateSelectedRange(newValue);
+            }
         });
     }
 
@@ -1122,4 +1130,5 @@ public class WorksheetController implements Initializable, AutoCloseable {
         logger.trace(() -> "Finalizing worksheet controller: " + this.toString());
         super.finalize();
     }
+
 }

@@ -17,9 +17,9 @@
 
 package eu.fthevenet.util.javafx.controls;
 
+import eu.fthevenet.util.javafx.bindings.BindingManager;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -52,35 +52,9 @@ public class TimeRangePicker extends ToggleButton {
     private final PopupControl popup;
     private final Property<ZoneId> zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
     private final Property<TimeRange> timeRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
-
-
     private final ObjectProperty<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
+    private final BindingManager bindingManager = new BindingManager();
 
-    private ChangeListener<ZonedDateTime> onStartDateChanged = (observable, oldValue, newValue) -> {
-        if (newValue != null) {
-            TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
-            if (newRange.isNegative()) {
-                TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
-                this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.getDuration())));
-            }
-            else {
-                this.selectedRange.setValue(newRange);
-            }
-        }
-    };
-
-    private ChangeListener<ZonedDateTime> onEndDateChanged = (observable, oldValue, newValue) -> {
-        if (newValue != null) {
-            TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
-            if (newRange.isNegative()) {
-                TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
-                this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.getDuration()), newValue));
-            }
-            else {
-                this.selectedRange.setValue(newRange);
-            }
-        }
-    };
 
     public TimeRangePicker() throws IOException {
         super();
@@ -105,42 +79,52 @@ public class TimeRangePicker extends ToggleButton {
             this.selectedRange.setValue(TimeRange.of(beginning, end));
         };
 
-        selectedRange.addListener((observable, oldValue, newValue) -> {
+        timeRangePickerController.startDate.setDateTimeValue(selectedRange.getValue().getBeginning());
+        timeRangePickerController.endDate.setDateTimeValue(selectedRange.getValue().getEnd());
+
+        bindingManager.bind(timeRangePickerController.startDate.zoneIdProperty(), zoneId);
+        bindingManager.bind(timeRangePickerController.endDate.zoneIdProperty(), zoneId);
+        bindingManager.bindBidirectionnal(timeRangePickerController.zoneIdProperty(), zoneId);
+        bindingManager.attachListener(zoneId, (observable, oldValue, newValue) -> updateText());
+
+        bindingManager.attachListener(selectedRange, (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
-                suspendDateListeners();
+                bindingManager.suspend();
                 try {
                     zoneId.setValue(newValue.zoneId);
                     timeRangePickerController.startDate.setDateTimeValue(newValue.getBeginning());
                     timeRangePickerController.endDate.setDateTimeValue(newValue.getEnd());
                 } finally {
-                    resumeDateListeners();
+                    bindingManager.resume();
                     updateText();
                 }
             }
         });
+        bindingManager.attachListener(timeRangePickerController.startDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
+                if (newRange.isNegative()) {
+                    TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
+                    this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.getDuration())));
+                }
+                else {
+                    this.selectedRange.setValue(newRange);
+                }
+            }
+        });
 
-        timeRangePickerController.startDate.setDateTimeValue(selectedRange.getValue().getBeginning());
-        timeRangePickerController.endDate.setDateTimeValue(selectedRange.getValue().getEnd());
-        resumeDateListeners();
-    }
-
-    private void resumeDateListeners() {
-        timeRangePickerController.startDate.dateTimeValueProperty().addListener(onStartDateChanged);
-        timeRangePickerController.endDate.dateTimeValueProperty().addListener(onEndDateChanged);
-        timeRangePickerController.startDate.zoneIdProperty().bind(zoneId);
-        timeRangePickerController.endDate.zoneIdProperty().bind(zoneId);
-        zoneId.addListener(this::onZoneIdChanged);
-        timeRangePickerController.zoneIdProperty().bindBidirectional(zoneId);
-    }
-
-    private void suspendDateListeners() {
-        timeRangePickerController.startDate.dateTimeValueProperty().removeListener(onStartDateChanged);
-        timeRangePickerController.endDate.dateTimeValueProperty().removeListener(onEndDateChanged);
-        timeRangePickerController.startDate.zoneIdProperty().unbind();
-        timeRangePickerController.endDate.zoneIdProperty().unbind();
-        zoneId.addListener(this::onZoneIdChanged);
-        timeRangePickerController.zoneIdProperty().unbindBidirectional(zoneId);
-
+        bindingManager.attachListener(timeRangePickerController.endDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
+                if (newRange.isNegative()) {
+                    TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
+                    this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.getDuration()), newValue));
+                }
+                else {
+                    this.selectedRange.setValue(newRange);
+                }
+            }
+        });
     }
 
 
@@ -150,6 +134,10 @@ public class TimeRangePicker extends ToggleButton {
 
     public Property<ZoneId> zoneIdProperty() {
         return zoneId;
+    }
+
+    public void closeBindingManager() {
+        bindingManager.close();
     }
 
     private void updateText() {
@@ -168,45 +156,43 @@ public class TimeRangePicker extends ToggleButton {
         return selectedRange;
     }
 
-    public void setSelectedRange(TimeRange selectedRange) {
+    public void initSelectedRange(TimeRange selectedRange) {
         this.selectedRange.setValue(selectedRange);
     }
 
-    public void updateRangeBeginning(ZonedDateTime newValue) {
-        suspendDateListeners();
+    public void updateSelectedRange(TimeRange newValue) {
+        bindingManager.suspend();
         try {
             logger.trace(() -> "updateRangeBeginning -> " + newValue.toString());
-            timeRangePickerController.startDate.setDateTimeValue(newValue);
-            //zoneId.setValue(newValue.getZone());
+            timeRangePickerController.startDate.setDateTimeValue(newValue.getBeginning());
+            timeRangePickerController.endDate.setDateTimeValue(newValue.getEnd());
+            this.selectedRange.setValue(TimeRange.of(newValue.getBeginning(), newValue.getEnd()));
+            zoneId.setValue(newValue.getZoneId());
             updateText();
         } finally {
-            resumeDateListeners();
+            bindingManager.resume();
         }
     }
 
-    public void updateRangeEnd(ZonedDateTime newValue) {
-        suspendDateListeners();
-        try {
-            logger.trace(() -> "updateRangeEnd -> " + newValue.toString());
-            timeRangePickerController.endDate.setDateTimeValue(newValue);
-            //  zoneId.setValue(newValue.getZone());
-            updateText();
-        } finally {
-            resumeDateListeners();
-        }
-    }
 
     public TimeRange getTimeRange() {
         return timeRange.getValue();
     }
 
-    public ReadOnlyProperty<TimeRange> timeRangeProperty() {
+    public Property<TimeRange> timeRangeProperty() {
         return timeRange;
     }
 
     private void onZoneIdChanged(ObservableValue<? extends ZoneId> observable, ZoneId oldValue, ZoneId newValue) {
         updateText();
     }
+
+    public void setOnSelectedRangeChanged(ChangeListener<TimeRange> timeRangeChangeListener) {
+        bindingManager.attachListener(selectedRange, timeRangeChangeListener);
+    }
+
+
+
 
     private class TimeRangePickerController {
 
