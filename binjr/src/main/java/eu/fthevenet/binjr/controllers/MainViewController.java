@@ -249,8 +249,7 @@ public class MainViewController implements Initializable {
                     slidePanel(1, Duration.millis(0));
                     searchBarHidden.setValue(false);
                 }
-            }
-            else {
+            } else {
                 if (!searchBarHidden.getValue()) {
                     slidePanel(-1, Duration.millis(0));
                     searchBarHidden.setValue(true);
@@ -291,8 +290,7 @@ public class MainViewController implements Initializable {
         stage.setOnCloseRequest(event -> {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
-            }
-            else {
+            } else {
                 Platform.exit();
             }
         });
@@ -307,14 +305,12 @@ public class MainViewController implements Initializable {
         if (associatedFile.isPresent()) {
             logger.debug(() -> "Opening associated file " + associatedFile.get());
             loadWorkspace(new File(associatedFile.get()));
-        }
-        else if (prefs.isLoadLastWorkspaceOnStartup()) {
+        } else if (prefs.isLoadLastWorkspaceOnStartup()) {
             prefs.getMostRecentSavedWorkspace().ifPresent(path -> {
                 File latestWorkspace = path.toFile();
                 if (latestWorkspace.exists()) {
                     loadWorkspace(latestWorkspace);
-                }
-                else {
+                } else {
                     logger.warn("Cannot reopen workspace " + latestWorkspace.getPath() + ": file does not exists");
                 }
             });
@@ -369,8 +365,7 @@ public class MainViewController implements Initializable {
     public void handleExpandCommandBar(ActionEvent actionEvent) {
         if (!commandBar.isExpanded()) {
             showCommandBar();
-        }
-        else {
+        } else {
             hideCommandBar();
         }
     }
@@ -473,8 +468,7 @@ public class MainViewController implements Initializable {
                 m.setOnAction(e -> loadWorkspace(new File(((MenuItem) e.getSource()).getText())));
                 return m;
             }).collect(Collectors.toList()));
-        }
-        else {
+        } else {
             MenuItem none = new MenuItem("none");
             none.setDisable(true);
             menu.getItems().setAll(none);
@@ -736,8 +730,7 @@ public class MainViewController implements Initializable {
             if (workspace.hasPath()) {
                 workspace.save();
                 return true;
-            }
-            else {
+            } else {
                 return saveWorkspaceAs();
             }
         } catch (IOException e) {
@@ -800,8 +793,7 @@ public class MainViewController implements Initializable {
         if (treeView.isPresent()) {
             newSourcePane.setContent(treeView.get());
             sourcesAdapters.put(newSourcePane, source);
-        }
-        else {
+        } else {
             TreeItem<TimeSeriesBinding<Double>> i = new TreeItem<>();
             i.setValue(new TimeSeriesBinding<>());
             Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
@@ -857,9 +849,16 @@ public class MainViewController implements Initializable {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
-            linkedTimeRange.bindBidirectional(current.selectedRangeProperty());
-
-
+            current.getWorksheet().timeRangeLinkedProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    linkedTimeRange.bindBidirectional(current.selectedRangeProperty());
+                } else {
+                    linkedTimeRange.unbindBidirectional(current.selectedRangeProperty());
+                }
+            });
+            if (current.getWorksheet().isTimeRangeLinked()) {
+                linkedTimeRange.bindBidirectional(current.selectedRangeProperty());
+            }
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
@@ -893,8 +892,7 @@ public class MainViewController implements Initializable {
                     ClipboardContent content = new ClipboardContent();
                     content.put(TIME_SERIES_BINDING_FORMAT, cell.getItem().getTreeHierarchy());
                     db.setContent(content);
-                }
-                else {
+                } else {
                     logger.debug("No TreeItem selected: canceling drag and drop");
                 }
                 event.consume();
@@ -919,8 +917,7 @@ public class MainViewController implements Initializable {
             for (TreeItem<T> t : branch.getChildren()) {
                 getAllBindingsFromBranch(t, bindings);
             }
-        }
-        else {
+        } else {
             bindings.add(branch.getValue());
         }
     }
@@ -1016,8 +1013,7 @@ public class MainViewController implements Initializable {
                     toDateTime = getSelectedWorksheetController().getWorksheet().getToDateTime();
                     fromDateTime = getSelectedWorksheetController().getWorksheet().getFromDateTime();
                     zoneId = getSelectedWorksheetController().getWorksheet().getTimeZone();
-                }
-                else {
+                } else {
                     toDateTime = ZonedDateTime.now();
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                     zoneId = ZoneId.systemDefault();
@@ -1062,8 +1058,7 @@ public class MainViewController implements Initializable {
                 }
                 if (searchCaseSensitiveToggle.isSelected()) {
                     return i.getValue().getLegend().contains(searchField.getText());
-                }
-                else {
+                } else {
                     return i.getValue().getLegend().toLowerCase().contains(searchField.getText().toLowerCase());
                 }
             });
@@ -1076,8 +1071,7 @@ public class MainViewController implements Initializable {
             }
             selectedTreeView.getSelectionModel().select(searchResultSet.get(currentSearchHit));
             selectedTreeView.scrollTo(selectedTreeView.getRow(searchResultSet.get(currentSearchHit)));
-        }
-        else {
+        } else {
             searchField.setStyle("-fx-background-color: #ffcccc;");
         }
         logger.trace(() -> "Search for " + searchField.getText() + " yielded " + searchResultSet.size() + " match(es)");
@@ -1106,8 +1100,7 @@ public class MainViewController implements Initializable {
                         workspace.removeWorksheets(ctlr.getWorksheet());
                         seriesControllers.remove(t);
                         ctlr.close();
-                    }
-                    else {
+                    } else {
                         logger.warn("Could not find a controller assigned to tab " + t.getText());
                     }
                 }));
@@ -1130,8 +1123,7 @@ public class MainViewController implements Initializable {
                         workspace.removeSource(removedSource);
                         logger.debug("Closing Source " + removedSource.getName());
                         removedSource.close();
-                    }
-                    else {
+                    } else {
                         logger.trace("No Source to close attached to tab " + t.getText());
                     }
                 } catch (Exception e) {
@@ -1163,12 +1155,10 @@ public class MainViewController implements Initializable {
                 TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     addToNewWorksheet(item);
-                }
-                else {
+                } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
-            }
-            else {
+            } else {
                 logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
             }
             event.consume();
@@ -1217,24 +1207,19 @@ public class MainViewController implements Initializable {
                     }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
                         addToNewChartInCurrentWorksheet(item);
-                    }
-                    else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
+                    } else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                         if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {
                             getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
-                        }
-                        else {
+                        } else {
                             addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), getSelectedWorksheetController().getWorksheet().getDefaultChart());
                         }
-                    }
-                    else {
+                    } else {
                         logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
                     }
-                }
-                else {
+                } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
-            }
-            else {
+            } else {
                 logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
             }
             event.consume();

@@ -22,10 +22,7 @@ import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
 import eu.fthevenet.util.javafx.charts.XYChartSelection;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
@@ -64,6 +61,8 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     private Property<ZonedDateTime> toDateTime;
     @IsDirtyable
     private Property<ChartLayout> chartLayout;
+    @IsDirtyable
+    private Property<Boolean> timeRangeLinked;
 
     private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
     private final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
@@ -128,7 +127,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
         this.selectedChart = new SimpleObjectProperty<>(0);
         this.chartLayout = new SimpleObjectProperty<>(ChartLayout.STACKED);
-
+        this.timeRangeLinked = new SimpleBooleanProperty(false);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -335,5 +334,17 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.chartLayout.setValue(chartLayout);
     }
 
+    @XmlAttribute
+    public Boolean isTimeRangeLinked() {
+        return timeRangeLinked.getValue();
+    }
+
+    public Property<Boolean> timeRangeLinkedProperty() {
+        return timeRangeLinked;
+    }
+
+    public void setTimeRangeLinked(Boolean timeRangeLinked) {
+        this.timeRangeLinked.setValue(timeRangeLinked);
+    }
 }
 

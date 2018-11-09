@@ -46,7 +46,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Copy this time range">
+                                <Tooltip text="Copy Time Range">
                                     <font>
                                         <Font size="10.0"/>
                                     </font>
@@ -63,13 +63,30 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Paste a time range">
+                                <Tooltip text="Paste Time Range">
                                     <font>
                                         <Font size="10.0"/>
                                     </font>
                                 </Tooltip>
                             </tooltip>
                         </Button>
+                        <ToggleButton fx:id="linkTimeRangeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button" text="Link"
+                                      HBox.hgrow="SOMETIMES">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <children>
+                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="link-icon"/>
+                                    </children>
+                                </HBox>T
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Link Worksheet Time Line">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </ToggleButton>
                         <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="18.0" styleClass="dialog-button">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">

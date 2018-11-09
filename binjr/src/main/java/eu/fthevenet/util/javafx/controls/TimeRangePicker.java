@@ -192,6 +192,17 @@ public class TimeRangePicker extends ToggleButton {
     }
 
 
+    public Boolean isTimeRangeLinked() {
+        return timeRangePickerController.linkTimeRangeButton.isSelected();
+    }
+
+    public Property<Boolean> timeRangeLinkedProperty() {
+        return timeRangePickerController.linkTimeRangeButton.selectedProperty();
+    }
+
+    public void setTimeRangeLinked(Boolean timeRangeLinked) {
+        timeRangePickerController.linkTimeRangeButton.setSelected(timeRangeLinked);
+    }
 
 
     private class TimeRangePickerController {
@@ -256,6 +267,8 @@ public class TimeRangePicker extends ToggleButton {
         private Button pasteTimeRangeButton;
         @FXML
         private Button copyTimeRangeButton;
+        @FXML
+        private ToggleButton linkTimeRangeButton;
 
         private TextFormatter<ZoneId> formatter;
 
@@ -416,21 +429,4 @@ public class TimeRangePicker extends ToggleButton {
     }
 
 
-//    class ForceObjectProperty<T> extends SimpleObjectProperty<T> {
-//
-//        public ForceObjectProperty(T initialValue) {
-//            super(initialValue);
-//        }
-//
-//        @Override
-//        public void fireValueChangedEvent(){
-//            super.fireValueChangedEvent();
-//        }
-//
-//        @Override
-//        public void invalidated() {
-//
-//            super.invalidated();
-//        }
-//    }
 }
