@@ -37,6 +37,7 @@
                             </tooltip>
                         </ZonedDateTimePicker>
                         <TextField fx:id="timezoneField"/>
+
                         <Button fx:id="copyTimeRangeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button" text="Copy" HBox.hgrow="SOMETIMES">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
@@ -77,7 +78,7 @@
                                     <children>
                                         <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="link-icon"/>
                                     </children>
-                                </HBox>T
+                                </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Link Worksheet Time Line">
