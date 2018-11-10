@@ -4,7 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<AnchorPane fx:id="intervalSelector" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="615.0" styleClass="interval-picker-popup" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<AnchorPane fx:id="intervalSelector" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="180.0" prefWidth="651.0" styleClass="interval-picker-popup" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox layoutX="10.0" layoutY="6.0" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
             <children>
@@ -37,6 +37,57 @@
                             </tooltip>
                         </ZonedDateTimePicker>
                         <TextField fx:id="timezoneField"/>
+
+                        <Button fx:id="copyTimeRangeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button" text="Copy" HBox.hgrow="SOMETIMES">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <children>
+                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="copy-icon"/>
+                                    </children>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Copy Time Range">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="pasteTimeRangeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button" text="Paste"
+                                HBox.hgrow="SOMETIMES">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <children>
+                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="clipboard-icon"/>
+                                    </children>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Paste Time Range">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <ToggleButton fx:id="linkTimeRangeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button" text="Link"
+                                      HBox.hgrow="SOMETIMES">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <children>
+                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="link-icon"/>
+                                    </children>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Link Worksheet Time Line">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </ToggleButton>
                         <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefWidth="18.0" styleClass="dialog-button">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">

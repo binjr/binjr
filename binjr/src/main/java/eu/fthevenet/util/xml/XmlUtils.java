@@ -34,6 +34,7 @@ import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 
 /**
@@ -133,6 +134,14 @@ public class XmlUtils {
         try (FileOutputStream fout = new FileOutputStream(file)) {
             serialize(object, fout);
         }
+    }
+
+    public static <T> String serialize(T object) throws IOException, JAXBException {
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            serialize(object, out);
+            return new String(out.toByteArray(), StandardCharsets.UTF_8);
+        }
+
     }
 
     public static <T> void serialize(T object, OutputStream out) throws JAXBException {

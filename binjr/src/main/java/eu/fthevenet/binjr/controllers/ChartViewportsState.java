@@ -19,6 +19,9 @@ package eu.fthevenet.binjr.controllers;
 
 import eu.fthevenet.binjr.data.workspace.Chart;
 import eu.fthevenet.util.javafx.charts.XYChartSelection;
+import eu.fthevenet.util.javafx.controls.TimeRangePicker;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -41,15 +44,22 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
-    private ChangeListener<ZonedDateTime> onStartXChanged;
-    private ChangeListener<ZonedDateTime> onEndXChanged;
 
+    private final ReadOnlyObjectWrapper<TimeRangePicker.TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
 
     @Override
     public void close() {
         this.startX.removeListener(onRefreshAllRequired);
         this.endX.removeListener(onRefreshAllRequired);
         axisStates.values().forEach(AxisState::close);
+    }
+
+    public TimeRangePicker.TimeRange getTimeRange() {
+        return timeRange.get();
+    }
+
+    public ReadOnlyObjectProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
+        return timeRange.getReadOnlyProperty();
     }
 
     public class AxisState implements AutoCloseable {
@@ -221,6 +231,7 @@ public class ChartViewportsState implements AutoCloseable {
                 selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
                 parent.invalidateAll(toHistory, dontPlotChart, false);
             });
+            timeRange.set(TimeRangePicker.TimeRange.of(startX.getValue(), endX.getValue()));
         } finally {
             this.resumeAxisListeners();
         }
