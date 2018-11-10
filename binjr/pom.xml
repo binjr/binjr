@@ -122,8 +122,10 @@
                                         <module>java.management</module>
                                         <module>java.rmi</module>
                                         <module>java.management.rmi</module>
+                                        <module>jdk.management.agent</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
+                                        <module>jdk.management.jfr</module>
                                         <module>jdk.zipfs</module>
                                         <!-- Platform specific -->
                                         <module>jdk.crypto.mscapi</module>
@@ -197,6 +199,8 @@
                                         <module>java.management</module>
                                         <module>java.rmi</module>
                                         <module>java.management.rmi</module>
+                                        <module>jdk.management.agent</module>
+                                        <module>jdk.management.jfr</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
                                         <module>jdk.zipfs</module>
@@ -271,6 +275,8 @@
                                         <module>java.management</module>
                                         <module>java.rmi</module>
                                         <module>java.management.rmi</module>
+                                        <module>jdk.management.agent</module>
+                                        <module>jdk.management.jfr</module>
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
                                         <module>jdk.zipfs</module>
