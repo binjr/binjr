@@ -34,12 +34,8 @@ build_script:
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
-    echo $JAVA_HOME$
-
-    PATH
-
     java -version
 
-#    cd binjr
-#
-#    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
+    cd binjr
+
+    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
