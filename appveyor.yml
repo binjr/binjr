@@ -30,9 +30,13 @@ build_script:
 - ps: >-
     $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
 
-    $ENV:PATH=”$ENV:PATH;$ENV:WIX\bin;$ENV:JAVA_HOME\bin”
+    $ENV:PATH=”$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin”
 
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
+
+    echo $JAVA_HOME$
+
+    PATH
 
     java -version
 
