@@ -57,6 +57,7 @@
         <project.scm.id>${github.global.server}</project.scm.id>
         <skipDeploy>true</skipDeploy>
         <openjfx.scope>compile</openjfx.scope>
+        <openjfx.version>11.0.1</openjfx.version>
     </properties>
     <scm>
         <connection>scm:git:https://github.com/fthevenet/binjr.git</connection>
@@ -79,7 +80,7 @@
                     <plugin>
                         <groupId>com.googlecode.maven-download-plugin</groupId>
                         <artifactId>download-maven-plugin</artifactId>
-                        <version>1.3.0</version>
+                        <version>1.4.1</version>
                         <executions>
                             <execution>
                                 <phase>generate-resources</phase>
@@ -108,7 +109,7 @@
                                 </goals>
                                 <configuration>
                                     <modulePath>
-                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-${openjfx.version}</path>
                                     </modulePath>
                                     <modules>
                                         <!-- Common modules for all platforms -->
@@ -127,6 +128,7 @@
                                         <module>jdk.management</module>
                                         <module>jdk.management.jfr</module>
                                         <module>jdk.zipfs</module>
+                                        <module>jdk.unsupported.desktop</module>
                                         <!-- Platform specific -->
                                         <module>jdk.crypto.mscapi</module>
                                     </modules>
@@ -185,7 +187,7 @@
                                 </goals>
                                 <configuration>
                                     <modulePath>
-                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-${openjfx.version}</path>
                                     </modulePath>
                                     <modules>
                                         <!-- Common modules for all platforms -->
@@ -204,6 +206,7 @@
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
                                         <module>jdk.zipfs</module>
+                                        <module>jdk.unsupported.desktop</module>
                                         <!-- Platform specific -->
                                     </modules>
                                     <compression>2</compression>
@@ -261,7 +264,7 @@
                                 </goals>
                                 <configuration>
                                     <modulePath>
-                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-11</path>
+                                        <path>${binjr.deploy.openjfx.jmods.path}/javafx-jmods-${openjfx.version}</path>
                                     </modulePath>
                                     <modules>
                                         <!-- Common modules for all platforms -->
@@ -280,6 +283,7 @@
                                         <module>jdk.security.auth</module>
                                         <module>jdk.management</module>
                                         <module>jdk.zipfs</module>
+                                        <module>jdk.unsupported.desktop</module>
                                         <!-- Platform specific -->
                                     </modules>
                                     <compression>2</compression>
@@ -470,19 +474,19 @@
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-controls</artifactId>
-            <version>11</version>
+            <version>${openjfx.version}</version>
             <scope>${openjfx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
-            <version>11</version>
+            <version>${openjfx.version}</version>
             <scope>${openjfx.scope}</scope>
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-swing</artifactId>
-            <version>11</version>
+            <version>${openjfx.version}</version>
             <scope>${openjfx.scope}</scope>
         </dependency>
     </dependencies>
