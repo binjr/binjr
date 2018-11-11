@@ -1,5 +1,7 @@
 version: '{build}'
 
+image: Visual Studio 2017
+
 environment:
   GITHUB_TOKEN:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
@@ -14,8 +16,8 @@ init:
 
 
 install:
-  - choco install openjdk --version 11.0
-  - refreshenv
+#  - choco install openjdk --version 11.0
+#  - refreshenv
 
 branches:
 
