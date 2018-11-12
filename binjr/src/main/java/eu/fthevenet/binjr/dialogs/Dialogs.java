@@ -121,7 +121,7 @@ public class Dialogs {
                 .owner(owner).showError());
     }
 
-    public static void notifyError(String title, Exception e, Pos position, Node owner) {
+    public static void notifyError(String title, Throwable e, Pos position, Node owner) {
         logger.debug(() -> title, e);
         notifyError(title, e.getMessage(), position, owner);
     }

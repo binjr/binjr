@@ -130,7 +130,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
             } catch (DataAdapterException e) {
                 Dialogs.notifyError("Error with the adapter to source", e, Pos.CENTER, timezoneField);
                 ae.consume();
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 Dialogs.notifyError("Unexpected error while retrieving data adapter", e, Pos.CENTER, timezoneField);
                 ae.consume();
             }
