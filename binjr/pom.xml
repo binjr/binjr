@@ -73,7 +73,7 @@
                 <binjr.deploy.jdk>openjdk-11_windows-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>zip</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
-                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-windows/</binjr.deploy.openjfx.jmods.url>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-${openjfx.version}-jmods-windows/</binjr.deploy.openjfx.jmods.url>
             </properties>
             <build>
                 <plugins>
@@ -88,10 +88,11 @@
                                     <goal>wget</goal>
                                 </goals>
                                 <configuration>
+                                    <skipCache>true</skipCache>
                                     <url>${binjr.deploy.openjfx.jmods.url}</url>
                                     <unpack>true</unpack>
                                     <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
-                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
+                                    <outputFileName>javafx-${openjfx.version}-jmods.zip</outputFileName>
                                 </configuration>
                             </execution>
                         </executions>
@@ -151,7 +152,7 @@
                 <binjr.deploy.jdk>openjdk-11_linux-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>tar.gz</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
-                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-linux/</binjr.deploy.openjfx.jmods.url>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-${openjfx.version}-jmods-linux/</binjr.deploy.openjfx.jmods.url>
             </properties>
             <build>
                 <plugins>
@@ -169,7 +170,7 @@
                                     <url>${binjr.deploy.openjfx.jmods.url}</url>
                                     <unpack>true</unpack>
                                     <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
-                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
+                                    <outputFileName>javafx-${openjfx.version}-jmods.zip</outputFileName>
                                 </configuration>
                             </execution>
                         </executions>
@@ -228,7 +229,7 @@
                 <binjr.deploy.jdk>openjdk-11_macos-x64</binjr.deploy.jdk>
                 <binjr.deploy.format>tar.gz</binjr.deploy.format>
                 <binjr.deploy.openjfx.jmods.path>${project.build.directory}/openjfx-${binjr.deploy.jdk}</binjr.deploy.openjfx.jmods.path>
-                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-11-jmods-mac/</binjr.deploy.openjfx.jmods.url>
+                <binjr.deploy.openjfx.jmods.url>https://gluonhq.com/download/javafx-${openjfx.version}-jmods-mac/</binjr.deploy.openjfx.jmods.url>
             </properties>
             <build>
                 <plugins>
@@ -246,7 +247,7 @@
                                     <url>${binjr.deploy.openjfx.jmods.url}</url>
                                     <unpack>true</unpack>
                                     <outputDirectory>${binjr.deploy.openjfx.jmods.path}</outputDirectory>
-                                    <outputFileName>javafx-11-jmods.zip</outputFileName>
+                                    <outputFileName>javafx-${openjfx.version}-jmods.zip</outputFileName>
                                 </configuration>
                             </execution>
                         </executions>
@@ -305,6 +306,37 @@
             </properties>
             <build>
                 <plugins>
+                    <plugin>
+                        <groupId>com.ruleoftech</groupId>
+                        <artifactId>markdown-page-generator-plugin</artifactId>
+                        <version>2.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>generate-readme</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>generate</goal>
+                                </goals>
+                                <configuration>
+                                    <headerHtmlFile>${project.basedir}/src/main/deploy/html/header.html</headerHtmlFile>
+                                    <inputDirectory>${project.basedir}/src/main/deploy/</inputDirectory>
+                                    <outputDirectory>${project.build.directory}/binjr-${binjr.deploy.jdk}</outputDirectory>
+                                </configuration>
+                            </execution>
+                            <!--<execution>-->
+                            <!--<id>generate-docs</id>-->
+                            <!--<phase>process-resources</phase>-->
+                            <!--<goals>-->
+                            <!--<goal>generate</goal>-->
+                            <!--</goals>-->
+                            <!--<configuration>-->
+                            <!--<headerHtmlFile>${project.basedir}/src/main/resources/docs/html/header_doc.html</headerHtmlFile>-->
+                            <!--<inputDirectory>${project.build.directory}/docs/</inputDirectory>-->
+                            <!--<outputDirectory>${project.build.directory}/docs/</outputDirectory>-->
+                            <!--</configuration>-->
+                            <!--</execution>-->
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>

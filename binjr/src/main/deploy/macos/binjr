@@ -16,10 +16,11 @@ done
 PRGDIR=`dirname "$PRG"`
 BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 
-JAVACMD=
+JAVACMD="./runtime/bin/java"
 
-exec "./runtime/bin/java" $JAVA_OPTS  \
-  -cp "./app/*" \
+exec $JAVACMD \
+  -splash:"./resources/images/splashscreen.png" \
+  -cp "./app/*:./plugins/*" \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \

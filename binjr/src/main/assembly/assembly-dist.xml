@@ -35,11 +35,11 @@
             <outputDirectory></outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/src/main/deploy/resources/LICENSE</source>
+            <source>${project.basedir}/src/main/deploy/LICENSE</source>
             <outputDirectory></outputDirectory>
         </file>
         <file>
-            <source>${project.basedir}/src/main/deploy/resources/NOTICE</source>
+            <source>${project.basedir}/src/main/deploy/NOTICE</source>
             <outputDirectory></outputDirectory>
         </file>
     </files>
@@ -54,6 +54,10 @@
             <excludes>
                 <exclude>*/**</exclude>
             </excludes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/deploy/resources</directory>
+            <outputDirectory>resources</outputDirectory>
         </fileSet>
     </fileSets>
     <dependencySets>
