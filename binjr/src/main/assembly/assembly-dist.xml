@@ -42,6 +42,10 @@
             <source>${project.basedir}/src/main/deploy/NOTICE</source>
             <outputDirectory></outputDirectory>
         </file>
+        <file>
+            <source>${project.build.directory}/README.html</source>
+            <outputDirectory></outputDirectory>
+        </file>
     </files>
     <fileSets>
         <fileSet>

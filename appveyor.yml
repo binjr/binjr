@@ -10,32 +10,20 @@ environment:
   APPVEYOR_RDP_PASSWORD:
     secure: 4amxfxphFUcpp60d9Q6gJg==
 
-
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-
-install:
-#  - choco install openjdk --version 11.0
-#  - refreshenv
-
 branches:
-
   only:
-
   - binjr2
 
 build_script:
-
-- ps: >-
+-
+  ps: |-
     $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
-
-    $ENV:PATH=”$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin”
-
+    $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
-
     java -version
-
     cd binjr
-
     mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
+

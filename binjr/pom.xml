@@ -320,21 +320,9 @@
                                 <configuration>
                                     <headerHtmlFile>${project.basedir}/src/main/deploy/html/header.html</headerHtmlFile>
                                     <inputDirectory>${project.basedir}/src/main/deploy/</inputDirectory>
-                                    <outputDirectory>${project.build.directory}/binjr-${binjr.deploy.jdk}</outputDirectory>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
                                 </configuration>
                             </execution>
-                            <!--<execution>-->
-                            <!--<id>generate-docs</id>-->
-                            <!--<phase>process-resources</phase>-->
-                            <!--<goals>-->
-                            <!--<goal>generate</goal>-->
-                            <!--</goals>-->
-                            <!--<configuration>-->
-                            <!--<headerHtmlFile>${project.basedir}/src/main/resources/docs/html/header_doc.html</headerHtmlFile>-->
-                            <!--<inputDirectory>${project.build.directory}/docs/</inputDirectory>-->
-                            <!--<outputDirectory>${project.build.directory}/docs/</outputDirectory>-->
-                            <!--</configuration>-->
-                            <!--</execution>-->
                         </executions>
                     </plugin>
                     <plugin>
