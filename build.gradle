@@ -16,13 +16,28 @@ buildscript {
 apply plugin: 'com.google.osdetector'
 
 ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
-ext.openjfxversion = "11.0.1"
+ext.openjfxVersion = "11.0.1"
+ext.licenseName = 'Apache License, Version 2.0'
+ext.licenseUrl = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
+ext.licenseDistribution = 'repo'
+def run = false
 
 subprojects {
     apply plugin: 'java'
     group 'eu.fthevenet'
     version '2.0.0.beta-SNAPSHOT'
     sourceCompatibility = 11
+    description 'Flexible Time Series Visualization'
+    compileJava.options.encoding = 'UTF-8'
+
+    dependencies {
+        compileOnly "org.openjfx:javafx-base:$openjfxVersion:$platform"
+        compileOnly "org.openjfx:javafx-graphics:$openjfxVersion:$platform"
+        compileOnly "org.openjfx:javafx-controls:$openjfxVersion:$platform"
+        compileOnly "org.openjfx:javafx-fxml:$openjfxVersion:$platform"
+        compileOnly "org.openjfx:javafx-swing:$openjfxVersion:$platform"
+    }
+
 
     repositories {
         mavenCentral()

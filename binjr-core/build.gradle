@@ -1,18 +1,16 @@
-dependencies {
-    compile 'org.apache.logging.log4j:log4j-core:2.11.1'
-    compile 'org.apache.httpcomponents:httpclient:4.5.6'
-    compile 'org.controlsfx:controlsfx:9.0.0'
-    compile 'org.gillius:jfxutils:1.0'
-    compile 'com.google.code.gson:gson:2.8.5'
-    compile 'org.apache.commons:commons-csv:1.5'
-    compile 'org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438'
-    compile 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+apply plugin: 'java-library'
 
-    compile "org.openjfx:javafx-base:$openjfxversion:$platform"
-    compile "org.openjfx:javafx-graphics:$openjfxversion:$platform"
-    compile "org.openjfx:javafx-controls:$openjfxversion:$platform"
-    compile "org.openjfx:javafx-fxml:$openjfxversion:$platform"
-    compile "org.openjfx:javafx-swing:$openjfxversion:$platform"
+dependencies {
+    api 'org.apache.logging.log4j:log4j-core:2.11.1'
+    api 'org.apache.httpcomponents:httpclient:4.5.6'
+    api 'org.controlsfx:controlsfx:9.0.0'
+    api 'org.gillius:jfxutils:1.0'
+    api 'com.google.code.gson:gson:2.8.5'
+    api 'org.apache.commons:commons-csv:1.5'
+    api 'org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438'
+    api 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+
 
     testCompile 'junit:junit:4.12'
 }
@@ -26,12 +24,16 @@ compileJava {
     }
 }
 
-//run {
-//    doFirst {
-//        jvmArgs = [
-//                '--module-path', classpath.asPath,
-//                '--add-modules', 'javafx.controls,javafx.fxml,javafx.swing'
-//        ]
-//    }
-//}
-//mainClassName = 'eu.fthevenet.binjr.Binjr'
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'eu.fthevenet.binjr.Bootstrap',
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'SplashScreen-Image': 'images / splashscreen.png',
+//                'Build-Number': $ { env.BINJR_BUILD_NUMBER }
+        )
+    }
+}

@@ -1,12 +1,51 @@
 plugins {
-   id 'application'
+    id 'application'
+    id "de.undercouch.download" version "3.4.3"
 }
 
-
 dependencies {
-   compile project(':binjr-core')
-   compile project(':binjr-adapter-jrds')
-   compile project(':binjr-adapter-csv')
+    implementation project(':binjr-core')
+    implementation project(':binjr-adapter-jrds')
+    implementation project(':binjr-adapter-csv')
+}
+
+def jdk = System.getProperty("java.home")
+def moduleList = "javafx.controls,javafx.fxml,javafx.swing,java.base,java.prefs," +
+        "java.sql,java.xml,java.management,java.rmi,java.management.rmi," +
+        "jdk.management.agent,jdk.security.auth,jdk.management," +
+        "jdk.management.jfr,jdk.zipfs,jdk.unsupported.desktop" +
+        platform == 'win' ? ",jdk.crypto.mscapi" : ""
+def openjfxJmodsUrl = "https://gluonhq.com/download/javafx-${openjfxVersion.replace(".", "-")}-jmods-${platform == 'win' ? 'windows' : platform}"
+def openjfxJmodsFolder = "$buildDir${File.separator}openjfx-jmods"
+
+task downloadopenJfxJmods(dependsOn: [assemble], type: Download) {
+    src openjfxJmodsUrl
+    dest new File(openjfxJmodsFolder, 'openjfx-jmods.zip')
+}
+
+task downloadAndUnzipFile(dependsOn: downloadopenJfxJmods, type: Copy) {
+    from zipTree(downloadopenJfxJmods.dest)
+    into openjfxJmodsFolder
+}
+
+task createAppBundle(type: Exec, dependsOn: [downloadAndUnzipFile]) {
+    workingDir project.projectDir
+    commandLine = [
+            'jlink',
+            '-p', "${jdk}/jmods${File.pathSeparator}${openjfxJmodsFolder}/javafx-jmods-${openjfxVersion}",
+            '--add-modules', moduleList,
+            '--strip-debug',
+            '--no-header-files',
+            '--no-man-pages',
+            "--vm=server",
+            "--compress=2",
+            '--output', "${buildDir}/distribution/${project.name}/runtime"
+    ]
+
+    doLast {
+        System.out.println("Application '${project.name}' packaged.")
+        System.out.println(" -> location: ${buildDir}/distribution/${project.name}/")
+    }
 }
 
 mainClassName = 'eu.fthevenet.binjr.Bootstrap'
