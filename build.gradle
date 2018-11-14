@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
+    }
+}
+
+//plugins {
+//    id 'java'
+////    id 'application'
+//}
+
+
+apply plugin: 'com.google.osdetector'
+
+ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
+ext.openjfxversion = "11.0.1"
+
+subprojects {
+    apply plugin: 'java'
+    group 'eu.fthevenet'
+    version '2.0.0.beta-SNAPSHOT'
+    sourceCompatibility = 11
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+
+

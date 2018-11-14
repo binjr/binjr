@@ -1,0 +1,12 @@
+plugins {
+   id 'application'
+}
+
+
+dependencies {
+   compile project(':binjr-core')
+   compile project(':binjr-adapter-jrds')
+   compile project(':binjr-adapter-csv')
+}
+
+mainClassName = 'eu.fthevenet.binjr.Bootstrap'

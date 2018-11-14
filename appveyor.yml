@@ -24,6 +24,6 @@ build_script:
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
     java -version
-    cd binjr
-    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
+
+#    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
 

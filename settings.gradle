@@ -1,0 +1,6 @@
+rootProject.name = 'binjr'
+include 'binjr-core'
+include 'binjr-adapter-csv'
+include 'binjr-adapter-jrds'
+include 'binjr-app'
+

@@ -1,0 +1,37 @@
+dependencies {
+    compile 'org.apache.logging.log4j:log4j-core:2.11.1'
+    compile 'org.apache.httpcomponents:httpclient:4.5.6'
+    compile 'org.controlsfx:controlsfx:9.0.0'
+    compile 'org.gillius:jfxutils:1.0'
+    compile 'com.google.code.gson:gson:2.8.5'
+    compile 'org.apache.commons:commons-csv:1.5'
+    compile 'org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438'
+    compile 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+
+    compile "org.openjfx:javafx-base:$openjfxversion:$platform"
+    compile "org.openjfx:javafx-graphics:$openjfxversion:$platform"
+    compile "org.openjfx:javafx-controls:$openjfxversion:$platform"
+    compile "org.openjfx:javafx-fxml:$openjfxversion:$platform"
+    compile "org.openjfx:javafx-swing:$openjfxversion:$platform"
+
+    testCompile 'junit:junit:4.12'
+}
+
+compileJava {
+    doFirst {
+        options.compilerArgs = [
+                '--module-path', classpath.asPath,
+                '--add-modules', 'javafx.controls,javafx.fxml,javafx.swing'
+        ]
+    }
+}
+
+//run {
+//    doFirst {
+//        jvmArgs = [
+//                '--module-path', classpath.asPath,
+//                '--add-modules', 'javafx.controls,javafx.fxml,javafx.swing'
+//        ]
+//    }
+//}
+//mainClassName = 'eu.fthevenet.binjr.Binjr'
