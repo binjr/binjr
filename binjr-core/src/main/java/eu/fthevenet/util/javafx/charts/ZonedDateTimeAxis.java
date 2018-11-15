@@ -1,4 +1,3 @@
-package eu.fthevenet.util.javafx.charts;
 /*
  * The MIT License (MIT)
  *
@@ -22,6 +21,9 @@ package eu.fthevenet.util.javafx.charts;
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+package eu.fthevenet.util.javafx.charts;
+
 
 import javafx.beans.property.*;
 import javafx.scene.chart.Axis;
