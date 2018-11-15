@@ -1,12 +1,3 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.google.gradle:osdetector-gradle-plugin:1.6.0'
-    }
-}
-
 /*
  *    Copyright 2017-2018 Frederic Thevenet
  *
@@ -22,43 +13,146 @@ buildscript {
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-
-//plugins {
-//    id 'java'
-////    id 'application'
+//buildscript {
+//    repositories {
+//        jcenter()
+//        maven { url 'http://dl.bintray.com/content/aalmiray/kordamp' }
+//    }
+//    dependencies {
+//        classpath 'org.kordamp:markdown-gradle-plugin:1.2.0'
+//    }
 //}
+//apply plugin: 'org.kordamp.markdown.convert'
+
+plugins {
+    id "de.undercouch.download" version "3.4.3"
+    id "org.kordamp.markdown.convert" version "1.2.0"
+}
 
 
-apply plugin: 'com.google.osdetector'
+ext.BINJR_VERSION = '2.0.0.beta'
 
-ext.platform = osdetector.os == 'osx' ? 'mac' : osdetector.os == 'windows' ? 'win' : osdetector.os
-ext.openjfxVersion = "11.0.1"
-ext.licenseName = 'Apache License, Version 2.0'
-ext.licenseUrl = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
-ext.licenseDistribution = 'repo'
-def run = false
+ext.LICENSE_NAME = 'Apache License, Version 2.0'
+ext.LICENSE_URL = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
+ext.LICENSE_DISTRIBUTION = 'repo'
+
+ext.OS_NAME = System.getProperty("os.name").toLowerCase()
+ext.OS_ARCH = System.getProperty("os.arch")
+ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
+ext.IS_MAC = OS_NAME.contains("mac") || OS_NAME.contains("darwin")
+ext.IS_WINDOWS = OS_NAME.contains("windows")
+ext.IS_LINUX = OS_NAME.contains("linux")
+ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
+ext.JDK_HOME = System.getProperty("java.home")
+ext.OPENJFX_VERSION = "11.0.1"
+ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
+ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
+ext.JLINK_ADD_MODULES = "javafx.controls,javafx.fxml,javafx.swing,java.base,java.prefs,java.sql,java.xml,java.management,java.rmi," +
+        "java.management.rmi,jdk.management.agent,jdk.security.auth,jdk.management,jdk.management.jfr,jdk.zipfs," +
+        "jdk.unsupported.desktop${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
+ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
+ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 
 subprojects {
     apply plugin: 'java'
     group 'eu.fthevenet'
-    version '2.0.0.beta-SNAPSHOT'
+    version BINJR_VERSION
     sourceCompatibility = 11
     description 'Flexible Time Series Visualization'
     compileJava.options.encoding = 'UTF-8'
 
     dependencies {
-        compileOnly "org.openjfx:javafx-base:$openjfxVersion:$platform"
-        compileOnly "org.openjfx:javafx-graphics:$openjfxVersion:$platform"
-        compileOnly "org.openjfx:javafx-controls:$openjfxVersion:$platform"
-        compileOnly "org.openjfx:javafx-fxml:$openjfxVersion:$platform"
-        compileOnly "org.openjfx:javafx-swing:$openjfxVersion:$platform"
+        compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+        compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+        compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+        compileOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+        compileOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
     }
-
 
     repositories {
         mavenCentral()
     }
 }
 
+task clean(type: Delete) {
+    delete buildDir
+}
 
+task copyAppLibs(type: Copy) {
+    into "$DISTRIBUTION_PATH/app"
+    from project(":binjr-core").configurations.runtimeClasspath
+    from project(":binjr-core").jar
+}
 
+task copyPluginLibs(type: Copy) {
+    into "$DISTRIBUTION_PATH/plugins"
+    from project(":binjr-adapter-jrds").jar
+    from project(":binjr-adapter-csv").jar
+}
+
+task copyLauncher(type: Copy) {
+    into DISTRIBUTION_PATH
+    from "${projectDir}/distribution/platforms/${OS_FAMILY}"
+}
+
+task copyResources(type: Copy) {
+    into "$DISTRIBUTION_PATH/resources"
+    from "${projectDir}/distribution/resources"
+}
+
+//task convertMarkdowndDocs(type: markdownToHtml) {
+markdownToHtml{
+    sourceDir =  file("${projectDir}/distribution/info")
+    outputDir = file("$DISTRIBUTION_PATH")
+}
+
+task downloadopenJfxJmods(type: Download) {
+    src OPENJFX_JMODS_DOWNLOAD_URL
+    dest new File("${buildDir}/tmp", 'openjfx-jmods.zip')
+}
+
+task downloadAndUnzipFile(dependsOn: downloadopenJfxJmods, type: Copy) {
+    from zipTree(downloadopenJfxJmods.dest)
+    into buildDir
+}
+
+task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
+    workingDir project.projectDir
+    commandLine = [
+            'jlink',
+            '-p', "${JDK_HOME}/jmods${File.pathSeparator}${buildDir}/javafx-jmods-${OPENJFX_VERSION}",
+            '--add-modules', JLINK_ADD_MODULES,
+            '--strip-debug',
+            '--no-header-files',
+            '--no-man-pages',
+            "--vm=server",
+            "--compress=2",
+            '--output', "${DISTRIBUTION_PATH}/runtime"
+    ]
+
+    doLast {
+        System.out.println("Application '${project.name}' packaged.")
+        System.out.println(" -> location: ${DISTRIBUTION_PATH}/")
+    }
+}
+
+task packageDistributionZip(type: Zip, dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
+    from DISTRIBUTION_PATH
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.zip"
+}
+
+task packageDistributionTar(type: Tar) {
+    compression Compression.GZIP
+    from DISTRIBUTION_PATH
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.tar.gz"
+}
+
+task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, createRuntimeImage]) {
+    if (IS_WINDOWS) {
+        finalizedBy(packageDistributionZip)
+    } else {
+        finalizedBy(packageDistributionTar)
+    }
+}
