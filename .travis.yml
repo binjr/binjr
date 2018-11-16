@@ -1,6 +1,7 @@
 env:
   global:
   - BINJR_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
+  - secure: Av567sqYBUvpTumbpfVnKvs20XauwCmJzqDfenDGpjqq0G7JNhE4l1hPdZ8LmsTMZrm0fI09YwqFTFxHphj3oi8S6wv0tv7+n8ByVDLOzyyTnw6Pw9JYOLwjW8RNB9fY7WWHkG1vJkLuQakukMmO1jSBN8hbSb77CF8dEKcNB9OSSsjEfVQn9+b6mtTVJXHmq1q1kc+a/gbkFDFnTGUot8op3N+5XxXcDIc3EqiJ6JAicMPV94aSCuw7qgmrqF3ols0X402xs+OPWEPEB8PDBZ15DZxxKxfgD0AvuC2jnX+ijmd1yxctE4ziWDoT4xmRM3qE+R2JN3aY6RPaK/8hnEHIXe25DipqCVGS5P8btRQ0CK7x48LJolp8HLNPY390GL1BQ2VGSVA0LQwkSlp+LuQovvHxEcubhcw+We2Go0XWPOPp5Ce1CT8yQbFfQPsGjCiWoAC8Uueq3vsxs0dQPpjl+v5MHuIA74VEwzkZeZZYm9phJYqB4MAG0R3aDYy0xTJt6vmPVjKCcQO56kZWL29cBH9z4YcP7eo9FpZuQjMioawDXEU831FvrEAveXZFeYQ5Ufbr9DuhHzfhRF2w22fqPX0SjWBV2WuiPQdTX73qWZwG+pfcaBYkqF3dSfnvKaEiM4qe+glo9TSMuGmP+4huAmAdgUBe+h9w3I5RRLo=
 #  - secure: nBONte2+/5CdL1thPN+MGV2qEvmG3e0LuiJBsK8XZOqAGWV2/hz3TPLCQOTM18kZYzcmcVHu24kJSGGC4ZerTXlRt3IxE+/j8VObzW3CB0HM2dYKULxr1qobWx/0Ob+fM/Cbmicf+XsPL/fmMi35jjt0OboyA8ZEgsJgPqro6HyKdeoBEfUQNN3McRXxHDB1BEeNEZgYlh090wHs+PpAodGI672CL8zdwZsOzix+Lym65PiC+kZ7lVwdD6osGx/wjxWP6FavYbIyd4qf4OzwsKD53rUgV59AYG61i2cOrC7dQTVxk/ybBCSlG9CNHMqhJMu1lMz01OXiOPFUAGAEj2xkA6lE7G6mIfCHVvrCaZCNdHRiCtY2tkm0HXgllOwOQjs/wNlOEAsSDht+QTTBcejYuecl3yaEEbxyglcs5Kj/iwFOpysLuIutkaS83Ob6cTWIxMUql1jnWiZg1BiKRof0Opt3ZcjwWmP7UiZWsrIUEO6A4rLViHIq8CiU0zziYXnq5UUFvwIslz4p9ioAMUB5ld/icWf97KOwFWpOMXAeVOBCOEZ6xQOEkYV6IZVKeViF45Kj655Bmm6OPvAIDOoJvX/p9lIdDFZSMoHwTs5VGnN92DOdB+cE+nsdlnu2JrXFyLG0duQInvfBuy8uUtTBODR8o9tV246dD7mLOJo=
 #  - secure: r1lB2M5+zEcnOehZVcgqn6/EPvUWAhzfrM7px0Df88xI4PqQofNZ3UwTWKcjRstaAt35dTbKBOpY3TkmdTTHIV69BN/P9y4a8hXyTE+SWLO2frJvuqqm6uByjllT8XMEdCA8a4Zza/p+68yEjWMTc6AtG/9aBPt91k4CFrL5gla8d/9iwaTSiA1996w9p76Jf7aDYTr+QaQdmBGrDC88PMlce6UDePm6nRc6r6F9rePleCchAUQVlbS1JeHsP26MQSycBhfIGxnYm1DVBQ79ckFFJRGhBH9yPkCnRvJbohpB34lD/uYbh9Y8H2l4v2DOf8wfcGwKhs/kYsZQ5wsks8L6Tiiszk6FcvxOxY6BSGklO+tIToiLUxDGY1WF3aJOcwzQ4U+u8AoMDk5lvk0sg5EZ9gLvCsKkQttGBU/hBhFzWtCQn+g2oK9JUdvmM89qDhMPVLbQK3rLJhEDijjtM3bP82wODzhAhcigGAOY1nNwXyq8jtquI3P6WhJMyVTAAnJsk+BV4gcjM42lsGPTlqbUxtbD08x+LwJLqQe9l4kADpAPap2eWMeG1cZprksbDn3Oc7oRdmiVj1Mcn7l7JpfQl1N/hAtKPiejz6s24bG8Hs0gMiYKb1xSR0Q4N3x3y/jFo77cWF4bck9deJetvHYBrccilbo4AVtgn19WF1I=
 #  - secure: FUAEGvUTaaIikw2a2Ext+5lLGsPloBjmYP6FPVtUPaGYOzIJ4QzR6tbcOj9bDIAfcUvsy2f/YcGjIHjkz8/ImehhnNsEAeJ+1pflI0NE6gjjkH33l9MA37AOIAt1HavFm29NZllEyF6ZrULyKr3cE84hNRzgYLUrdxecKGrY7SQey4aWrOh2uE8K7EeXcuI4v458p5CZiYfiE7OeA9Ekr4US1LCya8hTK56o5NtdUugKqD52NHGN5cmmISvmvv1ozptXTuBeyryXMvBbuxLu/bqEB0myZpxBsxi+Ow82uRSbEIWSH+4RY0VG8fFif2MCrIJ/NgGsCDabUPaNKMLYJ9caPrzk6rGdQhBx2W+S7rltS/tx/GseCH6yF4Wfj3GktyH2+dCdj5SA+veqtHfboYrW9gvmQ4y8YF3seOdn5YHSJ439k6Ne/BlVsWjoQ5MsI4CpE3uOFbb0oFuRnDIXgeowFp9zw5CjcO0xBZsxRzGKoL1iA6RAuaOUtDWjbds6iedrkMmX3Gp53Mxj3tw/agQprOprhD2a3nNfIr9eBxGkInj63NVKAp4KDbiCH0D2xwn/LVj4Zg4J2QMk30IdGtRJwPwOcefIYBfw2mHm+yxi31eHFT7zH43Nyx5G6t0tKfQGga3jQHBlMlqZLq52kaGtcyhr7BYG2AJVCUj3XFI=
@@ -21,36 +22,38 @@ jdk: openjdk11
 install: true
 
 stages:
-  - name: build
-  - name: snapshot
-    if: os = linux AND branch = master
-  - name: release
-    if: os = linux AND branch = release
-  - name: upload
-    if: branch = release
+- Build
+- OSSRH Snapshot
+  if: os = linux AND branch = master
+- Maven Central Release
+  if: os = linux AND branch = release
+- GitHub Release
+  if: branch = release
 
 jobs:
   include:
-    - stage: build
+    - stage: Build
       script: ./gradlew clean packageDistribution
-    - stage: snapshot
+    - stage: OSSRH Snapshot
       script: echo "TODO push to snapshot maven repo"
-    - stage: release
+    - stage: Maven Central Release
       script: echo "TODO push to release maven repo"
-    - stage: upload
-      script: echo "TODO upload package to GH release"
+    - stage: GitHub Release
+      deploy:
+        provider: releases
+        api_key: $GITHUB_TOKEN
+        file_glob: true
+        file:
+        - build/*.zip
+        - build/*.tar.gz
+        skip_cleanup: true
+        on:
+          tags: true
 
 
-#deploy:
-#  provider: releases
-#  api_key:
-#    secure: Av567sqYBUvpTumbpfVnKvs20XauwCmJzqDfenDGpjqq0G7JNhE4l1hPdZ8LmsTMZrm0fI09YwqFTFxHphj3oi8S6wv0tv7+n8ByVDLOzyyTnw6Pw9JYOLwjW8RNB9fY7WWHkG1vJkLuQakukMmO1jSBN8hbSb77CF8dEKcNB9OSSsjEfVQn9+b6mtTVJXHmq1q1kc+a/gbkFDFnTGUot8op3N+5XxXcDIc3EqiJ6JAicMPV94aSCuw7qgmrqF3ols0X402xs+OPWEPEB8PDBZ15DZxxKxfgD0AvuC2jnX+ijmd1yxctE4ziWDoT4xmRM3qE+R2JN3aY6RPaK/8hnEHIXe25DipqCVGS5P8btRQ0CK7x48LJolp8HLNPY390GL1BQ2VGSVA0LQwkSlp+LuQovvHxEcubhcw+We2Go0XWPOPp5Ce1CT8yQbFfQPsGjCiWoAC8Uueq3vsxs0dQPpjl+v5MHuIA74VEwzkZeZZYm9phJYqB4MAG0R3aDYy0xTJt6vmPVjKCcQO56kZWL29cBH9z4YcP7eo9FpZuQjMioawDXEU831FvrEAveXZFeYQ5Ufbr9DuhHzfhRF2w22fqPX0SjWBV2WuiPQdTX73qWZwG+pfcaBYkqF3dSfnvKaEiM4qe+glo9TSMuGmP+4huAmAdgUBe+h9w3I5RRLo=
-#  file_glob: true
-#  file:
-#  - build/*.zip
-#  - build/*.tar.gz
-#  skip_cleanup: true
-#  on:
-#    branch: release
+
+
+
+
 
 
