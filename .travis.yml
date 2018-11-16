@@ -1,4 +1,4 @@
-language: shell
+language: java
 env:
   global:
   - BINJR_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER

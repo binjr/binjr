@@ -11,9 +11,9 @@ environment:
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-#branches:
-#  only:
-#  - binjr2
+branches:
+  only:
+  - gradle
 
 build_script:
 -
@@ -22,6 +22,8 @@ build_script:
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
     java -version
+
+    pwd
 
     gradlew.bat clean packageDistribution
 
