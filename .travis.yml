@@ -32,7 +32,7 @@ matrix:
       - stage: Maven Central Release
         script: echo "TODO push to release maven repo"
       - stage: GitHub Release
-          script: echo "TODO release to GH"
+        script: echo "TODO release to GH"
 
   - os: osx
     stages:
