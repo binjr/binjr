@@ -5,15 +5,11 @@ image: Visual Studio 2017
 environment:
   GITHUB_TOKEN:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
-  APPVEYOR_RDP_PASSWORD:
-    secure: 4amxfxphFUcpp60d9Q6gJg==
-
-init:
-  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 branches:
   only:
-  - gradle
+    - master
+    - release
 
 build_script:
 -

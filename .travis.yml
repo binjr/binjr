@@ -8,14 +8,32 @@ env:
 #  - secure: UB8M14NlBswcF887PU0ybnAcfNRzGD5HWcQqrt9U9P6DfrqxommkKuCqMkAd9kkQ4lRyWndewq6wMlRWIdhXtvU3awEXukkn1VYyAChukdUdI3JpzI2Z8ysgBr8ABJ7eNHtHdtNk1sJDpZ9akZkk69dKo9zAq74ytSCvWJlkjHmHTyl/o8RERWXUSWAxIs4ekCLlM6EsLPaG/dTz4644ZlnL56Uio/RDz6s98Efi5sU2MCO/twZR6WoJSvoGLkBkJogwrJmZuePxb5zzHWHH6tXa1fztg540kPHYP15Z2coGFdiKW2ckvGx4LJD9aigKNfNAu/xNLqhX02oKYIa511HvapCnoRgm6zSCeKC0GY+l5FTp89uw/oWq6PW4QXfAp1rFC9pIFQp3OKneppFNo46+fpmdvypLW6HKyIE+NFTQvhJUa8pW90jnxaNoyCPt9aSHctkca9TL8PeyCLccCdqNw86OCP/nnomKq6redYPNEnDqNdIqyWorYB+85fgkHyUZZQVNsNSCRcLON/u7EdVRvR1qI/CFMGM/RvsEYomAf+fi/OVcaSEBWPhXlRuoL8fg05fdrdJ0q5dWMNCJ7dsIiZFyTIt+AdWtXZgeHPTKRSQrW0wcEuvgkfd2DmGVWDdr0t6UYSkPzppYycnj1kkb+aMvSRps3PCRqHrXTKE=
 branches:
   only:
-  - gradle
+  - master
+  - release
 
 matrix:
   include:
     - language: java
       os: linux
       jdk: openjdk11
-      script: ./gradlew clean packageDistribution
+      install: true
+
+      stages:
+      - name: build
+      - name: snapshot
+        if: branch = master
+      - name: release
+        if: branch = release
+
+      jobs:
+        include:
+        - stage: build
+          script: ./gradlew clean packageDistribution
+        - stage: snapshot
+          script: echo "TODO push SNAPSHOT"
+        - stage: release
+          script: echo "TODO push RELEASE"
+
 
     - language: java
       os: osx
@@ -27,16 +45,16 @@ matrix:
 #      script:
 #        - choco --version
 
-deploy:
-  provider: releases
-  api_key:
-    secure: Av567sqYBUvpTumbpfVnKvs20XauwCmJzqDfenDGpjqq0G7JNhE4l1hPdZ8LmsTMZrm0fI09YwqFTFxHphj3oi8S6wv0tv7+n8ByVDLOzyyTnw6Pw9JYOLwjW8RNB9fY7WWHkG1vJkLuQakukMmO1jSBN8hbSb77CF8dEKcNB9OSSsjEfVQn9+b6mtTVJXHmq1q1kc+a/gbkFDFnTGUot8op3N+5XxXcDIc3EqiJ6JAicMPV94aSCuw7qgmrqF3ols0X402xs+OPWEPEB8PDBZ15DZxxKxfgD0AvuC2jnX+ijmd1yxctE4ziWDoT4xmRM3qE+R2JN3aY6RPaK/8hnEHIXe25DipqCVGS5P8btRQ0CK7x48LJolp8HLNPY390GL1BQ2VGSVA0LQwkSlp+LuQovvHxEcubhcw+We2Go0XWPOPp5Ce1CT8yQbFfQPsGjCiWoAC8Uueq3vsxs0dQPpjl+v5MHuIA74VEwzkZeZZYm9phJYqB4MAG0R3aDYy0xTJt6vmPVjKCcQO56kZWL29cBH9z4YcP7eo9FpZuQjMioawDXEU831FvrEAveXZFeYQ5Ufbr9DuhHzfhRF2w22fqPX0SjWBV2WuiPQdTX73qWZwG+pfcaBYkqF3dSfnvKaEiM4qe+glo9TSMuGmP+4huAmAdgUBe+h9w3I5RRLo=
-  file_glob: true
-  file:
-  - build/*.zip
-  - build/*.tar.gz
-  skip_cleanup: true
-  on:
-    tags: true
+#deploy:
+#  provider: releases
+#  api_key:
+#    secure: Av567sqYBUvpTumbpfVnKvs20XauwCmJzqDfenDGpjqq0G7JNhE4l1hPdZ8LmsTMZrm0fI09YwqFTFxHphj3oi8S6wv0tv7+n8ByVDLOzyyTnw6Pw9JYOLwjW8RNB9fY7WWHkG1vJkLuQakukMmO1jSBN8hbSb77CF8dEKcNB9OSSsjEfVQn9+b6mtTVJXHmq1q1kc+a/gbkFDFnTGUot8op3N+5XxXcDIc3EqiJ6JAicMPV94aSCuw7qgmrqF3ols0X402xs+OPWEPEB8PDBZ15DZxxKxfgD0AvuC2jnX+ijmd1yxctE4ziWDoT4xmRM3qE+R2JN3aY6RPaK/8hnEHIXe25DipqCVGS5P8btRQ0CK7x48LJolp8HLNPY390GL1BQ2VGSVA0LQwkSlp+LuQovvHxEcubhcw+We2Go0XWPOPp5Ce1CT8yQbFfQPsGjCiWoAC8Uueq3vsxs0dQPpjl+v5MHuIA74VEwzkZeZZYm9phJYqB4MAG0R3aDYy0xTJt6vmPVjKCcQO56kZWL29cBH9z4YcP7eo9FpZuQjMioawDXEU831FvrEAveXZFeYQ5Ufbr9DuhHzfhRF2w22fqPX0SjWBV2WuiPQdTX73qWZwG+pfcaBYkqF3dSfnvKaEiM4qe+glo9TSMuGmP+4huAmAdgUBe+h9w3I5RRLo=
+#  file_glob: true
+#  file:
+#  - build/*.zip
+#  - build/*.tar.gz
+#  skip_cleanup: true
+#  on:
+#    tags: true
 
 
