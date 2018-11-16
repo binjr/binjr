@@ -2,4 +2,4 @@
 set -ev
 java -version
 pwd
-gradlew clean packageDistribution
+./gradlew clean packageDistribution

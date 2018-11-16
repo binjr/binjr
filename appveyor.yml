@@ -25,7 +25,10 @@ build_script:
 
     pwd
 
-    gradlew.bat clean packageDistribution
+    dir
+
+
+    .\gradlew.bat clean packageDistribution
 
 #    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
 
