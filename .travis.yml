@@ -16,15 +16,18 @@ branches:
 matrix:
   include:
     - language: java
-      os:
-        - linux
-        - osx
+      os: linux
+      jdk: openjdk11
+      script: ./gradlew clean packageDistribution
+
+    - language: java
+      os: osx
       jdk: openjdk11
       script: ./gradlew clean packageDistribution
 
     - language: shell
       os: windows
       script:
-        - java -version
+        - choco --version
 
 
