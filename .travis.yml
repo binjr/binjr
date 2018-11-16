@@ -28,6 +28,7 @@ matrix:
     - language: shell
       os: windows
       script:
-        - choco --version
+        - powershell
+        - C:\ProgramData\chocolatey\choco --version
 
 
