@@ -7,38 +7,38 @@ env:
 #  - secure: UB8M14NlBswcF887PU0ybnAcfNRzGD5HWcQqrt9U9P6DfrqxommkKuCqMkAd9kkQ4lRyWndewq6wMlRWIdhXtvU3awEXukkn1VYyAChukdUdI3JpzI2Z8ysgBr8ABJ7eNHtHdtNk1sJDpZ9akZkk69dKo9zAq74ytSCvWJlkjHmHTyl/o8RERWXUSWAxIs4ekCLlM6EsLPaG/dTz4644ZlnL56Uio/RDz6s98Efi5sU2MCO/twZR6WoJSvoGLkBkJogwrJmZuePxb5zzHWHH6tXa1fztg540kPHYP15Z2coGFdiKW2ckvGx4LJD9aigKNfNAu/xNLqhX02oKYIa511HvapCnoRgm6zSCeKC0GY+l5FTp89uw/oWq6PW4QXfAp1rFC9pIFQp3OKneppFNo46+fpmdvypLW6HKyIE+NFTQvhJUa8pW90jnxaNoyCPt9aSHctkca9TL8PeyCLccCdqNw86OCP/nnomKq6redYPNEnDqNdIqyWorYB+85fgkHyUZZQVNsNSCRcLON/u7EdVRvR1qI/CFMGM/RvsEYomAf+fi/OVcaSEBWPhXlRuoL8fg05fdrdJ0q5dWMNCJ7dsIiZFyTIt+AdWtXZgeHPTKRSQrW0wcEuvgkfd2DmGVWDdr0t6UYSkPzppYycnj1kkb+aMvSRps3PCRqHrXTKE=
 
 os:
-- linux
-- osx
+  - linux
+  - osx
 #  - windows
 
 branches:
   only:
-  - master
-  - release
+    - master
+    - release
 
 language: java
 jdk: openjdk11
 install: true
 
 stages:
-- name: build
-- name: snapshot
-  if: os = linux AND branch = master
-- name: release
-  if: os = linux AND branch = release
-- name: upload
-  if: branch = release
+  - name: build
+  - name: snapshot
+    if: os = linux AND branch = master
+  - name: release
+    if: os = linux AND branch = release
+  - name: upload
+    if: branch = release
 
 jobs:
   include:
-  - stage: build
-    script: ./gradlew clean packageDistribution
-  - stage: snapshot-linux
-    script: echo "TODO: push to snapshot maven repo"
-  - stage: release-linux
-    script: echo "TODO: push to release maven repo"
-  - stage: upload
-    script: echo "TODO: upload package to GH release"
+    - stage: build
+      script: ./gradlew clean packageDistribution
+    - stage: snapshot
+      script: echo "TODO push to snapshot maven repo"
+    - stage: release
+      script: echo "TODO push to release maven repo"
+    - stage: upload
+      script: echo "TODO upload package to GH release"
 
 
 #deploy:
