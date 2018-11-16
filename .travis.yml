@@ -1,4 +1,4 @@
-language: java
+language: shell
 env:
   global:
   - BINJR_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
@@ -15,6 +15,7 @@ branches:
 os:
 - linux
 - osx
+- windows
 jdk:
 - openjdk11
 
