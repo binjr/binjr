@@ -32,7 +32,8 @@ stages:
 
 jobs:
   include:
-    - script: ./gradlew clean packageDistribution
+    - name: Build
+      script: ./gradlew clean packageDistribution
       os:
       - linux
       - osx
