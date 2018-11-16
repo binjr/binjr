@@ -22,7 +22,7 @@ jdk: openjdk11
 install: true
 
 stages:
-- name: Build
+- name: build
 - name: OSSRH Snapshot
   if: branch = master
 - name: Maven Central Release
@@ -32,11 +32,8 @@ stages:
 
 jobs:
   include:
-    - name: Build
+    - name: build
       script: ./gradlew clean packageDistribution
-      os:
-      - linux
-      - osx
     - stage: OSSRH Snapshot
       script: echo "TODO push to snapshot maven repo"
       os: linux
@@ -46,9 +43,6 @@ jobs:
     - stage: GitHub Release
       script:  ./gradlew clean packageDistribution
       deploy:
-        os:
-          - linux
-          - osx
         provider: releases
         api_key: $GITHUB_TOKEN
         file_glob: true
