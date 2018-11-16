@@ -24,7 +24,6 @@ jdk: openjdk11
 
 stages:
 - name: build
-  if: branch = master OR branch = release
 - name: OSSRH Snapshot
   if: branch = master
 - name: Maven Central Release
@@ -34,7 +33,7 @@ stages:
 
 jobs:
   include:
-    - name: build
+    - stage: build
       script: ./gradlew build
     - stage: OSSRH Snapshot
       script: echo "TODO push to snapshot maven repo"
