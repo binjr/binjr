@@ -22,12 +22,12 @@ jdk: openjdk11
 install: true
 
 stages:
-- Build
-- OSSRH Snapshot
+- name: Build
+- name: OSSRH Snapshot
   if: os = linux AND branch = master
-- Maven Central Release
+- name: Maven Central Release
   if: os = linux AND branch = release
-- GitHub Release
+- name: GitHub Release
   if: branch = release
 
 jobs:
