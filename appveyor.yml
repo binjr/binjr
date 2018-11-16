@@ -22,13 +22,5 @@ build_script:
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
     java -version
-
-    pwd
-
-    dir
-
-
     .\gradlew.bat clean packageDistribution
-
-#    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
 

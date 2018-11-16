@@ -1,4 +1,4 @@
-language: java
+
 env:
   global:
   - BINJR_BUILD_NUMBER=$TRAVIS_BUILD_NUMBER
@@ -12,13 +12,19 @@ env:
 branches:
   only:
   - gradle
-os:
-- linux
-- osx
-- windows
-jdk:
-- openjdk11
 
-sudo: false
+matrix:
+  include:
+    - language: java
+      os:
+        - linux
+        - osx
+      jdk: openjdk11
+      script: ./gradlew clean packageDistribution
 
-script: "./ci/build.sh"
+    - language: shell
+      os: windows
+      script:
+        - java -version
+
+
