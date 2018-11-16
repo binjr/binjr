@@ -1,13 +1,12 @@
-# binjr 2 beta ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=binjr2) 
+# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=binjr2) 
 
->This is a version of binjr built to run on Java 11 and beyond. 
-It should be considered of beta quality for the time being.
+>Starting with version 2.0.0, binjr is build to run on Java 11 and beyond. 
 >
 >___Please note that it does not run on previous version of Java.___
 >
->Also note that as of Java 11, the JavaFX runtime, which binjr relies on, is no longer supplied as part of the JDK. 
->
->As such, the simplest way to run this version of binjr is to use the full distribution package (choose the right one for your OS), which contains a modular runtime image of Java 11 that includes the JavaFX runtime modules and all other dependencies.
+> If you require a version that relies on Java 8, you can use the latest releases versioned 1.x.x, 
+> the source code for it being available in branch [binjr-1_x](https://github.com/fthevenet/binjr/tree/binjr-1_x),
+> but be aware that this branch will be no longer be updated in the near future.
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
