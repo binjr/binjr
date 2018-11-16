@@ -8,6 +8,10 @@
 #  - secure: UB8M14NlBswcF887PU0ybnAcfNRzGD5HWcQqrt9U9P6DfrqxommkKuCqMkAd9kkQ4lRyWndewq6wMlRWIdhXtvU3awEXukkn1VYyAChukdUdI3JpzI2Z8ysgBr8ABJ7eNHtHdtNk1sJDpZ9akZkk69dKo9zAq74ytSCvWJlkjHmHTyl/o8RERWXUSWAxIs4ekCLlM6EsLPaG/dTz4644ZlnL56Uio/RDz6s98Efi5sU2MCO/twZR6WoJSvoGLkBkJogwrJmZuePxb5zzHWHH6tXa1fztg540kPHYP15Z2coGFdiKW2ckvGx4LJD9aigKNfNAu/xNLqhX02oKYIa511HvapCnoRgm6zSCeKC0GY+l5FTp89uw/oWq6PW4QXfAp1rFC9pIFQp3OKneppFNo46+fpmdvypLW6HKyIE+NFTQvhJUa8pW90jnxaNoyCPt9aSHctkca9TL8PeyCLccCdqNw86OCP/nnomKq6redYPNEnDqNdIqyWorYB+85fgkHyUZZQVNsNSCRcLON/u7EdVRvR1qI/CFMGM/RvsEYomAf+fi/OVcaSEBWPhXlRuoL8fg05fdrdJ0q5dWMNCJ7dsIiZFyTIt+AdWtXZgeHPTKRSQrW0wcEuvgkfd2DmGVWDdr0t6UYSkPzppYycnj1kkb+aMvSRps3PCRqHrXTKE=
 
 
+
+os:
+  - linux
+  - osx
 #  - windows
 
 #branches:
@@ -20,21 +24,18 @@ jdk: openjdk11
 #install: true
 #sudo: false
 
-stages:
-- name: build
-- name: OSSRH Snapshot
-  if: branch = master
-- name: Maven Central Release
-  if: branch = release
-- name: GitHub Release
-
+#stages:
+#- name: build
+#- name: OSSRH Snapshot
+#  if: branch = master
+#- name: Maven Central Release
+#  if: branch = release
+#- name: GitHub Release
+#
 
 jobs:
   include:
     - stage: build
-      os:
-      - linux
-      - osx
       script: ./gradlew build
     - stage: OSSRH Snapshot
       script: echo "TODO push to snapshot maven repo"
@@ -43,9 +44,6 @@ jobs:
       script: echo "TODO push to release maven repo"
 #      os: linux
     - stage: GitHub Release
-      os:
-      - linux
-      - osx
       script: echo "TODO release to GH"
 #      script:  ./gradlew clean packageDistribution
 #      deploy:
