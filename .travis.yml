@@ -7,39 +7,47 @@ env:
 #  - secure: FUAEGvUTaaIikw2a2Ext+5lLGsPloBjmYP6FPVtUPaGYOzIJ4QzR6tbcOj9bDIAfcUvsy2f/YcGjIHjkz8/ImehhnNsEAeJ+1pflI0NE6gjjkH33l9MA37AOIAt1HavFm29NZllEyF6ZrULyKr3cE84hNRzgYLUrdxecKGrY7SQey4aWrOh2uE8K7EeXcuI4v458p5CZiYfiE7OeA9Ekr4US1LCya8hTK56o5NtdUugKqD52NHGN5cmmISvmvv1ozptXTuBeyryXMvBbuxLu/bqEB0myZpxBsxi+Ow82uRSbEIWSH+4RY0VG8fFif2MCrIJ/NgGsCDabUPaNKMLYJ9caPrzk6rGdQhBx2W+S7rltS/tx/GseCH6yF4Wfj3GktyH2+dCdj5SA+veqtHfboYrW9gvmQ4y8YF3seOdn5YHSJ439k6Ne/BlVsWjoQ5MsI4CpE3uOFbb0oFuRnDIXgeowFp9zw5CjcO0xBZsxRzGKoL1iA6RAuaOUtDWjbds6iedrkMmX3Gp53Mxj3tw/agQprOprhD2a3nNfIr9eBxGkInj63NVKAp4KDbiCH0D2xwn/LVj4Zg4J2QMk30IdGtRJwPwOcefIYBfw2mHm+yxi31eHFT7zH43Nyx5G6t0tKfQGga3jQHBlMlqZLq52kaGtcyhr7BYG2AJVCUj3XFI=
 #  - secure: UB8M14NlBswcF887PU0ybnAcfNRzGD5HWcQqrt9U9P6DfrqxommkKuCqMkAd9kkQ4lRyWndewq6wMlRWIdhXtvU3awEXukkn1VYyAChukdUdI3JpzI2Z8ysgBr8ABJ7eNHtHdtNk1sJDpZ9akZkk69dKo9zAq74ytSCvWJlkjHmHTyl/o8RERWXUSWAxIs4ekCLlM6EsLPaG/dTz4644ZlnL56Uio/RDz6s98Efi5sU2MCO/twZR6WoJSvoGLkBkJogwrJmZuePxb5zzHWHH6tXa1fztg540kPHYP15Z2coGFdiKW2ckvGx4LJD9aigKNfNAu/xNLqhX02oKYIa511HvapCnoRgm6zSCeKC0GY+l5FTp89uw/oWq6PW4QXfAp1rFC9pIFQp3OKneppFNo46+fpmdvypLW6HKyIE+NFTQvhJUa8pW90jnxaNoyCPt9aSHctkca9TL8PeyCLccCdqNw86OCP/nnomKq6redYPNEnDqNdIqyWorYB+85fgkHyUZZQVNsNSCRcLON/u7EdVRvR1qI/CFMGM/RvsEYomAf+fi/OVcaSEBWPhXlRuoL8fg05fdrdJ0q5dWMNCJ7dsIiZFyTIt+AdWtXZgeHPTKRSQrW0wcEuvgkfd2DmGVWDdr0t6UYSkPzppYycnj1kkb+aMvSRps3PCRqHrXTKE=
 
-os:
-  - linux
-  - osx
-#  - windows
+#os:
+#  - linux
+#  - osx
+##  - windows
 
-branches:
-  only:
-    - master
-    - release
+#branches:
+#  only:
+#    - master
+#    - release
 
 language: java
 jdk: openjdk11
 install: true
-#
-#stages:
-#- name: Build
-#- name: OSSRH Snapshot
-#  if: os = linux AND branch = master
-#- name: Maven Central Release
-#  if: os = linux AND branch = release
-#- name: GitHub Release
-#  if: branch = release
+
+stages:
+- name: Build
+- name: OSSRH Snapshot
+  if: branch = master
+- name: Maven Central Release
+  if: branch = release
+- name: GitHub Release
+
 
 jobs:
   include:
-    - stage: Build
-      script: ./gradlew clean packageDistribution
+    - script: ./gradlew clean packageDistribution
+      os:
+      - linux
+      - osx
     - stage: OSSRH Snapshot
       script: echo "TODO push to snapshot maven repo"
+      os: linux
     - stage: Maven Central Release
       script: echo "TODO push to release maven repo"
+      os: linux
     - stage: GitHub Release
+      script:  ./gradlew clean packageDistribution
       deploy:
+        os:
+          - linux
+          - osx
         provider: releases
         api_key: $GITHUB_TOKEN
         file_glob: true
