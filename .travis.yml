@@ -20,15 +20,15 @@ branches:
 language: java
 jdk: openjdk11
 install: true
-
-stages:
-- name: Build
-- name: OSSRH Snapshot
-  if: os = linux AND branch = master
-- name: Maven Central Release
-  if: os = linux AND branch = release
-- name: GitHub Release
-  if: branch = release
+#
+#stages:
+#- name: Build
+#- name: OSSRH Snapshot
+#  if: os = linux AND branch = master
+#- name: Maven Central Release
+#  if: os = linux AND branch = release
+#- name: GitHub Release
+#  if: branch = release
 
 jobs:
   include:
