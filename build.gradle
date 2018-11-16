@@ -29,7 +29,6 @@ plugins {
     id "org.kordamp.markdown.convert" version "1.2.0"
 }
 
-
 ext.BINJR_VERSION = '2.0.0.beta'
 
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
@@ -100,7 +99,6 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
-//task convertMarkdowndDocs(type: markdownToHtml) {
 markdownToHtml{
     sourceDir =  file("${projectDir}/distribution/info")
     outputDir = file("$DISTRIBUTION_PATH")
@@ -129,7 +127,6 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
             "--compress=2",
             '--output', "${DISTRIBUTION_PATH}/runtime"
     ]
-
     doLast {
         System.out.println("Application '${project.name}' packaged.")
         System.out.println(" -> location: ${DISTRIBUTION_PATH}/")

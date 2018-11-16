@@ -20,4 +20,4 @@ jdk:
 
 sudo: false
 
-#script: "./ci/build.sh"
+script: "./ci/build.sh"

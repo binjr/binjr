@@ -5,17 +5,15 @@ image: Visual Studio 2017
 environment:
   GITHUB_TOKEN:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
-  SCM_USERNAME:
-    secure: 8BjoFIdSfcFM5UNtivbS5w==
   APPVEYOR_RDP_PASSWORD:
     secure: 4amxfxphFUcpp60d9Q6gJg==
 
 init:
   - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
-branches:
-  only:
-  - binjr2
+#branches:
+#  only:
+#  - binjr2
 
 build_script:
 -
@@ -24,6 +22,8 @@ build_script:
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
     java -version
+
+    gradlew clean packageDistribution
 
 #    mvn clean deploy  --settings "./cd/maven_settings.xml" -P binjr-snapshot,create-runtime-image-windows-x64,package-runtime-image -V
 
