@@ -11,9 +11,43 @@ language: java
 jdk: openjdk11
 install: true
 
-os:
-  - linux
-  - osx
+
+
+matrix:
+  include:
+  - os: linux
+    stages:
+    - name: build
+    - name: OSSRH Snapshot
+      if: branch = master
+    - name: Maven Central Release
+      if: branch = release
+    - name: GitHub Release
+    jobs:
+      include:
+      - stage: build
+        script: ./gradlew build
+      - stage: OSSRH Snapshot
+        script: echo "TODO push to snapshot maven repo"
+      - stage: Maven Central Release
+        script: echo "TODO push to release maven repo"
+      - stage: GitHub Release
+          script: echo "TODO release to GH"
+
+  - os: osx
+    stages:
+    - name: build
+    - name: GitHub Release
+    jobs:
+      include:
+      - stage: build
+        script: ./gradlew build
+      - stage: GitHub Release
+        script: echo "TODO release to GH"
+
+#os:
+#  - linux
+#  - osx
 #  - windows
 
 #branches:
@@ -23,39 +57,23 @@ os:
 
 
 #sudo: false
+#
 
-stages:
-- name: build
-- name: OSSRH Snapshot
-  if: branch = master
-- name: Maven Central Release
-  if: branch = release
-- name: GitHub Release
+#
+#  - stage: GitHub Release
+#      script: echo "TODO release to GH"
+    #      script:  ./gradlew clean packageDistribution
+    #      deploy:
+    #        provider: releases
+    #        api_key: $GITHUB_TOKEN
+    #        file_glob: true
+    #        file:
+    #        - build/*.zip
+    #        - build/*.tar.gz
+    #        skip_cleanup: true
+    #        on:
+    #          tags: true
 
-
-jobs:
-  include:
-    - stage: build
-      script: ./gradlew build
-    - stage: OSSRH Snapshot
-      script: echo "TODO push to snapshot maven repo"
-#      os: linux
-    - stage: Maven Central Release
-      script: echo "TODO push to release maven repo"
-#      os: linux
-    - stage: GitHub Release
-      script: echo "TODO release to GH"
-#      script:  ./gradlew clean packageDistribution
-#      deploy:
-#        provider: releases
-#        api_key: $GITHUB_TOKEN
-#        file_glob: true
-#        file:
-#        - build/*.zip
-#        - build/*.tar.gz
-#        skip_cleanup: true
-#        on:
-#          tags: true
 
 
 
