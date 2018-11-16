@@ -24,7 +24,7 @@ jdk: openjdk11
 
 stages:
 - name: build
- # if: branch = master OR branch = release
+  if: branch = master OR branch = release
 - name: OSSRH Snapshot
   if: branch = master
 - name: Maven Central Release
