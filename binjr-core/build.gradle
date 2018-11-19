@@ -49,7 +49,7 @@ jar {
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
                 'SplashScreen-Image': 'images / splashscreen.png',
-//                'Build-Number': $ { env.BINJR_BUILD_NUMBER }
+                'Build-Number':  BINJR_BUILD_NUMBER
         )
     }
 }
