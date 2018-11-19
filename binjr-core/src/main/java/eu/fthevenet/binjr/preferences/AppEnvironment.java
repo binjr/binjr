@@ -106,13 +106,12 @@ public class AppEnvironment {
 
     /**
      * Returns a version number extracted from the specified manifest.
-     * <p>The version number is extracted according to the following rules:
+     * <p>The version number is extracted according to the following rules:</p>
      * <ul>
      * <li>If the key {@code Specification-Version} is present and can be formatted as valid {@link Version} instance then it is returned, else</li>
      * <li>If the key {@code Implementation-Version} is present and can be formatted as valid {@link Version} instance then it is returned, else</li>
      * <li> {@code Version.emptyVersion} is returned</li>
      * </ul>
-     * </p>
      *
      * @param manifest the {@link Manifest} from which a version number should be extracted.
      * @return a version number extracted from the specified manifest.

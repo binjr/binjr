@@ -151,7 +151,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * Returns an instance of {@link DataAdapter}
      *
      * @return an instance of {@link DataAdapter}
-     * @throws DateTimeException     if the provided {@link ZoneId] is invalid
+     * @throws DateTimeException if the provided {@link ZoneId} is invalid
      */
     protected abstract DataAdapter<?, ?> getDataAdapter() throws DataAdapterException;
 

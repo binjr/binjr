@@ -44,17 +44,10 @@ import java.util.List;
 
 /**
  * An axis that displays date and time values.
- * <p/>
- * Tick labels are usually automatically set and calculated depending on the range unless you explicitly
- * {@linkplain #setTickLabelFormatter(StringConverter) set an formatter}.
- * <p/>
- * <p>
+ * Tick labels are usually automatically set and calculated depending on the range unless you explicitly {@linkplain #setTickLabelFormatter(StringConverter) set an formatter}.
  * You also have the chance to specify fix lower and upper bounds, otherwise they are calculated by your data.
- * <p/>
- * <p>
  * This code is a straight forward adaptation of the original DateTimeAxis by Christian Schudt and Diego Cirujano
  * to use JAVA 8 {@link java.time.ZonedDateTime} instead of {@link java.util.Date}
- * </p>
  *
  * @author Christian Schudt
  * @author Diego Cirujano

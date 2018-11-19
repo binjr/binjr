@@ -17,3 +17,15 @@
 dependencies {
     compile project(':binjr-core')
 }
+
+jar {
+    manifest {
+        attributes(
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Build-Number':  BINJR_BUILD_NUMBER
+        )
+    }
+}

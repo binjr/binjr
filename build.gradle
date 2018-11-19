@@ -17,10 +17,17 @@
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
+    id "com.github.breadmoirai.github-release" version "2.2.0"
 }
 
 ext.BINJR_VERSION = '2.0.0-SNAPSHOT'
-ext.BINJR_BUILD_NUMBER =  System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
+ext.IS_RELEASE = System.getenv('TRAVIS_BRANCH') == null ? false : System.getenv('TRAVIS_BRANCH').toLowerCase().endsWith('release')
+
+if (IS_RELEASE && BINJR_VERSION.endsWith('SNAPSHOT')) {
+    throw new GradleException('Trying to release a SNAPSHOT version!')
+}
+
+ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
 ext.LICENSE_URL = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
@@ -42,8 +49,14 @@ ext.JLINK_ADD_MODULES = "javafx.controls,javafx.fxml,javafx.swing,java.base,java
         "jdk.unsupported.desktop${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
+ext.ARCHIVE_PATH = ""
+
+ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
+ext."signing.secretKeyRingFile" = "../ci/codesigning.asc"
+ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 subprojects {
+
     apply plugin: 'java'
     group 'eu.fthevenet'
     version BINJR_VERSION
@@ -68,6 +81,7 @@ task clean(type: Delete) {
     delete buildDir
 }
 
+
 task copyAppLibs(type: Copy) {
     into "$DISTRIBUTION_PATH/libs"
     from project(":binjr-core").configurations.runtimeClasspath
@@ -90,8 +104,8 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
-markdownToHtml{
-    sourceDir =  file("${projectDir}/distribution/info")
+markdownToHtml {
+    sourceDir = file("${projectDir}/distribution/info")
     outputDir = file("$DISTRIBUTION_PATH")
 }
 
@@ -141,7 +155,24 @@ task packageDistributionTar(type: Tar) {
 task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(packageDistributionZip)
+        ARCHIVE_PATH = "$buildDir/${packageDistributionZip.archiveName}"
     } else {
         finalizedBy(packageDistributionTar)
+        ARCHIVE_PATH = "$buildDir/${packageDistributionTar.archiveName}"
     }
+}
+
+project.tasks['githubRelease'].dependsOn('packageDistribution')
+
+githubRelease {
+    token "${System.getenv('GITHUB_TOKEN')}"
+    owner "fthevenet"
+    repo "binjr"
+    tagName "v${BINJR_VERSION}"
+    targetCommitish "master"
+    releaseName "binjr v${BINJR_VERSION}"
+    draft false
+    prerelease !IS_RELEASE
+    releaseAssets new File(ARCHIVE_PATH)
+    overwrite true
 }
