@@ -178,14 +178,14 @@ body {
   color: #444;
   font-family: 'Open Sans', Helvetica, sans-serif;
   font-weight: 300;
-  margin: 6rem auto 1rem;
+  margin: 3rem auto 1rem;
   max-width: 48rem;
 }
 
 img {
   border-radius: 50%;
   height: 200px;
-  margin: 0 auto;
+  margin: 3rem;
   width: 200px;
 }
 
@@ -222,4 +222,9 @@ li {
 
 p {
   color: #777;
+}
+
+hr {
+    border-top: 1px solid #E1E1E1;
+    border-bottom: 0px;
 }

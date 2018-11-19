@@ -1,5 +1,11 @@
-##![binjr](../resources/images/binjr_logo.png)
-# binjr
+<html lang="en">
+<head>
+    <title>binjr</title>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="./resources/css/air.css">
+</head>
+
+#![binjr](./resources/images/binjr_logo.png)
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
@@ -8,15 +14,6 @@ Its focus is on enabling end users to constitute their own custom sets of views 
 As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively.
 
 It is a Java based client application and runs on multiple Desktop environnements (Windows, MacOS and Linux).
-
->This is a version of binjr built to run on Java 11 and beyond. 
-It should be considered of beta quality for the time being.
->
->___Please note that it does not run on previous version of Java.___
->
->Also note that as of Java 11, the JavaFX runtime, which binjr relies on, is no longer supplied as part of the JDK. 
->
->As such, the simplest way to run this version of binjr is to use the full distribution package (choose the right one for your OS), which contains a modular runtime image of Java 11 that includes the JavaFX runtime modules and all other dependencies.
 
 
 ### Getting help
@@ -32,3 +29,11 @@ For more info and to download the latest release, please visit the binjr website
 
 *binjr* is released under the [Apache License version 2.0](https://github.com/fthevenet/binjr/blob/master/LICENSE).
 
+<footer>
+    <br>
+    <hr>
+    <p style="text-align:left;">
+        © 2017-2018 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
+        <span style="float:right;"><a href="https://www.binjr.eu">www.binjr.eu</a></span>
+    </p>
+</footer>

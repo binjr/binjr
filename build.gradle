@@ -68,7 +68,7 @@ task clean(type: Delete) {
 }
 
 task copyAppLibs(type: Copy) {
-    into "$DISTRIBUTION_PATH/app"
+    into "$DISTRIBUTION_PATH/libs"
     from project(":binjr-core").configurations.runtimeClasspath
     from project(":binjr-core").jar
 }
@@ -93,6 +93,7 @@ markdownToHtml{
     sourceDir =  file("${projectDir}/distribution/info")
     outputDir = file("$DISTRIBUTION_PATH")
 }
+
 
 task downloadopenJfxJmods(type: Download) {
     src OPENJFX_JMODS_DOWNLOAD_URL

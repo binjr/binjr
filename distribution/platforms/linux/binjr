@@ -21,7 +21,7 @@ JAVACMD="./runtime/bin/java"
 exec $JAVACMD \
   -Djdk.gtk.version=2 \
   -splash:"./resources/images/splashscreen.png" \
-  -cp "./app/*:./plugins/*" \
+  -cp "./libs/*:./plugins/*" \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
