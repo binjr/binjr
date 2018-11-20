@@ -13,12 +13,11 @@ matrix:
     language: java
     install: true
     jdk: openjdk11
-    if: branch = ci
+    if: branch = master
     script:
-    - echo "linux snapshot"
     - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
-    - "./gradlew publish githubRelease"
+    - ./gradlew publish githubRelease
   - os: linux
 #    language: java
     jdk: openjdk11
@@ -27,10 +26,6 @@ matrix:
   - os: osx
     language: java
     jdk: openjdk11
-    if: branch = ci
-    script: echo "osx snapshot"
-  - os: osx
-    language: java
-    jdk: openjdk11
-    if: branch = release
-    script: echo "osx release"
+    script:
+    - chmod +x gradlew
+    - ./gradlew githubRelease
