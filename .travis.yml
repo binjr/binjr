@@ -14,13 +14,14 @@ matrix:
   include:
   - os: linux
     language: java
+    install: true
     jdk: openjdk11
     if: branch = ci
     script:
     - echo "linux snapshot"
     - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
-    - ./gradlew clean githubRelease
+    - ./gradlew publish githubRelease
 
   - os: linux
     language: java

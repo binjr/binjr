@@ -80,7 +80,6 @@ task clean(type: Delete) {
     delete buildDir
 }
 
-
 task copyAppLibs(type: Copy) {
     into "$DISTRIBUTION_PATH/libs"
     from project(":binjr-core").configurations.runtimeClasspath
