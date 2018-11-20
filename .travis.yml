@@ -20,7 +20,7 @@ matrix:
     - chmod +x gradlew
     - "./gradlew publish githubRelease"
   - os: linux
-    language: java
+#    language: java
     jdk: openjdk11
     if: branch = release
     script: echo "linux release"

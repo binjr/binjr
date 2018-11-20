@@ -55,13 +55,27 @@ ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
-subprojects {
-    apply plugin: 'java'
+//subprojects {
+configure(subprojects - project(':binjr-app'))  {
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'signing'
+
     group 'eu.fthevenet'
     version BINJR_VERSION
     sourceCompatibility = 11
     description 'Flexible Time Series Visualization'
     compileJava.options.encoding = 'UTF-8'
+
+    task javadocJar(type: Jar) {
+        classifier = 'javadoc'
+        from javadoc
+    }
+
+    task sourcesJar(type: Jar) {
+        classifier = 'sources'
+        from sourceSets.main.allSource
+    }
 
     dependencies {
         compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -73,6 +87,56 @@ subprojects {
 
     repositories {
         mavenCentral()
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                artifactId = project.name
+                from components.java
+                artifact sourcesJar
+                artifact javadocJar
+                pom {
+                    name = project.name
+                    description = 'Flexible Time Series Visualization'
+                    url = 'https://www.binjr.eu'
+                    licenses {
+                        license {
+                            name = 'The Apache License, Version 2.0'
+                            url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution = 'repo'
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = 'fthevenet'
+                            name = 'Frederic Thevenet'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git:https://github.com/fthevenet/binjr.git'
+                        developerConnection = 'scm:git:https://github.com/fthevenet/binjr.git'
+                        url = 'https://github.com/fthevenet/binjr'
+                    }
+                }
+            }
+        }
+        repositories {
+            maven {
+                credentials {
+                    username System.getenv('OSSRH_JIRA_USERNAME')
+                    password System.getenv('OSSRH_JIRA_PASSWORD')
+                }
+                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+                url = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
+            }
+        }
+    }
+
+    signing {
+        sign publishing.publications.mavenJava
     }
 }
 

@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-plugins {
+plugins{
     id 'application'
 }
 
@@ -28,6 +28,11 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
     runtimeOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
     runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-
 }
+
 mainClassName = 'eu.fthevenet.binjr.Bootstrap'
+
+repositories {
+    mavenCentral()
+}
+
