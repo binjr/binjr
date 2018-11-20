@@ -52,7 +52,7 @@ ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 ext.ARCHIVE_PATH = ""
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
-ext."signing.secretKeyRingFile" = "~/.gnupg/secring.gpg"
+ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 subprojects {
