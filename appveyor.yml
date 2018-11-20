@@ -21,7 +21,7 @@ branches:
 
   only:
 
-  - master
+  - binjr-1_x
 
 only_commits:
 
