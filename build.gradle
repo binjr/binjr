@@ -237,5 +237,5 @@ githubRelease {
     draft false
     prerelease !IS_RELEASE
     releaseAssets new File(ARCHIVE_PATH)
-    overwrite true
+    overwrite false
 }
