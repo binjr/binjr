@@ -1,5 +1,5 @@
 # binjr
-![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr) [![Maven Central](https://img.shields.io/maven-central/v/eu.fthevenet/binjr.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.fthevenet%22%20AND%20a:%22binjr%22)
+![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=binjr-1_x) [![AppVeyor build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr) [![Maven Central](https://img.shields.io/maven-central/v/eu.fthevenet/binjr.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.fthevenet%22%20AND%20a:%22binjr%22)
 
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
@@ -17,7 +17,7 @@ It is a Java based client application, packaged as a single executable JAR file 
 ## Getting started
 
 
-_binjr_ is Java application, built on top of JavaFX, and requires a Java Runtime Environment version 1.8 with JavaFX version 8u40 or later.
+_binjr_ is a Java application, built on top of JavaFX, and requires a Java Runtime Environment version 1.8 with JavaFX version 8u40 or later.
 
 The latest release can be found [here](https://github.com/fthevenet/binjr/releases/latest), and is available in different forms:
 * _As a JAR_
