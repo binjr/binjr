@@ -169,6 +169,7 @@ githubRelease {
     repo "binjr"
     tagName "v${BINJR_VERSION}"
     targetCommitish "master"
+    body "binjr v${BINJR_VERSION}"
     releaseName "binjr v${BINJR_VERSION}"
     draft false
     prerelease !IS_RELEASE
