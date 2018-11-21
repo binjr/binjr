@@ -18,7 +18,7 @@ matrix:
     script:
     - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
-    - ./gradlew publish  githubRelease
+    - ./gradlew publish  packageDistribution
   - os: linux
     if: branch = release
     script:
@@ -28,12 +28,10 @@ matrix:
   - os: osx
     if: branch = master
     script:
-    - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
-    - ./gradlew  githubRelease
+    - ./gradlew  packageDistribution
   - os: osx
     if: branch = release
     script:
-    - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
     - ./gradlew githubRelease

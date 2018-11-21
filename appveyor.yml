@@ -6,17 +6,27 @@ environment:
   GITHUB_TOKEN:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
 
-branches:
-  only:
-    - master
-    - release
 
-build_script:
+install:
 -
   ps: |-
     $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
-    java -version
-    .\gradlew.bat clean packageDistribution
 
+for:
+-
+  branches:
+    only:
+      - master
+
+  build_script:
+  - ps: .\gradlew.bat packageDistribution
+
+  -
+    branches:
+      only:
+      - release
+
+    build_script:
+    - ps: .\gradlew.bat githubRelease
