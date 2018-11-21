@@ -1,3 +1,5 @@
+import java.util.stream.Collectors
+
 /*
  *    Copyright 2017-2018 Frederic Thevenet
  *
@@ -14,11 +16,21 @@
  *    limitations under the License.
  */
 
+buildscript {
+    dependencies {
+        classpath files(file('./distribution/gradle-plugins').listFiles())
+    }
+}
+
+
+
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id "com.github.breadmoirai.github-release" version "2.2.0"
+//    id "com.github.breadmoirai.github-release" version "2.2.0"
 }
+
+apply plugin: "com.github.breadmoirai.github-release"
 
 ext.BINJR_VERSION = '2.0.0-SNAPSHOT'
 ext.IS_RELEASE = System.getenv('TRAVIS_BRANCH') == null ? false : System.getenv('TRAVIS_BRANCH').toLowerCase().endsWith('release')
@@ -56,7 +68,7 @@ ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/sec
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 //subprojects {
-configure(subprojects - project(':binjr-app'))  {
+configure(subprojects - project(':binjr-app')) {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
@@ -231,11 +243,12 @@ githubRelease {
     owner "fthevenet"
     repo "binjr"
     tagName "v${BINJR_VERSION}"
-    targetCommitish "master"
+    //targetCommitish "master"
     body "binjr v${BINJR_VERSION}"
     releaseName "binjr v${BINJR_VERSION}"
     draft false
     prerelease !IS_RELEASE
     releaseAssets new File(ARCHIVE_PATH)
     overwrite false
+    allowUploadToExisting true
 }

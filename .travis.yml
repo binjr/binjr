@@ -7,25 +7,33 @@ env:
   - secure: UB8M14NlBswcF887PU0ybnAcfNRzGD5HWcQqrt9U9P6DfrqxommkKuCqMkAd9kkQ4lRyWndewq6wMlRWIdhXtvU3awEXukkn1VYyAChukdUdI3JpzI2Z8ysgBr8ABJ7eNHtHdtNk1sJDpZ9akZkk69dKo9zAq74ytSCvWJlkjHmHTyl/o8RERWXUSWAxIs4ekCLlM6EsLPaG/dTz4644ZlnL56Uio/RDz6s98Efi5sU2MCO/twZR6WoJSvoGLkBkJogwrJmZuePxb5zzHWHH6tXa1fztg540kPHYP15Z2coGFdiKW2ckvGx4LJD9aigKNfNAu/xNLqhX02oKYIa511HvapCnoRgm6zSCeKC0GY+l5FTp89uw/oWq6PW4QXfAp1rFC9pIFQp3OKneppFNo46+fpmdvypLW6HKyIE+NFTQvhJUa8pW90jnxaNoyCPt9aSHctkca9TL8PeyCLccCdqNw86OCP/nnomKq6redYPNEnDqNdIqyWorYB+85fgkHyUZZQVNsNSCRcLON/u7EdVRvR1qI/CFMGM/RvsEYomAf+fi/OVcaSEBWPhXlRuoL8fg05fdrdJ0q5dWMNCJ7dsIiZFyTIt+AdWtXZgeHPTKRSQrW0wcEuvgkfd2DmGVWDdr0t6UYSkPzppYycnj1kkb+aMvSRps3PCRqHrXTKE=
   - secure: SPIhofarBUpTOvNtFJSuCbWuCtgcaYDSeAsZvMgEuU+VcQiLKvFOwLn/6FVRL/6OgWwvyrhLfGf8OJN19SFbs9smpC2ETH2rJBCm3HeOYV6HMRh9Ki9JzkFDhmRAkz2HNKMlIlEN5T7dY0Msf8+ZVpzKoywsVmSIgezBPMjy/GKNaXHG82WRyy0st+7t5dgh7pfZIhpBNHJA1AvMkbZ6L283Zc3sco0MNFECGZoWdX4JIxkutBHrcBYLcRlUkk9tytH97+kHTv7DLOEkYC6fMti/M+RKKy1LCCBhwC+kymZDOxomXn8NEJ+fV9LNOTCpo8kXRO4uBuAfcGoge7DwpBmZf2pj45F5wqLO7rCtdxAGSXdFF5hZLw0E2nAfII3TBrj8bTLT77vwemzIL0odEMFoWiccbBe6tr1ZxAP8ODf9E+pVQN3jnKwuZZA4b2u3sTq4wNybqDzmL82qmQhDebDoBQUVIWrmvQl80FXPDY5qkCNFoq2bsib56r+wRPYftxiz19w8sM1F0UuqrUy4S0XiRcYdzTtXvuI+IEhuvhYlZfi6BIXft9UEvpdrAv9NrjOKLPaUqpF8nYoqu2rTyCGBeFwx9Hpf8yXO6ytCTA/gD7sGI1P5MpcqxqvhZ09lvWyJIea5msWfxgfqImB+HcWkYVN5HL1cjUoRJ6jteVU=
 
+language: java
+install: true
+jdk: openjdk11
+
 matrix:
   include:
   - os: linux
-    language: java
-    install: true
-    jdk: openjdk11
     if: branch = master
     script:
     - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
-    - ./gradlew publish githubRelease
+    - ./gradlew publish packageDistribution
   - os: linux
-#    language: java
-    jdk: openjdk11
     if: branch = release
-    script: echo "linux release"
-  - os: osx
-    language: java
-    jdk: openjdk11
     script:
+    - gpg --fast-import ./ci/codesigning.asc
+    - chmod +x gradlew
+    - ./gradlew publish githubRelease
+  - os: osx
+    if: branch = master
+    script:
+    - gpg --fast-import ./ci/codesigning.asc
+    - chmod +x gradlew
+    - ./gradlew packageDistribution
+  - os: osx
+    if: branch = release
+    script:
+    - gpg --fast-import ./ci/codesigning.asc
     - chmod +x gradlew
     - ./gradlew githubRelease
