@@ -6,6 +6,8 @@ environment:
   GITHUB_TOKEN:
     secure: hp0jiQjq4o0cTcg9leeZ9sNq3FdEGkq1sNe8sDj9fTKOuQDn+1IN02bPoAOL9tBX
 
+appveyor_repo_tag: false
+
 install:
 -
   ps: |-
