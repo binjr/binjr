@@ -6,7 +6,6 @@ environment:
   GITHUB_TOKEN:
     secure: 4vpPlabt2OKA/pyJKSZUr3KJg8y0uJFnzf/kTmVUTCPIb9Q3fpjED+1LEXHYQ4UY
 
-
 install:
 -
   ps: |-
@@ -23,10 +22,10 @@ for:
   build_script:
   - ps: .\gradlew.bat packageDistribution
 
-  -
-    branches:
-      only:
-      - release
+-
+  branches:
+    only:
+    - release
 
-    build_script:
-    - ps: .\gradlew.bat githubRelease
+  build_script:
+  - ps: .\gradlew.bat githubRelease
