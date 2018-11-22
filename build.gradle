@@ -213,7 +213,7 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
-task packageDistributionZip(type: Zip, dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
+task packageDistributionZip(type: Zip) {
     from DISTRIBUTION_PATH
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
@@ -226,7 +226,7 @@ task packageDistributionTar(type: Tar) {
     archiveName "${DISTRIBUTION_NAME}.tar.gz"
 }
 
-task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, createRuntimeImage]) {
+task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(packageDistributionZip)
         ARCHIVE_PATH = "$buildDir/${packageDistributionZip.archiveName}"
