@@ -20,7 +20,7 @@ for:
       - master
 
   build_script:
-  - ps: .\gradlew.bat packageDistribution
+  - cmd: .\gradlew.bat packageDistribution
 
 -
   branches:
@@ -28,4 +28,4 @@ for:
     - release
 
   build_script:
-  - ps: .\gradlew.bat githubRelease
+  - cmd: .\gradlew.bat githubRelease
