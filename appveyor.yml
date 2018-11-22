@@ -21,7 +21,7 @@ for:
       - master
 
   build_script:
-  - cmd: .\gradlew.bat githubRelease
+  - cmd: .\gradlew.bat packageDistribution
 
 -
   branches:
