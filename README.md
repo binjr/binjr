@@ -1,4 +1,6 @@
-# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master) 
+# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master)  [![Build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8/branch/master?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr/branch/master)
+
+
 
 >Starting with version 2.0.0, binjr is built to run on Java 11 and beyond. 
 >
