@@ -1,5 +1,3 @@
-import java.util.stream.Collectors
-
 /*
  *    Copyright 2017-2018 Frederic Thevenet
  *
@@ -23,7 +21,6 @@ buildscript {
 }
 
 
-
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
@@ -32,12 +29,11 @@ plugins {
 
 apply plugin: "com.github.breadmoirai.github-release"
 
-ext.BINJR_VERSION = '2.0.0-SNAPSHOT'
+
 ext.IS_RELEASE = System.getenv('CURRENT_BRANCH') == null ? false : System.getenv('CURRENT_BRANCH').toLowerCase().endsWith('release')
 
-if (IS_RELEASE && BINJR_VERSION.endsWith('SNAPSHOT')) {
-    throw new GradleException('Trying to release a SNAPSHOT version!')
-}
+ext.BINJR_VERSION = "2.0.0${IS_RELEASE ? '' : '-SNAPSHOT'}"
+
 
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 
