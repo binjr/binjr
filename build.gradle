@@ -33,7 +33,7 @@ plugins {
 apply plugin: "com.github.breadmoirai.github-release"
 
 ext.BINJR_VERSION = '2.0.0-SNAPSHOT'
-ext.IS_RELEASE = System.getenv('TRAVIS_BRANCH') == null ? false : System.getenv('TRAVIS_BRANCH').toLowerCase().endsWith('release')
+ext.IS_RELEASE = System.getenv('CURRENT_BRANCH') == null ? false : System.getenv('CURRENT_BRANCH').toLowerCase().endsWith('release')
 
 if (IS_RELEASE && BINJR_VERSION.endsWith('SNAPSHOT')) {
     throw new GradleException('Trying to release a SNAPSHOT version!')

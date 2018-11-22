@@ -9,6 +9,7 @@ environment:
 install:
 -
   ps: |-
+    $ENV:CURRENT_BRANCH=$ENV:APPVEYOR_REPO_BRANCH
     $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
