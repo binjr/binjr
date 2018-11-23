@@ -19,12 +19,12 @@ plugins {
     id "org.kordamp.markdown.convert" version "1.2.0"
 }
 
-ext.IS_RELEASE = System.getenv('IS_TAG') == null ?: false
+ext.IS_RELEASE = System.getenv('IS_TAG') != null ? (System.getenv('IS_TAG') == "true") : false
 
 ext.BINJR_VERSION = "2.0.0${IS_RELEASE ? '' : '-SNAPSHOT'}"
 
-if (IS_RELEASE && System.getenv('CURRENT_BRANCH') != "v${BINJR_VERSION}"){
-    throw new GradleException("Tag name [${CURRENT_BRANCH}] does not match version [${BINJR_VERSION}]")
+if (IS_RELEASE && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
+    throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
 }
 
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
@@ -55,7 +55,6 @@ ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
-//subprojects {
 configure(subprojects - project(':binjr-app')) {
     apply plugin: 'java-library'
     apply plugin: 'maven-publish'
@@ -170,7 +169,6 @@ markdownToHtml {
     sourceDir = file("${projectDir}/distribution/info")
     outputDir = file("$DISTRIBUTION_PATH")
 }
-
 
 task downloadopenJfxJmods(type: Download) {
     src OPENJFX_JMODS_DOWNLOAD_URL

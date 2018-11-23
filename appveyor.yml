@@ -2,30 +2,26 @@ version: '{build}'
 
 image: Visual Studio 2017
 
-environment:
-  GITHUB_TOKEN:
-    secure: hp0jiQjq4o0cTcg9leeZ9sNq3FdEGkq1sNe8sDj9fTKOuQDn+1IN02bPoAOL9tBX
-
 install:
--
-  ps: |-
-    $ENV:IS_TAG=$ENV:APPVEYOR_REPO_TAG
-    $ENV:CURRENT_BRANCH=$ENV:APPVEYOR_REPO_BRANCH
-    $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
-    $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
-    $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
+  - ps: |-
+      $ENV:IS_TAG=$ENV:APPVEYOR_REPO_TAG
+      $ENV:REPO_TAG_NAME=$ENV:APPVEYOR_REPO_TAG_NAME
+      $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
+      $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
+      $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
 build_script:
--
-  cmd: .\gradlew.bat packageDistribution
+  - cmd: .\gradlew.bat packageDistribution
 
+artifacts:
+  - path: 'build\*.zip'
+    name: binjr_zip
 
 deploy:
--
-  tag: $(APPVEYOR_REPO_TAG_NAME)
-  provider: GitHub
-  auth_token:
-    secure: $(GITHUB_TOKEN)
-  artifact: /.*\.zip/
-  on:
-    appveyor_repo_tag: true
+  - tag: $(APPVEYOR_REPO_TAG_NAME)
+    provider: GitHub
+    auth_token:
+      secure: hp0jiQjq4o0cTcg9leeZ9sNq3FdEGkq1sNe8sDj9fTKOuQDn+1IN02bPoAOL9tBX
+    artifact: binjr_zip
+    on:
+      appveyor_repo_tag: true
