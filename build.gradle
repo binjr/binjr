@@ -133,15 +133,20 @@ configure(subprojects - project(':binjr-app')) {
                 url = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
             }
         }
-        doLast{
-            if (IS_RELEASE) {
-                closeAndReleaseRepository
-            }
-        }
     }
 
     signing {
         sign publishing.publications.mavenJava
+    }
+}
+
+nexusStaging {
+    packageGroup = 'eu.fthevenet'
+}
+
+task publishAndRelease(dependsOn: (subprojects - project(':binjr-app')).publish){
+    if (IS_RELEASE){
+        finalizedBy(closeAndReleaseRepository)
     }
 }
 
@@ -205,10 +210,6 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
-nexusStaging {
-    packageGroup = 'eu.fthevenet'
-}
-
 task packageDistributionZip(type: Zip) {
     from DISTRIBUTION_PATH
     destinationDir buildDir
@@ -224,11 +225,13 @@ task packageDistributionTar(type: Tar) {
 
 task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
-        (packageDistributionZip)
+        finalizedBy(packageDistributionZip)
         ARCHIVE_PATH = "$buildDir/${packageDistributionZip.archiveName}"
     } else {
         finalizedBy(packageDistributionTar)
         ARCHIVE_PATH = "$buildDir/${packageDistributionTar.archiveName}"
     }
 }
+
+
 
