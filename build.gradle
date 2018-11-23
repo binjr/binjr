@@ -141,6 +141,8 @@ configure(subprojects - project(':binjr-app')) {
 }
 
 nexusStaging {
+    username = System.getenv('OSSRH_JIRA_USERNAME')
+    password = System.getenv('OSSRH_JIRA_PASSWORD')
     packageGroup = 'eu.fthevenet'
 }
 
