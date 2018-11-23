@@ -17,6 +17,7 @@
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
+    id 'io.codearte.nexus-staging' version '0.12.0'
 }
 
 ext.IS_RELEASE = System.getenv('IS_TAG') != null ? (System.getenv('IS_TAG') == "true") : false
@@ -199,6 +200,10 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
+nexusStaging {
+    packageGroup = 'eu.fthevenet'
+}
+
 task packageDistributionZip(type: Zip) {
     from DISTRIBUTION_PATH
     destinationDir buildDir
@@ -214,10 +219,14 @@ task packageDistributionTar(type: Tar) {
 
 task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
-        finalizedBy(packageDistributionZip)
+        (packageDistributionZip)
         ARCHIVE_PATH = "$buildDir/${packageDistributionZip.archiveName}"
     } else {
         finalizedBy(packageDistributionTar)
         ARCHIVE_PATH = "$buildDir/${packageDistributionTar.archiveName}"
     }
+}
+
+if (IS_RELEASE) {
+    publish.finalizedBy closeAndReleaseRepository
 }
