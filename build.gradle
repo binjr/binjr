@@ -133,6 +133,11 @@ configure(subprojects - project(':binjr-app')) {
                 url = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
             }
         }
+        doLast{
+            if (IS_RELEASE) {
+                closeAndReleaseRepository
+            }
+        }
     }
 
     signing {
@@ -227,6 +232,3 @@ task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources,
     }
 }
 
-if (IS_RELEASE) {
-    project.tasks('publish').finalizedBy(project.tasks('closeAndReleaseRepository'))
-}
