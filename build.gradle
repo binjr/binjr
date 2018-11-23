@@ -14,26 +14,18 @@
  *    limitations under the License.
  */
 
-buildscript {
-    dependencies {
-        classpath files(file('./distribution/gradle-plugins').listFiles())
-    }
-}
-
-
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-//    id "com.github.breadmoirai.github-release" version "2.2.0"
 }
 
-apply plugin: "com.github.breadmoirai.github-release"
-
-
-ext.IS_RELEASE = System.getenv('CURRENT_BRANCH') == null ? false : System.getenv('CURRENT_BRANCH').toLowerCase().endsWith('release')
+ext.IS_RELEASE = System.getenv('IS_TAG') == null ?: false
 
 ext.BINJR_VERSION = "2.0.0${IS_RELEASE ? '' : '-SNAPSHOT'}"
 
+if (IS_RELEASE && System.getenv('CURRENT_BRANCH') != "v${BINJR_VERSION}"){
+    throw new GradleException("Tag name [${CURRENT_BRANCH}] does not match version [${BINJR_VERSION}]")
+}
 
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 
@@ -230,21 +222,4 @@ task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources,
         finalizedBy(packageDistributionTar)
         ARCHIVE_PATH = "$buildDir/${packageDistributionTar.archiveName}"
     }
-}
-
-project.tasks['githubRelease'].dependsOn('packageDistribution')
-
-githubRelease {
-    token "${System.getenv('GITHUB_TOKEN')}"
-    owner "fthevenet"
-    repo "binjr"
-    tagName "v${BINJR_VERSION}"
-    //targetCommitish "master"
-    body "binjr v${BINJR_VERSION}"
-    releaseName "binjr v${BINJR_VERSION}"
-    draft false
-    prerelease !IS_RELEASE
-    releaseAssets new File(ARCHIVE_PATH)
-    overwrite false
-    allowUploadToExisting true
 }

@@ -9,24 +9,23 @@ environment:
 install:
 -
   ps: |-
+    $ENV:IS_TAG=$ENV:APPVEYOR_REPO_TAG
     $ENV:CURRENT_BRANCH=$ENV:APPVEYOR_REPO_BRANCH
     $ENV:JAVA_HOME="C:\Program Files\Java\jdk11"
     $ENV:PATH="$ENV:JAVA_HOME\bin;$ENV:PATH;$ENV:WIX\bin"
     $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
-for:
+build_script:
 -
-  branches:
-    only:
-      - master
+  cmd: .\gradlew.bat packageDistribution
 
-  build_script:
-  - cmd: .\gradlew.bat packageDistribution
 
+deploy:
 -
-  branches:
-    only:
-    - release
-
-  build_script:
-  - cmd: .\gradlew.bat githubRelease
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  provider: GitHub
+  auth_token:
+    secure: $(GITHUB_TOKEN)
+  artifact: /.*\.zip/
+  on:
+    appveyor_repo_tag: true
