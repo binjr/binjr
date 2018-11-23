@@ -228,5 +228,5 @@ task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources,
 }
 
 if (IS_RELEASE) {
-    publish.finalizedBy closeAndReleaseRepository
+    project.tasks('publish').finalizedBy(project.tasks('closeAndReleaseRepository'))
 }
