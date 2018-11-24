@@ -24,6 +24,10 @@ dependencies {
     api 'org.apache.commons:commons-csv:1.5'
     api 'org.glassfish.jaxb:jaxb-runtime:2.4.0-b180830.0438'
     api 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'
+    // Only to prepare POM for Maven central upload
+    api "org.openjfx:javafx-controls:$OPENJFX_VERSION"
+    api "org.openjfx:javafx-fxml:$OPENJFX_VERSION"
+    api "org.openjfx:javafx-swing:$OPENJFX_VERSION"
 }
 
 compileJava {
