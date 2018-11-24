@@ -20,7 +20,8 @@ plugins {
  //   id 'io.codearte.nexus-staging' version '0.12.0'
 }
 
-ext.IS_RELEASE = System.getenv('IS_TAG') != null ? (System.getenv('IS_TAG') == "true") : false
+ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
+ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
 ext.BINJR_VERSION = "2.0.0${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
@@ -48,7 +49,9 @@ ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
-if (IS_RELEASE && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
+System.out.println("Building version: ${BINJR_VERSION}")
+
+if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
 }
 
