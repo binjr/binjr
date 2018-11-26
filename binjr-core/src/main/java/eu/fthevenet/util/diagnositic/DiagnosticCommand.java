@@ -36,16 +36,13 @@ public interface DiagnosticCommand {
 
     String vmCommandLine(String... args);
 
-    DiagnosticCommand local = (new Supplier<DiagnosticCommand>() {
-        @Override
-        public DiagnosticCommand get() {
-            try {
-                MBeanServer server = ManagementFactory.getPlatformMBeanServer();
-                ObjectName name = new ObjectName("com.sun.management", "type", "DiagnosticCommand");
-                return JMX.newMBeanProxy(server, name, DiagnosticCommand.class);
-            } catch (MalformedObjectNameException e) {
-                throw new AssertionError(e);
-            }
+    DiagnosticCommand local = ((Supplier<DiagnosticCommand>) () -> {
+        try {
+            MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            ObjectName name = new ObjectName("com.sun.management", "type", "DiagnosticCommand");
+            return JMX.newMBeanProxy(server, name, DiagnosticCommand.class);
+        } catch (MalformedObjectNameException e) {
+            throw new AssertionError(e);
         }
     }).get();
 

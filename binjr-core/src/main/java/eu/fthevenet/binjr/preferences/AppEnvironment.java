@@ -206,14 +206,29 @@ public class AppEnvironment {
         List<SysInfoProperty> sysInfo = new ArrayList<>();
         sysInfo.add(new SysInfoProperty("Version", getVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
         sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
+        sysInfo.add(new SysInfoProperty("JavaFX Version", System.getProperty("javafx.runtime.version")));
         sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
         sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
         sysInfo.add(new SysInfoProperty("Java Home", System.getProperty("java.home")));
         sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
-        sysInfo.add(new SysInfoProperty("JVM Heap Max size", String.format("%.0f MB", (double) rt.maxMemory() / 1024 / 1024)));
-        sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
+        sysInfo.add(new SysInfoProperty("JVM Heap Stats",getHeapStats()));
+     //   sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
+
         return sysInfo;
+    }
+
+    private String getHeapStats(){
+        Runtime rt = Runtime.getRuntime();
+        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
+        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
+        return String.format(
+                "Max: %.0fMB | Committed: %.0fMB | Used: %.0fMB",
+                maxMB,
+                committedMB,
+                usedMB
+        );
     }
 
     /**
