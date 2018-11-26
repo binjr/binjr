@@ -76,6 +76,9 @@ public class Source implements Dirtyable, Closeable {
      */
     public Source() {
         this.status = new ChangeWatcher(this);
+        if (adapterId == null) {
+            this.adapterId = UUID.randomUUID();
+        }
     }
 
     /**
