@@ -1,4 +1,4 @@
-# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master)  [![Build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8/branch/master?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr/branch/master)
+# binjr ![Travis build status](https://travis-ci.org/fthevenet/binjr.svg?branch=master)  [![Build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8/branch/master?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr/branch/master)[![Maven Central](https://img.shields.io/maven-central/v/eu.fthevenet/binjr.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.fthevenet%22%20AND%20a:%22binjr-core%22)
 
 
 
