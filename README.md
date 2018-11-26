@@ -22,6 +22,10 @@ It is a Java based client application and runs on multiple Desktop environnement
 
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
 
+## Getting started
+The platform specific packages avalable on the [release page](https://github.com/fthevenet/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
+
+Simply download the one for your system (Windows, Linux or macOS), unpack it and run "binjr" to start!
 
 ## Getting help
 The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference).
