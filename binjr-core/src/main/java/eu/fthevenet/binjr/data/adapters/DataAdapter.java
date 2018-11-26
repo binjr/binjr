@@ -163,6 +163,15 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
         this.id = id;
     }
 
+    /**
+     * Returns true is the adapter is closed, false otherwise.
+     *
+     * @return true is the adapter is closed, false otherwise.
+     */
+    public boolean isClosed() {
+        return closed;
+    }
+
     protected String validateParameterNullity(Map<String, String> params, String paramName) throws InvalidAdapterParameterException {
         return validateParameter(params, paramName, s -> {
             if (s == null) {
@@ -189,9 +198,5 @@ public abstract class DataAdapter<T, A extends Decoder<T>> implements AutoClosea
                 "id=" + id +
                 "sourceName" + getSourceName() +
                 '}';
-    }
-
-    public boolean isClosed() {
-        return closed;
     }
 }
