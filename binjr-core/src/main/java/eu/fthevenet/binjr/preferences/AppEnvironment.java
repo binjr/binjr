@@ -145,7 +145,7 @@ public class AppEnvironment {
     /**
      * Returns the manifest for the JAR which packages the specified class.
      *
-     * @param aClass
+     * @param aClass the class to packaged by the jar to return the manifest for.
      * @return the manifest for the JAR which packages the specified class.
      */
     public Manifest getManifest(Class<?> aClass) {
@@ -199,36 +199,17 @@ public class AppEnvironment {
      * @return a list of system properties
      */
     public List<SysInfoProperty> getSysInfoProperties() {
-        Runtime rt = Runtime.getRuntime();
-        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024 / 1024;
-        double percentUsage = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
-
         List<SysInfoProperty> sysInfo = new ArrayList<>();
         sysInfo.add(new SysInfoProperty("Version", getVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
         sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
-        sysInfo.add(new SysInfoProperty("JavaFX Version", System.getProperty("javafx.runtime.version")));
+        sysInfo.add(new SysInfoProperty("JavaFX Version", System.getProperty("javafx.version")));
         sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
         sysInfo.add(new SysInfoProperty("Java VM name", System.getProperty("java.vm.name") + " (" + System.getProperty("java.vm.version") + ")"));
         sysInfo.add(new SysInfoProperty("Java Home", System.getProperty("java.home")));
         sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
-        sysInfo.add(new SysInfoProperty("JVM Heap Stats",getHeapStats()));
-     //   sysInfo.add(new SysInfoProperty("JVM Heap Usage", String.format("%.2f%% (%.0f/%.0f MB)", percentUsage, usedMB, (double) rt.totalMemory() / 1024 / 1024)));
-
+        sysInfo.add(new SysInfoProperty("JVM Heap Stats", getHeapStats()));
         return sysInfo;
-    }
-
-    private String getHeapStats(){
-        Runtime rt = Runtime.getRuntime();
-        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
-        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
-        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
-        return String.format(
-                "Max: %.0fMB | Committed: %.0fMB | Used: %.0fMB",
-                maxMB,
-                committedMB,
-                usedMB
-        );
     }
 
     /**
@@ -251,39 +232,97 @@ public class AppEnvironment {
         }
     }
 
+    /**
+     * Set to true to enable debug mode, set to false to disable it.
+     *
+     * @param value true to enable debug mode, set to false to disable it.
+     */
     public void setDebugMode(boolean value) {
         debugMode.setValue(value);
     }
 
+    /**
+     * Returns true is debug mode is enabled, false otherwise.
+     *
+     * @return true is debug mode is enabled, false otherwise.
+     */
     public boolean isDebugMode() {
         return debugMode.get();
     }
 
+    /**
+     * The debugMode Property
+     *
+     * @return the debugMode Property
+     */
     public BooleanProperty debugModeProperty() {
         return debugMode;
     }
 
+    /**
+     * Returns true is output console is visible, false otherwise.
+     *
+     * @return true is output console is visible, false otherwise.
+     */
     public boolean isConsoleVisible() {
         return consoleVisible.get();
     }
 
+    /**
+     * The consoleVisible property
+     *
+     * @return the consoleVisible property
+     */
     public BooleanProperty consoleVisibleProperty() {
         return consoleVisible;
     }
 
+    /**
+     * Set to true to render the output console visible, set to false to make it invisible.
+     *
+     * @param consoleVisible true to render the output console visible, set to false to make it invisible.
+     */
     public void setConsoleVisible(boolean consoleVisible) {
         this.consoleVisible.set(consoleVisible);
     }
 
+    /**
+     * Returns the root log level currently set.
+     *
+     * @return the root log level currently set.
+     */
     public Level getLogLevel() {
         return logLevel.getValue();
     }
 
+    /**
+     * The logLevel property.
+     *
+     * @return The logLevel property.
+     */
     public Property<Level> logLevelProperty() {
         return logLevel;
     }
 
+    /**
+     * Sets the root log level.
+     *
+     * @param logLevel the root log level.
+     */
     public void setLogLevel(Level logLevel) {
         this.logLevel.setValue(logLevel);
+    }
+
+    private String getHeapStats() {
+        Runtime rt = Runtime.getRuntime();
+        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
+        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
+        return String.format(
+                "Max: %.0fMB | Committed: %.0fMB | Used: %.0fMB",
+                maxMB,
+                committedMB,
+                usedMB
+        );
     }
 }

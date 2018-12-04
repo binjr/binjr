@@ -46,7 +46,7 @@ public class Dialogs {
     private static final Logger logger = LogManager.getLogger(Dialogs.class);
 
     /**
-     * Display an error notification
+     * Displays an error notification
      *
      * @param e the exception to display
      */
@@ -55,7 +55,7 @@ public class Dialogs {
     }
 
     /**
-     * Display an error notification
+     * Displays an error notification
      *
      * @param header the header text for the dialog
      * @param e      the exception to display
@@ -103,7 +103,7 @@ public class Dialogs {
     }
 
     /**
-     * Display an error notification
+     * Displays an error notification
      *
      * @param title    the title for the notification
      * @param message  the title for the notification
@@ -120,17 +120,26 @@ public class Dialogs {
                 .owner(owner).showError());
     }
 
-    public static void notifyError(String title, Throwable e, Pos position, Node owner) {
-        logger.debug(() -> title, e);
-        notifyError(title, e.getMessage(), position, owner);
+    /**
+     * Displays an error notification
+     *
+     * @param title    the title for the notification
+     * @param t        the {@link Throwable} to display.
+     * @param position the position for the notification
+     * @param owner    the node to which the notification is attached
+     */
+    public static void notifyError(String title, Throwable t, Pos position, Node owner) {
+        logger.debug(() -> title, t);
+        notifyError(title, t.getMessage(), position, owner);
     }
 
     /**
-     * Display an warning notification
+     * Displays an warning notification
      *
-     * @param title   the title for the notification
-     * @param message the title for the notification
-     * @param owner   the node to which the notification is attached
+     * @param title    the title for the notification
+     * @param message  the title for the notification
+     * @param position the position of the notification on screen.
+     * @param owner    the node to which the notification is attached
      */
     public static void notifyWarning(String title, String message, Pos position, Node owner) {
         logger.warn(title + " - " + message);
@@ -145,9 +154,10 @@ public class Dialogs {
     /**
      * Display an info notification
      *
-     * @param title   the title for the notification
-     * @param message the title for the notification
-     * @param owner   the node to which the notification is attached
+     * @param title    the title for the notification
+     * @param message  the title for the notification
+     * @param position the position of the notification on screen.
+     * @param owner    the node to which the notification is attached
      */
     public static void notifyInfo(String title, String message, Pos position, Node owner) {
         logger.info(title + " - " + message);
@@ -173,7 +183,7 @@ public class Dialogs {
     }
 
     /**
-     * Launch the system default browser to browse the provided URL
+     * Launches the system default browser to browse the provided URL
      *
      * @param url a string that represent the url to point the browser at
      * @throws IOException        if the default browser is not found or fails to be launched

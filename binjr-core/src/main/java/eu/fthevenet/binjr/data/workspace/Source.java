@@ -29,12 +29,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Closeable;
-import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
 
 /**
- * A class that represents and holds the current state of a single data source
+ * A class that represents and holds the current state of a single data source.
  *
  * @author Frederic Thevenet
  */
@@ -49,7 +48,7 @@ public class Source implements Dirtyable, Closeable {
     private final ChangeWatcher status;
     private DataAdapter adapter;
     private final BindingManager bindingManager = new BindingManager();
-    private Property<Boolean>  editable = new SimpleBooleanProperty();
+    private Property<Boolean> editable = new SimpleBooleanProperty();
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
@@ -159,20 +158,11 @@ public class Source implements Dirtyable, Closeable {
         this.status.cleanUp();
     }
 
-
-    private void setAdapterClassName(String adapterClassName) {
-        this.adapterClassName = adapterClassName;
-    }
-
-    private void setAdapterParams(Map<String, String> adapterParams) {
-        this.adapterParams = adapterParams;
-    }
-
-    @XmlTransient
-    public DataAdapter getAdapter() {
-        return adapter;
-    }
-
+    /**
+     * Returns the {@link BindingManager} instance for the {@link Source}
+     *
+     * @return the {@link BindingManager} instance for the {@link Source}
+     */
     @XmlTransient
     public BindingManager getBindingManager() {
         return bindingManager;
@@ -184,20 +174,60 @@ public class Source implements Dirtyable, Closeable {
         adapter.close();
     }
 
+    /**
+     * Returns the {@link DataAdapter} attached to the {@link Source}.
+     *
+     * @return the {@link DataAdapter} attached to the {@link Source}.
+     */
+    @XmlTransient
+    public DataAdapter getAdapter() {
+        return adapter;
+    }
+
+    /**
+     * Sets the {@link DataAdapter} attached to the {@link Source}.
+     *
+     * @param adapter the {@link DataAdapter} attached to the {@link Source}.
+     */
     public void setAdapter(DataAdapter adapter) {
         this.adapter = adapter;
     }
 
+    /**
+     * Returns true is the source is editable, false otherwise.
+     *
+     * @return true is the source is editable, false otherwise
+     */
     @XmlTransient
-    public Boolean getEditable() {
+    public Boolean isEditable() {
         return editable.getValue();
     }
 
+    /**
+     * The editable property.
+     *
+     * @return the editable property.
+     */
     public Property<Boolean> editableProperty() {
         return editable;
     }
 
+    /**
+     * Set to true if the source is editable, false otherwise.
+     *
+     * @param editable true if the source is editable, false otherwise.
+     */
     public void setEditable(Boolean editable) {
         this.editable.setValue(editable);
     }
+
+    //region Private members.
+    private void setAdapterClassName(String adapterClassName) {
+        this.adapterClassName = adapterClassName;
+    }
+
+    private void setAdapterParams(Map<String, String> adapterParams) {
+        this.adapterParams = adapterParams;
+    }
+    //endregion
 }

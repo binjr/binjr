@@ -371,122 +371,272 @@ public class GlobalPreferences {
         return recentFiles;
     }
 
+    /**
+     * Returns true is auto check for update is on, false otherwise.
+     *
+     * @return true is auto check for update is on, false otherwise.
+     */
     public boolean isCheckForUpdateOnStartUp() {
         return checkForUpdateOnStartUp.get();
     }
 
+    /**
+     * The checkForUpdateOnStartUp property.
+     *
+     * @return the checkForUpdateOnStartUp property.
+     */
     public BooleanProperty checkForUpdateOnStartUpProperty() {
         return checkForUpdateOnStartUp;
     }
 
+    /**
+     * Set to true to check for update on startup.
+     *
+     * @param checkForUpdateOnStartUp true to check for update on startup.
+     */
     public void setCheckForUpdateOnStartUp(boolean checkForUpdateOnStartUp) {
         this.checkForUpdateOnStartUp.set(checkForUpdateOnStartUp);
     }
 
+    /**
+     * Returns true is the horizontal marker is enabled, false otherwise.
+     *
+     * @return true is the horizontal marker is enabled, false otherwise.
+     */
     public boolean getHorizontalMarkerOn() {
         return horizontalMarkerOn.get();
     }
 
+    /**
+     * The horizontalMarkerOn property
+     *
+     * @return the horizontalMarkerOn property
+     */
     public BooleanProperty horizontalMarkerOnProperty() {
         return horizontalMarkerOn;
     }
 
+    /**
+     * Set to true to enable the horizontal marker, to false to disable it.
+     *
+     * @param horizontalMarkerOn true to enable the horizontal marker, to false to disable it.
+     */
     public void setHorizontalMarkerOn(boolean horizontalMarkerOn) {
         this.horizontalMarkerOn.set(horizontalMarkerOn);
     }
 
+    /**
+     * Returns true is the vertical marker is enabled, false otherwise.
+     *
+     * @return true is the vertical marker is enabled, false otherwise.
+     */
     public boolean getVerticalMarkerOn() {
         return verticalMarkerOn.get();
     }
 
+    /**
+     * The verticalMarkerOn property
+     *
+     * @return the verticalMarkerOn property
+     */
     public BooleanProperty verticalMarkerOnProperty() {
         return verticalMarkerOn;
     }
 
+    /**
+     * Set to true to enable the vertical marker, to false to disable it.
+     *
+     * @param verticalMarkerOn true to enable the vertical marker, to false to disable it.
+     */
     public void setVerticalMarkerOn(boolean verticalMarkerOn) {
         this.verticalMarkerOn.set(verticalMarkerOn);
     }
 
+    /**
+     * Returns true is the outline of area charts is displayed, false otherwise.
+     *
+     * @return true is the outline of area charts is displayed, false otherwise.
+     */
     public boolean isShowAreaOutline() {
         return showAreaOutline.getValue();
     }
 
+    /**
+     * The showAreaOutline property
+     *
+     * @return the showAreaOutline property
+     */
     public BooleanProperty showAreaOutlineProperty() {
         return showAreaOutline;
     }
 
+    /**
+     * Set to true to display the outline on area charts.
+     *
+     * @param showAreaOutline true to display the outline on area charts.
+     */
     public void setShowAreaOutline(boolean showAreaOutline) {
         this.showAreaOutline.setValue(showAreaOutline);
     }
 
+    /**
+     * Returns the default opacity for new area charts.
+     *
+     * @return the default opacity for new area charts.
+     */
     public double getDefaultGraphOpacity() {
         return defaultGraphOpacity.get();
     }
 
+    /**
+     * The defaultGraphOpacity property.
+     *
+     * @return the defaultGraphOpacity property.
+     */
     public DoubleProperty defaultGraphOpacityProperty() {
         return defaultGraphOpacity;
     }
 
+    /**
+     * Sets the default opacity for new area charts.
+     *
+     * @param defaultGraphOpacity the default opacity for new area charts.
+     */
     public void setDefaultGraphOpacity(double defaultGraphOpacity) {
         this.defaultGraphOpacity.set(defaultGraphOpacity);
     }
 
+    /**
+     * Returns true is the shift key is pressed, false otherwise.
+     *
+     * @return true is the shift key is pressed, false otherwise.
+     */
     public Boolean isShiftPressed() {
         return shiftPressed.get();
     }
 
+    /**
+     * Sets the shiftPressed property's value.
+     *
+     * @param shiftPressed the shiftPressed property's value.
+     */
     public void setShiftPressed(Boolean shiftPressed) {
         this.shiftPressed.set(shiftPressed);
     }
 
+    /**
+     * The shiftPressed property
+     *
+     * @return the shiftPressed property
+     */
     public BooleanProperty shiftPressedProperty() {
         return shiftPressed;
     }
 
+    /**
+     * Returns true is the control key is pressed, false otherwise.
+     *
+     * @return true is the control key is pressed, false otherwise.
+     */
     public Boolean isCtrlPressed() {
         return ctrlPressed.getValue();
     }
 
+    /**
+     * The ctrlPressed property
+     *
+     * @param ctrlPressed the ctrlPressed property
+     */
     public void setCtrlPressed(Boolean ctrlPressed) {
         this.ctrlPressed.set(ctrlPressed);
     }
 
+    /**
+     * The ctrlPressed property
+     *
+     * @return the ctrlPressed property
+     */
     public BooleanProperty ctrlPressedProperty() {
         return ctrlPressed;
     }
 
+    /**
+     * Returns the location for plugins.
+     *
+     * @return the location for plugins.
+     */
     public Path getPluginsLocation() {
         return pluginsLocation.getValue();
     }
 
+    /**
+     * Sets  the location for plugins.
+     *
+     * @param pluginsLocation the location for plugins.
+     */
     public void setPluginsLocation(Path pluginsLocation) {
         this.pluginsLocation.setValue(pluginsLocation);
     }
 
+    /**
+     * The pluginsLocation property.
+     *
+     * @return the pluginsLocation property.
+     */
     public Property<Path> pluginsLocationProperty() {
         return pluginsLocation;
     }
 
+    /**
+     * Returns the duration to display notification popups.
+     *
+     * @return the duration to display notification popups.
+     */
     public Duration getNotificationPopupDuration() {
         return notificationPopupDuration.getValue();
     }
 
+    /**
+     * The notificationPopupDuration property.
+     *
+     * @return the notificationPopupDuration property.
+     */
     public Property<Duration> notificationPopupDurationProperty() {
         return notificationPopupDuration;
     }
 
+    /**
+     * Sets the duration to display notification popups.
+     *
+     * @param notificationPopupDuration the duration to display notification popups.
+     */
     public void setNotificationPopupDuration(Duration notificationPopupDuration) {
         this.notificationPopupDuration.setValue(notificationPopupDuration);
     }
 
+    /**
+     * Returns true is plugins should be loaded from external location, false otherwise.
+     *
+     * @return true is plugins should be loaded from external location, false otherwise.
+     */
     public boolean isLoadPluginsFromExternalLocation() {
         return loadPluginsFromExternalLocation.get();
     }
 
+    /**
+     * The loadPluginsFromExternalLocation property.
+     *
+     * @return the loadPluginsFromExternalLocation property.
+     */
     public BooleanProperty loadPluginsFromExternalLocationProperty() {
         return loadPluginsFromExternalLocation;
     }
 
+    /**
+     * Set to true if plugins should be loaded from external location, false otherwise.
+     *
+     * @param loadPluginsFromExternalLocation true if plugins should be loaded from external location, false otherwise.
+     */
     public void setLoadPluginsFromExternalLocation(boolean loadPluginsFromExternalLocation) {
         this.loadPluginsFromExternalLocation.set(loadPluginsFromExternalLocation);
     }

@@ -26,6 +26,12 @@ import javafx.scene.control.TableView;
 
 import java.time.ZonedDateTime;
 
+/**
+ * Defines the viewport to hosts an XYChart in worksheet.
+ *
+ * @param <T> the type for the Y axis on the XYChart.
+ * @author Frederic Thevenet
+ */
 public class ChartViewPort<T extends Number> {
     private Chart<T> dataStore;
     private XYChart<ZonedDateTime, T> chart;
@@ -33,6 +39,13 @@ public class ChartViewPort<T extends Number> {
     private PrefixFormatter prefixFormatter;
     private TableView<TimeSeriesInfo<Double>> seriesTable;
 
+    /**
+     * Initializes a new instance of the {@link ChartViewPort} class.
+     *
+     * @param dataStore            the data store for the viewport.
+     * @param chart                the chart control.
+     * @param propertiesController the chart properties controller.
+     */
     public ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
         this.dataStore = dataStore;
         this.chart = chart;
@@ -53,22 +66,47 @@ public class ChartViewPort<T extends Number> {
         }
     }
 
+    /**
+     * Returns the chart properties controller.
+     *
+     * @return the chart properties controller.
+     */
     public ChartPropertiesController<T> getPropertiesController() {
         return propertiesController;
     }
 
+    /**
+     * Returns the {@link XYChart} control.
+     *
+     * @return the {@link XYChart} control.
+     */
     public XYChart<ZonedDateTime, T> getChart() {
         return chart;
     }
 
+    /**
+     * Returns the chart's data store.
+     *
+     * @return the chart's data store.
+     */
     public Chart<T> getDataStore() {
         return dataStore;
     }
 
+    /**
+     * Returns the unit prefix formatter.
+     *
+     * @return the unit prefix formatter.
+     */
     public PrefixFormatter getPrefixFormatter() {
         return prefixFormatter;
     }
 
+    /**
+     * Returns the table view control holding the series info.
+     *
+     * @return the table view control holding the series info.
+     */
     public TableView<TimeSeriesInfo<Double>> getSeriesTable() {
         return seriesTable;
     }

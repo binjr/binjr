@@ -83,8 +83,10 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     /**
      * Initializes a new instance of the {@link Worksheet} class with the provided name, chart type and zoneid
      *
-     * @param name     the name for the new {@link Worksheet} instance
-     * @param timezone the {@link ZoneId} for the new {@link Worksheet} instance
+     * @param name         the name for the new {@link Worksheet} instance
+     * @param timezone     the {@link ZoneId} for the new {@link Worksheet} instance
+     * @param fromDateTime the beginning of the time range represented on the worksheet.
+     * @param toDateTime   the end of the time range represented on the worksheet.
      */
     public Worksheet(String name, ZonedDateTime fromDateTime, ZonedDateTime toDateTime, ZoneId timezone) {
         this(name,
@@ -111,6 +113,15 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         );
     }
 
+    /**
+     * Initializes a new instance of the {@link Worksheet} class.
+     *
+     * @param name         the name for the new {@link Worksheet} instance
+     * @param charts       the charts for the worksheet
+     * @param timezone     the timezone for the worksheet
+     * @param fromDateTime the start of the time range for the worksheet
+     * @param toDateTime   the end of the time range for the worksheet
+     */
     public Worksheet(String name,
                      List<Chart<T>> charts,
                      ZoneId timezone,
@@ -131,7 +142,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.status = new ChangeWatcher(this);
     }
 
-
+    /**
+     * Returns the default chart for the worksheet.
+     *
+     * @return the default chart for the worksheet.
+     */
     public Chart<T> getDefaultChart() {
         return charts.get(0);
     }
@@ -248,26 +263,51 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         this.toDateTime.setValue(toDateTime);
     }
 
+    /**
+     * Returns the worksheet's currently selected chart.
+     *
+     * @return the worksheet's currently selected chart.
+     */
     @XmlTransient
     public Integer getSelectedChart() {
         return selectedChart.getValue();
     }
 
+    /**
+     * The selectedChart property.
+     *
+     * @return the selectedChart property.
+     */
     public Property<Integer> selectedChartProperty() {
         return selectedChart;
     }
 
+    /**
+     * Sets  the worksheet's currently selected chart.
+     *
+     * @param selectedChart the worksheet's currently selected chart.
+     */
     public void setSelectedChart(Integer selectedChart) {
         this.selectedChart.setValue(selectedChart);
     }
 
 
+    /**
+     * Returns all the {@link Chart} instance in the worksheet.
+     *
+     * @return all the {@link Chart} instance in the worksheet.
+     */
     @XmlElementWrapper(name = "Charts")
     @XmlElements(@XmlElement(name = "Chart"))
     public ObservableList<Chart<T>> getCharts() {
         return charts;
     }
 
+    /**
+     * Sets the {@link Chart} instance in the worksheet.
+     *
+     * @param charts the {@link Chart} instance in the worksheet.
+     */
     public void setCharts(ObservableList<Chart<T>> charts) {
         this.charts = charts;
     }
@@ -280,6 +320,102 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
         );
     }
 
+    /**
+     * Returns the previous state of the all the charts on the worksheet.
+     *
+     * @return the previous state of the all the charts on the worksheet.
+     */
+    @XmlTransient
+    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
+        return previousState;
+    }
+
+    /**
+     * Sets the previous state of the all the charts on the worksheet.
+     *
+     * @param previousState the previous state of the all the charts on the worksheet.
+     */
+    public void setPreviousState(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState) {
+        this.previousState = previousState;
+    }
+
+    /**
+     * Returns the backward history for the worksheet.
+     *
+     * @return the backward history for the worksheet.
+     */
+    @XmlTransient
+    public WorksheetNavigationHistory getBackwardHistory() {
+        return backwardHistory;
+    }
+
+    /**
+     * Returns the forward history for the worksheet.
+     *
+     * @return the forward history for the worksheet.
+     */
+    @XmlTransient
+    public WorksheetNavigationHistory getForwardHistory() {
+        return forwardHistory;
+    }
+
+    /**
+     * Returns the way charts are laid out on the worksheet.
+     *
+     * @return the way charts are laid out on the worksheet.
+     */
+    @XmlAttribute
+    public ChartLayout getChartLayout() {
+        return chartLayout.getValue();
+    }
+
+    /**
+     * The chartLayout property.
+     *
+     * @return the chartLayout property.
+     */
+    public Property<ChartLayout> chartLayoutProperty() {
+        return chartLayout;
+    }
+
+    /**
+     * Specify the way charts are laid out on the worksheet.
+     *
+     * @param chartLayout the way charts are laid out on the worksheet.
+     */
+    public void setChartLayout(ChartLayout chartLayout) {
+        this.chartLayout.setValue(chartLayout);
+    }
+
+    /**
+     * Returns true if the worksheet's timeline is linked to other worksheets, false otherwise.
+     *
+     * @return true if the worksheet's timeline is linked to other worksheets, false otherwise.
+     */
+    @XmlAttribute
+    public Boolean isTimeRangeLinked() {
+        return timeRangeLinked.getValue();
+    }
+
+    /**
+     * The timeRangeLinked property.
+     *
+     * @return the timeRangeLinked property.
+     */
+    public Property<Boolean> timeRangeLinkedProperty() {
+        return timeRangeLinked;
+    }
+
+    /**
+     * Set to true if the worksheet's timeline is linked to other worksheets, false otherwise.
+     *
+     * @param timeRangeLinked true if the worksheet's timeline is linked to other worksheets, false otherwise.
+     */
+    public void setTimeRangeLinked(Boolean timeRangeLinked) {
+        this.timeRangeLinked.setValue(timeRangeLinked);
+    }
+
+    // region Dirtyable
     @XmlTransient
     @Override
     public Boolean isDirty() {
@@ -295,55 +431,13 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     public void cleanUp() {
         status.cleanUp();
     }
+    // endregion
 
+    // region Closeable
     @Override
     public void close() {
         charts.forEach(Chart::close);
     }
-
-    @XmlTransient
-    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
-        return previousState;
-    }
-
-    public void setPreviousState(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState) {
-        this.previousState = previousState;
-    }
-
-    @XmlTransient
-    public WorksheetNavigationHistory getBackwardHistory() {
-        return backwardHistory;
-    }
-
-    @XmlTransient
-    public WorksheetNavigationHistory getForwardHistory() {
-        return forwardHistory;
-    }
-
-    @XmlAttribute
-    public ChartLayout getChartLayout() {
-        return chartLayout.getValue();
-    }
-
-    public Property<ChartLayout> chartLayoutProperty() {
-        return chartLayout;
-    }
-
-    public void setChartLayout(ChartLayout chartLayout) {
-        this.chartLayout.setValue(chartLayout);
-    }
-
-    @XmlAttribute
-    public Boolean isTimeRangeLinked() {
-        return timeRangeLinked.getValue();
-    }
-
-    public Property<Boolean> timeRangeLinkedProperty() {
-        return timeRangeLinked;
-    }
-
-    public void setTimeRangeLinked(Boolean timeRangeLinked) {
-        this.timeRangeLinked.setValue(timeRangeLinked);
-    }
+    // endregion
 }
 

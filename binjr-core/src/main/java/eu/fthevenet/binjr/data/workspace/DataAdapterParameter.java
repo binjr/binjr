@@ -21,6 +21,9 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
+/**
+ * Represents a single parameter used to confidure a {@link eu.fthevenet.binjr.data.adapters.DataAdapter} instance.
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "parameter")
 public class DataAdapterParameter {
@@ -29,28 +32,57 @@ public class DataAdapterParameter {
     @XmlAttribute
     private String value;
 
+    /**
+     * Initializes a new instance of the {@link DataAdapterParameter} class.
+     */
     public DataAdapterParameter() {
         this.name = "";
         this.value = "";
     }
 
+    /**
+     * Initializes a new instance of the {@link DataAdapterParameter} class.
+     *
+     * @param name  the name of the parameter.
+     * @param value the value of the parameter.
+     */
     public DataAdapterParameter(String name, String value) {
         this.name = name;
         this.value = value;
     }
 
+    /**
+     * Sets the name of the parameter.
+     *
+     * @param name the name of the parameter.
+     */
     public void setName(String name) {
         this.name = name;
     }
 
+    /**
+     * Gets the name of the parameter.
+     *
+     * @return the name of the parameter.
+     */
     public String getValue() {
         return value;
     }
 
+    /**
+     * Sets the value of the parameter.
+     *
+     * @param value the value of the parameter.
+     */
     public void setValue(String value) {
         this.value = value;
     }
 
+    /**
+     * Gets  the value of the parameter.
+     *
+     * @return the value of the parameter.
+     */
     public String getName() {
         return name;
     }

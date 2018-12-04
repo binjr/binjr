@@ -53,7 +53,7 @@ public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
     private final Set<String> suggestedUnits;
     private static final String SUGGEST_WORKSHEET_UNITS = "suggest_worksheet_units";
 
-
+    @SuppressWarnings("unchecked")
     /**
      * Initializes a new instance of the {@link EditWorksheetDialog} class.
      *

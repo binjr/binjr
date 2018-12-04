@@ -20,6 +20,9 @@ import javax.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * An {@link XmlAdapter} used to marshal/unmarchal {@link DataAdapterParameters} instance to and from XML.
+ */
 public class ParameterMapAdapter extends XmlAdapter<DataAdapterParameters, Map<String, String>> {
     public ParameterMapAdapter() {
     }

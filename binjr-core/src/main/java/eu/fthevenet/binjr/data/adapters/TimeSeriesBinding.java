@@ -202,6 +202,7 @@ public class TimeSeriesBinding<T> {
         return this.adapter;
     }
 
+    @SuppressWarnings("unchecked")
     public void setAdapter(DataAdapter adapter) {
         this.adapter = adapter;
     }

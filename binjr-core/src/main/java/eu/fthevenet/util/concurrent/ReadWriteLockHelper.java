@@ -265,6 +265,7 @@ public class ReadWriteLockHelper {
          *
          * @param operation the {@link CheckedRunnable} to evaluate.
          * @param <E>       the type of the exception thrown by the {@link CheckedRunnable}.
+         * @return true if the lock was acquired, false otherwise.
          * @throws E the exception thrown by the {@link CheckedRunnable}.
          */
         public <E extends Exception> boolean tryLock(CheckedRunnable<E> operation) throws E {
@@ -286,6 +287,7 @@ public class ReadWriteLockHelper {
          * @param t         the parameter to pass the {@link CheckedConsumer}
          * @param <T>       the type of the parameter to pass the {@link CheckedConsumer}
          * @param <E>       the type of the exception thrown by the {@link CheckedConsumer}.
+         * @return true if the lock was acquired, false otherwise.
          * @throws E the exception thrown by the {@link CheckedConsumer}.
          */
         public <T, E extends Exception> boolean tryLock(CheckedConsumer<T, E> operation, T t) throws E {

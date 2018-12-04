@@ -128,8 +128,8 @@ public class DataAdapterFactory {
      */
     public DataAdapter<?, ?> newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
-            return retrieveAdapterInfo(key).getAdapterClass().newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            return retrieveAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of adapter " + key, e);
         }
     }

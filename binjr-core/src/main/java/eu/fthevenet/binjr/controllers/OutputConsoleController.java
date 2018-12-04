@@ -46,6 +46,11 @@ import java.net.URL;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * The controller for the output console window.
+ *
+ * @author Frederic Thevenet
+ */
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
     @FXML
@@ -78,6 +83,15 @@ public class OutputConsoleController implements Initializable {
         });
     }
 
+    /**
+     * Returns the alwaysOnTop toggle button.
+     *
+     * @return the alwaysOnTop toggle button.
+     */
+    public ToggleButton getAlwaysOnTopToggle() {
+        return alwaysOnTopToggle;
+    }
+
     private synchronized void initTextFlowAppender() {
         LoggerContext lc = (LoggerContext) LogManager.getContext(false);
         TextFlowAppender appender = TextFlowAppender.createAppender(
@@ -92,11 +106,13 @@ public class OutputConsoleController implements Initializable {
         lc.updateLoggers();
     }
 
-    public void handleClearConsole(ActionEvent actionEvent) {
+    @FXML
+    private void handleClearConsole(ActionEvent actionEvent) {
         this.textOutput.getChildren().clear();
     }
 
-    public void handleSaveConsoleOutput(ActionEvent actionEvent) {
+    @FXML
+    private void handleSaveConsoleOutput(ActionEvent actionEvent) {
         try {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save console ouptut");
@@ -118,7 +134,8 @@ public class OutputConsoleController implements Initializable {
         }
     }
 
-    public void handleCopyConsoleOutput(ActionEvent actionEvent) {
+    @FXML
+    private void handleCopyConsoleOutput(ActionEvent actionEvent) {
         try {
             final ClipboardContent content = new ClipboardContent();
             content.putString(textOutput.getChildren().stream().map(node -> ((Text) node).getText()).collect(Collectors.joining()));
@@ -126,9 +143,5 @@ public class OutputConsoleController implements Initializable {
         } catch (Exception e) {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, scrollPane);
         }
-    }
-
-    public ToggleButton getAlwaysOnTopToggle() {
-        return alwaysOnTopToggle;
     }
 }

@@ -16,10 +16,8 @@
 
 package eu.fthevenet.util.function;
 
-import java.util.function.Consumer;
-
 /**
- * A functional interface equivalent to {@link Consumer}, whose method
+ * A functional interface equivalent to {@link java.util.function.Predicate}, whose method
  * throws a checked exception.
  *
  * @param <T> the type of the input to the operation.
@@ -32,6 +30,7 @@ public interface CheckedPredicate<T, E extends Exception> {
      * Performs this operation on the given argument.
      *
      * @param t the input argument
+     * @return the result of the predicate resolution.
      * @throws E a checked exception
      */
     boolean test(T t) throws E;

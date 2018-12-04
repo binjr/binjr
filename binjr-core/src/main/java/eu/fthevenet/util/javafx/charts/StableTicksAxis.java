@@ -59,9 +59,6 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
             setScale(value);
         }
     };
-//    private final Button minAxisButton = new Button();
-//    private final Button maxAxisButton = new Button();
-//    private final ToggleButton centerAxisButton = new ToggleButton();
 
     private AxisTickFormatter axisTickFormatter;
     private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
@@ -78,6 +75,11 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
      */
     private BooleanProperty forceZeroInRange = new SimpleBooleanProperty(true);
 
+    /**
+     * Initializes a new instance of the {@link StableTicksAxis} class.
+     *
+     * @param prefixFormatter the {@link PrefixFormatter} instance to use.
+     */
     public StableTicksAxis(PrefixFormatter prefixFormatter) {
         super();
         getStyleClass().setAll("axis");
@@ -94,23 +96,37 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         };
     }
 
+    /**
+     * Returns the axis tick formatter.
+     *
+     * @return the axis tick formatter.
+     */
     public AxisTickFormatter getAxisTickFormatter() {
         return axisTickFormatter;
     }
 
+    /**
+     * Sets  the axis tick formatter.
+     *
+     * @param axisTickFormatter the axis tick formatter.
+     */
     public void setAxisTickFormatter(AxisTickFormatter axisTickFormatter) {
         this.axisTickFormatter = axisTickFormatter;
     }
 
     /**
      * Amount of padding to add on the each end of the axis when auto ranging.
+     *
+     * @return Amount of padding to add on the each end of the axis when auto ranging.
      */
     public double getAutoRangePadding() {
         return autoRangePadding.get();
     }
-
+    
     /**
-     * Amount of padding to add on the each end of the axis when auto ranging.
+     * The autoRangePadding property.
+     *
+     * @return the autoRangePadding property.
      */
     public DoubleProperty autoRangePaddingProperty() {
         return autoRangePadding;
@@ -118,6 +134,8 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
 
     /**
      * Amount of padding to add on the each end of the axis when auto ranging.
+     *
+     * @param autoRangePadding Amount of padding to add on the each end of the axis when auto ranging.
      */
     public void setAutoRangePadding(double autoRangePadding) {
         this.autoRangePadding.set(autoRangePadding);
@@ -125,13 +143,17 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
 
     /**
      * If true, when auto-ranging, force 0 to be the min or max end of the range.
+     *
+     * @return true if force 0 to be the min or max end of the range when auto-ranging, false otherwize.
      */
     public boolean isForceZeroInRange() {
         return forceZeroInRange.get();
     }
 
     /**
-     * If true, when auto-ranging, force 0 to be the min or max end of the range.
+     * The forceZeroInRange property
+     *
+     * @return the forceZeroInRange property
      */
     public BooleanProperty forceZeroInRangeProperty() {
         return forceZeroInRange;
@@ -139,6 +161,8 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
 
     /**
      * If true, when auto-ranging, force 0 to be the min or max end of the range.
+     *
+     * @param forceZeroInRange set to true, when auto-ranging, to force 0 to be the min or max end of the range.
      */
     public void setForceZeroInRange(boolean forceZeroInRange) {
         this.forceZeroInRange.set(forceZeroInRange);
@@ -290,14 +314,29 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         }
     }
 
+    /**
+     * Returns the tick spacing value.
+     *
+     * @return the tick spacing value.
+     */
     public double getTickSpacing() {
         return tickSpacing.get();
     }
 
+    /**
+     * The tickSpacing property
+     *
+     * @return the tickSpacing property
+     */
     public SimpleDoubleProperty tickSpacingProperty() {
         return tickSpacing;
     }
 
+    /**
+     * Sets the value of the space space in between ticks.
+     *
+     * @param tickSpacing the value of the space space in between ticks.
+     */
     public void setTickSpacing(double tickSpacing) {
         this.tickSpacing.set(tickSpacing);
     }

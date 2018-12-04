@@ -21,13 +21,13 @@ import java.util.StringTokenizer;
 
 /**
  * * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
- * <p>
+ * <br>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * <p>
+ * <br>
  * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
+ * <br>
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -50,8 +50,8 @@ public class Version implements Comparable {
 
     /**
      * Creates a version identifier from the specified numerical components.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * The qualifier is set to the empty string.
      *
      * @param major Major component of the version identifier.
@@ -77,6 +77,7 @@ public class Version implements Comparable {
      * @param qualifier Qualifier component of the version identifier. If
      *                  <code>null</code> is specified, then the qualifier will be set
      *                  to the empty string.
+     * @param snapshot true if the version is a snapshot.
      * @throws IllegalArgumentException If the numerical components are negative
      *                                  or the qualifier string is invalid.
      */
@@ -94,10 +95,10 @@ public class Version implements Comparable {
 
     /**
      * Created a version identifier from the specified string.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * Here is the grammar for version strings.
-     * <p>
+     * <br>
      * <pre>
      * version ::= major('.'minor('.'micro('.'qualifier)?)?)?
      * major ::= digit+
@@ -107,7 +108,7 @@ public class Version implements Comparable {
      * digit ::= [0..9]
      * alpha ::= [a..zA..Z]
      * </pre>
-     * <p>
+     * <br>
      * There must be no whitespace in version.
      *
      * @param version String representation of the version identifier.
@@ -184,8 +185,8 @@ public class Version implements Comparable {
 
     /**
      * Parses a version identifier from the specified string.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * See <code>Version(String)</code> for the format of the version string.
      *
      * @param version String representation of the version identifier. Leading
@@ -250,8 +251,8 @@ public class Version implements Comparable {
 
     /**
      * Returns the string representation of this version identifier.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * The format of the version string will be <code>major.minor.micro</code>
      * if qualifier is the empty string or
      * <code>major.minor.micro.qualifier</code> otherwise.
@@ -280,8 +281,8 @@ public class Version implements Comparable {
 
     /**
      * Compares this <code>Version</code> object to another object.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * A version is considered to be <b>equal to </b> another version if the
      * major, minor and micro components are equal and the qualifier component
      * is equal (using <code>String.equals</code>).
@@ -305,8 +306,8 @@ public class Version implements Comparable {
 
     /**
      * Compares this <code>Version</code> object to another object.
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * A version is considered to be <b>less than </b> another version if its
      * major component is less than the other version's major component, or the
      * major components are equal and its minor component is less than the other
@@ -315,8 +316,8 @@ public class Version implements Comparable {
      * or the major, minor and micro components are equal and it's qualifier
      * component is less than the other version's qualifier component (using
      * <code>String.compareTo</code>).
-     * <p>
-     * <p>
+     * <br>
+     * <br>
      * A version is considered to be <b>equal to</b> another version if the
      * major, minor and micro components are equal and the qualifier component
      * is equal (using <code>String.compareTo</code>).

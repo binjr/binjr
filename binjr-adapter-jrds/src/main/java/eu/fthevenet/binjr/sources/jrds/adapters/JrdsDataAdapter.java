@@ -82,8 +82,11 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     private String encoding;
     private JrdsTreeViewTab treeViewTab;
 
+
     /**
-     * Default constructor
+     * Initialises a new instance of the {@link JrdsDataAdapter} class.
+     *
+     * @throws DataAdapterException if an error occurs while initializing the adapter.
      */
     public JrdsDataAdapter() throws DataAdapterException {
         super();
@@ -92,9 +95,12 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     /**
      * Initializes a new instance of the {@link JrdsDataAdapter} class.
      *
+     * @param baseURL     the URL to the JRDS webapp.
      * @param zoneId      the id of the time zone used to record dates.
      * @param encoding    the encoding used by the download servlet.
-     * @param treeViewTab the filter to apply to the tree view
+     * @param treeViewTab the tab to apply.
+     * @param filter      the filter to apply to the tree view.
+     * @throws DataAdapterException if an error occurs while initializing the adapter.
      */
     public JrdsDataAdapter(URL baseURL, ZoneId zoneId, String encoding, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         super(baseURL);
@@ -107,9 +113,12 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
     /**
      * Builds a new instance of the {@link JrdsDataAdapter} class from the provided parameters.
      *
-     * @param address the URL to the JRDS webapp.
-     * @param zoneId  the id of the time zone used to record dates.
+     * @param address     the URL to the JRDS webapp.
+     * @param zoneId      the id of the time zone used to record dates.
+     * @param treeViewTab the tab to apply.
+     * @param filter      the filter to apply to the tree view.
      * @return a new instance of the {@link JrdsDataAdapter} class.
+     * @throws DataAdapterException if an error occurs while initializing the adapter.
      */
     public static JrdsDataAdapter fromUrl(String address, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         try {

@@ -72,6 +72,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * Initializes a new instance of the {@link DataAdapterDialog} class.
      *
      * @param owner the owner window for the dialog
+     * @param mode the mode (Path or URL) to use for the dialog.
      */
     public DataAdapterDialog(Node owner, Mode mode) {
         if (owner != null) {
@@ -151,7 +152,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * Returns an instance of {@link DataAdapter}
      *
      * @return an instance of {@link DataAdapter}
-     * @throws DateTimeException if the provided {@link ZoneId} is invalid
+     * @throws DataAdapterException if the provided {@link ZoneId} is invalid
      */
     protected abstract DataAdapter<?, ?> getDataAdapter() throws DataAdapterException;
 

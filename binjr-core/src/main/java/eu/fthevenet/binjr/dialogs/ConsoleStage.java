@@ -28,6 +28,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
+/**
+ * The {@link Stage} for the output console window.
+ */
 public class ConsoleStage {
     private static final Logger logger = LogManager.getLogger(ConsoleStage.class);
     private final Stage stage;
@@ -64,11 +67,16 @@ public class ConsoleStage {
         controller.getAlwaysOnTopToggle().setSelected(true);
     }
 
-
+    /**
+     * Show the output console window.
+     */
     public static void show() {
         ConsoleStageHolder.instance.stage.show();
     }
 
+    /**
+     * Hide the output console window.
+     */
     public static void hide() {
         ConsoleStageHolder.instance.stage.hide();
     }

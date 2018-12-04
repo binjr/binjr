@@ -51,10 +51,10 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      *
      * @param name         the name of the data adapter.
      * @param description  the description associated to the data adapter.
-     * @param version
-     * @param copyright
-     * @param license
-     * @param siteUrl
+     * @param version   the version information related to the data adapter
+     * @param copyright the copyright information related to the data adapter
+     * @param license the license information related to the data adapter
+     * @param siteUrl the version information related to the data adapter
      * @param adapterClass the class that implements the data adapter.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */

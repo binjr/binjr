@@ -90,6 +90,7 @@ public class XYChartSelection<X, Y> {
      * @param endX   the upper bound on the X axis of the selection
      * @param startY the lower bound on the Y axis of the selection
      * @param endY   the upper bound on the Y axis of the selection
+     * @param autoRangeY set to true to adapt the range on the Y axis automatically
      */
     public XYChartSelection(X startX, X endX, Y startY, Y endY, boolean autoRangeY) {
         this.startX = startX;

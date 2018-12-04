@@ -35,6 +35,8 @@ import java.util.Optional;
 
 /**
  * Represent the state of the time series view
+ *
+ * @author Frederic Thevenet
  */
 public class ChartViewportsState implements AutoCloseable {
     private final WorksheetController parent;
@@ -43,7 +45,6 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
-
     private final ReadOnlyObjectWrapper<TimeRangePicker.TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
 
     @Override
@@ -53,14 +54,27 @@ public class ChartViewportsState implements AutoCloseable {
         axisStates.values().forEach(AxisState::close);
     }
 
+    /**
+     * Returns the {@link eu.fthevenet.util.javafx.controls.TimeRangePicker.TimeRange} for the state.
+     *
+     * @return the {@link eu.fthevenet.util.javafx.controls.TimeRangePicker.TimeRange} for the state.
+     */
     public TimeRangePicker.TimeRange getTimeRange() {
         return timeRange.get();
     }
 
+    /**
+     * The timeRange property.
+     *
+     * @return the timeRange property.
+     */
     public ReadOnlyObjectProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
         return timeRange.getReadOnlyProperty();
     }
 
+    /**
+     * Represents the state of an {@link javafx.scene.chart.Axis}
+     */
     public class AxisState implements AutoCloseable {
         private final SimpleDoubleProperty startY;
         private final SimpleDoubleProperty endY;
@@ -71,7 +85,7 @@ public class ChartViewportsState implements AutoCloseable {
         /**
          * Initializes a new instance of the {@link AxisState} class.
          *
-         * @param chartViewPort
+         * @param chartViewPort the {@link ChartViewPort} instance attached to the axis.
          * @param startY        the lower bound of the Y axis
          * @param endY          the upper bound of the Y axis
          */
@@ -83,12 +97,17 @@ public class ChartViewportsState implements AutoCloseable {
             this.addListeners();
         }
 
-
+        /**
+         * Remove all listeners
+         */
         public void removeListeners() {
             this.startY.removeListener(onRefreshViewportRequired);
             this.endY.removeListener(onRefreshViewportRequired);
         }
 
+        /**
+         * All listeners
+         */
         public void addListeners() {
             this.startY.addListener(onRefreshViewportRequired);
             this.endY.addListener(onRefreshViewportRequired);
@@ -109,6 +128,13 @@ public class ChartViewportsState implements AutoCloseable {
             );
         }
 
+        /**
+         * Retrieves a {@link XYChartSelection} for the selected time range.
+         *
+         * @param beginning the beginning of the time range.
+         * @param end       the end of the time range.
+         * @return a {@link XYChartSelection} for the selected time range.
+         */
         public XYChartSelection<ZonedDateTime, Double> selectTimeRange(ZonedDateTime beginning, ZonedDateTime end) {
             return new XYChartSelection<>(
                     beginning,
@@ -125,7 +151,7 @@ public class ChartViewportsState implements AutoCloseable {
          * @param selection the {@link XYChartSelection} to set as the current state
          * @param toHistory true if the change in state should be recorded in the history
          */
-        public  void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
+        public void setSelection(XYChartSelection<ZonedDateTime, Double> selection, boolean toHistory) {
             if (toHistory) {
                 double r = (((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getUpperBound() - ((ValueAxis<Double>) chartViewPort.getChart().getYAxis()).getLowerBound()) - Math.abs(selection.getEndY() - selection.getStartY());
                 logger.debug(() -> "Y selection - Y axis range = " + r);
@@ -151,21 +177,34 @@ public class ChartViewportsState implements AutoCloseable {
         }
     }
 
+    /**
+     * Suspends listeners
+     */
     public void suspendAxisListeners() {
         this.startX.removeListener(onRefreshAllRequired);
         this.endX.removeListener(onRefreshAllRequired);
         axisStates.values().forEach(AxisState::removeListeners);
     }
 
+    /**
+     * Resumes listeners
+     */
     public void resumeAxisListeners() {
         this.startX.addListener(onRefreshAllRequired);
         this.endX.addListener(onRefreshAllRequired);
         axisStates.values().forEach(AxisState::addListeners);
     }
 
+    /**
+     * Initializes a new instance of the {@link ChartViewportsState} class.
+     *
+     * @param parent the parent worksheet controller
+     * @param startX the beginning of the time range.
+     * @param endX   the end of the time range.
+     */
     public ChartViewportsState(WorksheetController parent, ZonedDateTime startX, ZonedDateTime endX) {
         this.parent = parent;
-        onRefreshAllRequired =  (observable, oldValue, newValue) -> parent.invalidateAll(true, false, false);
+        onRefreshAllRequired = (observable, oldValue, newValue) -> parent.invalidateAll(true, false, false);
         this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
         this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
         this.startX.addListener(onRefreshAllRequired);
@@ -184,22 +223,47 @@ public class ChartViewportsState implements AutoCloseable {
 
     }
 
+    /**
+     * Returns the beginning the range for the X axis
+     *
+     * @return the beginning the range for the X axis
+     */
     public ZonedDateTime getStartX() {
         return startX.get();
     }
 
+    /**
+     * The startX property
+     *
+     * @return the startX property.
+     */
     public SimpleObjectProperty<ZonedDateTime> startXProperty() {
         return startX;
     }
 
+    /**
+     * Returns the end the range for the X axis.
+     *
+     * @return the end the range for the X axis.
+     */
     public ZonedDateTime getEndX() {
         return endX.get();
     }
 
+    /**
+     * The endX property.
+     *
+     * @return the endX property.
+     */
     public SimpleObjectProperty<ZonedDateTime> endXProperty() {
         return endX;
     }
 
+    /**
+     * Returns the current state for all charts as a map of {@link XYChartSelection} instances.
+     *
+     * @return the current state for all charts as a map of {@link XYChartSelection} instances.
+     */
     public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> asSelection() {
         Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
         for (Map.Entry<Chart<Double>, AxisState> e : axisStates.entrySet()) {
@@ -208,6 +272,13 @@ public class ChartViewportsState implements AutoCloseable {
         return selection;
     }
 
+    /**
+     * Returns the current state for all charts as a map of {@link XYChartSelection} instances for the selected time range.
+     *
+     * @param start the beginning of the time range.
+     * @param end   the end of the time range.
+     * @return the current state for all charts as a map of {@link XYChartSelection} instances for the selected time range.
+     */
     public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selectTimeRange(ZonedDateTime start, ZonedDateTime end) {
         Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selection = new HashMap<>();
 
@@ -217,6 +288,12 @@ public class ChartViewportsState implements AutoCloseable {
         return selection;
     }
 
+    /**
+     * Mutates the current state according to the provided map of selections.
+     *
+     * @param selectionMap a map of selections to apply.
+     * @param toHistory    true if state change should be added to hitory, false otherwise.
+     */
     public void setSelection(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> selectionMap, boolean toHistory) {
         this.suspendAxisListeners();
         try {
@@ -236,10 +313,23 @@ public class ChartViewportsState implements AutoCloseable {
         }
     }
 
+    /**
+     * Associate the provided state to the specified chart.
+     *
+     * @param chart            the chart to associated a state to
+     * @param xyChartViewState the state to associate.
+     * @return the state associated.
+     */
     public AxisState put(Chart<Double> chart, AxisState xyChartViewState) {
         return axisStates.put(chart, xyChartViewState);
     }
 
+    /**
+     * Returns an {@link Optional} of {@link AxisState} that contains the state associated to the sepcified chart.
+     *
+     * @param chart the chart to get the state for.
+     * @return an {@link Optional} of {@link AxisState} that contains the state associated to the sepcified chart.
+     */
     public Optional<AxisState> get(Chart<Double> chart) {
         AxisState yState = axisStates.get(chart);
         if (yState != null) {

@@ -147,7 +147,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         this.worksheet = worksheet;
         // Attach bindings
         for (Chart<Double> chart : worksheet.getCharts()) {
-            for (TimeSeriesInfo<?> s : chart.getSeries()) {
+            for (TimeSeriesInfo<Double> s : chart.getSeries()) {
                 UUID id = s.getBinding().getAdapterId();
                 DataAdapter<?, ?> da = sourcesAdapters
                         .stream()
@@ -1122,13 +1122,5 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentViewport.getDataStore().setShowProperties(value);
         }
     }
-
     //endregion
-
-    @Override
-    protected void finalize() throws Throwable {
-        logger.trace(() -> "Finalizing worksheet controller: " + this.toString());
-        super.finalize();
-    }
-
 }

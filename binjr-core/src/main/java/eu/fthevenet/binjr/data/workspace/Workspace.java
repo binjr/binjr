@@ -280,6 +280,7 @@ public class Workspace implements Dirtyable {
      * @return a new instance of the {@link Workspace} class
      * @throws IOException   if an IO error occurs when accessing the file
      * @throws JAXBException if an error occurs while deserializing the file
+     * @throws CannotLoadWorkspaceException if an error occurs while loading the workspace.
      */
     public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
         sanityCheck(file);

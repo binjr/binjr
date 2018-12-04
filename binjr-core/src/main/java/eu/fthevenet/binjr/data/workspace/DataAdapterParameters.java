@@ -21,13 +21,24 @@ import javax.xml.bind.annotation.XmlElements;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Wraps a collection of of {@link DataAdapterParameter} instances.
+ */
 public class DataAdapterParameters {
     @XmlElements(@XmlElement(name = "AdapterParameter"))
     public List<DataAdapterParameter> parameters = new ArrayList<>();
 
+    /**
+     * Initializes a new instance fo the {@link DataAdapterParameters} class.
+     */
     public DataAdapterParameters() {
     }
 
+    /**
+     * Initializes a new instance fo the {@link DataAdapterParameters} class.
+     *
+     * @param parameters A list of {@link DataAdapterParameter} instances to initializes.
+     */
     public DataAdapterParameters(List<DataAdapterParameter> parameters) {
         this.parameters = parameters;
     }

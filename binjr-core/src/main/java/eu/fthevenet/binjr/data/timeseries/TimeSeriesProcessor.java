@@ -71,7 +71,7 @@ public abstract class TimeSeriesProcessor<T> {
 
     /**
      * Try to get the nearest value for the specified time stamp.
-     * <p>
+     *
      * <p><b>Remark:</b> If the processor is already being accessed by another thread, returns immediately with Optional.empty</p>
      *
      * @param xValue the time stamp to get the value for.
@@ -84,7 +84,7 @@ public abstract class TimeSeriesProcessor<T> {
 
     /**
      * Get the nearest value for the specified time stamp.
-     * <p>
+     *
      * <p><b>Remark:</b> If the processor is already being accessed by another thread, waits until lock is released and returns requested value</p>
      *
      * @param xValue the time stamp to get the value for.
@@ -96,7 +96,7 @@ public abstract class TimeSeriesProcessor<T> {
 
     /**
      * Gets the data of the {@link TimeSeriesProcessor}
-     * <p>
+     *
      * <p><b>Remark:</b> the returned collection is a shallow copy of the the processor's own backing collection,
      * so it can be iterated through without risking a concurrent access error even if content is being added or
      * removed to the processor on a seperate thread. However, the the actual data for individual samples  are

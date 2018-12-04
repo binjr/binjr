@@ -100,6 +100,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param name      the name for the new {@link Worksheet} instance
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
+     * @param unitName the label for the unit of Y axis.
+     * @param prefix the unit prefix to use for the unit of Y axis.
      */
     public Chart(String name, ChartType chartType, String unitName, UnitPrefixes prefix) {
         this(name,
@@ -170,6 +172,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param startTime the start of the time interval
      * @param endTime   the end of the time interval
+     * @param bypassCache set to true to forcefully bypass any cache on the adapter.
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
     public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {

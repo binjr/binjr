@@ -61,14 +61,18 @@ public class GithubRelease {
     private GithubUser author;
 
     /**
-     * @return url
+     * Returns the url associated to the release.
+     *
+     * @return the url associated to the release.
      */
     public String getUrl() {
         return url;
     }
 
     /**
-     * @param url
+     * Sets  the url associated to the release.
+     *
+     * @param url the url associated to the release.
      * @return this release
      */
     public GithubRelease setUrl(String url) {
@@ -77,14 +81,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return htmlUrl
+     * Returns the url associated to the html page.
+     *
+     * @return htmlUrl the url associated to the html page.
      */
     public String getHtmlUrl() {
         return htmlUrl;
     }
 
     /**
-     * @param htmlUrl
+     * Sets the url associated to the html page.
+     *
+     * @param htmlUrl the url associated to the html page.
      * @return this release
      */
     public GithubRelease setHtmlUrl(String htmlUrl) {
@@ -93,14 +101,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return assetsUrl
+     * Returns the assets url
+     *
+     * @return the assets url
      */
     public String getAssetsUrl() {
         return assetsUrl;
     }
 
     /**
-     * @param assetsUrl
+     * Sets the assets url
+     *
+     * @param assetsUrl the assets url
      * @return this release
      */
     public GithubRelease setAssetsUrl(String assetsUrl) {
@@ -109,14 +121,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return uploadUrl
+     * Returns the upload url
+     *
+     * @return the upload url
      */
     public String getUploadUrl() {
         return uploadUrl;
     }
 
     /**
-     * @param uploadUrl
+     * Sets the upload url
+     *
+     * @param uploadUrl the upload url
      * @return this release
      */
     public GithubRelease setUploadUrl(String uploadUrl) {
@@ -125,14 +141,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return tarballUrl
+     * Retuns the tarball url
+     *
+     * @return the tarball url
      */
     public String getTarballUrl() {
         return tarballUrl;
     }
 
     /**
-     * @param tarballUrl
+     * Sets the tarball url
+     *
+     * @param tarballUrl the tarball url
      * @return this release
      */
     public GithubRelease setTarballUrl(String tarballUrl) {
@@ -141,14 +161,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return zipballUrl
+     * Returns the zip url.
+     *
+     * @return zipballUrl the zip url.
      */
     public String getZipballUrl() {
         return zipballUrl;
     }
 
     /**
-     * @param zipballUrl
+     * Sets the zip url.
+     *
+     * @param zipballUrl the zip url.
      * @return this release
      */
     public GithubRelease setZipballUrl(String zipballUrl) {
@@ -157,14 +181,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return id
+     * Returns the id of the release
+     *
+     * @return id the id of the release
      */
     public long getId() {
         return id;
     }
 
     /**
-     * @param id
+     * Sets the id of the release
+     *
+     * @param id the id of the release
      * @return this release
      */
     public GithubRelease setId(long id) {
@@ -173,14 +201,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return tagName
+     * Returns the tag name.
+     *
+     * @return tagName the tag name.
      */
     public String getTagName() {
         return tagName;
     }
 
     /**
-     * @param tagName
+     * Sets the tag name.
+     *
+     * @param tagName the tag name.
      * @return this release
      */
     public GithubRelease setTagName(String tagName) {
@@ -189,14 +221,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return targetCommitish
+     * Returns the target commitish
+     *
+     * @return targetCommitish  the target commitish
      */
     public String getTargetCommitish() {
         return targetCommitish;
     }
 
     /**
-     * @param targetCommitish
+     * Sets  the target commitish
+     *
+     * @param targetCommitish the target commitish
      * @return this release
      */
     public GithubRelease setTargetCommitish(String targetCommitish) {
@@ -205,14 +241,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return name
+     * Returns the name of the release.
+     *
+     * @return name the name of the release.
      */
     public String getName() {
         return name;
     }
 
     /**
-     * @param name
+     * Sets the name of the release.
+     *
+     * @param name the name of the release.
      * @return this release
      */
     public GithubRelease setName(String name) {
@@ -221,14 +261,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return body
+     * Returns the body of the release.
+     *
+     * @return body  the body of the release.
      */
     public String getBody() {
         return body;
     }
 
     /**
-     * @param body
+     * Sets  the body of the release.
+     *
+     * @param body the body of the release.
      * @return this release
      */
     public GithubRelease setBody(String body) {
@@ -237,14 +281,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return isDraft
+     * Returns true is the release is a draft, false otherwise.
+     *
+     * @return isDraft true is the release is a draft, false otherwise.
      */
     public boolean isDraft() {
         return isDraft;
     }
 
     /**
-     * @param isDraft
+     * Sets to true is the release is a draft, false otherwise.
+     *
+     * @param isDraft true is the release is a draft, false otherwise.
      * @return this release
      */
     public GithubRelease setDraft(boolean isDraft) {
@@ -253,14 +301,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return isPrerelease
+     * Returns true if the release is a pre-release, false otherwise.
+     *
+     * @return isPrerelease  true is the release is a pre-release, false otherwise.
      */
     public boolean isPrerelease() {
         return isPrerelease;
     }
 
     /**
-     * @param isPrerelease
+     * Sets to true if the release is a pre-release, false otherwise.
+     *
+     * @param isPrerelease true if the release is a pre-release, false otherwise.
      * @return this release
      */
     public GithubRelease setPrerelease(boolean isPrerelease) {
@@ -269,14 +321,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return createdAt
+     * Returns the creation date.
+     *
+     * @return createdAt the creation date.
      */
     public Date getCreatedAt() {
         return createdAt;
     }
 
     /**
-     * @param createdAt
+     * Sets the creation date.
+     *
+     * @param createdAt the creation date.
      * @return this release
      */
     public GithubRelease setCreatedAt(Date createdAt) {
@@ -285,14 +341,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return publishedAt
+     * Returns the publication date.
+     *
+     * @return publishedAt the publication date.
      */
     public Date getPublishedAt() {
         return publishedAt;
     }
 
     /**
-     * @param publishedAt
+     * Sets  the publication date.
+     *
+     * @param publishedAt the publication date.
      * @return this release
      */
     public GithubRelease setPublishedAt(Date publishedAt) {
@@ -301,14 +361,18 @@ public class GithubRelease {
     }
 
     /**
-     * @return author
+     * Returns the author of the release.
+     *
+     * @return author the author of the release.
      */
     public GithubUser getAuthor() {
         return author;
     }
 
     /**
-     * @param author
+     * Sets  the author of the release.
+     *
+     * @param author the author of the release.
      * @return this release
      */
     public GithubRelease setAuthor(GithubUser author) {
@@ -316,6 +380,11 @@ public class GithubRelease {
         return this;
     }
 
+    /**
+     * Returns the version of the release.
+     *
+     * @return the version of the release.
+     */
     public Version getVersion() {
         if (tagName == null) {
             return Version.emptyVersion;
