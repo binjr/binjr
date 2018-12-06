@@ -33,6 +33,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -169,11 +170,18 @@ public class AboutBoxController implements Initializable {
 
     private void fillTextFlow(TextFlow textFlow, URL sourceUrl) {
         try {
-            String license = new BufferedReader(new InputStreamReader(sourceUrl.openStream())).lines().collect(Collectors.joining("\n"));
-            Text licText = new Text(license);
-            licText.setFill(Color.valueOf("#204656"));
-            textFlow.getChildren().add(licText);
+            new BufferedReader(new InputStreamReader(sourceUrl.openStream())).lines().forEach(s -> {
+                Text licText = new Text();
+                if (s.startsWith("^b")) {
+                    s = s.replace("^b", "");
+                    licText.setStyle("-fx-font-weight: bold");
+                }
+                licText.setText(s+"\n");
+                licText.setFill(Color.valueOf("#204656"));
+                textFlow.getChildren().add(licText);
 
+            });
+            textFlow.setTextAlignment(TextAlignment.LEFT);
         } catch (IOException e) {
             logger.error("Cannot display content of URL " + sourceUrl + ": " + e.getMessage());
             logger.debug(() -> "Exception stack", e);
