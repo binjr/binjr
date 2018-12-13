@@ -59,12 +59,6 @@ public class AboutBoxController implements Initializable {
     public TextFlow licenseView;
     public TextFlow acknowledgementView;
 
-//    @FXML
-//    public WebView licenseView;
-//
-//    @FXML
-//    public WebView acknowledgementView;
-
     @FXML
     private DialogPane aboutRoot;
 
