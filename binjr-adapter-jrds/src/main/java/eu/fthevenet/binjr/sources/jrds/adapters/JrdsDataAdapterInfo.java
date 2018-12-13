@@ -22,7 +22,7 @@ import eu.fthevenet.binjr.preferences.AppEnvironment;
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
     public JrdsDataAdapterInfo() {
-        super("JRDS",
+        super("JRDS Server",
                 "JRDS Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,

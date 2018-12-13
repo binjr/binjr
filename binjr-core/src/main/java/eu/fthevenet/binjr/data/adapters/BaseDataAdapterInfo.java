@@ -25,7 +25,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import java.util.Objects;
 
 /**
- * An immutable representation of a {@link DataAdapter}'s metadata
+ * An immutable representation of a {@link SerializedDataAdapter}'s metadata
  *
  * @author Frederic Thevenet
  */

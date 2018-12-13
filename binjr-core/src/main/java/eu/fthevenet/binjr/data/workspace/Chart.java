@@ -187,15 +187,15 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
         // Define the reduction transform to apply
         TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters
-        Map<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
-        for (Map.Entry<DataAdapter<T, ?>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
-            DataAdapter<T, ?> adapter = byAdapterEntry.getKey();
+        Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (Map.Entry<DataAdapter<T>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
+            DataAdapter<T> adapter = byAdapterEntry.getKey();
             // Group all bindings-by-adapters by path
             Map<String, List<TimeSeriesInfo<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
                 // Get data for source
-                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.fetchDecodedData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
+                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.fetchData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
                 // Applying point reduction
                 data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
                 //Update timeSeries data

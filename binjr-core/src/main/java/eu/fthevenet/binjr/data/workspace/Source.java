@@ -17,6 +17,7 @@
 package eu.fthevenet.binjr.data.workspace;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.SerializedDataAdapter;
 import eu.fthevenet.binjr.data.dirtyable.ChangeWatcher;
 import eu.fthevenet.binjr.data.dirtyable.Dirtyable;
 import eu.fthevenet.binjr.data.dirtyable.IsDirtyable;
@@ -51,10 +52,10 @@ public class Source implements Dirtyable, Closeable {
     private Property<Boolean> editable = new SimpleBooleanProperty();
 
     /**
-     * Creates an instance of the {@link Source} class from the provided  {@link DataAdapter}
+     * Creates an instance of the {@link Source} class from the provided  {@link SerializedDataAdapter}
      *
-     * @param adapter the {@link DataAdapter} to create the {@link Source}  instance from
-     * @return an instance of the {@link Source} class from the provided  {@link DataAdapter}
+     * @param adapter the {@link SerializedDataAdapter} to create the {@link Source}  instance from
+     * @return an instance of the {@link Source} class from the provided  {@link SerializedDataAdapter}
      */
     @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
@@ -104,9 +105,9 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * The name of the class that implements the {@link DataAdapter} for the {@link Source}
+     * The name of the class that implements the {@link SerializedDataAdapter} for the {@link Source}
      *
-     * @return the name of the class that implements the {@link DataAdapter} for the {@link Source}
+     * @return the name of the class that implements the {@link SerializedDataAdapter} for the {@link Source}
      */
     @XmlAttribute(name = "adapter")
     public String getAdapterClassName() {
@@ -125,9 +126,9 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * Gets the id of the {@link DataAdapter} attached to the source
+     * Gets the id of the {@link SerializedDataAdapter} attached to the source
      *
-     * @return the id of the {@link DataAdapter} attached to the source
+     * @return the id of the {@link SerializedDataAdapter} attached to the source
      */
     @XmlAttribute(name = "id")
     public UUID getAdapterId() {
@@ -135,9 +136,9 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * Sets the id of the {@link DataAdapter} attached to the source
+     * Sets the id of the {@link SerializedDataAdapter} attached to the source
      *
-     * @param adapterId the id of the {@link DataAdapter} attached to the source
+     * @param adapterId the id of the {@link SerializedDataAdapter} attached to the source
      */
     public void setAdapterId(UUID adapterId) {
         this.adapterId = adapterId;
@@ -175,9 +176,9 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * Returns the {@link DataAdapter} attached to the {@link Source}.
+     * Returns the {@link SerializedDataAdapter} attached to the {@link Source}.
      *
-     * @return the {@link DataAdapter} attached to the {@link Source}.
+     * @return the {@link SerializedDataAdapter} attached to the {@link Source}.
      */
     @XmlTransient
     public DataAdapter getAdapter() {
@@ -185,9 +186,9 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * Sets the {@link DataAdapter} attached to the {@link Source}.
+     * Sets the {@link SerializedDataAdapter} attached to the {@link Source}.
      *
-     * @param adapter the {@link DataAdapter} attached to the {@link Source}.
+     * @param adapter the {@link SerializedDataAdapter} attached to the {@link Source}.
      */
     public void setAdapter(DataAdapter adapter) {
         this.adapter = adapter;

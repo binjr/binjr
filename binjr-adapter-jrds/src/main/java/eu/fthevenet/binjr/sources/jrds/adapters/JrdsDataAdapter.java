@@ -18,8 +18,8 @@ package eu.fthevenet.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
-import eu.fthevenet.binjr.data.adapters.DataAdapter;
-import eu.fthevenet.binjr.data.adapters.HttpDataAdapterBase;
+import eu.fthevenet.binjr.data.adapters.HttpDataAdapter;
+import eu.fthevenet.binjr.data.adapters.SerializedDataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.codec.CsvDecoder;
 import eu.fthevenet.binjr.data.exceptions.*;
@@ -61,12 +61,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * This class provides an implementation of {@link DataAdapter} for JRDS.
+ * This class provides an implementation of {@link SerializedDataAdapter} for JRDS.
  *
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Double>> {
+public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
@@ -204,23 +204,6 @@ public class JrdsDataAdapter extends HttpDataAdapterBase<Double, CsvDecoder<Doub
                 });
         treeViewTab = validateParameter(params, TREE_VIEW_TAB_PARAM_NAME, s -> s == null ? JrdsTreeViewTab.valueOf(params.get(TREE_VIEW_TAB_PARAM_NAME)) : JrdsTreeViewTab.HOSTS_TAB);
         this.filter = params.get(JRDS_FILTER);
-    }
-
-    @Override
-    public boolean ping() {
-        try {
-            return doHttpGet(craftRequestUri(""), new AbstractResponseHandler<Boolean>() {
-                @Override
-                public Boolean handleEntity(HttpEntity entity) throws IOException {
-                    String entityString = EntityUtils.toString(entity);
-                    logger.trace(entityString);
-                    return true;
-                }
-            });
-        } catch (Exception e) {
-            logger.debug(() -> "Ping failed", e);
-            return false;
-        }
     }
 
     @Override

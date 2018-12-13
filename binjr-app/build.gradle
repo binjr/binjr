@@ -22,6 +22,7 @@ dependencies {
     implementation project(':binjr-core')
     implementation project(':binjr-adapter-jrds')
     implementation project(':binjr-adapter-csv')
+    implementation project(':binjr-adapter-rrd4j')
 
     runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
     runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -34,5 +35,8 @@ mainClassName = 'eu.fthevenet.binjr.Bootstrap'
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
 }
 

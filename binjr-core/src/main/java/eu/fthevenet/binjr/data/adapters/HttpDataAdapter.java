@@ -62,29 +62,29 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends SimpleCachingDataAdapter<T, A> {
-    private static final Logger logger = LogManager.getLogger(HttpDataAdapterBase.class);
+public abstract class HttpDataAdapter<T, A extends Decoder<T>> extends SimpleCachingDataAdapter<T, A> {
+    private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final CloseableHttpClient httpClient;
     private URL baseAddress;
 
     /**
-     * Creates a new instance of the {@link HttpDataAdapterBase} class.
+     * Creates a new instance of the {@link HttpDataAdapter} class.
      *
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
-    public HttpDataAdapterBase() throws CannotInitializeDataAdapterException {
+    public HttpDataAdapter() throws CannotInitializeDataAdapterException {
         super();
         httpClient = httpClientFactory();
     }
 
     /**
-     * Creates a new instance of the {@link HttpDataAdapterBase} class for the specified base address.
+     * Creates a new instance of the {@link HttpDataAdapter} class for the specified base address.
      *
      * @param baseAddress the source's base address
      * @throws CannotInitializeDataAdapterException if the {@link DataAdapter} cannot be initialized.
      */
-    public HttpDataAdapterBase(URL baseAddress) throws CannotInitializeDataAdapterException {
+    public HttpDataAdapter(URL baseAddress) throws CannotInitializeDataAdapterException {
         super();
         this.baseAddress = baseAddress;
         httpClient = httpClientFactory();
@@ -130,7 +130,7 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
         try {
             this.httpClient.close();
         } catch (IOException e) {
-            logger.error("Error closing HttpDataAdapterBase", e);
+            logger.error("Error closing HttpDataAdapter", e);
         }
         super.close();
     }
@@ -281,5 +281,26 @@ public abstract class HttpDataAdapterBase<T, A extends Decoder<T>> extends Simpl
      */
     public void setBaseAddress(URL baseAddress) {
         this.baseAddress = baseAddress;
+    }
+
+    /**
+     * Pings the data source
+     *
+     * @return true if the data source responded to ping request, false otherwise.
+     */
+    public boolean ping() {
+        try {
+            return doHttpGet(craftRequestUri(""), new AbstractResponseHandler<Boolean>() {
+                @Override
+                public Boolean handleEntity(HttpEntity entity) throws IOException {
+                    String entityString = EntityUtils.toString(entity);
+                    logger.trace(entityString);
+                    return true;
+                }
+            });
+        } catch (Exception e) {
+            logger.debug(() -> "Ping failed", e);
+            return false;
+        }
     }
 }

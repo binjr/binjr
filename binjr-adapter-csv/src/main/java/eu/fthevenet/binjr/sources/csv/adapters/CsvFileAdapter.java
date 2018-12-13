@@ -16,6 +16,7 @@
 
 package eu.fthevenet.binjr.sources.csv.adapters;
 
+import eu.fthevenet.binjr.data.adapters.BaseDataAdapter;
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
 import eu.fthevenet.binjr.data.adapters.TimeSeriesBinding;
 import eu.fthevenet.binjr.data.codec.CsvDecoder;
@@ -53,14 +54,14 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * A {@link DataAdapter} implementation used to {@link eu.fthevenet.binjr.data.workspace.Worksheet} instances
  * with  data from a local CSV formatted file.
  */
-public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
+public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(CsvFileAdapter.class);
     private String dateTimePattern;
     private Path csvPath;
     private ZoneId zoneId;
     private Character delimiter;
     private String encoding;
-    private CsvDecoder<Double> decoder;
+    private CsvDecoder<Double> csvDecoder;
     private SortedMap<Long, DataSample<Double>> sortedDataStore;
     private List<String> headers;
 
@@ -101,6 +102,18 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
         this.encoding = encoding;
         this.dateTimePattern = dateTimePattern;
         this.delimiter = delimiter;
+        this.csvDecoder = new CsvDecoder<>(encoding, delimiter,
+                DoubleTimeSeriesProcessor::new,
+                s -> {
+                    try {
+                        Double val = Double.parseDouble(s);
+                        return val.isNaN() ? 0 : val;
+                    } catch (NumberFormatException e) {
+                        logger.debug(() -> "Cannot format value as a number", e);
+                        return 0.0;
+                    }
+                },
+                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(zoneId)));
     }
 
     @Override
@@ -116,7 +129,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
                         "-",
                         "/" + getSourceName(), this));
         try (InputStream in = Files.newInputStream(csvPath)) {
-            this.headers = getDecoder().getDataColumnHeaders(in);
+            this.headers = csvDecoder.getDataColumnHeaders(in);
             for (String header : headers) {
                 TimeSeriesBinding<Double> b = new TimeSeriesBinding<>(
                         header,
@@ -137,7 +150,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchDecodedData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
@@ -160,11 +173,6 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
-        throw new UnsupportedOperationException("Recovery of raw data is not supported for this data source.");
-    }
-
-    @Override
     public String getEncoding() {
         return encoding;
     }
@@ -174,25 +182,14 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
         return zoneId;
     }
 
-    @Override
-    public CsvDecoder<Double> getDecoder() {
-        if (decoder == null) {
-            // setup the CSV decoder
-            this.decoder = new CsvDecoder<>(getEncoding(), delimiter,
-                    DoubleTimeSeriesProcessor::new,
-                    s -> {
-                        try {
-                            Double val = Double.parseDouble(s);
-                            return val.isNaN() ? 0 : val;
-                        } catch (NumberFormatException e) {
-                            logger.debug(() -> "Cannot format value as a number", e);
-                            return 0.0;
-                        }
-                    },
-                    s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(getTimeZoneId())));
-        }
-        return decoder;
-    }
+
+//    public CsvDecoder<Double> getDecoder() {
+//        if (decoder == null) {
+//            // setup the CSV decoder
+//
+//        }
+//        return decoder;
+//    }
 
     @Override
     public String getSourceName() {
@@ -240,11 +237,6 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
     }
 
     @Override
-    public boolean ping() {
-        return Files.exists(csvPath);
-    }
-
-    @Override
     public void close() {
         if (sortedDataStore != null) {
             sortedDataStore.clear();
@@ -267,7 +259,7 @@ public class CsvFileAdapter extends DataAdapter<Double, CsvDecoder<Double>> {
         SortedMap<Long, DataSample<Double>> dataStore = new ConcurrentSkipListMap<>();
 
         try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::trace)) {
-            getDecoder().decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toEpochSecond(), sample));
+            csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toEpochSecond(), sample));
         }
         return dataStore;
     }

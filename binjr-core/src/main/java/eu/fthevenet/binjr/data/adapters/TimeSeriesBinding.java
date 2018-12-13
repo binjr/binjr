@@ -30,7 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 /**
- * Represents a binding between a time series and the {@link DataAdapter} used to produce it.
+ * Represents a binding between a time series and the {@link SerializedDataAdapter} used to produce it.
  *
  * @author Frederic Thevenet
  */
@@ -89,7 +89,7 @@ public class TimeSeriesBinding<T> {
     @XmlAttribute
     private final String treeHierarchy;
     @XmlTransient
-    private DataAdapter<T, ?> adapter;
+    private DataAdapter<T> adapter;
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class.
@@ -108,7 +108,7 @@ public class TimeSeriesBinding<T> {
     }
 
     /**
-     * Creates a clone of the provided binding, save for its {@link DataAdapter} instance which should be reassigned based its adapter ID
+     * Creates a clone of the provided binding, save for its {@link SerializedDataAdapter} instance which should be reassigned based its adapter ID
      *
      * @param binding the {@link TimeSeriesBinding} instance to clone.
      */
@@ -136,9 +136,9 @@ public class TimeSeriesBinding<T> {
      * @param graphType     the preferred type of graph representation
      * @param unitName      the unit for values
      * @param treeHierarchy the hierarchy in the tree representation
-     * @param adapter       the {@link DataAdapter} to the source
+     * @param adapter       the {@link SerializedDataAdapter} to the source
      */
-    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T, ?> adapter) {
+    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
         this(label,
                 path,
                 color,
@@ -151,7 +151,7 @@ public class TimeSeriesBinding<T> {
                 null);
     }
 
-    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T, ?> adapter, UUID adapterId) {
+    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
         this.legend = legend;
@@ -193,12 +193,12 @@ public class TimeSeriesBinding<T> {
     }
 
     /**
-     * Returns the {@link DataAdapter} of the binding
+     * Returns the {@link SerializedDataAdapter} of the binding
      *
-     * @return the {@link DataAdapter} of the binding
+     * @return the {@link SerializedDataAdapter} of the binding
      */
     @XmlTransient
-    public DataAdapter<T, ?> getAdapter() {
+    public DataAdapter<T> getAdapter() {
         return this.adapter;
     }
 
@@ -253,9 +253,9 @@ public class TimeSeriesBinding<T> {
     }
 
     /**
-     * Gets the {@link DataAdapter}'s id
+     * Gets the {@link SerializedDataAdapter}'s id
      *
-     * @return the {@link DataAdapter}'s id
+     * @return the {@link SerializedDataAdapter}'s id
      */
     public UUID getAdapterId() {
         return adapterId;

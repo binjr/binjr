@@ -17,6 +17,7 @@
 package eu.fthevenet.binjr.dialogs;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.SerializedDataAdapter;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
@@ -44,7 +45,7 @@ import java.util.Set;
 import java.util.prefs.Preferences;
 
 /**
- * A dialog box that returns a {@link DataAdapter} built according to user inputs.
+ * A dialog box that returns a {@link SerializedDataAdapter} built according to user inputs.
  *
  * @author Frederic Thevenet
  */
@@ -149,12 +150,12 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     }
 
     /**
-     * Returns an instance of {@link DataAdapter}
+     * Returns an instance of {@link SerializedDataAdapter}
      *
-     * @return an instance of {@link DataAdapter}
+     * @return an instance of {@link SerializedDataAdapter}
      * @throws DataAdapterException if the provided {@link ZoneId} is invalid
      */
-    protected abstract DataAdapter<?, ?> getDataAdapter() throws DataAdapterException;
+    protected abstract DataAdapter<?> getDataAdapter() throws DataAdapterException;
 
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();

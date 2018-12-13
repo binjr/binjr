@@ -21,7 +21,7 @@ import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 
 /**
- * An immutable representation of a {@link DataAdapter}'s metadata
+ * An immutable representation of a {@link SerializedDataAdapter}'s metadata
  *
  * @author Frederic Thevenet
  */

@@ -1,6 +1,6 @@
 /*
  *    Copyright 2017-2018 Frederic Thevenet
- *     
+ *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -14,18 +14,20 @@
  *    limitations under the License.
  */
 
-dependencies {
-    compileOnly project(':binjr-core')
-}
+package eu.fthevenet.binjr.sources.rrd4j.adapters;
 
-jar {
-    manifest {
-        attributes(
-                'Specification-Title': project.name,
-                'Specification-Version': project.version,
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Build-Number':  BINJR_BUILD_NUMBER
-        )
+import eu.fthevenet.binjr.data.adapters.BaseDataAdapterInfo;
+import eu.fthevenet.binjr.preferences.AppEnvironment;
+
+public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
+
+    public Rrd4jFileDataAdapterInfo() {
+        super("Rrd4j Files",
+                "Rrd4j Files Data Adapter",
+                AppEnvironment.COPYRIGHT_NOTICE,
+                AppEnvironment.LICENSE,
+                AppEnvironment.HTTP_WWW_BINJR_EU,
+                Rrd4jFileAdapter.class,
+                Rrd4jFileAdapterDialog.class);
     }
 }

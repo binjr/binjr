@@ -99,12 +99,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final double Y_AXIS_SEPARATION = 10;
     private final MainViewController parentController;
     private volatile boolean preventReload = false;
-    AtomicBoolean closed = new AtomicBoolean(false);
+    private AtomicBoolean closed = new AtomicBoolean(false);
 
     @FXML
     public AnchorPane root;
     @FXML
-    public AnchorPane chartParent;
+    private AnchorPane chartParent;
+
     protected List<ChartViewPort<Double>> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
@@ -140,7 +141,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private ChartViewportsState currentState;
     private String name;
     private final BindingManager bindingManager = new BindingManager();
-    public static final double TOOL_BUTTON_SIZE = 20;
+    private static final double TOOL_BUTTON_SIZE = 20;
 
     public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Collection<DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
@@ -149,7 +150,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (Chart<Double> chart : worksheet.getCharts()) {
             for (TimeSeriesInfo<Double> s : chart.getSeries()) {
                 UUID id = s.getBinding().getAdapterId();
-                DataAdapter<?, ?> da = sourcesAdapters
+                DataAdapter<?> da = sourcesAdapters
                         .stream()
                         .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                         .findAny()

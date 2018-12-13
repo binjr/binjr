@@ -29,14 +29,14 @@ import java.time.Instant;
 import java.util.Map;
 
 /**
- * An abstract implementation of {@link DataAdapter} that manages a cache in between the adapter and the data source.
+ * An abstract implementation of {@link SerializedDataAdapter} that manages a cache in between the adapter and the data source.
  * <p>This is an on-heap memory cache  with a finite capacity and an LRU eviction policy</p>
  * <p>Furthermore, values uses {@link java.lang.ref.SoftReference} to give the GC a chance to collect the cached elements
  * if the memory pressure becomes too high.</p>
  *
  * @author Frederic Thevenet
  */
-public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends DataAdapter<T, A> {
+public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends SerializedDataAdapter<T, A> {
     public static final int DEFAULT_CACHE_SIZE = 128;
     private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<byte[]>> cache;

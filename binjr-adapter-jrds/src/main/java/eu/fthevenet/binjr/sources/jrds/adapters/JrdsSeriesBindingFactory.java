@@ -49,7 +49,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, String label, String path, DataAdapter<Double, CsvDecoder<Double>> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, String label, String path, DataAdapter<Double> adapter) {
         return new TimeSeriesBinding<>(
                 label,
                 path,
@@ -71,7 +71,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter<Double, CsvDecoder<Double>> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
         final String label;
         final UnitPrefixes prefix;
         final ChartType graphType;
@@ -96,7 +96,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter<Double, CsvDecoder<Double>> adapter) {
+    public TimeSeriesBinding<Double> of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
         final String label;
         final Color color;
         final String legend;

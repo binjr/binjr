@@ -16,13 +16,15 @@
 
 package eu.fthevenet.binjr.data.workspace;
 
+import eu.fthevenet.binjr.data.adapters.DataAdapter;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 /**
- * Represents a single parameter used to confidure a {@link eu.fthevenet.binjr.data.adapters.DataAdapter} instance.
+ * Represents a single parameter used to confidure a {@link DataAdapter} instance.
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "parameter")

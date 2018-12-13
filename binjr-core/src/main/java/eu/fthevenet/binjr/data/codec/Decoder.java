@@ -16,6 +16,7 @@
 
 package eu.fthevenet.binjr.data.codec;
 
+import eu.fthevenet.binjr.data.adapters.SerializedDataAdapter;
 import eu.fthevenet.binjr.data.exceptions.DecodingDataFromAdapterException;
 import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
 import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
@@ -26,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Provides the means to decode data retreived from a data source via a {@link eu.fthevenet.binjr.data.adapters.DataAdapter}
+ * Provides the means to decode data retreived from a data source via a {@link SerializedDataAdapter}
  *
  * @author Frederic Thevenet
  */
