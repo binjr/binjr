@@ -480,7 +480,7 @@
 .tab-pane .tab-header-area .headers-region .tab:selected{
     -fx-border-color:-binjr-control-border-color;
     -fx-background-color: -binjr-window-background-color;
-    -fx-border-width:0 1 0 1;
+    -fx-border-width:0;/* 1 0 1;*/
 }
 
 

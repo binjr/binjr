@@ -411,10 +411,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return this.timeRangePicker.selectedRangeProperty();
     }
 
-//    ReadOnlyProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
-//        return this.timeRangePicker.timeRangeProperty();
-//    }
-
     private void initNavigationPane() {
         backButton.setOnAction(this::handleHistoryBack);
         forwardButton.setOnAction(this::handleHistoryForward);
@@ -433,15 +429,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
         });
-//        timeRangePicker.selectedRangeProperty().addListener((observable, oldValue, newValue) -> {
-//            currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
-//        });
-//        currentState.startXProperty().addListener((observable, oldValue, newValue) -> {
-//            timeRangePicker.updateRangeBeginning(newValue);
-//        });
-//        currentState.endXProperty().addListener((observable, oldValue, newValue) -> {
-//            timeRangePicker.updateRangeEnd(newValue);
-//        });
 
         currentState.timeRangeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -1123,5 +1110,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentViewport.getDataStore().setShowProperties(value);
         }
     }
+
+    BindingManager getBindingManager() {
+        return bindingManager;
+    }
+
     //endregion
 }

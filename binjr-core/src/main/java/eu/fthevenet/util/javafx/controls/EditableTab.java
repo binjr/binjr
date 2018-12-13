@@ -16,7 +16,9 @@
 
 package eu.fthevenet.util.javafx.controls;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
@@ -29,10 +31,11 @@ import javafx.scene.control.TextField;
 public class EditableTab extends Tab {
     private final Label label;
 
+    private BooleanProperty editable =new SimpleBooleanProperty(false);
     public String getName() {
         return label.textProperty().getValue();
     }
-
+    final TextField textField = new TextField();
     public Property<String> nameProperty() {
         return label.textProperty();
     }
@@ -52,29 +55,42 @@ public class EditableTab extends Tab {
         label.textProperty();
         setGraphic(label);
 
-        final TextField textField = new TextField();
-        label.setOnMouseClicked(event -> {
-            if (event.getClickCount() == 2) {
+        editable.addListener((observable, oldValue, newValue) -> {
+            if (newValue){
                 textField.setText(label.getText());
                 setGraphic(textField);
                 textField.selectAll();
                 textField.requestFocus();
-            }
-        });
-
-        textField.setOnAction(event -> {
-            if (!textField.getText().isEmpty()) {
-                label.setText(textField.getText());
-            }
-            setGraphic(label);
-        });
-
-        textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
+            }else{
                 if (!textField.getText().isEmpty()) {
                     label.setText(textField.getText());
                 }
                 setGraphic(label);
+            }
+        });
+
+
+        label.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                editable.setValue(true);
+//                textField.setText(label.getText());
+//                setGraphic(textField);
+//                textField.selectAll();
+//                textField.requestFocus();
+            }
+        });
+
+        textField.setOnAction(event -> {
+          editable.setValue(false);
+        });
+
+        textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
+            if (!newValue) {
+                editable.setValue(false);
+//                if (!textField.getText().isEmpty()) {
+//                    label.setText(textField.getText());
+//                }
+//                setGraphic(label);
             }
         });
     }
@@ -87,5 +103,20 @@ public class EditableTab extends Tab {
      */
     public void rename(String text) {
         label.setText(text);
+    }
+
+    public boolean isEditable() {
+        return editable.get();
+    }
+
+    public BooleanProperty editableProperty() {
+        return editable;
+    }
+
+    public void setEditable(boolean editable) {
+        if (editable) {
+            this.textField.requestFocus();
+        }
+        this.editable.set(editable);
     }
 }

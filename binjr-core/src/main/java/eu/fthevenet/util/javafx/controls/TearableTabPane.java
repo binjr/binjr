@@ -216,6 +216,18 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 });
     }
 
+
+    public void detachTab(Tab t) {
+        Objects.requireNonNull(t, "Tab to detach cannot be null");
+        logger.trace(() -> "Detaching tab " + t.getId() + " " + t.getText());
+        manager.setMovingTab(true);
+        try {
+            tearOffTab(t);
+        } finally {
+            manager.setMovingTab(false);
+        }
+    }
+
     /**
      * Returns the factory for creating new tabs
      *
