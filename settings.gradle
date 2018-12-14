@@ -14,12 +14,13 @@
  *    limitations under the License.
  */
 
-//enableFeaturePreview('STABLE_PUBLISHING')
-
 rootProject.name = 'binjr'
-include 'binjr-core'
 include 'binjr-adapter-csv'
 include 'binjr-adapter-jrds'
-include 'binjr-app'
 include 'binjr-adapter-rrd4j'
+include 'binjr-app'
+include 'binjr-core'
+
+
+
 
