@@ -16,11 +16,11 @@
 
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.preferences.AppEnvironment;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.control.Dialog;
 
 import java.util.Objects;
 
@@ -38,13 +38,12 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final String jarLocation;
     private final String siteUrl;
     private final Class<? extends DataAdapter> adapterClass;
-    private final Class<? extends DataAdapterDialog> adapterDialog;
+    private final Class<? extends Dialog<DataAdapter>> adapterDialog;
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
 
-    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
+    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends Dialog<DataAdapter>> dialogClass) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass);
     }
-
 
     /**
      * Initializes a new instance of the DataAdapterInfo class.
@@ -58,7 +57,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @param adapterClass the class that implements the data adapter.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    protected BaseDataAdapterInfo(String name, String description, Version version, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends DataAdapterDialog> dialogClass) {
+    protected BaseDataAdapterInfo(String name, String description, Version version, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends Dialog<DataAdapter>> dialogClass) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(description);
         Objects.requireNonNull(copyright);
@@ -131,7 +130,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
     @Override
-    public Class<? extends DataAdapterDialog> getAdapterDialog() {
+    public Class<? extends Dialog<DataAdapter>> getAdapterDialog() {
         return adapterDialog;
     }
 

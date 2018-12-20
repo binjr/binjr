@@ -17,24 +17,40 @@
 package eu.fthevenet.binjr.sources.rrd4j.adapters;
 
 import eu.fthevenet.binjr.data.adapters.DataAdapter;
+import eu.fthevenet.binjr.data.adapters.SerializedDataAdapter;
 import eu.fthevenet.binjr.data.exceptions.CannotInitializeDataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
-import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.dialogs.Dialogs;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
+import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
 
-public class Rrd4jFileAdapterDialog extends DataAdapterDialog {
-    List<File> rrdFiles = new ArrayList<>();
+/**
+ * A dialog box that returns a {@link SerializedDataAdapter} built according to user inputs.
+ *
+ * @author Frederic Thevenet
+ */
+public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
+    private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapterDialog.class);
+    private static final String BINJR_SOURCES = "binjr/sources";
+    private DataAdapter result = null;
+    private final TextField pathsField;
 
     /**
      * Initializes a new instance of the {@link Rrd4jFileAdapterDialog} class.
@@ -42,35 +58,87 @@ public class Rrd4jFileAdapterDialog extends DataAdapterDialog {
      * @param owner the owner window for the dialog
      */
     public Rrd4jFileAdapterDialog(Node owner) {
-        super(owner, Mode.PATH);
-        this.parent.setHeaderText("Add Rrd4j files");
+        if (owner != null) {
+            this.initOwner(Dialogs.getStage(owner));
+        }
+        this.setTitle("Source");
+        Button browseButton = new Button("Browse");
+        pathsField = new TextField();
+        HBox pathHBox = new HBox();
+        pathHBox.setSpacing(10);
+        pathHBox.setAlignment(Pos.CENTER);
+        pathHBox.getChildren().addAll(pathsField, browseButton);
+        browseButton.setPrefWidth(-1);
+        pathsField.setPrefWidth(400);
+        DialogPane dialogPane = new DialogPane();
+        dialogPane.setHeaderText("Add Rrd4j files");
+        dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialogPane.setGraphic(new Region());
+        dialogPane.getGraphic().getStyleClass().addAll("source-icon", "dialog-icon");
+        dialogPane.setContent(pathHBox);
+        this.setDialogPane(dialogPane);
+
+        browseButton.setOnAction(event -> {
+            File selectedFile = displayFileChooser((Node) event.getSource());
+            if (selectedFile != null) {
+                pathsField.setText(selectedFile.getPath());
+            }
+        });
+
+        Button okButton = (Button) dialogPane.lookupButton(ButtonType.OK);
+        Platform.runLater(pathsField::requestFocus);
+
+        okButton.addEventFilter(ActionEvent.ACTION, ae -> {
+            try {
+                result = getDataAdapter();
+            } catch (CannotInitializeDataAdapterException e) {
+                Dialogs.notifyError("Error initializing adapter to source", e, Pos.CENTER, pathsField);
+                ae.consume();
+            } catch (DataAdapterException e) {
+                Dialogs.notifyError("Error with the adapter to source", e, Pos.CENTER, pathsField);
+                ae.consume();
+            } catch (Throwable e) {
+                Dialogs.notifyError("Unexpected error while retrieving data adapter", e, Pos.CENTER, pathsField);
+                ae.consume();
+            }
+        });
+        this.setResultConverter(dialogButton -> {
+                    ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
+                    if (data == ButtonBar.ButtonData.OK_DONE) {
+                        return result;
+                    }
+                    return null;
+                }
+        );
     }
 
-    @Override
-    protected File displayFileChooser(Node owner) {
+
+    private File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Rrd4j Files");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD file", "*.rrd"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
         fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
-        rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
+        List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
         if (rrdFiles != null) {
-            uriField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));
+            pathsField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));
         }
         return null;
     }
 
-    @Override
-    protected DataAdapter<?> getDataAdapter() throws DataAdapterException {
-        List<Path> rrdFile = Arrays.stream(uriField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());
-//        if (!Files.exists(rrdFile)) {
-//            throw new CannotInitializeDataAdapterException("Cannot find " + uriField.getText());
-//        }
-        rrdFile.stream().findFirst().ifPresent(path -> {
+    /**
+     * Returns an instance of {@link SerializedDataAdapter}
+     *
+     * @return an instance of {@link SerializedDataAdapter}
+     * @throws DataAdapterException if the provided {@link ZoneId} is invalid
+     */
+    private DataAdapter<?> getDataAdapter() throws DataAdapterException {
+        List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());
+        rrdFiles.stream().findFirst().ifPresent(path -> {
             GlobalPreferences.getInstance().setMostRecentSaveFolder(path.getParent());
         });
-
-        return new Rrd4jFileAdapter(rrdFile, ZoneId.of(this.timezoneField.getText()));
+        return new Rrd4jFileAdapter(rrdFiles);
 
     }
+
 }

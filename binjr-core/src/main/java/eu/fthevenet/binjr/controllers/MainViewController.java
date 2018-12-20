@@ -767,7 +767,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void showAdapterDialog(DataAdapterDialog dlg) {
+    private void showAdapterDialog(Dialog<DataAdapter> dlg) {
         dlg.showAndWait().ifPresent(da -> {
             Source newSource = Source.of(da);
             TitledPane newSourcePane = newSourcePane(newSource);

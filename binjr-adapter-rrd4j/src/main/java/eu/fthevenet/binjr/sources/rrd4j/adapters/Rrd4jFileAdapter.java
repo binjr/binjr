@@ -46,17 +46,17 @@ import java.util.stream.Collectors;
 
 public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
-    private Collection<Path> rrdPaths;
+    private List<Path> rrdPaths;
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
-    private ZoneId zoneId;
+
 
     public Rrd4jFileAdapter() {
-        this(new ArrayList<Path>(), ZoneId.systemDefault());
+        this(new ArrayList<Path>());
     }
 
-    public Rrd4jFileAdapter(Collection<Path> rrdPath, ZoneId zoneId) {
+    public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
-        this.zoneId = zoneId;
+
 
     }
 
@@ -134,7 +134,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
             FetchData data = request.fetchData();
             Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
             for (int i = 0; i < data.getRowCount(); i++) {
-                ZonedDateTime timeStamp = Instant.ofEpochSecond(data.getTimestamps()[i]).atZone(zoneId);
+                ZonedDateTime timeStamp = Instant.ofEpochSecond(data.getTimestamps()[i]).atZone(getTimeZoneId());
                 for (TimeSeriesInfo<Double> info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
                     XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val.isNaN() ? 0 : val);
@@ -161,7 +161,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return "[RRD4J] " + rrdPaths.stream().map(p -> p.getFileName().toString()).collect(Collectors.joining(" "));
+        return "[RRD4J] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more rrd files" : "");
     }
 
     @Override

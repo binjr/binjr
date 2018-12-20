@@ -22,6 +22,7 @@ import eu.fthevenet.binjr.data.exceptions.NoAdapterFoundException;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.binjr.preferences.GlobalPreferences;
 import javafx.scene.Node;
+import javafx.scene.control.Dialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -109,7 +110,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no adapter matching the provided key could be found
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public DataAdapterDialog getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public Dialog<DataAdapter> getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
             return retrieveAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
 

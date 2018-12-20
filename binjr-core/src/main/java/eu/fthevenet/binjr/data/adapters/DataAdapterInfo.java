@@ -19,6 +19,7 @@ package eu.fthevenet.binjr.data.adapters;
 import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
+import javafx.scene.control.Dialog;
 
 /**
  * An immutable representation of a {@link SerializedDataAdapter}'s metadata
@@ -95,7 +96,7 @@ public interface DataAdapterInfo {
      *
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    public Class<? extends DataAdapterDialog> getAdapterDialog();
+    public Class<? extends Dialog<DataAdapter>> getAdapterDialog();
 
     /**
      * The enabled property.
