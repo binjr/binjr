@@ -22,8 +22,8 @@ import eu.fthevenet.binjr.preferences.AppEnvironment;
 public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     public Rrd4jFileDataAdapterInfo() {
-        super("Rrd4j Files",
-                "Rrd4j Files Data Adapter",
+        super("RRD Files",
+                "Round Robin Database Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,

@@ -30,12 +30,10 @@ import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.rrd4j.ConsolFun;
-import org.rrd4j.core.ArcDef;
-import org.rrd4j.core.FetchData;
-import org.rrd4j.core.FetchRequest;
-import org.rrd4j.core.RrdDb;
+import org.rrd4j.core.*;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -48,7 +46,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
     private List<Path> rrdPaths;
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
-
+    private List<Path> tempPathToCollect = new ArrayList<>();
 
     public Rrd4jFileAdapter() {
         this(new ArrayList<Path>());
@@ -56,8 +54,6 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
 
     public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
-
-
     }
 
     @Override
@@ -75,7 +71,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
         for (Path rrdPath : rrdPaths) {
             try {
                 String rrdFileName = rrdPath.getFileName().toString();
-                TimeSeriesBinding<Double> b = new TimeSeriesBinding<>(
+                var rrdNode = new TreeItem<>(new TimeSeriesBinding<>(
                         rrdFileName,
                         rrdFileName,
                         null,
@@ -83,10 +79,9 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                         UnitPrefixes.METRIC,
                         ChartType.STACKED,
                         "-",
-                        "/" + getSourceName() + "/" + rrdFileName,
-                        this);
-                var child = new TreeItem<>(b);
-                var rrd = new RrdDb(rrdPath.toUri());
+                        tree.getValue().getTreeHierarchy() + "/" + rrdFileName,
+                        this));
+                RrdDb rrd = openRrdDb(rrdPath);
                 rrdDbMap.put(rrdPath, rrd);
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs()).map(ArcDef::getConsolFun).collect(Collectors.toSet())) {
                     var consolFunNode = new TreeItem<>(new TimeSeriesBinding<>(
@@ -97,9 +92,9 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                             UnitPrefixes.METRIC,
                             ChartType.STACKED,
                             "-",
-                            "/" + getSourceName() + "/" + rrdFileName + "/" + consolFun.toString(),
+                            rrdNode.getValue().getTreeHierarchy() + "/" + consolFun.toString(),
                             this));
-                    child.getChildren().add(consolFunNode);
+                    rrdNode.getChildren().add(consolFunNode);
                     for (String ds : rrd.getDsNames()) {
                         consolFunNode.getChildren().add(new TreeItem<>(new TimeSeriesBinding<>(
                                 ds,
@@ -109,11 +104,11 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                                 UnitPrefixes.METRIC,
                                 ChartType.STACKED,
                                 "-",
-                                "/" + getSourceName() + "/" + rrdFileName + "/" + ds,
+                                consolFunNode.getValue().getTreeHierarchy()  + "/" + ds,
                                 this)));
                     }
                 }
-                tree.getChildren().add(child);
+                tree.getChildren().add(rrdNode);
             } catch (IOException e) {
                 throw new DataAdapterException("Failed to open rrd db", e);
             }
@@ -122,7 +117,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache)
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant
+            end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache)
             throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
@@ -161,7 +157,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return "[RRD4J] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more rrd files" : "");
+        return "[RRD] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more RRD files" : "");
     }
 
     @Override
@@ -184,14 +180,52 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public void close() {
+        closeRrdDb();
+        cleanTempFiles();
+        super.close();
+    }
+
+    private RrdDb openRrdDb(Path rrdPath) throws IOException {
+        if ("text/xml".equalsIgnoreCase(Files.probeContentType(rrdPath))) {
+            logger.debug(() -> "Attempting to import as an rrd XML dump");
+            Path temp = Files.createTempFile("binjr_", "_imported.rrd");
+            tempPathToCollect.add(temp);
+            return new RrdDb(temp.toUri(), RrdDb.PREFIX_XML + rrdPath.toString());
+        }
+        try {
+            return new RrdDb(rrdPath.toUri());
+        } catch (InvalidRrdException e) {
+            // Possibly a rrd db created with RrdTool.
+            // Try to convert and import.
+            logger.debug(() -> "Failed to open " + rrdPath + " as an Rrd4j db: attempting to import as an rrdTool db");
+            Path temp = Files.createTempFile("binjr_", "_imported.rrd");
+            tempPathToCollect.add(temp);
+            return new RrdDb(temp.toUri(), RrdDb.PREFIX_RRDTool + rrdPath.toString());
+        }
+    }
+
+    private void closeRrdDb() {
         rrdDbMap.forEach((s, rrdDb) -> {
-            logger.debug(() -> "Closing rrd db " + s);
+            logger.debug(() -> "Closing RRD db " + s);
             try {
                 rrdDb.close();
             } catch (IOException e) {
-                logger.error("Error attempting to close rrd db " + s, e);
+                logger.error("Error attempting to close RRD db " + s, e);
             }
         });
-        super.close();
+        rrdDbMap.clear();
+    }
+
+    private void cleanTempFiles() {
+        //Cleaning up temp files used to import rrdtool files
+        tempPathToCollect.forEach(p -> {
+            logger.debug(() -> "Deleting temp file " + p);
+            try {
+                Files.delete(p);
+            } catch (IOException e) {
+                logger.error("Failed to delete temp file", e);
+            }
+        });
+        tempPathToCollect.clear();
     }
 }

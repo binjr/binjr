@@ -14,3 +14,4 @@ out/
 /binjr-adapter-csv/build/
 /binjr-adapter-jrds/build/
 /binjr-app/build/
+/binjr-adapter-rrd4j/build/

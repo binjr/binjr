@@ -16,7 +16,7 @@
 
 dependencies {
     compileOnly project(':binjr-core')
-    compile 'org.rrd4j:rrd4j:3.3.1'
+    compile 'org.rrd4j:rrd4j:3.4'
 }
 
 jar {

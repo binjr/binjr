@@ -71,7 +71,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
         browseButton.setPrefWidth(-1);
         pathsField.setPrefWidth(400);
         DialogPane dialogPane = new DialogPane();
-        dialogPane.setHeaderText("Add Rrd4j files");
+        dialogPane.setHeaderText("Add RRD files");
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         dialogPane.setGraphic(new Region());
         dialogPane.getGraphic().getStyleClass().addAll("source-icon", "dialog-icon");
@@ -116,7 +116,8 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
     private File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Rrd4j Files");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD file", "*.rrd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD files", "*.rrd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dump", "*.xml"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
         fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
