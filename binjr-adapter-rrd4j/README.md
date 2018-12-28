@@ -1,4 +1,4 @@
-#binjr-adapter-rrd4j
+# binjr-adapter-rrd4j
 
 This modules implements a DataAdapter capable of consuming data from Round Robin Database files. 
 
