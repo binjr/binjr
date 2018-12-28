@@ -1,4 +1,4 @@
-#binjr-adapter-jrds
+# binjr-adapter-jrds
 
 This modules implements a DataAdapter capable of consuming data from a [JRDS](http://jrds.fr/) instance.
 

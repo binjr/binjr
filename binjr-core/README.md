@@ -1,4 +1,4 @@
-#binjr-core
+# binjr-core
 
 This is the main module for the application. It is responsible for :
  * The presentation layer and interaction with the end-user.
