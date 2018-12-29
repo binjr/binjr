@@ -1,26 +1,5 @@
-/*
- *    Copyright 2017-2018 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-package eu.fthevenet.util.version;
-
-import java.util.NoSuchElementException;
-import java.util.StringTokenizer;
-
 /**
- * * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
+ * Copyright (c) OSGi Alliance (2004, 2007). All Rights Reserved.
  * <br>
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +13,12 @@ import java.util.StringTokenizer;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package eu.fthevenet.util.version;
+
+import java.util.NoSuchElementException;
+import java.util.StringTokenizer;
+
 public class Version implements Comparable {
     public static final String SNAPSHOT = "-SNAPSHOT";
     private final int major;
@@ -77,7 +62,7 @@ public class Version implements Comparable {
      * @param qualifier Qualifier component of the version identifier. If
      *                  <code>null</code> is specified, then the qualifier will be set
      *                  to the empty string.
-     * @param snapshot true if the version is a snapshot.
+     * @param snapshot  true if the version is a snapshot.
      * @throws IllegalArgumentException If the numerical components are negative
      *                                  or the qualifier string is invalid.
      */
@@ -126,8 +111,7 @@ public class Version implements Comparable {
         if (version.endsWith(SNAPSHOT)) {
             this.isSnapshot = true;
             version = version.substring(0, version.length() - 9);
-        }
-        else {
+        } else {
             isSnapshot = false;
         }
 
@@ -264,8 +248,7 @@ public class Version implements Comparable {
         String base = major + SEPARATOR + minor + SEPARATOR + micro;
         if (qualifier.length() == 0) { //$NON-NLS-1$
             return isSnapshot ? base + SNAPSHOT : base;
-        }
-        else {
+        } else {
             return isSnapshot ? base + SEPARATOR + qualifier + SNAPSHOT : base + SEPARATOR + qualifier;
         }
     }

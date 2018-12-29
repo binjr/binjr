@@ -24,18 +24,6 @@ import java.lang.management.ManagementFactory;
 import java.util.function.Supplier;
 
 public interface DiagnosticCommand {
-    String threadPrint(String... args);
-
-    String help(String... args);
-
-    String vmSystemProperties(String... args);
-
-    String gcClassHistogram(String... args);
-
-    String vmFlags(String... args);
-
-    String vmCommandLine(String... args);
-
     DiagnosticCommand local = ((Supplier<DiagnosticCommand>) () -> {
         try {
             MBeanServer server = ManagementFactory.getPlatformMBeanServer();
@@ -86,7 +74,6 @@ public interface DiagnosticCommand {
         }
     }
 
-
     static String getHelp() throws DiagnosticException {
         try {
             return local.help();
@@ -94,4 +81,16 @@ public interface DiagnosticCommand {
             throw new DiagnosticException("Failed to invoke diagnostic command help", t);
         }
     }
+
+    String threadPrint(String... args);
+
+    String help(String... args);
+
+    String vmSystemProperties(String... args);
+
+    String gcClassHistogram(String... args);
+
+    String vmFlags(String... args);
+
+    String vmCommandLine(String... args);
 }

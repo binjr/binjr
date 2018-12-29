@@ -51,13 +51,11 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
                     if (callback instanceof NameCallback) {
                         NameCallback nc = (NameCallback) callback;
                         nc.setName(credentials.getLogin());
-                    }
-                    else if (callback instanceof PasswordCallback) {
+                    } else if (callback instanceof PasswordCallback) {
                         PasswordCallback pc = (PasswordCallback) callback;
                         pc.setPassword(credentials.getPwd());
                         credentials.clearPassword();
-                    }
-                    else {
+                    } else {
                         throw new UnsupportedCallbackException(callback, "Unknown Callback");
                     }
                 }
@@ -85,8 +83,7 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
             if (res.isPresent()) {
                 CredentialsEntry newCreds = new CredentialsEntry(dlg.getResult().getKey(), dlg.getResult().getValue().toCharArray());
                 future.put(newCreds);
-            }
-            else {
+            } else {
                 future.put(CredentialsEntry.CANCELLED);
             }
         });
@@ -109,8 +106,7 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
         public F get(long timeout, TimeUnit unit) throws InterruptedException, TimeoutException {
             if (latch.await(timeout, unit)) {
                 return value;
-            }
-            else {
+            } else {
                 throw new TimeoutException();
             }
         }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -89,8 +89,7 @@ public class ZonedDateTimePicker extends DatePicker {
             if (newValue != null) {
                 if (dateTimeValue.get() == null) {
                     dateTimeValue.set(ZonedDateTime.of(newValue, LocalTime.now(), getZoneId()));
-                }
-                else {
+                } else {
                     LocalTime time = dateTimeValue.get().toLocalTime();
                     dateTimeValue.set(ZonedDateTime.of(newValue, time, getZoneId()));
                 }

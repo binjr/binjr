@@ -22,14 +22,18 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.*?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
+<AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0"
+            xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="eu.fthevenet.binjr.controllers.PreferenceDialogController">
     <children>
-        <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0" prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
+        <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
+                prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
             <graphic>
                 <Region styleClass="cross-icon"/>
             </graphic>
         </Button>
-        <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
             <panes>
                 <TitledPane animated="false" text="Appearance &amp; Behavior">
                     <content>
@@ -37,7 +41,9 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
                                     <children>
-                                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0"
+                                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
                                                 <Label text="Theme"/>
                                                 <ChoiceBox fx:id="uiThemeChoiceBox"/>
@@ -71,7 +77,9 @@
 
                                 <AnchorPane>
                                     <children>
-                                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
+                                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                                              AnchorPane.topAnchor="0.0">
                                             <children>
                                                 <Label text="Show outline on area charts" wrapText="true"/>
                                                 <VBox fillWidth="false">
@@ -88,7 +96,8 @@
                                                     <children>
                                                         <HBox alignment="CENTER_LEFT">
                                                             <children>
-                                                                <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                                                                <Slider fx:id="graphOpacitySlider" blockIncrement="0.1"
+                                                                        max="1.0" min="0"/>
                                                                 <Label fx:id="opacityText" text="100%"/>
                                                             </children>
                                                         </HBox>
@@ -97,15 +106,18 @@
                                                 <Label text="Enable sample reduction" wrapText="true"/>
                                                 <VBox fillWidth="false">
                                                     <children>
-                                                        <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0" selected="true">
+                                                        <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0"
+                                                                      selected="true">
                                                             <font>
                                                                 <Font size="10.0"/>
                                                             </font>
                                                         </ToggleSwitch>
                                                     </children>
                                                 </VBox>
-                                                <Label fx:id="maxSampleLabel" text="Maximum number of samples" wrapText="true"/>
-                                                <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="-1.0" text="1000"/>
+                                                <Label fx:id="maxSampleLabel" text="Maximum number of samples"
+                                                       wrapText="true"/>
+                                                <TextField fx:id="downSamplingThreshold" prefHeight="25.0"
+                                                           prefWidth="-1.0" text="1000"/>
                                             </children>
                                         </VBox>
                                     </children>
@@ -123,12 +135,16 @@
                             <content>
                                 <AnchorPane>
                                     <children>
-                                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308"
+                                              spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
                                                 <Label text="Available Data Adapters"/>
-                                                <TableView fx:id="availableAdapterTable" editable="true" maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                                                <TableView fx:id="availableAdapterTable" editable="true"
+                                                           maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
                                                     <columns>
-                                                        <TableColumn fx:id="enabledColumn" prefWidth="24.0" resizable="false" sortable="false">
+                                                        <TableColumn fx:id="enabledColumn" prefWidth="24.0"
+                                                                     resizable="false" sortable="false">
                                                             <cellValueFactory>
                                                                 <PropertyValueFactory property="enabled"/>
                                                             </cellValueFactory>
@@ -172,11 +188,18 @@
                                                     </columns>
                                                 </TableView>
                                                 <Label text="Load from external location"/>
-                                                <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT" contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0" prefHeight="18.0" prefWidth="0.0"/>
-                                                <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
+                                                <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT"
+                                                              contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0"
+                                                              prefHeight="18.0" prefWidth="0.0"/>
+                                                <HBox maxHeight="1.7976931348623157E308"
+                                                      maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
                                                     <children>
-                                                        <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS"/>
-                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false" onAction="#handleBrowsePluginsFolder" prefWidth="25.0" text="..."/>
+                                                        <TextField fx:id="pluginLocTextfield"
+                                                                   maxWidth="1.7976931348623157E308"
+                                                                   HBox.hgrow="ALWAYS"/>
+                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false"
+                                                                onAction="#handleBrowsePluginsFolder" prefWidth="25.0"
+                                                                text="..."/>
                                                     </children>
                                                 </HBox>
                                             </children>
@@ -196,9 +219,12 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
                                     <children>
-                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
-                                                <Button fx:id="resetPrefs" mnemonicParsing="false" onAction="#handleResetSettings" styleClass="border-button" text="Restore to Default"/>
+                                                <Button fx:id="resetPrefs" mnemonicParsing="false"
+                                                        onAction="#handleResetSettings" styleClass="border-button"
+                                                        text="Restore to Default"/>
                                             </children>
                                         </VBox>
                                     </children>
@@ -216,7 +242,8 @@
                             <content>
                                 <AnchorPane minHeight="0.0" minWidth="0.0">
                                     <children>
-                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
                                                 <Label text="Check for updates on start-up" wrapText="true"/>
                                                 <VBox fillWidth="false">
@@ -225,7 +252,9 @@
                                                     </children>
                                                 </VBox>
                                                 <Label text="Check for updates now" wrapText="true"/>
-                                                <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleCheckForUpdate" styleClass="border-button" text="Check now"/>
+                                                <Button alignment="CENTER" mnemonicParsing="false"
+                                                        onAction="#handleCheckForUpdate" styleClass="border-button"
+                                                        text="Check now"/>
                                                 <TextFlow fx:id="updateFlow"/>
                                             </children>
                                         </VBox>
@@ -240,7 +269,8 @@
                 </TitledPane>
             </panes>
         </Accordion>
-        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0" styleClass="pane-title" text="Settings" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0">
+        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
+               styleClass="pane-title" text="Settings" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0">
             <font>
                 <Font size="14.0"/>
             </font>

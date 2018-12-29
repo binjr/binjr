@@ -138,7 +138,6 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
 
 
-
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
         visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility());
@@ -151,8 +150,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     void setPanelVisibility() {
         if (isVisible()) {
             show();
-        }
-        else {
+        } else {
             hide();
         }
     }

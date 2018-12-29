@@ -207,8 +207,7 @@ public class GlobalPreferences {
                     && mostRecentSaveFolder.getValue().toRealPath(LinkOption.NOFOLLOW_LINKS) != null
                     && mostRecentSaveFolder.getValue().toFile().isDirectory()) {
                 validatedPath = mostRecentSaveFolder.getValue();
-            }
-            else {
+            } else {
                 logger.error("MostRecentSaveFolder property does not point to a valid directory");
             }
         } catch (Exception e) {

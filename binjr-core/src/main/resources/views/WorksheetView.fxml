@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2018 Frederic Thevenet
+  ~    Copyright 2016-2018 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -23,13 +23,19 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border" AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border"
+            AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
             <AnchorPane>
                 <children>
-                    <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
+                    <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0"
+                          AnchorPane.rightAnchor="0.0">
+                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="back"
                                 textAlignment="CENTER">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
@@ -44,7 +50,10 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
+                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="forward"
                                 textAlignment="CENTER">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
@@ -59,7 +68,10 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="refresh"
                                 textAlignment="CENTER">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
@@ -77,7 +89,10 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0" maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false" styleClass="dialog-button" text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
+                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
+                                         maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
+                                         styleClass="dialog-button"
+                                         text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
                             <graphic>
                                 <HBox alignment="CENTER_LEFT" styleClass="icon-container">
                                     <Region styleClass="time-icon"/>
@@ -91,7 +106,9 @@
                                 </Tooltip>
                             </tooltip>
                         </TimeRangePicker>
-                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
+                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="camera-icon"/>
@@ -105,7 +122,9 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                      maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                      mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="vertical-crosshair-icon"/>
@@ -119,7 +138,10 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
+                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                      minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                      text="ToggleButton">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="horizontal-crosshair-icon"/>
@@ -133,7 +155,10 @@
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Add Chart">
+                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="Add Chart">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="addWorksheet-icon"/>
@@ -147,7 +172,10 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                    styleClass="dialog-button"
                                     text="Chart layout">>
                             <tooltip>
                                 <Tooltip text="Select chart layout">
@@ -169,7 +197,8 @@
                 </VBox.margin>
             </AnchorPane>
         </VBox>
-        <SplitPane dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0" VBox.vgrow="ALWAYS">
+        <SplitPane dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0"
+                   VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
@@ -177,13 +206,17 @@
                 <cursor>
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
-                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0" prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE" prefHeight="429.0"
+                            prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent"
+                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
                 </AnchorPane>
-                <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+                <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0"
+                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
             </AnchorPane>
             <AnchorPane styleClass="skinnable-pane-border">
-                <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <panes>
                     </panes>
                 </Accordion>

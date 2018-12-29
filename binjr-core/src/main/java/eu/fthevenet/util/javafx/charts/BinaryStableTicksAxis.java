@@ -69,8 +69,7 @@ public class BinaryStableTicksAxis extends StableTicksAxis {
                     divider = 0;
                 }
             }
-        }
-        else {
+        } else {
             //We have too many ticks or exactly max, so decrease until we're just under (or at) the limit.
             while (numTicks > maxTicks) {
                 ++divider;

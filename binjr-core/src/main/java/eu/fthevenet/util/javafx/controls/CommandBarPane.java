@@ -23,6 +23,7 @@ import javafx.scene.layout.AnchorPane;
 
 /**
  * An {@link AnchorPane} that can slide in or out from a side of its attached window.
+ *
  * @author Frederic Thevenet
  */
 public class CommandBarPane extends AnchorPane {

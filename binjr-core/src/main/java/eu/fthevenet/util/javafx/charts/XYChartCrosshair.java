@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -300,8 +300,7 @@ public class XYChartCrosshair<X, Y> {
             double height = horizontalMarker.getStartY() - selectionStart.getY();
             selection.setY(height < 0 ? horizontalMarker.getStartY() : selectionStart.getY());
             selection.setHeight(Math.abs(height));
-        }
-        else {
+        } else {
             selection.setY(verticalMarker.getStartY());
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
@@ -309,8 +308,7 @@ public class XYChartCrosshair<X, Y> {
             double width = verticalMarker.getStartX() - selectionStart.getX();
             selection.setX(width < 0 ? verticalMarker.getStartX() : selectionStart.getX());
             selection.setWidth(Math.abs(width));
-        }
-        else {
+        } else {
             selection.setX(horizontalMarker.getStartX());
             selection.setWidth(horizontalMarker.getEndX() - horizontalMarker.getStartX());
         }

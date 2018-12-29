@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -86,10 +86,10 @@ public class XYChartSelection<X, Y> {
     /**
      * Initializes a new instance of the {@link XYChartSelection} class
      *
-     * @param startX the lower bound on the X axis of the selection
-     * @param endX   the upper bound on the X axis of the selection
-     * @param startY the lower bound on the Y axis of the selection
-     * @param endY   the upper bound on the Y axis of the selection
+     * @param startX     the lower bound on the X axis of the selection
+     * @param endX       the upper bound on the X axis of the selection
+     * @param startY     the lower bound on the Y axis of the selection
+     * @param endY       the upper bound on the Y axis of the selection
      * @param autoRangeY set to true to adapt the range on the Y axis automatically
      */
     public XYChartSelection(X startX, X endX, Y startY, Y endY, boolean autoRangeY) {
@@ -142,8 +142,7 @@ public class XYChartSelection<X, Y> {
             if (o2 != null) {
                 return false;
             }
-        }
-        else if (!o1.equals(o2)) {
+        } else if (!o1.equals(o2)) {
             return false;
         }
         return true;

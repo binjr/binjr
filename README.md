@@ -7,8 +7,7 @@
 >___Please note that it does not run on previous version of Java.___
 >
 > If you require a version that runs on Java 8, you can use the latest releases versioned 1.x.x, 
-> the source code for it being available in branch [binjr-1_x](https://github.com/fthevenet/binjr/tree/binjr-1_x),
-> but be aware that this branch will be no longer be updated in the near future.
+> the source code for it being available in branch [binjr-1_x](https://github.com/fthevenet/binjr/tree/binjr-1_x).
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 

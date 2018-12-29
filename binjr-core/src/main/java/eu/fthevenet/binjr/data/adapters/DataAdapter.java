@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import java.util.UUID;
 
 /**
  * Provides the means to access a data source to retrieve time series data.
+ *
  * @param <T>
  */
 public interface DataAdapter<T> extends AutoCloseable {
@@ -93,6 +94,7 @@ public interface DataAdapter<T> extends AutoCloseable {
      * An api hook that is executed once, after parameters have been loaded and before any other call to the {@link DataAdapter} is made.
      * <p>Used to initialize resources and  start-up external components.</p>
      * <p>The default implementation does nothing.</p>
+     *
      * @throws DataAdapterException if an error occurs.
      */
     void onStart() throws DataAdapterException;

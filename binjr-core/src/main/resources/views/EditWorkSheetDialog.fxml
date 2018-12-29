@@ -19,11 +19,13 @@
 <?import eu.fthevenet.util.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<DialogPane fx:id="dialogPane" headerText="Create a new worksheet" prefHeight="337.0" prefWidth="352.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+<DialogPane fx:id="dialogPane" headerText="Create a new worksheet" prefHeight="337.0" prefWidth="352.0"
+            xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <GridPane prefHeight="244.0" prefWidth="341.0">
             <columnConstraints>
-                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="248.0" minWidth="10.0" prefWidth="92.0"/>
+                <ColumnConstraints halignment="LEFT" hgrow="SOMETIMES" maxWidth="248.0" minWidth="10.0"
+                                   prefWidth="92.0"/>
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="245.0" minWidth="-Infinity" prefWidth="230.0"/>
             </columnConstraints>
             <rowConstraints>
@@ -37,12 +39,16 @@
             </rowConstraints>
             <children>
                 <TextField fx:id="nameField" GridPane.columnIndex="1"/>
-                <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="305.0" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="305.0" GridPane.columnIndex="1"
+                           GridPane.rowIndex="1"/>
                 <TextField fx:id="unitNameField" GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                <ChoiceBox fx:id="unitPrefixesChoice" prefHeight="25.0" prefWidth="374.0" GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <ChoiceBox fx:id="unitPrefixesChoice" prefHeight="25.0" prefWidth="374.0" GridPane.columnIndex="1"
+                           GridPane.rowIndex="3"/>
                 <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="4"/>
-                <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1" GridPane.rowIndex="5"/>
-                <ZonedDateTimePicker fx:id="toDatePicker" prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1" GridPane.rowIndex="6"/>
+                <ZonedDateTimePicker fx:id="fromDatePicker" prefHeight="25.0" prefWidth="343.0" GridPane.columnIndex="1"
+                                     GridPane.rowIndex="5"/>
+                <ZonedDateTimePicker fx:id="toDatePicker" prefHeight="25.0" prefWidth="308.0" GridPane.columnIndex="1"
+                                     GridPane.rowIndex="6"/>
                 <Label text="Name"/>
                 <Label text="Timezone:" GridPane.rowIndex="4"/>
                 <Label text="Chart type:" GridPane.rowIndex="1"/>

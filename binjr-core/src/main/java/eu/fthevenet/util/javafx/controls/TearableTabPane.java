@@ -184,12 +184,10 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                             } finally {
                                 manager.setMovingTab(false);
                             }
-                        }
-                        else {
+                        } else {
                             logger.debug(() -> "Tabs on this pane cannot be reordered");
                         }
-                    }
-                    else {
+                    } else {
                         logger.debug(() -> "Failed to retrieve tab with id " + (id != null ? id : "null"));
                     }
                 }
@@ -385,8 +383,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         newTabButton.setAlignment(Pos.CENTER);
         if (onAddNewTab != null) {
             newTabButton.setOnAction(onAddNewTab);
-        }
-        else {
+        } else {
             newTabButton.setOnAction(event -> {
                 newTabFactory.apply(event).ifPresent(newTab -> {
                     getTabs().add(newTab);

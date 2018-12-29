@@ -16,7 +16,6 @@
 
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.dialogs.DataAdapterDialog;
 import eu.fthevenet.util.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.Dialog;

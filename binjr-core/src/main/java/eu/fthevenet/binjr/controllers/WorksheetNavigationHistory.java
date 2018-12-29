@@ -100,8 +100,7 @@ public class WorksheetNavigationHistory {
         AtomicInteger pos = new AtomicInteger(0);
         if (this.isEmpty()) {
             sb.append(" { empty }");
-        }
-        else {
+        } else {
             stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.entrySet().stream().map(e -> e.getKey().getName() + ": " + e.getValue().toString()).collect(Collectors.joining(" "))));
         }
         return sb.toString();

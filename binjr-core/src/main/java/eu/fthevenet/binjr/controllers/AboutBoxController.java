@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -45,7 +45,6 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 //import javafx.scene.web.WebView;
 
@@ -58,6 +57,7 @@ public class AboutBoxController implements Initializable {
     private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
     public TextFlow licenseView;
     public TextFlow acknowledgementView;
+    public Label copyrightText;
 
     @FXML
     private DialogPane aboutRoot;
@@ -101,6 +101,8 @@ public class AboutBoxController implements Initializable {
         fillTextFlow(licenseView, getClass().getResource("/text/about_license.txt"));
         fillTextFlow(acknowledgementView, getClass().getResource("/text/about_acknowledgements.txt"));
 
+        copyrightText.setText(AppEnvironment.COPYRIGHT_NOTICE);
+
         aboutRoot.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
                 Dialogs.getStage(aboutRoot).close();
@@ -112,8 +114,7 @@ public class AboutBoxController implements Initializable {
                 licenseView.setMaxSize(scene.getWidth(), scene.getHeight());
                 licenseView.maxWidthProperty().bind(scene.widthProperty());
                 licenseView.maxHeightProperty().bind(scene.heightProperty());
-            }
-            else {
+            } else {
                 licenseView.maxWidthProperty().unbind();
                 licenseView.maxHeightProperty().unbind();
             }
@@ -170,7 +171,7 @@ public class AboutBoxController implements Initializable {
                     s = s.replace("^b", "");
                     licText.setStyle("-fx-font-weight: bold");
                 }
-                licText.setText(s+"\n");
+                licText.setText(s + "\n");
                 licText.setFill(Color.valueOf("#204656"));
                 textFlow.getChildren().add(licText);
 

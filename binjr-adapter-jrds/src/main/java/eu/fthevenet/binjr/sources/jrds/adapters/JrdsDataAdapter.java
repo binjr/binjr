@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,7 +35,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.impl.client.AbstractResponseHandler;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -255,14 +254,12 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
             newBranch.getChildren().add(new TreeItem<>(null));
             // add a listener that will get the treeview filtered according to the selected filter/tag
             newBranch.expandedProperty().addListener(new FilteredViewListener(n, newBranch));
-        }
-        else {
+        } else {
             if (n.children != null) {
                 for (JsonJrdsItem.JsonTreeRef ref : n.children) {
                     attachNode(newBranch, ref._reference, nodes);
                 }
-            }
-            else {
+            } else {
                 // add a dummy node so that the branch can be expanded
                 newBranch.getChildren().add(new TreeItem<>(null));
                 // add a listener so that bindings for individual datastore are added lazily to avoid

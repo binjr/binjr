@@ -73,7 +73,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * Initializes a new instance of the {@link DataAdapterDialog} class.
      *
      * @param owner the owner window for the dialog
-     * @param mode the mode (Path or URL) to use for the dialog.
+     * @param mode  the mode (Path or URL) to use for the dialog.
      */
     public DataAdapterDialog(Node owner, Mode mode) {
         if (owner != null) {
@@ -101,8 +101,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
             this.browseButton.setPrefWidth(0);
             this.uriHBox.setSpacing(0);
             this.uriLabel.setText("Address:");
-        }
-        else {
+        } else {
             this.browseButton.setPrefWidth(-1);
             this.uriLabel.setText("Path:");
         }

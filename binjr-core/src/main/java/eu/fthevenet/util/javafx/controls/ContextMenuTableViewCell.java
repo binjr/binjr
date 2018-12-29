@@ -42,8 +42,7 @@ public class ContextMenuTableViewCell<S, T> extends TableCell<S, T> {
                 cell.itemProperty().addListener((observable, oldValue, newValue) -> {
                     cell.setText(newValue == null ? null : newValue.toString());
                 });
-            }
-            else {
+            } else {
                 cell = cellFactory.call(column);
             }
             cell.setContextMenu(contextMenu);

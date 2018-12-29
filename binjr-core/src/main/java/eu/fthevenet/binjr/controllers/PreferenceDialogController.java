@@ -134,8 +134,7 @@ public class PreferenceDialogController implements Initializable {
                         Pos.BOTTOM_RIGHT,
                         root);
                 Platform.runLater(() -> prefs.setPluginsLocation(oldValue));
-            }
-            else {
+            } else {
                 Dialogs.notifyInfo(
                         "Plugins Folder Location Changed",
                         "Changes to the plugins folder location will take effect the next time binjr is started",

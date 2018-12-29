@@ -74,8 +74,7 @@ public abstract class SimpleCachingDataAdapter<T, A extends Decoder<T>> extends 
                     end.toString()));
             payload = onCacheMiss(path, begin, end);
             cache.put(cacheEntryKey, new SoftReference<>(payload));
-        }
-        else {
+        } else {
             logger.trace(() -> String.format("Data successfully retrieved from cache for %s %s %s", path, begin.toString(), end.toString()));
         }
         return new ByteArrayInputStream(payload);

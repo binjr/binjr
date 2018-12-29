@@ -46,7 +46,7 @@ public class LRUMapSizeBound<K, V extends Cacheable> extends LinkedHashMap<K, V>
      * Initializes a new instance of the {@link LRUMapSizeBound} class with the specified capacity and initial values
      *
      * @param maxSize the maximum capacity for the {@link LRUMapSizeBound}
-     * @param values   initial values to populate the {@link LRUMapSizeBound}
+     * @param values  initial values to populate the {@link LRUMapSizeBound}
      */
     public LRUMapSizeBound(int maxSize, Map<? extends K, ? extends V> values) {
         this(maxSize);

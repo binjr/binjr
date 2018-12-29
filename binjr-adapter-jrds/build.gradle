@@ -1,6 +1,6 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
- *     
+ *    Copyright 2018 Frederic Thevenet
+ *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
  *    You may obtain a copy of the License at
@@ -25,7 +25,7 @@ jar {
                 'Specification-Version': project.version,
                 'Implementation-Title': project.name,
                 'Implementation-Version': project.version,
-                'Build-Number':  BINJR_BUILD_NUMBER
+                'Build-Number': BINJR_BUILD_NUMBER
         )
     }
 }

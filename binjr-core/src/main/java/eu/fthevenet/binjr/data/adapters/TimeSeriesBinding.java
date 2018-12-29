@@ -168,8 +168,7 @@ public class TimeSeriesBinding<T> {
         if (color == null) {
             // pickup a default color at random, based on the hash of the binding path, so it stays stable
             this.color = computeDefaultColor();
-        }
-        else {
+        } else {
             this.color = color;
         }
     }

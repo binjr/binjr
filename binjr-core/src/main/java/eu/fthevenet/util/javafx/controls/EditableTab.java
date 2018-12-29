@@ -31,11 +31,14 @@ import javafx.scene.control.TextField;
 public class EditableTab extends Tab {
     private final Label label;
 
-    private BooleanProperty editable =new SimpleBooleanProperty(false);
+    private BooleanProperty editable = new SimpleBooleanProperty(false);
+
     public String getName() {
         return label.textProperty().getValue();
     }
+
     final TextField textField = new TextField();
+
     public Property<String> nameProperty() {
         return label.textProperty();
     }
@@ -56,12 +59,12 @@ public class EditableTab extends Tab {
         setGraphic(label);
 
         editable.addListener((observable, oldValue, newValue) -> {
-            if (newValue){
+            if (newValue) {
                 textField.setText(label.getText());
                 setGraphic(textField);
                 textField.selectAll();
                 textField.requestFocus();
-            }else{
+            } else {
                 if (!textField.getText().isEmpty()) {
                     label.setText(textField.getText());
                 }
@@ -73,24 +76,16 @@ public class EditableTab extends Tab {
         label.setOnMouseClicked(event -> {
             if (event.getClickCount() == 2) {
                 editable.setValue(true);
-//                textField.setText(label.getText());
-//                setGraphic(textField);
-//                textField.selectAll();
-//                textField.requestFocus();
             }
         });
 
         textField.setOnAction(event -> {
-          editable.setValue(false);
+            editable.setValue(false);
         });
 
         textField.focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
                 editable.setValue(false);
-//                if (!textField.getText().isEmpty()) {
-//                    label.setText(textField.getText());
-//                }
-//                setGraphic(label);
             }
         });
     }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -100,8 +100,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param name      the name for the new {@link Worksheet} instance
      * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
-     * @param unitName the label for the unit of Y axis.
-     * @param prefix the unit prefix to use for the unit of Y axis.
+     * @param unitName  the label for the unit of Y axis.
+     * @param prefix    the unit prefix to use for the unit of Y axis.
      */
     public Chart(String name, ChartType chartType, String unitName, UnitPrefixes prefix) {
         this(name,
@@ -170,8 +170,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     /**
      * Fills up the backend for all {@link TimeSeriesInfo} in the worksheet with data from the adapter on the specified time interval
      *
-     * @param startTime the start of the time interval
-     * @param endTime   the end of the time interval
+     * @param startTime   the start of the time interval
+     * @param endTime     the end of the time interval
      * @param bypassCache set to true to forcefully bypass any cache on the adapter.
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */

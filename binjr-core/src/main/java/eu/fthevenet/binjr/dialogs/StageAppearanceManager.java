@@ -59,9 +59,11 @@ public class StageAppearanceManager {
     }
 
     private static final Logger logger = LogManager.getLogger(StageAppearanceManager.class);
+
     private static class Holder {
         private final static StageAppearanceManager instance = new StageAppearanceManager();
     }
+
     private final Map<Stage, Set<AppearanceOptions>> registeredStages;
 
     /**

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,8 +37,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
-import java.util.*;
-import java.util.prefs.Preferences;
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -71,7 +71,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
         browseButton.setPrefWidth(-1);
         pathsField.setPrefWidth(400);
         DialogPane dialogPane = new DialogPane();
-        dialogPane.setHeaderText("Add RRD files");
+        dialogPane.setHeaderText("Add RRD file(s)");
         dialogPane.getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         dialogPane.setGraphic(new Region());
         dialogPane.getGraphic().getStyleClass().addAll("source-icon", "dialog-icon");
@@ -115,9 +115,9 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
 
     private File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Rrd4j Files");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD files", "*.rrd"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dump", "*.xml"));
+        fileChooser.setTitle("Open Rrd4j File(s)");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD binary files", "*.rrd"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
         fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));

@@ -158,8 +158,7 @@ public class ChartViewportsState implements AutoCloseable {
                 if (r > 0.0001) {
                     chartViewPort.getDataStore().setAutoScaleYAxis(false);
                 }
-            }
-            else {
+            } else {
                 // Disable auto range on Y axis if zoomed in
                 chartViewPort.getDataStore().setAutoScaleYAxis(selection.isAutoRangeY());
             }

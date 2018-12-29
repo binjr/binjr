@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     public Rrd4jFileDataAdapterInfo() {
         super("RRD Files",
-                "Round Robin Database Data Adapter",
+                "RRD Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,

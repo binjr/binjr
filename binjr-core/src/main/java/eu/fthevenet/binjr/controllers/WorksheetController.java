@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -247,8 +247,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             StableTicksAxis yAxis;
             if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
                 yAxis = new BinaryStableTicksAxis();
-            }
-            else {
+            } else {
                 yAxis = new MetricStableTicksAxis();
             }
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
@@ -324,8 +323,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.bind(chart.maxWidthProperty(), chartParent.widthProperty().subtract(n));
             if (i == 0) {
                 chart.getYAxis().setSide(Side.LEFT);
-            }
-            else {
+            } else {
                 chart.getYAxis().setSide(Side.RIGHT);
                 chart.setVerticalZeroLineVisible(false);
                 chart.setHorizontalZeroLineVisible(false);
@@ -473,8 +471,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             ChangeListener<Boolean> refreshListener = (observable, oldValue, newValue) -> {
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                     invalidateAll(false, false, false);
-                }
-                else {
+                } else {
                     invalidate(currentViewPort, false, false);
                 }
             };
@@ -493,8 +490,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 ChangeListener<Boolean> r = (observable, oldValue, newValue) -> {
                     if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                         invalidateAll(false, false, false);
-                    }
-                    else {
+                    } else {
                         invalidate(currentViewPort, false, false);
                     }
                 };
@@ -763,16 +759,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                         }
                         logger.debug("dropped to " + event.toString());
-                    }
-                    else {
+                    } else {
                         logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
                     }
-                }
-                else {
+                } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
-            }
-            else {
+            } else {
                 logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
             }
             event.consume();
@@ -816,11 +809,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     for (int i = c.getFrom(); i < c.getTo(); ++i) {
                         // nothing for now
                     }
-                }
-                else if (c.wasUpdated()) {
+                } else if (c.wasUpdated()) {
                     // nothing for now
-                }
-                else {
+                } else {
                     if (!preventReload) {
                         if (c.wasAdded()) {
                             List<? extends Chart<Double>> added = c.getAddedSubList();
@@ -832,15 +823,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (c.wasRemoved()) {
                             if (worksheet.getSelectedChart() == c.getFrom()) {
                                 worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
-                            }
-                            else if (worksheet.getSelectedChart() > c.getFrom()) {
+                            } else if (worksheet.getSelectedChart() > c.getFrom()) {
                                 worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
                             }
                         }
                         logger.debug(() -> "Reloading worksheet controller because list changed: " + c.toString() + " in controller " + this.toString());
                         action.accept(this);
-                    }
-                    else {
+                    } else {
                         logger.debug(() -> "Reload explicitly prevented on change " + c.toString());
                     }
                 }
@@ -1047,8 +1036,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         if (!history.isEmpty()) {
             toHistory.push(currentState.asSelection());
             currentState.setSelection(history.pop(), false);
-        }
-        else {
+        } else {
             logger.debug(() -> "History is empty: nothing to go back to.");
         }
     }
@@ -1083,8 +1071,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 int dropIndex;
                 if (row.isEmpty()) {
                     dropIndex = tv.getItems().size();
-                }
-                else {
+                } else {
                     dropIndex = row.getIndex();
                 }
                 tv.getItems().add(dropIndex, draggedseries);

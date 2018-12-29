@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                                 UnitPrefixes.METRIC,
                                 ChartType.STACKED,
                                 "-",
-                                consolFunNode.getValue().getTreeHierarchy()  + "/" + ds,
+                                consolFunNode.getValue().getTreeHierarchy() + "/" + ds,
                                 this)));
                     }
                 }
@@ -157,7 +157,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
 
     @Override
     public String getSourceName() {
-        return "[RRD] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more RRD files" : "");
+        return "[RRD] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more RRD file(s)" : "");
     }
 
     @Override
@@ -192,6 +192,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
             tempPathToCollect.add(temp);
             return new RrdDb(temp.toUri(), RrdDb.PREFIX_XML + rrdPath.toString());
         }
+        //TODO Peek into the rrd file's header to determine its producer rather than wait for an exception to be thrown.
         try {
             return new RrdDb(rrdPath.toUri());
         } catch (InvalidRrdException e) {

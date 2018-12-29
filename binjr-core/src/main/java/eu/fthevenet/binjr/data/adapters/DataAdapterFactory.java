@@ -161,8 +161,7 @@ public class DataAdapterFactory {
                         logger.debug("Error stack", e);
                     }
                 }
-            }
-            else {
+            } else {
                 logger.warn("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
             }
         }

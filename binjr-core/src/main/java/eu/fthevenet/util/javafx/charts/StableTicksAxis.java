@@ -122,7 +122,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     public double getAutoRangePadding() {
         return autoRangePadding.get();
     }
-    
+
     /**
      * The autoRangePadding property.
      *
@@ -177,8 +177,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
             minValue = minValue - 1;
             maxValue = maxValue + 1;
 
-        }
-        else {
+        } else {
             //Add padding
             double delta = maxValue - minValue;
             double paddedMin = minValue - delta * autoRangePadding.get();
@@ -204,8 +203,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
             if (minValue < 0 && maxValue < 0) {
                 maxValue = 0;
                 minValue -= -minValue * autoRangePadding.get();
-            }
-            else if (minValue > 0 && maxValue > 0) {
+            } else if (minValue > 0 && maxValue > 0) {
                 minValue = 0;
                 maxValue += maxValue * autoRangePadding.get();
             }
@@ -250,8 +248,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
                             new KeyValue(scaleValue, rangeVal.scale)));
             animationTimeline.play();
 
-        }
-        else {
+        } else {
             currentLowerBound.set(rangeVal.low);
             setScale(rangeVal.scale);
         }
@@ -298,8 +295,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     private double getLength() {
         if (getSide().isHorizontal()) {
             return getWidth();
-        }
-        else {
+        } else {
             return getHeight();
         }
     }
@@ -308,8 +304,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         Dimension2D dim = measureTickMarkLabelSize("-888.88E-88", getTickLabelRotation());
         if (getSide().isHorizontal()) {
             return dim.getWidth();
-        }
-        else {
+        } else {
             return dim.getHeight();
         }
     }

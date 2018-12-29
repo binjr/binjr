@@ -177,11 +177,9 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         Collections.sort(list);
         if (list.isEmpty()) {
             minDate = maxDate = ZonedDateTime.now(zoneId.getValue());
-        }
-        else if (list.size() == 1) {
+        } else if (list.size() == 1) {
             minDate = maxDate = list.get(0);
-        }
-        else if (list.size() > 1) {
+        } else if (list.size() > 1) {
             minDate = list.get(0);
             maxDate = list.get(list.size() - 1);
         }
@@ -191,8 +189,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
     protected Object autoRange(double length) {
         if (isAutoRanging()) {
             return new Object[]{minDate, maxDate};
-        }
-        else {
+        } else {
             if (getLowerBound() == null || getUpperBound() == null) {
                 throw new IllegalArgumentException("If autoRanging is false, a lower and upper bound must be set.");
             }
@@ -241,8 +238,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         // Multiply this percent value with the range and add the zero offset.
         if (getSide().isVertical()) {
             return getHeight() - d * range + getZeroPosition();
-        }
-        else {
+        } else {
             return d * range + getZeroPosition();
         }
     }
@@ -261,8 +257,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         if (getSide().isVertical()) {
             long v = Math.round((displayPosition - getZeroPosition() - getHeight()) / -range * diff + currentLowerBound.get());
             return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
-        }
-        else {
+        } else {
             long v = Math.round((displayPosition - getZeroPosition()) / range * diff + currentLowerBound.get());
             return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
         }
@@ -355,11 +350,9 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         DateTimeFormatter formatter;
         if (actualInterval.unit == ChronoUnit.YEARS && date.getMonthValue() == 1 && date.getDayOfMonth() == 1) {
             formatter = DateTimeFormatter.ofPattern("yyyy");
-        }
-        else if (actualInterval.unit == ChronoUnit.MONTHS && date.getDayOfMonth() == 1) {
+        } else if (actualInterval.unit == ChronoUnit.MONTHS && date.getDayOfMonth() == 1) {
             formatter = DateTimeFormatter.ofPattern("MMM yy");
-        }
-        else {
+        } else {
             switch (actualInterval.unit) {
                 case DAYS:
                 case WEEKS:
@@ -463,8 +456,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                 evenDates.add(normalizedDate);
             }
             return evenDates;
-        }
-        else {
+        } else {
             return dates;
         }
     }

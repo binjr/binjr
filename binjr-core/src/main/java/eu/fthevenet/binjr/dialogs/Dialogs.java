@@ -196,28 +196,24 @@ public class Dialogs {
                     Desktop desktop = Desktop.getDesktop();
                     if (desktop.isSupported(Desktop.Action.BROWSE)) {
                         desktop.browse(new URI(url));
-                    }
-                    else {
+                    } else {
                         logger.warn("Action Desktop.Action.BROWSE is not supported on this platform");
                     }
-                }
-                else {
+                } else {
                     logger.warn("java.awt.Desktop is not supported on this platform");
                 }
                 break;
             case LINUX:
                 if (Runtime.getRuntime().exec(new String[]{"which", "xdg-open"}).getInputStream().read() != -1) {
                     Runtime.getRuntime().exec(new String[]{"xdg-open", url});
-                }
-                else {
+                } else {
                     logger.warn("Failed to find location for xdg-open");
                 }
                 break;
             case OSX:
                 if (Runtime.getRuntime().exec(new String[]{"which", "open"}).getInputStream().read() != -1) {
                     Runtime.getRuntime().exec(new String[]{"open", url});
-                }
-                else {
+                } else {
                     logger.warn("Failed to find location for open");
                 }
                 break;
@@ -292,8 +288,7 @@ public class Dialogs {
     public static void runOnFXThread(Runnable r) {
         if (Platform.isFxApplicationThread()) {
             r.run();
-        }
-        else {
+        } else {
             Platform.runLater(r);
         }
     }
@@ -310,8 +305,7 @@ public class Dialogs {
         Stage dlgStage = Dialogs.getStage(dialog.getDialogPane());
         if (dlgStage != null) {
             dlgStage.setAlwaysOnTop(true);
-        }
-        else {
+        } else {
             logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
         }
     }

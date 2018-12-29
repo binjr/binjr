@@ -89,15 +89,12 @@ public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn
                 if (item == null) {
                     super.setText(null);
                     super.setGraphic(null);
-                }
-                else if (formatter != null) {
+                } else if (formatter != null) {
                     super.setText(formatter.format(item));
-                }
-                else if (item instanceof Node) {
+                } else if (item instanceof Node) {
                     super.setText(null);
                     super.setGraphic((Node) item);
-                }
-                else {
+                } else {
                     super.setText(item.toString());
                     super.setGraphic(null);
                 }

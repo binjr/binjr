@@ -54,8 +54,7 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
         setText(null);
         if (empty) {
             setGraphic(null);
-        }
-        else {
+        } else {
             colorPicker.setValue(item);
             setGraphic(this.colorPicker);
         }

@@ -40,7 +40,7 @@ public class AppEnvironment {
     public static final String HTTP_GITHUB_REPO = "https://github.com/fthevenet/binjr";
     public static final String HTTP_WWW_BINJR_EU = "http://www.binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://github.com/fthevenet/binjr/wiki";
-    public static final String COPYRIGHT_NOTICE = "Copyright (c) 2017-2018 Frederic Thevenet";
+    public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2018 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
     private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
@@ -61,8 +61,7 @@ public class AppEnvironment {
         consoleVisible.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 ConsoleStage.show();
-            }
-            else {
+            } else {
                 ConsoleStage.hide();
             }
         });
@@ -226,8 +225,7 @@ public class AppEnvironment {
         }
         if (OS_NAME.startsWith("linux")) {
             return OsFamily.LINUX;
-        }
-        else {
+        } else {
             return OsFamily.UNSUPPORTED;
         }
     }

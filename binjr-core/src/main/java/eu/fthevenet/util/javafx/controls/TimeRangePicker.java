@@ -105,8 +105,7 @@ public class TimeRangePicker extends ToggleButton {
                 if (newRange.isNegative()) {
                     TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
                     this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.getDuration())));
-                }
-                else {
+                } else {
                     this.selectedRange.setValue(newRange);
                 }
             }
@@ -118,8 +117,7 @@ public class TimeRangePicker extends ToggleButton {
                 if (newRange.isNegative()) {
                     TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
                     this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.getDuration()), newValue));
-                }
-                else {
+                } else {
                     this.selectedRange.setValue(newRange);
                 }
             }

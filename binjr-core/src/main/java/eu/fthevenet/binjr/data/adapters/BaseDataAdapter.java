@@ -16,19 +16,12 @@
 
 package eu.fthevenet.binjr.data.adapters;
 
-import eu.fthevenet.binjr.data.codec.Decoder;
 import eu.fthevenet.binjr.data.exceptions.DataAdapterException;
 import eu.fthevenet.binjr.data.exceptions.InvalidAdapterParameterException;
-import eu.fthevenet.binjr.data.timeseries.TimeSeriesProcessor;
-import eu.fthevenet.binjr.data.workspace.TimeSeriesInfo;
 import eu.fthevenet.util.function.CheckedFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.time.Instant;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 

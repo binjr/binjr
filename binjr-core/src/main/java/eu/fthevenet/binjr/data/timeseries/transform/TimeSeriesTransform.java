@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2016-2018 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,8 +63,7 @@ public abstract class TimeSeriesTransform<T> {
             try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + names, logger::trace)) {
                 return apply(series);
             }
-        }
-        else {
+        } else {
             logger.debug(() -> "Transform " + getName() + " on series " + names + " is disabled.");
         }
         return series;

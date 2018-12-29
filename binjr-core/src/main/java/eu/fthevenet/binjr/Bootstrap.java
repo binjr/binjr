@@ -21,7 +21,8 @@ import org.apache.logging.log4j.Logger;
 
 
 /**
- * Bootstrap class for binjr that checks for JavaFX runtime presence and fails with an explicit error if not.
+ * Bootstrap class for binjr to workaround for JavaFX runtime presence  checks built into openJfx 11 which incorrectly
+ * fails if app is started from classpath.
  *
  * @author Frederic Thevenet
  */

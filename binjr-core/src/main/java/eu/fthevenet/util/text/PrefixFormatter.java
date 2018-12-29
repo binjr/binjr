@@ -56,8 +56,7 @@ public abstract class PrefixFormatter {
         }
         if (b % 2 == 0) {
             return pow(a * a, b / 2);
-        }
-        else {
+        } else {
             return a * pow(a * a, b / 2);
         }
     }

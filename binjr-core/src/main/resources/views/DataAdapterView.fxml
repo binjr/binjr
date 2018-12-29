@@ -18,7 +18,8 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+<DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
+            xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <GridPane fx:id="paramsGridPane">
             <columnConstraints>
@@ -36,7 +37,9 @@
                 <HBox fx:id="uriHBox" alignment="CENTER" spacing="5.0" GridPane.columnIndex="1">
                     <children>
                         <TextField fx:id="uriField" prefHeight="25.0" prefWidth="500.0"/>
-                        <Button fx:id="browseButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="74.0" text="Browse"/>
+                        <Button fx:id="browseButton" alignment="CENTER" contentDisplay="CENTER" maxWidth="-Infinity"
+                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="74.0"
+                                text="Browse"/>
                     </children>
                 </HBox>
             </children>

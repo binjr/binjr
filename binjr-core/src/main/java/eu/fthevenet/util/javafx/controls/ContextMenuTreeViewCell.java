@@ -37,8 +37,7 @@ public class ContextMenuTreeViewCell<T> extends TreeCell<T> {
             if (cellFactory == null) {
                 cell = new TreeCell<T>();
                 cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
-            }
-            else {
+            } else {
                 cell = cellFactory.call(treeView);
             }
             cell.setContextMenu(contextMenu);

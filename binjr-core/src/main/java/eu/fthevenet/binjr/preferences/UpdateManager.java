@@ -123,8 +123,7 @@ public class UpdateManager {
                 Version current = AppEnvironment.getInstance().getVersion();
                 if (latest.isPresent()) {
                     newReleaseAvailable.accept(latest.get());
-                }
-                else {
+                } else {
                     if (upToDate != null) {
                         upToDate.accept(current);
                     }
@@ -137,8 +136,7 @@ public class UpdateManager {
                 }
             });
             AsyncTaskManager.getInstance().submit(getLatestTask);
-        }
-        else {
+        } else {
             logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
         }
     }
