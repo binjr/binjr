@@ -433,7 +433,7 @@
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#toggleDebugMode" text="Exit Debug Mode" visible="true">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="D" control="UP" meta="UP" shift="DOWN" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="F12" control="UP" meta="UP" shift="UP" shortcut="UP"/>
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
