@@ -7,7 +7,7 @@
 >___Please note that it does not run on previous version of Java.___
 >
 > If you require a version that runs on Java 8, you can use the latest releases versioned 1.x.x, 
-> the source code for it being available in branch [binjr-1_x](https://github.com/fthevenet/binjr/tree/binjr-1_x).
+> the source code for it being available in branch [binjr-1_x](https://github.com/binjr/binjr/tree/binjr-1_x).
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 
@@ -22,18 +22,18 @@ It is a Java based client application and runs on multiple Desktop environnement
 ![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
 
 ## Getting started
-The platform specific packages avalable on the [release page](https://github.com/fthevenet/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
+The platform specific packages avalable on the [release page](https://github.com/binjr/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
 
 Simply download the one for your system (Windows, Linux or macOS), unpack it and run "binjr" to start!
 
 ## Getting help
-The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference).
+The documentation can be found [here](https://github.com/binjr/binjr/wiki/Reference).
 
-If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/fthevenet/binjr/issues).
+If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
 If you would like to contribute, please sumbit a pull request.
 
 ## How is it licensed?
 
-*binjr* is released under the [Apache License version 2.0](https://github.com/fthevenet/binjr/blob/master/LICENSE).
+*binjr* is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE).
 

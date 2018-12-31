@@ -9,5 +9,5 @@ zoomed in or out.
 Using this DataAdapter, you can connect to a JRDS server via HTTP and use the flexibility offered by binjr to 
 navigate through the data.
 
-This adapter supports authentication via Kerberos (see [here](https://github.com/fthevenet/binjr/wiki/Troubleshooting#kerberos-authentication-issues)
+This adapter supports authentication via Kerberos (see [here](https://github.com/binjr/binjr/wiki/Troubleshooting#kerberos-authentication-issues)
  if you need help getting it to work).

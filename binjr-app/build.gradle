@@ -31,7 +31,7 @@ dependencies {
     runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
 }
 
-mainClassName = 'eu.fthevenet.binjr.Bootstrap'
+mainClassName = 'eu.binjr.Bootstrap'
 
 repositories {
     mavenCentral()

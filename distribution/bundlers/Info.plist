@@ -13,7 +13,7 @@
   <key>CFBundleIconFile</key>
   <string>binjr.icns</string>
   <key>CFBundleIdentifier</key>
-  <string>eu.fthevenet.binjr</string>
+  <string>eu.binjr</string>
   <key>CFBundleInfoDictionaryVersion</key>
   <string>6.0</string>
   <key>CFBundleName</key>
@@ -37,7 +37,7 @@
     <dict>
       <key>LSItemContentTypes</key>
       <array>
-        <string>eu.fthevenet.binjr.bjr</string>
+        <string>eu.binjr.bjr</string>
       </array>
 
       <key>CFBundleTypeName</key>
@@ -59,7 +59,7 @@
   <array>
     <dict>
       <key>UTTypeIdentifier</key>
-      <string>eu.fthevenet.binjr.bjr</string>
+      <string>eu.binjr.bjr</string>
 
       <key>UTTypeDescription</key>
       <string>binjr Workspace Files</string>

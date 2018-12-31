@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~    Copyright 2016-2018 Frederic Thevenet
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<DialogPane fx:id="aboutRoot" maxWidth="-Infinity" minWidth="-Infinity" prefWidth="600.0" styleClass="about"
+            stylesheets="@/eu/binjr/css/About.css" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="eu.binjr.core.controllers.AboutBoxController">
+    <header>
+        <VBox>
+            <children>
+                <AnchorPane minWidth="0.0">
+                    <ImageView fitHeight="300.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0"
+                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                               AnchorPane.topAnchor="0.0">
+                        <Image url="@../images/logo_med.png"/>
+                    </ImageView>
+                    <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="205.0">
+                        <Label fx:id="versionLabel" text="version 0.0.0" textFill="WHITE" wrapText="true">
+                            <VBox.margin>
+                                <Insets left="4.0"/>
+                            </VBox.margin>
+                        </Label>
+                        <TextFlow fx:id="versionCheckFlow"/>
+                    </VBox>
+                </AnchorPane>
+                <AnchorPane>
+                    <children>
+                        <Label fx:id="copyrightText" styleClass="about-text" text="Copyright (c) 2017 Frederic Thevenet"
+                               textFill="#3a879a" AnchorPane.bottomAnchor="8.0" AnchorPane.leftAnchor="10.0"
+                               AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                        </Label>
+                        <Hyperlink fx:id="binjrUrl" alignment="TOP_LEFT" graphicTextGap="0.0" onAction="#goTobinjrDotEu"
+                                   styleClass="about-text" text="www.binjr.eu" textFill="#3a879a"
+                                   AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
+                            <font>
+                                <Font size="14.0"/>
+                            </font>
+                            <opaqueInsets>
+                                <Insets/>
+                            </opaqueInsets>
+                            <padding>
+                                <Insets top="-3.7"/>
+                            </padding>
+                        </Hyperlink>
+                    </children>
+                </AnchorPane>
+            </children>
+        </VBox>
+    </header>
+    <content>
+        <VBox>
+            <children>
+                <Accordion fx:id="detailsPane" prefWidth="600.0" styleClass="skinnable-pane-border">
+                    <panes>
+                        <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT"
+                                    text="System Information">
+                            <TableView fx:id="sysInfoListTable" maxWidth="-Infinity" minHeight="0.0"
+                                       minWidth="-Infinity" prefHeight="220.0" prefWidth="578.0">
+                                <columns>
+                                    <TableColumn editable="false" prefWidth="150.0" resizable="false" sortable="false"
+                                                 text="C1">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="key"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn editable="false" prefWidth="350.0" resizable="false" sortable="false"
+                                                 text="C2">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="value"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                                <padding>
+                                    <Insets left="15.0"/>
+                                </padding>
+                            </TableView>
+                        </TitledPane>
+                        <TitledPane fx:id="licensePane" animated="false" minHeight="0.0" text="License">
+                            <ScrollPane>
+                                <TextFlow fx:id="licenseView" maxHeight="-1.0" maxWidth="-Infinity" minWidth="-Infinity"
+                                          prefHeight="220.0" prefWidth="560.0" styleClass="about-text-view">
+                                    <padding>
+                                        <Insets left="10.0"/>
+                                    </padding>
+                                </TextFlow>
+                            </ScrollPane>
+                        </TitledPane>
+                        <TitledPane fx:id="acknowledgementPane" animated="false" text="Acknowledgements">
+                            <ScrollPane>
+                                <TextFlow fx:id="acknowledgementView" maxHeight="-1.0" maxWidth="-Infinity"
+                                          minWidth="-Infinity" prefHeight="220.0" prefWidth="560.0"
+                                          styleClass="about-text-view">
+                                    <padding>
+                                        <Insets left="10.0"/>
+                                    </padding>
+                                </TextFlow>
+                            </ScrollPane>
+                        </TitledPane>
+                    </panes>
+                </Accordion>
+            </children>
+        </VBox>
+    </content>
+    <ButtonType fx:constant="CLOSE"/>
+</DialogPane>

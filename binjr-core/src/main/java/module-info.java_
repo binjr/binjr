@@ -20,7 +20,7 @@
  *
  * @author Frederic Thevenet
  */
-module eu.fthevenet.binjr {
+module eu.binjr {
     // region *** requires ***
     requires javafx.controls;
     requires javafx.fxml;
@@ -47,27 +47,27 @@ module eu.fthevenet.binjr {
     // endregion
 
     // region *** exports ***
-    exports eu.fthevenet.binjr;
-    exports eu.fthevenet.binjr.controllers;
-    exports eu.fthevenet.util.javafx.controls;
-    exports eu.fthevenet.binjr.data.adapters;
-    exports eu.fthevenet.binjr.sources.jrds.adapters;
+    exports eu.binjr;
+    exports eu.binjr.core.controllers;
+    exports eu.binjr.common.javafx.controls;
+    exports eu.binjr.core.data.adapters;
+    exports eu.binjr.sources.jrds.adapters;
     //e ndregion
 
     // region *** opens ***
-    opens eu.fthevenet.binjr.data.adapters;
-    opens eu.fthevenet.binjr.controllers;
+    opens eu.binjr.core.data.adapters;
+    opens eu.binjr.core.controllers;
    // opens com.migesok.jaxb.adapter.javatime;
     // endregion
 
     // region *** uses ***
-    uses eu.fthevenet.binjr.data.adapters.DataAdapterInfo;
+    uses eu.binjr.core.data.adapters.DataAdapterInfo;
     // endregion
 
     //region ***provides ***
-    provides eu.fthevenet.binjr.data.adapters.DataAdapterInfo with
-            eu.fthevenet.binjr.sources.csv.adapters.CsvFileDataAdapterInfo,
-            eu.fthevenet.binjr.sources.jrds.adapters.JrdsDataAdapterInfo;
+    provides eu.binjr.core.data.adapters.DataAdapterInfo with
+            eu.binjr.sources.csv.adapters.CsvFileDataAdapterInfo,
+            eu.binjr.sources.jrds.adapters.JrdsDataAdapterInfo;
 
     // endregion
 }

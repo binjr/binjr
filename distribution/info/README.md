@@ -13,13 +13,13 @@ Its focus is on enabling end users to constitute their own custom sets of views 
 
 As such, *binjr* aims to become a valuable tool in forensic analysis when working with data sources that do not provide such flexible visualization natively.
 
-It is a Java based client application and runs on multiple Desktop environnements (Windows, MacOS and Linux).
+It is a Java based client application and runs on multiple Desktop environments (Windows, MacOS and Linux).
 
 
 ### Getting help
-The documentation can be found [here](https://github.com/fthevenet/binjr/wiki/Reference).
+The documentation can be found [here](https://www.binjr.eu/user_manual).
 
-If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/fthevenet/binjr/issues).
+If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
 For more info and to download the latest release, please visit the binjr website at [www.binjr.eu](https://www.binjr.eu) 
 
@@ -27,13 +27,13 @@ For more info and to download the latest release, please visit the binjr website
 
 ### How is it licensed?
 
-*binjr* is released under the [Apache License version 2.0](https://github.com/fthevenet/binjr/blob/master/LICENSE).
+*binjr* is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE).
 
 <footer>
     <br>
     <hr>
     <p style="text-align:left;">
-        © 2017-2018 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
+        © 2016-2018 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
         <span style="float:right;"><a href="https://www.binjr.eu">www.binjr.eu</a></span>
     </p>
 </footer>
