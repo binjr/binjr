@@ -33,7 +33,7 @@ For more info and to download the latest release, please visit the binjr website
     <br>
     <hr>
     <p style="text-align:left;">
-        © 2016-2018 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
+        © 2016-2019 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
         <span style="float:right;"><a href="https://www.binjr.eu">www.binjr.eu</a></span>
     </p>
 </footer>
