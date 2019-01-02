@@ -60,7 +60,7 @@ configure(subprojects - project(':binjr-app')) {
     apply plugin: 'maven-publish'
     apply plugin: 'signing'
 
-    group 'eu.fthevenet'
+    group 'eu.binjr'
     version BINJR_VERSION
     sourceCompatibility = 11
     description 'Flexible Time Series Visualization'
@@ -145,7 +145,7 @@ configure(subprojects - project(':binjr-app')) {
 //nexusStaging {
 //    username = System.getenv('OSSRH_JIRA_USERNAME')
 //    password = System.getenv('OSSRH_JIRA_PASSWORD')
-//    packageGroup = 'eu.fthevenet'
+//    packageGroup = 'eu.binjr'
 //}
 //
 task publishArtefacts(dependsOn: (subprojects - project(':binjr-app')).publish) {
