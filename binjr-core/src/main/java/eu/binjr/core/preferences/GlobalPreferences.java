@@ -55,6 +55,7 @@ public class GlobalPreferences {
     private static final String DEFAULT_PLUGINS_LOCATION = System.getProperty("user.home");
     private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
     private static final String LOAD_PLUGINS_FROM_EXTERNAL_LOCATION = "loadPluginsFromExternalLocation";
+    private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -73,13 +74,10 @@ public class GlobalPreferences {
     private final Property<Path> pluginsLocation = new SimpleObjectProperty<>();
     private final Property<Duration> notificationPopupDuration = new SimpleObjectProperty<>();
     private final BooleanProperty loadPluginsFromExternalLocation = new SimpleBooleanProperty();
+    private final IntegerProperty consoleMaxLineCapacity = new SimpleIntegerProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
-
-    private static class GlobalPreferencesHolder {
-        private final static GlobalPreferences instance = new GlobalPreferences();
-    }
 
     private GlobalPreferences() {
         this.prefs = Preferences.userRoot().node(BINJR_GLOBAL);
@@ -87,10 +85,10 @@ public class GlobalPreferences {
         mostRecentSaveFolder.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVE_FOLDER, newValue.toString()));
         downSamplingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(DOWN_SAMPLING_ENABLED, newValue));
         downSamplingThreshold.addListener((observable, oldValue, newValue) -> prefs.putInt(DOWN_SAMPLING_THRESHOLD, newValue.intValue()));
+        consoleMaxLineCapacity.addListener((observable, oldValue, newValue) -> prefs.putInt(CONSOLE_MAX_LINE_CAPACITY, newValue.intValue()));
         mostRecentSavedWorkspace.addListener((observable, oldValue, newValue) -> prefs.put(MOST_RECENT_SAVED_WORKSPACE, newValue.toString()));
         loadLastWorkspaceOnStartup.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, newValue));
         userInterfaceTheme.addListener((observable, oldValue, newValue) -> prefs.put(UI_THEME_NAME, newValue.name()));
-
         horizontalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HORIZONTAL_MARKER_ON, newValue));
         verticalMarkerOn.addListener((observable, oldValue, newValue) -> prefs.putBoolean(VERTICAL_MARKER_ON, newValue));
         showAreaOutline.addListener((observable, oldValue, newValue) -> prefs.putBoolean(SHOW_AREA_OUTLINE, newValue));
@@ -98,6 +96,15 @@ public class GlobalPreferences {
         pluginsLocation.addListener((observable, oldValue, newValue) -> prefs.put(PLUGINS_LOCATION, newValue.toString()));
         notificationPopupDuration.addListener((observable, oldValue, newValue) -> prefs.putDouble(NOTIFICATION_POPUP_DURATION, newValue.toSeconds()));
         loadPluginsFromExternalLocation.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, newValue));
+    }
+
+    /**
+     * Returns the singleton instance of {@link GlobalPreferences}
+     *
+     * @return the singleton instance of {@link GlobalPreferences}
+     */
+    public static GlobalPreferences getInstance() {
+        return GlobalPreferencesHolder.instance;
     }
 
     private void load() {
@@ -112,6 +119,7 @@ public class GlobalPreferences {
             loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
             mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
             downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 5000));
+            consoleMaxLineCapacity.setValue(prefs.getInt(CONSOLE_MAX_LINE_CAPACITY, 2000));
             downSamplingEnabled.setValue(prefs.getBoolean(DOWN_SAMPLING_ENABLED, true));
             mostRecentSaveFolder.setValue(Paths.get(prefs.get(MOST_RECENT_SAVE_FOLDER, System.getProperty("user.home"))));
             notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
@@ -133,30 +141,12 @@ public class GlobalPreferences {
     }
 
     /**
-     * Returns the singleton instance of {@link GlobalPreferences}
-     *
-     * @return the singleton instance of {@link GlobalPreferences}
-     */
-    public static GlobalPreferences getInstance() {
-        return GlobalPreferencesHolder.instance;
-    }
-
-    /**
      * Returns true if series down-sampling is enabled, false otherwise.
      *
      * @return true if series down-sampling is enabled, false otherwise.
      */
     public Boolean getDownSamplingEnabled() {
         return downSamplingEnabled.getValue();
-    }
-
-    /**
-     * Returns the down-sampling property
-     *
-     * @return the down-sampling property
-     */
-    public BooleanProperty downSamplingEnabledProperty() {
-        return downSamplingEnabled;
     }
 
     /**
@@ -169,6 +159,15 @@ public class GlobalPreferences {
     }
 
     /**
+     * Returns the down-sampling property
+     *
+     * @return the down-sampling property
+     */
+    public BooleanProperty downSamplingEnabledProperty() {
+        return downSamplingEnabled;
+    }
+
+    /**
      * Returns the series down-sampling threshold value
      *
      * @return the series down-sampling threshold value
@@ -178,21 +177,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * Returns the property for the series down-sampling threshold value
-     *
-     * @return the property for the series down-sampling threshold value
-     */
-    public IntegerProperty downSamplingThresholdProperty() {
-        return downSamplingThreshold;
-    }
-
-    /**
      * Sets the series down-sampling threshold value
      *
      * @param downSamplingThreshold the series down-sampling threshold value
      */
     public void setDownSamplingThreshold(int downSamplingThreshold) {
         this.downSamplingThreshold.setValue(downSamplingThreshold);
+    }
+
+    /**
+     * Returns the property for the series down-sampling threshold value
+     *
+     * @return the property for the series down-sampling threshold value
+     */
+    public IntegerProperty downSamplingThresholdProperty() {
+        return downSamplingThreshold;
     }
 
     /**
@@ -217,15 +216,6 @@ public class GlobalPreferences {
     }
 
     /**
-     * The mostRecentSaveFolder property
-     *
-     * @return the mostRecentSaveFolder property
-     */
-    public Property<Path> mostRecentSaveFolderProperty() {
-        return mostRecentSaveFolder;
-    }
-
-    /**
      * Sets the path of the folder of the most recently saved item
      *
      * @param mostRecentSaveFolder the path of the folder of the most recently saved item
@@ -244,21 +234,21 @@ public class GlobalPreferences {
     }
 
     /**
+     * The mostRecentSaveFolder property
+     *
+     * @return the mostRecentSaveFolder property
+     */
+    public Property<Path> mostRecentSaveFolderProperty() {
+        return mostRecentSaveFolder;
+    }
+
+    /**
      * Gets the path from the most recently saved workspace
      *
      * @return the path from the most recently saved workspace
      */
     public Optional<Path> getMostRecentSavedWorkspace() {
         return Paths.get("Untitled").equals(mostRecentSavedWorkspace.getValue()) ? Optional.empty() : Optional.of(mostRecentSavedWorkspace.getValue());
-    }
-
-    /**
-     * The mostRecentSavedWorkspace property
-     *
-     * @return the  mostRecentSavedWorkspace property
-     */
-    public Property<Path> mostRecentSavedWorkspaceProperty() {
-        return mostRecentSavedWorkspace;
     }
 
     /**
@@ -274,21 +264,21 @@ public class GlobalPreferences {
     }
 
     /**
+     * The mostRecentSavedWorkspace property
+     *
+     * @return the  mostRecentSavedWorkspace property
+     */
+    public Property<Path> mostRecentSavedWorkspaceProperty() {
+        return mostRecentSavedWorkspace;
+    }
+
+    /**
      * Returns true if  the most recently saved workspace should be re-opned on startup, false otherwise
      *
      * @return true if  the most recently saved workspace should be re-opned on startup, false otherwise
      */
     public boolean isLoadLastWorkspaceOnStartup() {
         return loadLastWorkspaceOnStartup.get();
-    }
-
-    /**
-     * The loadLastWorkspaceOnStartup property
-     *
-     * @return the loadLastWorkspaceOnStartup property
-     */
-    public BooleanProperty loadLastWorkspaceOnStartupProperty() {
-        return loadLastWorkspaceOnStartup;
     }
 
     /**
@@ -301,6 +291,15 @@ public class GlobalPreferences {
     }
 
     /**
+     * The loadLastWorkspaceOnStartup property
+     *
+     * @return the loadLastWorkspaceOnStartup property
+     */
+    public BooleanProperty loadLastWorkspaceOnStartupProperty() {
+        return loadLastWorkspaceOnStartup;
+    }
+
+    /**
      * Gets the current UI theme
      *
      * @return the current UI theme
@@ -310,21 +309,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The UI theme property
-     *
-     * @return the UI theme property
-     */
-    public Property<UserInterfaceThemes> userInterfaceThemeProperty() {
-        return userInterfaceTheme;
-    }
-
-    /**
      * Sets the UI theme
      *
      * @param userInterfaceTheme the UI theme to apply
      */
     public void setUserInterfaceTheme(UserInterfaceThemes userInterfaceTheme) {
         this.userInterfaceTheme.setValue(userInterfaceTheme);
+    }
+
+    /**
+     * The UI theme property
+     *
+     * @return the UI theme property
+     */
+    public Property<UserInterfaceThemes> userInterfaceThemeProperty() {
+        return userInterfaceTheme;
     }
 
     /**
@@ -380,21 +379,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The checkForUpdateOnStartUp property.
-     *
-     * @return the checkForUpdateOnStartUp property.
-     */
-    public BooleanProperty checkForUpdateOnStartUpProperty() {
-        return checkForUpdateOnStartUp;
-    }
-
-    /**
      * Set to true to check for update on startup.
      *
      * @param checkForUpdateOnStartUp true to check for update on startup.
      */
     public void setCheckForUpdateOnStartUp(boolean checkForUpdateOnStartUp) {
         this.checkForUpdateOnStartUp.set(checkForUpdateOnStartUp);
+    }
+
+    /**
+     * The checkForUpdateOnStartUp property.
+     *
+     * @return the checkForUpdateOnStartUp property.
+     */
+    public BooleanProperty checkForUpdateOnStartUpProperty() {
+        return checkForUpdateOnStartUp;
     }
 
     /**
@@ -407,21 +406,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The horizontalMarkerOn property
-     *
-     * @return the horizontalMarkerOn property
-     */
-    public BooleanProperty horizontalMarkerOnProperty() {
-        return horizontalMarkerOn;
-    }
-
-    /**
      * Set to true to enable the horizontal marker, to false to disable it.
      *
      * @param horizontalMarkerOn true to enable the horizontal marker, to false to disable it.
      */
     public void setHorizontalMarkerOn(boolean horizontalMarkerOn) {
         this.horizontalMarkerOn.set(horizontalMarkerOn);
+    }
+
+    /**
+     * The horizontalMarkerOn property
+     *
+     * @return the horizontalMarkerOn property
+     */
+    public BooleanProperty horizontalMarkerOnProperty() {
+        return horizontalMarkerOn;
     }
 
     /**
@@ -434,21 +433,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The verticalMarkerOn property
-     *
-     * @return the verticalMarkerOn property
-     */
-    public BooleanProperty verticalMarkerOnProperty() {
-        return verticalMarkerOn;
-    }
-
-    /**
      * Set to true to enable the vertical marker, to false to disable it.
      *
      * @param verticalMarkerOn true to enable the vertical marker, to false to disable it.
      */
     public void setVerticalMarkerOn(boolean verticalMarkerOn) {
         this.verticalMarkerOn.set(verticalMarkerOn);
+    }
+
+    /**
+     * The verticalMarkerOn property
+     *
+     * @return the verticalMarkerOn property
+     */
+    public BooleanProperty verticalMarkerOnProperty() {
+        return verticalMarkerOn;
     }
 
     /**
@@ -461,21 +460,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The showAreaOutline property
-     *
-     * @return the showAreaOutline property
-     */
-    public BooleanProperty showAreaOutlineProperty() {
-        return showAreaOutline;
-    }
-
-    /**
      * Set to true to display the outline on area charts.
      *
      * @param showAreaOutline true to display the outline on area charts.
      */
     public void setShowAreaOutline(boolean showAreaOutline) {
         this.showAreaOutline.setValue(showAreaOutline);
+    }
+
+    /**
+     * The showAreaOutline property
+     *
+     * @return the showAreaOutline property
+     */
+    public BooleanProperty showAreaOutlineProperty() {
+        return showAreaOutline;
     }
 
     /**
@@ -488,21 +487,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The defaultGraphOpacity property.
-     *
-     * @return the defaultGraphOpacity property.
-     */
-    public DoubleProperty defaultGraphOpacityProperty() {
-        return defaultGraphOpacity;
-    }
-
-    /**
      * Sets the default opacity for new area charts.
      *
      * @param defaultGraphOpacity the default opacity for new area charts.
      */
     public void setDefaultGraphOpacity(double defaultGraphOpacity) {
         this.defaultGraphOpacity.set(defaultGraphOpacity);
+    }
+
+    /**
+     * The defaultGraphOpacity property.
+     *
+     * @return the defaultGraphOpacity property.
+     */
+    public DoubleProperty defaultGraphOpacityProperty() {
+        return defaultGraphOpacity;
     }
 
     /**
@@ -596,21 +595,21 @@ public class GlobalPreferences {
     }
 
     /**
-     * The notificationPopupDuration property.
-     *
-     * @return the notificationPopupDuration property.
-     */
-    public Property<Duration> notificationPopupDurationProperty() {
-        return notificationPopupDuration;
-    }
-
-    /**
      * Sets the duration to display notification popups.
      *
      * @param notificationPopupDuration the duration to display notification popups.
      */
     public void setNotificationPopupDuration(Duration notificationPopupDuration) {
         this.notificationPopupDuration.setValue(notificationPopupDuration);
+    }
+
+    /**
+     * The notificationPopupDuration property.
+     *
+     * @return the notificationPopupDuration property.
+     */
+    public Property<Duration> notificationPopupDurationProperty() {
+        return notificationPopupDuration;
     }
 
     /**
@@ -623,6 +622,15 @@ public class GlobalPreferences {
     }
 
     /**
+     * Set to true if plugins should be loaded from external location, false otherwise.
+     *
+     * @param loadPluginsFromExternalLocation true if plugins should be loaded from external location, false otherwise.
+     */
+    public void setLoadPluginsFromExternalLocation(boolean loadPluginsFromExternalLocation) {
+        this.loadPluginsFromExternalLocation.set(loadPluginsFromExternalLocation);
+    }
+
+    /**
      * The loadPluginsFromExternalLocation property.
      *
      * @return the loadPluginsFromExternalLocation property.
@@ -632,11 +640,33 @@ public class GlobalPreferences {
     }
 
     /**
-     * Set to true if plugins should be loaded from external location, false otherwise.
+     * Returns the maximum number of lines to display in the output console.
      *
-     * @param loadPluginsFromExternalLocation true if plugins should be loaded from external location, false otherwise.
+     * @return the maximum number of lines to display in the output console.
      */
-    public void setLoadPluginsFromExternalLocation(boolean loadPluginsFromExternalLocation) {
-        this.loadPluginsFromExternalLocation.set(loadPluginsFromExternalLocation);
+    public int getConsoleMaxLineCapacity() {
+        return consoleMaxLineCapacity.get();
+    }
+
+    /**
+     * Sets the maximum number of lines to display in the output console.
+     *
+     * @param consoleMaxLineCapacity the maximum number of lines to display in the output console.
+     */
+    public void setConsoleMaxLineCapacity(int consoleMaxLineCapacity) {
+        this.consoleMaxLineCapacity.set(consoleMaxLineCapacity);
+    }
+
+    /**
+     * The consoleMaxLineCapacity property.
+     *
+     * @return the consoleMaxLineCapacity property.
+     */
+    public IntegerProperty consoleMaxLineCapacityProperty() {
+        return consoleMaxLineCapacity;
+    }
+
+    private static class GlobalPreferencesHolder {
+        private final static GlobalPreferences instance = new GlobalPreferences();
     }
 }

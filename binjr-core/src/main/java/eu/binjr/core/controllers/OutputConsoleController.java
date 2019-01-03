@@ -16,25 +16,24 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
-import eu.binjr.common.function.CheckedLambdas;
-import eu.binjr.common.logging.TextFlowAppender;
 import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
+import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,6 +42,7 @@ import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.*;
 import java.net.URL;
+import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
  */
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
+    public TextField consoleMaxLinesText;
     @FXML
     private TextFlow textOutput;
     @FXML
@@ -62,6 +63,8 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private ToggleButton alwaysOnTopToggle;
 
+    private TextFlowAppender appender;
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         textOutput.getChildren().addListener(
@@ -70,7 +73,12 @@ public class OutputConsoleController implements Initializable {
                     scrollPane.layout();
                     scrollPane.setVvalue(1.0f);
                 }));
-        initTextFlowAppender();
+
+        final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        consoleMaxLinesText.setTextFormatter(formatter);
+        formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().consoleMaxLineCapacityProperty());
+
+        this.appender = initTextFlowAppender();
         Platform.runLater(() -> {
             logLevelChoice.getItems().setAll(Level.values());
             logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
@@ -92,7 +100,7 @@ public class OutputConsoleController implements Initializable {
         return alwaysOnTopToggle;
     }
 
-    private synchronized void initTextFlowAppender() {
+    private synchronized TextFlowAppender initTextFlowAppender() {
         LoggerContext lc = (LoggerContext) LogManager.getContext(false);
         TextFlowAppender appender = TextFlowAppender.createAppender(
                 "InternalConsole",
@@ -104,11 +112,13 @@ public class OutputConsoleController implements Initializable {
         lc.getConfiguration().addAppender(appender);
         lc.getRootLogger().addAppender(lc.getConfiguration().getAppender(appender.getName()));
         lc.updateLoggers();
+        return appender;
     }
 
     @FXML
     private void handleClearConsole(ActionEvent actionEvent) {
-        this.textOutput.getChildren().clear();
+        this.appender.clearBuffer();
+       // this.textOutput.getChildren().clear();
     }
 
     @FXML

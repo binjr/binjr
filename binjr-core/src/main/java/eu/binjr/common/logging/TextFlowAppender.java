@@ -16,7 +16,8 @@
 
 package eu.binjr.common.logging;
 
-import javafx.application.Platform;
+import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import org.apache.logging.log4j.Level;
@@ -31,8 +32,7 @@ import org.apache.logging.log4j.core.config.plugins.PluginFactory;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -49,7 +49,7 @@ public final class TextFlowAppender extends AbstractAppender {
     private final Lock lock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
-
+    private final LogBuffer<Text, String> logBuffer = new LogBuffer<>();
 
     protected TextFlowAppender(String name, Filter filter,
                                Layout<? extends Serializable> layout,
@@ -61,35 +61,13 @@ public final class TextFlowAppender extends AbstractAppender {
         logColors.put(Level.WARN, "log-warn");
         logColors.put(Level.ERROR, "log-error");
         logColors.put(Level.FATAL, "log-fatal");
-    }
-
-    /**
-     * This method is where the appender does the work.
-     *
-     * @param event Log event with log data
-     */
-    @Override
-    public void append(LogEvent event) {
-        lock.lock();
-        try {
-            final String message = new String(getLayout().toByteArray(event));
-            // append log text to TextArea
-            if (textArea != null) {
-                Text log = new Text(message);
-                log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
-                Platform.runLater(() -> {
-                    try {
-                        textArea.getChildren().add(log);
-                    } catch (final Throwable t) {
-                        System.out.println("Error while append to TextFlow: " + t.getMessage());
-                    }
-                });
+        Timer timer = new Timer(true);
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                refreshTextFlow();
             }
-        } catch (final IllegalStateException ex) {
-            ex.printStackTrace();
-        } finally {
-            lock.unlock();
-        }
+        }, 500, 500);
     }
 
     /**
@@ -117,7 +95,6 @@ public final class TextFlowAppender extends AbstractAppender {
         return new TextFlowAppender(name, filter, layout, true);
     }
 
-
     /**
      * Set TextFlow to append
      *
@@ -125,5 +102,72 @@ public final class TextFlowAppender extends AbstractAppender {
      */
     public static void setTextFlow(TextFlow textFlow) {
         TextFlowAppender.textArea = textFlow;
+    }
+
+    /**
+     * Clear the circular buffer used by the appender
+     */
+    public void clearBuffer() {
+        logBuffer.clear();
+    }
+
+    /**
+     * This method is where the appender does the work.
+     *
+     * @param event Log event with log data
+     */
+    @Override
+    public synchronized void append(LogEvent event) {
+        new String(getLayout().toByteArray(event)).lines().forEach(
+                message -> {
+                    Text log = new Text(message + "\n");
+                    log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
+                    logBuffer.put(log, null);
+                });
+    }
+
+    private void refreshTextFlow() {
+        if (lock.tryLock()) {
+            try {
+                if (textArea != null && logBuffer.isDirty()) {
+                    logBuffer.clean();
+                    Dialogs.runOnFXThread(() -> {
+                        textArea.getChildren().clear();
+                        textArea.getChildren().addAll(logBuffer.keySet());
+                    });
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+    }
+
+    private class LogBuffer<K, V> extends LinkedHashMap<K, V> {
+        private volatile boolean dirty;
+
+        public void clean() {
+            this.dirty = false;
+        }
+
+        @Override
+        public V put(K key, V value) {
+            dirty = true;
+            return super.put(key, value);
+        }
+
+        @Override
+        public void clear() {
+            dirty = true;
+            super.clear();
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return size() > GlobalPreferences.getInstance().getConsoleMaxLineCapacity();
+        }
+
+        public boolean isDirty() {
+            return dirty;
+        }
     }
 }
