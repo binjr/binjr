@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,8 +19,16 @@ package eu.binjr.sources.jrds.adapters;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.preferences.AppEnvironment;
 
+/**
+ * Defines the metadata associated with the JrdsDataAdapter.
+ *
+ * @author Frederic Thevenet
+ */
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
+    /**
+     * Initialises a new instance of the {@link JrdsDataAdapterInfo} class.
+     */
     public JrdsDataAdapterInfo() {
         super("JRDS Server",
                 "JRDS Data Adapter",

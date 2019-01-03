@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018 Frederic Thevenet
+ *    Copyright 2018-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * A dialog box that returns a {@link SerializedDataAdapter} built according to user inputs.
+ * A dialog box that returns a {@link Rrd4jFileAdapterDialog} built according to user inputs.
  *
  * @author Frederic Thevenet
  */
@@ -112,7 +112,6 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
         );
     }
 
-
     private File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Rrd4j File(s)");
@@ -128,10 +127,10 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
     }
 
     /**
-     * Returns an instance of {@link SerializedDataAdapter}
+     * Returns an instance of {@link Rrd4jFileAdapter}
      *
-     * @return an instance of {@link SerializedDataAdapter}
-     * @throws DataAdapterException if the provided {@link ZoneId} is invalid
+     * @return an instance of {@link Rrd4jFileAdapter}
+     * @throws DataAdapterException if the provided parameters are invalid
      */
     private DataAdapter<?> getDataAdapter() throws DataAdapterException {
         List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());

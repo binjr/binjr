@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -29,7 +30,6 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.UnitPrefixes;
-import eu.binjr.common.logging.Profiler;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
@@ -51,8 +51,10 @@ import java.util.SortedMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * A {@link DataAdapter} implementation used to {@link eu.binjr.core.data.workspace.Worksheet} instances
+ * A {@link DataAdapter} implementation used to feed {@link eu.binjr.core.data.workspace.Worksheet} instances
  * with  data from a local CSV formatted file.
+ *
+ * @author Frederic Thevenet
  */
 public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(CsvFileAdapter.class);
@@ -79,7 +81,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      *
      * @param csvPath the path to the csv file.
      * @param zoneId  the time zone to used.
-     * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
+     * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath, ZoneId zoneId) throws DataAdapterException {
         this(csvPath, zoneId, "utf-8", "yyyy-MM-dd HH:mm:ss", ',');
@@ -93,7 +95,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
      * @param encoding        the encoding for the csv file.
      * @param dateTimePattern a pattern to decode time stamps.
      * @param delimiter       the character used by the csv file to separate cells in csv records.
-     * @throws DataAdapterException if the {@link DataAdapter} could not be initializes.
+     * @throws DataAdapterException if the {@link DataAdapter} could not be initialized.
      */
     public CsvFileAdapter(String csvPath, ZoneId zoneId, String encoding, String dateTimePattern, char delimiter) throws DataAdapterException {
         super();

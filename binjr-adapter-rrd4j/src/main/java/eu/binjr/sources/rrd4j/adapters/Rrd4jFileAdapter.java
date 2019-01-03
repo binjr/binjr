@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018 Frederic Thevenet
+ *    Copyright 2018-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -42,16 +42,29 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A {@link eu.binjr.core.data.adapters.DataAdapter} implementation capable of consuming data from Round Robin Database files.
+ *
+ * @author Frederic Thevenet
+ */
 public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
-    private List<Path> rrdPaths;
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
+    private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();
 
+    /**
+     * Initialises a new instance of the {@link Rrd4jFileAdapter} class.
+     */
     public Rrd4jFileAdapter() {
         this(new ArrayList<Path>());
     }
 
+    /**
+     * Initialises a new instance of the {@link Rrd4jFileAdapter} class from the provided list of {@link Path}
+     *
+     * @param rrdPath a list of {@link Path} to be mounted by the adapter.
+     */
     public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
     }

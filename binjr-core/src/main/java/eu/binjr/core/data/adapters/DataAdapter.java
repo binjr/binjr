@@ -30,7 +30,8 @@ import java.util.UUID;
 /**
  * Provides the means to access a data source to retrieve time series data.
  *
- * @param <T>
+ * @param <T> The type of data retrieved by the adapter.
+ * @author Frederic Thevenet
  */
 public interface DataAdapter<T> extends AutoCloseable {
     /**

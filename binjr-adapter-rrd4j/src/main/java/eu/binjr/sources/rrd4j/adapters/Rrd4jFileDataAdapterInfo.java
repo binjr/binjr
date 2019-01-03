@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018 Frederic Thevenet
+ *    Copyright 2018-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,8 +19,16 @@ package eu.binjr.sources.rrd4j.adapters;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.preferences.AppEnvironment;
 
+/**
+ * Defines the metadata associated with the Rrd4jFileDataAdapter
+ *
+ * @author Frederic Thevenet
+ */
 public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
 
+    /**
+     * Initialises a new instance of the {@link Rrd4jFileDataAdapterInfo} class.
+     */
     public Rrd4jFileDataAdapterInfo() {
         super("RRD Files",
                 "RRD Data Adapter",

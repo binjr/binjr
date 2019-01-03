@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * TextFlowAppender for Log4j 2
+ *
+ * @author Frederic Thevenet
  */
 @Plugin(
         name = "TextFlowAppender",
