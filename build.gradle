@@ -17,13 +17,15 @@
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    //   id 'io.codearte.nexus-staging' version '0.12.0'
+    id 'io.codearte.nexus-staging' version '0.12.0'
+    id "de.marcphilipp.nexus-publish" version "0.1.1"
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
 ext.BINJR_VERSION = "2.2.0${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
+ext.GROUP_ID = 'eu.binjr'
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
 ext.LICENSE_URL = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
 ext.LICENSE_DISTRIBUTION = 'repo'
@@ -55,12 +57,18 @@ if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
 }
 
+nexusStaging {
+    username = System.getenv('OSSRH_JIRA_USERNAME')
+    password = System.getenv('OSSRH_JIRA_PASSWORD')
+    packageGroup = GROUP_ID
+}
+
 configure(subprojects - project(':binjr-app')) {
     apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
     apply plugin: 'signing'
+    apply plugin: "de.marcphilipp.nexus-publish"
 
-    group 'eu.binjr'
+    group GROUP_ID
     version BINJR_VERSION
     sourceCompatibility = 11
     description 'Flexible Time Series Visualization'
@@ -140,21 +148,21 @@ configure(subprojects - project(':binjr-app')) {
     signing {
         sign publishing.publications.mavenJava
     }
+
+    nexusPublishing {
+        packageGroup = rootProject.nexusStaging.packageGroup
+        stagingProfileId = rootProject.nexusStaging.stagingProfileId
+        username = rootProject.nexusStaging.username
+        password = rootProject.nexusStaging.password
+    }
 }
 
-//nexusStaging {
-//    username = System.getenv('OSSRH_JIRA_USERNAME')
-//    password = System.getenv('OSSRH_JIRA_PASSWORD')
-//    packageGroup = 'eu.binjr'
-//}
-//
-task publishArtefacts(dependsOn: (subprojects - project(':binjr-app')).publish) {
-
+task publishArtifacts(dependsOn: (subprojects - project(':binjr-app')).publish) {
     if (IS_RELEASE) {
-//        finalizedBy(closeAndReleaseRepository)
+        finalizedBy(publishToNexus)
     }
     doLast {
-        System.out.println("Done publishing artefacts from subprojeccts.")
+        System.out.println("Done publishing artifacts from subprojeccts.")
     }
 }
 

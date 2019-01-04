@@ -25,7 +25,7 @@ script:
   - if [ $TRAVIS_TAG == $TRAVIS_BRANCH ]; then export IS_TAG=true; else export IS_TAG=false; fi
   - chmod +x gradlew
   - if [ $TRAVIS_OS_NAME == "linux" ]; then gpg --fast-import ./distribution/publishing/codesigning.asc; fi
-  - if [ $TRAVIS_OS_NAME == "linux" ]; then ./gradlew publishArtefacts packageDistribution; else ./gradlew packageDistribution; fi
+  - if [ $TRAVIS_OS_NAME == "linux" ]; then ./gradlew publishArtifacts packageDistribution; else ./gradlew packageDistribution; fi
 
 deploy:
   tag_name: $TRAVIS_TAG
