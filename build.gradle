@@ -60,7 +60,11 @@ if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
 nexusStaging {
     username = System.getenv('OSSRH_JIRA_USERNAME')
     password = System.getenv('OSSRH_JIRA_PASSWORD')
-    packageGroup = GROUP_ID
+  //  packageGroup = GROUP_ID
+
+    def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+    def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
+    serverUrl = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
 }
 
 configure(subprojects - project(':binjr-app')) {
@@ -132,17 +136,6 @@ configure(subprojects - project(':binjr-app')) {
                 }
             }
         }
-        repositories {
-            maven {
-                credentials {
-                    username System.getenv('OSSRH_JIRA_USERNAME')
-                    password System.getenv('OSSRH_JIRA_PASSWORD')
-                }
-                def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-                def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-                url = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
-            }
-        }
     }
 
     signing {
@@ -157,12 +150,12 @@ configure(subprojects - project(':binjr-app')) {
     }
 }
 
-task publishArtifacts(dependsOn: (subprojects - project(':binjr-app')).publishToNexus) {
+task publishArtifacts(dependsOn: (subprojects - project(':binjr-app')).publish) {
     if (IS_RELEASE) {
-        finalizedBy(closeAndReleaseRepository)
+            finalizedBy(closeRepository)
     }
     doLast {
-        System.out.println("Done publishing artifacts from subprojeccts.")
+        System.out.println("Done publishing artifacts from subprojects.")
     }
 }
 
