@@ -104,25 +104,7 @@
     -fx-border-color: -binjr-dark-blue-color;
     -fx-background-color: -binjr-dark-blue-color;
 }
-/*
-.choice-box {
-    -fx-background-color: -binjr-pane-background-color;
-    -fx-border-color: -binjr-control-border-color;
-    -fx-border-width:1;
-    -fx-background-radius: 0, 0, 0, 0;
-    -fx-padding: 0em 0.166667em 0em 0.166667em;
-    -fx-background-insets: -1.4, 0, 1, 2;
-}
 
-.choice-box:hover {
-    -fx-border-color: -binjr-color-dark-gray;
-}
-
-.choice-box:pressed:hover {
-    -fx-background-color: -binjr-button-color;
-    -fx-border-color: -binjr-control-border-color;
-}
-*/
 .button:disabled,
 .choice-box:disabled {
     -fx-opacity: .4;

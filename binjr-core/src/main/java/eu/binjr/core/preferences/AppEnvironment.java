@@ -45,7 +45,7 @@ public class AppEnvironment {
 
     private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
     private final BooleanProperty debugMode = new SimpleBooleanProperty();
-    private final BooleanProperty consoleVisible = new SimpleBooleanProperty();
+ //   private final BooleanProperty consoleVisible = new SimpleBooleanProperty();
     private final Property<Level> logLevel = new SimpleObjectProperty<>();
 
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
@@ -58,13 +58,13 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
-        consoleVisible.addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                ConsoleStage.show();
-            } else {
-                ConsoleStage.hide();
-            }
-        });
+//        consoleVisible.addListener((observable, oldValue, newValue) -> {
+//            if (newValue) {
+//
+//            } else {
+//
+//            }
+//        });
 
         logLevel.setValue(LogManager.getRootLogger().getLevel());
         logLevel.addListener((observable, oldLevel, newLevel) -> {
@@ -75,12 +75,17 @@ public class AppEnvironment {
         debugMode.addListener((observable, oldValue, newValue) -> {
             Level newLevel = configuredRootLevel;
             if (newValue) {
+                ConsoleStage.show();
+                logger.warn("Entering debug mode");
                 if (newLevel.compareTo(Level.DEBUG) < 0) {
                     newLevel = Level.DEBUG;
                 }
             }
+            else {
+                logger.info("Leaving debug mode");
+                ConsoleStage.hide();
+            }
             logLevel.setValue(newLevel);
-            consoleVisible.setValue(newValue);
         });
         debugMode.setValue(LogManager.getRootLogger().isDebugEnabled());
     }
@@ -257,32 +262,32 @@ public class AppEnvironment {
         return debugMode;
     }
 
-    /**
-     * Returns true is output console is visible, false otherwise.
-     *
-     * @return true is output console is visible, false otherwise.
-     */
-    public boolean isConsoleVisible() {
-        return consoleVisible.get();
-    }
-
-    /**
-     * The consoleVisible property
-     *
-     * @return the consoleVisible property
-     */
-    public BooleanProperty consoleVisibleProperty() {
-        return consoleVisible;
-    }
-
-    /**
-     * Set to true to render the output console visible, set to false to make it invisible.
-     *
-     * @param consoleVisible true to render the output console visible, set to false to make it invisible.
-     */
-    public void setConsoleVisible(boolean consoleVisible) {
-        this.consoleVisible.set(consoleVisible);
-    }
+//    /**
+//     * Returns true is output console is visible, false otherwise.
+//     *
+//     * @return true is output console is visible, false otherwise.
+//     */
+//    public boolean isConsoleVisible() {
+//        return consoleVisible.get();
+//    }
+//
+//    /**
+//     * The consoleVisible property
+//     *
+//     * @return the consoleVisible property
+//     */
+//    public BooleanProperty consoleVisibleProperty() {
+//        return consoleVisible;
+//    }
+//
+//    /**
+//     * Set to true to render the output console visible, set to false to make it invisible.
+//     *
+//     * @param consoleVisible true to render the output console visible, set to false to make it invisible.
+//     */
+//    public void setConsoleVisible(boolean consoleVisible) {
+//        this.consoleVisible.set(consoleVisible);
+//    }
 
     /**
      * Returns the root log level currently set.

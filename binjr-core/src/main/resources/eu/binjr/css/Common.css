@@ -5,3 +5,16 @@
 .command-bar:expanded .command-bar-pinned-item {
     -fx-content-display: left;
 }
+
+.command-bar .context-menu .icon-container {
+    -fx-padding: 0 14 0 8;
+}
+
+.context-menu .icon-container {
+    -fx-padding: 0 14 0 8;
+}
+
+.context-menu * {
+    -icon-scale-x: 2.5;
+    -icon-scale-y: 2.5;
+}

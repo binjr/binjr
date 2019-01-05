@@ -21,6 +21,8 @@ import eu.binjr.core.preferences.AppEnvironment;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
@@ -52,15 +54,20 @@ public class ConsoleStage {
         final Scene scene = new Scene(root);
         stage = new Stage();
         stage.setScene(scene);
-        stage.setTitle("binjr console output");
+        stage.setTitle("binjr debug console");
         StageAppearanceManager.getInstance().register(stage);
         stage.initStyle(StageStyle.UTILITY);
         stage.show();
         stage.setOnCloseRequest(event -> {
-            AppEnvironment.getInstance().setConsoleVisible(false);
+            AppEnvironment.getInstance().setDebugMode(false);
             event.consume();
         });
 
+        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+            if (e.getCode() == KeyCode.F12) {
+                AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
+            }
+        });
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
             stage.setAlwaysOnTop(newValue);
         });

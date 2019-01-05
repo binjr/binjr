@@ -17,93 +17,176 @@
   -->
 
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.ChoiceBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ScrollPane?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Font?>
-<?import javafx.scene.text.TextFlow?>
-
-<VBox minHeight="100.0" minWidth="300.0" prefHeight="300.0" prefWidth="1000.0" styleClass="console-pane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.OutputConsoleController">
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<VBox fx:id="root" minHeight="100.0" minWidth="300.0" prefHeight="300.0" prefWidth="1000.0" styleClass="console-pane"
+      xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="eu.binjr.core.controllers.OutputConsoleController">
     <children>
-        <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
-            <content>
-                <TextFlow fx:id="textOutput" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" />
-            </content>
-        </ScrollPane>
         <AnchorPane prefHeight="40.0" styleClass="worksheet-tool-bar" VBox.vgrow="NEVER">
             <children>
-                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                      AnchorPane.topAnchor="0.0">
                     <children>
-                        <Label text="Set log level to: " />
-                        <ChoiceBox fx:id="logLevelChoice" />
-                  <Separator orientation="VERTICAL" prefHeight="200.0" />
-                  <Label text="Limit number of lines to:" />
-                  <TextField fx:id="consoleMaxLinesText" prefHeight="25.0" prefWidth="83.0" />
+                        <MenuButton fx:id="debugMenuButton" contentDisplay="LEFT" maxWidth="-Infinity"
+                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0"
+                                    text="Debug Commands">
+                            <graphic>
+                                <HBox styleClass="icon-container">
+                                    <Region styleClass="debug-neutral-icon,menu-icon">
+                                        <padding>
+                                            <Insets left="8.0" right="14.0"/>
+                                        </padding>
+                                    </Region>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Debugging options">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                            <items>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpHeapStats"
+                                          text="Dump Heap Stats">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-low-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmFlags"
+                                          text="Dump VM Flags">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-low-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmCommandLine"
+                                          text="Dump VM Command Line">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-low-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpVmSystemProperties"
+                                          text="Dump VM System Properties">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-low-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugForceGC" text="Run GC">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-med-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugRunFinalization"
+                                          text="Run Finalization">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-med-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpThreadsStacks"
+                                          text="Dump Threads Stacks">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-med-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                                <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpClassHistogram"
+                                          text="Dump GC Class Histogram">
+                                    <graphic>
+                                        <HBox styleClass="icon-container">
+                                            <Region styleClass="debug-high-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+                            </items>
+                        </MenuButton>
+                        <Label text="Set log level to: "/>
+                        <ChoiceBox fx:id="logLevelChoice"/>
+                        <Label text="Limit number of lines to:">
+                            <padding>
+                                <Insets left="8.0"/>
+                            </padding>
+                        </Label>
+                        <TextField fx:id="consoleMaxLinesText" prefHeight="25.0" prefWidth="83.0"/>
                     </children>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                      AnchorPane.topAnchor="0.0">
                     <children>
-                        <ToggleButton fx:id="alwaysOnTopToggle" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Always on top">
+                        <ToggleButton fx:id="alwaysOnTopToggle" contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                      prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button"
+                                      text="Always on top">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="pin-icon" />
+                                    <Region styleClass="pin-icon"/>
                                 </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Always on top">
                                     <font>
-                                        <Font size="10.0" />
+                                        <Font size="10.0"/>
                                     </font>
                                 </Tooltip>
                             </tooltip>
                         </ToggleButton>
-                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleClearConsole" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Clear">
+                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleClearConsole"
+                                prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Clear">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="trash-icon" />
+                                    <Region styleClass="trash-icon"/>
                                 </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Clear console output">
                                     <font>
-                                        <Font size="10.0" />
+                                        <Font size="10.0"/>
                                     </font>
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleSaveConsoleOutput" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Save">
+                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                onAction="#handleSaveConsoleOutput" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Save">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="fileSave-icon" />
+                                    <Region styleClass="fileSave-icon"/>
                                 </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Save console output to file">
                                     <font>
-                                        <Font size="10.0" />
+                                        <Font size="10.0"/>
                                     </font>
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleCopyConsoleOutput" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Copy">
+                        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
+                                onAction="#handleCopyConsoleOutput" prefHeight="30.0" prefWidth="30.0"
+                                styleClass="dialog-button" text="Copy">
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region maxHeight="20" style=" -icon-scale-x: 2.5; -icon-scale-y: 2.5" styleClass="copy-icon" />
+                                    <Region maxHeight="20" style=" -icon-scale-x: 2.5; -icon-scale-y: 2.5"
+                                            styleClass="copy-icon"/>
                                 </HBox>
                             </graphic>
                             <tooltip>
                                 <Tooltip text="Copy console output to clipboard">
                                     <font>
-                                        <Font size="10.0" />
+                                        <Font size="10.0"/>
                                     </font>
                                 </Tooltip>
                             </tooltip>
@@ -112,8 +195,18 @@
                 </HBox>
             </children>
             <padding>
-                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
             </padding>
         </AnchorPane>
+        <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" VBox.vgrow="ALWAYS">
+            <content>
+                <TextFlow fx:id="textOutput" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308">
+                    <padding>
+                        <Insets bottom="2.0" left="2.0" right="2.0" top="2.0"/>
+                    </padding>
+                </TextFlow>
+            </content>
+        </ScrollPane>
+
     </children>
 </VBox>

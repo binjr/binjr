@@ -17,6 +17,7 @@
 package eu.binjr.common.logging;
 
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -51,7 +52,7 @@ public final class TextFlowAppender extends AbstractAppender {
     private final Lock lock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
-    private final LogBuffer<Text, String> logBuffer = new LogBuffer<>();
+    private final LogBuffer<Text, Object> logBuffer = new LogBuffer<>();
 
     protected TextFlowAppender(String name, Filter filter,
                                Layout<? extends Serializable> layout,
@@ -67,7 +68,9 @@ public final class TextFlowAppender extends AbstractAppender {
         timer.schedule(new TimerTask() {
             @Override
             public void run() {
-                refreshTextFlow();
+                if (AppEnvironment.getInstance().isDebugMode()) {
+                    refreshTextFlow();
+                }
             }
         }, 500, 500);
     }

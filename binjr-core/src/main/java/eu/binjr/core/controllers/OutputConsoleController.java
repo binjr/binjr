@@ -16,8 +16,11 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.diagnositic.DiagnosticCommand;
+import eu.binjr.common.diagnositic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.TextFlowAppender;
+import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
@@ -30,6 +33,9 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
@@ -54,6 +60,7 @@ import java.util.stream.Collectors;
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
     public TextField consoleMaxLinesText;
+    public VBox root;
     @FXML
     private TextFlow textOutput;
     @FXML
@@ -154,4 +161,80 @@ public class OutputConsoleController implements Initializable {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, scrollPane);
         }
     }
+
+
+
+    public void handleDebugForceGC(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
+        System.gc();
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+
+    }
+
+    public void handleDebugRunFinalization(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
+        System.runFinalization();
+    }
+
+    public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
+        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
+    }
+
+    public void handleDebugDumpThreadsStacks(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e, root);
+        }
+    }
+
+    public void handleDebugDumpVmSystemProperties(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e, root);
+        }
+    }
+
+    public void handleDebugDumpClassHistogram(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e, root);
+        }
+    }
+
+    private String getJvmHeapStats() {
+        Runtime rt = Runtime.getRuntime();
+        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
+        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
+        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
+        double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
+        double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
+        return String.format(
+                "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
+                maxMB,
+                committedMB,
+                usedMB,
+                percentCommitted,
+                percentMax
+        );
+    }
+
+    public void handleDebugDumpVmFlags(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e, root);
+        }
+    }
+
+    public void handleDebugDumpVmCommandLine(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
+        } catch (DiagnosticException e) {
+            Dialogs.notifyException("Error running diagnostic command", e, root);
+        }
+    }
+
 }

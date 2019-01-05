@@ -56,12 +56,6 @@
     -fx-smooth: false;
 }
 
-
-.context-menu .icon-container {
-    -fx-padding: 0 14 0 8;
-
-}
-
 .command-bar .context-menu * {
     -icon-scale-x: 2.5;
     -icon-scale-y: 2.5;

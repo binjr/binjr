@@ -16,7 +16,8 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.core.Binjr;
+import eu.binjr.common.github.GithubRelease;
+import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -31,10 +32,6 @@ import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.UpdateManager;
-import eu.binjr.common.diagnositic.DiagnosticCommand;
-import eu.binjr.common.diagnositic.DiagnosticException;
-import eu.binjr.common.github.GithubRelease;
-import eu.binjr.common.javafx.controls.*;
 import javafx.animation.*;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -95,9 +92,9 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  * @author Frederic Thevenet
  */
 public class MainViewController implements Initializable {
-    private static final Logger logger = LogManager.getLogger(MainViewController.class);
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final double TOOL_BUTTON_SIZE = 20;
@@ -110,17 +107,6 @@ public class MainViewController implements Initializable {
     private final Map<TitledPane, Source> sourcesAdapters = new HashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
-
-
-    private Timeline showTimeline;
-    private Timeline hideTimeline;
-    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
-    private Property<TimeRangePicker.TimeRange> linkedTimeRange = new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
-
-    public MenuButton debugMenuButton;
-    public MenuItem consoleMenuItem;
-    public Menu debugLevelMenu;
-    private Optional<String> associatedFile = Optional.empty();
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -145,6 +131,11 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding<Double>>> searchResultSet;
     int currentSearchHit = -1;
+    private Timeline showTimeline;
+    private Timeline hideTimeline;
+    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+    private Property<TimeRangePicker.TimeRange> linkedTimeRange = new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
+    private Optional<String> associatedFile = Optional.empty();
     @FXML
     private MenuItem refreshMenuItem;
     @FXML
@@ -190,7 +181,6 @@ public class MainViewController implements Initializable {
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
 
-        debugMenuButton.visibleProperty().bind(AppEnvironment.getInstance().debugModeProperty());
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
@@ -224,9 +214,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
-        AppEnvironment.getInstance().consoleVisibleProperty().addListener((observable, oldValue, newValue) -> {
-            consoleMenuItem.setText((newValue ? "Hide" : "Show") + " Console");
-        });
+
 
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
@@ -289,6 +277,11 @@ public class MainViewController implements Initializable {
                 event.consume();
             } else {
                 Platform.exit();
+            }
+        });
+        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+            if (e.getCode() == KeyCode.F12) {
+                AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
         });
         stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
@@ -1286,90 +1279,6 @@ public class MainViewController implements Initializable {
 
     public void refreshAllWorksheets() {
         seriesControllers.values().forEach(WorksheetController::refresh);
-    }
-
-    public void handleDebugForceGC(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
-        System.gc();
-        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
-
-    }
-
-    public void handleDebugRunFinalization(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
-        System.runFinalization();
-    }
-
-    public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
-    }
-
-    public void handleDebugDumpThreadsStacks(ActionEvent actionEvent) {
-        try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpThreadStacks());
-        } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    public void handleDebugDumpVmSystemProperties(ActionEvent actionEvent) {
-        try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmSystemProperties());
-        } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    public void handleDebugDumpClassHistogram(ActionEvent actionEvent) {
-        try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
-        } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    private String getJvmHeapStats() {
-        Runtime rt = Runtime.getRuntime();
-        double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
-        double committedMB = (double) rt.totalMemory() / 1024.0 / 1024.0;
-        double usedMB = ((double) rt.totalMemory() - rt.freeMemory()) / 1024.0 / 1024.0;
-        double percentCommitted = (((double) rt.totalMemory() - rt.freeMemory()) / rt.totalMemory()) * 100;
-        double percentMax = (((double) rt.totalMemory() - rt.freeMemory()) / rt.maxMemory()) * 100;
-        return String.format(
-                "JVM Heap: Max=%.0fMB, Committed=%.0fMB, Used=%.0fMB (%.2f%% of committed, %.2f%% of max)",
-                maxMB,
-                committedMB,
-                usedMB,
-                percentCommitted,
-                percentMax
-        );
-    }
-
-    public void handleDebugDumpVmFlags(ActionEvent actionEvent) {
-        try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmFlags());
-        } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    public void handleDebugDumpVmCommandLine(ActionEvent actionEvent) {
-        try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
-        } catch (DiagnosticException e) {
-            Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    public void toggleDebugMode(ActionEvent actionEvent) {
-        AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
-        if (AppEnvironment.getInstance().isDebugMode()) {
-            logger.warn("Entering debug mode");
-        }
-    }
-
-    public void toggleConsoleVisibility(ActionEvent actionEvent) {
-        AppEnvironment.getInstance().setConsoleVisible(!AppEnvironment.getInstance().isConsoleVisible());
     }
 
     //endregion
