@@ -60,7 +60,7 @@ if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
 nexusStaging {
     username = System.getenv('OSSRH_JIRA_USERNAME')
     password = System.getenv('OSSRH_JIRA_PASSWORD')
-  //  packageGroup = GROUP_ID
+    packageGroup = GROUP_ID
 
     def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
     def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
