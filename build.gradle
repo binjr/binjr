@@ -61,10 +61,6 @@ nexusStaging {
     username = System.getenv('OSSRH_JIRA_USERNAME')
     password = System.getenv('OSSRH_JIRA_PASSWORD')
     packageGroup = GROUP_ID
-
-    def releasesRepoUrl = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
-    def snapshotsRepoUrl = "https://oss.sonatype.org/content/repositories/snapshots/"
-    serverUrl = IS_RELEASE ? releasesRepoUrl : snapshotsRepoUrl
 }
 
 configure(subprojects - project(':binjr-app')) {
@@ -121,7 +117,6 @@ configure(subprojects - project(':binjr-app')) {
                             distribution = 'repo'
                         }
                     }
-
                     developers {
                         developer {
                             id = 'fthevenet'
@@ -152,7 +147,7 @@ configure(subprojects - project(':binjr-app')) {
 
 task publishArtifacts(dependsOn: (subprojects - project(':binjr-app')).publish) {
     if (IS_RELEASE) {
-            finalizedBy(closeRepository)
+        finalizedBy(closeAndReleaseRepository)
     }
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
