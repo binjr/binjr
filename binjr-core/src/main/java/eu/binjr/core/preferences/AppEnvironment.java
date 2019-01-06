@@ -262,33 +262,6 @@ public class AppEnvironment {
         return debugMode;
     }
 
-//    /**
-//     * Returns true is output console is visible, false otherwise.
-//     *
-//     * @return true is output console is visible, false otherwise.
-//     */
-//    public boolean isConsoleVisible() {
-//        return consoleVisible.get();
-//    }
-//
-//    /**
-//     * The consoleVisible property
-//     *
-//     * @return the consoleVisible property
-//     */
-//    public BooleanProperty consoleVisibleProperty() {
-//        return consoleVisible;
-//    }
-//
-//    /**
-//     * Set to true to render the output console visible, set to false to make it invisible.
-//     *
-//     * @param consoleVisible true to render the output console visible, set to false to make it invisible.
-//     */
-//    public void setConsoleVisible(boolean consoleVisible) {
-//        this.consoleVisible.set(consoleVisible);
-//    }
-
     /**
      * Returns the root log level currently set.
      *

@@ -16,14 +16,14 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.version.Version;
+import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.CannotLoadWorkspaceException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
-import eu.binjr.common.version.Version;
-import eu.binjr.common.xml.XmlUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -98,6 +98,65 @@ public class Workspace implements Dirtyable {
     }
 
     /**
+     * Deserializes the content of the provided file as a new instance of the {@link Workspace} class
+     *
+     * @param file the file to deserialize
+     * @return a new instance of the {@link Workspace} class
+     * @throws IOException                  if an IO error occurs when accessing the file
+     * @throws JAXBException                if an error occurs while deserializing the file
+     * @throws CannotLoadWorkspaceException if an error occurs while loading the workspace.
+     */
+    public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
+        sanityCheck(file);
+        Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
+        logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
+        workspace.setPath(file.toPath());
+        workspace.cleanUp();
+        return workspace;
+    }
+
+    private static void sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
+        if (file == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        }
+        if (!file.exists()) {
+            throw new FileNotFoundException("Could not find specified workspace file " + file.getPath());
+        }
+        try {
+            String verStr = XmlUtils.getFirstAttributeValue(file, "schemaVersion");
+            if (verStr == null) {
+                throw new CannotLoadWorkspaceException(
+                        "Could not determine the workspace's schema version: it was probably produced with an older, incompatible version of binjr." +
+                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
+            }
+            Version foundVersion = new Version(verStr);
+            if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
+                if (foundVersion.getMajor() != SUPPORTED_SCHEMA_VERSION.getMajor()) {
+                    // Only throw if major version is different, only warn otherwise.
+                    throw new CannotLoadWorkspaceException(
+                            "This workspace is not compatible with the current version of binjr. (Supported schema version="
+                                    + SUPPORTED_SCHEMA_VERSION.toString()
+                                    + ", found="
+                                    + foundVersion.toString() + ")");
+                }
+                logger.warn("This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
+                        + SUPPORTED_SCHEMA_VERSION.toString()
+                        + ", found="
+                        + foundVersion.toString() + ")");
+            }
+            if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
+                throw new CannotLoadWorkspaceException(
+                        "This workspace is not compatible with the current version of binjr. (Minimum supported schema version="
+                                + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString()
+                                + ", found="
+                                + foundVersion.toString() + ")");
+            }
+        } catch (XMLStreamException e) {
+            throw new CannotLoadWorkspaceException("Error retrieving bjr schema version", e);
+        }
+    }
+
+    /**
      * Add all the elements in the provided collection to the list of {@link Worksheet} instances
      *
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
@@ -106,6 +165,11 @@ public class Workspace implements Dirtyable {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
+    /**
+     * Add all the elements in the provided collection to the list of {@link Worksheet} instances
+     *
+     * @param worksheetsToAdd the {@link Worksheet} instances to add
+     */
     public void addWorksheets(Worksheet<?>... worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
@@ -143,6 +207,11 @@ public class Workspace implements Dirtyable {
         this.sources.addAll(sourcesToAdd);
     }
 
+    /**
+     * Add a single {@link Source} instance to the worksheet.
+     *
+     * @param sourceToAdd the {@link Source} instance to add.
+     */
     public void addSource(Source sourceToAdd) {
         this.sources.add(sourceToAdd);
     }
@@ -156,6 +225,11 @@ public class Workspace implements Dirtyable {
         this.sources.removeAll(sourcesToRemove);
     }
 
+    /**
+     * Remove a single {@link Source} instance from the worksheet.
+     *
+     * @param sourceToRemove the {@link Source} to remove.
+     */
     public void removeSource(Source sourceToRemove) {
         this.sources.remove(sourceToRemove);
     }
@@ -188,6 +262,21 @@ public class Workspace implements Dirtyable {
     }
 
     /**
+     * Sets the {@link Path} for the serialized form of the {@link Workspace}
+     *
+     * @param path the {@link Path} for the serialized form of the {@link Workspace}
+     */
+    public void setPath(Path path) {
+        if (path == null) {
+            throw new IllegalArgumentException("Path cannot be null");
+        }
+        this.path.setValue(path);
+        if (hasPath()) {
+            GlobalPreferences.getInstance().setMostRecentSavedWorkspace(path);
+        }
+    }
+
+    /**
      * Returns the property that observes the {@link Path} for the serialized form of the {@link Workspace}
      *
      * @return the property that observes the {@link Path} for the serialized form of the {@link Workspace}
@@ -206,21 +295,6 @@ public class Workspace implements Dirtyable {
             return false;
         }
         return getPath().toFile().exists();
-    }
-
-    /**
-     * Sets the {@link Path} for the serialized form of the {@link Workspace}
-     *
-     * @param path the {@link Path} for the serialized form of the {@link Workspace}
-     */
-    public void setPath(Path path) {
-        if (path == null) {
-            throw new IllegalArgumentException("Path cannot be null");
-        }
-        this.path.setValue(path);
-        if (hasPath()) {
-            GlobalPreferences.getInstance().setMostRecentSavedWorkspace(path);
-        }
     }
 
     @Override
@@ -273,24 +347,6 @@ public class Workspace implements Dirtyable {
         GlobalPreferences.getInstance().setMostRecentSaveFolder(file.toPath());
     }
 
-    /**
-     * Deserializes the content of the provided file as a new instance of the {@link Workspace} class
-     *
-     * @param file the file to deserialize
-     * @return a new instance of the {@link Workspace} class
-     * @throws IOException                  if an IO error occurs when accessing the file
-     * @throws JAXBException                if an error occurs while deserializing the file
-     * @throws CannotLoadWorkspaceException if an error occurs while loading the workspace.
-     */
-    public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
-        sanityCheck(file);
-        Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
-        logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
-        workspace.setPath(file.toPath());
-        workspace.cleanUp();
-        return workspace;
-    }
-
     @Override
     public Boolean isDirty() {
         return this.status.isDirty();
@@ -304,46 +360,5 @@ public class Workspace implements Dirtyable {
     @Override
     public void cleanUp() {
         this.status.cleanUp();
-    }
-
-    private static void sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
-        if (file == null) {
-            throw new IllegalArgumentException("File cannot be null");
-        }
-        if (!file.exists()) {
-            throw new FileNotFoundException("Could not find specified workspace file " + file.getPath());
-        }
-        try {
-            String verStr = XmlUtils.getFirstAttributeValue(file, "schemaVersion");
-            if (verStr == null) {
-                throw new CannotLoadWorkspaceException(
-                        "Could not determine the workspace's schema version: it was probably produced with an older, incompatible version of binjr." +
-                                "\n (Minimum supported schema version=" + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString() + ")");
-            }
-            Version foundVersion = new Version(verStr);
-            if (foundVersion.compareTo(SUPPORTED_SCHEMA_VERSION) > 0) {
-                if (foundVersion.getMajor() != SUPPORTED_SCHEMA_VERSION.getMajor()) {
-                    // Only throw if major version is different, only warn otherwise.
-                    throw new CannotLoadWorkspaceException(
-                            "This workspace is not compatible with the current version of binjr. (Supported schema version="
-                                    + SUPPORTED_SCHEMA_VERSION.toString()
-                                    + ", found="
-                                    + foundVersion.toString() + ")");
-                }
-                logger.warn("This workspace version is higher that the supported version; there may be incompatibilities (Supported schema version="
-                        + SUPPORTED_SCHEMA_VERSION.toString()
-                        + ", found="
-                        + foundVersion.toString() + ")");
-            }
-            if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
-                throw new CannotLoadWorkspaceException(
-                        "This workspace is not compatible with the current version of binjr. (Minimum supported schema version="
-                                + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString()
-                                + ", found="
-                                + foundVersion.toString() + ")");
-            }
-        } catch (XMLStreamException e) {
-            throw new CannotLoadWorkspaceException("Error retrieving bjr schema version", e);
-        }
     }
 }

@@ -16,12 +16,12 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
-import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -41,15 +41,25 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Source")
 public class Source implements Dirtyable, Closeable {
+    private final ChangeWatcher status;
+    private final BindingManager bindingManager = new BindingManager();
     private UUID adapterId;
     @IsDirtyable
     private Property<String> name = new SimpleStringProperty();
     private String adapterClassName;
     private Map<String, String> adapterParams;
-    private final ChangeWatcher status;
     private DataAdapter adapter;
-    private final BindingManager bindingManager = new BindingManager();
     private Property<Boolean> editable = new SimpleBooleanProperty();
+
+    /**
+     * Initializes a new instance of the {@link Source} class
+     */
+    public Source() {
+        this.status = new ChangeWatcher(this);
+        if (adapterId == null) {
+            this.adapterId = UUID.randomUUID();
+        }
+    }
 
     /**
      * Creates an instance of the {@link Source} class from the provided  {@link SerializedDataAdapter}
@@ -72,16 +82,6 @@ public class Source implements Dirtyable, Closeable {
     }
 
     /**
-     * Initializes a new instance of the {@link Source} class
-     */
-    public Source() {
-        this.status = new ChangeWatcher(this);
-        if (adapterId == null) {
-            this.adapterId = UUID.randomUUID();
-        }
-    }
-
-    /**
      * The name of the {@link Source}
      *
      * @return the name of the {@link Source}
@@ -100,6 +100,11 @@ public class Source implements Dirtyable, Closeable {
         this.name.setValue(name);
     }
 
+    /**
+     * The name property
+     *
+     * @return the name property.
+     */
     public Property<String> nameProperty() {
         return this.name;
     }
