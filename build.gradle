@@ -189,6 +189,36 @@ task copyResources(type: Copy) {
 markdownToHtml {
     sourceDir = file("${projectDir}/distribution/info")
     outputDir = file("$DISTRIBUTION_PATH")
+
+    doLast {
+        ConfigurableFileTree tree = fileTree(dir: "$DISTRIBUTION_PATH")
+        tree.include '**/*.html'
+
+        tree.each { File file ->
+            String path = file.path
+            File newFile = new File("${DISTRIBUTION_PATH}/tmp_${file.name}")
+            newFile << "<html lang=\"en\">\n" +
+                    "<head>\n" +
+                    "    <title>" + (file.name - ".html") + "</title>\n" +
+                    "    <meta charset=\"utf-8\"/>\n" +
+                    "    <link rel=\"stylesheet\" href=\"./resources/css/air.css\">\n" +
+                    "</head>"
+            newFile << file.getText("utf-8")
+            if (!file.name.startsWith("LICENSE")) {
+                newFile << "<footer>\n" +
+                        "    <br>\n" +
+                        "    <hr>\n" +
+                        "    <p style=\"text-align:left;\">\n" +
+                        "        (c) 2016-2019 <a href=\"https://www.fthevenet.eu\">Frederic Thevenet</a>\n" +
+                        "        <span style=\"float:right;\"><a href=\"https://www.binjr.eu\">www.binjr.eu</a></span>\n" +
+                        "    </p>\n" +
+                        "</footer>"
+            }
+            file.delete()
+            newFile.renameTo(path)
+        }
+
+    }
 }
 
 task downloadopenJfxJmods(type: Download) {

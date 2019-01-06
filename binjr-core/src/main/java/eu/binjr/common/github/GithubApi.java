@@ -118,7 +118,8 @@ public class GithubApi {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(URL_PROTOCOL)
                 .setHost(GITHUB_API_HOSTNAME)
-                .setPath("/repos/" + owner + "/" + repo + "/releases");
+                .setPath("/repos/" + owner + "/" + repo + "/releases")
+                .addParameter("per_page", "100");
 
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = new HttpGet(requestUrl.build());

@@ -1,10 +1,3 @@
-<html lang="en">
-<head>
-    <title>binjr</title>
-    <meta charset="utf-8"/>
-    <link rel="stylesheet" href="./resources/css/air.css">
-</head>
-
 #![binjr](./resources/images/binjr_logo.png)
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
@@ -28,12 +21,3 @@ For more info and to download the latest release, please visit the binjr website
 ### How is it licensed?
 
 *binjr* is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE).
-
-<footer>
-    <br>
-    <hr>
-    <p style="text-align:left;">
-        © 2016-2019 <a href="https://www.fthevenet.eu">Frederic Thevenet</a>
-        <span style="float:right;"><a href="https://www.binjr.eu">www.binjr.eu</a></span>
-    </p>
-</footer>
