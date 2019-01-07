@@ -1,4 +1,5 @@
-#![binjr](./resources/images/binjr_logo.png)
+# ![binjr](./resources/images/binjr_logo.png)
+##### _Version ${version}, Released on ${releaseDate}_ 
 
 *binjr* is an open source time series visualization tool. It can plot time series data from multiple sources as a set of charts, which end users can navigate or zoom in and out.
 

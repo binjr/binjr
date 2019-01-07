@@ -1,3 +1,5 @@
+import java.text.SimpleDateFormat
+
 /*
  *    Copyright 2018-2019 Frederic Thevenet
  *
@@ -186,10 +188,17 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
-markdownToHtml {
-    sourceDir = file("${projectDir}/distribution/info")
-    outputDir = file("$DISTRIBUTION_PATH")
+task copyInfo(type: Copy){
+    from "${projectDir}/distribution/info"
+    into "${buildDir}/tmp/info"
+    expand(["version": "$BINJR_VERSION", "releaseDate": "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}"])
+}
 
+markdownToHtml.dependsOn(copyInfo)
+
+markdownToHtml {
+    sourceDir = file("${buildDir}/tmp/info")
+    outputDir = file("$DISTRIBUTION_PATH")
     doLast {
         ConfigurableFileTree tree = fileTree(dir: "$DISTRIBUTION_PATH")
         tree.include '**/*.html'
@@ -217,7 +226,6 @@ markdownToHtml {
             file.delete()
             newFile.renameTo(path)
         }
-
     }
 }
 
