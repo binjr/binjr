@@ -48,6 +48,10 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
+    static {
+        // Disable the forced sync mechanism for  Rrd4J NIO backend.
+        RrdBackendFactory.setActiveFactories(new RrdNioBackendFactory(0));
+    }
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
     private List<Path> rrdPaths;
