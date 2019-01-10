@@ -1,17 +1,14 @@
 .idea
 *.iml
 
-/binjr/target/
+
 /binjr/dependency-reduced-pom.xml
 /log4j2.xml
 binjr.log
 launcher/
+target/
 out/
+build/
 /.gradle/
-/binjr-core/build/
-/binjr-adapters/build/
-/build/
-/binjr-adapter-csv/build/
-/binjr-adapter-jrds/build/
-/binjr-app/build/
-/binjr-adapter-rrd4j/build/
+
+
