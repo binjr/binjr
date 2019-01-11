@@ -188,10 +188,18 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
-task copyInfo(type: Copy){
+task copyInfo(type: Copy) {
     from "${projectDir}/distribution/info"
     into "${buildDir}/tmp/info"
-    expand(["version": "$BINJR_VERSION", "releaseDate": "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}"])
+
+    def changeHistory = new File("./CHANGELOG.md").getText("utf-8")
+    def currentChanges = new File("./UNRELEASED.md").getText("utf-8")
+    expand(["version"       : "$BINJR_VERSION",
+            "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
+            "changeHistory" : "$changeHistory",
+            "currentChanges": "$currentChanges",
+            "tagName"       : "v${BINJR_VERSION}"
+    ])
 }
 
 markdownToHtml.dependsOn(copyInfo)
