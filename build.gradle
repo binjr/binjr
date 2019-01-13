@@ -19,13 +19,13 @@ import java.text.SimpleDateFormat
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id 'io.codearte.nexus-staging' version '0.12.0'
+    id 'io.codearte.nexus-staging' version '0.20.0'
     id "de.marcphilipp.nexus-publish" version "0.1.1" apply false
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.BINJR_VERSION = "2.2.1${IS_RELEASE ? '' : '-SNAPSHOT'}"
+ext.BINJR_VERSION = "2.2.2${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
 ext.LICENSE_NAME = 'Apache License, Version 2.0'

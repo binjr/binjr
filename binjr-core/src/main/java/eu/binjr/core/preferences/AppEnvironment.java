@@ -58,14 +58,6 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
-//        consoleVisible.addListener((observable, oldValue, newValue) -> {
-//            if (newValue) {
-//
-//            } else {
-//
-//            }
-//        });
-
         logLevel.setValue(LogManager.getRootLogger().getLevel());
         logLevel.addListener((observable, oldLevel, newLevel) -> {
             Configurator.setRootLevel(newLevel);

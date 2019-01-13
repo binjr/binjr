@@ -1,4 +1,10 @@
-# binjr [![Build Status](https://travis-ci.org/binjr/binjr.svg?branch=master)](https://travis-ci.org/binjr/binjr)  [![Build status](https://ci.appveyor.com/api/projects/status/tv8vc0emdueymlp8/branch/master?svg=true)](https://ci.appveyor.com/project/fthevenet/binjr/branch/master) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22)
+# binjr 
+[![Build Status: Linux](https://img.shields.io/travis/binjr/binjr.svg?logo=linux&logoColor=white&style=flat-square)](https://travis-ci.org/binjr/binjr)
+[![Build Status: macOS](https://img.shields.io/travis/binjr/binjr.svg?logo=apple&logoColor=white&style=flat-square)](https://travis-ci.org/binjr/binjr)
+[![Build Status: Windows](https://img.shields.io/appveyor/ci/fthevenet/binjr.svg?logo=windows&style=flat-square)](https://ci.appveyor.com/project/fthevenet/binjr/branch/master)
+[![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?style=flat-square)](https://github.com/binjr/binjr/releases/latest)
+[![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central&style=flat-square)](https://search.maven.org/search?q=g:%22eu.binjr%22)
+
 
 
 

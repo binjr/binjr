@@ -36,7 +36,7 @@ import eu.binjr.common.xml.adapters.LocalDateTimeXmlAdapter;
 import eu.binjr.common.xml.adapters.ZoneIdXmlAdapter;
 import eu.binjr.common.xml.adapters.ZonedDateTimeXmlAdapter;
 import eu.binjr.common.version.Version;
-import eu.binjr.common.version.VersionXmlAdapter;
+import eu.binjr.common.xml.adapters.VersionXmlAdapter;
 import eu.binjr.common.xml.adapters.ColorXmlAdapter;
 import javafx.scene.paint.Color;
 

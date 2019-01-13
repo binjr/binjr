@@ -45,6 +45,7 @@ public class GithubApi {
     private static final Logger logger = LogManager.getLogger(GithubApi.class);
     public static final String GITHUB_API_HOSTNAME = "api.github.com";
     public static final String URL_PROTOCOL = "https";
+    private String oauthToken;
     private final CloseableHttpClient httpClient;
     private Gson gson;
 
@@ -94,7 +95,9 @@ public class GithubApi {
                 .setScheme(URL_PROTOCOL)
                 .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases/" + id);
-
+        if (oauthToken != null) {
+            requestUrl.addParameter("access_token", oauthToken);
+        }
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = new HttpGet(requestUrl.build());
         return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<GithubRelease>() {
@@ -120,7 +123,9 @@ public class GithubApi {
                 .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases")
                 .addParameter("per_page", "100");
-
+        if (oauthToken != null) {
+            requestUrl.addParameter("access_token", oauthToken);
+        }
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = new HttpGet(requestUrl.build());
         return httpClient.execute(httpget, new AbstractResponseHandler<List<GithubRelease>>() {
@@ -130,5 +135,14 @@ public class GithubApi {
                 }.getType());
             }
         });
+    }
+
+    /**
+     * Set the OAuth2 api token.
+     *
+     * @param oauthToken the OAuth2 api token.
+     */
+    public void setOauthToken(String oauthToken) {
+        this.oauthToken = oauthToken;
     }
 }

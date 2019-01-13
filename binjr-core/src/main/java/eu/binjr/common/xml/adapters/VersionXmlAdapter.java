@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.version;
+package eu.binjr.common.xml.adapters;
+
+import eu.binjr.common.version.Version;
 
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
