@@ -1,4 +1,6 @@
-# binjr-core [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22%20AND%20a:%22binjr-core%22)
+# binjr-core 
+
+[![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central&style=flat-square)](https://search.maven.org/search?q=g:%22eu.binjr%22%20AND%20a:%22binjr-core%22)
 
 This is the main module for the application. It is responsible for :
  * The presentation layer and interaction with the end-user.
