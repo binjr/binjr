@@ -44,7 +44,8 @@ ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINU
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
 ext.JLINK_ADD_MODULES = "javafx.controls,javafx.fxml,javafx.swing,java.base,java.prefs,java.sql,java.xml,java.management,java.rmi," +
         "java.management.rmi,jdk.management.agent,jdk.security.auth,jdk.management,jdk.management.jfr,jdk.zipfs," +
-        "jdk.unsupported.desktop${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
+        "jdk.unsupported.desktop,jdk.crypto.ec,jdk.crypto.cryptoki${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
+
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 ext.ARCHIVE_PATH = ""
