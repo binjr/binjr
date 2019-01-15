@@ -532,7 +532,6 @@ public class MainViewController implements Initializable {
         });
 
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
-        // editButtonsGroup.getToggles().add(editButton);
         toolbar.getChildren().addAll(closeButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
 
@@ -708,7 +707,7 @@ public class MainViewController implements Initializable {
             }
             workspace.cleanUp();
             GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
-            logger.debug(() -> "Recently loaded workspaces: " + GlobalPreferences.getInstance().getRecentFiles().stream().collect(Collectors.joining(" ")));
+            logger.debug(() -> "Recently loaded workspaces: " + String.join(" ", GlobalPreferences.getInstance().getRecentFiles()));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading workspace", e, root);
@@ -756,7 +755,6 @@ public class MainViewController implements Initializable {
         dlg.showAndWait().ifPresent(da -> {
             Source newSource = Source.of(da);
             TitledPane newSourcePane = newSourcePane(newSource);
-            // newSourcePane.setText(da.getSourceName());
             sourceMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
@@ -922,6 +920,7 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
+        Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
         TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
         treeView.setShowRoot(false);
         Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
@@ -945,12 +944,18 @@ public class MainViewController implements Initializable {
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
             dp.onStart();
-            TreeItem<TimeSeriesBinding<Double>> bindingTree = dp.getBindingTree();
+            @SuppressWarnings("unchecked") TreeItem<TimeSeriesBinding<Double>> bindingTree = dp.getBindingTree();
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
-        } catch (DataAdapterException e) {
+        } catch (Throwable e) {
             Dialogs.notifyException("An error occurred while getting data from source " + dp.getSourceName(), e, root);
+            // Failed to load tree: attempt to close DataAdapter
+            try {
+                dp.close();
+            } catch (Throwable t) {
+                logger.warn("An error occurred while attempting to close DataAdapter " + dp.getId(), e);
+            }
         }
         return Optional.empty();
     }
@@ -997,7 +1002,6 @@ public class MainViewController implements Initializable {
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }
-
 
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
