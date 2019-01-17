@@ -245,5 +245,13 @@ public class TimeSeriesInfo<T> implements Dirtyable {
         status.cleanUp();
     }
 
-
+    @Override
+    public String toString() {
+        return "TimeSeriesInfo{" +
+                "displayName=" + displayName +
+                ", selected=" + selected +
+                ", displayColor=" + displayColor +
+                ", binding=" + binding +
+                '}';
+    }
 }
