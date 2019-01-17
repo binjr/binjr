@@ -19,7 +19,6 @@ BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
 JAVACMD="./runtime/bin/java"
 
 exec $JAVACMD \
-  -Djdk.gtk.version=2 \
   -splash:"./resources/images/splashscreen.png" \
   -cp "./libs/*:./plugins/*" \
   -Dapp.name="binjr" \
