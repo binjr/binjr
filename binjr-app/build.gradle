@@ -16,6 +16,8 @@
 
 plugins {
     id 'application'
+    id 'signing'
+    id 'de.marcphilipp.nexus-publish'
 }
 
 dependencies {
@@ -24,14 +26,14 @@ dependencies {
     implementation project(':binjr-adapter-csv')
     implementation project(':binjr-adapter-rrd4j')
 
-    runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-    runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-    runtimeOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-    runtimeOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-    runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+//    runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+//    runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+//    runtimeOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+//    runtimeOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+//    runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
 }
 
-mainClassName = 'eu.binjr.Bootstrap'
+mainClassName = 'eu.binjr.core.Bootstrap'
 
 repositories {
     mavenCentral()
@@ -40,3 +42,72 @@ repositories {
     }
 }
 
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = project.name
+            groupId = GROUP_ID
+            version = BINJR_VERSION
+            //from components.java
+            pom {
+                packaging = 'pom'
+                name = project.name
+                description = 'Flexible Time Series Visualization'
+                url = 'https://www.binjr.eu'
+                licenses {
+                    license {
+                        name = 'The Apache License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'fthevenet'
+                        name = 'Frederic Thevenet'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:https://github.com/binjr/binjr.git'
+                    developerConnection = 'scm:git:https://github.com/binjr/binjr.git'
+                    url = 'https://github.com/binjr/binjr'
+                }
+                withXml {
+                    Node pluginNode = asNode().appendNode('build')
+                            .appendNode('plugins')
+                            .appendNode('plugin')
+                    pluginNode.appendNode('groupId', 'org.codehaus.mojo')
+                    pluginNode.appendNode('artifactId', 'exec-maven-plugin')
+                    pluginNode.appendNode('version', '1.2.1')
+                    pluginNode.appendNode('executions')
+                            .appendNode('execution')
+                            .appendNode('goals')
+                            .appendNode('goal', 'java')
+                    pluginNode.appendNode('configuration')
+                            .appendNode('mainClass','eu.binjr.core.Binjr')
+
+                    Node depsNode = asNode().appendNode('dependencies')
+                    project.configurations.runtimeClasspath.each{
+                        if (it.name.startsWith('binjr')) {
+                            Node depNode = depsNode.appendNode('dependency')
+                            depNode.appendNode('groupId', GROUP_ID)
+                            depNode.appendNode('artifactId', it.name)
+                            depNode.appendNode('version', BINJR_VERSION)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+signing {
+    sign publishing.publications.mavenJava
+}
+
+nexusPublishing {
+    packageGroup = rootProject.nexusStaging.packageGroup
+    stagingProfileId = rootProject.nexusStaging.stagingProfileId
+    username = rootProject.nexusStaging.username
+    password = rootProject.nexusStaging.password
+}
