@@ -57,8 +57,7 @@ public class DataAdapterFactory {
         try {
             this.loadAdapters();
         } catch (Throwable e) {
-            logger.error(e);
-
+            logger.error("Error loading adapters", e);
         }
     }
 
@@ -167,7 +166,12 @@ public class DataAdapterFactory {
             } else {
                 logger.warn("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
             }
-            loadFromServiceLoader(ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0]))));
+            loadFromServiceLoader(
+                    ServiceLoader.load(
+                            DataAdapterInfo.class,
+                            new URLClassLoader(urls.toArray(new URL[0]),Thread.currentThread().getContextClassLoader())
+                    )
+            );
         }
     }
 
