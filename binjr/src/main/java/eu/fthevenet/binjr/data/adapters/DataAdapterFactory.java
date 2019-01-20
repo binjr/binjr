@@ -44,10 +44,6 @@ public class DataAdapterFactory {
     private static final Logger logger = LogManager.getLogger(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters;
 
-    private static class DataAdapterFactoryHolder {
-        private static final DataAdapterFactory instance = new DataAdapterFactory();
-    }
-
     /**
      * Initializes a new instance if the {@link DataAdapterFactory} class.
      */
@@ -130,8 +126,11 @@ public class DataAdapterFactory {
     }
 
     private void loadAdapters() {
-        List<URL> urls = new ArrayList<>();
+        // Load plugins from classpath
+        loadFromServiceLoader(ServiceLoader.load(DataAdapterInfo.class));
+        //Load plugin from external folder
         if (GlobalPreferences.getInstance().isLoadPluginsFromExternalLocation()) {
+            List<URL> urls = new ArrayList<>();
             if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
                 logger.info(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
                 PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
@@ -152,20 +151,26 @@ public class DataAdapterFactory {
                 } catch (IOException e) {
                     logger.error("Error while scanning for plugins: " + e.getMessage());
                     if (logger.isDebugEnabled()) {
-                        logger.debug("Error stack", e);
+                        logger.debug("Stack trace", e);
                     }
                 }
-            }
-            else {
+            } else {
                 logger.warn("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
             }
+            loadFromServiceLoader(
+                    ServiceLoader.load(
+                            DataAdapterInfo.class,
+                            new URLClassLoader(urls.toArray(new URL[0]), Thread.currentThread().getContextClassLoader())
+                    )
+            );
         }
-        Iterator<DataAdapterInfo> adapterInfoIterator = ServiceLoader.load(DataAdapterInfo.class, new URLClassLoader(urls.toArray(new URL[0]))).iterator();
-        while (adapterInfoIterator.hasNext()) {
+    }
+
+    private void loadFromServiceLoader(ServiceLoader<DataAdapterInfo> sl) {
+        for (DataAdapterInfo dataAdapterInfo : sl) {
             try {
-                DataAdapterInfo adapterInfo = adapterInfoIterator.next();
-                registeredAdapters.put(adapterInfo.getKey(), adapterInfo);
-                logger.debug(() -> "Successfully registered DataAdapterInfo " + adapterInfo.toString() + " from external JAR.");
+                registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
+                logger.debug(() -> "Successfully registered DataAdapterInfo " + dataAdapterInfo.toString() + " from external JAR.");
             } catch (ServiceConfigurationError sce) {
                 logger.error("Failed to load DataAdapter", sce);
             } catch (Exception e) {
@@ -180,6 +185,10 @@ public class DataAdapterFactory {
             throw new NoAdapterFoundException("Could not find a registered adapter for key " + key);
         }
         return info;
+    }
+
+    private static class DataAdapterFactoryHolder {
+        private static final DataAdapterFactory instance = new DataAdapterFactory();
     }
 
 }
