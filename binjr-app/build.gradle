@@ -26,11 +26,11 @@ dependencies {
     implementation project(':binjr-adapter-csv')
     implementation project(':binjr-adapter-rrd4j')
 
-//    runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-//    runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-//    runtimeOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-//    runtimeOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
-//    runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+    runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+    runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+    runtimeOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+    runtimeOnly "org.openjfx:javafx-fxml:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
+    runtimeOnly "org.openjfx:javafx-swing:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
 }
 
 mainClassName = 'eu.binjr.core.Bootstrap'
@@ -48,7 +48,6 @@ publishing {
             artifactId = project.name
             groupId = GROUP_ID
             version = BINJR_VERSION
-            //from components.java
             pom {
                 packaging = 'pom'
                 name = project.name
@@ -91,7 +90,7 @@ publishing {
                         if (it.name.startsWith('binjr')) {
                             Node depNode = depsNode.appendNode('dependency')
                             depNode.appendNode('groupId', GROUP_ID)
-                            depNode.appendNode('artifactId', it.name)
+                            depNode.appendNode('artifactId', it.name.replace("-${BINJR_VERSION}.jar", ""))
                             depNode.appendNode('version', BINJR_VERSION)
                         }
                     }
