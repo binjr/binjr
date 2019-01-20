@@ -16,6 +16,8 @@
 
 package eu.binjr.core;
 
+import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.OsFamily;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,6 +38,10 @@ public final class Bootstrap {
      */
     public static void main(String[] args) {
         try {
+            if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX){
+                // Force openJfx to fall back to gtk 2 to workaround issue with Wayland
+                System.setProperty("jdk.gtk.version","2");
+            }
             Binjr.main(args);
         } catch (Exception e) {
             logger.fatal("Failed to load binjr", e);
