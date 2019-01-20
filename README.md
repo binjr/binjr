@@ -23,9 +23,9 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 
 It is a Java based client application and runs on multiple Desktop environnements (Windows, MacOS and Linux).
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot01.png)
+![Screenshot](http://binjr.eu/assets/images/screenshot01.png)
 
-![Screenshot](http://www.binjr.eu/assets/images/screenshot02.png)
+![Screenshot](http://binjr.eu/assets/images/screenshot02.png)
 
 ## Getting started
 The platform specific packages avalable on the [release page](https://github.com/binjr/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.

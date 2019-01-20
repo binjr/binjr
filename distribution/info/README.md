@@ -11,11 +11,11 @@ It is a Java based client application and runs on multiple Desktop environments 
 
 
 ### Getting help
-The documentation can be found [here](https://www.binjr.eu/user_manual).
+The documentation can be found [here](https://binjr.eu/user_manual).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
-For more info and to download the latest release, please visit the binjr website at [www.binjr.eu](https://www.binjr.eu) 
+For more info and to download the latest release, please visit the [binjr website](https://binjr.eu) 
 
 
 

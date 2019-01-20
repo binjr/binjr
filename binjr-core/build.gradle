@@ -42,7 +42,7 @@ compileJava {
 jar {
     manifest {
         attributes(
-                'Main-Class': 'eu.binjr.Bootstrap',
+                'Main-Class': 'eu.binjr.core.Bootstrap',
                 'Specification-Title': project.name,
                 'Specification-Version': project.version,
                 'Implementation-Title': project.name,

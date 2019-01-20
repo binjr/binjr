@@ -15,7 +15,7 @@
  */
 
 dependencies {
-    compileOnly project(':binjr-core')
+    compile project(':binjr-core')
 }
 
 jar {

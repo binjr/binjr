@@ -54,7 +54,7 @@
                             </font>
                         </Label>
                         <Hyperlink fx:id="binjrUrl" alignment="TOP_LEFT" graphicTextGap="0.0" onAction="#goTobinjrDotEu"
-                                   styleClass="about-text" text="www.binjr.eu" textFill="#3a879a"
+                                   styleClass="about-text" text="https://binjr.eu" textFill="#3a879a"
                                    AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="0.0">
                             <font>
                                 <Font size="14.0"/>
