@@ -32,6 +32,24 @@ The platform specific packages avalable on the [release page](https://github.com
 
 Simply download the one for your system (Windows, Linux or macOS), unpack it and run "binjr" to start!
 
+Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest published version of binjr by simply running the following command line:
+
+* On Linux or macOS:  
+  ```
+  curl http://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -f /tmp/run-binjr.pom
+  ```
+  
+* On Windows: 
+  ```
+  curl http://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
+  ```
+  
+  If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
+  ```
+  curl http://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -Dbinjr.version=2.3.0 -f /tmp/run-binjr.pom
+  ```
+  
+  
 ## Getting help
 The documentation can be found [here](https://github.com/binjr/binjr/wiki/Reference).
 
