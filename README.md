@@ -36,7 +36,7 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
 
 * On Linux or macOS:  
   ```
-  curl https://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -f /tmp/run-binjr.pom
+  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
   ```
   
 * On Windows: 
@@ -46,7 +46,7 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
   
 If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
   ```
-  curl https://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -Dbinjr.version=2.3.0 -f /tmp/run-binjr.pom
+  mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
   ```
   
   

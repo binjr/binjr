@@ -14,14 +14,13 @@ while [ -h "$PRG" ]; do
 done
 
 PRGDIR=`dirname "$PRG"`
-BASEDIR=`cd "$PRGDIR/.." >/dev/null; pwd`
+BASEDIR=`cd "$PRGDIR" >/dev/null; pwd`
 
-JAVACMD="./runtime/bin/java"
+JAVACMD="$BASEDIR/runtime/bin/java"
 
 exec $JAVACMD \
-  -Djdk.gtk.version=2 \
   -splash:"./resources/images/splashscreen.png" \
-  -cp "./libs/*:./plugins/*" \
+  -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
