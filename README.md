@@ -23,9 +23,9 @@ As such, *binjr* aims to become a valuable tool in forensic analysis when workin
 
 It is a Java based client application and runs on multiple Desktop environnements (Windows, MacOS and Linux).
 
-![Screenshot](http://binjr.eu/assets/images/screenshot01.png)
+![Screenshot](https://binjr.eu/assets/images/screenshot01.png)
 
-![Screenshot](http://binjr.eu/assets/images/screenshot02.png)
+![Screenshot](https://binjr.eu/assets/images/screenshot02.png)
 
 ## Getting started
 The platform specific packages avalable on the [release page](https://github.com/binjr/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
@@ -36,17 +36,17 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
 
 * On Linux or macOS:  
   ```
-  curl http://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -f /tmp/run-binjr.pom
+  curl https://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -f /tmp/run-binjr.pom
   ```
   
 * On Windows: 
   ```
-  curl http://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
+  curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
   ```
   
 If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
   ```
-  curl http://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -Dbinjr.version=2.3.0 -f /tmp/run-binjr.pom
+  curl https://binjr.eu/run-binjr.pom > /tmp/run-binjr.pom ; mvn exec:java -Dbinjr.version=2.3.0 -f /tmp/run-binjr.pom
   ```
   
   
