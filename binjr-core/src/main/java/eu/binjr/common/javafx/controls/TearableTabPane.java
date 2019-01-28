@@ -447,7 +447,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     onClosingWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
                 }
                 stage.close();
-                this.close();
+                detachedTabPane.close();
             }
         });
         if (onOpenNewWindow != null) {
@@ -522,6 +522,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
 
         public void removeTab(Tab tab) {
+            logger.trace(()->"Removing tab " + tab.getText() + " (movingTab=" + movingTab +")");
             idToTabMap.remove(getId(tab));
             tabToPaneMap.remove(tab);
             if (!movingTab) {
