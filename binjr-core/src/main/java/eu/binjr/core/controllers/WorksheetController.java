@@ -16,6 +16,13 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.javafx.charts.*;
+import eu.binjr.common.javafx.controls.ColorTableCell;
+import eu.binjr.common.javafx.controls.DecimalFormatTableCellFactory;
+import eu.binjr.common.javafx.controls.DelayedAction;
+import eu.binjr.common.javafx.controls.TimeRangePicker;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -24,13 +31,6 @@ import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.GlobalPreferences;
-import eu.binjr.common.javafx.bindings.BindingManager;
-import eu.binjr.common.javafx.charts.*;
-import eu.binjr.common.javafx.controls.ColorTableCell;
-import eu.binjr.common.javafx.controls.DecimalFormatTableCellFactory;
-import eu.binjr.common.javafx.controls.DelayedAction;
-import eu.binjr.common.javafx.controls.TimeRangePicker;
-import eu.binjr.common.logging.Profiler;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -62,6 +62,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
@@ -964,47 +965,49 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void abortIfClosed() {
-
-    }
-
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.getData().setAll(series.getProcessor().getData());
-            newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
-                if (newNode != null) {
-                    switch (currentChart.getChartType()) {
-                        case AREA:
-                        case STACKED:
-                            ObservableList<Node> children = ((Group) newNode).getChildren();
-                            if (children != null && children.size() >= 1) {
-                                Path stroke = (Path) children.get(1);
-                                Path fill = (Path) children.get(0);
+            if (currentChart.getChartType() == ChartType.SCATTER) {
+                for (var data : newSeries.getData()) {
+                    var c = new Circle();
+                    c.radiusProperty().bind(currentChart.strokeWidthProperty().multiply(3.0));
+                    c.fillProperty().bind(series.displayColorProperty());
+                    data.setNode(c);
+                }
+            } else {
+                newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
+                    if (newNode != null) {
+                        switch (currentChart.getChartType()) {
+                            case AREA:
+                            case STACKED:
+                                ObservableList<Node> children = ((Group) newNode).getChildren();
+                                if (children != null && children.size() >= 1) {
+                                    Path stroke = (Path) children.get(1);
+                                    Path fill = (Path) children.get(0);
+                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+                                    stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
+                                    stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
+                                    stroke.strokeProperty().bind(series.displayColorProperty());
+                                    fill.fillProperty().bind(Bindings.createObjectBinding(
+                                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
+                                            series.displayColorProperty(),
+                                            currentChart.graphOpacityProperty()));
+                                }
+                                break;
+                            case LINE:
+                                Path stroke = (Path) newNode;
                                 logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                                stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
                                 stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
                                 stroke.strokeProperty().bind(series.displayColorProperty());
-                                fill.fillProperty().bind(Bindings.createObjectBinding(
-                                        () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
-                                        series.displayColorProperty(),
-                                        currentChart.graphOpacityProperty()));
-                            }
-                            break;
-                        case SCATTER:
-                            //TODO set colors to points
-                            break;
-                        case LINE:
-                            Path stroke = (Path) newNode;
-                            logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-                            stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
-                            stroke.strokeProperty().bind(series.displayColorProperty());
-                            break;
-                        default:
-                            break;
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }
-            });
+                });
+            }
             return newSeries;
         }
     }

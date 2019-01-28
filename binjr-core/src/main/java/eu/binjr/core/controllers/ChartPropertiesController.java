@@ -123,10 +123,10 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
         strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-        adaptToChartType(chart.getChartType() == ChartType.LINE);
+        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER );
         chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                adaptToChartType(newValue == ChartType.LINE);
+                adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
             }
         });
         showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
