@@ -972,7 +972,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             if (currentChart.getChartType() == ChartType.SCATTER) {
                 for (var data : newSeries.getData()) {
                     var c = new Circle();
-                    c.radiusProperty().bind(currentChart.strokeWidthProperty().multiply(3.0));
+                    c.radiusProperty().bind(currentChart.strokeWidthProperty());
                     c.fillProperty().bind(series.displayColorProperty());
                     data.setNode(c);
                 }
