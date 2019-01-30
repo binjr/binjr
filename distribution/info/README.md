@@ -64,54 +64,18 @@ with someone else.
 
 ### Getting started
 
->Starting with version 2.0.0, binjr is built to run on Java 11 and beyond. 
->
->___Please note that it does not run on previous version of Java.___
->
-> If you require a version that runs on Java 8, you can use the latest releases versioned 1.x.x, 
-> the source code for it being available in branch [binjr-1_x](https://github.com/binjr/binjr/tree/binjr-1_x).
+This package contains contains everything needed to run ***binjr***, including a copy of the Java runtime specially
+ crafted to only include the required components and save disk space.
 
-The platform specific packages avalable on the [release page](https://github.com/binjr/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
+Make sure you've downloaded the right package for the OS you intend to run ***binjr*** on (see the
+ [release page](https://github.com/binjr/binjr/releases/latest) for more), unpack it and run `binjr` to start!
 
-Simply download the one for your system (Windows, Linux or macOS), unpack it and run "binjr" to start!
-
-Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest published version of binjr by simply running the following command line:
-
-* On Linux or macOS:  
-  ```
-  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
-  ```
-  
-* On Windows: 
-  ```
-  curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
-  ```
-  
-If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
-  ```
-  mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
-  ```
-  
   
 ### Getting help
 
 The documentation can be found [here](https://github.com/binjr/binjr/wiki/Reference).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
-
-### Contributing
-
-At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
-that it is a fully community driven effort with a tiny number of contributors.  
-
-The great thing about it being an open source, community driven project, though, is that should you believe that there is 
- is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,
- there's probably very little to stop make it happen (other than spare time and/or financial resources, but let's not be petty).
- 
-So, please, do not hesitate to suggest anew  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
- 
-Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
-with your changes. 
 
 
 ### How is it licensed?

@@ -20,7 +20,7 @@ only needs one specifically written piece of code - here called a data adapter -
 source of time series data.
 
 ***binjr*** was originally designed - and it still mostly used - to browse performance metrics collected from computers 
-and software components, but it was built as a forensic analysis tool, to investigate performance issuess or applications
+and software components, but it was built as a forensic analysis tool, to investigate performance issues or applications
 crashes, rather than as a typical monitoring application.   
 
 Because of that, the user experience is more reminiscent of using a profiling application like [WPA](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
@@ -29,7 +29,7 @@ a custom view by using any of the time-series exposed by the source, simply by d
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
-The user can then save the current state of the view at any time to a file, inorder to reopen it later or to share it 
+The user can then save the current state of the view at any time to a file, in order to reopen it later or to share it 
 with someone else.
 
 ![Screenshot](https://binjr.eu/assets/images/screenshot06.png)
@@ -74,18 +74,18 @@ with someone else.
 
 ## Getting started
 
->Starting with version 2.0.0, binjr is built to run on Java 11 and beyond. 
->
->___Please note that it does not run on previous version of Java.___
->
-> If you require a version that runs on Java 8, you can use the latest releases versioned 1.x.x, 
-> the source code for it being available in branch [binjr-1_x](https://github.com/binjr/binjr/tree/binjr-1_x).
+#### Download a full package
 
-The platform specific packages avalable on the [release page](https://github.com/binjr/binjr/releases/latest) contain all the dependencies requiered to run the app, including the Java runtime.
+Packages that contain all the dependencies required to run the app, including a copy of the Java runtime specially 
+crafted to only include the required components and save disk space, are available on the [release page](https://github.com/binjr/binjr/releases/latest).  
+The packages are less than 45 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
 
-Simply download the one for your system (Windows, Linux or macOS), unpack it and run "binjr" to start!
+Simply download the one for your system, unpack it and run `binjr` to start!
 
-Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest published version of binjr by simply running the following command line:
+#### Launch the latest version via Apache Maven
+ 
+Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest
+ published version of binjr by simply running the following command line:
 
 * On Linux or macOS:  
   ```
@@ -97,11 +97,18 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
   curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
   ```
   
-If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
-  ```
-  mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
-  ```
+> If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
+>   ```
+>   mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
+>   ```
   
+In that case, you do not need to worry about keeping your copy of ***binjr*** up to date: you will always be served with 
+the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22).  
+Downloaded components are cached local by Maven , so that it need to download them again every time you 
+wish to run the application.
+
+Please remember that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
+machine but also need your JAVA_HOME environment variable pointing at a copy of a __Java runtime version 11 or later__.
   
 ## Getting help
 
@@ -116,7 +123,7 @@ that it is a fully community driven effort with a tiny number of contributors.
 
 The great thing about it being an open source, community driven project, though, is that should you believe that there is 
  is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,
- there's probably very little to stop make it happen (other than spare time and/or financial resources, but let's not be petty).
+ there are always ways to make it happen.
  
 So, please, do not hesitate to suggest anew  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
  
