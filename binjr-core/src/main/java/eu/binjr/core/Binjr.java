@@ -16,6 +16,7 @@
 
 package eu.binjr.core;
 
+import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.common.logging.Profiler;
@@ -26,6 +27,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
 
@@ -37,6 +40,8 @@ import java.awt.*;
 public class Binjr extends Application {
     public static final Logger runtimeDebuggingFeatures = LogManager.getLogger("runtimeDebuggingFeatures");
     private static final Logger logger = LogManager.getLogger(Binjr.class);
+    // initialize the debug console appender early to start capturing logs ASAP.
+    public static final TextFlowAppender DEBUG_CONSOLE_APPENDER = initTextFlowAppender();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -71,5 +76,24 @@ public class Binjr extends Application {
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         launch(args);
+    }
+
+    private static TextFlowAppender initTextFlowAppender() {
+        try {
+            TextFlowAppender appender = TextFlowAppender.createAppender(
+                    "InternalConsole",
+                    PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),
+                    null
+            );
+            appender.start();
+            LoggerContext lc = (LoggerContext) LogManager.getContext(false);
+            lc.getConfiguration().addAppender(appender);
+            lc.getRootLogger().addAppender(lc.getConfiguration().getAppender(appender.getName()));
+            lc.updateLoggers();
+            return appender;
+        } catch (Throwable t) {
+            logger.error("Failed to initialize debug console appender", t);
+        }
+        return null;
     }
 }

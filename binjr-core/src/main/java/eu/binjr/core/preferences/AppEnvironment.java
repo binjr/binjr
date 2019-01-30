@@ -79,7 +79,6 @@ public class AppEnvironment {
             }
             logLevel.setValue(newLevel);
         });
-        debugMode.setValue(LogManager.getRootLogger().isDebugEnabled());
     }
 
     /**

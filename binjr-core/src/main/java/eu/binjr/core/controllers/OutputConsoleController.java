@@ -19,7 +19,6 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.diagnositic.DiagnosticCommand;
 import eu.binjr.common.diagnositic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
-import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -33,8 +32,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -43,14 +40,14 @@ import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.*;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+
+import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
 
 /**
  * The controller for the output console window.
@@ -70,7 +67,6 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private ToggleButton alwaysOnTopToggle;
 
-    private TextFlowAppender appender;
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -85,7 +81,13 @@ public class OutputConsoleController implements Initializable {
         consoleMaxLinesText.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().consoleMaxLineCapacityProperty());
 
-        this.appender = initTextFlowAppender();
+        if (DEBUG_CONSOLE_APPENDER == null){
+            Text log = new Text("<ERROR: The debug console appender is unavailable!>\n");
+            log.getStyleClass().add("log-error");
+            textOutput.getChildren().add(log);
+        }else {
+            DEBUG_CONSOLE_APPENDER.setTextFlow(textOutput);
+        }
         Platform.runLater(() -> {
             logLevelChoice.getItems().setAll(Level.values());
             logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
@@ -107,25 +109,13 @@ public class OutputConsoleController implements Initializable {
         return alwaysOnTopToggle;
     }
 
-    private synchronized TextFlowAppender initTextFlowAppender() {
-        LoggerContext lc = (LoggerContext) LogManager.getContext(false);
-        TextFlowAppender appender = TextFlowAppender.createAppender(
-                "InternalConsole",
-                PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),
-                null
-        );
-        TextFlowAppender.setTextFlow(textOutput);
-        appender.start();
-        lc.getConfiguration().addAppender(appender);
-        lc.getRootLogger().addAppender(lc.getConfiguration().getAppender(appender.getName()));
-        lc.updateLoggers();
-        return appender;
-    }
+
 
     @FXML
     private void handleClearConsole(ActionEvent actionEvent) {
-        this.appender.clearBuffer();
-       // this.textOutput.getChildren().clear();
+        if (DEBUG_CONSOLE_APPENDER != null) {
+            DEBUG_CONSOLE_APPENDER.clearBuffer();
+        }
     }
 
     @FXML
@@ -161,8 +151,6 @@ public class OutputConsoleController implements Initializable {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, scrollPane);
         }
     }
-
-
 
     public void handleDebugForceGC(ActionEvent actionEvent) {
         Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");

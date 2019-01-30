@@ -48,8 +48,8 @@ import java.util.concurrent.locks.ReentrantLock;
         elementType = "appender",
         printObject = true)
 public final class TextFlowAppender extends AbstractAppender {
-    private static TextFlow textArea;
-    private final Lock lock = new ReentrantLock();
+    private TextFlow textArea;
+    private final Lock textAreaLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
     private final LogBuffer<Text, Object> logBuffer = new LogBuffer<>();
@@ -105,14 +105,19 @@ public final class TextFlowAppender extends AbstractAppender {
      *
      * @param textFlow TextFlow to append
      */
-    public static void setTextFlow(TextFlow textFlow) {
-        TextFlowAppender.textArea = textFlow;
+    public void setTextFlow(TextFlow textFlow) {
+        textAreaLock.lock();
+        try {
+            this.textArea = textFlow;
+        } finally {
+            textAreaLock.unlock();
+        }
     }
 
     /**
      * Clear the circular buffer used by the appender
      */
-    public void clearBuffer() {
+    public synchronized void clearBuffer() {
         logBuffer.clear();
     }
 
@@ -132,7 +137,7 @@ public final class TextFlowAppender extends AbstractAppender {
     }
 
     private void refreshTextFlow() {
-        if (lock.tryLock()) {
+        if (textAreaLock.tryLock()) {
             try {
                 if (textArea != null && logBuffer.isDirty()) {
                     logBuffer.clean();
@@ -142,7 +147,7 @@ public final class TextFlowAppender extends AbstractAppender {
                     });
                 }
             } finally {
-                lock.unlock();
+                textAreaLock.unlock();
             }
         }
     }
