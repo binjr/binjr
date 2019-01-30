@@ -29,7 +29,7 @@ a custom view by using any of the time-series exposed by the source, simply by d
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
-The user can then save the current state of the view at any time to a file, in order to reopen it later or to share it 
+The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
 
 ![Screenshot](https://binjr.eu/assets/images/screenshot06.png)
@@ -56,7 +56,7 @@ with someone else.
   * Create many charts views in detachable tabs, which you can synchronize to the same time line.
   
 ####  Fast, responsive & aesthetically pleasing visuals
-  * Built on top of JavaFX for modern visual and great performances thanks to cross-platform, hardware accelerated graphics.
+  * Built on top of [JavaFX](https://openjfx.io/) for a modern look and great performances thanks to cross-platform, hardware accelerated graphics.
   * Offers three different UI themes, to better integrate with host OS and fit user preferences.
     
 ####  Java based application 
@@ -74,18 +74,18 @@ with someone else.
 
 ## Getting started
 
-#### Download a full package
+#### Download an application bundle
 
 Packages that contain all the dependencies required to run the app, including a copy of the Java runtime specially 
 crafted to only include the required components and save disk space, are available on the [release page](https://github.com/binjr/binjr/releases/latest).  
-The packages are less than 45 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
+The bundles are less than 45 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
 
 Simply download the one for your system, unpack it and run `binjr` to start!
 
 #### Launch the latest version via Apache Maven
  
 Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest
- published version of binjr by simply running the following command line:
+ published version of ***binjr*** by simply running the following command line:
 
 * On Linux or macOS:  
   ```
@@ -102,13 +102,22 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
 >   mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
 >   ```
   
-In that case, you do not need to worry about keeping your copy of ***binjr*** up to date: you will always be served with 
-the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22).  
-Downloaded components are cached local by Maven , so that it need to download them again every time you 
+that way, you do not need to worry about keeping your copy of ***binjr*** up to date: you will always start 
+the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22) 
+(unless you explicitly set the desired version, see above).   
+Downloaded components are cached locally by Maven , so that it need to download them again every time you 
 wish to run the application.
 
-Please remember that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
-machine but also need your JAVA_HOME environment variable pointing at a copy of a __Java runtime version 11 or later__.
+Remember, however, that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
+machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
+
+#### Build from source
+
+You can also build or run the application from the source code using the included Gradle wrapper.  
+Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
+* `./gradlew build` to build the JAR for the all the modules.
+* `./gradlew run` to build and start the application straight away.
+* `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
   
 ## Getting help
 

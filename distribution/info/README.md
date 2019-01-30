@@ -21,7 +21,7 @@ a custom view by using any of the time-series exposed by the source, simply by d
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
-The user can then save the current state of the view at any time to a file, inorder to reopen it later or to share it 
+The user can then save the current state of the session at any time to a file, inorder to reopen it later or to share it 
 with someone else.
 
 ### Features
@@ -46,7 +46,7 @@ with someone else.
   * Create many charts views in detachable tabs, which you can synchronize to the same time line.
   
 ####  Fast, responsive & aesthetically pleasing visuals
-  * Built on top of JavaFX for modern visual and great performances thanks to cross-platform, hardware accelerated graphics.
+  * Built on top of JavaFX for a modern look and great performances thanks to cross-platform, hardware accelerated graphics.
   * Offers three different UI themes, to better integrate with host OS and fit user preferences.
     
 ####  Java based application 
