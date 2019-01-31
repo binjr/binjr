@@ -107,8 +107,8 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
 Runnning ***binjr*** that way means that you don't need to worry about keeping your copy up to date: it will always start 
 the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22) 
 (unless you explicitly set the desired version, see above).   
-Downloaded components are cached locally by Maven, so that it need to download them again every time you 
-wish to run the application.
+Downloaded components are cached locally by Maven, so it doesn't need to download them again every time you 
+run the application.
 
 Remember, however, that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
 machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
