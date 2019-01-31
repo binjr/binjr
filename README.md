@@ -76,9 +76,11 @@ with someone else.
 
 #### Download an application bundle
 
-Packages that contain all the dependencies required to run the app, including a copy of the Java runtime specially 
-crafted to only include the required components and save disk space, are available on the [release page](https://github.com/binjr/binjr/releases/latest).  
-The bundles are less than 45 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
+The simplest way to start using ***binjr*** is to download an application bundle from the [release page](https://github.com/binjr/binjr/releases/latest).  
+
+These bundles contain all the dependencies required to run the app, including a copy of the Java runtime specially 
+crafted to only include the required components and save disk space.  
+They are less than 45 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
 
 Simply download the one for your system, unpack it and run `binjr` to start!
 
@@ -102,10 +104,10 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
 >   mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
 >   ```
   
-that way, you do not need to worry about keeping your copy of ***binjr*** up to date: you will always start 
+Runnning ***binjr*** that way means that you don't need to worry about keeping your copy up to date: it will always start 
 the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22) 
 (unless you explicitly set the desired version, see above).   
-Downloaded components are cached locally by Maven , so that it need to download them again every time you 
+Downloaded components are cached locally by Maven, so that it need to download them again every time you 
 wish to run the application.
 
 Remember, however, that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
