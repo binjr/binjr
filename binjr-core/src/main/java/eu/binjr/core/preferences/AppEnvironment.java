@@ -43,11 +43,8 @@ public class AppEnvironment {
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2019 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
-    private final Level configuredRootLevel = LogManager.getRootLogger().getLevel();
     private final BooleanProperty debugMode = new SimpleBooleanProperty();
- //   private final BooleanProperty consoleVisible = new SimpleBooleanProperty();
     private final Property<Level> logLevel = new SimpleObjectProperty<>();
-
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -65,19 +62,14 @@ public class AppEnvironment {
         });
 
         debugMode.addListener((observable, oldValue, newValue) -> {
-            Level newLevel = configuredRootLevel;
             if (newValue) {
                 ConsoleStage.show();
-                logger.warn("Entering debug mode");
-                if (newLevel.compareTo(Level.DEBUG) < 0) {
-                    newLevel = Level.DEBUG;
-                }
+                logger.warn("Entering debug console");
             }
             else {
-                logger.info("Leaving debug mode");
+                logger.info("Leaving debug console");
                 ConsoleStage.hide();
             }
-            logLevel.setValue(newLevel);
         });
     }
 
