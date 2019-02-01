@@ -74,7 +74,9 @@ with someone else.
 
 ## Getting started
 
-#### Download an application bundle
+There are several ways to get up and running with ***binjr***:
+
+### Download an application bundle
 
 The simplest way to start using ***binjr*** is to download an application bundle from the [release page](https://github.com/binjr/binjr/releases/latest).  
 
@@ -84,11 +86,11 @@ They are less than 45 MB in size and there is one for each of the supported plat
 
 Simply download the one for your system, unpack it and run `binjr` to start!
 
-#### Launch the latest version via Apache Maven
+### Launch the latest version via Apache Maven
  
 Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start ***binjr*** simply by running the following command line:
 
-##### On Linux or macOS:
+#### On Linux or macOS:
 
 * To start the latest version:
   ```
@@ -99,7 +101,7 @@ Alternatively, if your environment is properly set up to run Java 11 and Apache 
   mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom) -Dbinjr.version=2.3.0
   ```
   
-##### On Windows:
+#### On Windows:
 
 * To start the latest version:
   ```
@@ -119,7 +121,7 @@ run the application.
 > **NB:** In order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
 > machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
 
-#### Build from source
+### Build from source
 
 You can also build or run the application from the source code using the included Gradle wrapper.  
 Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
