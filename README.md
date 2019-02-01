@@ -86,23 +86,29 @@ Simply download the one for your system, unpack it and run `binjr` to start!
 
 #### Launch the latest version via Apache Maven
  
-Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start the latest
- published version of ***binjr*** by simply running the following command line:
+Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start ***binjr*** simply by running the following command line:
 
-* On Linux or macOS:  
+##### On Linux or macOS:
+
+* To start the latest version:
   ```
   mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
   ```
+* To start a specific version:
+  ```
+  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom) -Dbinjr.version=2.3.0
+  ```
   
-* On Windows: 
+##### On Windows:
+
+* To start the latest version:
   ```
   curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
   ```
-  
-> If you want to run a specific version, add the following to the mvn command; `-Dbinjr.version=X.X.X`. For instance, if you want to run version 2.3.0:
->   ```
->   mvn exec:java -Dbinjr.version=2.3.0 -f  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
->   ```
+* To start a specific version:
+  ```
+  curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom -Dbinjr.version=2.3.0
+  ```
   
 Runnning ***binjr*** that way means that you don't need to worry about keeping your copy up to date: it will always start 
 the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22) 
@@ -110,8 +116,8 @@ the latest version that was published over on [Maven Central](https://search.mav
 Downloaded components are cached locally by Maven, so it doesn't need to download them again every time you 
 run the application.
 
-Remember, however, that in order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
-machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
+> **NB:** In order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
+> machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
 
 #### Build from source
 
