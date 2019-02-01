@@ -131,7 +131,7 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
   
 ## Getting help
 
-The documentation can be found [here](https://github.com/binjr/binjr/wiki/Reference).
+The documentation can be found [here](https://github.com/binjr/binjr/wiki/).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
