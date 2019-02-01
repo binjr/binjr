@@ -249,21 +249,6 @@ public class MainViewController implements Initializable {
         Platform.runLater(this::runAfterInitialize);
     }
 
-
-    /**
-     * Sets parameters for the main controller view.
-     *
-     * @param parameters parameters for the main controller view.
-     */
-    public void setParameters(Application.Parameters parameters) {
-        // look for a .bjr file passed as a cmd line argument
-        associatedFile = parameters.getUnnamed()
-                .stream()
-                .filter(s -> s.endsWith(".bjr"))
-                .filter(s -> Files.exists(Paths.get(s)))
-                .findFirst();
-    }
-
     protected void runAfterInitialize() {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         Stage stage = Dialogs.getStage(root);
@@ -1283,6 +1268,14 @@ public class MainViewController implements Initializable {
 
     public void refreshAllWorksheets() {
         seriesControllers.values().forEach(WorksheetController::refresh);
+    }
+
+    public Optional<String> getAssociatedFile() {
+        return associatedFile;
+    }
+
+    public void setAssociatedFile(Optional<String> associatedFile) {
+        this.associatedFile = associatedFile;
     }
 
     //endregion

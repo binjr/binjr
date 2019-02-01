@@ -16,21 +16,27 @@
 
 package eu.binjr.core;
 
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.dialogs.StageAppearanceManager;
-import eu.binjr.common.logging.Profiler;
+import eu.binjr.core.preferences.AppEnvironment;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * The entry point fo the application.
@@ -45,11 +51,12 @@ public class Binjr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        processCommandLineOptions(getParameters());
         logger.info(() -> "Starting binjr");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
         Parent root = loader.load();
         MainViewController mainViewController = loader.getController();
-        mainViewController.setParameters(getParameters());
+        mainViewController.setAssociatedFile(getAssociatedWorkspace(getParameters()));
         primaryStage.setTitle("binjr");
         StageAppearanceManager.getInstance().register(primaryStage);
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
@@ -80,6 +87,7 @@ public class Binjr extends Application {
 
     private static TextFlowAppender initTextFlowAppender() {
         try {
+            Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
             TextFlowAppender appender = TextFlowAppender.createAppender(
                     "InternalConsole",
                     PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),
@@ -95,5 +103,25 @@ public class Binjr extends Application {
             logger.error("Failed to initialize debug console appender", t);
         }
         return null;
+    }
+
+    private void processCommandLineOptions(Parameters parameters) {
+        getParameters().getNamed().forEach((name, val) -> {
+            switch (name.toLowerCase()) {
+                case "loglevel":
+                    AppEnvironment.getInstance().setLogLevel(Level.toLevel(val, Level.INFO));
+                    break;
+                case "logfile":
+                    break;
+            }
+        });
+    }
+
+    private Optional<String> getAssociatedWorkspace(Parameters parameters) {
+        return parameters.getUnnamed()
+                .stream()
+                .filter(s -> s.endsWith(".bjr"))
+                .filter(s -> Files.exists(Paths.get(s)))
+                .findFirst();
     }
 }
