@@ -12,7 +12,7 @@ only needs one specifically written piece of code - here called a data adapter -
 source of time series data.
 
 ***binjr*** was originally designed - and it still mostly used - to browse performance metrics collected from computers 
-and software components, but it was built as a forensic analysis tool, to investigate performance issuess or applications
+and software components, but it was built as a forensic analysis tool, to investigate performance issues or applications
 crashes, rather than as a typical monitoring application.   
 
 Because of that, the user experience is more reminiscent of using a profiling application like [WPA](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
@@ -21,7 +21,7 @@ a custom view by using any of the time-series exposed by the source, simply by d
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
-The user can then save the current state of the session at any time to a file, inorder to reopen it later or to share it 
+The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
 
 ### Features
@@ -46,12 +46,12 @@ with someone else.
   * Create many charts views in detachable tabs, which you can synchronize to the same time line.
   
 ####  Fast, responsive & aesthetically pleasing visuals
-  * Built on top of JavaFX for a modern look and great performances thanks to cross-platform, hardware accelerated graphics.
+  * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
   * Offers three different UI themes, to better integrate with host OS and fit user preferences.
     
 ####  Java based application 
   * Cross-platform: works great on Linux, macOS and Windows desktops!
-  * Strong performances under heavy load (many charts with dozens of series and tens of thousands of samples).  
+  * Strong performances, even under heavy load (dozens of charts with dozens of series and thousands of samples). s 
 
   
 ### Supported data sources
@@ -73,7 +73,7 @@ Make sure you've downloaded the right package for the OS you intend to run ***bi
   
 ### Getting help
 
-The documentation can be found [here](https://github.com/binjr/binjr/wiki/Reference).
+The documentation can be found [here](https://github.com/binjr/binjr/wiki).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 

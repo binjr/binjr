@@ -56,12 +56,12 @@ with someone else.
   * Create many charts views in detachable tabs, which you can synchronize to the same time line.
   
 ####  Fast, responsive & aesthetically pleasing visuals
-  * Built on top of [JavaFX](https://openjfx.io/) for a modern look and great performances thanks to cross-platform, hardware accelerated graphics.
+  * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
   * Offers three different UI themes, to better integrate with host OS and fit user preferences.
     
 ####  Java based application 
   * Cross-platform: works great on Linux, macOS and Windows desktops!
-  * Strong performances under heavy load (many charts with dozens of series and tens of thousands of samples).  
+  * Strong performances, even under heavy load (dozens of charts with dozens of series and thousands of samples).  
 
   
 ## Supported data sources
