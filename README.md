@@ -9,8 +9,8 @@
 
 
 
-***binjr*** is a time series data browser; its purpose is to render time series data produced and stored by 
-other applications, and to navigate these rendition as fluently as possible, using the mouse to zoom in and out on
+***binjr*** is a time series data browser; it renders time series data produced and stored by 
+other applications and let the user navigate through the data as fluently as possible, using the mouse to zoom in and out on
 dynamically composed charts, created by the end user on the fly.
  
 It is a standalone client application, that runs independently from the applications that produce the data; there are
