@@ -1,9 +1,7 @@
 # ![binjr](./resources/images/binjr_logo.png)
 ##### _Version ${version}, Released on ${releaseDate}_ 
 
-***binjr*** is a time series data browser; its purpose is to render time series data produced and stored by 
-other applications, and to navigate these rendition as fluently as possible, using the mouse to zoom in and out on
-dynamically composed charts, created by the end user on the fly.
+***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically editable charts and provides many features to navigate through the data in a natural and fluent fashion (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
  
 It is a standalone client application, that runs independently from the applications that produce the data; there are
 no application server or server side components dedicated to ***binjr*** that needs to be installed on the source.   
