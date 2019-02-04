@@ -205,9 +205,15 @@ task copyAppLibs(type: Copy) {
     from(project(":binjr-core").configurations.runtimeClasspath) {
         exclude "javafx-*.jar"
     }
-    from project(":binjr-adapter-jrds").configurations.runtimeClasspath
-    from project(":binjr-adapter-csv").configurations.runtimeClasspath
-    from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath
+    from project(":binjr-adapter-jrds").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-csv").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-core").jar
 }
 
