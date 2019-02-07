@@ -106,7 +106,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public AnchorPane root;
     @FXML
     private AnchorPane chartParent;
-
     protected List<ChartViewPort<Double>> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
