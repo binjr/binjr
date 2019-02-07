@@ -52,6 +52,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
         // Disable the forced sync mechanism for  Rrd4J NIO backend.
         RrdBackendFactory.setActiveFactories(new RrdNioBackendFactory(0));
     }
+
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
     private List<Path> rrdPaths;
@@ -207,18 +208,28 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
             logger.debug(() -> "Attempting to import as an rrd XML dump");
             Path temp = Files.createTempFile("binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
-            return new RrdDb(temp.toUri(), RrdDb.PREFIX_XML + rrdPath.toString());
+            return RrdDb.getBuilder()
+                    .setPath(temp.toUri())
+                    .setReadOnly(true)
+                    .setExternalPath(RrdDb.PREFIX_XML + rrdPath.toString())
+                    .build();
         }
-        //TODO Peek into the rrd file's header to determine its producer rather than wait for an exception to be thrown.
         try {
-            return new RrdDb(rrdPath.toUri());
+            return RrdDb.getBuilder()
+                    .setPath(rrdPath.toUri())
+                    .setReadOnly(true)
+                    .build();
         } catch (InvalidRrdException e) {
             // Possibly a rrd db created with RrdTool.
             // Try to convert and import.
             logger.debug(() -> "Failed to open " + rrdPath + " as an Rrd4j db: attempting to import as an rrdTool db");
             Path temp = Files.createTempFile("binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
-            return new RrdDb(temp.toUri(), RrdDb.PREFIX_RRDTool + rrdPath.toString());
+            return RrdDb.getBuilder()
+                    .setPath(temp.toUri())
+                    .setReadOnly(true)
+                    .setExternalPath(RrdDb.PREFIX_RRDTool + rrdPath.toString())
+                    .build();
         }
     }
 
