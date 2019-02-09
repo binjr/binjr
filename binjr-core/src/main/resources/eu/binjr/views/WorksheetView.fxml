@@ -99,7 +99,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Take a snapshot of the worksheet">
+                                <Tooltip text="Edit the time range for the current worksheet.">
                                     <font>
                                         <Font size="10.0"/>
                                     </font>
