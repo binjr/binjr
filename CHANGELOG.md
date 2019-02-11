@@ -1,3 +1,12 @@
+### [binjr v2.3.1](https://github.com/binjr/binjr/releases/tag/v2.3.1)
+Released on Mon, 11 Feb 2019
+
+* _[Fixed]_ Debug console appender is initialized only when console is displayed for the first time.
+* _[Fixed]_ Log level changes when entering or leaving debug console.
+* _[Fixed]_ Date formatting does not use the system locale.
+* _[Fixed]_ Wrong tooltip for time range picker on worksheet.
+
+
 ### [binjr v2.3.0](https://github.com/binjr/binjr/releases/tag/v2.3.0)
 Released on Mon, 28 Jan 2019
 
