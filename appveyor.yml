@@ -11,7 +11,7 @@ install:
       $ENV:BINJR_BUILD_NUMBER=$ENV:APPVEYOR_BUILD_NUMBER
 
 build_script:
-  - cmd: .\gradlew.bat packageDistribution
+  - cmd: .\gradlew.bat --parallel clean packageDistribution
 
 artifacts:
   - path: 'build\*.zip'
