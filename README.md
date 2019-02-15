@@ -7,7 +7,7 @@
 [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central&style=flat-square)](https://search.maven.org/search?q=g:%22eu.binjr%22)
 
 
-***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically editable charts and provides many features to navigate through the data in a natural and fluent fashion (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
+***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically editable charts and provides advanced features to navigate through the data in a natural and fluent fashion (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
  
 It is a standalone client application, that runs independently from the applications that produce the data; there are
 no application server or server side components dedicated to ***binjr*** that needs to be installed on the source.   
