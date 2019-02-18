@@ -33,7 +33,6 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.UpdateManager;
 import javafx.animation.*;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
@@ -73,8 +72,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -129,7 +126,7 @@ public class MainViewController implements Initializable {
     public ToggleButton searchCaseSensitiveToggle;
     @FXML
     public StackPane sourceArea;
-    List<TreeItem<TimeSeriesBinding<Double>>> searchResultSet;
+    List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
     private Timeline showTimeline;
     private Timeline hideTimeline;
@@ -188,7 +185,7 @@ public class MainViewController implements Initializable {
 
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-                    Boolean expandRequiered = true;
+                    boolean expandRequiered = true;
                     for (TitledPane pane : sourcesPane.getPanes()) {
                         if (pane.isExpanded()) {
                             expandRequiered = false;
@@ -347,7 +344,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddNewWorksheet(Event event) {
-        editWorksheet(new Worksheet<>());
+        editWorksheet(new Worksheet());
     }
 
     @FXML
@@ -549,11 +546,11 @@ public class MainViewController implements Initializable {
         return menuItems;
     }
 
-    TreeView<TimeSeriesBinding<Double>> getSelectedTreeView() {
+    TreeView<TimeSeriesBinding> getSelectedTreeView() {
         if (sourcesPane == null || sourcesPane.getExpandedPane() == null) {
             return null;
         }
-        return (TreeView<TimeSeriesBinding<Double>>) sourcesPane.getExpandedPane().getContent();
+        return (TreeView<TimeSeriesBinding>) sourcesPane.getExpandedPane().getContent();
     }
 
     private void showCommandBar() {
@@ -600,13 +597,13 @@ public class MainViewController implements Initializable {
         commandBar.setMinWidth(v);
     }
 
-    private void expandBranch(TreeItem<TimeSeriesBinding<Double>> branch) {
+    private void expandBranch(TreeItem<TimeSeriesBinding> branch) {
         if (branch == null) {
             return;
         }
         branch.setExpanded(true);
         if (branch.getChildren() != null) {
-            for (TreeItem<TimeSeriesBinding<Double>> item : branch.getChildren()) {
+            for (TreeItem<TimeSeriesBinding> item : branch.getChildren()) {
                 expandBranch(item);
             }
         }
@@ -687,7 +684,7 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheets(Workspace wsFromfile) {
         try {
-            for (Worksheet<Double> worksheet : wsFromfile.getWorksheets()) {
+            for (Worksheet worksheet : wsFromfile.getWorksheets()) {
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
@@ -744,7 +741,7 @@ public class MainViewController implements Initializable {
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
-                        Optional<TreeView<TimeSeriesBinding<Double>>> treeView = (Optional<TreeView<TimeSeriesBinding<Double>>>) event.getSource().getValue();
+                        Optional<TreeView<TimeSeriesBinding>> treeView = (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
                         if (treeView.isPresent()) {
                             newSourcePane.setContent(treeView.get());
                             sourcesAdapters.put(newSourcePane, newSource);
@@ -761,14 +758,14 @@ public class MainViewController implements Initializable {
 
     private void loadSource(Source source) throws DataAdapterException {
         TitledPane newSourcePane = newSourcePane(source);
-        Optional<TreeView<TimeSeriesBinding<Double>>> treeView;
+        Optional<TreeView<TimeSeriesBinding>> treeView;
         treeView = buildTreeViewForTarget(source.getAdapter());
         if (treeView.isPresent()) {
             newSourcePane.setContent(treeView.get());
             sourcesAdapters.put(newSourcePane, source);
         } else {
-            TreeItem<TimeSeriesBinding<Double>> i = new TreeItem<>();
-            i.setValue(new TimeSeriesBinding<>());
+            TreeItem<TimeSeriesBinding> i = new TreeItem<>();
+            i.setValue(new TimeSeriesBinding());
             Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
@@ -780,7 +777,7 @@ public class MainViewController implements Initializable {
         });
     }
 
-    private boolean loadWorksheet(Worksheet<Double> worksheet) {
+    private boolean loadWorksheet(Worksheet worksheet) {
         EditableTab newTab = new EditableTab("New worksheet");
         loadWorksheet(worksheet, newTab, false);
         worksheetTabPane.getTabs().add(newTab);
@@ -801,12 +798,12 @@ public class MainViewController implements Initializable {
         if (tab == null) {
             throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
         }
-        Worksheet<Double> worksheet = worksheetCtrl.getWorksheet();
+        Worksheet worksheet = worksheetCtrl.getWorksheet();
         worksheetCtrl.close();
         loadWorksheet(worksheet, tab, false);
     }
 
-    private void loadWorksheet(Worksheet<Double> worksheet, EditableTab newTab, boolean setToEditMode) {
+    private void loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
             WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
             try {
@@ -844,7 +841,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getTabMenu(EditableTab tab, Worksheet<Double> worksheet) {
+    private ContextMenu getTabMenu(EditableTab tab, Worksheet worksheet) {
         MenuItem close = new MenuItem("Close Tab");
         close.setOnAction(event -> {
             EventHandler<Event> handler = tab.getOnClosed();
@@ -871,7 +868,7 @@ public class MainViewController implements Initializable {
         edit.setOnAction(event -> tab.setEditable(true));
         MenuItem duplicate = new MenuItem("Duplicate Tab");
         duplicate.setOnAction(event -> {
-            editWorksheet(new Worksheet<>(worksheet));
+            editWorksheet(new Worksheet(worksheet));
         });
         MenuItem detach = new MenuItem("Detach Tab");
         detach.setOnAction(event -> {
@@ -895,7 +892,7 @@ public class MainViewController implements Initializable {
         );
     }
 
-    private boolean editWorksheet(Worksheet<Double> worksheet) {
+    private boolean editWorksheet(Worksheet worksheet) {
         TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
         EditableTab newTab = new EditableTab("");
         loadWorksheet(worksheet, newTab, true);
@@ -904,12 +901,12 @@ public class MainViewController implements Initializable {
         return true;
     }
 
-    private Optional<TreeView<TimeSeriesBinding<Double>>> buildTreeViewForTarget(DataAdapter dp) {
+    private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
-        TreeView<TimeSeriesBinding<Double>> treeView = new TreeView<>();
+        TreeView<TimeSeriesBinding> treeView = new TreeView<>();
         treeView.setShowRoot(false);
-        Callback<TreeView<TimeSeriesBinding<Double>>, TreeCell<TimeSeriesBinding<Double>>> dragAndDropCellFactory = param -> {
-            final TreeCell<TimeSeriesBinding<Double>> cell = new TreeCell<>();
+        Callback<TreeView<TimeSeriesBinding>, TreeCell<TimeSeriesBinding>> dragAndDropCellFactory = param -> {
+            final TreeCell<TimeSeriesBinding> cell = new TreeCell<>();
             cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
             cell.setOnDragDetected(event -> {
                 if (cell.getItem() != null) {
@@ -929,7 +926,7 @@ public class MainViewController implements Initializable {
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
             dp.onStart();
-            @SuppressWarnings("unchecked") TreeItem<TimeSeriesBinding<Double>> bindingTree = dp.getBindingTree();
+            TreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
@@ -972,7 +969,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
+    private ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         ContextMenu contextMenu = new ContextMenu(getSelectedWorksheetController().getWorksheet().getCharts()
                 .stream()
                 .map(c -> {
@@ -988,7 +985,7 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding<Double>> treeView) {
+    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
         addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getChartListContextMenu(treeView).getItems()));
@@ -999,19 +996,19 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
         try {
-            Worksheet<Double> worksheet = getSelectedWorksheetController().getWorksheet();
-            TimeSeriesBinding<Double> binding = treeItem.getValue();
-            Chart<Double> chart = new Chart<>(
+            Worksheet worksheet = getSelectedWorksheetController().getWorksheet();
+            TimeSeriesBinding binding = treeItem.getValue();
+            Chart chart = new Chart(
                     binding.getLegend(),
                     binding.getGraphType(),
                     binding.getUnitName(),
                     binding.getUnitPrefix()
             );
-            List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+            List<TimeSeriesBinding> bindings = new ArrayList<>();
             getAllBindingsFromBranch(treeItem, bindings);
-            for (TimeSeriesBinding<Double> b : bindings) {
+            for (TimeSeriesBinding b : bindings) {
                 chart.addSeries(TimeSeriesInfo.fromBinding(b));
             }
             worksheet.getCharts().add(chart);
@@ -1020,10 +1017,10 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem, Chart<Double> targetChart) {
+    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem, Chart targetChart) {
         try {
             if (getSelectedWorksheetController() != null && treeItem != null) {
-                List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                List<TimeSeriesBinding> bindings = new ArrayList<>();
                 getAllBindingsFromBranch(treeItem, bindings);
                 getSelectedWorksheetController().addBindings(bindings, targetChart);
             }
@@ -1032,12 +1029,12 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void addToNewWorksheet(TreeItem<TimeSeriesBinding<Double>> treeItem) {
+    private void addToNewWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
         // Schedule for later execution in order to let other UI components worksheetTabFactory refreshed
         // before modal dialog gets displayed (fixes unsightly UI glitches on Linux)
         Platform.runLater(() -> {
             try {
-                TimeSeriesBinding<Double> binding = treeItem.getValue();
+                TimeSeriesBinding binding = treeItem.getValue();
                 ZonedDateTime toDateTime;
                 ZonedDateTime fromDateTime;
                 ZoneId zoneId;
@@ -1051,21 +1048,21 @@ public class MainViewController implements Initializable {
                     zoneId = ZoneId.systemDefault();
                 }
 
-                List<Chart<Double>> chartList = new ArrayList<>();
-                chartList.add(new Chart<>(
+                List<Chart> chartList = new ArrayList<>();
+                chartList.add(new Chart(
                         binding.getLegend(),
                         binding.getGraphType(),
                         binding.getUnitName(),
                         binding.getUnitPrefix()
                 ));
-                Worksheet<Double> worksheet = new Worksheet<Double>(binding.getLegend(),
+                Worksheet worksheet = new Worksheet(binding.getLegend(),
                         chartList,
                         zoneId,
                         fromDateTime,
                         toDateTime
                 );
                 if (editWorksheet(worksheet) && getSelectedWorksheetController() != null) {
-                    List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                    List<TimeSeriesBinding> bindings = new ArrayList<>();
                     getAllBindingsFromBranch(treeItem, bindings);
                     getSelectedWorksheetController().addBindings(bindings, getSelectedWorksheetController().getWorksheet().getDefaultChart());
                 }
@@ -1079,7 +1076,7 @@ public class MainViewController implements Initializable {
         if (isNullOrEmpty(searchField.getText())) {
             return;
         }
-        TreeView<TimeSeriesBinding<Double>> selectedTreeView = getSelectedTreeView();
+        TreeView<TimeSeriesBinding> selectedTreeView = getSelectedTreeView();
         if (selectedTreeView == null) {
             return;
         }
@@ -1175,16 +1172,16 @@ public class MainViewController implements Initializable {
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
         EditableTab newTab = new EditableTab("");
-        loadWorksheet(new Worksheet<>(), newTab, true);
+        loadWorksheet(new Worksheet(), newTab, true);
         return Optional.of(newTab);
     }
 
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
+            TreeView<TimeSeriesBinding> treeView = getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     addToNewWorksheet(item);
                 } else {
@@ -1229,9 +1226,9 @@ public class MainViewController implements Initializable {
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding<Double>> treeView = getSelectedTreeView();
+            TreeView<TimeSeriesBinding> treeView = getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {

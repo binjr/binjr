@@ -22,12 +22,10 @@ import java.util.Map;
 
 /**
  * Represents a single sample/record from a csv file
- *
- * @param <T> the type for data contained in cells
  */
-public class DataSample<T> {
+public class DataSample {
     private final ZonedDateTime timeStamp;
-    private final Map<String, T> cells;
+    private final Map<String, Double> cells;
 
     /**
      * Initializes a new instance of the {@link DataSample} class.
@@ -53,7 +51,7 @@ public class DataSample<T> {
      *
      * @return a map of cells for the sample
      */
-    public Map<String, T> getCells() {
+    public Map<String, Double> getCells() {
         return cells;
     }
 }

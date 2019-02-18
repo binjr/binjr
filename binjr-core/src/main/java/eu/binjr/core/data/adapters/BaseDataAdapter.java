@@ -30,7 +30,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class BaseDataAdapter<T> implements DataAdapter<T> {
+public abstract class BaseDataAdapter implements DataAdapter {
     private static final Logger logger = LogManager.getLogger(BaseDataAdapter.class);
     private UUID id = UUID.randomUUID();
     private volatile boolean closed = false;

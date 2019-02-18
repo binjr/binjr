@@ -132,7 +132,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
      * @return an instance of {@link Rrd4jFileAdapter}
      * @throws DataAdapterException if the provided parameters are invalid
      */
-    private DataAdapter<?> getDataAdapter() throws DataAdapterException {
+    private DataAdapter getDataAdapter() throws DataAdapterException {
         List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());
         rrdFiles.stream().findFirst().ifPresent(path -> {
             GlobalPreferences.getInstance().setMostRecentSaveFolder(path.getParent());

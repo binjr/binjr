@@ -45,12 +45,12 @@ import java.util.function.Consumer;
  *
  * @author Frederic Thevenet
  */
-public class CsvDecoder<T extends Number> implements Decoder<T> {
+public class CsvDecoder implements Decoder {
     private final String encoding;
     private final char delimiter;
-    private final CheckedFunction<String, T, DecodingDataFromAdapterException> numberParser;
+    private final CheckedFunction<String, Double, DecodingDataFromAdapterException> numberParser;
     private final CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser;
-    private final TimeSeriesProcessorFactory<T> timeSeriesFactory;
+    private final TimeSeriesProcessorFactory timeSeriesFactory;
     private static final Logger logger = LogManager.getLogger(CsvDecoder.class);
 
     /**
@@ -64,8 +64,8 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
      */
     public CsvDecoder(String encoding,
                       char delimiter,
-                      TimeSeriesProcessorFactory<T> timeSeriesFactory,
-                      CheckedFunction<String, T, DecodingDataFromAdapterException> numberParser,
+                      TimeSeriesProcessorFactory timeSeriesFactory,
+                      CheckedFunction<String, Double, DecodingDataFromAdapterException> numberParser,
                       CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser) {
         this.encoding = encoding;
         this.delimiter = delimiter;
@@ -93,7 +93,7 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> decode(InputStream in, List<TimeSeriesInfo<T>> seriesInfo) throws IOException, DecodingDataFromAdapterException {
+    public Map<TimeSeriesInfo, TimeSeriesProcessor> decode(InputStream in, List<TimeSeriesInfo> seriesInfo) throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT
@@ -102,15 +102,15 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
                         .withSkipHeaderRecord()
                         .withDelimiter(delimiter);
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
-                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series = new HashMap<>();
+                Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
                 for (CSVRecord csvRecord : records) {
                     nbpoints.incrementAndGet();
                     ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
-                    for (TimeSeriesInfo<T> info : seriesInfo) {
-                        T val = numberParser.apply(csvRecord.get(info.getBinding().getLabel()));
-                        XYChart.Data<ZonedDateTime, T> point = new XYChart.Data<>(timeStamp, val);
-                        TimeSeriesProcessor<T> l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
+                    for (TimeSeriesInfo info : seriesInfo) {
+                        Double val = numberParser.apply(csvRecord.get(info.getBinding().getLabel()));
+                        XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
+                        TimeSeriesProcessor l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
                         l.addSample(point);
                     }
                 }
@@ -129,7 +129,7 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
      * @throws IOException                      in the event of an I/O error.
      * @throws DecodingDataFromAdapterException if an error occurred while decoding the CSV file.
      */
-    public void decode(InputStream in, List<String> headers, Consumer<DataSample<T>> mapToResult) throws IOException, DecodingDataFromAdapterException {
+    public void decode(InputStream in, List<String> headers, Consumer<DataSample> mapToResult) throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT
@@ -141,7 +141,7 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
 
                 for (CSVRecord csvRecord : records) {
                     ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
-                    DataSample<T> tRecord = new DataSample<>(timeStamp);
+                    DataSample tRecord = new DataSample(timeStamp);
                     for (String h : headers) {
                         tRecord.getCells().put(h, numberParser.apply(csvRecord.get(h)));
                     }
@@ -174,7 +174,7 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
      *
      * @return the function used to parse numeric fields.
      */
-    public CheckedFunction<String, T, DecodingDataFromAdapterException> getNumberParser() {
+    public CheckedFunction<String, Double, DecodingDataFromAdapterException> getNumberParser() {
         return numberParser;
     }
 
@@ -200,9 +200,9 @@ public class CsvDecoder<T extends Number> implements Decoder<T> {
         }
     }
 
-    private TimeSeriesInfo<T> getBindingFromName(List<TimeSeriesInfo<T>> seriesInfo, String seriesName) {
+    private TimeSeriesInfo getBindingFromName(List<TimeSeriesInfo> seriesInfo, String seriesName) {
         if (seriesInfo != null) {
-            for (TimeSeriesInfo<T> b : seriesInfo) {
+            for (TimeSeriesInfo b : seriesInfo) {
                 if (b.getBinding().getLabel().equalsIgnoreCase(seriesName)) {
                     return b;
                 }

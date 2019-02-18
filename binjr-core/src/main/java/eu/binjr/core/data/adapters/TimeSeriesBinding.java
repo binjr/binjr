@@ -36,7 +36,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
-public class TimeSeriesBinding<T> {
+public class TimeSeriesBinding {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -89,7 +89,7 @@ public class TimeSeriesBinding<T> {
     @XmlAttribute
     private final String treeHierarchy;
     @XmlTransient
-    private DataAdapter<T> adapter;
+    private DataAdapter adapter;
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class.
@@ -112,7 +112,7 @@ public class TimeSeriesBinding<T> {
      *
      * @param binding the {@link TimeSeriesBinding} instance to clone.
      */
-    public TimeSeriesBinding(TimeSeriesBinding<T> binding) {
+    public TimeSeriesBinding(TimeSeriesBinding binding) {
         this(binding.label,
                 binding.path,
                 binding.color,
@@ -138,7 +138,7 @@ public class TimeSeriesBinding<T> {
      * @param treeHierarchy the hierarchy in the tree representation
      * @param adapter       the {@link SerializedDataAdapter} to the source
      */
-    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter) {
+    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter adapter) {
         this(label,
                 path,
                 color,
@@ -151,7 +151,7 @@ public class TimeSeriesBinding<T> {
                 null);
     }
 
-    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
+    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
         this.legend = legend;
@@ -197,11 +197,10 @@ public class TimeSeriesBinding<T> {
      * @return the {@link SerializedDataAdapter} of the binding
      */
     @XmlTransient
-    public DataAdapter<T> getAdapter() {
+    public DataAdapter getAdapter() {
         return this.adapter;
     }
 
-    @SuppressWarnings("unchecked")
     public void setAdapter(DataAdapter adapter) {
         this.adapter = adapter;
     }

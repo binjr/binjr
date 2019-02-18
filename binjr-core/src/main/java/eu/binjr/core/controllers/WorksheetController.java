@@ -96,7 +96,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
-    private Worksheet<Double> worksheet;
+    private Worksheet worksheet;
     private static final double Y_AXIS_SEPARATION = 10;
     private final MainViewController parentController;
     private volatile boolean preventReload = false;
@@ -106,7 +106,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public AnchorPane root;
     @FXML
     private AnchorPane chartParent;
-    protected List<ChartViewPort<Double>> viewPorts = new ArrayList<>();
+    protected List<ChartViewPort> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
     @FXML
@@ -143,14 +143,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     private static final double TOOL_BUTTON_SIZE = 20;
 
-    public WorksheetController(MainViewController parentController, Worksheet<Double> worksheet, Collection<DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
+    public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
         // Attach bindings
-        for (Chart<Double> chart : worksheet.getCharts()) {
-            for (TimeSeriesInfo<Double> s : chart.getSeries()) {
+        for (Chart chart : worksheet.getCharts()) {
+            for (TimeSeriesInfo s : chart.getSeries()) {
                 UUID id = s.getBinding().getAdapterId();
-                DataAdapter<?> da = sourcesAdapters
+                DataAdapter da = sourcesAdapters
                         .stream()
                         .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                         .findAny()
@@ -160,9 +160,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private ChartPropertiesController buildChartPropertiesController(Chart<Double> chart) throws IOException {
+    private ChartPropertiesController buildChartPropertiesController(Chart chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ChartPropertiesView.fxml"));
-        ChartPropertiesController propertiesController = new ChartPropertiesController<>(getWorksheet(), chart);
+        ChartPropertiesController propertiesController = new ChartPropertiesController(getWorksheet(), chart);
         loader.setController(propertiesController);
         Pane settingsPane = loader.load();
         AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.SETTINGS_PANE_DISTANCE);
@@ -192,7 +192,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
      *
      * @return the {@link Worksheet} instance associated with this controller
      */
-    public Worksheet<Double> getWorksheet() {
+    public Worksheet getWorksheet() {
         return this.worksheet;
     }
 
@@ -231,7 +231,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void initChartViewPorts() throws IOException {
         ZonedDateTimeAxis defaultXAxis = buildTimeAxis();
-        for (Chart<Double> currentChart : getWorksheet().getCharts()) {
+        for (Chart currentChart : getWorksheet().getCharts()) {
             ZonedDateTimeAxis xAxis;
             switch (worksheet.getChartLayout()) {
                 case OVERLAID:
@@ -261,19 +261,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
             XYChart<ZonedDateTime, Double> viewPort;
             switch (currentChart.getChartType()) {
                 case AREA:
-                    viewPort = new AreaChart<>(xAxis, (ValueAxis) yAxis);
+                    viewPort = new AreaChart<>(xAxis, yAxis);
                     ((AreaChart) viewPort).setCreateSymbols(false);
                     break;
                 case STACKED:
-                    viewPort = new StackedAreaChart<>(xAxis, (ValueAxis) yAxis);
+                    viewPort = new StackedAreaChart<>(xAxis, yAxis);
                     ((StackedAreaChart) viewPort).setCreateSymbols(false);
                     break;
                 case SCATTER:
-                    viewPort = new ScatterChart<>(xAxis, (ValueAxis) yAxis);
+                    viewPort = new ScatterChart<>(xAxis, yAxis);
                     break;
                 case LINE:
                 default:
-                    viewPort = new LineChart<>(xAxis, (ValueAxis) yAxis);
+                    viewPort = new LineChart<>(xAxis, yAxis);
                     ((LineChart) viewPort).setCreateSymbols(false);
             }
             viewPort.setCache(true);
@@ -282,7 +282,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setFocusTraversable(true);
             viewPort.setLegendVisible(false);
             viewPort.setAnimated(false);
-            viewPorts.add(new ChartViewPort<>(currentChart, viewPort, buildChartPropertiesController(currentChart)));
+            viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
 
         bindingManager.bind(selectChartLayout.visibleProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
@@ -304,7 +304,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void setupOverlayChartLayout() {
         for (int i = 0; i < viewPorts.size(); i++) {
-            ChartViewPort<Double> v = viewPorts.get(i);
+            ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
             int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
             DoubleBinding n = Bindings.createDoubleBinding(
@@ -360,7 +360,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(vBox.prefHeightProperty(), chartParent.heightProperty());
         bindingManager.bind(vBox.prefWidthProperty(), chartParent.widthProperty());
         for (int i = 0; i < viewPorts.size(); i++) {
-            ChartViewPort<Double> v = viewPorts.get(i);
+            ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
             int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
             DoubleBinding n = Bindings.createDoubleBinding(
@@ -418,7 +418,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(this::handleAddNewChart);
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
-        for (ChartViewPort<Double> viewPort : viewPorts) {
+        for (ChartViewPort viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
         }
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
@@ -435,8 +435,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         });
     }
 
-    private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
-        Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
+    private Map<Chart, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
+        Map<Chart, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
         selection.forEach((xyChart, xyChartSelection) -> {
             viewPorts.stream().filter(v -> v.getChart().equals(xyChart)).findFirst().ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection));
         });
@@ -444,14 +444,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void handleAddNewChart(ActionEvent actionEvent) {
-        worksheet.getCharts().add(new Chart<>());
+        worksheet.getCharts().add(new Chart());
     }
 
     private void initTableViewPane() {
-        for (ChartViewPort<Double> currentViewPort : viewPorts) {
+        for (ChartViewPort currentViewPort : viewPorts) {
             currentViewPort.getSeriesTable().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             CheckBox showAllCheckBox = new CheckBox();
-            TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn = new TableColumn<>();
+            TableColumn<TimeSeriesInfo, Boolean> visibleColumn = new TableColumn<>();
             visibleColumn.setGraphic(showAllCheckBox);
             visibleColumn.setSortable(false);
             visibleColumn.setResizable(false);
@@ -460,7 +460,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             InvalidationListener isVisibleListener = (observable) -> {
                 boolean andAll = true;
                 boolean orAll = false;
-                for (TimeSeriesInfo<?> t : currentViewPort.getDataStore().getSeries()) {
+                for (TimeSeriesInfo t : currentViewPort.getDataStore().getSeries()) {
                     andAll &= t.isSelected();
                     orAll |= t.isSelected();
                 }
@@ -502,41 +502,41 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             });
 
-            DecimalFormatTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+            DecimalFormatTableCellFactory<TimeSeriesInfo, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
             alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
 
-            TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();
+            TableColumn<TimeSeriesInfo, Color> colorColumn = new TableColumn<>();
             colorColumn.setSortable(false);
             colorColumn.setResizable(false);
             colorColumn.setPrefWidth(32);
 
-            TableColumn<TimeSeriesInfo<Double>, Boolean> nameColumn = new TableColumn<>("Name");
+            TableColumn<TimeSeriesInfo, Boolean> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
-            TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
+            TableColumn<TimeSeriesInfo, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
             minColumn.setPrefWidth(75);
             minColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo<Double>, String> maxColumn = new TableColumn<>("Max.");
+            TableColumn<TimeSeriesInfo, String> maxColumn = new TableColumn<>("Max.");
             maxColumn.setSortable(false);
             maxColumn.setPrefWidth(75);
             maxColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo<Double>, String> avgColumn = new TableColumn<>("Avg.");
+            TableColumn<TimeSeriesInfo, String> avgColumn = new TableColumn<>("Avg.");
             avgColumn.setSortable(false);
             avgColumn.setPrefWidth(75);
             avgColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo<Double>, String> currentColumn = new TableColumn<>("Current");
+            TableColumn<TimeSeriesInfo, String> currentColumn = new TableColumn<>("Current");
             currentColumn.setSortable(false);
             currentColumn.setPrefWidth(75);
             currentColumn.setCellFactory(alignRightCellFactory);
             currentColumn.getStyleClass().add("column-bold-text");
 
-            TableColumn<TimeSeriesInfo<Double>, String> pathColumn = new TableColumn<>("Path");
+            TableColumn<TimeSeriesInfo, String> pathColumn = new TableColumn<>("Path");
             pathColumn.setSortable(false);
             pathColumn.setPrefWidth(400);
 
@@ -571,7 +571,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             currentViewPort.getSeriesTable().setOnKeyReleased(event -> {
                 if (event.getCode().equals(KeyCode.DELETE)) {
-                    removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) event.getSource());
+                    removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
             });
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
@@ -721,9 +721,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return btn;
     }
 
-    Optional<ChartViewPort<?>> getAttachedViewport(TitledPane pane) {
-        if (pane != null && (pane.getUserData() instanceof ChartViewPort<?>)) {
-            return Optional.of((ChartViewPort<?>) pane.getUserData());
+    Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
+        if (pane != null && (pane.getUserData() instanceof ChartViewPort)) {
+            return Optional.of((ChartViewPort) pane.getUserData());
         }
         return Optional.empty();
     }
@@ -739,9 +739,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding<Double>> treeView = parentController.getSelectedTreeView();
+            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding<Double>> item = treeView.getSelectionModel().getSelectedItem();
+                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {
@@ -751,8 +751,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         try {
                             TitledPane droppedPane = (TitledPane) event.getSource();
                             droppedPane.setExpanded(true);
-                            ChartViewPort<Double> viewPort = (ChartViewPort<Double>) droppedPane.getUserData();
-                            List<TimeSeriesBinding<Double>> bindings = new ArrayList<>();
+                            ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
+                            List<TimeSeriesBinding> bindings = new ArrayList<>();
                             parentController.getAllBindingsFromBranch(item, bindings);
                             addBindings(bindings, viewPort.getDataStore());
                         } catch (Exception e) {
@@ -803,7 +803,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(c.chartTypeProperty(), controllerReloadListener);
         });
 
-        ListChangeListener<Chart<Double>> chartListListener = c -> {
+        ListChangeListener<Chart> chartListListener = c -> {
             while (c.next()) {
                 if (c.wasPermutated()) {
                     for (int i = c.getFrom(); i < c.getTo(); ++i) {
@@ -814,8 +814,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 } else {
                     if (!preventReload) {
                         if (c.wasAdded()) {
-                            List<? extends Chart<Double>> added = c.getAddedSubList();
-                            Chart<Double> chart = added.get(added.size() - 1);
+                            List<? extends Chart> added = c.getAddedSubList();
+                            Chart chart = added.get(added.size() - 1);
                             int chartIndex = worksheet.getCharts().indexOf(chart);
                             worksheet.setSelectedChart(chartIndex);
                             chart.setShowProperties(true);
@@ -839,12 +839,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     //region *** protected members ***
-    protected void addBindings(Collection<TimeSeriesBinding<Double>> bindings, Chart<Double> targetChart) {
+    protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
         InvalidationListener isVisibleListener = (observable) -> {
             viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
                 boolean andAll = true;
                 boolean orAll = false;
-                for (TimeSeriesInfo<?> t : targetChart.getSeries()) {
+                for (TimeSeriesInfo t : targetChart.getSeries()) {
                     andAll &= t.isSelected();
                     orAll |= t.isSelected();
                 }
@@ -853,8 +853,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 showAllCheckBox.setSelected(andAll);
             });
         };
-        for (TimeSeriesBinding<Double> b : bindings) {
-            TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
+        for (TimeSeriesBinding b : bindings) {
+            TimeSeriesInfo newSeries = TimeSeriesInfo.fromBinding(b);
             bindingManager.attachListener(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false)));
             bindingManager.attachListener(newSeries.selectedProperty(), isVisibleListener);
             targetChart.addSeries(newSeries);
@@ -864,8 +864,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         invalidateAll(false, false, false);
     }
 
-    protected void removeSelectedBinding(TableView<TimeSeriesInfo<Double>> seriesTable) {
-        List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
+    protected void removeSelectedBinding(TableView<TimeSeriesInfo> seriesTable) {
+        List<TimeSeriesInfo> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
         seriesTable.getItems().removeAll(selected);
         seriesTable.getSelectionModel().clearSelection();
         invalidateAll(false, false, false);
@@ -891,11 +891,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     @FXML
-    protected void handleRemoveSeries(ActionEvent actionEvent) {
-        removeSelectedBinding((TableView<TimeSeriesInfo<Double>>) actionEvent.getSource());
-    }
-
-    @FXML
     protected void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
     }
@@ -909,12 +904,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         getWorksheet().setPreviousState(currentState.asSelection());
         logger.debug(() -> getWorksheet().getBackwardHistory().dump());
-        for (ChartViewPort<Double> viewPort : viewPorts) {
+        for (ChartViewPort viewPort : viewPorts) {
             invalidate(viewPort, dontPlotChart, forceRefresh);
         }
     }
 
-    void invalidate(ChartViewPort<Double> viewPort, boolean dontPlot, boolean forceRefresh) {
+    void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {
                 XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
@@ -926,7 +921,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void plotChart(ChartViewPort<Double> viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
+    private void plotChart(ChartViewPort viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::trace)) {
             worksheetMaskerPane.setVisible(true);
             AsyncTaskManager.getInstance().submit(() -> {
@@ -964,7 +959,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart<Double> currentChart, TimeSeriesInfo<Double> series) {
+    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.getData().setAll(series.getProcessor().getData());
@@ -1043,8 +1038,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
-        TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
+    private TableRow<TimeSeriesInfo> seriesTableRowFactory(TableView<TimeSeriesInfo> tv) {
+        TableRow<TimeSeriesInfo> row = new TableRow<>();
         row.setOnDragDetected(event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
@@ -1069,7 +1064,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                TimeSeriesInfo<Double> draggedseries = tv.getItems().remove(draggedIndex);
+                TimeSeriesInfo draggedseries = tv.getItems().remove(draggedIndex);
                 int dropIndex;
                 if (row.isEmpty()) {
                     dropIndex = tv.getItems().size();
@@ -1087,14 +1082,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     public void toggleShowPropertiesPane() {
-        ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
         }
     }
 
     public void setShowPropertiesPane(boolean value) {
-        ChartViewPort<Double> currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties(value);
         }

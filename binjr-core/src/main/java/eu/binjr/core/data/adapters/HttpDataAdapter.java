@@ -62,7 +62,7 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class HttpDataAdapter<T, A extends Decoder<T>> extends SimpleCachingDataAdapter<T, A> {
+public abstract class HttpDataAdapter<A extends Decoder> extends SimpleCachingDataAdapter< A> {
     private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final CloseableHttpClient httpClient;

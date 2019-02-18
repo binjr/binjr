@@ -96,7 +96,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no registered {@link DataAdapter} could be found for the provided key
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public DataAdapter<?> newAdapter(DataAdapterInfo info) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public DataAdapter newAdapter(DataAdapterInfo info) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         return newAdapter(info.getKey());
     }
 
@@ -126,7 +126,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no registered {@link DataAdapter} could be found for the provided key
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public DataAdapter<?> newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public DataAdapter newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
             return retrieveAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {

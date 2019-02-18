@@ -161,7 +161,7 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToAdd the list of {@link Worksheet} instances to add
      */
-    public void addWorksheets(Collection<Worksheet<?>> worksheetsToAdd) {
+    public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
@@ -170,7 +170,7 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToAdd the {@link Worksheet} instances to add
      */
-    public void addWorksheets(Worksheet<?>... worksheetsToAdd) {
+    public void addWorksheets(Worksheet... worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 

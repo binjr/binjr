@@ -34,7 +34,7 @@ import java.util.function.BiConsumer;
  * and bindings onto {@link javafx.beans.Observable} instances.
  * <p>
  * This makes it possible to remove all listeners and bindings attached to to
- * registered {@link Observable} instances in a determinist fashion (on invoking {@code close()})
+ * registered {@link javafx.beans.Observable} instances in a determinist fashion (on invoking {@code close()})
  * and helps alleviate the potential for references leaks in some scenarios.
  * </p>
  *

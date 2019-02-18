@@ -31,9 +31,9 @@ import java.util.Optional;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesProcessor<T> {
+public abstract class TimeSeriesProcessor {
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
-    protected List<XYChart.Data<ZonedDateTime, T>> data;
+    protected List<XYChart.Data<ZonedDateTime, Double>> data;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
@@ -47,7 +47,7 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @return the minimum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final T getMinValue() {
+    public final Double getMinValue() {
         return monitor.read().lock(this::computeMinValue);
     }
 
@@ -56,7 +56,7 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @return the average for all Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final T getAverageValue() {
+    public final Double getAverageValue() {
         return monitor.read().lock(this::computeAverageValue);
     }
 
@@ -65,7 +65,7 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @return the maximum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final T getMaxValue() {
+    public final Double getMaxValue() {
         return monitor.read().lock(this::computeMaxValue);
     }
 
@@ -77,7 +77,7 @@ public abstract class TimeSeriesProcessor<T> {
      * @param xValue the time stamp to get the value for.
      * @return An {@link Optional} instance that contains tthe value for the time position nearest to the one requested if process could complete and value is non-null.
      */
-    public Optional<T> tryGetNearestValue(ZonedDateTime xValue) {
+    public Optional<Double> tryGetNearestValue(ZonedDateTime xValue) {
         // If the lock is already acquired, just abandon the request and return Optional.empty
         return monitor.read().tryLock(this::unsafeGetNearestValue, xValue);
     }
@@ -90,7 +90,7 @@ public abstract class TimeSeriesProcessor<T> {
      * @param xValue the time stamp to get the value for.
      * @return the value for the time position nearest to the one requested.
      */
-    public T getNearestValue(ZonedDateTime xValue) {
+    public Double getNearestValue(ZonedDateTime xValue) {
         return monitor.read().lock(this::unsafeGetNearestValue, xValue);
     }
 
@@ -104,7 +104,7 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @return the data of the {@link TimeSeriesProcessor}
      */
-    public Collection<XYChart.Data<ZonedDateTime, T>> getData() {
+    public Collection<XYChart.Data<ZonedDateTime, Double>> getData() {
         return monitor.read().lock(() -> new ArrayList<>(data));
     }
 
@@ -113,7 +113,7 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @param newData the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
      */
-    public void setData(Collection<XYChart.Data<ZonedDateTime, T>> newData) {
+    public void setData(Collection<XYChart.Data<ZonedDateTime, Double>> newData) {
         monitor.write().lock(() -> this.data = new ArrayList<>(newData));
     }
 
@@ -123,7 +123,7 @@ public abstract class TimeSeriesProcessor<T> {
      * @param index the index of the sample to retrieve.
      * @return the data sample at the given index.
      */
-    public XYChart.Data<ZonedDateTime, T> getSample(int index) {
+    public XYChart.Data<ZonedDateTime, Double> getSample(int index) {
         return monitor.read().lock(() -> this.data.get(index));
     }
 
@@ -141,20 +141,20 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @param sample a new sample to add to the processor's data store
      */
-    public void addSample(XYChart.Data<ZonedDateTime, T> sample) {
+    public void addSample(XYChart.Data<ZonedDateTime, Double> sample) {
         monitor.write().lock(() -> this.data.add(sample));
     }
 
-    protected abstract T computeMinValue();
+    protected abstract Double computeMinValue();
 
-    protected abstract T computeAverageValue();
+    protected abstract Double computeAverageValue();
 
-    protected abstract T computeMaxValue();
+    protected abstract Double computeMaxValue();
 
-    private T unsafeGetNearestValue(ZonedDateTime xValue) {
-        T value = null;
+    private Double unsafeGetNearestValue(ZonedDateTime xValue) {
+        Double value = null;
         if (xValue != null && data != null) {
-            for (XYChart.Data<ZonedDateTime, T> sample : data) {
+            for (XYChart.Data<ZonedDateTime, Double> sample : data) {
                 value = sample.getYValue();
                 if (xValue.isBefore(sample.getXValue())) {
                     //TODO check if previous value is nearer and return corresponding value instead

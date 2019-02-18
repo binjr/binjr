@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class WorksheetNavigationHistory {
     private static final Logger logger = LogManager.getLogger(WorksheetNavigationHistory.class);
-    private final Deque<Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>>> stack = new ArrayDeque<>();
+    private final Deque<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> stack = new ArrayDeque<>();
     private final SimpleBooleanProperty empty = new SimpleBooleanProperty(true);
 
     /**
@@ -44,7 +44,7 @@ public class WorksheetNavigationHistory {
      * @param state the provided {@link XYChartSelection}
      * @return the provided {@link XYChartSelection}
      */
-    void push(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> state) {
+    void push(Map<Chart, XYChartSelection<ZonedDateTime, Double>> state) {
         if (state == null) {
             logger.warn(() -> "Trying to push null state into backwardHistory");
             return;
@@ -66,8 +66,8 @@ public class WorksheetNavigationHistory {
      *
      * @return the topmost {@link XYChartSelection} from the stack.
      */
-    Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> pop() {
-        Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> r = this.stack.pop();
+    Map<Chart, XYChartSelection<ZonedDateTime, Double>> pop() {
+        Map<Chart, XYChartSelection<ZonedDateTime, Double>> r = this.stack.pop();
         empty.set(stack.isEmpty());
         return r;
     }

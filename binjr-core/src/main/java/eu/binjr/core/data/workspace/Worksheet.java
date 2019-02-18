@@ -45,11 +45,11 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet<T> implements Dirtyable, AutoCloseable {
+public class Worksheet implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
-    private ObservableList<Chart<T>> charts;
+    private ObservableList<Chart> charts;
     @IsDirtyable
     private Property<String> name;
     @IsDirtyable
@@ -63,11 +63,11 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
     @IsDirtyable
     private Property<Boolean> timeRangeLinked;
 
-    private Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState;
-    private final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
-    private final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
-    private Property<Integer> selectedChart;
-    private final ChangeWatcher status;
+    private transient Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState;
+    private transient final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
+    private transient final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
+    private transient Property<Integer> selectedChart;
+    private transient final ChangeWatcher status;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -93,8 +93,9 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
                 FXCollections.observableList(new LinkedList<>()),
                 timezone,
                 fromDateTime,
-                toDateTime
-        );
+                toDateTime,
+                ChartLayout.STACKED,
+                false);
     }
 
     /**
@@ -102,14 +103,16 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @param initWorksheet the {@link Worksheet} instance to clone.
      */
-    public Worksheet(Worksheet<T> initWorksheet) {
+    public Worksheet(Worksheet initWorksheet) {
         this(initWorksheet.getName(),
                 initWorksheet.getCharts().stream()
                         .map(Chart::new)
                         .collect(Collectors.toCollection(() -> FXCollections.observableList(new LinkedList<>()))),
                 initWorksheet.getTimeZone(),
                 initWorksheet.getFromDateTime(),
-                initWorksheet.getToDateTime()
+                initWorksheet.getToDateTime(),
+                initWorksheet.getChartLayout(),
+                initWorksheet.isTimeRangeLinked()
         );
     }
 
@@ -123,21 +126,38 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      * @param toDateTime   the end of the time range for the worksheet
      */
     public Worksheet(String name,
-                     List<Chart<T>> charts,
+                     List<Chart> charts,
                      ZoneId timezone,
                      ZonedDateTime fromDateTime,
                      ZonedDateTime toDateTime) {
+        this(name,
+                charts,
+                timezone,
+                fromDateTime,
+                toDateTime,
+                ChartLayout.STACKED,
+                false);
+    }
+
+    private Worksheet(String name,
+                      List<Chart> charts,
+                      ZoneId timezone,
+                      ZonedDateTime fromDateTime,
+                      ZonedDateTime toDateTime,
+                      ChartLayout chartLayout,
+                      boolean timeRangeLinked) {
         this.name = new SimpleStringProperty(name);
         this.charts = FXCollections.observableList(new LinkedList<>(charts));
         if (this.charts.isEmpty()) {
-            this.charts.add(new Chart<>());
+            this.charts.add(new Chart());
         }
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(fromDateTime);
         this.toDateTime = new SimpleObjectProperty<>(toDateTime);
+        this.chartLayout = new SimpleObjectProperty<>(chartLayout);
+        this.timeRangeLinked = new SimpleBooleanProperty(timeRangeLinked);
         this.selectedChart = new SimpleObjectProperty<>(0);
-        this.chartLayout = new SimpleObjectProperty<>(ChartLayout.STACKED);
-        this.timeRangeLinked = new SimpleBooleanProperty(false);
+
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -147,7 +167,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @return the default chart for the worksheet.
      */
-    public Chart<T> getDefaultChart() {
+    public Chart getDefaultChart() {
         return charts.get(0);
     }
 
@@ -299,7 +319,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      */
     @XmlElementWrapper(name = "Charts")
     @XmlElements(@XmlElement(name = "Chart"))
-    public ObservableList<Chart<T>> getCharts() {
+    public ObservableList<Chart> getCharts() {
         return charts;
     }
 
@@ -308,7 +328,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @param charts the {@link Chart} instance in the worksheet.
      */
-    public void setCharts(ObservableList<Chart<T>> charts) {
+    public void setCharts(ObservableList<Chart> charts) {
         this.charts = charts;
     }
 
@@ -326,7 +346,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      * @return the previous state of the all the charts on the worksheet.
      */
     @XmlTransient
-    public Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
+    public Map<Chart, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
         return previousState;
     }
 
@@ -335,7 +355,7 @@ public class Worksheet<T> implements Dirtyable, AutoCloseable {
      *
      * @param previousState the previous state of the all the charts on the worksheet.
      */
-    public void setPreviousState(Map<Chart<Double>, XYChartSelection<ZonedDateTime, Double>> previousState) {
+    public void setPreviousState(Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState) {
         this.previousState = previousState;
     }
 

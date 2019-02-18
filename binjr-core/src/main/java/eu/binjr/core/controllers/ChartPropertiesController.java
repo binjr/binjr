@@ -16,15 +16,13 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.*;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -35,6 +33,8 @@ import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.controlsfx.control.ToggleSwitch;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -44,12 +44,12 @@ import java.util.ResourceBundle;
  *
  * @author Frederic Thevenet
  */
-public class ChartPropertiesController<T extends Number> implements Initializable {
+public class ChartPropertiesController implements Initializable, Closeable {
     public static final double SETTINGS_PANE_DISTANCE = -210;
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
-    private final Chart<T> chart;
-    private final Worksheet<T> worksheet;
+    private final Chart chart;
+    private final Worksheet worksheet;
     @FXML
     private AnchorPane root;
     @FXML
@@ -79,8 +79,10 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     @FXML
     private HBox yAxisScaleSettings;
 
+    private final BindingManager bindingManager = new BindingManager();
 
-    public ChartPropertiesController(Worksheet<T> worksheet, Chart<T> chart) {
+
+    public ChartPropertiesController(Worksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
         this.chart = chart;
 
@@ -123,7 +125,7 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
         strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
-        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER );
+        adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
         chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
@@ -155,9 +157,18 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
         }
     }
 
-    private <T extends Number> void setAndBindTextFormatter(TextField textField, StringConverter<T> converter, Property<T> stateProperty) {
-        final TextFormatter<T> formatter = new TextFormatter<>(converter);
-        formatter.valueProperty().bindBidirectional(stateProperty);
+    private void setAndBindTextFormatter(TextField textField, StringConverter<Number> converter, DoubleProperty stateProperty) {
+        final TextFormatter<Number> formatter = new TextFormatter<>(converter);
+        bindingManager.attachListener(formatter.valueProperty(), (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+            //    stateProperty.setValue(newValue);
+            }
+        });
+        bindingManager.attachListener(stateProperty, (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+
+            }
+        });
         textField.setTextFormatter(formatter);
     }
 
@@ -192,4 +203,8 @@ public class ChartPropertiesController<T extends Number> implements Initializabl
     }
 
 
+    @Override
+    public void close() throws IOException {
+        bindingManager.close();
+    }
 }

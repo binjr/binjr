@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
+public class Rrd4jFileAdapter extends BaseDataAdapter {
     static {
         // Disable the forced sync mechanism for  Rrd4J NIO backend.
         RrdBackendFactory.setActiveFactories(new RrdNioBackendFactory(0));
@@ -75,9 +75,9 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(
-                new TimeSeriesBinding<>(
+    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+        TreeItem<TimeSeriesBinding> tree = new TreeItem<>(
+                new TimeSeriesBinding(
                         "",
                         "/",
                         null,
@@ -89,7 +89,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
         for (Path rrdPath : rrdPaths) {
             try {
                 String rrdFileName = rrdPath.getFileName().toString();
-                var rrdNode = new TreeItem<>(new TimeSeriesBinding<>(
+                var rrdNode = new TreeItem<>(new TimeSeriesBinding(
                         rrdFileName,
                         rrdFileName,
                         null,
@@ -102,7 +102,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                 RrdDb rrd = openRrdDb(rrdPath);
                 rrdDbMap.put(rrdPath, rrd);
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs()).map(ArcDef::getConsolFun).collect(Collectors.toSet())) {
-                    var consolFunNode = new TreeItem<>(new TimeSeriesBinding<>(
+                    var consolFunNode = new TreeItem<>(new TimeSeriesBinding(
                             consolFun.toString(),
                             rrdPath.resolve(consolFun.toString()).toString(),
                             null,
@@ -114,7 +114,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
                             this));
                     rrdNode.getChildren().add(consolFunNode);
                     for (String ds : rrd.getDsNames()) {
-                        consolFunNode.getChildren().add(new TreeItem<>(new TimeSeriesBinding<>(
+                        consolFunNode.getChildren().add(new TreeItem<>(new TimeSeriesBinding(
                                 ds,
                                 consolFunNode.getValue().getPath(),
                                 null,
@@ -135,8 +135,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant
-            end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache)
+    public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant
+            end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache)
             throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
@@ -146,13 +146,13 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
             FetchRequest request = rrdDbMap.get(dsPath.getParent()).createFetchRequest(ConsolFun.valueOf(dsPath.getFileName().toString()), begin.getEpochSecond(), end.getEpochSecond());
             request.setFilter(seriesInfo.stream().map(s -> s.getBinding().getLabel()).toArray(String[]::new));
             FetchData data = request.fetchData();
-            Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
+            Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
             for (int i = 0; i < data.getRowCount(); i++) {
                 ZonedDateTime timeStamp = Instant.ofEpochSecond(data.getTimestamps()[i]).atZone(getTimeZoneId());
-                for (TimeSeriesInfo<Double> info : seriesInfo) {
+                for (TimeSeriesInfo info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
                     XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val.isNaN() ? 0 : val);
-                    TimeSeriesProcessor<Double> seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
+                    TimeSeriesProcessor seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
                     seriesProcessor.addSample(point);
                 }
             }

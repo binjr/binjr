@@ -67,7 +67,6 @@ public class Source implements Dirtyable, Closeable {
      * @param adapter the {@link SerializedDataAdapter} to create the {@link Source}  instance from
      * @return an instance of the {@link Source} class from the provided  {@link SerializedDataAdapter}
      */
-    @SuppressWarnings("unchecked")
     public static Source of(DataAdapter adapter) {
         if (adapter == null) {
             throw new IllegalArgumentException("adapter cannot be null");

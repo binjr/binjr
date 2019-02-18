@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesTransform<T> {
+public abstract class TimeSeriesTransform {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
     private final String name;
 
@@ -48,7 +48,7 @@ public abstract class TimeSeriesTransform<T> {
      * @param series the time series to apply the transform to.
      * @return A map of the transformed series.
      */
-    protected abstract Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> apply(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series);
+    protected abstract Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> series);
 
     /**
      * Applies the transform function to the provided series
@@ -57,7 +57,7 @@ public abstract class TimeSeriesTransform<T> {
      * @param enabled true if the transform should be applied, false otherwise.
      * @return A map of the transformed series.
      */
-    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> transform(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> series, boolean enabled) {
+    public Map<TimeSeriesInfo, TimeSeriesProcessor> transform(Map<TimeSeriesInfo, TimeSeriesProcessor> series, boolean enabled) {
         String names = series.keySet().stream().map(tTimeSeriesInfo -> tTimeSeriesInfo.getBinding().getLabel()).reduce((s, s2) -> s + " " + s2).orElse("null");
         if (enabled) {
             try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + names, logger::trace)) {

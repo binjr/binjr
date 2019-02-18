@@ -66,7 +66,7 @@ public class PreferenceDialogController implements Initializable {
     public TextField pluginLocTextfield;
     public Button browsePluginLocButton;
     public TableView<DataAdapterInfo> availableAdapterTable;
-    public TableColumn enabledColumn;
+    public TableColumn<DataAdapterInfo, Boolean> enabledColumn;
     public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
     @FXML
     private ToggleSwitch loadExternalToggle;
@@ -114,7 +114,7 @@ public class PreferenceDialogController implements Initializable {
             maxSampleLabel.setDisable(!newValue);
         });
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
-        final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<Path>() {
+        final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
             @Override
             public String toString(Path object) {
                 return object.toString();
@@ -145,8 +145,7 @@ public class PreferenceDialogController implements Initializable {
         loadExternalToggle.selectedProperty().bindBidirectional(prefs.loadPluginsFromExternalLocationProperty());
         browsePluginLocButton.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
         pluginLocTextfield.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
-
-        enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
+        enabledColumn.setCellFactory( CheckBoxTableCell.forTableColumn(enabledColumn));
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));

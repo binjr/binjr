@@ -33,7 +33,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
-public class TimeSeriesInfo<T> implements Dirtyable {
+public class TimeSeriesInfo implements Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
@@ -41,9 +41,9 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     @IsDirtyable
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
-    private final TimeSeriesBinding<T> binding;
+    private final TimeSeriesBinding binding;
     private final ChangeWatcher status;
-    private Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
+    private Property<TimeSeriesProcessor> processor = new SimpleObjectProperty<>();
 
     /**
      * Parameter-less constructor (needed for XMl serialization)
@@ -64,7 +64,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @param seriesInfo the {@link TimeSeriesInfo} instance to clone.
      */
-    public TimeSeriesInfo(TimeSeriesInfo<T> seriesInfo) {
+    public TimeSeriesInfo(TimeSeriesInfo seriesInfo) {
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
@@ -82,7 +82,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           TimeSeriesBinding<T> binding) {
+                           TimeSeriesBinding binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
@@ -95,14 +95,13 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
      *
      * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
-     * @param <T>     the type of Y data for that series
      * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
      */
-    public static <T> TimeSeriesInfo<T> fromBinding(TimeSeriesBinding<T> binding) {
+    public static TimeSeriesInfo fromBinding(TimeSeriesBinding binding) {
         if (binding == null) {
             throw new IllegalArgumentException("binding cannot be null");
         }
-        return new TimeSeriesInfo<>(binding.getLegend(),
+        return new TimeSeriesInfo(binding.getLegend(),
                 true,
                 binding.getColor(),
                 binding);
@@ -197,7 +196,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @return the {@link TimeSeriesBinding} to get the data from
      */
-    public TimeSeriesBinding<T> getBinding() {
+    public TimeSeriesBinding getBinding() {
         return binding;
     }
 
@@ -207,7 +206,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      * @return the data processor for the series
      */
     @XmlTransient
-    public TimeSeriesProcessor<T> getProcessor() {
+    public TimeSeriesProcessor getProcessor() {
         return processor.getValue();
     }
 
@@ -216,7 +215,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @param processor the data processor for the series
      */
-    public void setProcessor(TimeSeriesProcessor<T> processor) {
+    public void setProcessor(TimeSeriesProcessor processor) {
         this.processor.setValue(processor);
     }
 
@@ -225,7 +224,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      *
      * @return The processor property.
      */
-    public Property<TimeSeriesProcessor<T>> processorProperty() {
+    public Property<TimeSeriesProcessor> processorProperty() {
         return this.processor;
     }
 

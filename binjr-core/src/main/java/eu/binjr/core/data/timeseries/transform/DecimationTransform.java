@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class DecimationTransform<T> extends TimeSeriesTransform<T> {
+public class DecimationTransform extends TimeSeriesTransform {
     private final int threshold;
 
     /**
@@ -46,7 +46,7 @@ public class DecimationTransform<T> extends TimeSeriesTransform<T> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> apply(Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> m) {
+    public Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> m) {
         return m.entrySet()
                 .parallelStream()
                 .collect(Collectors.toMap(Map.Entry::getKey, o -> {
@@ -57,9 +57,9 @@ public class DecimationTransform<T> extends TimeSeriesTransform<T> {
                 }));
     }
 
-    private Collection<XYChart.Data<ZonedDateTime, T>> decimate(TimeSeriesProcessor<T> data, int threshold) {
+    private Collection<XYChart.Data<ZonedDateTime, Double>> decimate(TimeSeriesProcessor data, int threshold) {
         int dataLength = data.size();
-        List<XYChart.Data<ZonedDateTime, T>> sampled = new ArrayList<>(threshold);
+        List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>(threshold);
         double every = (double) (dataLength - 2) / (threshold - 2);
         sampled.add(data.getSample(0)); // Always add the first point
         for (int i = 1; i < threshold - 1; i++) {

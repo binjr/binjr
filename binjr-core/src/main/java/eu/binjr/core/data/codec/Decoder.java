@@ -31,7 +31,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public interface Decoder<T> {
+public interface Decoder {
 
     /**
      * Decode a stream of data into a map of {@link TimeSeriesProcessor} instances.
@@ -42,5 +42,5 @@ public interface Decoder<T> {
      * @throws IOException                      in the event of an IO error
      * @throws DecodingDataFromAdapterException in the event of an decoding error
      */
-    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> decode(InputStream in, List<TimeSeriesInfo<T>> seriesNames) throws IOException, DecodingDataFromAdapterException;
+    Map<TimeSeriesInfo, TimeSeriesProcessor> decode(InputStream in, List<TimeSeriesInfo> seriesNames) throws IOException, DecodingDataFromAdapterException;
 }

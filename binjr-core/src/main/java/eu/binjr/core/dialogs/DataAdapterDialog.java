@@ -154,7 +154,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
      * @return an instance of {@link SerializedDataAdapter}
      * @throws DataAdapterException if the provided {@link ZoneId} is invalid
      */
-    protected abstract DataAdapter<?> getDataAdapter() throws DataAdapterException;
+    protected abstract DataAdapter getDataAdapter() throws DataAdapterException;
 
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();

@@ -56,15 +56,15 @@ import java.util.concurrent.ConcurrentSkipListMap;
  *
  * @author Frederic Thevenet
  */
-public class CsvFileAdapter extends BaseDataAdapter<Double> {
+public class CsvFileAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(CsvFileAdapter.class);
     private String dateTimePattern;
     private Path csvPath;
     private ZoneId zoneId;
     private Character delimiter;
     private String encoding;
-    private CsvDecoder<Double> csvDecoder;
-    private SortedMap<Long, DataSample<Double>> sortedDataStore;
+    private CsvDecoder csvDecoder;
+    private SortedMap<Long, DataSample> sortedDataStore;
     private List<String> headers;
 
     /**
@@ -104,7 +104,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         this.encoding = encoding;
         this.dateTimePattern = dateTimePattern;
         this.delimiter = delimiter;
-        this.csvDecoder = new CsvDecoder<>(encoding, delimiter,
+        this.csvDecoder = new CsvDecoder(encoding, delimiter,
                 DoubleTimeSeriesProcessor::new,
                 s -> {
                     try {
@@ -119,9 +119,9 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
-        TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(
-                new TimeSeriesBinding<>(
+    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+        TreeItem<TimeSeriesBinding> tree = new TreeItem<>(
+                new TimeSeriesBinding(
                         "",
                         "/",
                         null,
@@ -133,7 +133,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         try (InputStream in = Files.newInputStream(csvPath)) {
             this.headers = csvDecoder.getDataColumnHeaders(in);
             for (String header : headers) {
-                TimeSeriesBinding<Double> b = new TimeSeriesBinding<>(
+                TimeSeriesBinding b = new TimeSeriesBinding(
                         header,
                         header,
                         null,
@@ -152,20 +152,20 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
-        Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
-        Map<String, TimeSeriesInfo<Double>> rDict = new HashMap<>();
-        for (TimeSeriesInfo<Double> info : seriesInfo) {
+        Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
+        Map<String, TimeSeriesInfo> rDict = new HashMap<>();
+        for (TimeSeriesInfo info : seriesInfo) {
             rDict.put(info.getBinding().getLabel(), info);
             series.put(info, new DoubleTimeSeriesProcessor());
         }
 
-        for (DataSample<Double> sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
+        for (DataSample sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
             for (String n : sample.getCells().keySet()) {
-                TimeSeriesInfo<Double> i = rDict.get(n);
+                TimeSeriesInfo i = rDict.get(n);
                 if (i != null) {
                     series.get(i).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
                 }
@@ -246,7 +246,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         super.close();
     }
 
-    protected SortedMap<Long, DataSample<Double>> getDataStore() throws DataAdapterException {
+    protected SortedMap<Long, DataSample> getDataStore() throws DataAdapterException {
         if (sortedDataStore == null) {
             try (InputStream in = Files.newInputStream(csvPath)) {
                 this.sortedDataStore = buildSortedDataStore(in);
@@ -257,8 +257,8 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         return sortedDataStore;
     }
 
-    private SortedMap<Long, DataSample<Double>> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
-        SortedMap<Long, DataSample<Double>> dataStore = new ConcurrentSkipListMap<>();
+    private SortedMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
+        SortedMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
 
         try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::trace)) {
             csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toEpochSecond(), sample));

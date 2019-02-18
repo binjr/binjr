@@ -16,14 +16,11 @@
 
 package eu.binjr.core.data.workspace;
 
-import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.DecimationTransform;
-import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -36,7 +33,6 @@ import java.time.ZonedDateTime;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -49,11 +45,12 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Chart")
-public class Chart<T> implements Dirtyable, AutoCloseable {
+public class Chart implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
+
     @IsDirtyable
-    private ObservableList<TimeSeriesInfo<T>> series;
+    private ObservableList<TimeSeriesInfo> series;
     @IsDirtyable
     private Property<String> name;
     @IsDirtyable
@@ -75,8 +72,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     @IsDirtyable
     private DoubleProperty yAxisMaxValue;
 
-    private BooleanProperty showProperties;
-    private final ChangeWatcher status;
+    private transient BooleanProperty showProperties;
+    private transient final ChangeWatcher status;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -91,8 +88,8 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
                 GlobalPreferences.getInstance().isShowAreaOutline(),
                 1.0,
                 true,
-                0.0,
-                100.0);
+               0.0,
+              100.0);
     }
 
     /**
@@ -122,7 +119,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param initChart the {@link Chart} instance to clone.
      */
-    public Chart(Chart<T> initChart) {
+    public Chart(Chart initChart) {
         this(initChart.getName(),
                 initChart.getChartType(),
                 initChart.getSeries().stream()
@@ -141,7 +138,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
 
     private Chart(String name,
                   ChartType chartType,
-                  List<TimeSeriesInfo<T>> bindings,
+                  List<TimeSeriesInfo> bindings,
                   String unitName,
                   UnitPrefixes base,
                   double graphOpacity,
@@ -149,7 +146,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
                   double strokeWidth,
                   boolean autoScaleYAxis,
                   double yAxisMinValue,
-                  double yAxisMaxValue) {
+                 double yAxisMaxValue) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);
@@ -168,38 +165,46 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Fills up the backend for all {@link TimeSeriesInfo} in the worksheet with data from the adapter on the specified time interval
+     * Fills up the backend for all {@link TimeSeriesInfo} in the chart by querying the relevant data adapters
+     * for the specified time interval.
      *
      * @param startTime   the start of the time interval
      * @param endTime     the end of the time interval
      * @param bypassCache set to true to forcefully bypass any cache on the adapter.
      * @throws DataAdapterException if an error occurs while retrieving data from the adapter
      */
-    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache) throws DataAdapterException {
+    public void fetchDataFromSources(ZonedDateTime startTime, ZonedDateTime endTime, boolean bypassCache)
+            throws DataAdapterException {
         // prune series from closed adapters
         series.removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
-                logger.debug(() -> seriesInfo.getDisplayName() + " will be pruned because attached adapter " + seriesInfo.getBinding().getAdapter().getId() + " is closed.");
+                logger.debug(() -> seriesInfo.getDisplayName() + " will be pruned because attached adapter " +
+                        seriesInfo.getBinding().getAdapter().getId() + " is closed.");
                 return true;
             }
             return false;
         });
         // Define the reduction transform to apply
-        TimeSeriesTransform<T> reducer = new DecimationTransform<>(GlobalPreferences.getInstance().getDownSamplingThreshold());
+        var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
         // Group all bindings by common adapters
-        Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
-        for (Map.Entry<DataAdapter<T>, List<TimeSeriesInfo<T>>> byAdapterEntry : bindingsByAdapters.entrySet()) {
-            DataAdapter<T> adapter = byAdapterEntry.getKey();
-            // Group all bindings-by-adapters by path
-            Map<String, List<TimeSeriesInfo<T>>> bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            for (Map.Entry<String, List<TimeSeriesInfo<T>>> byPathEntry : bindingsByPath.entrySet()) {
+        var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
+            var adapter = byAdapterEntry.getKey();
+            // Group all queries with the same adapter and path
+            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            for (var byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
-                // Get data for source
-                Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> data = adapter.fetchData(path, startTime.toInstant(), endTime.toInstant(), byPathEntry.getValue(), bypassCache);
-                // Applying point reduction
+                // Get data from the adapter
+                var data = adapter.fetchData(
+                        path,
+                        startTime.toInstant(),
+                        endTime.toInstant(),
+                        byPathEntry.getValue(),
+                        bypassCache);
+                // Applying sample reduction
                 data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
                 //Update timeSeries data
-                for (TimeSeriesInfo<T> seriesInfo : data.keySet()) {
+                for (var seriesInfo : data.keySet()) {
                     seriesInfo.setProcessor(data.get(seriesInfo));
                 }
             }
@@ -211,7 +216,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param seriesInfo the {@link TimeSeriesInfo} to add
      */
-    public void addSeries(TimeSeriesInfo<T> seriesInfo) {
+    public void addSeries(TimeSeriesInfo seriesInfo) {
         series.add(seriesInfo);
     }
 
@@ -220,7 +225,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
      *
      * @param seriesInfo the collection {@link TimeSeriesInfo} to add
      */
-    public void addSeries(Collection<TimeSeriesInfo<T>> seriesInfo) {
+    public void addSeries(Collection<TimeSeriesInfo> seriesInfo) {
         this.series.addAll(seriesInfo);
     }
 
@@ -278,7 +283,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     //   @XmlTransient
     @XmlElementWrapper(name = "SeriesList")
     @XmlElements(@XmlElement(name = "Timeseries"))
-    public ObservableList<TimeSeriesInfo<T>> getSeries() {
+    public ObservableList<TimeSeriesInfo> getSeries() {
         return series;
     }
 
@@ -495,7 +500,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
 
     @XmlAttribute
     public double getyAxisMinValue() {
-        return yAxisMinValue.get();
+        return yAxisMinValue.getValue();
     }
 
     public DoubleProperty yAxisMinValueProperty() {
@@ -503,12 +508,12 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     }
 
     public void setyAxisMinValue(double yAxisMinValue) {
-        this.yAxisMinValue.set(yAxisMinValue);
+        this.yAxisMinValue.setValue(yAxisMinValue);
     }
 
     @XmlAttribute
     public double getyAxisMaxValue() {
-        return yAxisMaxValue.get();
+        return yAxisMaxValue.getValue();
     }
 
     public DoubleProperty yAxisMaxValueProperty() {
@@ -516,7 +521,7 @@ public class Chart<T> implements Dirtyable, AutoCloseable {
     }
 
     public void setyAxisMaxValue(double yAxisMaxValue) {
-        this.yAxisMaxValue.set(yAxisMaxValue);
+        this.yAxisMaxValue.setValue(yAxisMaxValue);
     }
 
     @XmlTransient

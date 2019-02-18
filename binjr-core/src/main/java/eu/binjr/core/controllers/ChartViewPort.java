@@ -29,15 +29,14 @@ import java.time.ZonedDateTime;
 /**
  * Defines the viewport to hosts an XYChart in worksheet.
  *
- * @param <T> the type for the Y axis on the XYChart.
  * @author Frederic Thevenet
  */
-public class ChartViewPort<T extends Number> {
-    private Chart<T> dataStore;
-    private XYChart<ZonedDateTime, T> chart;
-    private ChartPropertiesController<T> propertiesController;
+public class ChartViewPort {
+    private Chart dataStore;
+    private XYChart<ZonedDateTime, Double> chart;
+    private ChartPropertiesController propertiesController;
     private PrefixFormatter prefixFormatter;
-    private TableView<TimeSeriesInfo<Double>> seriesTable;
+    private TableView<TimeSeriesInfo> seriesTable;
 
     /**
      * Initializes a new instance of the {@link ChartViewPort} class.
@@ -46,7 +45,7 @@ public class ChartViewPort<T extends Number> {
      * @param chart                the chart control.
      * @param propertiesController the chart properties controller.
      */
-    public ChartViewPort(Chart<T> dataStore, XYChart<ZonedDateTime, T> chart, ChartPropertiesController<T> propertiesController) {
+    public ChartViewPort(Chart dataStore, XYChart<ZonedDateTime, Double> chart, ChartPropertiesController propertiesController) {
         this.dataStore = dataStore;
         this.chart = chart;
         this.seriesTable = new TableView<>();
@@ -71,7 +70,7 @@ public class ChartViewPort<T extends Number> {
      *
      * @return the chart properties controller.
      */
-    public ChartPropertiesController<T> getPropertiesController() {
+    public ChartPropertiesController getPropertiesController() {
         return propertiesController;
     }
 
@@ -80,7 +79,7 @@ public class ChartViewPort<T extends Number> {
      *
      * @return the {@link XYChart} control.
      */
-    public XYChart<ZonedDateTime, T> getChart() {
+    public XYChart<ZonedDateTime, Double> getChart() {
         return chart;
     }
 
@@ -89,7 +88,7 @@ public class ChartViewPort<T extends Number> {
      *
      * @return the chart's data store.
      */
-    public Chart<T> getDataStore() {
+    public Chart getDataStore() {
         return dataStore;
     }
 
@@ -107,7 +106,7 @@ public class ChartViewPort<T extends Number> {
      *
      * @return the table view control holding the series info.
      */
-    public TableView<TimeSeriesInfo<Double>> getSeriesTable() {
+    public TableView<TimeSeriesInfo> getSeriesTable() {
         return seriesTable;
     }
 

@@ -124,7 +124,6 @@ public class TimeRangePicker extends ToggleButton {
         });
     }
 
-
     public ZoneId getZoneId() {
         return zoneId.getValue();
     }

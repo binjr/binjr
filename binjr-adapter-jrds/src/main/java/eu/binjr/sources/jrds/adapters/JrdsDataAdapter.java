@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>> {
+public class JrdsDataAdapter extends HttpDataAdapter< CsvDecoder> {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
@@ -138,12 +138,12 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
     //region [DataAdapter Members]
 
     @Override
-    public TreeItem<TimeSeriesBinding<Double>> getBindingTree() throws DataAdapterException {
+    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         try {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-            TreeItem<TimeSeriesBinding<Double>> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            TreeItem<TimeSeriesBinding> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
             for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
@@ -216,9 +216,9 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
     }
 
     @Override
-    public CsvDecoder<Double> getDecoder() {
+    public CsvDecoder getDecoder() {
         final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvDecoder<>(getEncoding(), DELIMITER,
+        return new CsvDecoder(getEncoding(), DELIMITER,
                 DoubleTimeSeriesProcessor::new,
                 s -> {
                     Double val = Double.parseDouble(s);
@@ -244,10 +244,10 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
         }
     }
 
-    private void attachNode(TreeItem<TimeSeriesBinding<Double>> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
+    private void attachNode(TreeItem<TimeSeriesBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
         JsonJrdsItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        TreeItem<TimeSeriesBinding<Double>> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
+        TreeItem<TimeSeriesBinding> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
         if (JRDS_FILTER.equals(n.type)) {
             // add a dummy node so that the branch can be expanded
@@ -348,10 +348,10 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
 
     private class GraphDescListener implements ChangeListener<Boolean> {
         private final String currentPath;
-        private final TreeItem<TimeSeriesBinding<Double>> newBranch;
-        private final TreeItem<TimeSeriesBinding<Double>> tree;
+        private final TreeItem<TimeSeriesBinding> newBranch;
+        private final TreeItem<TimeSeriesBinding> tree;
 
-        public GraphDescListener(String currentPath, TreeItem<TimeSeriesBinding<Double>> newBranch, TreeItem<TimeSeriesBinding<Double>> tree) {
+        public GraphDescListener(String currentPath, TreeItem<TimeSeriesBinding> newBranch, TreeItem<TimeSeriesBinding> tree) {
             this.currentPath = currentPath;
             this.newBranch = newBranch;
             this.tree = tree;
@@ -382,9 +382,9 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double, CsvDecoder<Double>>
 
     private class FilteredViewListener implements ChangeListener<Boolean> {
         private final JsonJrdsItem n;
-        private final TreeItem<TimeSeriesBinding<Double>> newBranch;
+        private final TreeItem<TimeSeriesBinding> newBranch;
 
-        public FilteredViewListener(JsonJrdsItem n, TreeItem<TimeSeriesBinding<Double>> newBranch) {
+        public FilteredViewListener(JsonJrdsItem n, TreeItem<TimeSeriesBinding> newBranch) {
             this.n = n;
             this.newBranch = newBranch;
         }

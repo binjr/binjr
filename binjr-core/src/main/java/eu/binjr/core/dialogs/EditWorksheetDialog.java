@@ -46,23 +46,22 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class EditWorksheetDialog<T> extends Dialog<Worksheet> {
+public class EditWorksheetDialog extends Dialog<Worksheet> {
     private static final Logger logger = LogManager.getLogger(EditWorksheetDialog.class);
     private static final String BINJR_SUGGEST = "binjr/suggest";
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final Set<String> suggestedUnits;
     private static final String SUGGEST_WORKSHEET_UNITS = "suggest_worksheet_units";
 
-    @SuppressWarnings("unchecked")
     /**
      * Initializes a new instance of the {@link EditWorksheetDialog} class.
      *
      * @param worksheet the worksheet to edit
      * @param owner     the owner window for the dialog
      */
-    public EditWorksheetDialog(Worksheet<T> worksheet, Node owner) {
+    public EditWorksheetDialog(Worksheet worksheet, Node owner) {
         // Clone the worksheet before binding it to the UI (we don't want to mutate the provided instance in case the user cancel the edition)
-        Worksheet<T> resultWorksheet = new Worksheet<>(worksheet);
+        Worksheet resultWorksheet = new Worksheet(worksheet);
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }

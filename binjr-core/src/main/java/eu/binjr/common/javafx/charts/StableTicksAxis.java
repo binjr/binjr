@@ -39,7 +39,7 @@ import java.util.List;
  *
  * @author Jason Winnebeck
  */
-public abstract class StableTicksAxis extends ValueAxis<Number> {
+public abstract class StableTicksAxis extends ValueAxis<Double> {
 
     /**
      * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
@@ -48,7 +48,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     public static final int BTN_WITDTH = 21;
 
     private final Timeline animationTimeline = new Timeline();
-    private final WritableValue<Double> scaleValue = new WritableValue<Double>() {
+    private final WritableValue<Double> scaleValue = new WritableValue<>() {
         @Override
         public Double getValue() {
             return getScale();
@@ -63,7 +63,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     private AxisTickFormatter axisTickFormatter;
     private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
 
-    private List<Number> minorTicks;
+    private List<Double> minorTicks;
 
     /**
      * Amount of padding to add on the each end of the axis when auto ranging.
@@ -229,7 +229,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
 
 
     @Override
-    protected List<Number> calculateMinorTickMarks() {
+    protected List<Double> calculateMinorTickMarks() {
         return minorTicks;
     }
 
@@ -265,7 +265,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     }
 
     @Override
-    protected List<Number> calculateTickValues(double length, Object range) {
+    protected List<Double> calculateTickValues(double length, Object range) {
         Range rangeVal = (Range) range;
         //Use floor so we start generating ticks before the axis starts -- this is really only relevant
         //because of the minor ticks before the first visible major tick. We'll generate a first
@@ -274,8 +274,8 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
         //Generate one more tick than we expect, for "overlap" to get minor ticks on both sides of the
         //first and last major tick.
         int numTicks = (int) (rangeVal.getDelta() / rangeVal.tickSpacing) + 1;
-        List<Number> ret = new ArrayList<Number>(numTicks + 1);
-        minorTicks = new ArrayList<Number>((numTicks + 2) * NUM_MINOR_TICKS);
+        List<Double> ret = new ArrayList<>(numTicks + 1);
+        minorTicks = new ArrayList<>((numTicks + 2) * NUM_MINOR_TICKS);
         double minorTickSpacing = rangeVal.tickSpacing / (NUM_MINOR_TICKS + 1);
         for (int i = 0; i <= numTicks; ++i) {
             double majorTick = firstTick + rangeVal.tickSpacing * i;
@@ -288,7 +288,7 @@ public abstract class StableTicksAxis extends ValueAxis<Number> {
     }
 
     @Override
-    protected String getTickMarkLabel(Number number) {
+    protected String getTickMarkLabel(Double number) {
         return axisTickFormatter.format(number);
     }
 

@@ -48,8 +48,8 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, String label, String path, DataAdapter<Double> adapter) {
-        return new TimeSeriesBinding<>(
+    public TimeSeriesBinding of(String parentName, String label, String path, DataAdapter adapter) {
+        return new TimeSeriesBinding(
                 label,
                 path,
                 null,
@@ -70,7 +70,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter<Double> adapter) {
+    public TimeSeriesBinding of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter adapter) {
         final String label;
         final UnitPrefixes prefix;
         final ChartType graphType;
@@ -82,7 +82,7 @@ public class JrdsSeriesBindingFactory {
         graphType = ChartType.STACKED;
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
-        return new TimeSeriesBinding<>(label, path, null, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
+        return new TimeSeriesBinding(label, path, null, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
     }
 
     /**
@@ -95,7 +95,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding<Double> of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter<Double> adapter) {
+    public TimeSeriesBinding of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter adapter) {
         final String label;
         final Color color;
         final String legend;
@@ -141,7 +141,7 @@ public class JrdsSeriesBindingFactory {
         }
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
-        return new TimeSeriesBinding<>(label, path, color, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
+        return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
     }
 
     private UnitPrefixes findPrefix(Graphdesc graphdesc) {
