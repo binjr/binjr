@@ -125,24 +125,46 @@ public class ChartPropertiesController implements Initializable, Closeable {
         assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
         assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
 
-        NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
         bindingManager.bindBidirectional(graphOpacitySlider.valueProperty(), chart.graphOpacityProperty());
         bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
         bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
         adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
         bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
-            }
+            adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
-        setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
-        setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
+        TextFormatter<Number> yMinFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        bindingManager.attachListener(yMinFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
+            if ((chart.getyAxisMaxValue() - newValue.doubleValue() > 0)) {
+                chart.yAxisMinValueProperty().setValue(newValue);
+            } else {
+                yMinFormatter.valueProperty().setValue(oldValue);
+            }
+        });
+        bindingManager.attachListener(chart.yAxisMinValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
+            yMinFormatter.valueProperty().setValue(newValue);
+        });
+        yMinRange.setTextFormatter(yMinFormatter);
+        TextFormatter<Number> yMaxFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        bindingManager.attachListener(yMaxFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
+            if ((newValue.doubleValue() - chart.getyAxisMinValue() > 0)) {
+                chart.yAxisMaxValueProperty().setValue(newValue);
+            } else {
+                yMaxFormatter.valueProperty().setValue(oldValue);
+            }
+        });
+        bindingManager.attachListener(chart.yAxisMaxValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
+            yMaxFormatter.valueProperty().setValue(newValue);
+        });
+        yMaxRange.setTextFormatter(yMaxFormatter);
+
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());
+
+
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         bindingManager.attachListener(showAreaOutline.selectedProperty(),
                 (ChangeListener<Boolean>) (observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
@@ -159,12 +181,6 @@ public class ChartPropertiesController implements Initializable, Closeable {
         } else {
             hide();
         }
-    }
-
-    private void setAndBindTextFormatter(TextField textField, StringConverter<Number> converter, DoubleProperty stateProperty) {
-        final TextFormatter<Number> formatter = new TextFormatter<>(converter);
-        bindingManager.bindBidirectional(formatter.valueProperty(), stateProperty);
-        textField.setTextFormatter(formatter);
     }
 
     private void adaptToChartType(boolean disable) {
