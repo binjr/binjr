@@ -784,6 +784,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             this.worksheet = null;
             this.seriesTableContainer = null;
             this.crossHair = null;
+            viewPorts.forEach(ChartViewPort::close);
             viewPorts = null;
         }
     }

@@ -16,27 +16,33 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.core.data.workspace.Chart;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.PrefixFormatter;
+import eu.binjr.core.data.workspace.Chart;
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableView;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.Closeable;
 import java.time.ZonedDateTime;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Defines the viewport to hosts an XYChart in worksheet.
  *
  * @author Frederic Thevenet
  */
-public class ChartViewPort {
-    private Chart dataStore;
-    private XYChart<ZonedDateTime, Double> chart;
-    private ChartPropertiesController propertiesController;
-    private PrefixFormatter prefixFormatter;
-    private TableView<TimeSeriesInfo> seriesTable;
+public class ChartViewPort implements Closeable {
+    private final Chart dataStore;
+    private final XYChart<ZonedDateTime, Double> chart;
+    private final ChartPropertiesController propertiesController;
+    private final PrefixFormatter prefixFormatter;
+    private final TableView<TimeSeriesInfo> seriesTable;
+    private static final Logger logger = LogManager.getLogger(ChartViewPort.class);
+    private final AtomicBoolean closing = new AtomicBoolean(false);
 
     /**
      * Initializes a new instance of the {@link ChartViewPort} class.
@@ -108,6 +114,14 @@ public class ChartViewPort {
      */
     public TableView<TimeSeriesInfo> getSeriesTable() {
         return seriesTable;
+    }
+
+    @Override
+    public void close() {
+        if (closing.compareAndSet(false, true)) {
+            logger.debug(() -> "Closing ChartViewPort " + this.toString());
+            propertiesController.close();
+        }
     }
 
 }

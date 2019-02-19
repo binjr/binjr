@@ -81,7 +81,7 @@ public class BindingManager implements AutoCloseable {
     }
 
 
-    public <T> void bindBidirectionnal(Property<T> property, Property<T> binding) {
+    public <T> void bindBidirectional(Property<T> property, Property<T> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
         logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());

@@ -83,7 +83,7 @@ public class TimeRangePicker extends ToggleButton {
 
         bindingManager.bind(timeRangePickerController.startDate.zoneIdProperty(), zoneId);
         bindingManager.bind(timeRangePickerController.endDate.zoneIdProperty(), zoneId);
-        bindingManager.bindBidirectionnal(timeRangePickerController.zoneIdProperty(), zoneId);
+        bindingManager.bindBidirectional(timeRangePickerController.zoneIdProperty(), zoneId);
         bindingManager.attachListener(zoneId, (observable, oldValue, newValue) -> updateText());
 
         bindingManager.attachListener(selectedRange, (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {

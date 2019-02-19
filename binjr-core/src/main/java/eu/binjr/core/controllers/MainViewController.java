@@ -821,13 +821,13 @@ public class MainViewController implements Initializable {
             seriesControllers.put(newTab, current);
             current.getWorksheet().timeRangeLinkedProperty().addListener((observable, oldValue, newValue) -> {
                 if (newValue) {
-                    current.getBindingManager().bindBidirectionnal(linkedTimeRange, current.selectedRangeProperty());
+                    current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
                 } else {
                     current.getBindingManager().unbindBidirectionnal(linkedTimeRange, current.selectedRangeProperty());
                 }
             });
             if (current.getWorksheet().isTimeRangeLinked()) {
-                current.getBindingManager().bindBidirectionnal(linkedTimeRange, current.selectedRangeProperty());
+                current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
             }
             newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
             if (setToEditMode) {

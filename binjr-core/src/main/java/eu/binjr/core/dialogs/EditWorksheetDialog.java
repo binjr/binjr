@@ -84,7 +84,7 @@ public class EditWorksheetDialog extends Dialog<Worksheet> {
 
             unitNameField.textProperty().bindBidirectional(resultWorksheet.getDefaultChart().unitProperty());
             nameField.textProperty().bindBidirectional(resultWorksheet.nameProperty());
-            TextFormatter<ZoneId> formatter = new TextFormatter<ZoneId>(new StringConverter<ZoneId>() {
+            TextFormatter<ZoneId> formatter = new TextFormatter<>(new StringConverter<>() {
                 @Override
                 public String toString(ZoneId object) {
                     return object.toString();

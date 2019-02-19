@@ -23,6 +23,7 @@ import eu.binjr.core.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
@@ -31,13 +32,15 @@ import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.Closeable;
-import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * The controller class for the chart properties view.
@@ -45,11 +48,13 @@ import java.util.ResourceBundle;
  * @author Frederic Thevenet
  */
 public class ChartPropertiesController implements Initializable, Closeable {
+    private static final Logger logger = LogManager.getLogger(ChartPropertiesController.class);
     public static final double SETTINGS_PANE_DISTANCE = -210;
     private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
     private final Chart chart;
     private final Worksheet worksheet;
+    private final AtomicBoolean closing = new AtomicBoolean(false);
     @FXML
     private AnchorPane root;
     @FXML
@@ -121,32 +126,31 @@ public class ChartPropertiesController implements Initializable, Closeable {
         assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
 
         NumberStringConverter numberFormatter = new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT));
-        graphOpacitySlider.valueProperty().bindBidirectional(chart.graphOpacityProperty());
-        opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
-        strokeWidthSlider.valueProperty().bindBidirectional(chart.strokeWidthProperty());
-        strokeWidthText.textProperty().bind(Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
+        bindingManager.bindBidirectional(graphOpacitySlider.valueProperty(), chart.graphOpacityProperty());
+        bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+        bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
+        bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
         adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
-        chart.chartTypeProperty().addListener((observable, oldValue, newValue) -> {
+        bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
             }
         });
-        showAreaOutline.selectedProperty().bindBidirectional(chart.showAreaOutlineProperty());
-        autoScaleYAxis.selectedProperty().bindBidirectional(chart.autoScaleYAxisProperty());
+        bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
+        bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
         setAndBindTextFormatter(yMinRange, numberFormatter, chart.yAxisMinValueProperty());
         setAndBindTextFormatter(yMaxRange, numberFormatter, chart.yAxisMaxValueProperty());
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
-        chart.chartTypeProperty().bind(chartTypeChoice.getSelectionModel().selectedItemProperty());
-
-
+        bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        showAreaOutline.selectedProperty().addListener((observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
-        visibleProperty().addListener((observable, oldValue, newValue) -> setPanelVisibility());
-        this.visibleProperty().bindBidirectional(chart.showPropertiesProperty());
+        bindingManager.attachListener(showAreaOutline.selectedProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
+        bindingManager.attachListener(visibleProperty(), (observable, oldValue, newValue) -> setPanelVisibility());
+        bindingManager.bindBidirectional(visibleProperty(), chart.showPropertiesProperty());
 
         closeButton.setOnAction(e -> visibleProperty().setValue(false));
-        yAxisScaleSettings.disableProperty().bind(autoScaleYAxis.selectedProperty());
+        bindingManager.bind(yAxisScaleSettings.disableProperty(), autoScaleYAxis.selectedProperty());
     }
 
     void setPanelVisibility() {
@@ -159,16 +163,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
 
     private void setAndBindTextFormatter(TextField textField, StringConverter<Number> converter, DoubleProperty stateProperty) {
         final TextFormatter<Number> formatter = new TextFormatter<>(converter);
-        bindingManager.attachListener(formatter.valueProperty(), (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-            //    stateProperty.setValue(newValue);
-            }
-        });
-        bindingManager.attachListener(stateProperty, (observable, oldValue, newValue) -> {
-            if (newValue != null) {
-
-            }
-        });
+        bindingManager.bindBidirectional(formatter.valueProperty(), stateProperty);
         textField.setTextFormatter(formatter);
     }
 
@@ -204,7 +199,10 @@ public class ChartPropertiesController implements Initializable, Closeable {
 
 
     @Override
-    public void close() throws IOException {
-        bindingManager.close();
+    public void close() {
+        if (closing.compareAndSet(false, true)) {
+            logger.debug(() -> "Closing ChartPropertiesController " + this.toString());
+            bindingManager.close();
+        }
     }
 }
