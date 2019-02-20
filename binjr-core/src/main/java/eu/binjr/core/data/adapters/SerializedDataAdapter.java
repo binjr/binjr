@@ -36,7 +36,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class SerializedDataAdapter<A extends Decoder> extends BaseDataAdapter {
+public abstract class SerializedDataAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(SerializedDataAdapter.class);
     private UUID id = UUID.randomUUID();
     protected volatile boolean closed = false;
@@ -72,6 +72,6 @@ public abstract class SerializedDataAdapter<A extends Decoder> extends BaseDataA
      *
      * @return the {@link Decoder} used to produce {@link TimeSeriesProcessor} from the source.
      */
-    public abstract A getDecoder();
+    public abstract Decoder getDecoder();
 
 }

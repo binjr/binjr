@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends HttpDataAdapter< CsvDecoder> {
+public class JrdsDataAdapter extends HttpDataAdapter {
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
