@@ -31,9 +31,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
+import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.plugins.convert.TypeConverters;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.Closeable;
@@ -146,6 +148,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.attachListener(chart.yAxisMinValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
             yMinFormatter.valueProperty().setValue(newValue);
         });
+        yMinFormatter.valueProperty().setValue(chart.getyAxisMinValue());
         yMinRange.setTextFormatter(yMinFormatter);
         TextFormatter<Number> yMaxFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         bindingManager.attachListener(yMaxFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
@@ -158,6 +161,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.attachListener(chart.yAxisMaxValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
             yMaxFormatter.valueProperty().setValue(newValue);
         });
+        yMaxFormatter.valueProperty().setValue(chart.getyAxisMaxValue());
         yMaxRange.setTextFormatter(yMaxFormatter);
 
         chartTypeChoice.getItems().setAll(ChartType.values());

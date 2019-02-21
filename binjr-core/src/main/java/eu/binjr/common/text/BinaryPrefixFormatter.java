@@ -16,16 +16,29 @@
 
 package eu.binjr.common.text;
 
+import java.util.TreeMap;
+
 /**
  * An implementation of {@link PrefixFormatter} for binary prefixes
  *
  * @author Frederic Thevenet
  */
 public class BinaryPrefixFormatter extends PrefixFormatter {
+
+    public static final int BASE = 1024;
+
     /**
      * Initializes a new instance of the {@link BinaryPrefixFormatter} class
      */
     public BinaryPrefixFormatter() {
-        super(1024, new String[]{"ki", "Mi", "Gi", "Ti", "Pi", "Ei"});
+        super(BASE,new TreeMap<>() {{
+            put(Math.pow(BASE,0.0), "");
+            put(Math.pow(BASE,1.0), "ki");
+            put(Math.pow(BASE,2.0), "Mi");
+            put(Math.pow(BASE,3.0), "Gi");
+            put(Math.pow(BASE,4.0), "Ti");
+            put(Math.pow(BASE,5.0), "Pi");
+            put(Math.pow(BASE,6.0), "Ei");
+        }});
     }
 }

@@ -16,6 +16,8 @@
 
 package eu.binjr.common.text;
 
+import java.util.TreeMap;
+
 /**
  * An implementation of {@link PrefixFormatter} for metric prefixes
  *
@@ -23,10 +25,26 @@ package eu.binjr.common.text;
  */
 public class MetricPrefixFormatter extends PrefixFormatter {
 
+    public static final int BASE = 1000;
+
     /**
      * Initializes a new instance of the {@link MetricPrefixFormatter} class
      */
     public MetricPrefixFormatter() {
-        super(1000, new String[]{"k", "M", "G", "T", "P", "E"});
+        super(BASE, new TreeMap<>() {{
+            put(Math.pow(BASE,-6.0), "a");
+            put(Math.pow(BASE,-5.0), "f");
+            put(Math.pow(BASE,-4.0), "p");
+            put(Math.pow(BASE,-3.0), "n");
+            put(Math.pow(BASE,-2.0), "µ");
+            put(Math.pow(BASE,-1.0), "m");
+            put(Math.pow(BASE,0.0), "");
+            put(Math.pow(BASE,1.0), "k");
+            put(Math.pow(BASE,2.0), "M");
+            put(Math.pow(BASE,3.0), "G");
+            put(Math.pow(BASE,4.0), "T");
+            put(Math.pow(BASE,5.0), "P");
+            put(Math.pow(BASE,6.0), "E");
+        }});
     }
 }

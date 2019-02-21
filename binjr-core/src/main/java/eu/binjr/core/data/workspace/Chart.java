@@ -88,8 +88,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                 GlobalPreferences.getInstance().isShowAreaOutline(),
                 1.0,
                 true,
-               0.0,
-              100.0);
+                0.0,
+                100.0);
     }
 
     /**
@@ -146,7 +146,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                   double strokeWidth,
                   boolean autoScaleYAxis,
                   double yAxisMinValue,
-                 double yAxisMaxValue) {
+                  double yAxisMaxValue) {
         this.name = new SimpleStringProperty(name);
         this.unit = new SimpleStringProperty(unitName);
         this.chartType = new SimpleObjectProperty<>(chartType);

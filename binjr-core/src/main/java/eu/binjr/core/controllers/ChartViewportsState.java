@@ -92,8 +92,8 @@ public class ChartViewportsState implements AutoCloseable {
         public AxisState(ChartViewPort chartViewPort, double startY, double endY) {
             this.chartViewPort = chartViewPort;
             this.onRefreshViewportRequired = (observable, oldValue, newValue) -> parent.invalidate(chartViewPort, true, false);
-            this.startY = new SimpleDoubleProperty(roundYValue(startY));
-            this.endY = new SimpleDoubleProperty(roundYValue(endY));
+            this.startY = new SimpleDoubleProperty(startY);
+            this.endY = new SimpleDoubleProperty(endY);
             this.addListeners();
         }
 
@@ -162,13 +162,11 @@ public class ChartViewportsState implements AutoCloseable {
                 // Disable auto range on Y axis if zoomed in
                 chartViewPort.getDataStore().setAutoScaleYAxis(selection.isAutoRangeY());
             }
-            this.startY.set(roundYValue(selection.getStartY()));
-            this.endY.set(roundYValue(selection.getEndY()));
+            this.startY.set(selection.getStartY());
+            this.endY.set(selection.getEndY());
         }
 
-        private double roundYValue(double y) {
-            return y;
-        }
+
 
         @Override
         public void close() {
@@ -219,7 +217,6 @@ public class ChartViewportsState implements AutoCloseable {
         }
         parent.getWorksheet().fromDateTimeProperty().bind(this.startX);
         parent.getWorksheet().toDateTimeProperty().bind(this.endX);
-
     }
 
     /**

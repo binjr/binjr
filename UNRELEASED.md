@@ -12,5 +12,5 @@
     Because the complexity of making the rest of the code fully generic is high, the benefit to do so is not apparent 
     for the time being and the code resulting from the current status quo is prone to unsafe casts to and other code 
     smells, it is preferable to revert to using raw types that only deal with `double` values everywhere. 
-  
+   
 * _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis cause worksheet to become unresponsive.
