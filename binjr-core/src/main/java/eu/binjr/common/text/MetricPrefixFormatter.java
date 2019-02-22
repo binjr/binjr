@@ -31,20 +31,20 @@ public class MetricPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link MetricPrefixFormatter} class
      */
     public MetricPrefixFormatter() {
-        super(BASE, new TreeMap<>() {{
-            put(Math.pow(BASE,-6.0), "a");
-            put(Math.pow(BASE,-5.0), "f");
-            put(Math.pow(BASE,-4.0), "p");
-            put(Math.pow(BASE,-3.0), "n");
-            put(Math.pow(BASE,-2.0), "µ");
-            put(Math.pow(BASE,-1.0), "m");
-            put(Math.pow(BASE,0.0), "");
-            put(Math.pow(BASE,1.0), "k");
-            put(Math.pow(BASE,2.0), "M");
-            put(Math.pow(BASE,3.0), "G");
-            put(Math.pow(BASE,4.0), "T");
-            put(Math.pow(BASE,5.0), "P");
-            put(Math.pow(BASE,6.0), "E");
+        super(new TreeMap<>() {{
+            put(Math.pow(BASE, -6.0), "a");
+            put(Math.pow(BASE, -5.0), "f");
+            put(Math.pow(BASE, -4.0), "p");
+            put(Math.pow(BASE, -3.0), "n");
+            put(Math.pow(BASE, -2.0), "µ");
+            put(Math.pow(BASE, -1.0), "m");
+            put(Math.pow(BASE, 0.0), "");
+            put(Math.pow(BASE, 1.0), "k");
+            put(Math.pow(BASE, 2.0), "M");
+            put(Math.pow(BASE, 3.0), "G");
+            put(Math.pow(BASE, 4.0), "T");
+            put(Math.pow(BASE, 5.0), "P");
+            put(Math.pow(BASE, 6.0), "E");
         }});
     }
 }

@@ -86,7 +86,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
     /**
      * Stores the min and max date of the list of dates which is used.
-     * If {@link #autoRanging} is true, these values are used as lower and upper bounds.
+     * If {@link #Axis:autoRanging} is true, these values are used as lower and upper bounds.
      */
     private ZonedDateTime minDate, maxDate;
 

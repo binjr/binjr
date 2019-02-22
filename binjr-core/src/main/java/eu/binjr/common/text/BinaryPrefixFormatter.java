@@ -31,7 +31,11 @@ public class BinaryPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link BinaryPrefixFormatter} class
      */
     public BinaryPrefixFormatter() {
-        super(BASE,new TreeMap<>() {{
+        super(new TreeMap<>() {{
+            put(Math.pow(BASE,-4.0), "*2⁻¹⁰⁰⁰⁰⁰⁰⁰⁰⁰");
+            put(Math.pow(BASE,-3.0), "*2⁻¹⁰⁰⁰⁰⁰⁰");
+            put(Math.pow(BASE,-2.0), "*2⁻¹⁰⁰⁰");
+            put(Math.pow(BASE,-1.0), "*2⁻¹⁰");
             put(Math.pow(BASE,0.0), "");
             put(Math.pow(BASE,1.0), "ki");
             put(Math.pow(BASE,2.0), "Mi");

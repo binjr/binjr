@@ -66,6 +66,11 @@ public class XYChartSelection<X, Y> {
         return endY;
     }
 
+    /**
+     * Return true is auto range is enabled on the Y axis, false otherwise.
+     *
+     * @return true is auto range is enabled on the Y axis, false otherwise.
+     */
     public boolean isAutoRangeY() {
         return autoRangeY;
     }
@@ -115,15 +120,12 @@ public class XYChartSelection<X, Y> {
         if (this == obj) {
             return true;
         }
-
         if (obj == null) {
             return false;
         }
-
         if (getClass() != obj.getClass()) {
             return false;
         }
-
         XYChartSelection other = (XYChartSelection) obj;
         if (!evaluatesEquality(this.getEndX(), other.getEndX())) {
             return false;
@@ -139,13 +141,8 @@ public class XYChartSelection<X, Y> {
 
     private boolean evaluatesEquality(Object o1, Object o2) {
         if (o1 == null) {
-            if (o2 != null) {
-                return false;
-            }
-        } else if (!o1.equals(o2)) {
-            return false;
-        }
-        return true;
+            return o2 == null;
+        } else return o1.equals(o2);
     }
 
     @Override

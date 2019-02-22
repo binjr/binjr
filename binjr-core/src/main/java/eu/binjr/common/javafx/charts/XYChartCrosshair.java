@@ -196,18 +196,30 @@ public class XYChartCrosshair<X, Y> {
         selectionDoneEvent = action;
     }
 
+    /**
+     * Returns the Y value for currently selected set of coordinates for the provided chart.
+     *
+     * @param chart The chart to retrieve the current Y value from.
+     * @return the Y value for currently selected set of coordinates for the provided chart.
+     */
     public Y getCurrentYValue(XYChart<X, Y> chart) {
         return currentYValues.get(chart).getValue();
     }
 
-//    public ReadOnlyProperty<Y> currentYValueProperty() {
-//        return currentYValues;
-//    }
-
+    /**
+     * Retusn  the X value for currently selected set of coordinates.
+     *
+     * @return the X value for currently selected set of coordinates.
+     */
     public X getCurrentXValue() {
         return currentXValue.getValue();
     }
 
+    /**
+     * The currentXValue property.
+     *
+     * @return the currentXValue property.
+     */
     public Property<X> currentXValueProperty() {
         return currentXValue;
     }

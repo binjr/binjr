@@ -26,17 +26,16 @@ import java.util.NavigableMap;
  * @author Frederic Thevenet
  */
 public abstract class PrefixFormatter {
-    private static final String PATTERN = "###,###.###";
-    protected final int base;
+    private static final String PATTERN = "###,###.##";
     private final NavigableMap<Double, String> suffixMap;
 
     /**
-     * Initializes a new instance of {@link PrefixFormatter} with the arithmetical base and a representation of the prefixes.
+     * Initializes a new instance of {@link PrefixFormatter} with the arithmetical base and a
+     * representation of the prefixes.
      *
-     * @param base     the arithmetical base for the unit
+     * @param suffixMap a map of the suffix labels and the associated divider as the key.
      */
-    protected PrefixFormatter(int base, NavigableMap<Double, String> suffixMap) {
-        this.base = base;
+    protected PrefixFormatter(NavigableMap<Double, String> suffixMap) {
         this.suffixMap = suffixMap;
     }
 

@@ -143,7 +143,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     private static final double TOOL_BUTTON_SIZE = 20;
 
-    public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters) throws IOException, NoAdapterFoundException {
+    public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
+            throws NoAdapterFoundException {
         this.parentController = parentController;
         this.worksheet = worksheet;
         // Attach bindings
@@ -349,8 +350,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
         });
         hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
-        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
-        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
+                Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                        hCrosshair.selectedProperty(),
+                        globalPrefs.shiftPressedProperty()));
+        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
+                Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                        vCrosshair.selectedProperty(),
+                        globalPrefs.ctrlPressedProperty()));
     }
 
     private void setupStackedChartLayout() {
@@ -390,8 +397,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
         });
         hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
-        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
-        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
+                Bindings.createBooleanBinding(() ->
+                        globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                        hCrosshair.selectedProperty(),
+                        globalPrefs.shiftPressedProperty()));
+        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
+                Bindings.createBooleanBinding(() ->
+                        globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                        vCrosshair.selectedProperty(),
+                        globalPrefs.ctrlPressedProperty()));
         for (int i = 1; i < viewPorts.size(); i++) {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
@@ -400,8 +415,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());
                 currentState.setSelection(convertSelection(s), true);
             });
-            bindingManager.bind(ch.horizontalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(), hCrosshair.selectedProperty(), globalPrefs.shiftPressedProperty()));
-            bindingManager.bind(ch.verticalMarkerVisibleProperty(), Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(), vCrosshair.selectedProperty(), globalPrefs.ctrlPressedProperty()));
+            bindingManager.bind(ch.horizontalMarkerVisibleProperty(),
+                    Bindings.createBooleanBinding(() ->
+                            globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                            hCrosshair.selectedProperty(),
+                            globalPrefs.shiftPressedProperty()));
+            bindingManager.bind(ch.verticalMarkerVisibleProperty(),
+                    Bindings.createBooleanBinding(() ->
+                            globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                            vCrosshair.selectedProperty(),
+                            globalPrefs.ctrlPressedProperty()));
         }
     }
 
@@ -438,7 +461,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private Map<Chart, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
         selection.forEach((xyChart, xyChartSelection) -> {
-            viewPorts.stream().filter(v -> v.getChart().equals(xyChart)).findFirst().ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection));
+            viewPorts.stream()
+                    .filter(v -> v.getChart().equals(xyChart))
+                    .findFirst()
+                    .ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection));
         });
         return result;
     }

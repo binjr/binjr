@@ -22,7 +22,9 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -30,17 +32,14 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.util.Duration;
-import javafx.util.StringConverter;
-import javafx.util.converter.DoubleStringConverter;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.plugins.convert.TypeConverters;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.Closeable;
 import java.net.URL;
-import java.util.Locale;
+import java.text.DecimalFormat;
 import java.util.ResourceBundle;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -137,7 +136,8 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
-        TextFormatter<Number> yMinFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        NumberStringConverter numberStringConverter = new NumberStringConverter(new DecimalFormat("###,###.####"));
+        TextFormatter<Number> yMinFormatter = new TextFormatter<>(numberStringConverter);
         bindingManager.attachListener(yMinFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
             if ((chart.getyAxisMaxValue() - newValue.doubleValue() > 0)) {
                 chart.yAxisMinValueProperty().setValue(newValue);
@@ -150,7 +150,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
         yMinFormatter.valueProperty().setValue(chart.getyAxisMinValue());
         yMinRange.setTextFormatter(yMinFormatter);
-        TextFormatter<Number> yMaxFormatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        TextFormatter<Number> yMaxFormatter = new TextFormatter<>(numberStringConverter);
         bindingManager.attachListener(yMaxFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
             if ((newValue.doubleValue() - chart.getyAxisMinValue() > 0)) {
                 chart.yAxisMaxValueProperty().setValue(newValue);
