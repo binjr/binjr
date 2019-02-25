@@ -399,12 +399,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                        globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                                globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
                         globalPrefs.shiftPressedProperty()));
         bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                        globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                                globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
                         globalPrefs.ctrlPressedProperty()));
         for (int i = 1; i < viewPorts.size(); i++) {
@@ -417,12 +417,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             });
             bindingManager.bind(ch.horizontalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                            globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                                    globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
                             hCrosshair.selectedProperty(),
                             globalPrefs.shiftPressedProperty()));
             bindingManager.bind(ch.verticalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                            globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                                    globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
                             globalPrefs.ctrlPressedProperty()));
         }
@@ -647,7 +647,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             HBox toolbar = new HBox();
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
-            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
+            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
             closeButton.setOnAction(event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
@@ -655,6 +655,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             });
             bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
+            bindingManager.bind(closeButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
 
             ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
             editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
@@ -691,7 +692,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 worksheet.getCharts().add(idx + 1, currentViewPort.getDataStore());
             });
 
-            toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
+            toolbar.getChildren().addAll(moveUpButton, moveDownButton, closeButton, editButton);
             titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
             HBox hBox = new HBox();
             hBox.setAlignment(Pos.CENTER);
@@ -802,6 +803,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public void close() {
         if (closed.compareAndSet(false, true)) {
             logger.debug(() -> "Closing worksheetController " + this.toString());
+            editButtonsGroup.getToggles().clear();
             bindingManager.close();
             currentState.close();
             hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());

@@ -26,12 +26,23 @@
             xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="eu.binjr.core.controllers.PreferenceDialogController">
     <children>
-        <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
-                prefWidth="30.0" styleClass="exit" AnchorPane.rightAnchor="2.0" AnchorPane.topAnchor="5.0">
-            <graphic>
-                <Region styleClass="cross-icon"/>
-            </graphic>
-        </Button>
+        <HBox  AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" spacing="5" alignment="CENTER_LEFT">
+            <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
+                    prefWidth="30.0" styleClass="dialog-button">
+                <graphic>
+                    <Region styleClass="backArrow-icon"/>
+                </graphic>
+            </Button>
+            <Label alignment="CENTER_LEFT"  maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
+                   styleClass="pane-title" text="Settings">
+                <font>
+                    <Font size="14.0"/>
+                </font>
+                <!--<padding>-->
+                    <!--<Insets left="0.0" right="0" top="0" bottom="0"/>-->
+                <!--</padding>-->
+            </Label>
+        </HBox>
         <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                    AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
             <panes>
@@ -269,14 +280,6 @@
                 </TitledPane>
             </panes>
         </Accordion>
-        <Label layoutX="100.0" layoutY="12.0" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
-               styleClass="pane-title" text="Settings" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0">
-            <font>
-                <Font size="14.0"/>
-            </font>
-            <padding>
-                <Insets left="5.0"/>
-            </padding>
-        </Label>
+
     </children>
 </AnchorPane>

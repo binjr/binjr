@@ -38,6 +38,7 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
@@ -481,13 +482,14 @@ public class MainViewController implements Initializable {
         HBox toolbar = new HBox();
         toolbar.getStyleClass().add("title-pane-tool-bar");
         toolbar.setAlignment(Pos.CENTER);
-        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
+        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
         closeButton.setOnAction(event -> {
             if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
                     "WARNING: This will remove all associated series from existing worksheets.", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 sourcesPane.getPanes().remove(newPane);
             }
         });
+        source.getBindingManager().bind(closeButton.visibleProperty(), source.editableProperty());
 
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
@@ -496,25 +498,30 @@ public class MainViewController implements Initializable {
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
+        source.getBindingManager().attachListener(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            if (!newValue) {
+                source.setEditable(false);
+            }
+        });
 
         HBox editFieldsGroup = new HBox();
         DoubleBinding db = Bindings.createDoubleBinding(() -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
         source.getBindingManager().bind(editFieldsGroup.prefHeightProperty(), db);
         source.getBindingManager().bind(editFieldsGroup.maxHeightProperty(), db);
         source.getBindingManager().bind(editFieldsGroup.minHeightProperty(), db);
-        source.getBindingManager().bind(editFieldsGroup.visibleProperty(), source.editableProperty());
+        source.getBindingManager().bindBidirectional(editFieldsGroup.visibleProperty(), source.editableProperty());
         editFieldsGroup.setSpacing(5);
         TextField sourceNameField = new TextField();
-        sourceNameField.textProperty().bindBidirectional(source.nameProperty());
+        source.getBindingManager().bindBidirectional(sourceNameField.textProperty(), source.nameProperty());
         editFieldsGroup.getChildren().add(sourceNameField);
-        sourceNameField.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            if (!newValue) {
-                source.setEditable(false);
-            }
-        });
+
+
+        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+        source.getBindingManager().bindBidirectional(editButton.selectedProperty(), source.editableProperty());
+        editButton.setOnAction(event -> newPane.setExpanded(true));
 
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
-        toolbar.getChildren().addAll(closeButton);
+        toolbar.getChildren().addAll(closeButton, editButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
 
         titleRegion.setOnMouseClicked(event -> {
