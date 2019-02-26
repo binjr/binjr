@@ -62,11 +62,14 @@ public class Worksheet implements Dirtyable, AutoCloseable {
     private Property<ChartLayout> chartLayout;
     @IsDirtyable
     private Property<Boolean> timeRangeLinked;
+    @IsDirtyable
+    private Property<Boolean> chartLegendsVisible;
 
     private transient Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState;
     private transient final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
     private transient final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
     private transient Property<Integer> selectedChart;
+
     private transient final ChangeWatcher status;
 
     /**
@@ -95,7 +98,8 @@ public class Worksheet implements Dirtyable, AutoCloseable {
                 fromDateTime,
                 toDateTime,
                 ChartLayout.STACKED,
-                false);
+                false,
+                true);
     }
 
     /**
@@ -112,7 +116,8 @@ public class Worksheet implements Dirtyable, AutoCloseable {
                 initWorksheet.getFromDateTime(),
                 initWorksheet.getToDateTime(),
                 initWorksheet.getChartLayout(),
-                initWorksheet.isTimeRangeLinked()
+                initWorksheet.isTimeRangeLinked(),
+                initWorksheet.isChartLegendsVisible()
         );
     }
 
@@ -136,7 +141,8 @@ public class Worksheet implements Dirtyable, AutoCloseable {
                 fromDateTime,
                 toDateTime,
                 ChartLayout.STACKED,
-                false);
+                false,
+                true);
     }
 
     private Worksheet(String name,
@@ -145,7 +151,8 @@ public class Worksheet implements Dirtyable, AutoCloseable {
                       ZonedDateTime fromDateTime,
                       ZonedDateTime toDateTime,
                       ChartLayout chartLayout,
-                      boolean timeRangeLinked) {
+                      boolean timeRangeLinked,
+                      boolean chartLegendsVisible) {
         this.name = new SimpleStringProperty(name);
         this.charts = FXCollections.observableList(new LinkedList<>(charts));
         if (this.charts.isEmpty()) {
@@ -157,6 +164,7 @@ public class Worksheet implements Dirtyable, AutoCloseable {
         this.chartLayout = new SimpleObjectProperty<>(chartLayout);
         this.timeRangeLinked = new SimpleBooleanProperty(timeRangeLinked);
         this.selectedChart = new SimpleObjectProperty<>(0);
+        this.chartLegendsVisible = new SimpleBooleanProperty(chartLegendsVisible);
 
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
@@ -433,6 +441,18 @@ public class Worksheet implements Dirtyable, AutoCloseable {
      */
     public void setTimeRangeLinked(Boolean timeRangeLinked) {
         this.timeRangeLinked.setValue(timeRangeLinked);
+    }
+
+    public Boolean isChartLegendsVisible() {
+        return chartLegendsVisible.getValue();
+    }
+
+    public Property<Boolean> chartLegendsVisibleProperty() {
+        return chartLegendsVisible;
+    }
+
+    public void setChartLegendsVisible(Boolean chartLegendsVisible) {
+        this.chartLegendsVisible.setValue(chartLegendsVisible);
     }
 
     // region Dirtyable

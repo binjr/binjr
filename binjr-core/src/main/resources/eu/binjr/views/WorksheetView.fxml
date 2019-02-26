@@ -106,22 +106,7 @@
                                 </Tooltip>
                             </tooltip>
                         </TimeRangePicker>
-                        <Button fx:id="snapshotButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="camera-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip text="Take a snapshot of the worksheet">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                        </Button>
+
                         <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                       maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                       mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
@@ -172,7 +157,7 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                        <MenuButton fx:id="moreOptionsButton" alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
                                     styleClass="dialog-button"
@@ -186,10 +171,55 @@
                             </tooltip>
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="layout-icon"/>
+                                    <Region styleClass="ellipsis-icon"/>
                                 </HBox>
                             </graphic>
+                            <items>
+                                <MenuItem fx:id="snapshotButton" styleClass="dialog-button" text="Snapshot">
+                                        <graphic>
+                                            <HBox alignment="CENTER" styleClass="icon-container">
+                                                <Region styleClass="camera-icon"/>
+                                            </HBox>
+                                        </graphic>
+                                </MenuItem>
+                                <MenuItem fx:id="toggleTableViewButton" styleClass="dialog-button" text="Hide Charts Legends">
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="table-view-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </MenuItem>
+
+                                <Menu fx:id="selectChartLayout"
+                                      styleClass="dialog-button"
+                                      text="Chart layout">
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="layout-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </Menu>
+                            </items>
+
                         </MenuButton>
+                        <!--<MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"-->
+                                    <!--maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"-->
+                                    <!--minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
+                                    <!--styleClass="dialog-button"-->
+                                    <!--text="Chart layout">-->
+                            <!--<tooltip>-->
+                                <!--<Tooltip text="Select chart layout">-->
+                                    <!--<font>-->
+                                        <!--<Font size="11.0"/>-->
+                                    <!--</font>-->
+                                <!--</Tooltip>-->
+                            <!--</tooltip>-->
+                            <!--<graphic>-->
+                                <!--<HBox alignment="CENTER" styleClass="icon-container">-->
+                                    <!--<Region styleClass="layout-icon"/>-->
+                                <!--</HBox>-->
+                            <!--</graphic>-->
+                        <!--</MenuButton>-->
                     </HBox>
                 </children>
                 <VBox.margin>
@@ -197,7 +227,7 @@
                 </VBox.margin>
             </AnchorPane>
         </VBox>
-        <SplitPane dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0"
+        <SplitPane fx:id="splitPane" dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0"
                    VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets/>
@@ -214,9 +244,9 @@
                 <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
             </AnchorPane>
-            <AnchorPane styleClass="skinnable-pane-border">
+            <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
-                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" minHeight="0.0">
                     <panes>
                     </panes>
                 </Accordion>

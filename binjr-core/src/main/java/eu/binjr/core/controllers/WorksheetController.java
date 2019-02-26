@@ -114,13 +114,17 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private Accordion seriesTableContainer;
     @FXML
+    private SplitPane splitPane;
+    @FXML
     private Button backButton;
     @FXML
     private Button forwardButton;
     @FXML
     private Button refreshButton;
     @FXML
-    private Button snapshotButton;
+    private MenuItem snapshotButton;
+    @FXML
+    private MenuItem toggleTableViewButton;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -132,9 +136,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private ContextMenu seriesListMenu;
     @FXML
-    private MenuButton selectChartLayout;
+    private Menu selectChartLayout;
     @FXML
     private TimeRangePicker timeRangePicker;
+    @FXML
+    private AnchorPane chartsLegendsPane;
 
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
@@ -142,6 +148,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private String name;
     private final BindingManager bindingManager = new BindingManager();
     private static final double TOOL_BUTTON_SIZE = 20;
+
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -217,8 +224,28 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Platform.runLater(() -> invalidateAll(false, false, false));
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(),(ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                toggleChartsLegendvisibilty(newValue);
+            });
+            toggleChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
+
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
+        }
+    }
+
+    private void toggleChartsLegendvisibilty(Boolean newValue) {
+        if (!newValue){
+            splitPane.setDividerPositions(1.0,0.0);
+            toggleTableViewButton.setText("Show Charts Legends");
+            chartsLegendsPane.setVisible(false);
+            chartsLegendsPane.setMaxHeight(0.0);
+        }else{
+            chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
+            chartsLegendsPane.setVisible(true);
+            toggleTableViewButton.setText("Hide Charts Legends");
+            splitPane.setDividerPositions(0.7,0.3);
+
         }
     }
 
@@ -437,6 +464,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         forwardButton.setOnAction(this::handleHistoryForward);
         refreshButton.setOnAction(this::handleRefresh);
         snapshotButton.setOnAction(this::handleTakeSnapshot);
+        toggleTableViewButton.setOnAction(this::handleToggleTableViewButton);
         bindingManager.bind(backButton.disableProperty(), getWorksheet().getBackwardHistory().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(this::handleAddNewChart);
@@ -922,6 +950,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     protected void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
+    }
+
+    @FXML
+    protected void handleToggleTableViewButton(ActionEvent actionEvent) {
+        getWorksheet().setChartLegendsVisible(!getWorksheet().isChartLegendsVisible());
     }
     //endregion
 
