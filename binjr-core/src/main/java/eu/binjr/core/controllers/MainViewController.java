@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.github.GithubRelease;
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -100,11 +101,12 @@ public class MainViewController implements Initializable {
     private static final double EXPANDED_WIDTH = 200;
     private static final int ANIMATION_DURATION = 50;
 
-    private final Workspace workspace;
+    private Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
-    private final Map<TitledPane, Source> sourcesAdapters = new HashMap<>();
+    private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+ //   private final BindingManager workspaceBindings = new BindingManager();
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -618,7 +620,7 @@ public class MainViewController implements Initializable {
 
     private boolean confirmAndClearWorkspace() {
         if (!workspace.isDirty()) {
-            clearWorkspace();
+            closeWorkspace();
             return true;
         }
         // Make sure that main stage is visible before invoking modal dialog, else modal dialog may appear
@@ -631,14 +633,15 @@ public class MainViewController implements Initializable {
         if (res == ButtonType.YES && !saveWorkspace()) {
             return false;
         }
-        clearWorkspace();
+        closeWorkspace();
         return true;
     }
 
-    private void clearWorkspace() {
+    private void closeWorkspace() {
         logger.debug(() -> "Clearing workspace");
         worksheetTabPane.clearAllTabs();
         sourcesPane.getPanes().clear();
+        //sourcesPane = new Accordion();
         seriesControllers.clear();
         sourcesAdapters.values().forEach(source -> {
             try {
@@ -648,7 +651,10 @@ public class MainViewController implements Initializable {
             }
         });
         sourcesAdapters.clear();
-        workspace.clear();
+        workspace.close();
+        workspace = new Workspace();
+        //loadWorkspace(new Workspace());
+
     }
 
     private void openWorkspaceFromFile() {

@@ -106,7 +106,7 @@ public class Binjr extends Application {
     }
 
     private void processCommandLineOptions(Parameters parameters) {
-        getParameters().getNamed().forEach((name, val) -> {
+        parameters.getNamed().forEach((name, val) -> {
             switch (name.toLowerCase()) {
                 case "loglevel":
                     AppEnvironment.getInstance().setLogLevel(Level.toLevel(val, Level.INFO));

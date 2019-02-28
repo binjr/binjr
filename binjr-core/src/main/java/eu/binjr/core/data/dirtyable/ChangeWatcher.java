@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.dirtyable;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -27,6 +28,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
@@ -41,10 +43,11 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.NONE)
-public class ChangeWatcher implements Dirtyable {
+public class ChangeWatcher implements Dirtyable, Closeable {
     private static final Logger logger = LogManager.getLogger(ChangeWatcher.class);
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
     private final List<ObservableList<? extends Dirtyable>> watchedLists;
+    private final BindingManager bindingManager = new BindingManager();
 
     private final ChangeListener<Boolean> dirtyableChangeListener = (observable, oldValue, newValue) -> {
         if (newValue) {
@@ -64,7 +67,7 @@ public class ChangeWatcher implements Dirtyable {
             try {
                 Object fieldValue = readField(field, source);
                 if (fieldValue instanceof Property) {
-                    ((Property<?>) fieldValue).addListener((observable, oldValue, newValue) -> forceDirty());
+                    bindingManager.attachListener((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
                 }
                 if (fieldValue instanceof ObservableList) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
@@ -85,8 +88,8 @@ public class ChangeWatcher implements Dirtyable {
                                                 forceDirty();
                                             }
                                             for (Dirtyable dirtyable : c.getAddedSubList()) {
-                                                evaluateDirty(dirtyable.isDirty());
-                                                dirtyable.dirtyProperty().addListener(dirtyableChangeListener);
+                                                this.dirty.setValue(dirty.getValue() || dirtyable.isDirty());
+                                                bindingManager.attachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                         if (c.wasRemoved()) {
@@ -94,12 +97,12 @@ public class ChangeWatcher implements Dirtyable {
                                                 forceDirty();
                                             }
                                             for (Dirtyable dirtyable : c.getRemoved()) {
-                                                dirtyable.dirtyProperty().removeListener(dirtyableChangeListener);
+                                                bindingManager.detachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                     }
                                 });
-                                ol.addListener(listChangeListener);
+                                bindingManager.attachListener(ol, listChangeListener);
                                 break;
                             }
                         }
@@ -125,10 +128,6 @@ public class ChangeWatcher implements Dirtyable {
     public void cleanUp() {
         dirty.setValue(false);
         watchedLists.forEach(l -> l.forEach(Dirtyable::cleanUp));
-    }
-
-    private void evaluateDirty(Boolean isDirty) {
-        this.dirty.setValue(dirty.getValue() | isDirty);
     }
 
     private void forceDirty() {
@@ -169,5 +168,11 @@ public class ChangeWatcher implements Dirtyable {
             currentClass = currentClass.getSuperclass();
         }
         return allFields;
+    }
+
+    @Override
+    public void close() {
+        watchedLists.clear();
+        bindingManager.close();
     }
 }

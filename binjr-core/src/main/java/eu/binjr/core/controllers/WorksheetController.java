@@ -35,6 +35,7 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -62,6 +63,7 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
@@ -149,7 +151,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private final BindingManager bindingManager = new BindingManager();
     private static final double TOOL_BUTTON_SIZE = 20;
 
-
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
         this.parentController = parentController;
@@ -183,7 +184,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         Platform.runLater(settingsPane::toFront);
         return propertiesController;
     }
-
 
     //region [Properties]
     public String getName() {
@@ -224,7 +224,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Platform.runLater(() -> invalidateAll(false, false, false));
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(),(ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 toggleChartsLegendvisibilty(newValue);
             });
             toggleChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
@@ -235,16 +235,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void toggleChartsLegendvisibilty(Boolean newValue) {
-        if (!newValue){
-            splitPane.setDividerPositions(1.0,0.0);
+        if (!newValue) {
+            splitPane.setDividerPositions(1.0, 0.0);
             toggleTableViewButton.setText("Show Charts Legends");
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
-        }else{
+        } else {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
             toggleTableViewButton.setText("Hide Charts Legends");
-            splitPane.setDividerPositions(0.7,0.3);
+            splitPane.setDividerPositions(0.7, 0.3);
 
         }
     }
@@ -831,7 +831,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public void close() {
         if (closed.compareAndSet(false, true)) {
             logger.debug(() -> "Closing worksheetController " + this.toString());
-            editButtonsGroup.getToggles().clear();
             bindingManager.close();
             currentState.close();
             hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());
@@ -1028,12 +1027,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             if (currentChart.getChartType() == ChartType.SCATTER) {
                 for (var data : newSeries.getData()) {
                     var c = new Circle();
-                    c.radiusProperty().bind(currentChart.strokeWidthProperty());
-                    c.fillProperty().bind(series.displayColorProperty());
+                    bindingManager.bind(c.radiusProperty(), currentChart.strokeWidthProperty());
+                    bindingManager.bind(c.fillProperty(), series.displayColorProperty());
                     data.setNode(c);
                 }
             } else {
-                newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
+                bindingManager.attachListener(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
                     if (newNode != null) {
                         switch (currentChart.getChartType()) {
                             case AREA:
@@ -1063,6 +1062,36 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         }
                     }
                 });
+//                newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
+//                    if (newNode != null) {
+//                        switch (currentChart.getChartType()) {
+//                            case AREA:
+//                            case STACKED:
+//                                ObservableList<Node> children = ((Group) newNode).getChildren();
+//                                if (children != null && children.size() >= 1) {
+//                                    Path stroke = (Path) children.get(1);
+//                                    Path fill = (Path) children.get(0);
+//                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+//                                    stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
+//                                    stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
+//                                    stroke.strokeProperty().bind(series.displayColorProperty());
+//                                    fill.fillProperty().bind(Bindings.createObjectBinding(
+//                                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
+//                                            series.displayColorProperty(),
+//                                            currentChart.graphOpacityProperty()));
+//                                }
+//                                break;
+//                            case LINE:
+//                                Path stroke = (Path) newNode;
+//                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
+//                                stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
+//                                stroke.strokeProperty().bind(series.displayColorProperty());
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                    }
+//                });
             }
             return newSeries;
         }

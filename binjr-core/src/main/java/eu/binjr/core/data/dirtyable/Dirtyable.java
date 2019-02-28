@@ -18,13 +18,15 @@ package eu.binjr.core.data.dirtyable;
 
 import javafx.beans.property.BooleanProperty;
 
+import java.io.Closeable;
+
 /**
  * Classes implementing this interface can have the changes made on member decorated with the
  * {@link IsDirtyable} annotation tracked by an instance of {@link ChangeWatcher}.
  *
  * @author Frederic Thevenet
  */
-public interface Dirtyable {
+public interface Dirtyable extends Closeable {
     /**
      * Returns true if the {@link Dirtyable} instance needs to be persisted, false otherwise
      *
@@ -43,4 +45,6 @@ public interface Dirtyable {
      * Clear the dirty status of the {@link Dirtyable} instance
      */
     void cleanUp();
+
+
 }

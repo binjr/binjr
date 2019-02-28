@@ -177,6 +177,7 @@ public class Source implements Dirtyable, Closeable {
     public void close() {
         bindingManager.close();
         adapter.close();
+        status.close();
     }
 
     /**

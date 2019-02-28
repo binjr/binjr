@@ -477,6 +477,7 @@ public class Worksheet implements Dirtyable, AutoCloseable {
     @Override
     public void close() {
         charts.forEach(Chart::close);
+        this.status.close();
     }
     // endregion
 }

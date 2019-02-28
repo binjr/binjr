@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.version.Version;
 import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -74,6 +75,7 @@ public class Workspace implements Dirtyable {
     private final Version schemaVersion = new Version(WORKSPACE_SCHEMA_VERSION);
     @XmlAttribute(name = "producerInfo", required = false)
     private final String producerInfo;
+    private transient final BindingManager bindingManager = new BindingManager();
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -239,7 +241,7 @@ public class Workspace implements Dirtyable {
      *
      * @return all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      */
-    public Iterable<Worksheet> getWorksheets() {
+    public ObservableList<Worksheet> getWorksheets() {
         return worksheets;
     }
 
@@ -315,6 +317,16 @@ public class Workspace implements Dirtyable {
         clearSources();
         cleanUp();
         this.setPath(Paths.get("Untitled"));
+        this.status.close();
+    }
+
+    public void close(){
+        worksheets.forEach(Worksheet::close);
+        sources.forEach(Source::close);
+        cleanUp();
+        this.setPath(Paths.get("Untitled"));
+        this.status.close();
+        bindingManager.close();
     }
 
     /**
@@ -360,5 +372,9 @@ public class Workspace implements Dirtyable {
     @Override
     public void cleanUp() {
         this.status.cleanUp();
+    }
+
+    public BindingManager getBindingManager() {
+        return bindingManager;
     }
 }

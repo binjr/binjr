@@ -55,7 +55,7 @@ public class BindingManager implements AutoCloseable {
      * @param binding  the {@link ObservableValue} to bind to the {@link Property}
      * @param <T>      the type common to both {@link Property} and {@link ObservableValue}
      */
-    public <T> void bind(Property<T> property, ObservableValue<T> binding) {
+    public <T, U extends T> void bind(Property<T> property, ObservableValue<U> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
         Objects.requireNonNull(binding, "binding parameter cannot be null");
         logger.trace(() -> "Binding " + binding.toString() + " to " + property.toString());
@@ -227,7 +227,8 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(detachAction, "ifPresent parameter cannot be null");
         List<U> listeners = map.get(observable);
         if (listeners == null) {
-            throw new IllegalArgumentException("Observable " + observable.toString() + " is not managed by this BindingManager instance");
+            logger.debug (()->"Observable " + observable.toString() + " is not managed by this BindingManager instance");
+            return;
         }
         listeners.stream().filter(l -> l.equals(listener)).findFirst().ifPresent(found -> map.get(observable).remove(found));
         logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());
@@ -240,7 +241,8 @@ public class BindingManager implements AutoCloseable {
         Objects.requireNonNull(detachAction, "attachAction parameter cannot be null");
         List<U> l = map.get(observable);
         if (l == null) {
-            throw new IllegalArgumentException("ObservableList " + observable.toString() + " is not managed by this BindingManager instance");
+            logger.debug (()->"ObservableList " + observable.toString() + " is not managed by this BindingManager instance");
+            return;
         }
         l.forEach(listener -> {
             logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());

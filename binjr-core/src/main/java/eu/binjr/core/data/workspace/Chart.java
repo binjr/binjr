@@ -482,7 +482,9 @@ public class Chart implements Dirtyable, AutoCloseable {
 
     @Override
     public void close() {
-        series.clear();
+        this.series.forEach(TimeSeriesInfo::close);
+       // this.series.clear();
+        this.status.close();
     }
 
     @XmlAttribute

@@ -253,4 +253,9 @@ public class TimeSeriesInfo implements Dirtyable {
                 ", binding=" + binding +
                 '}';
     }
+
+    @Override
+    public void close() {
+        this.status.close();
+    }
 }
