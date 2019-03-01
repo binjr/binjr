@@ -42,11 +42,11 @@ import java.util.function.BiConsumer;
  */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);
-    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
-    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new ConcurrentHashMap<>();
-    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new ConcurrentHashMap<>();
-    private final Map<Property<?>, ObservableValue> boundProperties = new ConcurrentHashMap<>();
-    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new ConcurrentHashMap<>();
+    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new WeakHashMap<>();
+    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new WeakHashMap<>();
+    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new WeakHashMap<>();
+    private final Map<Property<?>, ObservableValue> boundProperties = new WeakHashMap<>();
+    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new WeakHashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.

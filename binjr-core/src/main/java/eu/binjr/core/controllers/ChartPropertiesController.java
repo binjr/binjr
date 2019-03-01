@@ -223,6 +223,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
         if (closing.compareAndSet(false, true)) {
             logger.debug(() -> "Closing ChartPropertiesController " + this.toString());
             bindingManager.close();
+            closeButton.setOnAction(null);
         }
     }
 }

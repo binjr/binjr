@@ -30,12 +30,14 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.WeakHashMap;
 
 /**
  * A class that embeds the logic required to discover and track modification on object implementing {@link Dirtyable}
@@ -46,7 +48,7 @@ import java.util.List;
 public class ChangeWatcher implements Dirtyable, Closeable {
     private static final Logger logger = LogManager.getLogger(ChangeWatcher.class);
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
-    private final List<ObservableList<? extends Dirtyable>> watchedLists;
+    private final List<WeakReference<ObservableList<? extends Dirtyable>>> watchedLists;
     private final BindingManager bindingManager = new BindingManager();
 
     private final ChangeListener<Boolean> dirtyableChangeListener = (observable, oldValue, newValue) -> {
@@ -80,7 +82,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                             if (Dirtyable.class.isAssignableFrom((Class<?>) type)) {
                                 @SuppressWarnings("unchecked")
                                 ObservableList<? extends Dirtyable> ol = (ObservableList<? extends Dirtyable>) fieldValue;
-                                watchedLists.add(ol);
+                                watchedLists.add(new WeakReference<>(ol));
                                 ListChangeListener<Dirtyable> listChangeListener = (c -> {
                                     while (c.next()) {
                                         if (c.wasAdded()) {
@@ -127,7 +129,12 @@ public class ChangeWatcher implements Dirtyable, Closeable {
     @Override
     public void cleanUp() {
         dirty.setValue(false);
-        watchedLists.forEach(l -> l.forEach(Dirtyable::cleanUp));
+        watchedLists.forEach(reference -> {
+            var dirtyables = reference.get();
+            if (dirtyables != null) {
+                dirtyables.forEach(Dirtyable::cleanUp);
+            }
+        });
     }
 
     private void forceDirty() {

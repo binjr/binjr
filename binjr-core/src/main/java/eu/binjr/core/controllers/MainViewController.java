@@ -832,7 +832,7 @@ public class MainViewController implements Initializable {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
-            current.getWorksheet().timeRangeLinkedProperty().addListener((observable, oldValue, newValue) -> {
+            current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),(ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 if (newValue) {
                     current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
                 } else {
@@ -842,12 +842,13 @@ public class MainViewController implements Initializable {
             if (current.getWorksheet().isTimeRangeLinked()) {
                 current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
             }
-            newTab.nameProperty().bindBidirectional(worksheet.nameProperty());
+            current.getBindingManager().bindBidirectional(newTab.nameProperty(),worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
-            newTab.setContextMenu(getTabMenu(newTab, worksheet));
+           //TODO
+            // newTab.setContextMenu(getTabMenu(newTab, worksheet));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
@@ -1138,6 +1139,9 @@ public class MainViewController implements Initializable {
             if (c.wasRemoved()) {
                 c.getRemoved().forEach((t -> {
                     WorksheetController ctlr = seriesControllers.get(t);
+                    // sever ref to allow collect
+                    t.setContent(null);
+                    t.setContextMenu(null);
                     if (ctlr != null) {
                         workspace.removeWorksheets(ctlr.getWorksheet());
                         seriesControllers.remove(t);

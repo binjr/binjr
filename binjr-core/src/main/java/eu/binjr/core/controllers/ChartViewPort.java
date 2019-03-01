@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChartViewPort implements Closeable {
     private final Chart dataStore;
     private final XYChart<ZonedDateTime, Double> chart;
-    private final ChartPropertiesController propertiesController;
+    private ChartPropertiesController propertiesController;
     private final PrefixFormatter prefixFormatter;
     private final TableView<TimeSeriesInfo> seriesTable;
     private static final Logger logger = LogManager.getLogger(ChartViewPort.class);
@@ -121,6 +121,7 @@ public class ChartViewPort implements Closeable {
         if (closing.compareAndSet(false, true)) {
             logger.debug(() -> "Closing ChartViewPort " + this.toString());
             propertiesController.close();
+            propertiesController = null;
         }
     }
 
