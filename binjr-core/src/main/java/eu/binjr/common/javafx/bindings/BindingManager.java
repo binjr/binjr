@@ -22,11 +22,14 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.MenuItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 /**
@@ -47,6 +50,9 @@ public class BindingManager implements AutoCloseable {
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new WeakHashMap<>();
     private final Map<Property<?>, ObservableValue> boundProperties = new WeakHashMap<>();
     private final Map<Property<?>, Property> bidirectionallyBoundProperties = new WeakHashMap<>();
+
+    private final Map<ButtonBase,  EventHandler<ActionEvent>> buttons = new WeakHashMap<>();
+    private final Map<MenuItem,  EventHandler<ActionEvent>> menuItems= new WeakHashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -193,6 +199,10 @@ public class BindingManager implements AutoCloseable {
         visitMap(changeListeners, ObservableValue::removeListener);
         changeListeners.clear();
         unbindAll();
+        unregisterAllButtonActions();
+        buttons.clear();
+        unregisterAllMenuItemActions();
+        menuItems.clear();
     }
 
     public synchronized void suspend() {
@@ -207,6 +217,41 @@ public class BindingManager implements AutoCloseable {
         visitMap(invalidationListeners, ObservableValue::addListener);
         visitMap(changeListeners, ObservableValue::addListener);
         boundProperties.forEach(Property::bind);
+    }
+
+    public void setMenuItemAction(MenuItem menuItem, EventHandler<ActionEvent> action){
+        logger.debug(()-> "Setting action event handler to " + menuItem.getText());
+        menuItems.put(menuItem, action);
+        menuItem.setOnAction(action);
+    }
+
+    public void unregisterMenuItemAction(MenuItem menuItem){
+        if (menuItem != null) {
+            logger.debug(()-> "Unregistering action event handler from " + menuItem.getText());
+            menuItem.setOnAction(null);
+        }
+    }
+
+    public void unregisterAllMenuItemActions(){
+        menuItems.forEach((menuItem, actionEventEventHandler) -> unregisterMenuItemAction(menuItem));
+    }
+
+
+    public void setButtonAction(ButtonBase button, EventHandler<ActionEvent> action){
+        logger.debug(()-> "Setting action event handler to " + button.getText());
+        buttons.put(button, action);
+        button.setOnAction(action);
+    }
+
+    public void unregisterButtonAction(ButtonBase button){
+        if (button != null) {
+            logger.debug(()-> "Unregistering action event handler from " + button.getText());
+            button.setOnAction(null);
+        }
+    }
+
+    public void unregisterAllButtonActions(){
+       buttons.forEach((buttonBase, actionEventEventHandler) -> buttonBase.setOnAction(null));
     }
 
 

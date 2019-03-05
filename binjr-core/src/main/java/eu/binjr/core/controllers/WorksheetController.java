@@ -73,6 +73,7 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
+import org.gillius.jfxutils.EventHandlerManager;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -316,7 +317,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(selectChartLayout.visibleProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
         selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
             MenuItem item = new MenuItem(chartLayout.toString());
-            item.setOnAction(event -> worksheet.setChartLayout(chartLayout));
+            bindingManager.setMenuItemAction(item, event -> worksheet.setChartLayout(chartLayout));
             return item;
         }).collect(Collectors.toList()));
 
@@ -460,14 +461,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void initNavigationPane() {
-        backButton.setOnAction(this::handleHistoryBack);
-        forwardButton.setOnAction(this::handleHistoryForward);
-        refreshButton.setOnAction(this::handleRefresh);
-        snapshotButton.setOnAction(this::handleTakeSnapshot);
-        toggleTableViewButton.setOnAction(this::handleToggleTableViewButton);
+       bindingManager.setButtonAction(backButton, this::handleHistoryBack);
+        bindingManager.setButtonAction( forwardButton, this::handleHistoryForward);
+        bindingManager.setButtonAction( refreshButton, this::handleRefresh);
+        bindingManager.setMenuItemAction(  snapshotButton, this::handleTakeSnapshot);
+        bindingManager.setMenuItemAction( toggleTableViewButton,this::handleToggleTableViewButton);
         bindingManager.bind(backButton.disableProperty(), getWorksheet().getBackwardHistory().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
-        addChartButton.setOnAction(this::handleAddNewChart);
+        bindingManager.setButtonAction(  addChartButton, this::handleAddNewChart);
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
         for (ChartViewPort viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
@@ -540,7 +541,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             visibleColumn.setCellValueFactory(p -> p.getValue().selectedProperty());
             visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
 
-            showAllCheckBox.setOnAction(event -> {
+            bindingManager.setButtonAction(showAllCheckBox, event -> {
                 ChangeListener<Boolean> r = (observable, oldValue, newValue) -> {
                     if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                         invalidateAll(false, false, false);
@@ -676,7 +677,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
             Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
-            closeButton.setOnAction(event -> {
+            bindingManager.setButtonAction( closeButton,event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                     worksheet.getCharts().remove(currentViewPort.getDataStore());
@@ -687,7 +688,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
             editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
-            editButton.setOnAction(event -> newPane.setExpanded(true));
+            bindingManager.setButtonAction(editButton,event -> newPane.setExpanded(true));
 
             editButtonsGroup.getToggles().add(editButton);
 
@@ -695,7 +696,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.bind(moveUpButton.disableProperty(),
                     Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()));
             bindingManager.bind(moveUpButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
-            moveUpButton.setOnAction(event -> {
+            bindingManager.setButtonAction( moveUpButton,event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.getDataStore());
                 this.preventReload = true;
                 try {
@@ -709,7 +710,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Button moveDownButton = (Button) newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
             bindingManager.bind(moveDownButton.disableProperty(), Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()));
             bindingManager.bind(moveDownButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
-            moveDownButton.setOnAction(event -> {
+            bindingManager.setButtonAction( moveDownButton,event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.getDataStore());
                 this.preventReload = true;
                 try {
