@@ -17,7 +17,6 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.github.GithubRelease;
-import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -106,7 +105,7 @@ public class MainViewController implements Initializable {
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
- //   private final BindingManager workspaceBindings = new BindingManager();
+    //   private final BindingManager workspaceBindings = new BindingManager();
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -500,7 +499,7 @@ public class MainViewController implements Initializable {
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
-        source.getBindingManager().attachListener(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+        source.getBindingManager().register(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             if (!newValue) {
                 source.setEditable(false);
             }
@@ -653,8 +652,6 @@ public class MainViewController implements Initializable {
         sourcesAdapters.clear();
         workspace.close();
         workspace = new Workspace();
-        //loadWorkspace(new Workspace());
-
     }
 
     private void openWorkspaceFromFile() {
@@ -811,6 +808,8 @@ public class MainViewController implements Initializable {
         if (tab == null) {
             throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
         }
+        seriesControllers.remove(tab);
+        tab.setContent(null);
         Worksheet worksheet = worksheetCtrl.getWorksheet();
         worksheetCtrl.close();
         loadWorksheet(worksheet, tab, false);
@@ -826,29 +825,31 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                p.setOnDragOver(this::handleDragOverWorksheetView);
-                p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
+                current.getBindingManager().registerNodeAction(p, Node::setOnDragOver, this::handleDragOverWorksheetView);
+                //p.setOnDragOver(this::handleDragOverWorksheetView);
+                current.getBindingManager().registerNodeAction(p, Node::setOnDragDropped, this::handleDragDroppedOnWorksheetView);
+                //   p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
-            current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),(ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            current.getBindingManager().register(current.getWorksheet().timeRangeLinkedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 if (newValue) {
-                    current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
+                    current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
                 } else {
-                    current.getBindingManager().unbindBidirectionnal(linkedTimeRange, current.selectedRangeProperty());
+                    current.getBindingManager().unbindBidirectionnal(current.selectedRangeProperty(), linkedTimeRange);
                 }
             });
             if (current.getWorksheet().isTimeRangeLinked()) {
-                current.getBindingManager().bindBidirectional(linkedTimeRange, current.selectedRangeProperty());
+                current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
             }
-            current.getBindingManager().bindBidirectional(newTab.nameProperty(),worksheet.nameProperty());
+            current.getBindingManager().bindBidirectional(newTab.nameProperty(), worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
-           //TODO
-            // newTab.setContextMenu(getTabMenu(newTab, worksheet));
+            //TODO
+            newTab.setContextMenu(getTabMenu(newTab, worksheet));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);

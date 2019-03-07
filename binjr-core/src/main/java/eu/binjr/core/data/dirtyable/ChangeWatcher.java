@@ -37,7 +37,6 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.WeakHashMap;
 
 /**
  * A class that embeds the logic required to discover and track modification on object implementing {@link Dirtyable}
@@ -69,7 +68,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
             try {
                 Object fieldValue = readField(field, source);
                 if (fieldValue instanceof Property) {
-                    bindingManager.attachListener((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
+                    bindingManager.register((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
                 }
                 if (fieldValue instanceof ObservableList) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
@@ -91,7 +90,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                                             }
                                             for (Dirtyable dirtyable : c.getAddedSubList()) {
                                                 this.dirty.setValue(dirty.getValue() || dirtyable.isDirty());
-                                                bindingManager.attachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
+                                                bindingManager.register(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                         if (c.wasRemoved()) {
@@ -99,12 +98,12 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                                                 forceDirty();
                                             }
                                             for (Dirtyable dirtyable : c.getRemoved()) {
-                                                bindingManager.detachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
+                                                bindingManager.unregister(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                     }
                                 });
-                                bindingManager.attachListener(ol, listChangeListener);
+                                bindingManager.register(ol, listChangeListener);
                                 break;
                             }
                         }

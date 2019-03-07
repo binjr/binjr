@@ -90,7 +90,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.manager = manager;
         this.tearable = tearable;
         this.reorderable = reorderable;
-        bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(),
+        bindingManager.register(this.getSelectionModel().selectedItemProperty(),
                 (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
         this.getTabs().addListener((ListChangeListener<Tab>) c -> {
             while (c.next()) {
@@ -197,7 +197,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         Platform.runLater(() -> {
             positionNewTabButton();
             Stage stage = (Stage) this.getScene().getWindow();
-            bindingManager.attachListener(stage.focusedProperty(),
+            bindingManager.register(stage.focusedProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                         if (newValue) {
                             manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
@@ -206,7 +206,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         });
 
         // Prepare to change the button on screen position if the tearableTabMap side changes
-        bindingManager.attachListener(sideProperty(),
+        bindingManager.register(sideProperty(),
                 (observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         positionNewTabButton();

@@ -23,7 +23,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.MenuItem;
 import org.apache.logging.log4j.LogManager;
@@ -51,8 +53,10 @@ public class BindingManager implements AutoCloseable {
     private final Map<Property<?>, ObservableValue> boundProperties = new WeakHashMap<>();
     private final Map<Property<?>, Property> bidirectionallyBoundProperties = new WeakHashMap<>();
 
-    private final Map<ButtonBase,  EventHandler<ActionEvent>> buttons = new WeakHashMap<>();
-    private final Map<MenuItem,  EventHandler<ActionEvent>> menuItems= new WeakHashMap<>();
+    private final Map<ButtonBase, EventHandler<ActionEvent>> buttons = new WeakHashMap<>();
+    private final Map<MenuItem, EventHandler<ActionEvent>> menuItems = new WeakHashMap<>();
+
+    private final Map<Node, List<BiConsumer<Node, ?>>> registeredNodes = new WeakHashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -80,7 +84,7 @@ public class BindingManager implements AutoCloseable {
         boundProperties.clear();
 
         bidirectionallyBoundProperties.forEach((property, binding) -> {
-            logger.trace(() -> "Unbinding property " + property.toString());
+            logger.trace(() -> "Unbinding property " + property.toString() + " from " + binding.toString());
             property.unbindBidirectional(binding);
         });
         bidirectionallyBoundProperties.clear();
@@ -109,8 +113,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to attach the listener to.
      * @param listener   the {@link ChangeListener} to attach
      */
-    public void attachListener(ObservableValue<?> observable, ChangeListener<?> listener) {
-        attachListener(observable, listener, changeListeners, ObservableValue::addListener);
+    public void register(ObservableValue<?> observable, ChangeListener<?> listener) {
+        register(observable, listener, changeListeners, ObservableValue::addListener);
     }
 
     /**
@@ -119,8 +123,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to attach the listener to.
      * @param listener   the {@link InvalidationListener} to attach
      */
-    public void attachListener(ObservableValue<?> observable, InvalidationListener listener) {
-        attachListener(observable, listener, invalidationListeners, ObservableValue::addListener);
+    public void register(ObservableValue<?> observable, InvalidationListener listener) {
+        register(observable, listener, invalidationListeners, ObservableValue::addListener);
     }
 
     /**
@@ -129,8 +133,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableList} to attach the listener to.
      * @param listener   the {@link ListChangeListener} to attach
      */
-    public void attachListener(ObservableList<?> observable, ListChangeListener listener) {
-        attachListener(observable, listener, listChangeListeners, ObservableList::addListener);
+    public void register(ObservableList<?> observable, ListChangeListener listener) {
+        register(observable, listener, listChangeListeners, ObservableList::addListener);
     }
 
     /**
@@ -139,8 +143,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove the listener from.
      * @param listener   the {@link ChangeListener} to remove
      */
-    public void detachListener(ObservableValue<?> observable, ChangeListener listener) {
-        detachListener(observable, listener, changeListeners, ObservableValue::removeListener);
+    public void unregister(ObservableValue<?> observable, ChangeListener listener) {
+        unregister(observable, listener, changeListeners, ObservableValue::removeListener);
     }
 
     /**
@@ -149,8 +153,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove the listener from.
      * @param listener   the {@link InvalidationListener} to remove
      */
-    public void detachListener(ObservableValue<?> observable, InvalidationListener listener) {
-        detachListener(observable, listener, invalidationListeners, ObservableValue::removeListener);
+    public void unregister(ObservableValue<?> observable, InvalidationListener listener) {
+        unregister(observable, listener, invalidationListeners, ObservableValue::removeListener);
     }
 
     /**
@@ -159,8 +163,8 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableList} to remove the listener from.
      * @param listener   the {@link ListChangeListener} to remove
      */
-    public void detachListener(ObservableList<?> observable, ListChangeListener<?> listener) {
-        detachListener(observable, listener, listChangeListeners, ObservableList::removeListener);
+    public void unregister(ObservableList<?> observable, ListChangeListener<?> listener) {
+        unregister(observable, listener, listChangeListeners, ObservableList::removeListener);
     }
 
     /**
@@ -169,7 +173,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove all listeners from.
      */
     public void detachAllInvalidationListeners(ObservableValue<?> observable) {
-        detachAllListener(observable, invalidationListeners, ObservableValue::removeListener);
+        unregister(observable, invalidationListeners, ObservableValue::removeListener);
     }
 
     /**
@@ -178,7 +182,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove all listeners from.
      */
     public void detachAllChangeListeners(ObservableValue<?> observable) {
-        detachAllListener(observable, changeListeners, ObservableValue::removeListener);
+        unregister(observable, changeListeners, ObservableValue::removeListener);
     }
 
     /**
@@ -187,22 +191,18 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableList} to remove all listeners from.
      */
     public void detachAllListChangeListeners(ObservableList<?> observable) {
-        detachAllListener(observable, listChangeListeners, ObservableList::removeListener);
+        unregister(observable, listChangeListeners, ObservableList::removeListener);
     }
 
     @Override
     public synchronized void close() {
-        visitMap(listChangeListeners, ObservableList::removeListener);
-        listChangeListeners.clear();
-        visitMap(invalidationListeners, ObservableValue::removeListener);
-        invalidationListeners.clear();
-        visitMap(changeListeners, ObservableValue::removeListener);
-        changeListeners.clear();
+        unregisterAll(listChangeListeners, ObservableList::removeListener);
+        unregisterAll(invalidationListeners, ObservableValue::removeListener);
+        unregisterAll(changeListeners, ObservableValue::removeListener);
         unbindAll();
         unregisterAllButtonActions();
-        buttons.clear();
         unregisterAllMenuItemActions();
-        menuItems.clear();
+        unregisterAllNodeAction();
     }
 
     public synchronized void suspend() {
@@ -219,43 +219,70 @@ public class BindingManager implements AutoCloseable {
         boundProperties.forEach(Property::bind);
     }
 
-    public void setMenuItemAction(MenuItem menuItem, EventHandler<ActionEvent> action){
-        logger.debug(()-> "Setting action event handler to " + menuItem.getText());
+    public void setMenuItemAction(MenuItem menuItem, EventHandler<ActionEvent> action) {
+        Objects.requireNonNull(menuItem, "menuItem cannot be null");
+        logger.debug(() -> "Setting action event handler to " + menuItem.getText());
         menuItems.put(menuItem, action);
         menuItem.setOnAction(action);
     }
 
-    public void unregisterMenuItemAction(MenuItem menuItem){
-        if (menuItem != null) {
-            logger.debug(()-> "Unregistering action event handler from " + menuItem.getText());
+    public void unregisterMenuItemAction(MenuItem menuItem) {
+        Objects.requireNonNull(menuItem, "menuItem cannot be null");
+        logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
+        menuItem.setOnAction(null);
+        menuItems.remove(menuItem);
+    }
+
+    public void unregisterAllMenuItemActions() {
+        menuItems.forEach((menuItem, actionEventEventHandler) -> {
+            logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
             menuItem.setOnAction(null);
-        }
-    }
-
-    public void unregisterAllMenuItemActions(){
-        menuItems.forEach((menuItem, actionEventEventHandler) -> unregisterMenuItemAction(menuItem));
+        });
+        menuItems.clear();
     }
 
 
-    public void setButtonAction(ButtonBase button, EventHandler<ActionEvent> action){
-        logger.debug(()-> "Setting action event handler to " + button.getText());
+    public void setButtonAction(ButtonBase button, EventHandler<ActionEvent> action) {
+        Objects.requireNonNull(button, "button cannot be null");
+        logger.debug(() -> "Setting action event handler to " + button.getText());
         buttons.put(button, action);
         button.setOnAction(action);
     }
 
-    public void unregisterButtonAction(ButtonBase button){
-        if (button != null) {
-            logger.debug(()-> "Unregistering action event handler from " + button.getText());
+    public void unregisterButtonAction(ButtonBase button) {
+        Objects.requireNonNull(button, "button cannot be null");
+        logger.debug(() -> "Unregistering action event handler from " + button.getText());
+        button.setOnAction(null);
+        buttons.remove(button);
+    }
+
+    public void unregisterAllButtonActions() {
+        buttons.forEach((button, actionEventEventHandler) -> {
+            logger.debug(() -> "Unregistering action event handler from " + button.getText());
             button.setOnAction(null);
-        }
+        });
+        buttons.clear();
     }
 
-    public void unregisterAllButtonActions(){
-       buttons.forEach((buttonBase, actionEventEventHandler) -> buttonBase.setOnAction(null));
+    public <T extends Event> void registerNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register, EventHandler<T> handler) {
+//        logger.debug(() -> "Registering action event handler" + register + " to " + node );
+//        registeredNodes.computeIfAbsent(node, p -> new ArrayList<>()).add(register);
+//        register.accept(node, handler);
+        register(node, register, registeredNodes, (n, r) -> register.accept(n, handler));
     }
 
+    public <T extends Event> void unregisterNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register) {
+//        logger.debug(() -> "Unregistering action event handler" + register + " from " + node );
+//        register.accept(node, null);
+//        registeredNodes.remove(node);
+        unregister(node, register, registeredNodes, (n, r) -> r.accept(n, null));
+    }
 
-    private <T, U> void attachListener(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> attachAction) {
+    public void unregisterAllNodeAction() {
+        unregisterAll(registeredNodes, (n, nodeBiConsumer) -> nodeBiConsumer.accept(n, null));
+    }
+
+    private <T, U> void register(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> attachAction) {
         Objects.requireNonNull(observable, "observable parameter cannot be null");
         Objects.requireNonNull(listener, "listener parameter cannot be null");
         Objects.requireNonNull(map, "map parameter cannot be null");
@@ -265,45 +292,56 @@ public class BindingManager implements AutoCloseable {
         attachAction.accept(observable, listener);
     }
 
-    private <T, U> void detachListener(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
-        Objects.requireNonNull(observable, "observable parameter cannot be null");
-        Objects.requireNonNull(listener, "listener parameter cannot be null");
+    private <T, U> void unregister(T key, U value, Map<T, List<U>> map, BiConsumer<T, U> unregisterAction) {
+        Objects.requireNonNull(key, "key parameter cannot be null");
+        Objects.requireNonNull(value, "value parameter cannot be null");
         Objects.requireNonNull(map, "map parameter cannot be null");
-        Objects.requireNonNull(detachAction, "ifPresent parameter cannot be null");
-        List<U> listeners = map.get(observable);
+        Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
+        List<U> listeners = map.get(key);
         if (listeners == null) {
-            logger.debug (()->"Observable " + observable.toString() + " is not managed by this BindingManager instance");
+            logger.debug(() -> "Object " + key.toString() + " is not managed by this BindingManager instance");
             return;
         }
-        listeners.stream().filter(l -> l.equals(listener)).findFirst().ifPresent(found -> map.get(observable).remove(found));
-        logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());
-        detachAction.accept(observable, listener);
+        listeners.stream().filter(l -> l.equals(value)).findFirst().ifPresent(found -> map.get(key).remove(found));
+        logger.trace(() -> "Unregistering " + value.toString() + " from " + key.toString());
+        unregisterAction.accept(key, value);
     }
 
-    private <T, U> void detachAllListener(T observable, Map<T, List<U>> map, BiConsumer<T, U> detachAction) {
-        Objects.requireNonNull(observable, "observable paramater cannot be null");
+    private <T, U> void unregister(T key, Map<T, List<U>> map, BiConsumer<T, U> unregisterAction) {
+        Objects.requireNonNull(key, "key paramater cannot be null");
         Objects.requireNonNull(map, "map parameter cannot be null");
-        Objects.requireNonNull(detachAction, "attachAction parameter cannot be null");
-        List<U> l = map.get(observable);
+        Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
+        List<U> l = map.get(key);
         if (l == null) {
-            logger.debug (()->"ObservableList " + observable.toString() + " is not managed by this BindingManager instance");
+            logger.debug(() -> "Object " + key.toString() + " is not managed by this BindingManager instance");
             return;
         }
-        l.forEach(listener -> {
-            logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());
-            detachAction.accept(observable, listener);
+        l.forEach(value -> {
+            logger.trace(() -> "Unregistering " + value.toString() + " from " + key.toString());
+            unregisterAction.accept(key, value);
         });
-        map.remove(observable);
+        map.remove(key);
+    }
+
+    private <T, U> void unregisterAll(Map<T, List<U>> map, BiConsumer<T, U> unregisterAction) {
+        Objects.requireNonNull(map, "map parameter cannot be null");
+        Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
+        map.forEach((k, vList) -> {
+            vList.forEach(v -> {
+                logger.trace(() -> "Unregistering " + v.toString() + " from " + k.toString());
+                unregisterAction.accept(k, v);
+            });
+        });
+        map.clear();
     }
 
     private <T, U> void visitMap(Map<T, List<U>> map, BiConsumer<T, U> action) {
         Objects.requireNonNull(map, "map parameter cannot be null");
-        Objects.requireNonNull(action, "attachAction parameter cannot be null");
+        Objects.requireNonNull(action, "action parameter cannot be null");
         map.forEach((observable, listeners) -> listeners.forEach(listener -> {
-            logger.trace(() -> "Removing Listener " + listener.toString() + " from observable " + observable.toString());
+            logger.trace(() -> "visiting key " + listener.toString() + " value " + observable.toString());
             action.accept(observable, listener);
         }));
     }
-
 
 }

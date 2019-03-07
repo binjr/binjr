@@ -84,9 +84,9 @@ public class TimeRangePicker extends ToggleButton {
         bindingManager.bind(timeRangePickerController.startDate.zoneIdProperty(), zoneId);
         bindingManager.bind(timeRangePickerController.endDate.zoneIdProperty(), zoneId);
         bindingManager.bindBidirectional(timeRangePickerController.zoneIdProperty(), zoneId);
-        bindingManager.attachListener(zoneId, (observable, oldValue, newValue) -> updateText());
+        bindingManager.register(zoneId, (observable, oldValue, newValue) -> updateText());
 
-        bindingManager.attachListener(selectedRange, (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
+        bindingManager.register(selectedRange, (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 bindingManager.suspend();
                 try {
@@ -99,7 +99,7 @@ public class TimeRangePicker extends ToggleButton {
                 }
             }
         });
-        bindingManager.attachListener(timeRangePickerController.startDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+        bindingManager.register(timeRangePickerController.startDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
                 if (newRange.isNegative()) {
@@ -111,7 +111,7 @@ public class TimeRangePicker extends ToggleButton {
             }
         });
 
-        bindingManager.attachListener(timeRangePickerController.endDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+        bindingManager.register(timeRangePickerController.endDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
                 if (newRange.isNegative()) {
@@ -132,7 +132,7 @@ public class TimeRangePicker extends ToggleButton {
         return zoneId;
     }
 
-    public void closeBindingManager() {
+    public void dispose() {
         bindingManager.close();
     }
 
@@ -184,7 +184,7 @@ public class TimeRangePicker extends ToggleButton {
     }
 
     public void setOnSelectedRangeChanged(ChangeListener<TimeRange> timeRangeChangeListener) {
-        bindingManager.attachListener(selectedRange, timeRangeChangeListener);
+        bindingManager.register(selectedRange, timeRangeChangeListener);
     }
 
 

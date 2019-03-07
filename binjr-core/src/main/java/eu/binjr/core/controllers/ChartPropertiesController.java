@@ -131,34 +131,34 @@ public class ChartPropertiesController implements Initializable, Closeable {
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());
         bindingManager.bind(strokeWidthText.textProperty(), Bindings.format("%.1f", strokeWidthSlider.valueProperty()));
         adaptToChartType(chart.getChartType() == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
-        bindingManager.attachListener(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
+        bindingManager.register(chart.chartTypeProperty(), (ChangeListener<ChartType>) (observable, oldValue, newValue) -> {
             adaptToChartType(newValue == ChartType.LINE || chart.getChartType() == ChartType.SCATTER);
         });
         bindingManager.bindBidirectional(showAreaOutline.selectedProperty(), chart.showAreaOutlineProperty());
         bindingManager.bindBidirectional(autoScaleYAxis.selectedProperty(), chart.autoScaleYAxisProperty());
         NumberStringConverter numberStringConverter = new NumberStringConverter(new DecimalFormat("###,###.####"));
         TextFormatter<Number> yMinFormatter = new TextFormatter<>(numberStringConverter);
-        bindingManager.attachListener(yMinFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
+        bindingManager.register(yMinFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
             if ((chart.getyAxisMaxValue() - newValue.doubleValue() > 0)) {
                 chart.yAxisMinValueProperty().setValue(newValue);
             } else {
                 yMinFormatter.valueProperty().setValue(oldValue);
             }
         });
-        bindingManager.attachListener(chart.yAxisMinValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
+        bindingManager.register(chart.yAxisMinValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
             yMinFormatter.valueProperty().setValue(newValue);
         });
         yMinFormatter.valueProperty().setValue(chart.getyAxisMinValue());
         yMinRange.setTextFormatter(yMinFormatter);
         TextFormatter<Number> yMaxFormatter = new TextFormatter<>(numberStringConverter);
-        bindingManager.attachListener(yMaxFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
+        bindingManager.register(yMaxFormatter.valueProperty(), (ChangeListener<Number>) (observable, oldValue, newValue) -> {
             if ((newValue.doubleValue() - chart.getyAxisMinValue() > 0)) {
                 chart.yAxisMaxValueProperty().setValue(newValue);
             } else {
                 yMaxFormatter.valueProperty().setValue(oldValue);
             }
         });
-        bindingManager.attachListener(chart.yAxisMaxValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
+        bindingManager.register(chart.yAxisMaxValueProperty(), (ChangeListener<Double>) (observable, oldValue, newValue) -> {
             yMaxFormatter.valueProperty().setValue(newValue);
         });
         yMaxFormatter.valueProperty().setValue(chart.getyAxisMaxValue());
@@ -170,9 +170,9 @@ public class ChartPropertiesController implements Initializable, Closeable {
 
 
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        bindingManager.attachListener(showAreaOutline.selectedProperty(),
+        bindingManager.register(showAreaOutline.selectedProperty(),
                 (ChangeListener<Boolean>) (observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
-        bindingManager.attachListener(visibleProperty(), (observable, oldValue, newValue) -> setPanelVisibility());
+        bindingManager.register(visibleProperty(), (observable, oldValue, newValue) -> setPanelVisibility());
         bindingManager.bindBidirectional(visibleProperty(), chart.showPropertiesProperty());
 
         closeButton.setOnAction(e -> visibleProperty().setValue(false));

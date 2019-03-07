@@ -122,6 +122,13 @@ public class ChartViewPort implements Closeable {
             logger.debug(() -> "Closing ChartViewPort " + this.toString());
             propertiesController.close();
             propertiesController = null;
+            seriesTable.getColumns().forEach(c -> {
+                c.setCellValueFactory(null);
+                c.setCellFactory(null);
+            });
+            seriesTable.setRowFactory(null);
+            seriesTable.getColumns().clear();
+            seriesTable.setItems(null);
         }
     }
 

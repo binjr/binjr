@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.charts;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -72,6 +73,7 @@ public class XYChartCrosshair<X, Y> {
     private final Property<X> currentXValue = new SimpleObjectProperty<>();
     private final XYChart<X, Y> masterChart;
     private final BooleanProperty isMouseOverChart = new SimpleBooleanProperty(false);
+    private final BindingManager bindingManager = new BindingManager();
 
 
     /**
@@ -127,10 +129,10 @@ public class XYChartCrosshair<X, Y> {
         });
         masterChart.setOnMouseExited(event -> isMouseOverChart.set(false));
         masterChart.setOnMouseEntered(event -> isMouseOverChart.set(true));
-        horizontalMarker.visibleProperty().bind(horizontalMarkerVisible.and(isMouseOverChart));
-        yAxisLabel.visibleProperty().bind(horizontalMarkerVisible.and(isMouseOverChart));
-        verticalMarker.visibleProperty().bind(verticalMarkerVisible.and(isMouseOverChart));
-        xAxisLabel.visibleProperty().bind(verticalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind( horizontalMarker.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind( yAxisLabel.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind( verticalMarker.visibleProperty(),verticalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind( xAxisLabel.visibleProperty(),verticalMarkerVisible.and(isMouseOverChart));
     }
 
     /**
@@ -222,6 +224,17 @@ public class XYChartCrosshair<X, Y> {
      */
     public Property<X> currentXValueProperty() {
         return currentXValue;
+    }
+
+    public void dispose(){
+        logger.debug(()-> "Disposing XYChartCrossHair " + toString());
+        selectionDoneEvent = null;
+        bindingManager.close();
+        masterChart.removeEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
+        masterChart.removeEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
+        masterChart.setOnMouseReleased(null);
+        masterChart.setOnMouseExited(null);
+        masterChart.setOnMouseEntered(null);
     }
 
     private void fireSelectionDoneEvent() {

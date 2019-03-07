@@ -35,7 +35,6 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -55,6 +54,7 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -63,7 +63,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
@@ -73,7 +72,6 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
-import org.gillius.jfxutils.EventHandlerManager;
 
 import javax.imageio.ImageIO;
 import java.io.File;
@@ -223,9 +221,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidateAll(false, false, false));
-            bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            bindingManager.register(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.register(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.register(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 toggleChartsLegendvisibilty(newValue);
             });
             toggleChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
@@ -423,8 +421,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
         });
-        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
-        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
+        bindingManager.bindBidirectional(hCrosshair.selectedProperty(),globalPrefs.horizontalMarkerOnProperty());
+        bindingManager.bindBidirectional(vCrosshair.selectedProperty(),globalPrefs.verticalMarkerOnProperty());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
                                 globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
@@ -461,14 +459,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void initNavigationPane() {
-       bindingManager.setButtonAction(backButton, this::handleHistoryBack);
-        bindingManager.setButtonAction( forwardButton, this::handleHistoryForward);
-        bindingManager.setButtonAction( refreshButton, this::handleRefresh);
-        bindingManager.setMenuItemAction(  snapshotButton, this::handleTakeSnapshot);
-        bindingManager.setMenuItemAction( toggleTableViewButton,this::handleToggleTableViewButton);
+        bindingManager.setButtonAction(backButton, this::handleHistoryBack);
+        bindingManager.setButtonAction(forwardButton, this::handleHistoryForward);
+        bindingManager.setButtonAction(refreshButton, this::handleRefresh);
+        bindingManager.setMenuItemAction(snapshotButton, this::handleTakeSnapshot);
+        bindingManager.setMenuItemAction(toggleTableViewButton, this::handleToggleTableViewButton);
         bindingManager.bind(backButton.disableProperty(), getWorksheet().getBackwardHistory().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
-        bindingManager.setButtonAction(  addChartButton, this::handleAddNewChart);
+        bindingManager.setButtonAction(addChartButton, this::handleAddNewChart);
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
         for (ChartViewPort viewPort : viewPorts) {
             currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
@@ -532,8 +530,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             };
 
             currentViewPort.getDataStore().getSeries().forEach(doubleTimeSeriesInfo -> {
-                bindingManager.attachListener(doubleTimeSeriesInfo.selectedProperty(), refreshListener);
-                bindingManager.attachListener(doubleTimeSeriesInfo.selectedProperty(), isVisibleListener);
+                bindingManager.register(doubleTimeSeriesInfo.selectedProperty(), refreshListener);
+                bindingManager.register(doubleTimeSeriesInfo.selectedProperty(), isVisibleListener);
                 // Explicitly call the listener to initialize the proper status of the checkbox
                 isVisibleListener.invalidated(null);
             });
@@ -553,7 +551,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.detachAllChangeListeners(s.selectedProperty()));
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
                 r.changed(null, null, null);
-                currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
+                currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.register(s.selectedProperty(), r));
 
             });
 
@@ -596,7 +594,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             pathColumn.setPrefWidth(400);
 
             currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
-            bindingManager.attachListener(crossHair.verticalMarkerVisibleProperty(),
+            bindingManager.register(crossHair.verticalMarkerVisibleProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
 
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -623,8 +621,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     }, crossHair.currentXValueProperty()));
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
-
-            currentViewPort.getSeriesTable().setOnKeyReleased(event -> {
+            bindingManager.registerNodeAction(currentViewPort.getSeriesTable(), Node::setOnKeyReleased, event -> {
                 if (event.getCode().equals(KeyCode.DELETE)) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
@@ -633,8 +630,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
 
-            newPane.setOnDragOver(this::handleDragOverWorksheetView);
-            newPane.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
+            bindingManager.registerNodeAction(newPane, Node::setOnDragOver, this::handleDragOverWorksheetView);
+            bindingManager.registerNodeAction(newPane, Node::setOnDragDropped, this::handleDragDroppedOnWorksheetView);
             newPane.setUserData(currentViewPort);
 
             GridPane titleRegion = new GridPane();
@@ -677,7 +674,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
             Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
-            bindingManager.setButtonAction( closeButton,event -> {
+            bindingManager.setButtonAction(closeButton, event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                     worksheet.getCharts().remove(currentViewPort.getDataStore());
@@ -688,7 +685,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
             editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
-            bindingManager.setButtonAction(editButton,event -> newPane.setExpanded(true));
+            bindingManager.setButtonAction(editButton, event -> newPane.setExpanded(true));
 
             editButtonsGroup.getToggles().add(editButton);
 
@@ -696,7 +693,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.bind(moveUpButton.disableProperty(),
                     Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()));
             bindingManager.bind(moveUpButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
-            bindingManager.setButtonAction( moveUpButton,event -> {
+            bindingManager.setButtonAction(moveUpButton, event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.getDataStore());
                 this.preventReload = true;
                 try {
@@ -710,7 +707,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Button moveDownButton = (Button) newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
             bindingManager.bind(moveDownButton.disableProperty(), Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()));
             bindingManager.bind(moveDownButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
-            bindingManager.setButtonAction( moveDownButton,event -> {
+            bindingManager.setButtonAction(moveDownButton, event -> {
                 int idx = worksheet.getCharts().indexOf(currentViewPort.getDataStore());
                 this.preventReload = true;
                 try {
@@ -733,7 +730,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
-        bindingManager.attachListener(seriesTableContainer.expandedPaneProperty(),
+        bindingManager.register(seriesTableContainer.expandedPaneProperty(),
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
                     Boolean expandRequiered = true;
                     for (TitledPane pane : seriesTableContainer.getPanes()) {
@@ -837,27 +834,53 @@ public class WorksheetController implements Initializable, AutoCloseable {
             hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());
             vCrosshair.selectedProperty().unbindBidirectional(globalPrefs.verticalMarkerOnProperty());
             currentState = null;
-            this.worksheet = null;
-            this.seriesTableContainer = null;
-            this.crossHair = null;
+
+            this.seriesTableContainer.getPanes().forEach(pane-> {
+                pane.setUserData(null);
+                pane.setContent(null);
+            });
+            this.seriesTableContainer.getPanes().clear();
+            //Workaround JDK-8220012
+            this.seriesTableContainer.getPanes().add(new TitledPane());
+            crossHair.dispose();
             viewPorts.forEach(ChartViewPort::close);
             viewPorts = null;
+            timeRangePicker.dispose();
+            this.worksheet = null;
+          //  clearButtonActionEventHandler(this.root);
+
+        }
+
+    }
+
+    private void clearButtonActionEventHandler(Node node) {
+        if (node instanceof Parent) {
+            for (var child : ((Parent) node).getChildrenUnmodifiable()) {
+                clearButtonActionEventHandler(child);
+            }
+        }
+        //  node.getProperties().clear();
+
+        if (node instanceof ButtonBase) {
+            logger.debug(()-> "Unregister onAction handler from " + node.toString());
+            ((ButtonBase) node).setOnAction(null);
         }
     }
+
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         ChangeListener<Object> controllerReloadListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
-                logger.debug("Reloading worksheet controller because property changed from: " + oldValue + " to " + newValue);
+                logger.debug(() -> "Reloading worksheet controller because property changed from: " + oldValue + " to " + newValue);
                 action.accept(this);
                 this.close();
             }
         };
-        bindingManager.attachListener(worksheet.chartLayoutProperty(), controllerReloadListener);
+        bindingManager.register(worksheet.chartLayoutProperty(), controllerReloadListener);
 
         this.worksheet.getCharts().forEach(c -> {
-            bindingManager.attachListener(c.unitPrefixesProperty(), controllerReloadListener);
-            bindingManager.attachListener(c.chartTypeProperty(), controllerReloadListener);
+            bindingManager.register(c.unitPrefixesProperty(), controllerReloadListener);
+            bindingManager.register(c.chartTypeProperty(), controllerReloadListener);
         });
 
         ListChangeListener<Chart> chartListListener = c -> {
@@ -892,7 +915,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             }
         };
-        bindingManager.attachListener(worksheet.getCharts(), chartListListener);
+        bindingManager.register(worksheet.getCharts(), chartListListener);
     }
 
     //region *** protected members ***
@@ -912,8 +935,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         };
         for (TimeSeriesBinding b : bindings) {
             TimeSeriesInfo newSeries = TimeSeriesInfo.fromBinding(b);
-            bindingManager.attachListener(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false)));
-            bindingManager.attachListener(newSeries.selectedProperty(), isVisibleListener);
+            bindingManager.register(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false)));
+            bindingManager.register(newSeries.selectedProperty(), isVisibleListener);
             targetChart.addSeries(newSeries);
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
@@ -1033,7 +1056,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     data.setNode(c);
                 }
             } else {
-                bindingManager.attachListener(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
+                bindingManager.register(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
                     if (newNode != null) {
                         switch (currentChart.getChartType()) {
                             case AREA:
@@ -1063,36 +1086,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         }
                     }
                 });
-//                newSeries.nodeProperty().addListener((node, oldNode, newNode) -> {
-//                    if (newNode != null) {
-//                        switch (currentChart.getChartType()) {
-//                            case AREA:
-//                            case STACKED:
-//                                ObservableList<Node> children = ((Group) newNode).getChildren();
-//                                if (children != null && children.size() >= 1) {
-//                                    Path stroke = (Path) children.get(1);
-//                                    Path fill = (Path) children.get(0);
-//                                    logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-//                                    stroke.visibleProperty().bind(currentChart.showAreaOutlineProperty());
-//                                    stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
-//                                    stroke.strokeProperty().bind(series.displayColorProperty());
-//                                    fill.fillProperty().bind(Bindings.createObjectBinding(
-//                                            () -> series.getDisplayColor().deriveColor(0.0, 1.0, 1.0, currentChart.getGraphOpacity()),
-//                                            series.displayColorProperty(),
-//                                            currentChart.graphOpacityProperty()));
-//                                }
-//                                break;
-//                            case LINE:
-//                                Path stroke = (Path) newNode;
-//                                logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
-//                                stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
-//                                stroke.strokeProperty().bind(series.displayColorProperty());
-//                                break;
-//                            default:
-//                                break;
-//                        }
-//                    }
-//                });
             }
             return newSeries;
         }
@@ -1132,7 +1125,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private TableRow<TimeSeriesInfo> seriesTableRowFactory(TableView<TimeSeriesInfo> tv) {
         TableRow<TimeSeriesInfo> row = new TableRow<>();
-        row.setOnDragDetected(event -> {
+        bindingManager.registerNodeAction(row,Node::setOnDragDetected,event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
@@ -1142,9 +1135,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 db.setContent(cc);
                 event.consume();
             }
-        });
+        } );
 
-        row.setOnDragOver(event -> {
+        bindingManager.registerNodeAction(row, Node::setOnDragOver,event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE) && row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
@@ -1152,7 +1145,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         });
 
-        row.setOnDragDropped(event -> {
+        bindingManager.registerNodeAction(row,Node::setOnDragDropped, event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
