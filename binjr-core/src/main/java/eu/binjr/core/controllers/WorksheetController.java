@@ -96,18 +96,21 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
-    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
-    private Worksheet worksheet;
     private static final double Y_AXIS_SEPARATION = 10;
+    private static final double TOOL_BUTTON_SIZE = 20;
+    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final MainViewController parentController;
-    private volatile boolean preventReload = false;
-    private AtomicBoolean closed = new AtomicBoolean(false);
+    private final ToggleGroup editButtonsGroup = new ToggleGroup();
+    private final BindingManager bindingManager = new BindingManager();
 
     @FXML
     public AnchorPane root;
+    protected List<ChartViewPort> viewPorts = new ArrayList<>();
+    private Worksheet worksheet;
+    private volatile boolean preventReload = false;
+    private AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
     private AnchorPane chartParent;
-    protected List<ChartViewPort> viewPorts = new ArrayList<>();
     @FXML
     private TextField yMinRange;
     @FXML
@@ -142,13 +145,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private TimeRangePicker timeRangePicker;
     @FXML
     private AnchorPane chartsLegendsPane;
-
     private XYChartCrosshair<ZonedDateTime, Double> crossHair;
-    private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private ChartViewportsState currentState;
     private String name;
-    private final BindingManager bindingManager = new BindingManager();
-    private static final double TOOL_BUTTON_SIZE = 20;
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -421,8 +420,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
         });
-        bindingManager.bindBidirectional(hCrosshair.selectedProperty(),globalPrefs.horizontalMarkerOnProperty());
-        bindingManager.bindBidirectional(vCrosshair.selectedProperty(),globalPrefs.verticalMarkerOnProperty());
+        bindingManager.bindBidirectional(hCrosshair.selectedProperty(), globalPrefs.horizontalMarkerOnProperty());
+        bindingManager.bindBidirectional(vCrosshair.selectedProperty(), globalPrefs.verticalMarkerOnProperty());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
                                 globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
@@ -621,11 +620,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     }, crossHair.currentXValueProperty()));
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
-            bindingManager.registerNodeAction(currentViewPort.getSeriesTable(), Node::setOnKeyReleased, event -> {
+
+
+            currentViewPort.getSeriesTable().setOnKeyReleased(bindingManager.register(event -> {
                 if (event.getCode().equals(KeyCode.DELETE)) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
-            });
+            }));
+
+//            bindingManager.registerNodeAction(currentViewPort.getSeriesTable(), Node::setOnKeyReleased, event -> {
+//                if (event.getCode().equals(KeyCode.DELETE)) {
+//                    removeSelectedBinding(currentViewPort.getSeriesTable());
+//                }
+//            });
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
@@ -835,7 +842,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             vCrosshair.selectedProperty().unbindBidirectional(globalPrefs.verticalMarkerOnProperty());
             currentState = null;
 
-            this.seriesTableContainer.getPanes().forEach(pane-> {
+            this.seriesTableContainer.getPanes().forEach(pane -> {
                 pane.setUserData(null);
                 pane.setContent(null);
             });
@@ -847,7 +854,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPorts = null;
             timeRangePicker.dispose();
             this.worksheet = null;
-          //  clearButtonActionEventHandler(this.root);
+            //  clearButtonActionEventHandler(this.root);
 
         }
 
@@ -862,7 +869,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         //  node.getProperties().clear();
 
         if (node instanceof ButtonBase) {
-            logger.debug(()-> "Unregister onAction handler from " + node.toString());
+            logger.debug(() -> "Unregister onAction handler from " + node.toString());
             ((ButtonBase) node).setOnAction(null);
         }
     }
@@ -1125,7 +1132,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private TableRow<TimeSeriesInfo> seriesTableRowFactory(TableView<TimeSeriesInfo> tv) {
         TableRow<TimeSeriesInfo> row = new TableRow<>();
-        bindingManager.registerNodeAction(row,Node::setOnDragDetected,event -> {
+        bindingManager.registerNodeAction(row, Node::setOnDragDetected, event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
@@ -1135,9 +1142,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 db.setContent(cc);
                 event.consume();
             }
-        } );
+        });
 
-        bindingManager.registerNodeAction(row, Node::setOnDragOver,event -> {
+        bindingManager.registerNodeAction(row, Node::setOnDragOver, event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE) && row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
@@ -1145,7 +1152,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
         });
 
-        bindingManager.registerNodeAction(row,Node::setOnDragDropped, event -> {
+        bindingManager.registerNodeAction(row, Node::setOnDragDropped, event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);

@@ -25,6 +25,7 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
+import javafx.event.WeakEventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonBase;
 import javafx.scene.control.MenuItem;
@@ -47,16 +48,17 @@ import java.util.function.BiConsumer;
  */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);
-    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new WeakHashMap<>();
-    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new WeakHashMap<>();
-    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new WeakHashMap<>();
-    private final Map<Property<?>, ObservableValue> boundProperties = new WeakHashMap<>();
-    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new WeakHashMap<>();
+    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new HashMap<>();
+    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new HashMap<>();
+    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new HashMap<>();
+    private final Map<Property<?>, ObservableValue> boundProperties = new HashMap<>();
+    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new HashMap<>();
+    private final List<EventHandler<?>> registeredHandlers = new ArrayList<>();
 
-    private final Map<ButtonBase, EventHandler<ActionEvent>> buttons = new WeakHashMap<>();
-    private final Map<MenuItem, EventHandler<ActionEvent>> menuItems = new WeakHashMap<>();
+    private final Map<ButtonBase, EventHandler<ActionEvent>> buttons = new HashMap<>();
+    private final Map<MenuItem, EventHandler<ActionEvent>> menuItems = new HashMap<>();
 
-    private final Map<Node, List<BiConsumer<Node, ?>>> registeredNodes = new WeakHashMap<>();
+    private final Map<Node, List<BiConsumer<Node, ?>>> registeredNodes = new HashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -200,6 +202,9 @@ public class BindingManager implements AutoCloseable {
         unregisterAll(invalidationListeners, ObservableValue::removeListener);
         unregisterAll(changeListeners, ObservableValue::removeListener);
         unbindAll();
+        // Release strong refs to registered event handlers, so that their
+        // weak counterpart may be collected.
+        registeredHandlers.clear();
         unregisterAllButtonActions();
         unregisterAllMenuItemActions();
         unregisterAllNodeAction();
@@ -219,6 +224,17 @@ public class BindingManager implements AutoCloseable {
         boundProperties.forEach(Property::bind);
     }
 
+    public <T extends Event> WeakEventHandler<T> register(EventHandler<T> handler) {
+        // Store strong ref to handler, so it doesn't get collected prematurely.
+        registeredHandlers.add(handler);
+        // wrap in WeakEventHandler
+        return new WeakEventHandler<T>(handler);
+    }
+
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void setMenuItemAction(MenuItem menuItem, EventHandler<ActionEvent> action) {
         Objects.requireNonNull(menuItem, "menuItem cannot be null");
         logger.debug(() -> "Setting action event handler to " + menuItem.getText());
@@ -226,6 +242,10 @@ public class BindingManager implements AutoCloseable {
         menuItem.setOnAction(action);
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void unregisterMenuItemAction(MenuItem menuItem) {
         Objects.requireNonNull(menuItem, "menuItem cannot be null");
         logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
@@ -233,6 +253,10 @@ public class BindingManager implements AutoCloseable {
         menuItems.remove(menuItem);
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void unregisterAllMenuItemActions() {
         menuItems.forEach((menuItem, actionEventEventHandler) -> {
             logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
@@ -241,7 +265,10 @@ public class BindingManager implements AutoCloseable {
         menuItems.clear();
     }
 
-
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void setButtonAction(ButtonBase button, EventHandler<ActionEvent> action) {
         Objects.requireNonNull(button, "button cannot be null");
         logger.debug(() -> "Setting action event handler to " + button.getText());
@@ -249,6 +276,10 @@ public class BindingManager implements AutoCloseable {
         button.setOnAction(action);
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void unregisterButtonAction(ButtonBase button) {
         Objects.requireNonNull(button, "button cannot be null");
         logger.debug(() -> "Unregistering action event handler from " + button.getText());
@@ -256,6 +287,10 @@ public class BindingManager implements AutoCloseable {
         buttons.remove(button);
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void unregisterAllButtonActions() {
         buttons.forEach((button, actionEventEventHandler) -> {
             logger.debug(() -> "Unregistering action event handler from " + button.getText());
@@ -264,6 +299,10 @@ public class BindingManager implements AutoCloseable {
         buttons.clear();
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public <T extends Event> void registerNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register, EventHandler<T> handler) {
 //        logger.debug(() -> "Registering action event handler" + register + " to " + node );
 //        registeredNodes.computeIfAbsent(node, p -> new ArrayList<>()).add(register);
@@ -271,6 +310,10 @@ public class BindingManager implements AutoCloseable {
         register(node, register, registeredNodes, (n, r) -> register.accept(n, handler));
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public <T extends Event> void unregisterNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register) {
 //        logger.debug(() -> "Unregistering action event handler" + register + " from " + node );
 //        register.accept(node, null);
@@ -278,6 +321,10 @@ public class BindingManager implements AutoCloseable {
         unregister(node, register, registeredNodes, (n, r) -> r.accept(n, null));
     }
 
+    @Deprecated
+    /**
+     * @deprecated use WeakEventHandler instead
+     */
     public void unregisterAllNodeAction() {
         unregisterAll(registeredNodes, (n, nodeBiConsumer) -> nodeBiConsumer.accept(n, null));
     }
