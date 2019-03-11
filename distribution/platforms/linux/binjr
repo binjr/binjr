@@ -21,6 +21,7 @@ JAVACMD="$BASEDIR/runtime/bin/java"
 exec $JAVACMD \
   -splash:"./resources/images/splashscreen.png" \
   -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
+  -Xmx1024M \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \

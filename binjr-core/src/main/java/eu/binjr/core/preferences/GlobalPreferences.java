@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
 public class GlobalPreferences {
     private static final Logger logger = LogManager.getLogger(GlobalPreferences.class);
     private static final String BINJR_GLOBAL = "binjr/global";
-    private static final String DOWN_SAMPLING_THRESHOLD = "downSamplingThreshold";
+    private static final String DOWN_SAMPLING_THRESHOLD = "maxSamplesPerSeries";
     private static final String DOWN_SAMPLING_ENABLED = "enableDownSampling";
     private static final String MOST_RECENT_SAVE_FOLDER = "mostRecentSaveFolder";
     private static final String MOST_RECENT_SAVED_WORKSPACE = "mostRecentSavedWorkspace";
