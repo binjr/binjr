@@ -90,9 +90,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.manager = manager;
         this.tearable = tearable;
         this.reorderable = reorderable;
-        bindingManager.register(this.getSelectionModel().selectedItemProperty(),
-                (ChangeListener<Tab>) (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue));
-        this.getTabs().addListener((ListChangeListener<Tab>) c -> {
+        bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>)
+
+                (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue)
+        );
+        bindingManager.attachListener(this.getTabs(), (ListChangeListener<Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
                     for (Tab t : c.getAddedSubList()) {
@@ -112,8 +114,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                             .map(tab -> tab.getText() == null ? tab.toString() : tab.getText())
                             .reduce((s, s2) -> s + " " + s2).orElse("null"));
         });
-        this.setOnDragDetected(
-                (MouseEvent event) -> {
+        this.setOnDragDetected(bindingManager.registerHandler((MouseEvent event) -> {
                     if (!this.tearable) {
                         return;
                     }
@@ -132,8 +133,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     }
                     event.consume();
                 }
-        );
-        this.setOnDragOver(event -> {
+        ));
+        this.setOnDragOver(bindingManager.registerHandler(event -> {
             if (!this.tearable) {
                 return;
             }
@@ -144,8 +145,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 event.acceptTransferModes(TransferMode.MOVE);
                 event.consume();
             }
-        });
-        this.setOnDragDone(
+        }));
+        this.setOnDragDone(bindingManager.registerHandler(
                 (DragEvent event) -> {
                     if (!this.tearable || event.isDropCompleted()) {
                         return;
@@ -164,8 +165,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     }
                     event.consume();
                 }
-        );
-        this.setOnDragDropped(event -> {
+        ));
+        this.setOnDragDropped(bindingManager.registerHandler(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(manager.getDragAndDropFormat())) {
                 logger.trace(() -> "setOnDragDropped fired");
@@ -193,11 +194,11 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                 }
                 event.consume();
             }
-        });
+        }));
         Platform.runLater(() -> {
             positionNewTabButton();
             Stage stage = (Stage) this.getScene().getWindow();
-            bindingManager.register(stage.focusedProperty(),
+            bindingManager.attachListener(stage.focusedProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                         if (newValue) {
                             manager.setSelectedTab(this.getSelectionModel().getSelectedItem());
@@ -206,7 +207,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         });
 
         // Prepare to change the button on screen position if the tearableTabMap side changes
-        bindingManager.register(sideProperty(),
+        bindingManager.attachListener(sideProperty(),
                 (observable, oldValue, newValue) -> {
                     if (newValue != null) {
                         positionNewTabButton();
@@ -382,14 +383,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         newTabButton.setGraphic(icon);
         newTabButton.setAlignment(Pos.CENTER);
         if (onAddNewTab != null) {
-            newTabButton.setOnAction(onAddNewTab);
+            newTabButton.setOnAction(bindingManager.registerHandler(onAddNewTab));
         } else {
-            newTabButton.setOnAction(event -> {
+            newTabButton.setOnAction(bindingManager.registerHandler(event -> {
                 newTabFactory.apply(event).ifPresent(newTab -> {
                     getTabs().add(newTab);
                     this.getSelectionModel().select(newTab);
                 });
-            });
+            }));
         }
         tabHeaderBg.getChildren().add(newTabButton);
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
@@ -455,13 +456,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
         stage.show();
         detachedTabPane.getSelectionModel().select(tab);
-        stage.setOnCloseRequest(event -> {
+        stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
             detachedTabPane.getTabs().removeAll(detachedTabPane.getTabs());
-        });
+        }));
     }
 
     @Override
     public void close() {
+        getTabs().forEach(tab -> tab.setContextMenu(null));
         logger.trace(() -> "Closing down TearableTabPane instance");
         bindingManager.close();
     }
@@ -522,7 +524,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
 
         public void removeTab(Tab tab) {
-            logger.trace(()->"Removing tab " + tab.getText() + " (movingTab=" + movingTab +")");
+            logger.trace(() -> "Removing tab " + tab.getText() + " (movingTab=" + movingTab + ")");
             idToTabMap.remove(getId(tab));
             tabToPaneMap.remove(tab);
             if (!movingTab) {

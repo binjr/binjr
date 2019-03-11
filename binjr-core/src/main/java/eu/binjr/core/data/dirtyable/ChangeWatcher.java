@@ -68,7 +68,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
             try {
                 Object fieldValue = readField(field, source);
                 if (fieldValue instanceof Property) {
-                    bindingManager.register((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
+                    bindingManager.attachListener((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
                 }
                 if (fieldValue instanceof ObservableList) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();
@@ -90,7 +90,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                                             }
                                             for (Dirtyable dirtyable : c.getAddedSubList()) {
                                                 this.dirty.setValue(dirty.getValue() || dirtyable.isDirty());
-                                                bindingManager.register(dirtyable.dirtyProperty(), dirtyableChangeListener);
+                                                bindingManager.attachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                         if (c.wasRemoved()) {
@@ -98,12 +98,12 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                                                 forceDirty();
                                             }
                                             for (Dirtyable dirtyable : c.getRemoved()) {
-                                                bindingManager.unregister(dirtyable.dirtyProperty(), dirtyableChangeListener);
+                                                bindingManager.detachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
                                     }
                                 });
-                                bindingManager.register(ol, listChangeListener);
+                                bindingManager.attachListener(ol, listChangeListener);
                                 break;
                             }
                         }

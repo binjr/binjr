@@ -22,17 +22,17 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.WeakEventHandler;
-import javafx.scene.Node;
-import javafx.scene.control.ButtonBase;
-import javafx.scene.control.MenuItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 
 /**
@@ -48,17 +48,12 @@ import java.util.function.BiConsumer;
  */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);
-    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new HashMap<>();
-    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new HashMap<>();
-    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new HashMap<>();
-    private final Map<Property<?>, ObservableValue> boundProperties = new HashMap<>();
-    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new HashMap<>();
+    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new ConcurrentHashMap<>();
+    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new ConcurrentHashMap<>();
+    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new ConcurrentHashMap<>();
+    private final Map<Property<?>, ObservableValue> boundProperties = new ConcurrentHashMap<>();
+    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new ConcurrentHashMap<>();
     private final List<EventHandler<?>> registeredHandlers = new ArrayList<>();
-
-    private final Map<ButtonBase, EventHandler<ActionEvent>> buttons = new HashMap<>();
-    private final Map<MenuItem, EventHandler<ActionEvent>> menuItems = new HashMap<>();
-
-    private final Map<Node, List<BiConsumer<Node, ?>>> registeredNodes = new HashMap<>();
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -115,7 +110,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to attach the listener to.
      * @param listener   the {@link ChangeListener} to attach
      */
-    public void register(ObservableValue<?> observable, ChangeListener<?> listener) {
+    public void attachListener(ObservableValue<?> observable, ChangeListener<?> listener) {
         register(observable, listener, changeListeners, ObservableValue::addListener);
     }
 
@@ -125,7 +120,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to attach the listener to.
      * @param listener   the {@link InvalidationListener} to attach
      */
-    public void register(ObservableValue<?> observable, InvalidationListener listener) {
+    public void attachListener(ObservableValue<?> observable, InvalidationListener listener) {
         register(observable, listener, invalidationListeners, ObservableValue::addListener);
     }
 
@@ -135,7 +130,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableList} to attach the listener to.
      * @param listener   the {@link ListChangeListener} to attach
      */
-    public void register(ObservableList<?> observable, ListChangeListener listener) {
+    public void attachListener(ObservableList<?> observable, ListChangeListener listener) {
         register(observable, listener, listChangeListeners, ObservableList::addListener);
     }
 
@@ -145,7 +140,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove the listener from.
      * @param listener   the {@link ChangeListener} to remove
      */
-    public void unregister(ObservableValue<?> observable, ChangeListener listener) {
+    public void detachListener(ObservableValue<?> observable, ChangeListener listener) {
         unregister(observable, listener, changeListeners, ObservableValue::removeListener);
     }
 
@@ -155,7 +150,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableValue} to remove the listener from.
      * @param listener   the {@link InvalidationListener} to remove
      */
-    public void unregister(ObservableValue<?> observable, InvalidationListener listener) {
+    public void detachListener(ObservableValue<?> observable, InvalidationListener listener) {
         unregister(observable, listener, invalidationListeners, ObservableValue::removeListener);
     }
 
@@ -165,7 +160,7 @@ public class BindingManager implements AutoCloseable {
      * @param observable the {@link ObservableList} to remove the listener from.
      * @param listener   the {@link ListChangeListener} to remove
      */
-    public void unregister(ObservableList<?> observable, ListChangeListener<?> listener) {
+    public void detachListener(ObservableList<?> observable, ListChangeListener<?> listener) {
         unregister(observable, listener, listChangeListeners, ObservableList::removeListener);
     }
 
@@ -205,9 +200,6 @@ public class BindingManager implements AutoCloseable {
         // Release strong refs to registered event handlers, so that their
         // weak counterpart may be collected.
         registeredHandlers.clear();
-        unregisterAllButtonActions();
-        unregisterAllMenuItemActions();
-        unregisterAllNodeAction();
     }
 
     public synchronized void suspend() {
@@ -224,109 +216,11 @@ public class BindingManager implements AutoCloseable {
         boundProperties.forEach(Property::bind);
     }
 
-    public <T extends Event> WeakEventHandler<T> register(EventHandler<T> handler) {
+    public <T extends Event> WeakEventHandler<T> registerHandler(EventHandler<T> handler) {
         // Store strong ref to handler, so it doesn't get collected prematurely.
         registeredHandlers.add(handler);
         // wrap in WeakEventHandler
         return new WeakEventHandler<T>(handler);
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void setMenuItemAction(MenuItem menuItem, EventHandler<ActionEvent> action) {
-        Objects.requireNonNull(menuItem, "menuItem cannot be null");
-        logger.debug(() -> "Setting action event handler to " + menuItem.getText());
-        menuItems.put(menuItem, action);
-        menuItem.setOnAction(action);
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void unregisterMenuItemAction(MenuItem menuItem) {
-        Objects.requireNonNull(menuItem, "menuItem cannot be null");
-        logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
-        menuItem.setOnAction(null);
-        menuItems.remove(menuItem);
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void unregisterAllMenuItemActions() {
-        menuItems.forEach((menuItem, actionEventEventHandler) -> {
-            logger.debug(() -> "Unregistering action event handler from " + menuItem.getText());
-            menuItem.setOnAction(null);
-        });
-        menuItems.clear();
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void setButtonAction(ButtonBase button, EventHandler<ActionEvent> action) {
-        Objects.requireNonNull(button, "button cannot be null");
-        logger.debug(() -> "Setting action event handler to " + button.getText());
-        buttons.put(button, action);
-        button.setOnAction(action);
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void unregisterButtonAction(ButtonBase button) {
-        Objects.requireNonNull(button, "button cannot be null");
-        logger.debug(() -> "Unregistering action event handler from " + button.getText());
-        button.setOnAction(null);
-        buttons.remove(button);
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void unregisterAllButtonActions() {
-        buttons.forEach((button, actionEventEventHandler) -> {
-            logger.debug(() -> "Unregistering action event handler from " + button.getText());
-            button.setOnAction(null);
-        });
-        buttons.clear();
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public <T extends Event> void registerNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register, EventHandler<T> handler) {
-//        logger.debug(() -> "Registering action event handler" + register + " to " + node );
-//        registeredNodes.computeIfAbsent(node, p -> new ArrayList<>()).add(register);
-//        register.accept(node, handler);
-        register(node, register, registeredNodes, (n, r) -> register.accept(n, handler));
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public <T extends Event> void unregisterNodeAction(Node node, BiConsumer<Node, EventHandler<T>> register) {
-//        logger.debug(() -> "Unregistering action event handler" + register + " from " + node );
-//        register.accept(node, null);
-//        registeredNodes.remove(node);
-        unregister(node, register, registeredNodes, (n, r) -> r.accept(n, null));
-    }
-
-    @Deprecated
-    /**
-     * @deprecated use WeakEventHandler instead
-     */
-    public void unregisterAllNodeAction() {
-        unregisterAll(registeredNodes, (n, nodeBiConsumer) -> nodeBiConsumer.accept(n, null));
     }
 
     private <T, U> void register(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> attachAction) {

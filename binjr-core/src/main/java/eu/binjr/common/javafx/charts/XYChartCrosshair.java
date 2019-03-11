@@ -95,16 +95,16 @@ public class XYChartCrosshair<X, Y> {
         this.xValuesFormatter = xValuesFormatter;
         masterChart = charts.keySet().stream().reduce((p, n) -> n).orElseThrow(() -> new IllegalStateException("Could not identify last element in chart linked hash map."));
         this.chartInfo = new XYChartInfo(masterChart, parent);
-        masterChart.addEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
-        masterChart.addEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
-        masterChart.setOnMouseReleased(e -> {
+        masterChart.addEventHandler(MouseEvent.MOUSE_MOVED, bindingManager.registerHandler(this::handleMouseMoved));
+        masterChart.addEventHandler(MouseEvent.MOUSE_DRAGGED, bindingManager.registerHandler(this::handleMouseMoved));
+        masterChart.setOnMouseReleased(bindingManager.registerHandler(e -> {
             if (isSelecting.get()) {
                 fireSelectionDoneEvent();
                 drawVerticalMarker();
                 drawHorizontalMarker();
             }
             isSelecting.set(false);
-        });
+        }));
         isSelecting.addListener((observable, oldValue, newValue) -> {
             logger.debug(() -> "observable=" + observable + " oldValue=" + oldValue + " newValue=" + newValue);
             if (!oldValue && newValue) {
@@ -127,8 +127,8 @@ public class XYChartCrosshair<X, Y> {
                 currentXValue.setValue(null);
             }
         });
-        masterChart.setOnMouseExited(event -> isMouseOverChart.set(false));
-        masterChart.setOnMouseEntered(event -> isMouseOverChart.set(true));
+        masterChart.setOnMouseExited(bindingManager.registerHandler(event -> isMouseOverChart.set(false)));
+        masterChart.setOnMouseEntered(bindingManager.registerHandler(event -> isMouseOverChart.set(true)));
         bindingManager.bind( horizontalMarker.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
         bindingManager.bind( yAxisLabel.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
         bindingManager.bind( verticalMarker.visibleProperty(),verticalMarkerVisible.and(isMouseOverChart));
@@ -230,11 +230,6 @@ public class XYChartCrosshair<X, Y> {
         logger.debug(()-> "Disposing XYChartCrossHair " + toString());
         selectionDoneEvent = null;
         bindingManager.close();
-        masterChart.removeEventHandler(MouseEvent.MOUSE_MOVED, this::handleMouseMoved);
-        masterChart.removeEventHandler(MouseEvent.MOUSE_DRAGGED, this::handleMouseMoved);
-        masterChart.setOnMouseReleased(null);
-        masterChart.setOnMouseExited(null);
-        masterChart.setOnMouseEntered(null);
     }
 
     private void fireSelectionDoneEvent() {

@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.github.GithubRelease;
+import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -499,7 +500,7 @@ public class MainViewController implements Initializable {
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
-        source.getBindingManager().register(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+        source.getBindingManager().attachListener(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             if (!newValue) {
                 source.setEditable(false);
             }
@@ -825,15 +826,17 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                current.getBindingManager().registerNodeAction(p, Node::setOnDragOver, this::handleDragOverWorksheetView);
+
+                p.setOnDragOver(current.getBindingManager().registerHandler(this::handleDragOverWorksheetView));
                 //p.setOnDragOver(this::handleDragOverWorksheetView);
-                current.getBindingManager().registerNodeAction(p, Node::setOnDragDropped, this::handleDragDroppedOnWorksheetView);
+                p.setOnDragDropped(current.getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
                 //   p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
-            current.getBindingManager().register(current.getWorksheet().timeRangeLinkedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),
+                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 if (newValue) {
                     current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
                 } else {
@@ -849,25 +852,25 @@ public class MainViewController implements Initializable {
                 current.setShowPropertiesPane(true);
             }
             //TODO
-            newTab.setContextMenu(getTabMenu(newTab, worksheet));
+            newTab.setContextMenu(getTabMenu(newTab, worksheet,current.getBindingManager()));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
         }
     }
 
-    private ContextMenu getTabMenu(EditableTab tab, Worksheet worksheet) {
+    private ContextMenu getTabMenu(EditableTab tab, Worksheet worksheet, BindingManager manager) {
         MenuItem close = new MenuItem("Close Tab");
-        close.setOnAction(event -> {
+        close.setOnAction(manager.registerHandler(event -> {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
                 handler.handle(null);
             } else {
                 tab.getTabPane().getTabs().remove(tab);
             }
-        });
+        }));
         MenuItem closeOthers = new MenuItem("Close Other Tabs");
-        closeOthers.setOnAction(event -> {
+        closeOthers.setOnAction(manager.registerHandler(event -> {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
                 handler.handle(null);
@@ -878,23 +881,25 @@ public class MainViewController implements Initializable {
                         .collect(Collectors.toList())
                 );
             }
-        });
+        }));
         MenuItem edit = new MenuItem("Edit Tab");
-        edit.setOnAction(event -> tab.setEditable(true));
+        edit.setOnAction(manager.registerHandler(event -> tab.setEditable(true)));
         MenuItem duplicate = new MenuItem("Duplicate Tab");
-        duplicate.setOnAction(event -> {
+        duplicate.setOnAction(manager.registerHandler(event -> {
             editWorksheet(new Worksheet(worksheet));
-        });
+        }));
         MenuItem detach = new MenuItem("Detach Tab");
-        detach.setOnAction(event -> {
+        detach.setOnAction(manager.registerHandler(event -> {
             TearableTabPane pane = (TearableTabPane) tab.getTabPane();
             pane.detachTab(tab);
-        });
+        }));
         MenuItem link = new MenuItem();
-        link.textProperty().bind(Bindings.createStringBinding(() -> worksheet.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline", worksheet.timeRangeLinkedProperty()));
-        link.setOnAction(event -> {
+        manager.bind(link.textProperty(),Bindings.createStringBinding(() ->
+                worksheet.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
+                worksheet.timeRangeLinkedProperty()));
+        link.setOnAction(manager.registerHandler(event -> {
             worksheet.setTimeRangeLinked(!worksheet.isTimeRangeLinked());
-        });
+        }));
         return new ContextMenu(
                 close,
                 closeOthers,
