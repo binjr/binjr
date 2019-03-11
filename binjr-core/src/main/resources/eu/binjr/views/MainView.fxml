@@ -19,220 +19,204 @@
 <?import eu.binjr.common.javafx.controls.CommandBarPane?>
 <?import eu.binjr.common.javafx.controls.TearableTabPane?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.input.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.input.KeyCodeCombination?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.111"
-            xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
-    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.35" focusTraversable="true"
-               nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" styleClass="binjr-content-view"
-               AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0"
-               AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
-        <AnchorPane styleClass="skinnable-pane-border" SplitPane.resizableWithParent="false">
-            <StackPane fx:id="sourceArea" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0"
-                       AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
-                <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddSource"
-                       styleClass="add-source-background-icon" wrapText="true">
+
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
+    <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.3382608695652174" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" styleClass="binjr-content-view" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
+        <AnchorPane fx:id="sourcePane" minWidth="0.0" styleClass="skinnable-pane-border" SplitPane.resizableWithParent="false">
+            <StackPane fx:id="sourceArea" minWidth="0.0" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
+                <Label fx:id="addSourceLabel" alignment="CENTER" onMouseClicked="#handleAddSource" styleClass="add-source-background-icon" wrapText="true">
                     <graphic>
-                        <Region styleClass="addSource-icon"/>
+                        <Region styleClass="addSource-icon" />
                     </graphic>
                     <tooltip>
                         <Tooltip text="Click to add a new source">
                             <font>
-                                <Font size="11.0"/>
+                                <Font size="11.0" />
                             </font>
                         </Tooltip>
                     </tooltip>
                 </Label>
-                <Accordion fx:id="sourcesPane" minWidth="20" mouseTransparent="true" prefHeight="200.0"
-                           prefWidth="200.0" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
-                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                <Accordion fx:id="sourcesPane" minWidth="0.0" mouseTransparent="true" prefHeight="798.0" prefWidth="416.0" styleClass="series-table" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 
                 </Accordion>
-                <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
+                <MaskerPane fx:id="sourceMaskerPane" text="" visible="false" />
             </StackPane>
-            <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane"
-                        AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
-                           AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="5.0"/>
-                <HBox alignment="CENTER" layoutX="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                      AnchorPane.topAnchor="0.0">
+            <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane" AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="5.0" />
+                <HBox alignment="CENTER" layoutX="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                     </padding>
-                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
-                            onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"
-                            styleClass="dialog-button">
+                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button">
                         <graphic>
-                            <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
+                            <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon" />
                         </graphic>
                         <tooltip>
                             <Tooltip text="Find next occurrence">
                                 <font>
-                                    <Font size="11.0"/>
+                                    <Font size="11.0" />
                                 </font>
                             </Tooltip>
                         </tooltip>
                     </Button>
-                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString=""
-                                  graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
+                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString="" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
                         <tooltip>
                             <Tooltip text="Toggle case sensitivity">
                                 <font>
-                                    <Font size="11.0"/>
+                                    <Font size="11.0" />
                                 </font>
                             </Tooltip>
                         </tooltip>
                     </ToggleButton>
-                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
-                            onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="exit">
+                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="exit">
                         <graphic>
-                            <Region styleClass="cross-icon"/>
+                            <Region styleClass="cross-icon" />
                         </graphic>
                         <tooltip>
                             <Tooltip text="Hide the search bar">
                                 <font>
-                                    <Font size="11.0"/>
+                                    <Font size="11.0" />
                                 </font>
                             </Tooltip>
                         </tooltip>
                     </Button>
                 </HBox>
-                <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                           AnchorPane.topAnchor="0.0"/>
+                <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
             </AnchorPane>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
-            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0"
-                             side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0" side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <tabs>
                 </tabs>
             </TearableTabPane>
-            <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet"
-                   styleClass="add-worksheet-background-icon" visible="false" wrapText="true">
+            <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet" styleClass="add-worksheet-background-icon" visible="false" wrapText="true">
                 <graphic>
-                    <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon"/>
+                    <Region scaleX="20" scaleY="20" styleClass="addWorksheet-icon" />
                 </graphic>
                 <tooltip>
                     <Tooltip text="Click to add a new worksheet">
                         <font>
-                            <Font size="11.0"/>
+                            <Font size="11.0" />
                         </font>
                     </Tooltip>
                 </tooltip>
             </Label>
         </StackPane>
     </SplitPane>
-    <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0"
-                    styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                    AnchorPane.topAnchor="0.0">
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar"
-                prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0"
-                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tooltip>
                 <Tooltip text="Expand">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
             <graphic>
                 <HBox styleClass="command-bar-menu-graphic">
                     <VBox alignment="CENTER" spacing="3.0">
-                        <Line endX="15.0"/>
-                        <Line endX="15.0"/>
-                        <Line endX="15.0"/>
+                        <Line endX="15.0" />
+                        <Line endX="15.0" />
+                        <Line endX="15.0" />
                     </VBox>
                 </HBox>
             </graphic>
         </Button>
-        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item"
-                    text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="45.0">
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="45.0">
             <tooltip>
                 <Tooltip text="Workspaces">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="folder-icon"/>
+                    <Region styleClass="folder-icon" />
                 </HBox>
             </graphic>
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleNewWorkspace" text="New Workspace">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="N" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="fileNew-icon"/>
+                            <Region styleClass="fileNew-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#handleOpenWorkspace" text="Open…">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="O" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="fileOpen-icon"/>
+                            <Region styleClass="fileOpen-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
 
-                <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu"
-                      text="Open Recent">
+                <Menu fx:id="openRecentMenu" mnemonicParsing="false" onShowing="#populateOpenRecentMenu" text="Open Recent">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="fileRecent-icon"/>
+                            <Region styleClass="fileRecent-icon" />
                         </HBox>
                     </graphic>
-                    <MenuItem disable="true" mnemonicParsing="false" text="none"/>
+                    <MenuItem disable="true" mnemonicParsing="false" text="none" />
                 </Menu>
                 <MenuItem fx:id="saveMenuItem" mnemonicParsing="false" onAction="#handleSaveWorkspace" text="Save">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="fileSave-icon"/>
+                            <Region styleClass="fileSave-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#handleSaveAsWorkspace" text="Save As…">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="fileSaveAs-icon"/>
+                            <Region styleClass="fileSaveAs-icon" />
                         </HBox>
                     </graphic>
                     <accelerator>
-                        <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="DOWN" code="S" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40"
-                    styleClass="command-bar-pinned-item" text="Sources" AnchorPane.leftAnchor="0"
-                    AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="90.0">
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40" styleClass="command-bar-pinned-item" text="Sources" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0">
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="source-icon"/>
+                    <Region styleClass="source-icon" />
                 </HBox>
             </graphic>
             <tooltip>
                 <Tooltip text="Sources">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
@@ -240,84 +224,97 @@
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="addSource-icon"/>
+                            <Region styleClass="addSource-icon" />
                         </HBox>
                     </graphic>
                 </Menu>
-                <MenuItem onAction="#handleShowSearchBar" text="Find...">
+                <MenuItem fx:id="hideSourcePaneMenu" onAction="#handleToggleSourcePaneVisibility" text="Hide Source Pane">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="F" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="L" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="find-icon"/>
+                            <Region styleClass="side-pane-icon" />
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem onAction="#handleShowSearchBar" text="Find...">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="F" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                    </accelerator>
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="find-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0"
-                    styleClass="command-bar-pinned-item" text="Worksheets" AnchorPane.leftAnchor="0.0"
-                    AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="135.0">
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" styleClass="command-bar-pinned-item" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="chart-icon"/>
+                    <Region styleClass="chart-icon" />
                 </HBox>
             </graphic>
             <tooltip>
                 <Tooltip text="Worksheets">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="addWorksheet-icon"/>
+                            <Region styleClass="addWorksheet-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false"
-                          onAction="#handleDisplayChartProperties" text="Chart Properties">
+                <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="P" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="settings-icon"/>
+                            <Region styleClass="settings-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false"
-                          onAction="#handleRefreshAction" text="Refresh">
+
+                <MenuItem fx:id="toggleTableViewButton" styleClass="dialog-button"  onAction="#handleToggleChartLegendVisibility" text="Hide Charts Legends">
+                    <accelerator>
+                        <KeyCodeCombination alt="UP" code="B" control="UP" meta="UP" shift="UP" shortcut="DOWN" />
+                    </accelerator>
+                    <graphic>
+                        <HBox alignment="CENTER" styleClass="icon-container">
+                            <Region styleClass="table-view-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+
+                <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="refresh-icon"/>
+                            <Region styleClass="refresh-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item"
-                    text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                    AnchorPane.topAnchor="180.0">
+        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="help-icon"/>
+                    <Region styleClass="help-icon" />
                 </HBox>
             </graphic>
             <tooltip>
                 <Tooltip text="Help">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
@@ -325,61 +322,56 @@
                 <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="help-icon"/>
+                            <Region styleClass="help-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr website">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="binjr-icon"/>
+                            <Region styleClass="binjr-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
                 <MenuItem mnemonicParsing="false" onAction="#handleAboutAction" text="About binjr">
                     <graphic>
                         <HBox styleClass="icon-container">
-                            <Region styleClass="about-icon"/>
+                            <Region styleClass="about-icon" />
                         </HBox>
                     </graphic>
                 </MenuItem>
             </items>
         </MenuButton>
-        <Button mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0"
-                styleClass="command-bar-pinned-item" text="Settings" AnchorPane.bottomAnchor="45.0"
-                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button mnemonicParsing="false" onAction="#handlePreferencesAction" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Settings" AnchorPane.bottomAnchor="45.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="settings-icon"/>
+                    <Region styleClass="settings-icon" />
                 </HBox>
             </graphic>
             <tooltip>
                 <Tooltip text="Settings">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
         </Button>
-        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0"
-                styleClass="command-bar-pinned-item,exit" text="Exit" AnchorPane.bottomAnchor="0.0"
-                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+        <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0" styleClass="command-bar-pinned-item,exit" text="Exit" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
             <graphic>
                 <HBox styleClass="icon-container">
-                    <Region styleClass="quit-icon"/>
+                    <Region styleClass="quit-icon" />
                 </HBox>
             </graphic>
             <tooltip>
                 <Tooltip text="Exit">
                     <font>
-                        <Font size="11.0"/>
+                        <Font size="11.0" />
                     </font>
                 </Tooltip>
             </tooltip>
         </Button>
     </CommandBarPane>
-    <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar" AnchorPane.bottomAnchor="0"
-               AnchorPane.leftAnchor="-252" AnchorPane.topAnchor="0">
-        <fx:include source="PreferencePaneView.fxml"/>
+    <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-252" AnchorPane.topAnchor="0">
+        <fx:include source="PreferencePaneView.fxml" />
     </StackPane>
 </AnchorPane>

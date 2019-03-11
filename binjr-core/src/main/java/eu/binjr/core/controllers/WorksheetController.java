@@ -223,16 +223,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                toggleChartsLegendvisibilty(newValue);
+                setChartsLegendvisibilty(newValue);
             });
-            toggleChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
+            setChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
 
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
 
-    private void toggleChartsLegendvisibilty(Boolean newValue) {
+    private void setChartsLegendvisibilty(Boolean newValue) {
         if (!newValue) {
             splitPane.setDividerPositions(1.0, 0.0);
             toggleTableViewButton.setText("Show Charts Legends");
@@ -1184,6 +1184,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties(value);
+        }
+    }
+
+    public void toggleChartLegendVisibility(){
+        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        if (currentViewport != null) {
+            currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
         }
     }
 

@@ -100,6 +100,9 @@ public class MainViewController implements Initializable {
     private static final double COLLAPSED_WIDTH = 48;
     private static final double EXPANDED_WIDTH = 200;
     private static final int ANIMATION_DURATION = 50;
+    public AnchorPane sourcePane;
+    public MenuItem hideSourcePaneMenu;
+    public MenuItem toggleTableViewButton;
 
     private Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
@@ -184,6 +187,8 @@ public class MainViewController implements Initializable {
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
+        workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
+        toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
 
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
@@ -651,7 +656,7 @@ public class MainViewController implements Initializable {
         });
         sourcesAdapters.clear();
         workspace.close();
-     //   workspace = new Workspace();
+        //   workspace = new Workspace();
     }
 
     private void openWorkspaceFromFile() {
@@ -836,12 +841,12 @@ public class MainViewController implements Initializable {
             seriesControllers.put(newTab, current);
             current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                if (newValue) {
-                    current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
-                } else {
-                    current.getBindingManager().unbindBidirectionnal(current.selectedRangeProperty(), linkedTimeRange);
-                }
-            });
+                        if (newValue) {
+                            current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
+                        } else {
+                            current.getBindingManager().unbindBidirectionnal(current.selectedRangeProperty(), linkedTimeRange);
+                        }
+                    });
             if (current.getWorksheet().isTimeRangeLinked()) {
                 current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
             }
@@ -850,7 +855,7 @@ public class MainViewController implements Initializable {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
-            newTab.setContextMenu(getTabMenu(newTab, worksheet,current.getBindingManager()));
+            newTab.setContextMenu(getTabMenu(newTab, worksheet, current.getBindingManager()));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
@@ -892,8 +897,8 @@ public class MainViewController implements Initializable {
             pane.detachTab(tab);
         }));
         MenuItem link = new MenuItem();
-        manager.bind(link.textProperty(),Bindings.createStringBinding(() ->
-                worksheet.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
+        manager.bind(link.textProperty(), Bindings.createStringBinding(() ->
+                        worksheet.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
                 worksheet.timeRangeLinkedProperty()));
         link.setOnAction(manager.registerHandler(event -> {
             worksheet.setTimeRangeLinked(!worksheet.isTimeRangeLinked());
@@ -1294,6 +1299,35 @@ public class MainViewController implements Initializable {
 
     public void setAssociatedFile(Optional<String> associatedFile) {
         this.associatedFile = associatedFile;
+    }
+
+    public void handleToggleSourcePaneVisibility(ActionEvent actionEvent) {
+        workspace.setSourcePaneVisible(!workspace.isSourcePaneVisible());
+    }
+
+    private void toggleSourcePaneVisibilty(Boolean newValue) {
+        if (!newValue) {
+            contentView.setDividerPositions(0.0, 1.0);
+            hideSourcePaneMenu.setText("Show Source Pane");
+            sourcePane.setVisible(false);
+            sourcePane.setMaxWidth(0.0);
+        } else {
+            sourcePane.setMaxWidth(Double.MAX_VALUE);
+            sourcePane.setVisible(true);
+            hideSourcePaneMenu.setText("Hide Source Pane");
+            contentView.setDividerPositions(0.35, 0.65);
+
+        }
+    }
+
+    public void handleToggleChartLegendVisibility(ActionEvent actionEvent) {
+        if (getSelectedWorksheetController() != null) {
+            var worksheet = getSelectedWorksheetController().getWorksheet();
+            if (worksheet != null) {
+                worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
+               // toggleTableViewButton.setText( (worksheet.isChartLegendsVisible() ? "Show": "Hide") + " Charts Legends");
+            }
+        }
     }
 
     //endregion

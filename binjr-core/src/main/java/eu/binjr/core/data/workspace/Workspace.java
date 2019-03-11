@@ -27,6 +27,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -53,7 +54,7 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "2.1";
+    public static final String WORKSPACE_SCHEMA_VERSION = "2.2";
     public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("2.0");
     public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
 
@@ -77,6 +78,9 @@ public class Workspace implements Dirtyable {
     private final String producerInfo;
     private transient final BindingManager bindingManager = new BindingManager();
 
+//    @IsDirtyable
+//    @XmlAttribute(name = "sourcePaneVisible")
+    private transient final BooleanProperty sourcePaneVisible;
     /**
      * Initializes a new instance of the {@link Workspace} class
      */
@@ -97,6 +101,7 @@ public class Workspace implements Dirtyable {
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
         this.producerInfo = AppEnvironment.getInstance().getAppDescription();
+        this.sourcePaneVisible  = new SimpleBooleanProperty(true);
     }
 
     /**
@@ -376,5 +381,17 @@ public class Workspace implements Dirtyable {
 
     public BindingManager getBindingManager() {
         return bindingManager;
+    }
+
+    public Boolean isSourcePaneVisible() {
+        return sourcePaneVisible.getValue();
+    }
+
+    public Property<Boolean> sourcePaneVisibleProperty() {
+        return sourcePaneVisible;
+    }
+
+    public void setSourcePaneVisible(boolean value){
+        sourcePaneVisible.setValue(value);
     }
 }
