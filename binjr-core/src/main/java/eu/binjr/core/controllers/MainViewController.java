@@ -106,7 +106,6 @@ public class MainViewController implements Initializable {
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
-    //   private final BindingManager workspaceBindings = new BindingManager();
     @FXML
     public CommandBarPane commandBar;
     @FXML
@@ -652,7 +651,7 @@ public class MainViewController implements Initializable {
         });
         sourcesAdapters.clear();
         workspace.close();
-        workspace = new Workspace();
+     //   workspace = new Workspace();
     }
 
     private void openWorkspaceFromFile() {
@@ -851,7 +850,6 @@ public class MainViewController implements Initializable {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
-            //TODO
             newTab.setContextMenu(getTabMenu(newTab, worksheet,current.getBindingManager()));
 
         } catch (Exception e) {

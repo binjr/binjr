@@ -89,7 +89,7 @@ public class ChangeWatcher implements Dirtyable, Closeable {
                                                 forceDirty();
                                             }
                                             for (Dirtyable dirtyable : c.getAddedSubList()) {
-                                                this.dirty.setValue(dirty.getValue() || dirtyable.isDirty());
+                                                evaluateDirty(dirtyable.isDirty());
                                                 bindingManager.attachListener(dirtyable.dirtyProperty(), dirtyableChangeListener);
                                             }
                                         }
@@ -136,6 +136,10 @@ public class ChangeWatcher implements Dirtyable, Closeable {
         });
     }
 
+    private void evaluateDirty(Boolean isDirty) {
+        this.dirty.setValue(dirty.getValue() | isDirty);
+    }
+
     private void forceDirty() {
         dirty.setValue(true);
     }
@@ -178,7 +182,6 @@ public class ChangeWatcher implements Dirtyable, Closeable {
 
     @Override
     public void close() {
-        watchedLists.clear();
         bindingManager.close();
     }
 }
