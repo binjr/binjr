@@ -14,12 +14,14 @@
     for the time being and the code resulting from the current status quo is prone to unsafe casts to and other code 
     smells, it is preferable to revert to using raw types that only deal with `double` values everywhere. 
 
-* _[New]_ UI refresh:
+* _[New]_ User Interface enhancements:
   * Added an explicit button to trigger editing the name of a source. 
   * Icons for buttons that remove sources/worksheets have been changed from a cross to a bin, to emphasise the 
   fact that the action will irreversibly remove something and not simply dismiss a dialog/pane.  
-  * Remove source/worksheet buttons are now hidden until "edit more" is triggered.  
+  * Remove source/worksheet buttons are now hidden until the control is set to "edit mode".
+  * Added an option to show/hide series legend and source panes.
 * _[New]_ Added support for small numbers unit prefix (m = milli, µ = micro, n = nano, etc...) for formatting Y axis 
-  values.    
+  values.  
+* _[Fixed]_ Memory leak when adding, moving or changing the type of charts in the same worksheet.
 * _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis cause worksheet to become 
   unresponsive.
