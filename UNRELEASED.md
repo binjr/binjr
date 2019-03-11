@@ -16,12 +16,13 @@
 
 * _[New]_ User Interface enhancements:
   * Added an explicit button to trigger editing the name of a source. 
+  * Added an option to show/hide series legend and source panes.
   * Icons for buttons that remove sources/worksheets have been changed from a cross to a bin, to emphasise the 
   fact that the action will irreversibly remove something and not simply dismiss a dialog/pane.  
   * Remove source/worksheet buttons are now hidden until the control is set to "edit mode".
-  * Added an option to show/hide series legend and source panes.
+
 * _[New]_ Added support for small numbers unit prefix (m = milli, µ = micro, n = nano, etc...) for formatting Y axis 
   values.  
-* _[Fixed]_ Memory leak when adding, moving or changing the type of charts in the same worksheet.
-* _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis cause worksheet to become 
+* _[Fixed]_ A memory leak that occurs when adding, moving or changing the type of a chart in an existing worksheet.
+* _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis causes a worksheet to become 
   unresponsive.

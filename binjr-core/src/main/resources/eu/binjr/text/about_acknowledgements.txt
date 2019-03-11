@@ -20,6 +20,10 @@ Licensed under the 3-Clause BSD License (https://opensource.org/licenses/BSD-3-C
 Copyright (c) 2013, Christian Schudt.
 Licensed under the MIT License (https://opensource.org/licenses/MIT)
 
+^bFont Awesome Free
+by @fontawesome - https://fontawesome.com
+License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+
 ^bGoogle Gson
 Copyright 2008 Google Inc
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
