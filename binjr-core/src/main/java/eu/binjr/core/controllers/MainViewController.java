@@ -213,9 +213,13 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setOnOpenNewWindow(event -> {
             Stage stage = (Stage) event.getSource();
             stage.setTitle("binjr");
+            registerStageKeyEvents(stage);
             StageAppearanceManager.getInstance().register(stage);
         });
-        worksheetTabPane.setOnClosingWindow(event -> StageAppearanceManager.getInstance().unregister((Stage) event.getSource()));
+        worksheetTabPane.setOnClosingWindow(event -> {
+            StageAppearanceManager.getInstance().unregister((Stage) event.getSource());
+            unregisterStageKeyEvents((Stage) event.getSource());
+        });
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
 
@@ -268,18 +272,8 @@ public class MainViewController implements Initializable {
                 Platform.exit();
             }
         });
-        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
-            if (e.getCode() == KeyCode.F12) {
-                AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
-            }
-        });
-        stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> handleControlKey(e, true));
-        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> handleControlKey(e, false));
-        stage.focusedProperty().addListener((observable, oldValue, newValue) -> {
-            //main stage lost focus -> invalidates shift or ctrl pressed
-            prefs.setShiftPressed(false);
-            prefs.setCtrlPressed(false);
-        });
+
+        registerStageKeyEvents(stage);
 
         if (associatedFile.isPresent()) {
             logger.debug(() -> "Opening associated file " + associatedFile.get());
@@ -299,6 +293,36 @@ public class MainViewController implements Initializable {
             UpdateManager.getInstance().asyncCheckForUpdate(
                     this::onAvailableUpdate, null, null
             );
+        }
+    }
+
+    private void registerStageKeyEvents(Stage stage){
+        BindingManager manager = new BindingManager();
+        stage.setUserData(manager);
+        stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.F12) {
+                AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
+            }
+            if (e.getCode() == KeyCode.B && e.isControlDown()){
+                handleToggleChartLegendVisibility();
+            }
+            if (e.getCode() == KeyCode.P && e.isControlDown()){
+                handleDisplayChartProperties(null);
+            }
+        }));
+        stage.addEventFilter(KeyEvent.KEY_PRESSED,  manager.registerHandler(e -> handleControlKey(e, true)));
+        stage.addEventFilter(KeyEvent.KEY_RELEASED,  manager.registerHandler(e -> handleControlKey(e, false)));
+        manager.attachListener(stage.focusedProperty(),(observable, oldValue, newValue) -> {
+            //main stage lost focus -> invalidates shift or ctrl pressed
+            GlobalPreferences.getInstance().setShiftPressed(false);
+            GlobalPreferences.getInstance().setCtrlPressed(false);
+        });
+    }
+
+    private void unregisterStageKeyEvents(Stage stage){
+        BindingManager manager = (BindingManager)stage.getUserData();
+        if (manager != null){
+            manager.close();
         }
     }
 
@@ -1320,12 +1344,11 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void handleToggleChartLegendVisibility(ActionEvent actionEvent) {
+    public void handleToggleChartLegendVisibility() {
         if (getSelectedWorksheetController() != null) {
             var worksheet = getSelectedWorksheetController().getWorksheet();
             if (worksheet != null) {
                 worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
-               // toggleTableViewButton.setText( (worksheet.isChartLegendsVisible() ? "Show": "Hide") + " Charts Legends");
             }
         }
     }
