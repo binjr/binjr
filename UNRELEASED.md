@@ -20,10 +20,10 @@
   * Icons for buttons that remove sources/worksheets have been changed from a cross to a bin, to emphasise the 
   fact that the action will irreversibly remove something and not simply dismiss a dialog/pane.  
   * Remove source/worksheet buttons are now hidden until the control is set to "edit mode".
+  * Worksheets buttons can now overflow to a menu pane if there is not enough space to display all of them.
 
 * _[New]_ Added support for small numbers unit prefix (m = milli, µ = micro, n = nano, etc...) for formatting Y axis 
   values.  
 * _[Fixed]_ A memory leak that occurs when adding, moving or changing the type of a chart in an existing worksheet.
 * _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis causes a worksheet to become 
 * _[Fixed]_ Keyboard shortcuts do no work on detached tab windows.
-  unresponsive.

@@ -126,9 +126,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private Button refreshButton;
     @FXML
-    private MenuItem snapshotButton;
+    private Button snapshotButton;
     @FXML
-    private MenuItem toggleTableViewButton;
+    private Button toggleTableViewButton;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -140,7 +140,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private ContextMenu seriesListMenu;
     @FXML
-    private Menu selectChartLayout;
+    private MenuButton selectChartLayout;
     @FXML
     private TimeRangePicker timeRangePicker;
     @FXML
@@ -311,7 +311,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
 
-        bindingManager.bind(selectChartLayout.visibleProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()));
+        bindingManager.bind(selectChartLayout.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
         selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
             MenuItem item = new MenuItem(chartLayout.toString());
             item.setOnAction(bindingManager.registerHandler(event -> worksheet.setChartLayout(chartLayout)));

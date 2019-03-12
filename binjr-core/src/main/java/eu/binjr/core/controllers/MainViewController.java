@@ -102,7 +102,6 @@ public class MainViewController implements Initializable {
     private static final int ANIMATION_DURATION = 50;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
-    public MenuItem toggleTableViewButton;
 
     private Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();

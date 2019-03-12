@@ -1473,3 +1473,7 @@
     -fx-font-family: Consolas,  Monospace;
     -fx-fill: DARKRED;
 }
+
+.tool-bar {
+    -fx-spacing: 0;
+}

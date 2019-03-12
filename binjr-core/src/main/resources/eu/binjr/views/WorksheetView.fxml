@@ -91,6 +91,7 @@
                         </Button>
                         <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
                                          maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
+                                         minWidth="425"
                                          styleClass="dialog-button"
                                          text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
                             <graphic>
@@ -106,120 +107,169 @@
                                 </Tooltip>
                             </tooltip>
                         </TimeRangePicker>
+                        <ToolBar>
 
-                        <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                      maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                      mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" text="ToggleButton">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="vertical-crosshair-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip text="Toggle vertical crosshair marker">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                        </ToggleButton>
-                        <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                      minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                      text="ToggleButton">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="horizontal-crosshair-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip text="Toggle horizontal crosshair marker">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                        </ToggleButton>
-                        <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                text="Add Chart">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="addWorksheet-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip text="Add a new chart to the current worksheet.">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                        </Button>
-                        <MenuButton fx:id="moreOptionsButton" alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    styleClass="dialog-button"
-                                    text="Chart layout">>
-                            <tooltip>
-                                <Tooltip text="Select chart layout">
-                                    <font>
-                                        <Font size="11.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="ellipsis-icon"/>
-                                </HBox>
-                            </graphic>
                             <items>
-                                <MenuItem fx:id="snapshotButton" styleClass="dialog-button" text="Snapshot">
-                                        <graphic>
-                                            <HBox alignment="CENTER" styleClass="icon-container">
-                                                <Region styleClass="camera-icon"/>
-                                            </HBox>
-                                        </graphic>
-                                </MenuItem>
-                                <MenuItem fx:id="toggleTableViewButton" styleClass="dialog-button" text="Hide Charts Legends">
+                                <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
+                                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                        text="Snapshot">
+                                    <tooltip>
+                                        <Tooltip text="Save a screen capture of the current worksheet to disk">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="camera-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                </Button>
+                                <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                                              maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                              mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                              text="ToggleButton">
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="vertical-crosshair-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Toggle vertical crosshair marker">
+                                            <font>
+                                                <Font size="10.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                </ToggleButton>
+                                <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                              maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                              minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                                              prefWidth="40.0"
+                                              text="ToggleButton">
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="horizontal-crosshair-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Toggle horizontal crosshair marker">
+                                            <font>
+                                                <Font size="10.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                </ToggleButton>
+                                <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                        minWidth="-Infinity"
+                                        mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                        styleClass="dialog-button"
+                                        text="Add Chart">
+                                    <graphic>
+                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                            <Region styleClass="addWorksheet-icon"/>
+                                        </HBox>
+                                    </graphic>
+                                    <tooltip>
+                                        <Tooltip text="Add a new chart to the current worksheet.">
+                                            <font>
+                                                <Font size="10.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
+                                </Button>
+
+                                <Button fx:id="toggleTableViewButton" styleClass="dialog-button"
+                                        contentDisplay="GRAPHIC_ONLY"
+                                        maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                        text="Hide Charts Legends">
+                                    <tooltip>
+                                        <Tooltip text="Hide/Show Charts Legends">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
                                     <graphic>
                                         <HBox alignment="CENTER" styleClass="icon-container">
                                             <Region styleClass="table-view-icon"/>
                                         </HBox>
                                     </graphic>
-                                </MenuItem>
+                                </Button>
 
-                                <Menu fx:id="selectChartLayout"
-                                      styleClass="dialog-button"
-                                      text="Chart layout">
+                                <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
+                                            prefWidth="40.0"
+                                            styleClass="dialog-button"
+                                            text="Chart layout">
+                                    <tooltip>
+                                        <Tooltip text="Select chart layout">
+                                            <font>
+                                                <Font size="11.0"/>
+                                            </font>
+                                        </Tooltip>
+                                    </tooltip>
                                     <graphic>
                                         <HBox alignment="CENTER" styleClass="icon-container">
                                             <Region styleClass="layout-icon"/>
                                         </HBox>
                                     </graphic>
-                                </Menu>
+                                </MenuButton>
                             </items>
+                        </ToolBar>
 
-                        </MenuButton>
-                        <!--<MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"-->
-                                    <!--maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"-->
-                                    <!--minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
-                                    <!--styleClass="dialog-button"-->
-                                    <!--text="Chart layout">-->
-                            <!--<tooltip>-->
-                                <!--<Tooltip text="Select chart layout">-->
-                                    <!--<font>-->
-                                        <!--<Font size="11.0"/>-->
-                                    <!--</font>-->
-                                <!--</Tooltip>-->
-                            <!--</tooltip>-->
-                            <!--<graphic>-->
-                                <!--<HBox alignment="CENTER" styleClass="icon-container">-->
-                                    <!--<Region styleClass="layout-icon"/>-->
-                                <!--</HBox>-->
-                            <!--</graphic>-->
+                        <!---->
+                        <!--<MenuButton fx:id="moreOptionsButton" alignment="CENTER_RIGHT" contentDisplay="GRAPHIC_ONLY"-->
+                        <!--maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"-->
+                        <!--minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
+                        <!--styleClass="dialog-button"-->
+                        <!--text="Chart layout">>-->
+                        <!--<tooltip>-->
+                        <!--<Tooltip text="Select chart layout">-->
+                        <!--<font>-->
+                        <!--<Font size="11.0"/>-->
+                        <!--</font>-->
+                        <!--</Tooltip>-->
+                        <!--</tooltip>-->
+                        <!--<graphic>-->
+                        <!--<HBox alignment="CENTER" styleClass="icon-container">-->
+                        <!--<Region styleClass="ellipsis-icon"/>-->
+                        <!--</HBox>-->
+                        <!--</graphic>-->
+                        <!--<items>-->
+                        <!--<MenuItem fx:id="snapshotButton" styleClass="dialog-button" text="Snapshot">-->
+                        <!--<graphic>-->
+                        <!--<HBox alignment="CENTER" styleClass="icon-container">-->
+                        <!--<Region styleClass="camera-icon"/>-->
+                        <!--</HBox>-->
+                        <!--</graphic>-->
+                        <!--</MenuItem>-->
+                        <!--<MenuItem fx:id="toggleTableViewButton" styleClass="dialog-button" text="Hide Charts Legends">-->
+                        <!--<graphic>-->
+                        <!--<HBox alignment="CENTER" styleClass="icon-container">-->
+                        <!--<Region styleClass="table-view-icon"/>-->
+                        <!--</HBox>-->
+                        <!--</graphic>-->
+                        <!--</MenuItem>-->
+
+                        <!--<Menu fx:id="selectChartLayout"-->
+                        <!--styleClass="dialog-button"-->
+                        <!--text="Chart layout">-->
+                        <!--<graphic>-->
+                        <!--<HBox alignment="CENTER" styleClass="icon-container">-->
+                        <!--<Region styleClass="layout-icon"/>-->
+                        <!--</HBox>-->
+                        <!--</graphic>-->
+                        <!--</Menu>-->
+                        <!--</items>-->
+
                         <!--</MenuButton>-->
+
                     </HBox>
                 </children>
                 <VBox.margin>
@@ -227,7 +277,8 @@
                 </VBox.margin>
             </AnchorPane>
         </VBox>
-        <SplitPane fx:id="splitPane" dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0" prefWidth="718.0"
+        <SplitPane fx:id="splitPane" dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0"
+                   prefWidth="718.0"
                    VBox.vgrow="ALWAYS">
             <VBox.margin>
                 <Insets/>
@@ -246,7 +297,8 @@
             </AnchorPane>
             <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
-                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" minHeight="0.0">
+                           AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
+                           minHeight="0.0">
                     <panes>
                     </panes>
                 </Accordion>
