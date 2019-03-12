@@ -53,7 +53,7 @@ with someone else.
   
 ####  Fast, responsive & aesthetically pleasing visuals
   * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
-  * Offers three different UI themes, to better integrate with host OS and fit user preferences.
+  * Three different UI themes, to better integrate with host OS and fit user preferences.
     
 ####  Java based application 
   * Cross-platform: works great on Linux, macOS and Windows desktops!
