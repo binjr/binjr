@@ -44,12 +44,12 @@ import java.util.function.BiConsumer;
  */
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = LogManager.getLogger(BindingManager.class);
-    private final Map<ObservableValue, List<ChangeListener>> changeListeners = new WeakHashMap<>();
-    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = new WeakHashMap<>();
-    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = new WeakHashMap<>();
-    private final Map<Property<?>, ObservableValue> boundProperties = new WeakHashMap<>();
-    private final Map<Property<?>, Property> bidirectionallyBoundProperties = new WeakHashMap<>();
-    private final List<EventHandler<?>> registeredHandlers = new ArrayList<>();
+    private final Map<ObservableValue, List<ChangeListener>> changeListeners = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Property<?>, ObservableValue> boundProperties = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<Property<?>, Property> bidirectionallyBoundProperties = Collections.synchronizedMap(new WeakHashMap<>());
+    private final List<EventHandler<?>> registeredHandlers = Collections.synchronizedList(new ArrayList<>());
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -202,15 +202,15 @@ public class BindingManager implements AutoCloseable {
         visitMap(listChangeListeners, ObservableList::removeListener);
         visitMap(invalidationListeners, ObservableValue::removeListener);
         visitMap(changeListeners, ObservableValue::removeListener);
-        boundProperties.keySet().forEach(Property::unbind);
-    }
+            boundProperties.keySet().forEach(Property::unbind);
+        }
 
     public synchronized void resume() {
         visitMap(listChangeListeners, ObservableList::addListener);
         visitMap(invalidationListeners, ObservableValue::addListener);
         visitMap(changeListeners, ObservableValue::addListener);
-        boundProperties.forEach(Property::bind);
-    }
+            boundProperties.forEach(Property::bind);
+        }
 
     public <T extends Event> WeakEventHandler<T> registerHandler(EventHandler<T> handler) {
         // Store strong ref to handler, so it doesn't get collected prematurely.
@@ -263,22 +263,21 @@ public class BindingManager implements AutoCloseable {
     private <T, U> void unregisterAll(Map<T, List<U>> map, BiConsumer<T, U> unregisterAction) {
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
-        map.forEach((k, vList) -> {
-            vList.forEach(v -> {
-                logger.trace(() -> "Unregistering " + v.toString() + " from " + k.toString());
-                unregisterAction.accept(k, v);
+            map.forEach((k, vList) -> {
+                vList.forEach(v -> {
+                    logger.trace(() -> "Unregistering " + v.toString() + " from " + k.toString());
+                    unregisterAction.accept(k, v);
+                });
             });
-        });
         map.clear();
     }
 
     private <T, U> void visitMap(Map<T, List<U>> map, BiConsumer<T, U> action) {
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(action, "action parameter cannot be null");
-        map.forEach((observable, listeners) -> listeners.forEach(listener -> {
-            logger.trace(() -> "visiting key " + listener.toString() + " value " + observable.toString());
-            action.accept(observable, listener);
-        }));
+            map.forEach((observable, listeners) -> listeners.forEach(listener -> {
+                logger.trace(() -> "visiting key " + listener.toString() + " value " + observable.toString());
+                action.accept(observable, listener);
+            }));
     }
-
 }
