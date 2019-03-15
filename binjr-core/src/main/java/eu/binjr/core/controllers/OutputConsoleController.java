@@ -16,8 +16,8 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.diagnositic.DiagnosticCommand;
-import eu.binjr.common.diagnositic.DiagnosticException;
+import eu.binjr.common.diagnostic.DiagnosticCommand;
+import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;

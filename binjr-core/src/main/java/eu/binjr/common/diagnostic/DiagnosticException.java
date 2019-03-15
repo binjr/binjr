@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.diagnositic;
+package eu.binjr.common.diagnostic;
 
 /**
  * Signals that an error occurred while invoking a diagnostic command.

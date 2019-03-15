@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.diagnositic;
+package eu.binjr.common.diagnostic;
 
 import javax.management.JMX;
 import javax.management.MBeanServer;
