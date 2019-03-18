@@ -21,6 +21,8 @@ import eu.binjr.core.preferences.OsFamily;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Arrays;
+
 
 /**
  * Bootstrap class for binjr to workaround for JavaFX runtime presence  checks built into openJfx 11 which incorrectly
@@ -41,11 +43,19 @@ public final class Bootstrap {
             if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX){
                 // Force openJfx to fall back to gtk 2 to workaround issue with Wayland
                 System.setProperty("jdk.gtk.version","2");
+                args = appendToArray(args,"--dialogs.resizable=true");
             }
             Binjr.main(args);
         } catch (Exception e) {
             logger.fatal("Failed to load binjr", e);
             System.exit(1);
         }
+    }
+
+    @SafeVarargs
+    private static <T> T[] appendToArray(T[] array, T... elements) {
+        T[] newArray = Arrays.copyOf(array, array.length +  elements.length);
+        System.arraycopy(elements, 0, newArray, array.length, elements.length);
+        return newArray;
     }
 }

@@ -266,6 +266,8 @@ public class Dialogs {
         dlg.initOwner(Dialogs.getStage(node));
         setAlwaysOnTop(dlg);
         dlg.setTitle("binjr");
+        // Workaround JDK-8179073 (ref: https://bugs.openjdk.java.net/browse/JDK-8179073)
+        dlg.setResizable(AppEnvironment.getInstance().isResizableDialogs());
         dlg.getDialogPane().setHeaderText(header);
         dlg.getDialogPane().setContentText(content);
         if (icon == null) {

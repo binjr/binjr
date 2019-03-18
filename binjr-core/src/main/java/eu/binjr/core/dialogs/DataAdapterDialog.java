@@ -20,6 +20,7 @@ import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -146,7 +147,10 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         );
         TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
         timezoneField.setText(ZoneId.systemDefault().toString());
+        // Workaround JDK-8179073 (ref: https://bugs.openjdk.java.net/browse/JDK-8179073)
+        this.setResizable(AppEnvironment.getInstance().isResizableDialogs());
     }
+
 
     /**
      * Returns an instance of {@link SerializedDataAdapter}

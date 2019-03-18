@@ -22,9 +22,12 @@ exec $JAVACMD \
   -splash:"./resources/images/splashscreen.png" \
   -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
   -Xmx768M \
+  -Dprism.verbose=true \
+  -Djdk.gtk.version=2 \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
   "eu.binjr.core.Binjr" \
+  --dialogs.resizable=true \
   "$@"

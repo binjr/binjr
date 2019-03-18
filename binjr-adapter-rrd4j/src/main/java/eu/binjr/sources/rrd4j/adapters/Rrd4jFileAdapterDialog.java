@@ -21,6 +21,7 @@ import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -110,6 +111,8 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
                     return null;
                 }
         );
+        // Workaround JDK-8179073 (ref: https://bugs.openjdk.java.net/browse/JDK-8179073)
+        this.setResizable(AppEnvironment.getInstance().isResizableDialogs());
     }
 
     private File displayFileChooser(Node owner) {

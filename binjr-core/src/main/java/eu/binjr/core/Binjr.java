@@ -108,10 +108,13 @@ public class Binjr extends Application {
     private void processCommandLineOptions(Parameters parameters) {
         parameters.getNamed().forEach((name, val) -> {
             switch (name.toLowerCase()) {
-                case "loglevel":
+                case "dialogs.resizable":
+                    AppEnvironment.getInstance().setResizableDialogs(Boolean.valueOf(val));
+                    break;
+                case "log.level":
                     AppEnvironment.getInstance().setLogLevel(Level.toLevel(val, Level.INFO));
                     break;
-                case "logfile":
+                case "log.file":
                     break;
             }
         });

@@ -43,7 +43,8 @@ public class AppEnvironment {
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2019 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
-    private final BooleanProperty debugMode = new SimpleBooleanProperty();
+    private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);
+    private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final Property<Level> logLevel = new SimpleObjectProperty<>();
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
@@ -261,6 +262,18 @@ public class AppEnvironment {
      */
     public Property<Level> logLevelProperty() {
         return logLevel;
+    }
+
+    public boolean isResizableDialogs() {
+        return resizableDialogs.getValue();
+    }
+
+    public BooleanProperty resizableDialogsProperty() {
+        return resizableDialogs;
+    }
+
+    public void setResizableDialogs(boolean value) {
+        resizableDialogs.setValue(value);
     }
 
     /**
