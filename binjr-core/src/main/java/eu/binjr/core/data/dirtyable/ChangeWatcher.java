@@ -131,7 +131,11 @@ public class ChangeWatcher implements Dirtyable, Closeable {
         watchedLists.forEach(reference -> {
             var dirtyables = reference.get();
             if (dirtyables != null) {
-                dirtyables.forEach(Dirtyable::cleanUp);
+                dirtyables.forEach(d -> {
+                    if (d != null) {
+                        d.cleanUp();
+                    }
+                });
             }
         });
     }
@@ -182,6 +186,10 @@ public class ChangeWatcher implements Dirtyable, Closeable {
 
     @Override
     public void close() {
-        bindingManager.close();
+        try {
+            bindingManager.close();
+        } catch (Exception e) {
+            logger.warn("An error occurred while ChangeWatcher instance", e);
+        }
     }
 }

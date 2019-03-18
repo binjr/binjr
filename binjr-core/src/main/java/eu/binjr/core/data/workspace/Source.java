@@ -26,6 +26,8 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -41,6 +43,7 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Source")
 public class Source implements Dirtyable, Closeable {
+    private static final Logger logger = LogManager.getLogger(Source.class);
     private final ChangeWatcher status;
     private final BindingManager bindingManager = new BindingManager();
     private UUID adapterId;
@@ -175,9 +178,13 @@ public class Source implements Dirtyable, Closeable {
 
     @Override
     public void close() {
-        bindingManager.close();
-        adapter.close();
-        status.close();
+        try {
+            bindingManager.close();
+            adapter.close();
+            status.close();
+        } catch (Exception e) {
+            logger.warn("An error occuured while closing the source " + (this.getName() != null ? getName() : "null"), e);
+        }
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.version.Version;
 import eu.binjr.common.xml.XmlUtils;
@@ -37,6 +38,7 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
 import javax.xml.stream.XMLStreamException;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -78,9 +80,10 @@ public class Workspace implements Dirtyable {
     private final String producerInfo;
     private transient final BindingManager bindingManager = new BindingManager();
 
-//    @IsDirtyable
+    //    @IsDirtyable
 //    @XmlAttribute(name = "sourcePaneVisible")
     private transient final BooleanProperty sourcePaneVisible;
+
     /**
      * Initializes a new instance of the {@link Workspace} class
      */
@@ -101,7 +104,7 @@ public class Workspace implements Dirtyable {
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
         this.producerInfo = AppEnvironment.getInstance().getAppDescription();
-        this.sourcePaneVisible  = new SimpleBooleanProperty(true);
+        this.sourcePaneVisible = new SimpleBooleanProperty(true);
     }
 
     /**
@@ -325,13 +328,17 @@ public class Workspace implements Dirtyable {
         this.status.close();
     }
 
-    public void close(){
-        worksheets.forEach(Worksheet::close);
-        sources.forEach(Source::close);
-        cleanUp();
-        this.setPath(Paths.get("Untitled"));
-        this.status.close();
-        bindingManager.close();
+    public void close() {
+        try {
+            IOUtils.closeCollectionElements(worksheets);
+            IOUtils.closeCollectionElements(sources);
+            cleanUp();
+            this.setPath(Paths.get("Untitled"));
+            this.status.close();
+            bindingManager.close();
+        } catch (Exception e) {
+            logger.warn("An error occurred while closing the workspace " + (this.getPath() != null ? getPath() : "null"), e);
+        }
     }
 
     /**
@@ -391,7 +398,7 @@ public class Workspace implements Dirtyable {
         return sourcePaneVisible;
     }
 
-    public void setSourcePaneVisible(boolean value){
+    public void setSourcePaneVisible(boolean value) {
         sourcePaneVisible.setValue(value);
     }
 }

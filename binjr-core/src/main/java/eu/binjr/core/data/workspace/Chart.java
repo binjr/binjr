@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
@@ -482,8 +483,7 @@ public class Chart implements Dirtyable, AutoCloseable {
 
     @Override
     public void close() {
-        this.series.forEach(TimeSeriesInfo::close);
-       // this.series.clear();
+        IOUtils.closeCollectionElements(series);
         this.status.close();
     }
 

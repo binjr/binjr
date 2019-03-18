@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRangePicker;
@@ -51,7 +52,7 @@ public class ChartViewportsState implements AutoCloseable {
     public void close() {
         this.startX.removeListener(onRefreshAllRequired);
         this.endX.removeListener(onRefreshAllRequired);
-        axisStates.values().forEach(AxisState::close);
+        IOUtils.closeCollectionElements(axisStates.values());
     }
 
     /**

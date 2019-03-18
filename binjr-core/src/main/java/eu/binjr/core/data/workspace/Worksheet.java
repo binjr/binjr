@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.core.controllers.WorksheetNavigationHistory;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -476,7 +477,7 @@ public class Worksheet implements Dirtyable, AutoCloseable {
     // region Closeable
     @Override
     public void close() {
-        charts.forEach(Chart::close);
+        IOUtils.closeCollectionElements(charts);
         this.status.close();
     }
     // endregion

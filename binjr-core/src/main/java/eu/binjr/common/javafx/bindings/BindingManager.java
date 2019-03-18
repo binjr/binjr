@@ -189,13 +189,17 @@ public class BindingManager implements AutoCloseable {
 
     @Override
     public synchronized void close() {
-        unregisterAll(listChangeListeners, ObservableList::removeListener);
-        unregisterAll(invalidationListeners, ObservableValue::removeListener);
-        unregisterAll(changeListeners, ObservableValue::removeListener);
-        unbindAll();
-        // Release strong refs to registered event handlers, so that their
-        // weak counterpart may be collected.
-        registeredHandlers.clear();
+        try {
+            unregisterAll(listChangeListeners, ObservableList::removeListener);
+            unregisterAll(invalidationListeners, ObservableValue::removeListener);
+            unregisterAll(changeListeners, ObservableValue::removeListener);
+            unbindAll();
+            // Release strong refs to registered event handlers, so that their
+            // weak counterpart may be collected.
+            registeredHandlers.clear();
+        }catch (Exception e) {
+            logger.warn("An error occuured while closing BindingManager instance", e);
+        }
     }
 
     public synchronized void suspend() {

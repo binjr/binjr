@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.ColorTableCell;
@@ -850,7 +851,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             //Workaround JDK-8220012
             this.seriesTableContainer.getPanes().add(new TitledPane());
             crossHair.dispose();
-            viewPorts.forEach(ChartViewPort::close);
+            IOUtils.closeCollectionElements(viewPorts);
             viewPorts = null;
             timeRangePicker.dispose();
             this.worksheet = null;

@@ -16,13 +16,15 @@
 
 package eu.binjr.common.io;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Utility methods to read, write and copy data from and across streams
@@ -32,12 +34,15 @@ import java.nio.channels.WritableByteChannel;
 public class IOUtils {
     private static final int DEFAULT_COPY_BUFFER_SIZE = 32 * 1024;
     private static final int EOF = -1;
+    private static final Logger logger = LogManager.getLogger(IOUtils.class);
 
     public static long copyChannels(ReadableByteChannel input, WritableByteChannel output) throws IOException {
         return copyChannels(input, output, DEFAULT_COPY_BUFFER_SIZE);
     }
 
     public static long copyChannels(ReadableByteChannel input, WritableByteChannel output, int bufferSize) throws IOException {
+        Objects.requireNonNull(input, "Argument input must not be null");
+        Objects.requireNonNull(output, "Argument output must not be null");
         ByteBuffer buffer = ByteBuffer.allocateDirect(bufferSize);
         long count = 0;
         while (input.read(buffer) != -1) {
@@ -54,10 +59,11 @@ public class IOUtils {
 
     public static long copyStreams(InputStream input, OutputStream output) throws IOException {
         return copyStreams(input, output, DEFAULT_COPY_BUFFER_SIZE);
-
     }
 
     public static long copyStreams(InputStream input, OutputStream output, int bufferSize) throws IOException {
+        Objects.requireNonNull(input, "Argument input must not be null");
+        Objects.requireNonNull(output, "Argument output must not be null");
         byte[] buffer = new byte[bufferSize];
         long count = 0;
         int n;
@@ -69,6 +75,7 @@ public class IOUtils {
     }
 
     public static byte[] readToBuffer(InputStream input) throws IOException {
+        Objects.requireNonNull(input, "Argument input must not be null");
         try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             long count = copyStreams(input, baos);
             return baos.toByteArray();
@@ -76,6 +83,7 @@ public class IOUtils {
     }
 
     public static long consumeStream(InputStream input) throws IOException {
+        Objects.requireNonNull(input, "Argument input must not be null");
         byte[] buffer = new byte[DEFAULT_COPY_BUFFER_SIZE];
         long count = 0;
         int n;
@@ -91,5 +99,19 @@ public class IOUtils {
 
     public static String readToString(InputStream in, String charset) throws IOException {
         return new String(readToBuffer(in), charset);
+    }
+
+
+    public static  void closeCollectionElements(Collection<? extends AutoCloseable> collection) {
+        Objects.requireNonNull(collection, "Argument collection must not be null");
+        collection.forEach(worksheet -> {
+            if (worksheet != null) {
+                try {
+                    worksheet.close();
+                } catch (Exception e) {
+                    logger.warn("An error occurred while closing element" + worksheet + " in collection " + collection);
+                }
+            }
+        });
     }
 }
