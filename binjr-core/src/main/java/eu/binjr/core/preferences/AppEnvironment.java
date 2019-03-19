@@ -37,6 +37,7 @@ import java.util.jar.Manifest;
  * Provides access to the application's environmental properties
  */
 public class AppEnvironment {
+    public static final String APP_NAME = "binjr";
     public static final String HTTP_GITHUB_REPO = "https://github.com/binjr/binjr";
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://github.com/binjr/binjr/wiki";
@@ -66,8 +67,7 @@ public class AppEnvironment {
             if (newValue) {
                 ConsoleStage.show();
                 logger.warn("Entering debug console");
-            }
-            else {
+            } else {
                 logger.info("Leaving debug console");
                 ConsoleStage.hide();
             }
@@ -158,7 +158,7 @@ public class AppEnvironment {
      * @return a short description for the application.
      */
     public String getAppDescription() {
-        return "binjr v" + getVersion() + " (build #" + getBuildNumber() + ")";
+        return AppEnvironment.APP_NAME + " v" + getVersion() + " (build #" + getBuildNumber() + ")";
     }
 
     /**
@@ -264,14 +264,29 @@ public class AppEnvironment {
         return logLevel;
     }
 
+    /**
+     * Returns true if modal dialogs should be resizable, false otherwise.
+     *
+     * @return true if modal dialogs should be resizable, false otherwise.
+     */
     public boolean isResizableDialogs() {
         return resizableDialogs.getValue();
     }
 
+    /**
+     * The resizableDialogs property.
+     *
+     * @return the resizableDialogs property.
+     */
     public BooleanProperty resizableDialogsProperty() {
         return resizableDialogs;
     }
 
+    /**
+     * Set to true if modal dialogs should be resizable, false otherwise.
+     *
+     * @param value true if modal dialogs should be resizable, false otherwise.
+     */
     public void setResizableDialogs(boolean value) {
         resizableDialogs.setValue(value);
     }

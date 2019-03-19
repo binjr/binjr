@@ -27,4 +27,4 @@
 * _[Fixed]_ A memory leak that occurs when adding, moving or changing the type of a chart in an existing worksheet.
 * _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis causes a worksheet to become.
 * _[Fixed]_ Keyboard shortcuts do no work on detached tab windows.
-* _[Fixed]_ Dialog boxes are sometime drawn with a null width and heigth on some Linux/KDE platforms.
+* _[Fixed]_ Dialog boxes are sometime drawn with a null width and height on some Linux/KDE platforms.

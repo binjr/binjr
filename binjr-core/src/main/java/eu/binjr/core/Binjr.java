@@ -52,12 +52,12 @@ public class Binjr extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         processCommandLineOptions(getParameters());
-        logger.info(() -> "Starting binjr");
+        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
         Parent root = loader.load();
         MainViewController mainViewController = loader.getController();
         mainViewController.setAssociatedFile(getAssociatedWorkspace(getParameters()));
-        primaryStage.setTitle("binjr");
+        primaryStage.setTitle(AppEnvironment.APP_NAME);
         StageAppearanceManager.getInstance().register(primaryStage);
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             primaryStage.setScene(new Scene(root));

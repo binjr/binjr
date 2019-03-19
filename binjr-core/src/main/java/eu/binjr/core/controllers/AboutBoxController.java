@@ -150,7 +150,7 @@ public class AboutBoxController implements Initializable {
                     });
                     versionCheckFlow.getChildren().add(latestReleaseLink);
                 },
-                version -> l.setText("binjr is up to date"),
+                version -> l.setText(AppEnvironment.APP_NAME + " is up to date"),
                 () -> versionCheckFlow.getChildren().clear());
         sysInfoListTable.getItems().addAll(AppEnvironment.getInstance().getSysInfoProperties());
         versionLabel.setText("version " + AppEnvironment.getInstance().getVersion());

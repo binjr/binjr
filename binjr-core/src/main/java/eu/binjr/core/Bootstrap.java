@@ -47,7 +47,7 @@ public final class Bootstrap {
             }
             Binjr.main(args);
         } catch (Exception e) {
-            logger.fatal("Failed to load binjr", e);
+            logger.fatal("Failed to load "+ AppEnvironment.APP_NAME, e);
             System.exit(1);
         }
     }

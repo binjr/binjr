@@ -135,7 +135,8 @@ public class MainViewController implements Initializable {
     private Timeline showTimeline;
     private Timeline hideTimeline;
     private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
-    private Property<TimeRangePicker.TimeRange> linkedTimeRange = new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
+    private Property<TimeRangePicker.TimeRange> linkedTimeRange =
+            new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     private MenuItem refreshMenuItem;
@@ -211,7 +212,7 @@ public class MainViewController implements Initializable {
         worksheetTabPane.setTearable(true);
         worksheetTabPane.setOnOpenNewWindow(event -> {
             Stage stage = (Stage) event.getSource();
-            stage.setTitle("binjr");
+            stage.setTitle(AppEnvironment.APP_NAME);
             registerStageKeyEvents(stage);
             StageAppearanceManager.getInstance().register(stage);
         });
@@ -260,9 +261,14 @@ public class MainViewController implements Initializable {
         GlobalPreferences prefs = GlobalPreferences.getInstance();
         Stage stage = Dialogs.getStage(root);
         stage.titleProperty().bind(Bindings.createStringBinding(
-                () -> String.format("%s%s - binjr", (workspace.isDirty() ? "*" : ""), workspace.pathProperty().getValue().toString()),
+                () -> String.format("%s%s - %s",
+                        (workspace.isDirty() ? "*" : ""),
+                        workspace.pathProperty().getValue().toString(),
+                        AppEnvironment.APP_NAME
+                ),
                 workspace.pathProperty(),
-                workspace.dirtyProperty()));
+                workspace.dirtyProperty())
+        );
 
         stage.setOnCloseRequest(event -> {
             if (!confirmAndClearWorkspace()) {
@@ -295,32 +301,32 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void registerStageKeyEvents(Stage stage){
+    private void registerStageKeyEvents(Stage stage) {
         BindingManager manager = new BindingManager();
         stage.setUserData(manager);
         stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
-            if (e.getCode() == KeyCode.B && e.isControlDown()){
+            if (e.getCode() == KeyCode.B && e.isControlDown()) {
                 handleToggleChartLegendVisibility();
             }
-            if (e.getCode() == KeyCode.P && e.isControlDown()){
+            if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 handleDisplayChartProperties(null);
             }
         }));
-        stage.addEventFilter(KeyEvent.KEY_PRESSED,  manager.registerHandler(e -> handleControlKey(e, true)));
-        stage.addEventFilter(KeyEvent.KEY_RELEASED,  manager.registerHandler(e -> handleControlKey(e, false)));
-        manager.attachListener(stage.focusedProperty(),(observable, oldValue, newValue) -> {
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));
+        stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> handleControlKey(e, false)));
+        manager.attachListener(stage.focusedProperty(), (observable, oldValue, newValue) -> {
             //main stage lost focus -> invalidates shift or ctrl pressed
             GlobalPreferences.getInstance().setShiftPressed(false);
             GlobalPreferences.getInstance().setCtrlPressed(false);
         });
     }
 
-    private void unregisterStageKeyEvents(Stage stage){
-        BindingManager manager = (BindingManager)stage.getUserData();
-        if (manager != null){
+    private void unregisterStageKeyEvents(Stage stage) {
+        BindingManager manager = (BindingManager) stage.getUserData();
+        if (manager != null) {
             manager.close();
         }
     }
@@ -330,7 +336,7 @@ public class MainViewController implements Initializable {
     protected void handleAboutAction(ActionEvent event) throws IOException {
         Dialog<String> dialog = new Dialog<>();
         dialog.initStyle(StageStyle.DECORATED);
-        dialog.setTitle("About binjr");
+        dialog.setTitle("About " + AppEnvironment.APP_NAME);
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/eu/binjr/views/AboutBoxView.fxml")));
         dialog.initOwner(Dialogs.getStage(root));
         dialog.showAndWait();
@@ -477,7 +483,10 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
+    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory,
+                                        String text, String tooltipMsg,
+                                        String[] styleClass,
+                                        String[] iconStyleClass) {
         ButtonBase btn = btnFactory.get();
         btn.setText(text);
         btn.setPrefHeight(TOOL_BUTTON_SIZE);
@@ -502,8 +511,10 @@ public class MainViewController implements Initializable {
         source.getBindingManager().bind(label.textProperty(), source.nameProperty());
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
-        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
-        titleRegion.getColumnConstraints().add(new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+        titleRegion.getColumnConstraints().add(
+                new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+        titleRegion.getColumnConstraints().add(
+                new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
         source.getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
         source.getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
 
@@ -511,10 +522,15 @@ public class MainViewController implements Initializable {
         HBox toolbar = new HBox();
         toolbar.getStyleClass().add("title-pane-tool-bar");
         toolbar.setAlignment(Pos.CENTER);
-        Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Close the connection to this source.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
+        Button closeButton = (Button) newToolBarButton(Button::new,
+                "Close", "Close the connection to this source.",
+                new String[]{"exit"},
+                new String[]{"trash-icon", "small-icon"}
+        );
         closeButton.setOnAction(event -> {
             if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
-                    "WARNING: This will remove all associated series from existing worksheets.", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                    "WARNING: This will remove all associated series from existing worksheets.",
+                    ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 sourcesPane.getPanes().remove(newPane);
             }
         });
@@ -527,14 +543,16 @@ public class MainViewController implements Initializable {
         newPane.setGraphic(titleRegion);
         newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
         newPane.setAnimated(false);
-        source.getBindingManager().attachListener(newPane.expandedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-            if (!newValue) {
-                source.setEditable(false);
-            }
-        });
+        source.getBindingManager().attachListener(newPane.expandedProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (!newValue) {
+                        source.setEditable(false);
+                    }
+                });
 
         HBox editFieldsGroup = new HBox();
-        DoubleBinding db = Bindings.createDoubleBinding(() -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
+        DoubleBinding db = Bindings.createDoubleBinding(
+                () -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
         source.getBindingManager().bind(editFieldsGroup.prefHeightProperty(), db);
         source.getBindingManager().bind(editFieldsGroup.maxHeightProperty(), db);
         source.getBindingManager().bind(editFieldsGroup.minHeightProperty(), db);
@@ -545,7 +563,11 @@ public class MainViewController implements Initializable {
         editFieldsGroup.getChildren().add(sourceNameField);
 
 
-        ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+        ToggleButton editButton = (ToggleButton) newToolBarButton(
+                ToggleButton::new,
+                "Settings", "Edit the chart's settings",
+                new String[]{"dialog-button"},
+                new String[]{"settings-icon", "small-icon"});
         source.getBindingManager().bindBidirectional(editButton.selectedProperty(), source.editableProperty());
         editButton.setOnAction(event -> newPane.setExpanded(true));
 
@@ -599,7 +621,10 @@ public class MainViewController implements Initializable {
         Duration duration = Duration.millis(ANIMATION_DURATION);
         KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, EXPANDED_WIDTH));
         showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(() -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH), Duration.millis(50)).submit());
+        showTimeline.setOnFinished(event -> new DelayedAction(
+                () -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH),
+                Duration.millis(50)).submit()
+        );
         showTimeline.play();
         commandBar.setExpanded(true);
     }
@@ -653,7 +678,8 @@ public class MainViewController implements Initializable {
         // Make sure that main stage is visible before invoking modal dialog, else modal dialog may appear
         // behind main stage when made visible again.
         Dialogs.getStage(root).setIconified(false);
-        ButtonType res = Dialogs.confirmSaveDialog(root, (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
+        ButtonType res = Dialogs.confirmSaveDialog(root,
+                (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
         if (res == ButtonType.CANCEL) {
             return false;
         }
@@ -713,7 +739,8 @@ public class MainViewController implements Initializable {
                         loadWorksheets((Workspace) event.getSource().getValue());
                     }, event -> {
                         sourceMaskerPane.setVisible(false);
-                        Dialogs.notifyException("An error occurred while loading workspace from file " + (file != null ? file.getName() : "null"),
+                        Dialogs.notifyException("An error occurred while loading workspace from file " +
+                                        (file != null ? file.getName() : "null"),
                                 event.getSource().getException(),
                                 root);
                     });
@@ -779,7 +806,8 @@ public class MainViewController implements Initializable {
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
-                        Optional<TreeView<TimeSeriesBinding>> treeView = (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
+                        Optional<TreeView<TimeSeriesBinding>> treeView =
+                                (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
                         if (treeView.isPresent()) {
                             newSourcePane.setContent(treeView.get());
                             sourcesAdapters.put(newSourcePane, newSource);
@@ -789,7 +817,9 @@ public class MainViewController implements Initializable {
                     },
                     event -> {
                         sourceMaskerPane.setVisible(false);
-                        Dialogs.notifyException("Unexpected error getting data adapter:", event.getSource().getException(), root);
+                        Dialogs.notifyException("Unexpected error getting data adapter:",
+                                event.getSource().getException(),
+                                root);
                     });
         });
     }
@@ -845,7 +875,8 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            WorksheetController current = new WorksheetController(this, worksheet, sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
+            WorksheetController current = new WorksheetController(this, worksheet,
+                    sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
@@ -1184,7 +1215,11 @@ public class MainViewController implements Initializable {
                 }));
             }
         }
-        logger.debug(() -> "Worksheets in current workspace: " + StreamSupport.stream(workspace.getWorksheets().spliterator(), false).map(Worksheet::getName).reduce((s, s2) -> s + " " + s2).orElse("null"));
+        logger.debug(() -> "Worksheets in current workspace: " +
+                StreamSupport.stream(workspace.getWorksheets().spliterator(), false)
+                        .map(Worksheet::getName)
+                        .reduce((s, s2) -> s + " " + s2)
+                        .orElse("null"));
     }
 
     private void onSourceTabChanged(ListChangeListener.Change<? extends TitledPane> c) {
@@ -1246,7 +1281,9 @@ public class MainViewController implements Initializable {
     private void onAvailableUpdate(GithubRelease githubRelease) {
         Notifications n = Notifications.create()
                 .title("New release available!")
-                .text("You are currently running binjr version " + AppEnvironment.getInstance().getVersion() + "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
+                .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
+                        AppEnvironment.getInstance().getVersion() +
+                        "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
