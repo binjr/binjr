@@ -50,6 +50,7 @@ public class AppEnvironment {
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
+    private final BooleanProperty disableUpdateCheck = new SimpleBooleanProperty(false);
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -298,6 +299,34 @@ public class AppEnvironment {
      */
     public void setLogLevel(Level logLevel) {
         this.logLevel.setValue(logLevel);
+    }
+
+    /**
+     * <p>Set to true to prevent binjr from checking for update</p>
+     * <p><b>Remark:</b> This setting overrides the user preference to check for updates.</p>
+     *
+     * @param disableUpdateCheck true to prevent binjr from checking for update
+     */
+    public void setDisableUpdateCheck(Boolean disableUpdateCheck) {
+        this.disableUpdateCheck.setValue(disableUpdateCheck);
+    }
+
+    /**
+     * Returns he disableUpdateCheck property.
+     *
+     * @return The disableUpdateCheck property.
+     */
+    public BooleanProperty disableUpdateCheckProperty() {
+        return disableUpdateCheck;
+    }
+
+    /**
+     * Returns true if binjr is prevented from checking for update, false otherwise.
+     *
+     * @return true if binjr is prevented from checking for update, false otherwise.
+     */
+    public Boolean isDisableUpdateCheck() {
+        return disableUpdateCheck.getValue();
     }
 
     private String getHeapStats() {

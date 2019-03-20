@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -108,36 +108,46 @@ public class UpdateManager {
     }
 
     private void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure, boolean forceCheck) {
-        if (forceCheck || LocalDateTime.now().minus(1, ChronoUnit.HOURS).isAfter(getLastCheckForUpdate())) {
-            setLastCheckForUpdate(LocalDateTime.now());
-            Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
-                @Override
-                protected Optional<GithubRelease> call() throws Exception {
-                    logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                    return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
-                }
-            };
-            getLatestTask.setOnSucceeded(workerStateEvent -> {
-                logger.trace("UI update running on " + Thread.currentThread().getName());
-                Optional<GithubRelease> latest = getLatestTask.getValue();
-                Version current = AppEnvironment.getInstance().getVersion();
-                if (latest.isPresent()) {
-                    newReleaseAvailable.accept(latest.get());
-                } else {
-                    if (upToDate != null) {
-                        upToDate.accept(current);
-                    }
-                }
-            });
-            getLatestTask.setOnFailed(workerStateEvent -> {
-                logger.error("Error while checking for update", getLatestTask.getException());
-                if (onFailure != null) {
-                    onFailure.run();
-                }
-            });
-            AsyncTaskManager.getInstance().submit(getLatestTask);
-        } else {
-            logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
+        if (AppEnvironment.getInstance().isDisableUpdateCheck()) {
+            logger.trace(() -> "Update check is explicitly disabled.");
+            if (onFailure != null) {
+                onFailure.run();
+            }
+            return;
         }
+        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(getLastCheckForUpdate())) {
+            logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
+            if (onFailure != null) {
+                onFailure.run();
+            }
+            return;
+        }
+        setLastCheckForUpdate(LocalDateTime.now());
+        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
+            @Override
+            protected Optional<GithubRelease> call() throws Exception {
+                logger.trace("getNewRelease running on " + Thread.currentThread().getName());
+                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
+            }
+        };
+        getLatestTask.setOnSucceeded(workerStateEvent -> {
+            logger.trace("UI update running on " + Thread.currentThread().getName());
+            Optional<GithubRelease> latest = getLatestTask.getValue();
+            Version current = AppEnvironment.getInstance().getVersion();
+            if (latest.isPresent()) {
+                newReleaseAvailable.accept(latest.get());
+            } else {
+                if (upToDate != null) {
+                    upToDate.accept(current);
+                }
+            }
+        });
+        getLatestTask.setOnFailed(workerStateEvent -> {
+            logger.error("Error while checking for update", getLatestTask.getException());
+            if (onFailure != null) {
+                onFailure.run();
+            }
+        });
+        AsyncTaskManager.getInstance().submit(getLatestTask);
     }
 }

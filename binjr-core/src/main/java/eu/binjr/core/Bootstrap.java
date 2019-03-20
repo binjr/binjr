@@ -40,21 +40,21 @@ public final class Bootstrap {
      */
     public static void main(String[] args) {
         try {
-            if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX){
+            if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX) {
                 // Force openJfx to fall back to gtk 2 to workaround issue with Wayland
-                System.setProperty("jdk.gtk.version","2");
-                args = appendToArray(args,"--dialogs.resizable=true");
+                System.setProperty("jdk.gtk.version", "2");
+                args = appendToArray(args, "--resizable-dialogs=true");
             }
             Binjr.main(args);
         } catch (Exception e) {
-            logger.fatal("Failed to load "+ AppEnvironment.APP_NAME, e);
+            logger.fatal("Failed to load " + AppEnvironment.APP_NAME, e);
             System.exit(1);
         }
     }
 
     @SafeVarargs
     private static <T> T[] appendToArray(T[] array, T... elements) {
-        T[] newArray = Arrays.copyOf(array, array.length +  elements.length);
+        T[] newArray = Arrays.copyOf(array, array.length + elements.length);
         System.arraycopy(elements, 0, newArray, array.length, elements.length);
         return newArray;
     }

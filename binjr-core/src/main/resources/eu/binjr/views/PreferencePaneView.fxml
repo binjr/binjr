@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2018 Frederic Thevenet
+  ~    Copyright 2017-2019 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -247,7 +247,7 @@
                         </ScrollPane>
                     </content>
                 </TitledPane>
-                <TitledPane animated="false" text="Updates">
+                <TitledPane fx:id="updatePreferences" animated="false" text="Updates">
                     <content>
                         <ScrollPane fitToHeight="true" fitToWidth="true">
                             <content>

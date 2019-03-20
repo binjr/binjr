@@ -20,6 +20,7 @@ import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.dialogs.UserInterfaceThemes;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.NotificationDurationChoices;
 import eu.binjr.core.preferences.UpdateManager;
@@ -68,6 +69,8 @@ public class PreferenceDialogController implements Initializable {
     public TableView<DataAdapterInfo> availableAdapterTable;
     public TableColumn<DataAdapterInfo, Boolean> enabledColumn;
     public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+    @FXML
+    public TitledPane updatePreferences;
     @FXML
     private ToggleSwitch loadExternalToggle;
 
@@ -177,6 +180,7 @@ public class PreferenceDialogController implements Initializable {
         });
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
+        updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().disableUpdateCheckProperty()));
     }
 
     public void handleCheckForUpdate(ActionEvent actionEvent) {
