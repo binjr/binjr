@@ -174,7 +174,6 @@ public class AboutBoxController implements Initializable {
                 licText.setText(s + "\n");
                 licText.setFill(Color.valueOf("#204656"));
                 textFlow.getChildren().add(licText);
-
             });
             textFlow.setTextAlignment(TextAlignment.LEFT);
         } catch (IOException e) {

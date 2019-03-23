@@ -64,13 +64,14 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
-ext.ARCHIVE_PATH = ""
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 System.out.println("Building version: ${BINJR_VERSION}")
+System.out.println("Is tag:${System.getenv('IS_TAG')}")
+System.out.println("Tag name:${System.getenv('REPO_TAG_NAME')}")
 
 if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
@@ -312,7 +313,7 @@ task downloadAndUnzipFile(dependsOn: downloadopenJfxJmods, type: Copy) {
 task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     workingDir project.projectDir
     commandLine = [
-            'jlink',
+            "${JDK_HOME}/bin/jlink",
             '-p', "${JDK_HOME}/jmods${File.pathSeparator}${buildDir}/javafx-jmods-${OPENJFX_VERSION}",
             '--add-modules', JLINK_ADD_MODULES,
             '--strip-debug',
@@ -344,10 +345,8 @@ task packageDistributionTar(type: Tar) {
 task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(packageDistributionZip)
-        ARCHIVE_PATH = "$buildDir/${packageDistributionZip.archiveName}"
     } else {
         finalizedBy(packageDistributionTar)
-        ARCHIVE_PATH = "$buildDir/${packageDistributionTar.archiveName}"
     }
 }
 

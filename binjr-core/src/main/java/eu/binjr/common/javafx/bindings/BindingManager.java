@@ -56,7 +56,8 @@ public class BindingManager implements AutoCloseable {
      *
      * @param property the {@link Property} to bind
      * @param binding  the {@link ObservableValue} to bind to the {@link Property}
-     * @param <T>      the type common to both {@link Property} and {@link ObservableValue}
+     * @param <T>      the type of {@link Property}
+     * @param <U>      the type of {@link ObservableValue}
      */
     public <T, U extends T> void bind(Property<T> property, ObservableValue<U> binding) {
         Objects.requireNonNull(property, "property parameter cannot be null");
@@ -197,7 +198,7 @@ public class BindingManager implements AutoCloseable {
             // Release strong refs to registered event handlers, so that their
             // weak counterpart may be collected.
             registeredHandlers.clear();
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.warn("An error occuured while closing BindingManager instance", e);
         }
     }
@@ -206,15 +207,15 @@ public class BindingManager implements AutoCloseable {
         visitMap(listChangeListeners, ObservableList::removeListener);
         visitMap(invalidationListeners, ObservableValue::removeListener);
         visitMap(changeListeners, ObservableValue::removeListener);
-            boundProperties.keySet().forEach(Property::unbind);
-        }
+        boundProperties.keySet().forEach(Property::unbind);
+    }
 
     public synchronized void resume() {
         visitMap(listChangeListeners, ObservableList::addListener);
         visitMap(invalidationListeners, ObservableValue::addListener);
         visitMap(changeListeners, ObservableValue::addListener);
-            boundProperties.forEach(Property::bind);
-        }
+        boundProperties.forEach(Property::bind);
+    }
 
     public <T extends Event> WeakEventHandler<T> registerHandler(EventHandler<T> handler) {
         // Store strong ref to handler, so it doesn't get collected prematurely.
@@ -267,21 +268,21 @@ public class BindingManager implements AutoCloseable {
     private <T, U> void unregisterAll(Map<T, List<U>> map, BiConsumer<T, U> unregisterAction) {
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(unregisterAction, "unregisterAction parameter cannot be null");
-            map.forEach((k, vList) -> {
-                vList.forEach(v -> {
-                    logger.trace(() -> "Unregistering " + v.toString() + " from " + k.toString());
-                    unregisterAction.accept(k, v);
-                });
+        map.forEach((k, vList) -> {
+            vList.forEach(v -> {
+                logger.trace(() -> "Unregistering " + v.toString() + " from " + k.toString());
+                unregisterAction.accept(k, v);
             });
+        });
         map.clear();
     }
 
     private <T, U> void visitMap(Map<T, List<U>> map, BiConsumer<T, U> action) {
         Objects.requireNonNull(map, "map parameter cannot be null");
         Objects.requireNonNull(action, "action parameter cannot be null");
-            map.forEach((observable, listeners) -> listeners.forEach(listener -> {
-                logger.trace(() -> "visiting key " + listener.toString() + " value " + observable.toString());
-                action.accept(observable, listener);
-            }));
+        map.forEach((observable, listeners) -> listeners.forEach(listener -> {
+            logger.trace(() -> "visiting key " + listener.toString() + " value " + observable.toString());
+            action.accept(observable, listener);
+        }));
     }
 }

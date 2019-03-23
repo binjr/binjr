@@ -1,0 +1,66 @@
+trigger:
+  branches:
+    include:
+      - master
+  tags:
+    include:
+      - v*
+
+variables:
+  system.debug: true
+
+jobs:
+  # Linux app bundle job
+  - template: build-job.yml
+    parameters:
+      name: app_bundle_linux
+      platform: linux
+      pool:
+        vmImage: 'ubuntu-16.04'
+
+  # MacOS app bundle job
+  - template: build-job.yml
+    parameters:
+      name: app_bundle_mac
+      platform: mac
+      pool:
+        vmImage: 'macOS-10.13'
+
+  # Windows app bundle job
+  - template: build-job.yml
+    parameters:
+      name: app_bundle_windows
+      platform: win
+      pool:
+        vmImage: 'windows-2019'
+
+  # Publish to Maven repo
+  - job: maven_publish
+    dependsOn:
+    - app_bundle_linux
+    - app_bundle_windows
+    - app_bundle_mac
+    condition: succeeded()
+    pool:
+      vmImage: 'ubuntu-16.04'
+    steps:
+      - script: |
+          echo '##vso[task.setvariable variable=isTag;]true'
+        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+      - script: |
+          gpg --fast-import ./distribution/publishing/codesigning.asc
+      - task: Gradle@2
+        env:
+          IS_TAG: $(isTag)
+          REPO_TAG_NAME: $(Build.SourceBranchName)
+          GPG_KEY_NAME: $(gpg.keyname)
+          GPG_PASSPHRASE: $(gpg.passphrase)
+          OSSRH_JIRA_PASSWORD: $(ossrh.password)
+          OSSRH_JIRA_USERNAME: $(ossrh.username)
+        inputs:
+          gradleWrapperFile: 'gradlew'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.11'
+          jdkArchitectureOption: 'x64'
+          publishJUnitResults: false
+          tasks: 'publishArtifacts '
