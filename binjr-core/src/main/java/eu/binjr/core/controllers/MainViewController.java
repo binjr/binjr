@@ -512,9 +512,9 @@ public class MainViewController implements Initializable {
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
         titleRegion.getColumnConstraints().add(
-                new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+                new ColumnConstraints(45, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
         titleRegion.getColumnConstraints().add(
-                new ColumnConstraints(20, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+                new ColumnConstraints(45, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
         source.getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
         source.getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
 
