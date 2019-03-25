@@ -21,6 +21,8 @@ import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.PrefixFormatter;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableView;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +45,7 @@ public class ChartViewPort implements Closeable {
     private final TableView<TimeSeriesInfo> seriesTable;
     private static final Logger logger = LogManager.getLogger(ChartViewPort.class);
     private final AtomicBoolean closing = new AtomicBoolean(false);
+    private final BooleanProperty selected = new SimpleBooleanProperty(false);
 
     /**
      * Initializes a new instance of the {@link ChartViewPort} class.

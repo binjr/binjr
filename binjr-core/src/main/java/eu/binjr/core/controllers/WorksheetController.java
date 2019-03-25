@@ -265,8 +265,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     xAxis = defaultXAxis;
                     break;
                 case STACKED:
-                    xAxis = buildTimeAxis();
-                    break;
                 default:
                     xAxis = buildTimeAxis();
                     break;
@@ -280,6 +278,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);
             yAxis.setTickSpacing(30);
+
             bindingManager.bind(yAxis.labelProperty(),
                     Bindings.createStringBinding(
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
@@ -311,7 +310,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
         }
-
         bindingManager.bind(selectChartLayout.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
         selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
             MenuItem item = new MenuItem(chartLayout.toString());
@@ -384,6 +382,35 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
                         globalPrefs.ctrlPressedProperty()));
+        if (viewPorts.size() > 1) {
+            ChangeListener<Integer> changeListener = (observable, oldValue, newValue) -> {
+                var previousChart = viewPorts.get(oldValue);
+                if (previousChart != null) {
+
+                    previousChart.getChart()//.getYAxis().setStyle(" -fx-border-width:"+ (oldValue > 0 ? "0 4 0 0" : "0 0 0 4") +"; -fx-border-color: transparent;");
+                            .getYAxis()
+                            .getChildrenUnmodifiable()
+                            .stream()
+                            .filter(node -> node.getStyleClass().contains("axis-label"))
+                            .findFirst().ifPresent(n -> n.setStyle(" -fx-border-width:" +
+                            (oldValue == 0 ? "4 0 0 0" : "0 0 4 0")
+                            + "; -fx-border-color: transparent;"));
+                }
+                var selectedChart = viewPorts.get(newValue);
+                if (selectedChart != null) {
+                    selectedChart.getChart()//.getYAxis().setStyle("-fx-border-width: "+ (newValue> 0 ? "0 4 0 0" : "0 0 0 4") +"; -fx-border-color: -fx-accent;");
+                            .getYAxis()
+                            .getChildrenUnmodifiable()
+                            .stream()
+                            .filter(node -> node.getStyleClass().contains("axis-label"))
+                            .findFirst().ifPresent(n -> n.setStyle("-fx-border-width: " +
+                            (newValue == 0 ? "4 0 0 0" : "0 0 4 0")
+                            + "; -fx-border-color: -fx-accent;"));
+                }
+            };
+            bindingManager.attachListener(getWorksheet().selectedChartProperty(), changeListener);
+            changeListener.changed(getWorksheet().selectedChartProperty(), 0, getWorksheet().getSelectedChart());
+        }
     }
 
     private void setupStackedChartLayout() {
@@ -451,6 +478,37 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                     globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
                             globalPrefs.ctrlPressedProperty()));
+        }
+        if (viewPorts.size() > 1) {
+            ChangeListener<Integer> changeListener = (observable, oldValue, newValue) -> {
+                var previousChart = viewPorts.get(oldValue);
+                if (previousChart != null) {
+
+                    previousChart.getChart()//.getYAxis().setStyle(" -fx-border-width:"+ (oldValue > 0 ? "0 4 0 0" : "0 0 0 4") +"; -fx-border-color: transparent;");
+                            .getYAxis()
+                            .getChildrenUnmodifiable()
+                            .stream()
+                            .filter(node -> node.getStyleClass().contains("axis-label"))
+                            .findFirst().ifPresent(n -> n.setStyle(" -fx-border-width:" +
+                            //(oldValue == 0 ? "4 0 0 0" : "0 0 4 0")
+                            "4 0 0 0"
+                            + "; -fx-border-color: transparent;"));
+                }
+                var selectedChart = viewPorts.get(newValue);
+                if (selectedChart != null) {
+                    selectedChart.getChart()//.getYAxis().setStyle("-fx-border-width: "+ (newValue> 0 ? "0 4 0 0" : "0 0 0 4") +"; -fx-border-color: -fx-accent;");
+                            .getYAxis()
+                            .getChildrenUnmodifiable()
+                            .stream()
+                            .filter(node -> node.getStyleClass().contains("axis-label"))
+                            .findFirst().ifPresent(n -> n.setStyle("-fx-border-width: " +
+                            // (oldValue == 0 ? "4 0 0 0" : "0 0 4 0")
+                            "4 0 0 0"
+                            + "; -fx-border-color: -fx-accent;"));
+                }
+            };
+            bindingManager.attachListener(getWorksheet().selectedChartProperty(), changeListener);
+            changeListener.changed(getWorksheet().selectedChartProperty(), 0, getWorksheet().getSelectedChart());
         }
     }
 
@@ -621,19 +679,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     }, crossHair.currentXValueProperty()));
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
-
-
             currentViewPort.getSeriesTable().setOnKeyReleased(bindingManager.registerHandler(event -> {
                 if (event.getCode().equals(KeyCode.DELETE)) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
             }));
 
-//           currentViewPort.getSeriesTable().setOnKeyReleased, event -> {
-//                if (event.getCode().equals(KeyCode.DELETE)) {
-//                    removeSelectedBinding(currentViewPort.getSeriesTable());
-//                }
-//            });
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());

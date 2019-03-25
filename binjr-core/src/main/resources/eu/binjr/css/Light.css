@@ -339,7 +339,7 @@
 }
 
  .skinnable-pane-border {
-   -fx-border-color: red;/*  -binjr-window-background-color;*/
+   -fx-border-color: -fx-accent;/*  -binjr-window-background-color;*/
    -fx-border-width:0;
    -fx-padding: -1;
  }
