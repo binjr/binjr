@@ -681,7 +681,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             HBox toolbar = new HBox();
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
-            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"trash-icon", "small-icon"});
+            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
             closeButton.setOnAction(bindingManager.registerHandler(event -> {
                 if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
                         "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
@@ -689,7 +689,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             }));
             bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
-            bindingManager.bind(closeButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
 
             ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
             editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
@@ -726,7 +725,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 worksheet.getCharts().add(idx + 1, currentViewPort.getDataStore());
             }));
 
-            toolbar.getChildren().addAll(moveUpButton, moveDownButton, closeButton, editButton);
+            toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
             titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
             HBox hBox = new HBox();
             hBox.setAlignment(Pos.CENTER);
@@ -1188,7 +1187,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    public void toggleChartLegendVisibility(){
+    public void toggleChartLegendVisibility() {
         ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));

@@ -525,7 +525,7 @@ public class MainViewController implements Initializable {
         Button closeButton = (Button) newToolBarButton(Button::new,
                 "Close", "Close the connection to this source.",
                 new String[]{"exit"},
-                new String[]{"trash-icon", "small-icon"}
+                new String[]{"cross-icon", "small-icon"}
         );
         closeButton.setOnAction(event -> {
             if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
@@ -534,7 +534,6 @@ public class MainViewController implements Initializable {
                 sourcesPane.getPanes().remove(newPane);
             }
         });
-        source.getBindingManager().bind(closeButton.visibleProperty(), source.editableProperty());
 
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
@@ -572,7 +571,7 @@ public class MainViewController implements Initializable {
         editButton.setOnAction(event -> newPane.setExpanded(true));
 
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
-        toolbar.getChildren().addAll(closeButton, editButton);
+        toolbar.getChildren().addAll(editButton, closeButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
 
         titleRegion.setOnMouseClicked(event -> {
