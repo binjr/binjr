@@ -385,16 +385,9 @@
     -fx-border-width:1;
     -fx-border-color: -binjr-icon-background-color;
  }
-
- .chart,
- .chart-plot-background{
-    -fx-background-color: transparent;
-    -fx-border-width:0;
- }
   .axis {
     AXIS_COLOR: -binjr-control-border-color;
   }
-
 
  .chart-horizontal-grid-lines,
  .chart-vertical-grid-lines,

@@ -27,7 +27,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.Side;
 import javafx.scene.chart.ValueAxis;
+import javafx.scene.layout.Region;
 import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
 
@@ -47,6 +49,8 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     private static final int NUM_MINOR_TICKS = 3;
     public static final int BTN_WITDTH = 21;
 
+    private final BooleanProperty selected = new SimpleBooleanProperty(false);
+    private final Region selectionMarker = new Region();
     private final Timeline animationTimeline = new Timeline();
     private final WritableValue<Double> scaleValue = new WritableValue<>() {
         @Override
@@ -83,6 +87,10 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     public StableTicksAxis(PrefixFormatter prefixFormatter) {
         super();
         getStyleClass().setAll("axis");
+
+        selectionMarker.getStyleClass().add("selection-marker");
+        selectionMarker.visibleProperty().bind(selectedProperty());
+        this.getChildren().add(selectionMarker);
 
         this.axisTickFormatter = new AxisTickFormatter() {
             @Override
@@ -166,6 +174,27 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
      */
     public void setForceZeroInRange(boolean forceZeroInRange) {
         this.forceZeroInRange.set(forceZeroInRange);
+    }
+
+    @Override
+    protected void layoutChildren() {
+        super.layoutChildren();
+        Side side = getSide();
+        if (side.isVertical()) {
+            double contentX = this.getLayoutX();
+            double contentY = this.getLayoutY();
+            double contentWidth = this.getWidth();
+            double contentHeight = this.getHeight();
+
+            this.selectionMarker.setPrefWidth(4.0);
+            this.selectionMarker.setPrefHeight(contentHeight);
+            double actualXpos = side == Side.LEFT ? -10 : contentWidth;
+            selectionMarker.resizeRelocate(
+                    snapPositionX(actualXpos),
+                    snapPositionY(0),
+                    snapSizeX(4.0),
+                    snapSizeY(contentHeight));
+        }
     }
 
     @Override
@@ -334,6 +363,18 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
      */
     public void setTickSpacing(double tickSpacing) {
         this.tickSpacing.set(tickSpacing);
+    }
+
+    public boolean isSelected() {
+        return selected.get();
+    }
+
+    public void setSelected(boolean value) {
+        selected.setValue(value);
+    }
+
+    public BooleanProperty selectedProperty() {
+        return selected;
     }
 
     private static class Range {

@@ -321,17 +321,11 @@
     -fx-border-color:-binjr-gray-border-color;
  }
 
- .chart,
- .chart-plot-background{
-    -fx-background-color: transparent;
-    -fx-border-width:0;
-   /*  -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;*/
-   /*    -fx-font-size: 10pt;*/
- }
 
-  .chart-viewport-parent {
-   -fx-background-color: white;
-  }
+.chart-viewport-parent {
+    -fx-background-color: white;
+}
+
 .binjr-content-view {
    /*-fx-border-color:  red;*/
    -fx-border-width:0;

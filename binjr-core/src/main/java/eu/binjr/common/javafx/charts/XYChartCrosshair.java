@@ -310,6 +310,7 @@ public class XYChartCrosshair<X, Y> {
             isSelecting.set(true);
             drawSelection();
         }
+
     }
 
     private void drawSelection() {

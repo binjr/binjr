@@ -28,14 +28,17 @@
     -fx-padding: 12,0,0,0;
 }
 
-.chart-content {
-    -fx-border-color: transparent;
-    -fx-border-width: 0 0 0 4;
-   -fx-padding: 10 10 10 -4;
+.selection-marker {
+     -fx-background-color: -fx-accent;
 }
 
-.axis-label {
-    -fx-border-color: transparent;
-    -fx-border-width: 4;
-    -fx-padding: 10;
-}
+/*
+.chart-content {
+  -fx-background-color: #FF000020;
+}*/
+ .chart,
+ .chart-plot-background{
+    -fx-background-color:  transparent;
+    -fx-border-width:0;
+ }
+
