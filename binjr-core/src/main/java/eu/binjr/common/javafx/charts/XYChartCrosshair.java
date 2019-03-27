@@ -74,6 +74,7 @@ public class XYChartCrosshair<X, Y> {
     private final XYChart<X, Y> masterChart;
     private final BooleanProperty isMouseOverChart = new SimpleBooleanProperty(false);
     private final BindingManager bindingManager = new BindingManager();
+    private final BooleanProperty displayFullHeightMarker = new SimpleBooleanProperty(false);
 
 
     /**
@@ -129,10 +130,10 @@ public class XYChartCrosshair<X, Y> {
         });
         masterChart.setOnMouseExited(bindingManager.registerHandler(event -> isMouseOverChart.set(false)));
         masterChart.setOnMouseEntered(bindingManager.registerHandler(event -> isMouseOverChart.set(true)));
-        bindingManager.bind( horizontalMarker.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind( yAxisLabel.visibleProperty(),horizontalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind( verticalMarker.visibleProperty(),verticalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind( xAxisLabel.visibleProperty(),verticalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind(horizontalMarker.visibleProperty(), horizontalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind(yAxisLabel.visibleProperty(), horizontalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind(verticalMarker.visibleProperty(), verticalMarkerVisible.and(isMouseOverChart));
+        bindingManager.bind(xAxisLabel.visibleProperty(), verticalMarkerVisible.and(isMouseOverChart));
     }
 
     /**
@@ -226,8 +227,20 @@ public class XYChartCrosshair<X, Y> {
         return currentXValue;
     }
 
-    public void dispose(){
-        logger.debug(()-> "Disposing XYChartCrossHair " + toString());
+    public boolean isDisplayFullHeightMarker() {
+        return displayFullHeightMarker.get();
+    }
+
+    public BooleanProperty displayFullHeightMarkerProperty() {
+        return displayFullHeightMarker;
+    }
+
+    public void setDisplayFullHeightMarker(boolean displayFullHeightMarker) {
+        this.displayFullHeightMarker.set(displayFullHeightMarker);
+    }
+
+    public void dispose() {
+        logger.debug(() -> "Disposing XYChartCrossHair " + toString());
         selectionDoneEvent = null;
         bindingManager.close();
     }
@@ -287,10 +300,15 @@ public class XYChartCrosshair<X, Y> {
         }
         verticalMarker.setStartX(mousePosition.getX() + 0.5);
         verticalMarker.setEndX(mousePosition.getX() + 0.5);
-        verticalMarker.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
-        verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
+        if (displayFullHeightMarker.getValue()) {
+            verticalMarker.setStartY(0);
+            verticalMarker.setEndY(parent.getHeight());
+        } else {
+            verticalMarker.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
+            verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
+        }
         xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
-        xAxisLabel.setLayoutX(Math.min(mousePosition.getX(), chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
+        xAxisLabel.setLayoutX(Math.min(mousePosition.getX() + 4, chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
         currentXValue.setValue(getValueFromXcoord(mousePosition.getX()));
         xAxisLabel.setText(xValuesFormatter.apply(currentXValue.getValue()));
     }
@@ -321,10 +339,11 @@ public class XYChartCrosshair<X, Y> {
             double height = horizontalMarker.getStartY() - selectionStart.getY();
             selection.setY(height < 0 ? horizontalMarker.getStartY() : selectionStart.getY());
             selection.setHeight(Math.abs(height));
-        } else {
+        }  else {
             selection.setY(verticalMarker.getStartY());
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
+
         if (verticalMarkerVisible.get()) {
             double width = verticalMarker.getStartX() - selectionStart.getX();
             selection.setX(width < 0 ? verticalMarker.getStartX() : selectionStart.getX());
@@ -333,6 +352,7 @@ public class XYChartCrosshair<X, Y> {
             selection.setX(horizontalMarker.getStartX());
             selection.setWidth(horizontalMarker.getEndX() - horizontalMarker.getStartX());
         }
+
     }
 
     private Label newAxisLabel() {

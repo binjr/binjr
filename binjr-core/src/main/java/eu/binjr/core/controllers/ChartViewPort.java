@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.charts.XYChartCrosshair;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.PrefixFormatter;
@@ -46,6 +47,7 @@ public class ChartViewPort implements Closeable {
     private static final Logger logger = LogManager.getLogger(ChartViewPort.class);
     private final AtomicBoolean closing = new AtomicBoolean(false);
     private final BooleanProperty selected = new SimpleBooleanProperty(false);
+    private XYChartCrosshair<ZonedDateTime, Double> crosshair;
 
     /**
      * Initializes a new instance of the {@link ChartViewPort} class.
@@ -132,7 +134,17 @@ public class ChartViewPort implements Closeable {
             seriesTable.setRowFactory(null);
             seriesTable.getColumns().clear();
             seriesTable.setItems(null);
+            if (crosshair!= null){
+                crosshair.dispose();
+            }
         }
     }
 
+    public XYChartCrosshair<ZonedDateTime, Double> getCrosshair() {
+        return crosshair;
+    }
+
+    public void setCrosshair(XYChartCrosshair<ZonedDateTime, Double> crosshair) {
+        this.crosshair = crosshair;
+    }
 }

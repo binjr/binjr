@@ -72,8 +72,9 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     public TitledPane updatePreferences;
     @FXML
+    public ToggleSwitch fullHeightCrosshair;
+    @FXML
     private ToggleSwitch loadExternalToggle;
-
     @FXML
     private ToggleSwitch enableDownSampling;
     @FXML
@@ -117,6 +118,9 @@ public class PreferenceDialogController implements Initializable {
             maxSampleLabel.setDisable(!newValue);
         });
         enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
+
+        fullHeightCrosshair.selectedProperty().bindBidirectional(prefs.fullHeightCrosshairMarkerProperty());
+
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
             @Override
             public String toString(Path object) {

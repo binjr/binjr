@@ -32,10 +32,6 @@
      -fx-background-color: -fx-accent;
 }
 
-/*
-.chart-content {
-  -fx-background-color: #FF000020;
-}*/
  .chart,
  .chart-plot-background{
     -fx-background-color:  transparent;

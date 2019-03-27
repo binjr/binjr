@@ -56,6 +56,7 @@ public class GlobalPreferences {
     private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
     private static final String LOAD_PLUGINS_FROM_EXTERNAL_LOCATION = "loadPluginsFromExternalLocation";
     private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
+    private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairMarker";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -75,6 +76,7 @@ public class GlobalPreferences {
     private final Property<Duration> notificationPopupDuration = new SimpleObjectProperty<>();
     private final BooleanProperty loadPluginsFromExternalLocation = new SimpleBooleanProperty();
     private final IntegerProperty consoleMaxLineCapacity = new SimpleIntegerProperty();
+    private final BooleanProperty fullHeightCrosshairMarker = new SimpleBooleanProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -96,6 +98,8 @@ public class GlobalPreferences {
         pluginsLocation.addListener((observable, oldValue, newValue) -> prefs.put(PLUGINS_LOCATION, newValue.toString()));
         notificationPopupDuration.addListener((observable, oldValue, newValue) -> prefs.putDouble(NOTIFICATION_POPUP_DURATION, newValue.toSeconds()));
         loadPluginsFromExternalLocation.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, newValue));
+        checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
+        fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
     }
 
     /**
@@ -125,6 +129,7 @@ public class GlobalPreferences {
             notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
             pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
+            fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, true));
         } catch (Exception e) {
             logger.error("Error while loading application preferences", e);
         }
@@ -664,6 +669,18 @@ public class GlobalPreferences {
      */
     public IntegerProperty consoleMaxLineCapacityProperty() {
         return consoleMaxLineCapacity;
+    }
+
+    public boolean isFullHeightCrosshairMarker() {
+        return fullHeightCrosshairMarker.get();
+    }
+
+    public BooleanProperty fullHeightCrosshairMarkerProperty() {
+        return fullHeightCrosshairMarker;
+    }
+
+    public void setFullHeightCrosshairMarker(boolean fullHeightCrosshairMarker) {
+        this.fullHeightCrosshairMarker.set(fullHeightCrosshairMarker);
     }
 
     private static class GlobalPreferencesHolder {

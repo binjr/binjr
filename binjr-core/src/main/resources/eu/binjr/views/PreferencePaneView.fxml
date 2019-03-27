@@ -25,261 +25,212 @@
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0"
             xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="eu.binjr.core.controllers.PreferenceDialogController">
-    <children>
-        <HBox  AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" spacing="5" alignment="CENTER_LEFT">
-            <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
-                    prefWidth="30.0" styleClass="dialog-button">
-                <graphic>
-                    <Region styleClass="backArrow-icon"/>
-                </graphic>
-            </Button>
-            <Label alignment="CENTER_LEFT"  maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
-                   styleClass="pane-title" text="Settings">
-                <font>
-                    <Font size="14.0"/>
-                </font>
-                <!--<padding>-->
-                    <!--<Insets left="0.0" right="0" top="0" bottom="0"/>-->
-                <!--</padding>-->
-            </Label>
-        </HBox>
-        <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
-            <panes>
-                <TitledPane animated="false" text="Appearance &amp; Behavior">
-                    <content>
-                        <ScrollPane fitToHeight="true" fitToWidth="true">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <children>
-                                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0"
-                                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <children>
-                                                <Label text="Theme"/>
-                                                <ChoiceBox fx:id="uiThemeChoiceBox"/>
-                                                <Label text="Reload last workspace on start-up" wrapText="true"/>
-                                                <VBox fillWidth="false">
-                                                    <children>
-                                                        <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">
-                                                            <font>
-                                                                <Font size="10.0"/>
-                                                            </font>
-                                                        </ToggleSwitch>
-                                                    </children>
-                                                </VBox>
-                                                <Label text="Discard notifications after:"/>
-                                                <ChoiceBox fx:id="notifcationDurationChoiceBox"/>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </ScrollPane>
-                    </content>
-                </TitledPane>
-                <TitledPane fx:id="chartPrefsPane" animated="false" text="Charts Default">
-                    <content>
-                        <ScrollPane fitToHeight="true" fitToWidth="true">
-                            <content>
+    <HBox AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" spacing="5" alignment="CENTER_LEFT">
+        <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
+                prefWidth="30.0" styleClass="dialog-button">
+            <graphic>
+                <Region styleClass="backArrow-icon"/>
+            </graphic>
+        </Button>
+        <Label alignment="CENTER_LEFT" maxHeight="-Infinity" minHeight="-Infinity" prefHeight="40.0"
+               styleClass="pane-title" text="Settings">
+            <font>
+                <Font size="14.0"/>
+            </font>
+            <!--<padding>-->
+            <!--<Insets left="0.0" right="0" top="0" bottom="0"/>-->
+            <!--</padding>-->
+        </Label>
+    </HBox>
+    <Accordion fx:id="accordionPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">
+        <panes>
+            <TitledPane animated="false" text="Appearance &amp; Behavior">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Label text="Theme"/>
+                            <ChoiceBox fx:id="uiThemeChoiceBox"/>
+                            <Label text="Reload last workspace on start-up" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+                            <Label text="Discard notifications after:"/>
+                            <ChoiceBox fx:id="notifcationDurationChoiceBox"/>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+            <TitledPane fx:id="chartPrefsPane" animated="false" text="Charts">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane>
+                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
+                            <Label text="Span crosshair over all charts" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="fullHeightCrosshair" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+                            <Label text="Show outline on area charts" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="showOutline" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+                            <Label text="Default chart area opacity" wrapText="true"/>
+                            <VBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1"
+                                            max="1.0" min="0"/>
+                                    <Label fx:id="opacityText" text="100%"/>
+                                </HBox>
+                            </VBox>
+                            <Label text="Enable sample reduction" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0"
+                                              selected="true">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+                            <Label fx:id="maxSampleLabel" text="Maximum number of samples"
+                                   wrapText="true"/>
+                            <TextField fx:id="downSamplingThreshold" prefHeight="25.0"
+                                       prefWidth="-1.0" text="1000"/>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+            <TitledPane animated="false" text="Data Adapters">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane>
+                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308"
+                              spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Label text="Available Data Adapters"/>
+                            <TableView fx:id="availableAdapterTable" editable="true"
+                                       maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                                <columns>
+                                    <TableColumn fx:id="enabledColumn" prefWidth="24.0"
+                                                 resizable="false" sortable="false">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="enabled"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="Name">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="name"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="Version">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="version"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="Description">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="description"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
 
-                                <AnchorPane>
-                                    <children>
-                                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
-                                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                              AnchorPane.topAnchor="0.0">
-                                            <children>
-                                                <Label text="Show outline on area charts" wrapText="true"/>
-                                                <VBox fillWidth="false">
-                                                    <children>
-                                                        <ToggleSwitch fx:id="showOutline" prefWidth="1.0">
-                                                            <font>
-                                                                <Font size="10.0"/>
-                                                            </font>
-                                                        </ToggleSwitch>
-                                                    </children>
-                                                </VBox>
-                                                <Label text="Chart area  opacity" wrapText="true"/>
-                                                <VBox>
-                                                    <children>
-                                                        <HBox alignment="CENTER_LEFT">
-                                                            <children>
-                                                                <Slider fx:id="graphOpacitySlider" blockIncrement="0.1"
-                                                                        max="1.0" min="0"/>
-                                                                <Label fx:id="opacityText" text="100%"/>
-                                                            </children>
-                                                        </HBox>
-                                                    </children>
-                                                </VBox>
-                                                <Label text="Enable sample reduction" wrapText="true"/>
-                                                <VBox fillWidth="false">
-                                                    <children>
-                                                        <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0"
-                                                                      selected="true">
-                                                            <font>
-                                                                <Font size="10.0"/>
-                                                            </font>
-                                                        </ToggleSwitch>
-                                                    </children>
-                                                </VBox>
-                                                <Label fx:id="maxSampleLabel" text="Maximum number of samples"
-                                                       wrapText="true"/>
-                                                <TextField fx:id="downSamplingThreshold" prefHeight="25.0"
-                                                           prefWidth="-1.0" text="1000"/>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </ScrollPane>
-                    </content>
-                </TitledPane>
-                <TitledPane animated="false" text="Data Adapters">
-                    <content>
-                        <ScrollPane fitToHeight="true" fitToWidth="true">
-                            <content>
-                                <AnchorPane>
-                                    <children>
-                                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308"
-                                              spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <children>
-                                                <Label text="Available Data Adapters"/>
-                                                <TableView fx:id="availableAdapterTable" editable="true"
-                                                           maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
-                                                    <columns>
-                                                        <TableColumn fx:id="enabledColumn" prefWidth="24.0"
-                                                                     resizable="false" sortable="false">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="enabled"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="Name">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="name"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="Version">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="version"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="Description">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="description"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
+                                    <TableColumn sortable="false" text="Copyright">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="copyright"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="License">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="license"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="Url">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="siteUrl"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                    <TableColumn sortable="false" text="JAR">
+                                        <cellValueFactory>
+                                            <PropertyValueFactory property="jarLocation"/>
+                                        </cellValueFactory>
+                                    </TableColumn>
+                                </columns>
+                            </TableView>
+                            <Label text="Load from external location"/>
+                            <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT"
+                                          contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0"
+                                          prefHeight="18.0" prefWidth="0.0"/>
+                            <HBox maxHeight="1.7976931348623157E308"
+                                  maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
+                                <TextField fx:id="pluginLocTextfield"
+                                           maxWidth="1.7976931348623157E308"
+                                           HBox.hgrow="ALWAYS"/>
+                                <Button fx:id="browsePluginLocButton" mnemonicParsing="false"
+                                        onAction="#handleBrowsePluginsFolder" prefWidth="25.0"
+                                        text="..."/>
+                            </HBox>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+            <TitledPane animated="false" text="Manage Settings">
+                <ScrollPane>
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Button fx:id="resetPrefs" mnemonicParsing="false"
+                                    onAction="#handleResetSettings" styleClass="border-button"
+                                    text="Restore to Default"/>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+            <TitledPane fx:id="updatePreferences" animated="false" text="Updates">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Label text="Check for updates on start-up" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="updateCheckBox" prefWidth="1.0"/>
+                            </VBox>
+                            <Label text="Check for updates now" wrapText="true"/>
+                            <Button alignment="CENTER" mnemonicParsing="false"
+                                    onAction="#handleCheckForUpdate" styleClass="border-button"
+                                    text="Check now"/>
+                            <TextFlow fx:id="updateFlow"/>
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
+        </panes>
+    </Accordion>
 
-                                                        <TableColumn sortable="false" text="Copyright">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="copyright"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="License">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="license"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="Url">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="siteUrl"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                        <TableColumn sortable="false" text="JAR">
-                                                            <cellValueFactory>
-                                                                <PropertyValueFactory property="jarLocation"/>
-                                                            </cellValueFactory>
-                                                        </TableColumn>
-                                                    </columns>
-                                                </TableView>
-                                                <Label text="Load from external location"/>
-                                                <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT"
-                                                              contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0"
-                                                              prefHeight="18.0" prefWidth="0.0"/>
-                                                <HBox maxHeight="1.7976931348623157E308"
-                                                      maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
-                                                    <children>
-                                                        <TextField fx:id="pluginLocTextfield"
-                                                                   maxWidth="1.7976931348623157E308"
-                                                                   HBox.hgrow="ALWAYS"/>
-                                                        <Button fx:id="browsePluginLocButton" mnemonicParsing="false"
-                                                                onAction="#handleBrowsePluginsFolder" prefWidth="25.0"
-                                                                text="..."/>
-                                                    </children>
-                                                </HBox>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </ScrollPane>
-                    </content>
-                </TitledPane>
-                <TitledPane animated="false" text="Manage Settings">
-                    <content>
-                        <ScrollPane>
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <children>
-                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <children>
-                                                <Button fx:id="resetPrefs" mnemonicParsing="false"
-                                                        onAction="#handleResetSettings" styleClass="border-button"
-                                                        text="Restore to Default"/>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </ScrollPane>
-                    </content>
-                </TitledPane>
-                <TitledPane fx:id="updatePreferences" animated="false" text="Updates">
-                    <content>
-                        <ScrollPane fitToHeight="true" fitToWidth="true">
-                            <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0">
-                                    <children>
-                                        <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                                            <children>
-                                                <Label text="Check for updates on start-up" wrapText="true"/>
-                                                <VBox fillWidth="false">
-                                                    <children>
-                                                        <ToggleSwitch fx:id="updateCheckBox" prefWidth="1.0"/>
-                                                    </children>
-                                                </VBox>
-                                                <Label text="Check for updates now" wrapText="true"/>
-                                                <Button alignment="CENTER" mnemonicParsing="false"
-                                                        onAction="#handleCheckForUpdate" styleClass="border-button"
-                                                        text="Check now"/>
-                                                <TextFlow fx:id="updateFlow"/>
-                                            </children>
-                                        </VBox>
-                                    </children>
-                                </AnchorPane>
-                            </content>
-                            <padding>
-                                <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
-                            </padding>
-                        </ScrollPane>
-                    </content>
-                </TitledPane>
-            </panes>
-        </Accordion>
-
-    </children>
 </AnchorPane>

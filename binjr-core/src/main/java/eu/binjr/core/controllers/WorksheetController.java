@@ -146,7 +146,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private TimeRangePicker timeRangePicker;
     @FXML
     private AnchorPane chartsLegendsPane;
-    private XYChartCrosshair<ZonedDateTime, Double> crossHair;
     private ChartViewportsState currentState;
     private String name;
 
@@ -372,8 +371,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             hBox.setPickOnBounds(false);
             chart.setPickOnBounds(false);
             chart.getChildrenUnmodifiable()
-                    .stream().filter(node-> node.getStyleClass().contains("chart-content")).findFirst().ifPresent(node-> node.setPickOnBounds(false));
-
+                    .stream()
+                    .filter(node-> node.getStyleClass().contains("chart-content"))
+                    .findFirst()
+                    .ifPresent(node-> node.setPickOnBounds(false));
             hBox.setAlignment(Pos.CENTER_LEFT);
             bindingManager.bind(hBox.prefHeightProperty(), chartParent.heightProperty());
             bindingManager.bind(hBox.prefWidthProperty(), chartParent.widthProperty());
@@ -391,9 +392,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 bindingManager.bind(chart.translateXProperty(), viewPorts.get(0).getChart().getYAxis().widthProperty());
                 bindingManager.bind(chart.getYAxis().translateXProperty(), Bindings.createDoubleBinding(
                         () -> viewPorts.stream()
-                                .filter(c ->viewPorts.indexOf(c) != 0 &&  viewPorts.indexOf(c) < viewPorts.indexOf(v))
+                                .filter(c -> viewPorts.indexOf(c) != 0 && viewPorts.indexOf(c) < viewPorts.indexOf(v))
                                 .map(c -> c.getChart().getYAxis().getWidth())
-                                .reduce(Double::sum).orElse(0.0) + Y_AXIS_SEPARATION * (viewPorts.indexOf(v)-1),
+                                .reduce(Double::sum).orElse(0.0) + Y_AXIS_SEPARATION * (viewPorts.indexOf(v) - 1),
                         viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)));
             }
             chartParent.getChildren().add(hBox);
@@ -401,7 +402,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         viewPorts.forEach(v -> map.put(v.getChart(), v.getPrefixFormatter()::format));
-        crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
+        var crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
+        viewPorts.forEach(v -> v.setCrosshair(crossHair));
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
@@ -448,7 +450,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(viewPorts.get(0).getChart(), viewPorts.get(0).getPrefixFormatter()::format);
-        crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
+        var crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
+        crossHair.displayFullHeightMarkerProperty().bind(GlobalPreferences.getInstance().fullHeightCrosshairMarkerProperty());
+        viewPorts.get(0).setCrosshair(crossHair);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
@@ -469,6 +473,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
             XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m, chartParent, dateTimeFormatter::format);
+            ch.displayFullHeightMarkerProperty().bind(GlobalPreferences.getInstance().fullHeightCrosshairMarkerProperty());
             ch.onSelectionDone(s -> {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());
                 currentState.setSelection(convertSelection(s), true);
@@ -483,6 +488,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                     globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
                             globalPrefs.ctrlPressedProperty()));
+            viewPorts.get(i).setCrosshair(ch);
         }
     }
 
@@ -625,8 +631,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             pathColumn.setSortable(false);
             pathColumn.setPrefWidth(400);
 
-            currentColumn.setVisible(crossHair.isVerticalMarkerVisible());
-            bindingManager.attachListener(crossHair.verticalMarkerVisibleProperty(),
+
+            currentColumn.setVisible(getSelectedViewPort().getCrosshair().isVerticalMarkerVisible());
+            bindingManager.attachListener(getSelectedViewPort().getCrosshair().verticalMarkerVisibleProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
 
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -649,8 +656,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (p.getValue().getProcessor() == null) {
                             return "NaN";
                         }
-                        return currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().tryGetNearestValue(crossHair.getCurrentXValue()).orElse(Double.NaN));
-                    }, crossHair.currentXValueProperty()));
+                        return currentViewPort.getPrefixFormatter().format(p.getValue()
+                                .getProcessor()
+                                .tryGetNearestValue(getSelectedViewPort().getCrosshair().getCurrentXValue())
+                                .orElse(Double.NaN));
+                    }, getSelectedViewPort().getCrosshair().currentXValueProperty()));
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
             currentViewPort.getSeriesTable().setOnKeyReleased(bindingManager.registerHandler(event -> {
@@ -865,7 +875,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());
             vCrosshair.selectedProperty().unbindBidirectional(globalPrefs.verticalMarkerOnProperty());
             currentState = null;
-
             this.seriesTableContainer.getPanes().forEach(pane -> {
                 pane.setUserData(null);
                 pane.setContent(null);
@@ -873,31 +882,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
             this.seriesTableContainer.getPanes().clear();
             //Workaround JDK-8220012
             this.seriesTableContainer.getPanes().add(new TitledPane());
-            crossHair.dispose();
             IOUtils.closeCollectionElements(viewPorts);
             viewPorts = null;
             timeRangePicker.dispose();
             this.worksheet = null;
-            //  clearButtonActionEventHandler(this.root);
-
-        }
-
-    }
-
-    private void clearButtonActionEventHandler(Node node) {
-        if (node instanceof Parent) {
-            for (var child : ((Parent) node).getChildrenUnmodifiable()) {
-                clearButtonActionEventHandler(child);
-            }
-        }
-        //  node.getProperties().clear();
-
-        if (node instanceof ButtonBase) {
-            logger.debug(() -> "Unregister onAction handler from " + node.toString());
-            ((ButtonBase) node).setOnAction(null);
         }
     }
-
 
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
         ChangeListener<Object> controllerReloadListener = (observable, oldValue, newValue) -> {
@@ -1152,6 +1142,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
         } else {
             logger.debug(() -> "History is empty: nothing to go back to.");
         }
+    }
+
+    private ChartViewPort getSelectedViewPort() {
+        var v = viewPorts.get(getWorksheet().getSelectedChart());
+        if (v != null) {
+            return v;
+        }
+        throw new IllegalStateException("Could not retreive selected viewport on current worksheet");
     }
 
     private TableRow<TimeSeriesInfo> seriesTableRowFactory(TableView<TimeSeriesInfo> tv) {

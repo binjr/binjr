@@ -22,7 +22,7 @@
     -icon-color: black;
     SCROLL_BAR_THUMB: #BABABA;
     SCROLL_BAR_TRACK: #f0f0f0;
-    -fx-accent: -binjr-foreground-color; /*-binjr-dark-blue-color;*/
+    -fx-accent: /*-binjr-foreground-color;*/  -binjr-lighter-blue-color;
 }
 
 .column-bold-text{
