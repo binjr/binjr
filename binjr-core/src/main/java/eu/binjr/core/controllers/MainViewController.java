@@ -564,7 +564,7 @@ public class MainViewController implements Initializable {
 
         ToggleButton editButton = (ToggleButton) newToolBarButton(
                 ToggleButton::new,
-                "Settings", "Edit the chart's settings",
+                "Settings", "Edit the source's settings",
                 new String[]{"dialog-button"},
                 new String[]{"settings-icon", "small-icon"});
         source.getBindingManager().bindBidirectional(editButton.selectedProperty(), source.editableProperty());
@@ -845,8 +845,7 @@ public class MainViewController implements Initializable {
     }
 
     private boolean loadWorksheet(Worksheet worksheet) {
-        EditableTab newTab = new EditableTab("New worksheet");
-        loadWorksheet(worksheet, newTab, false);
+        EditableTab newTab = loadWorksheetInTab(worksheet, false);
         worksheetTabPane.getTabs().add(newTab);
         worksheetTabPane.getSelectionModel().select(newTab);
         return false;
@@ -872,7 +871,7 @@ public class MainViewController implements Initializable {
         loadWorksheet(worksheet, tab, false);
     }
 
-    private void loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
+    private WorksheetController loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
             WorksheetController current = new WorksheetController(this, worksheet,
                     sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
@@ -909,28 +908,47 @@ public class MainViewController implements Initializable {
                 current.setShowPropertiesPane(true);
             }
             newTab.setContextMenu(getTabMenu(newTab, worksheet, current.getBindingManager()));
-
+            return current;
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
+            return null;
+        }
+    }
+
+    private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
+        Button closeTabButton = (Button) newToolBarButton(
+                Button::new,
+                "Close", "Close Tab",
+                new String[]{"exit"},
+                new String[]{"cross-icon", "small-icon"});
+        EditableTab newTab = new EditableTab("New worksheet", closeTabButton);
+        var worksheetController = loadWorksheet(worksheet, newTab, editMode);
+        if (worksheetController != null) {
+            closeTabButton.setOnAction(worksheetController.getBindingManager().registerHandler(event -> closeWorksheetTab(newTab)));
+        } else {
+            closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
+        }
+        return newTab;
+    }
+
+    private void closeWorksheetTab(EditableTab tab) {
+        if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?", "",
+                ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+            EventHandler<Event> handler = tab.getOnClosed();
+            if (null != handler) {
+                handler.handle(null);
+            }
+            tab.getTabPane().getTabs().remove(tab);
         }
     }
 
     private ContextMenu getTabMenu(EditableTab tab, Worksheet worksheet, BindingManager manager) {
         MenuItem close = new MenuItem("Close Tab");
-        close.setOnAction(manager.registerHandler(event -> {
-            EventHandler<Event> handler = tab.getOnClosed();
-            if (null != handler) {
-                handler.handle(null);
-            } else {
-                tab.getTabPane().getTabs().remove(tab);
-            }
-        }));
+        close.setOnAction(manager.registerHandler(event -> closeWorksheetTab(tab)));
         MenuItem closeOthers = new MenuItem("Close Other Tabs");
         closeOthers.setOnAction(manager.registerHandler(event -> {
-            EventHandler<Event> handler = tab.getOnClosed();
-            if (null != handler) {
-                handler.handle(null);
-            } else {
+            if (Dialogs.confirmDialog(root, "Are you sure you want to close all tabs except for '" + tab.getName() + "'?",
+                    "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
                         .filter(tab1 -> !tab1.equals(tab))
@@ -969,13 +987,18 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(Worksheet worksheet) {
-        TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
-        EditableTab newTab = new EditableTab("");
-        loadWorksheet(worksheet, newTab, true);
+       TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
+//        Button closeButton = getTabCloseButton();
+//        EditableTab newTab = new EditableTab("", closeButton);
+//        closeButton.setOnAction(event -> closeWorksheetTab(newTab));
+//        loadWorksheet(worksheet, newTab, true);
+
+        var newTab = loadWorksheetInTab(worksheet, true);
         targetTabPane.getTabs().add(newTab);
         targetTabPane.getSelectionModel().select(newTab);
         return true;
     }
+
 
     private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
@@ -1254,9 +1277,7 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
-        EditableTab newTab = new EditableTab("");
-        loadWorksheet(new Worksheet(), newTab, true);
-        return Optional.of(newTab);
+        return Optional.of(loadWorksheetInTab(new Worksheet(), true));
     }
 
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {

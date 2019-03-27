@@ -15,7 +15,8 @@ worksheets using a stacked layout (Command bar "Settings > Charts > Hide Source 
 of them all at once.
 * _[New]_ A visual indication now identifies the currently selected charts on worksheets when there are more than one.
 * _[New]_ Clicking on a chart's title in the graphing area new selects it and expands its legend in the bottom pane.  
-* _[New]_ Added support for small numbers unit prefix (m = milli, µ = micro, n = nano, etc...) for formatting Y axis values.  
+* _[New]_ Added support for small numbers unit prefix (m = milli, µ = micro, n = nano, etc...) for formatting Y axis values.
+* _[New]_ Added confirmation dialog when closing one or several worksheet tabs.  
 * _[Fixed]_ A memory leak that occurs when adding, moving or changing the type of a chart in an existing worksheet.
 * _[Fixed]_ Uncaught exception when entering a negative range for a chart's Y axis causes a worksheet to become.
 * _[Fixed]_ Keyboard shortcuts do no work on detached tab windows.

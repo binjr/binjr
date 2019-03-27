@@ -19,9 +19,7 @@ package eu.binjr.common.javafx.controls;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 
 /**
  * A Tab control that can be renamed on double-click
@@ -47,16 +45,25 @@ public class EditableTab extends Tab {
         label.textProperty().setValue(tabName);
     }
 
+    public EditableTab(String text){
+        this(text, null);
+    }
+
     /**
      * Initializes a new instance of the {@link EditableTab} instance.
      *
      * @param text the title for the tab.
      */
-    public EditableTab(String text) {
+    public EditableTab(String text, Button closeButton) {
         super();
         label = new Label(text);
         label.textProperty();
         setGraphic(label);
+        if (closeButton != null){
+            setClosable(false);
+            label.setGraphic(closeButton);
+            label.setContentDisplay(ContentDisplay.RIGHT);
+        }
 
         editable.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
@@ -89,7 +96,6 @@ public class EditableTab extends Tab {
             }
         });
     }
-
 
     /**
      * Renames the tab
