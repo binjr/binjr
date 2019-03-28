@@ -947,7 +947,7 @@ public class MainViewController implements Initializable {
         close.setOnAction(manager.registerHandler(event -> closeWorksheetTab(tab)));
         MenuItem closeOthers = new MenuItem("Close Other Tabs");
         closeOthers.setOnAction(manager.registerHandler(event -> {
-            if (Dialogs.confirmDialog(root, "Are you sure you want to close all tabs except for '" + tab.getName() + "'?",
+            if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all tabs except for '" + tab.getName() + "'?",
                     "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
