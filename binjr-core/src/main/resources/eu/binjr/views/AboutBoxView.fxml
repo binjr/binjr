@@ -55,7 +55,7 @@
         </VBox>
     </header>
     <content>
-        <VBox alignment="BOTTOM_LEFT" spacing="20.0">
+        <VBox alignment="BOTTOM_LEFT" spacing="20.0" >
             <children>
                 <Accordion fx:id="detailsPane" prefWidth="600.0" styleClass="skinnable-pane-border">
                     <panes>
@@ -78,7 +78,7 @@
                                 </padding>
                             </TableView>
                         </TitledPane>
-                        <TitledPane fx:id="licensePane" animated="false" minHeight="0.0" text="License">
+                        <TitledPane fx:id="licensePane" animated="false"  minHeight="0.0" text="License">
                             <ScrollPane>
                                 <TextFlow fx:id="licenseView" maxHeight="-1.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="560.0" styleClass="about-text-view">
                                     <padding>
@@ -87,7 +87,7 @@
                                 </TextFlow>
                             </ScrollPane>
                         </TitledPane>
-                        <TitledPane fx:id="acknowledgementPane" animated="false" text="Acknowledgements">
+                        <TitledPane fx:id="acknowledgementPane"  animated="false" text="Acknowledgements">
                             <ScrollPane>
                                 <TextFlow fx:id="acknowledgementView" maxHeight="-1.0" maxWidth="-Infinity" minWidth="-Infinity" prefHeight="220.0" prefWidth="560.0" styleClass="about-text-view">
                                     <padding>

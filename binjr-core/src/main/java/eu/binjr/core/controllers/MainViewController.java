@@ -339,6 +339,7 @@ public class MainViewController implements Initializable {
         dialog.setTitle("About " + AppEnvironment.APP_NAME);
         dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/eu/binjr/views/AboutBoxView.fxml")));
         dialog.initOwner(Dialogs.getStage(root));
+        dialog.getDialogPane().getStylesheets().add(getClass().getResource(StageAppearanceManager.getFontFamilyCssPath()).toExternalForm());
         dialog.showAndWait();
     }
 
@@ -987,7 +988,7 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(Worksheet worksheet) {
-       TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
+        TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
 //        Button closeButton = getTabCloseButton();
 //        EditableTab newTab = new EditableTab("", closeButton);
 //        closeButton.setOnAction(event -> closeWorksheetTab(newTab));

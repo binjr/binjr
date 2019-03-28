@@ -16,7 +16,9 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.OsFamily;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -163,9 +165,22 @@ public class StageAppearanceManager {
             scene.getStylesheets().clear();
             Application.setUserAgentStylesheet(null);
             scene.getStylesheets().addAll(
+                    getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Common.css").toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
                     getClass().getResource(theme.getCssPath()).toExternalForm());
         });
+    }
+
+    public static String getFontFamilyCssPath(){
+        switch(AppEnvironment.getInstance().getOsFamily()){
+            default:
+            case WINDOWS:
+                return "/eu/binjr/css/Fonts-family-win.css";
+            case LINUX:
+                return "/eu/binjr/css/Fonts-family-ubuntu.css";
+            case OSX:
+                return "/eu/binjr/css/Fonts-family-mac.css";
+        }
     }
 }

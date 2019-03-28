@@ -173,7 +173,7 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill: -binjr-blue-color;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
+
     -fx-font-size: 10pt;
 }
 
@@ -256,32 +256,32 @@
 }
 
 .log-trace {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: GRAY;
 }
 
 .log-debug {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: STEELBLUE;
 }
 
 .log-info {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: black;
 }
 
 .log-warn {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: DARKORANGE;
 }
 
 .log-error {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: RED;
 }
 
 .log-fatal {
-    -fx-font-family: Consolas,  Monospace;
+
     -fx-fill: DARKRED;
 }
 

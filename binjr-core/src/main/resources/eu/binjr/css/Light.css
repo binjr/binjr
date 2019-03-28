@@ -22,8 +22,12 @@
     -icon-color: black;
     SCROLL_BAR_THUMB: #BABABA;
     SCROLL_BAR_TRACK: #f0f0f0;
+
     -fx-accent: /*-binjr-foreground-color;*/  -binjr-lighter-blue-color;
+
 }
+
+
 
 .column-bold-text{
     /*-fx-text-fill: -binjr-background-color;*/
@@ -310,7 +314,6 @@
  .date-picker-popup > * > .day-name-cell,
  .date-picker-popup > * > .week-number-cell {
      -fx-font-size: 0.75em;
-     -fx-font-family: "Segoe UI Semibold", "Segoe UI", Helvetica, Arial, sans-serif;
  }
 
  /***********************************/
@@ -578,14 +581,13 @@
 
 
 .toolPane .scroll-pane .viewport .text {
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
 .toolPane .pane-title {
-  -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
   -fx-font-size: 13pt;
 }
+
 .toolPane .content,
 .toolPane .title,
 .toolPane .scroll-pane,
@@ -749,7 +751,6 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill:white;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
 }
 
@@ -757,7 +758,6 @@
 
 .command-bar .square-button {
     -fx-text-fill:white;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
@@ -776,7 +776,6 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill:white;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
 }
 
@@ -784,7 +783,6 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill:white;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
     -fx-wrap-text: true;
 }
@@ -793,7 +791,6 @@
     -fx-alignment: center_left;
     -fx-graphic-text-gap:20;
     -fx-text-fill: -binjr-blue-color;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
@@ -895,7 +892,6 @@
 }
 
 .context-menu .label{
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
@@ -920,7 +916,6 @@
 .command-bar .pane-title {
     -fx-alignment: center_left;
     -fx-text-fill:white;
-    -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 18pt;
 }
 
@@ -937,7 +932,6 @@
     -fx-background-radius: 0, 0, 0, 0;
     -fx-padding: 0em 0.166667em 0em 0.166667em;
     -fx-background-insets: -1.4, 0, 1, 2;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
 }
 
 .command-bar .choice-box .text {
@@ -1239,7 +1233,6 @@
 .series-table .titled-pane > .title {
     -fx-graphic-text-gap:25;
     -fx-background-color: -binjr-window-background-color;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 10pt;
 }
 
@@ -1439,32 +1432,26 @@
 
 
 .log-trace {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: GRAY;
 }
 
 .log-debug {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: STEELBLUE;
 }
 
 .log-info {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: black;
 }
 
 .log-warn {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: DARKORANGE;
 }
 
 .log-error {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: RED;
 }
 
 .log-fatal {
-    -fx-font-family: Consolas,  Monospace;
     -fx-fill: DARKRED;
 }
 

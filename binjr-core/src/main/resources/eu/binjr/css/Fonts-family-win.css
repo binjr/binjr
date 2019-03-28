@@ -1,0 +1,24 @@
+.root{
+    -fx-font-family: "Segoe UI"
+}
+
+.date-picker-popup > * > .day-name-cell,
+.date-picker-popup > * > .week-number-cell {
+    -fx-font-family: "Segoe UI Semibold";
+}
+.command-bar .pane-title,
+.toolPane .pane-title,
+.about-text,
+.about .titled-pane > .title {
+    -fx-font-family: "Segoe UI Light";
+}
+
+.log-trace,
+.log-debug,
+.log-info,
+.log-warn,
+.log-error,
+.log-fatal {
+    -fx-font-family: "Consolas";
+}
+

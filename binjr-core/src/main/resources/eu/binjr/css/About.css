@@ -18,21 +18,7 @@
 .root {
     -fx-background-color: -binjr-foreground-color;
 }
-/*
-.table-row-cell:odd{
-    -fx-background-color: -binjr-lighter-blue-color;
-}
 
-/*
-.table-view:focused > .virtual-flow > .clipped-container > .sheet > .table-row-cell .table-cell:selected,
-.table-row-cell:filled:selected,
-.table-row-cell:filled > .table-cell:selected,
-.table-view:focused:row-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell:focused,
-.table-view:focused:cell-selection > .virtual-flow > .clipped-container > .sheet > .table-row-cell > .table-cell:focused {
-    -fx-background-color: -binjr-blue-color;
-    -fx-text-fill: white;
-}
-*/
 .table-row-cell:selected {
     -fx-background-color: -binjr-blue-color;
 }
@@ -46,18 +32,14 @@
     -fx-background-color: -binjr-background-color;
 }
 
-.button,
 .about-text{
     -fx-text-fill: -binjr-dark-blue-color;
-    -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 11pt;
 }
-
 
 .titled-pane {
     -fx-border-size:0;
     -fx-text-fill:-binjr-background-color;
-    -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 14pt;
 }
 
@@ -69,7 +51,6 @@
 .content {
     -fx-border-size:0;
     -fx-text-fill: -binjr-background-color;
-    -fx-font-family: "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 9pt;
     -fx-font-weight:normal;
   }
@@ -178,7 +159,7 @@
 .button:pressed,
 .button:default:hover:pressed {
      -fx-background-color:-binjr-background-color;
-    -fx-border-color: -binjr-background-color;
+     -fx-border-color: -binjr-background-color;
      -fx-text-fill: white;
  }
 
