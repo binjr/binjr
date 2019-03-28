@@ -923,12 +923,8 @@ public class MainViewController implements Initializable {
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"});
         EditableTab newTab = new EditableTab("New worksheet", closeTabButton);
-        var worksheetController = loadWorksheet(worksheet, newTab, editMode);
-        if (worksheetController != null) {
-            closeTabButton.setOnAction(worksheetController.getBindingManager().registerHandler(event -> closeWorksheetTab(newTab)));
-        } else {
-            closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
-        }
+        loadWorksheet(worksheet, newTab, editMode);
+        closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
         return newTab;
     }
 
