@@ -178,7 +178,7 @@ public class StageAppearanceManager {
             case WINDOWS:
                 return "/eu/binjr/css/Fonts-family-win.css";
             case LINUX:
-                return "/eu/binjr/css/Fonts-family-ubuntu.css";
+                return "/eu/binjr/css/Fonts-family-linux.css";
             case OSX:
                 return "/eu/binjr/css/Fonts-family-mac.css";
         }
