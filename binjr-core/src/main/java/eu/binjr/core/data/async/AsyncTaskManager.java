@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.async;
 
+import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -46,7 +47,7 @@ public class AsyncTaskManager {
                 return thread;
             }
         };
-        threadPool = Executors.newCachedThreadPool(threadFactory);
+        threadPool = Executors.newFixedThreadPool(GlobalPreferences.getInstance().getMaxAsyncTasksParallelism(), threadFactory);
     }
 
     /**

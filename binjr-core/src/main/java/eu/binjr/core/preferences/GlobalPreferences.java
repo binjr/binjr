@@ -57,6 +57,7 @@ public class GlobalPreferences {
     private static final String LOAD_PLUGINS_FROM_EXTERNAL_LOCATION = "loadPluginsFromExternalLocation";
     private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
     private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairMarker";
+    private static final String MAX_ASYNC_TASKS_PARALLELISM = "maxAsyncTasksParallelism";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -77,6 +78,7 @@ public class GlobalPreferences {
     private final BooleanProperty loadPluginsFromExternalLocation = new SimpleBooleanProperty();
     private final IntegerProperty consoleMaxLineCapacity = new SimpleIntegerProperty();
     private final BooleanProperty fullHeightCrosshairMarker = new SimpleBooleanProperty();
+    private final IntegerProperty maxAsyncTasksParallelism = new SimpleIntegerProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -100,6 +102,7 @@ public class GlobalPreferences {
         loadPluginsFromExternalLocation.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, newValue));
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
         fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
+        maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
     }
 
     /**
@@ -113,7 +116,7 @@ public class GlobalPreferences {
 
     private void load() {
         try {
-            recentFiles = new ArrayDeque<>(Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toList()));
+            recentFiles = Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toCollection(ArrayDeque::new));
             showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, false));
             defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
             verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
@@ -130,6 +133,7 @@ public class GlobalPreferences {
             pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
             fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, false));
+            maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
         } catch (Exception e) {
             logger.error("Error while loading application preferences", e);
         }
@@ -681,6 +685,18 @@ public class GlobalPreferences {
 
     public void setFullHeightCrosshairMarker(boolean fullHeightCrosshairMarker) {
         this.fullHeightCrosshairMarker.set(fullHeightCrosshairMarker);
+    }
+
+    public int getMaxAsyncTasksParallelism() {
+        return maxAsyncTasksParallelism.get();
+    }
+
+    public IntegerProperty maxAsyncTasksParallelismProperty() {
+        return maxAsyncTasksParallelism;
+    }
+
+    public void setMaxAsyncTasksParallelism(int maxAsyncTasksParallelism) {
+        this.maxAsyncTasksParallelism.set(maxAsyncTasksParallelism);
     }
 
     private static class GlobalPreferencesHolder {
