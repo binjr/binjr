@@ -12,7 +12,7 @@ Released on Fri, 29 Mar 2019
 * _[New]_ Added a "Settings" button to source panes. 
 * _[New]_ Added an option to hide the source pane (Command bar menu "Sources > Hide Source Pane" or Ctrl+L)
 * _[New]_ Added an option to hide charts legend (Worksheet toolbar "Hide Charts Legends" or Ctrl+B)
-* _[New]_ Added an option to span the vertical bar of the selection crosshair over the height of all charts in a 
+* _[New]_ Added an option to span the vertical bar of the selection crosshair over the height of all charts in a
 worksheets using a stacked layout (Command bar "Settings > Charts > Hide Source Pane > Span crosshair over all charts")
 * _[New]_ Buttons in a worksheet's toolbar will now overflow to a menu pane if there is not enough space to display all
 of them all at once.
