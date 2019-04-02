@@ -1596,3 +1596,23 @@
 .tool-bar {
     -fx-spacing: 0;
 }
+
+.tooltip{
+    -fx-effect: null;
+    -fx-border-with:1;
+    -fx-border-color: -binjr-control-border-color;
+    -fx-border-radius:0;
+    -fx-background-color: -fx-background;
+    -fx-font-size:9pt;
+}
+
+.command-bar .tooltip{
+   -fx-effect: null;
+    -fx-border-with: 1;
+    -fx-border-color: white;
+    -fx-border-radius:0;
+    -fx-background-radius: 0;
+    -fx-text-fill: white;
+    -fx-background-color: -binjr-background-color;
+    -fx-font-size:9pt;
+}
