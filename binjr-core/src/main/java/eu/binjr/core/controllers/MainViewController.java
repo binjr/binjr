@@ -54,6 +54,7 @@ import javafx.geometry.Side;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
@@ -985,39 +986,39 @@ public class MainViewController implements Initializable {
 
     private boolean editWorksheet(Worksheet worksheet) {
         TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
-//        Button closeButton = getTabCloseButton();
-//        EditableTab newTab = new EditableTab("", closeButton);
-//        closeButton.setOnAction(event -> closeWorksheetTab(newTab));
-//        loadWorksheet(worksheet, newTab, true);
-
         var newTab = loadWorksheetInTab(worksheet, true);
         targetTabPane.getTabs().add(newTab);
         targetTabPane.getSelectionModel().select(newTab);
         return true;
     }
 
-
     private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
         TreeView<TimeSeriesBinding> treeView = new TreeView<>();
         treeView.setShowRoot(false);
         Callback<TreeView<TimeSeriesBinding>, TreeCell<TimeSeriesBinding>> dragAndDropCellFactory = param -> {
-            final TreeCell<TimeSeriesBinding> cell = new TreeCell<>();
-            cell.itemProperty().addListener((observable, oldValue, newValue) -> cell.setText(newValue == null ? null : newValue.toString()));
-            cell.setOnDragDetected(event -> {
-                if (cell.getItem() != null) {
-                    expandBranch(cell.getTreeItem());
-                    Dragboard db = cell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
-                    db.setDragView(cell.snapshot(null, null));
-                    ClipboardContent content = new ClipboardContent();
-                    content.put(TIME_SERIES_BINDING_FORMAT, cell.getItem().getTreeHierarchy());
-                    db.setContent(content);
-                } else {
-                    logger.debug("No TreeItem selected: canceling drag and drop");
+            final TreeCell<TimeSeriesBinding> bindingTreeCell = new TreeCell<>();
+            bindingTreeCell.itemProperty().addListener((observable, oldValue, newValue) -> bindingTreeCell.setText(newValue == null ? null : newValue.toString()));
+            bindingTreeCell.setOnDragDetected(event -> {
+                try {
+                    if (bindingTreeCell.getItem() != null) {
+                        expandBranch(bindingTreeCell.getTreeItem());
+                        Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
+                        Label label = new Label("    " + bindingTreeCell.getItem().toString());
+                        // The label must be added to a scene so that layout is applied
+                        new Scene(label);
+                        db.setDragView(label.snapshot(null, null));
+                        ClipboardContent content = new ClipboardContent();
+                        content.put(TIME_SERIES_BINDING_FORMAT, bindingTreeCell.getItem().getTreeHierarchy());
+                        db.setContent(content);
+                    } else {
+                        logger.debug("No TreeItem selected: canceling drag and drop");
+                    }
+                } finally {
+                    event.consume();
                 }
-                event.consume();
             });
-            return cell;
+            return bindingTreeCell;
         };
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
