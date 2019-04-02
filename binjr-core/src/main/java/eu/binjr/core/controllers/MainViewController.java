@@ -56,6 +56,7 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
@@ -992,6 +993,14 @@ public class MainViewController implements Initializable {
         return true;
     }
 
+    private Image renderTextTooltip(String text){
+        var label = new Label("    " + text + "    ");
+        label.getStyleClass().add("tooltip");
+        // The label must be added to a scene so that CSS and layout are applied.
+        StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.TRANSPARENT));
+        return label.snapshot(null, null);
+    }
+
     private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
         TreeView<TimeSeriesBinding> treeView = new TreeView<>();
@@ -1004,10 +1013,7 @@ public class MainViewController implements Initializable {
                     if (bindingTreeCell.getItem() != null) {
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
-                        Label label = new Label("    " + bindingTreeCell.getItem().toString());
-                        // The label must be added to a scene so that layout is applied
-                        new Scene(label);
-                        db.setDragView(label.snapshot(null, null));
+                        db.setDragView(renderTextTooltip(bindingTreeCell.getItem().toString()));
                         ClipboardContent content = new ClipboardContent();
                         content.put(TIME_SERIES_BINDING_FORMAT, bindingTreeCell.getItem().getTreeHierarchy());
                         db.setContent(content);

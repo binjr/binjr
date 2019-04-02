@@ -183,4 +183,8 @@ public class StageAppearanceManager {
                 return "/eu/binjr/css/Fonts-family-mac.css";
         }
     }
+
+    public void applyUiTheme(Scene scene){
+        setUiTheme(scene, GlobalPreferences.getInstance().getUserInterfaceTheme());
+    }
 }
