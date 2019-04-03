@@ -76,7 +76,7 @@ public class DataAdapterFactory {
      * @return a collection of {@link DataAdapterInfo} for all active (enabled) {@link DataAdapter}
      */
     public Collection<DataAdapterInfo> getActiveAdapters() {
-        return registeredAdapters.values().stream().filter(DataAdapterInfo::isEnabled).collect(Collectors.toList());
+        return registeredAdapters.values().stream().filter(DataAdapterInfo::isEnabled).sorted(Comparator.comparing(DataAdapterInfo::getName)).collect(Collectors.toList());
     }
 
     /**
@@ -85,7 +85,7 @@ public class DataAdapterFactory {
      * @return a collection of {@link DataAdapterInfo} for all registered {@link DataAdapter}
      */
     public Collection<DataAdapterInfo> getAllAdapters() {
-        return registeredAdapters.values();
+        return registeredAdapters.values().stream().sorted(Comparator.comparing(DataAdapterInfo::getName)).collect(Collectors.toList());
     }
 
     /**
