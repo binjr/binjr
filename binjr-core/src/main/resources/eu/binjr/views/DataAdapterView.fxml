@@ -21,10 +21,10 @@
 <DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
     <content>
-        <GridPane fx:id="paramsGridPane">
+        <GridPane fx:id="paramsGridPane" hgap="10.0">
             <columnConstraints>
-                <ColumnConstraints maxWidth="248.0" minWidth="10.0" prefWidth="72.0"/>
-                <ColumnConstraints maxWidth="500.0" minWidth="10.0" prefWidth="300.0"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0"/>
+                <ColumnConstraints hgrow="ALWAYS" minWidth="10.0" prefWidth="300.0"/>
             </columnConstraints>
             <rowConstraints>
                 <RowConstraints maxHeight="32.0" minHeight="32.0" prefHeight="32.0"/>
