@@ -37,20 +37,22 @@ with someone else.
   * Standalone, client-side application.
   * Can connect to any number of sources, of different types, at the same time.
   * Communicates though the APIs exposed by the source. 
-  * Supports for data sources is expendable via plugins.
+  * Supports for data sources is extensible via plugins.
    
 ####  Designed for ad-hoc view composition
   * Drag and drop series from any sources directly on the chart view.
   * Mix series from different sources on the same view.
   * Allows charts overlay: create charts with several Y axis and a shared time line.
-  * Highly customizable; choose chart types, change series colours, transparency, legends, etc...
-  * The whole working session can be saved to a file at any time, to reopen later or to share it with someone else.  
+  * Highly customizable views; choose chart types, change series colours, transparency, legends, etc...
+  * Save you work session to a file at any time, to be reopened later or shared with someone else.  
    
 ####  Fluent navigation 
-  * Drag and drop driven zoom of both X and Y axis.
+  * Mouse driven zoom of both X and Y axis.
+  * Drag and drop composition.
   * Browser-like, forward & backward navigation of zoom history.
   * Advanced time-range selection widget.
-  * Create many charts views in detachable tabs, which you can synchronize to the same time line.
+  * The tabs holding the chart views can be detached into separate windows.
+  * Charts from different tabs/windows can be synchronized to a common time line.
   
 ####  Fast, responsive & aesthetically pleasing visuals
   * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
