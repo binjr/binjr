@@ -19,10 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.charts.*;
-import eu.binjr.common.javafx.controls.ColorTableCell;
-import eu.binjr.common.javafx.controls.DecimalFormatTableCellFactory;
-import eu.binjr.common.javafx.controls.DelayedAction;
-import eu.binjr.common.javafx.controls.TimeRangePicker;
+import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -55,7 +52,6 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -113,6 +109,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private AnchorPane chartParent;
     @FXML
+    private AnchorPane chartViewport;
+    @FXML
     private TextField yMinRange;
     @FXML
     private TextField yMaxRange;
@@ -146,6 +144,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private TimeRangePicker timeRangePicker;
     @FXML
     private AnchorPane chartsLegendsPane;
+    @FXML
+    private DrawerPane chartProperties;
+
     private ChartViewportsState currentState;
     private String name;
 
@@ -172,14 +173,24 @@ public class WorksheetController implements Initializable, AutoCloseable {
         ChartPropertiesController propertiesController = new ChartPropertiesController(getWorksheet(), chart);
         loader.setController(propertiesController);
         Pane settingsPane = loader.load();
-        AnchorPane.setRightAnchor(settingsPane, ChartPropertiesController.SETTINGS_PANE_DISTANCE);
+        chartProperties.getChildren().add(settingsPane);
+        AnchorPane.setRightAnchor(settingsPane, 0.0);
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
+        AnchorPane.setLeftAnchor(settingsPane, 0.0);
+
         settingsPane.getStyleClass().add("toolPane");
-        settingsPane.setPrefWidth(200);
-        settingsPane.setMinWidth(200);
-        chartParent.getChildren().add(settingsPane);
-        Platform.runLater(settingsPane::toFront);
+//        settingsPane.setPrefWidth(200);
+//        settingsPane.setMinWidth(200);
+
+        //Platform.runLater(settingsPane::toFront);
+//        bindingManager.attachListener(propertiesController.hiddenProperty(),
+//                (ChangeListener<Boolean>) (observable, oldValue, newValue) ->{
+//                    double d = newValue ? 0.0 : 200.0;
+//                    new DelayedAction(
+//                            () -> AnchorPane.setRightAnchor(chartParent,d),
+//                            Duration.millis(d)).submit();
+//                } );
         return propertiesController;
     }
 
@@ -372,9 +383,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chart.setPickOnBounds(false);
             chart.getChildrenUnmodifiable()
                     .stream()
-                    .filter(node-> node.getStyleClass().contains("chart-content"))
+                    .filter(node -> node.getStyleClass().contains("chart-content"))
                     .findFirst()
-                    .ifPresent(node-> node.setPickOnBounds(false));
+                    .ifPresent(node -> node.setPickOnBounds(false));
             hBox.setAlignment(Pos.CENTER_LEFT);
             bindingManager.bind(hBox.prefHeightProperty(), chartParent.heightProperty());
             bindingManager.bind(hBox.prefWidthProperty(), chartParent.widthProperty());
@@ -772,6 +783,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
+      //  bindingManager.bind(chartProperties.expandedProperty(),editButtonsGroup.selectedToggleProperty().isNotNull());
+        bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
+            if(newValue != null){
+                chartProperties.expand();
+            }else{
+                chartProperties.collapse();
+            }
+        });
+        chartProperties.setSibling(chartParent);
+        if (editButtonsGroup.getSelectedToggle()!=null){
+            chartProperties.expand();
+        }
+
         bindingManager.attachListener(seriesTableContainer.expandedPaneProperty(),
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
                     Boolean expandRequiered = true;

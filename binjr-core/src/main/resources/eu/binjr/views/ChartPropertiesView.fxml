@@ -21,7 +21,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.ToggleSwitch?>
-<AnchorPane fx:id="root" focusTraversable="true" prefHeight="459.0" prefWidth="190.0" styleClass="skinnable-pane-border"
+<AnchorPane fx:id="root" focusTraversable="true" prefWidth="200"  styleClass="skinnable-pane-border"
             xmlns="http://javafx.com/javafx/8.0.172-ea" xmlns:fx="http://javafx.com/fxml/1">
     <Button fx:id="closeButton" alignment="BASELINE_LEFT" graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0"
             styleClass="exit" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
@@ -38,7 +38,7 @@
             <Insets left="5.0"/>
         </padding>
     </Label>
-    <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="399.0" prefWidth="190.0" AnchorPane.bottomAnchor="25.0"
+    <ScrollPane fitToHeight="true" fitToWidth="true"  AnchorPane.bottomAnchor="25.0"
                 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="35.0">
         <padding>
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>

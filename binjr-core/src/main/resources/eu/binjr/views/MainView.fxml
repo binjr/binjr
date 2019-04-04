@@ -16,7 +16,7 @@
   ~    limitations under the License.
   -->
 
-<?import eu.binjr.common.javafx.controls.CommandBarPane?>
+<?import eu.binjr.common.javafx.controls.DrawerPane?>
 <?import eu.binjr.common.javafx.controls.TearableTabPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Accordion?>
@@ -123,7 +123,14 @@
             </Label>
         </StackPane>
     </SplitPane>
-    <CommandBarPane fx:id="commandBar" cache="true" cacheHint="SPEED" minWidth="48" prefWidth="48.0" styleClass="command-bar" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0">
+    <DrawerPane fx:id="commandBar" cache="true" cacheHint="SPEED"
+                animation="GROW"
+                collapsedWidth="48"
+                expandedWidth="200"
+                styleClass="command-bar"
+                AnchorPane.bottomAnchor="0.0"
+                AnchorPane.leftAnchor="0.0"
+                AnchorPane.topAnchor="0.0">
         <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleExpandCommandBar" prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tooltip>
                 <Tooltip text="Expand">
@@ -355,7 +362,7 @@
                 </Tooltip>
             </tooltip>
         </Button>
-    </CommandBarPane>
+    </DrawerPane>
     <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-252" AnchorPane.topAnchor="0">
         <fx:include source="PreferencePaneView.fxml" />
     </StackPane>

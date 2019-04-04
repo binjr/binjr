@@ -99,9 +99,9 @@ public class MainViewController implements Initializable {
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final double TOOL_BUTTON_SIZE = 20;
-    private static final double COLLAPSED_WIDTH = 48;
-    private static final double EXPANDED_WIDTH = 200;
-    private static final int ANIMATION_DURATION = 50;
+    //    private static final double COLLAPSED_WIDTH = 48;
+//    private static final double EXPANDED_WIDTH = 200;
+//    private static final int ANIMATION_DURATION = 50;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
 
@@ -111,7 +111,7 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     @FXML
-    public CommandBarPane commandBar;
+    public DrawerPane commandBar;
     @FXML
     public AnchorPane root;
     @FXML
@@ -134,9 +134,9 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
-    private Timeline showTimeline;
-    private Timeline hideTimeline;
-    private DoubleProperty commandBarWidth = new SimpleDoubleProperty(0.2);
+//    private Timeline showTimeline;
+//    private Timeline hideTimeline;
+
     private Property<TimeRangePicker.TimeRange> linkedTimeRange =
             new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private Optional<String> associatedFile = Optional.empty();
@@ -198,7 +198,6 @@ public class MainViewController implements Initializable {
                     for (TitledPane pane : sourcesPane.getPanes()) {
                         if (pane.isExpanded()) {
                             expandRequiered = false;
-
                         }
                     }
                     if ((expandRequiered) && (oldPane != null)) {
@@ -224,13 +223,11 @@ public class MainViewController implements Initializable {
         });
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
-
+        commandBar.setSibling(contentView);
 
         worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
         worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
-        commandBarWidth.addListener((observable, oldValue, newValue) -> {
-            doCommandBarResize(newValue.doubleValue());
-        });
+
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 invalidateSearchResults();
@@ -365,7 +362,8 @@ public class MainViewController implements Initializable {
             TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
             openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
-            showCommandBar();
+            // showCommandBar();
+            commandBar.expand();
 
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
@@ -374,11 +372,8 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void handleExpandCommandBar(ActionEvent actionEvent) {
-        if (!commandBar.isExpanded()) {
-            showCommandBar();
-        } else {
-            hideCommandBar();
-        }
+        commandBar.toggle();
+
     }
 
     @FXML
@@ -613,40 +608,40 @@ public class MainViewController implements Initializable {
         return (TreeView<TimeSeriesBinding>) sourcesPane.getExpandedPane().getContent();
     }
 
-    private void showCommandBar() {
-        if (hideTimeline != null) {
-            hideTimeline.stop();
-        }
-        if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
-            return;
-        }
-        Duration duration = Duration.millis(ANIMATION_DURATION);
-        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, EXPANDED_WIDTH));
-        showTimeline = new Timeline(keyFrame);
-        showTimeline.setOnFinished(event -> new DelayedAction(
-                () -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH),
-                Duration.millis(50)).submit()
-        );
-        showTimeline.play();
-        commandBar.setExpanded(true);
-    }
-
-    private void hideCommandBar() {
-        if (showTimeline != null) {
-            showTimeline.stop();
-        }
-        if (hideTimeline != null && hideTimeline.getStatus() == Animation.Status.RUNNING) {
-            return;
-        }
-        if (commandBarWidth.get() <= COLLAPSED_WIDTH) {
-            return;
-        }
-        Duration duration = Duration.millis(ANIMATION_DURATION);
-        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, COLLAPSED_WIDTH)));
-        AnchorPane.setLeftAnchor(contentView, COLLAPSED_WIDTH);
-        hideTimeline.play();
-        commandBar.setExpanded(false);
-    }
+//    private void showCommandBar() {
+//        if (hideTimeline != null) {
+//            hideTimeline.stop();
+//        }
+//        if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
+//            return;
+//        }
+//        Duration duration = Duration.millis(ANIMATION_DURATION);
+//        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, EXPANDED_WIDTH));
+//        showTimeline = new Timeline(keyFrame);
+//        showTimeline.setOnFinished(event -> new DelayedAction(
+//                () -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH),
+//                Duration.millis(50)).submit()
+//        );
+//        showTimeline.play();
+//        commandBar.setExpanded(true);
+//    }
+//
+//    private void hideCommandBar() {
+//        if (showTimeline != null) {
+//            showTimeline.stop();
+//        }
+//        if (hideTimeline != null && hideTimeline.getStatus() == Animation.Status.RUNNING) {
+//            return;
+//        }
+//        if (commandBarWidth.get() <= COLLAPSED_WIDTH) {
+//            return;
+//        }
+//        Duration duration = Duration.millis(ANIMATION_DURATION);
+//        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, COLLAPSED_WIDTH)));
+//        AnchorPane.setLeftAnchor(contentView, COLLAPSED_WIDTH);
+//        hideTimeline.play();
+//        commandBar.setExpanded(false);
+//    }
 
     private void slidePanel(int show, Duration delay) {
         TranslateTransition openNav = new TranslateTransition(new Duration(200), searchBarRoot);
@@ -654,10 +649,6 @@ public class MainViewController implements Initializable {
         openNav.setToY(show * -SEARCH_BAR_PANE_DISTANCE);
         openNav.play();
         openNav.setOnFinished(event -> AnchorPane.setBottomAnchor(sourceArea, show > 0 ? SEARCH_BAR_PANE_DISTANCE : 0));
-    }
-
-    private void doCommandBarResize(double v) {
-        commandBar.setMinWidth(v);
     }
 
     private void expandBranch(TreeItem<TimeSeriesBinding> branch) {
@@ -993,7 +984,7 @@ public class MainViewController implements Initializable {
         return true;
     }
 
-    private Image renderTextTooltip(String text){
+    private Image renderTextTooltip(String text) {
         var label = new Label("    " + text + "    ");
         label.getStyleClass().add("tooltip");
         // The label must be added to a scene so that CSS and layout are applied.

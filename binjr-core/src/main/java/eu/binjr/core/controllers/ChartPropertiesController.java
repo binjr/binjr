@@ -50,8 +50,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ChartPropertiesController implements Initializable, Closeable {
     private static final Logger logger = LogManager.getLogger(ChartPropertiesController.class);
-    public static final double SETTINGS_PANE_DISTANCE = -210;
-    private final BooleanProperty visible = new SimpleBooleanProperty(false);
+//    public static final double SETTINGS_PANE_DISTANCE = -210;
+//    public static final int ANIMATION_DURATION = 200;
+   // private final BooleanProperty visible = new SimpleBooleanProperty(false);
     private final BooleanProperty hidden = new SimpleBooleanProperty(true);
     private final Chart chart;
     private final Worksheet worksheet;
@@ -94,27 +95,35 @@ public class ChartPropertiesController implements Initializable, Closeable {
 
     }
 
-    public void show() {
-        if (hidden.getValue()) {
-            slidePanel(-1, Duration.millis(0));
-            hidden.setValue(false);
-        }
-    }
+//    public void show(boolean animate) {
+//        if (hidden.getValue()) {
+//            hidden.setValue(false);
+//            if (animate) {
+//                slidePanel(-1, Duration.millis(0));
+//            } else {
+//                root.setTranslateX(SETTINGS_PANE_DISTANCE);
+//            }
+//        }
+//    }
+//
+//    public void hide(boolean animate) {
+//        if (!hidden.getValue()) {
+//            hidden.setValue(true);
+//            if (animate) {
+//                slidePanel(1, Duration.millis(0));
+//            } else {
+//                root.setTranslateX(-SETTINGS_PANE_DISTANCE);
+//            }
+//        }
+//    }
 
-    public void hide() {
-        if (!hidden.getValue()) {
-            slidePanel(1, Duration.millis(0));
-            hidden.setValue(true);
-        }
-    }
-
-    private void slidePanel(int show, Duration delay) {
-        root.toFront();
-        TranslateTransition openNav = new TranslateTransition(new Duration(200), root);
-        openNav.setDelay(delay);
-        openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
-        openNav.play();
-    }
+//    private void slidePanel(int show, Duration delay) {
+//        root.toFront();
+//        TranslateTransition openNav = new TranslateTransition(new Duration(ANIMATION_DURATION), root);
+//        openNav.setDelay(delay);
+//        openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
+//        openNav.play();
+//    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -172,20 +181,20 @@ public class ChartPropertiesController implements Initializable, Closeable {
         strokeWidthControlDisabled(!showAreaOutline.isSelected());
         bindingManager.attachListener(showAreaOutline.selectedProperty(),
                 (ChangeListener<Boolean>) (observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
-        bindingManager.attachListener(visibleProperty(), (observable, oldValue, newValue) -> setPanelVisibility());
-        bindingManager.bindBidirectional(visibleProperty(), chart.showPropertiesProperty());
+        //bindingManager.attachListener(visibleProperty(), (observable, oldValue, newValue) -> togglePanelVisibility());
+        bindingManager.bindBidirectional(root.visibleProperty(), chart.showPropertiesProperty());
 
-        closeButton.setOnAction(e -> visibleProperty().setValue(false));
+        closeButton.setOnAction(e -> root.visibleProperty().setValue(false));
         bindingManager.bind(yAxisScaleSettings.disableProperty(), autoScaleYAxis.selectedProperty());
     }
 
-    void setPanelVisibility() {
-        if (isVisible()) {
-            show();
-        } else {
-            hide();
-        }
-    }
+//    private void togglePanelVisibility() {
+//        if (isVisible()) {
+//            show(true);
+//        } else {
+//            hide(true);
+//        }
+//    }
 
     private void adaptToChartType(boolean disable) {
         showAreaOutline.setDisable(disable);
@@ -209,13 +218,13 @@ public class ChartPropertiesController implements Initializable, Closeable {
         return hidden.getValue();
     }
 
-    public boolean isVisible() {
-        return visible.get();
-    }
-
-    public BooleanProperty visibleProperty() {
-        return this.visible;
-    }
+//    public boolean isVisible() {
+//        return visible.get();
+//    }
+//
+//    public BooleanProperty visibleProperty() {
+//        return this.visible;
+//    }
 
 
     @Override

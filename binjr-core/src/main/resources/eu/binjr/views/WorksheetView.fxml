@@ -16,6 +16,7 @@
   ~    limitations under the License.
   -->
 
+<?import eu.binjr.common.javafx.controls.DrawerPane?>
 <?import eu.binjr.common.javafx.controls.TimeRangePicker?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
@@ -230,7 +231,7 @@
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
-            <AnchorPane minHeight="0.0" minWidth="0.0" styleClass="skinnable-pane-border">
+            <AnchorPane fx:id="chartViewport" minHeight="0.0" minWidth="0.0" styleClass="skinnable-pane-border">
                 <cursor>
                     <Cursor fx:constant="DEFAULT"/>
                 </cursor>
@@ -239,6 +240,15 @@
                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
                 </AnchorPane>
+                <DrawerPane fx:id="chartProperties" cache="true" cacheHint="SPEED"
+                            collapsedWidth="0"
+                            expandedWidth="200"
+                            side="RIGHT"
+                            animation="SLIDE"
+                            AnchorPane.bottomAnchor="0.0"
+                            AnchorPane.rightAnchor="-200.0"
+                            AnchorPane.topAnchor="0.0">
+                </DrawerPane>
             </AnchorPane>
             <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <Accordion fx:id="seriesTableContainer" styleClass="series-table" AnchorPane.bottomAnchor="0.0"

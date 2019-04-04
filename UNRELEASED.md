@@ -2,3 +2,4 @@
 requests (e.g. continuous clicks on refresh or back/forward buttons).
 * _[Fixed]_ NPE when drag-and-dropping a folded tree.
 * _[Fixed]_ Tooltips are not styled according to the selected UI theme.
+* _[Fixed]_ Chart properties slide pane should not obscure charting area.
