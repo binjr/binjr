@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2018 Frederic Thevenet
+  ~    Copyright 2017-2019 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@
                         <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
                     </children>
                 </VBox>
-                <Label text="Show outline" wrapText="true"/>
+                <Label fx:id="showAreaOutlineLabel" text="Show outline" wrapText="true"/>
                 <VBox fillWidth="false">
                     <ToggleSwitch fx:id="showAreaOutline" prefWidth="1.0">
                     </ToggleSwitch>

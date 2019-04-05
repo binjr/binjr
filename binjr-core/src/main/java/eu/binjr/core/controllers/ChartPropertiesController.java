@@ -20,18 +20,13 @@ import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.Worksheet;
-import javafx.animation.TranslateTransition;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyBooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
-import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,10 +45,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class ChartPropertiesController implements Initializable, Closeable {
     private static final Logger logger = LogManager.getLogger(ChartPropertiesController.class);
-//    public static final double SETTINGS_PANE_DISTANCE = -210;
-//    public static final int ANIMATION_DURATION = 200;
-   // private final BooleanProperty visible = new SimpleBooleanProperty(false);
-    private final BooleanProperty hidden = new SimpleBooleanProperty(true);
     private final Chart chart;
     private final Worksheet worksheet;
     private final AtomicBoolean closing = new AtomicBoolean(false);
@@ -62,19 +53,21 @@ public class ChartPropertiesController implements Initializable, Closeable {
     @FXML
     private Button closeButton;
     @FXML
-    private Slider graphOpacitySlider = new Slider();
+    private Slider graphOpacitySlider;
     @FXML
-    private Label graphOpacityLabel = new Label();
+    private Label graphOpacityLabel;
     @FXML
-    private Slider strokeWidthSlider = new Slider();
+    private Slider strokeWidthSlider;
     @FXML
-    private Label strokeWidthText = new Label();
+    private Label strokeWidthText;
     @FXML
-    private Label strokeWidthLabel = new Label();
+    private Label strokeWidthLabel;
     @FXML
-    private Label opacityText = new Label();
+    private Label showAreaOutlineLabel;
     @FXML
-    private ToggleSwitch showAreaOutline = new ToggleSwitch();
+    private Label opacityText;
+    @FXML
+    private ToggleSwitch showAreaOutline;
     @FXML
     private ChoiceBox<ChartType> chartTypeChoice;
     @FXML
@@ -88,42 +81,10 @@ public class ChartPropertiesController implements Initializable, Closeable {
 
     private final BindingManager bindingManager = new BindingManager();
 
-
     public ChartPropertiesController(Worksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
         this.chart = chart;
-
     }
-
-//    public void show(boolean animate) {
-//        if (hidden.getValue()) {
-//            hidden.setValue(false);
-//            if (animate) {
-//                slidePanel(-1, Duration.millis(0));
-//            } else {
-//                root.setTranslateX(SETTINGS_PANE_DISTANCE);
-//            }
-//        }
-//    }
-//
-//    public void hide(boolean animate) {
-//        if (!hidden.getValue()) {
-//            hidden.setValue(true);
-//            if (animate) {
-//                slidePanel(1, Duration.millis(0));
-//            } else {
-//                root.setTranslateX(-SETTINGS_PANE_DISTANCE);
-//            }
-//        }
-//    }
-
-//    private void slidePanel(int show, Duration delay) {
-//        root.toFront();
-//        TranslateTransition openNav = new TranslateTransition(new Duration(ANIMATION_DURATION), root);
-//        openNav.setDelay(delay);
-//        openNav.setToX(show * -SETTINGS_PANE_DISTANCE);
-//        openNav.play();
-//    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -172,60 +133,35 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
         yMaxFormatter.valueProperty().setValue(chart.getyAxisMaxValue());
         yMaxRange.setTextFormatter(yMaxFormatter);
-
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());
-
-
-        strokeWidthControlDisabled(!showAreaOutline.isSelected());
-        bindingManager.attachListener(showAreaOutline.selectedProperty(),
-                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> strokeWidthControlDisabled(!newValue));
-        //bindingManager.attachListener(visibleProperty(), (observable, oldValue, newValue) -> togglePanelVisibility());
+        var strokeWithEditable = Bindings.createBooleanBinding(() ->
+                        (chart.chartTypeProperty().getValue() == ChartType.LINE ||
+                                chart.chartTypeProperty().getValue() == ChartType.SCATTER ||
+                                chart.showAreaOutlineProperty().getValue()),
+                chart.chartTypeProperty(),
+                chart.showAreaOutlineProperty());
+        strokeWidthSlider.disableProperty().bind(strokeWithEditable.not());
+        strokeWidthText.disableProperty().bind(strokeWithEditable.not());
+        strokeWidthLabel.disableProperty().bind(strokeWithEditable.not());
         bindingManager.bindBidirectional(root.visibleProperty(), chart.showPropertiesProperty());
-
         closeButton.setOnAction(e -> root.visibleProperty().setValue(false));
         bindingManager.bind(yAxisScaleSettings.disableProperty(), autoScaleYAxis.selectedProperty());
     }
 
-//    private void togglePanelVisibility() {
-//        if (isVisible()) {
-//            show(true);
-//        } else {
-//            hide(true);
-//        }
-//    }
-
     private void adaptToChartType(boolean disable) {
-        showAreaOutline.setDisable(disable);
-        showAreaOutline.setSelected(disable);
-        graphOpacitySlider.setDisable(disable);
-        graphOpacityLabel.setDisable(disable);
-        opacityText.setDisable(disable);
+        showAreaOutline.setManaged(!disable);
+        showAreaOutlineLabel.setManaged(!disable);
+        graphOpacitySlider.setManaged(!disable);
+        graphOpacityLabel.setManaged(!disable);
+        opacityText.setManaged(!disable);
+        showAreaOutline.setVisible(!disable);
+        showAreaOutlineLabel.setVisible(!disable);
+        graphOpacitySlider.setVisible(!disable);
+        graphOpacityLabel.setVisible(!disable);
+        opacityText.setVisible(!disable);
     }
-
-    private void strokeWidthControlDisabled(boolean disable) {
-        strokeWidthSlider.setDisable(disable);
-        strokeWidthText.setDisable(disable);
-        strokeWidthLabel.setDisable(disable);
-    }
-
-    public ReadOnlyBooleanProperty hiddenProperty() {
-        return hidden;
-    }
-
-    public boolean isHidden() {
-        return hidden.getValue();
-    }
-
-//    public boolean isVisible() {
-//        return visible.get();
-//    }
-//
-//    public BooleanProperty visibleProperty() {
-//        return this.visible;
-//    }
-
 
     @Override
     public void close() {
