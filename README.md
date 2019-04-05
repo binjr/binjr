@@ -1,10 +1,11 @@
 # binjr 
+[![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22)
 
-Platform | Build Status | Download
----|---|---
-Windows | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_windows)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_windows) | [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22)
-Linux | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_linux)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_linux) | [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22)
-macOS | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_mac)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_mac) | [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22) 
+Platform | Build Status
+---|---
+Windows | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_windows)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_windows) 
+Linux | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_linux)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_linux) 
+macOS | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_mac)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_mac)
 
 ## What is binjr?
 
