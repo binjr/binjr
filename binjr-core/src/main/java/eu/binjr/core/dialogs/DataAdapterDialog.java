@@ -116,12 +116,13 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
 
         okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
         Platform.runLater(uriField::requestFocus);
-        autoCompletionBinding = TextFields.bindAutoCompletion(uriField, suggestedUrls);
+        updateUriAutoCompletionBinding();
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapter();
-                autoCompletionLearnWord(uriField);
+                suggestedUrls.add(uriField.getText());
+                updateUriAutoCompletionBinding();
             } catch (DateTimeException e) {
                 Dialogs.notifyError("Invalid Timezone", e, Pos.CENTER, timezoneField);
                 ae.consume();
@@ -167,11 +168,11 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 
-    private void autoCompletionLearnWord(TextField field) {
-        suggestedUrls.add(field.getText());
+    private void updateUriAutoCompletionBinding() {
         if (autoCompletionBinding != null) {
             autoCompletionBinding.dispose();
         }
-        autoCompletionBinding = TextFields.bindAutoCompletion(field, suggestedUrls);
+        autoCompletionBinding = TextFields.bindAutoCompletion(uriField, suggestedUrls);
+        autoCompletionBinding.setPrefWidth(uriField.getPrefWidth());
     }
 }
