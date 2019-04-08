@@ -4,3 +4,4 @@ requests (e.g. continuous clicks on refresh or back/forward buttons).
 * _[Fixed]_ Tooltips are not styled according to the selected UI theme.
 * _[Fixed]_ Chart properties slide pane should not obscure charting area.
 * _[Fixed]_ Stroke width slider is grayed out for line and scatter point charts.
+* _[Fixed]_ Suggest popup on data adapter dialog doesn't adapt to longer URLs/paths.
