@@ -7,7 +7,6 @@ trigger:
       - v*
 
 variables:
-  system.debug: true
 
 jobs:
   # Linux app bundle job

@@ -1,3 +1,13 @@
+### [binjr v2.4.1](https://github.com/binjr/binjr/releases/tag/v2.4.1)
+Released on Mon, 08 Apr 2019
+
+* _[Fixed]_ The application becomes unresponsive and crashes with an out-of-memory error if it gets overflown with user requests (e.g. continuous clicks on refresh or back/forward buttons).
+* _[Fixed]_ NPE when drag-and-dropping a folded tree.
+* _[Fixed]_ Tooltips are not styled according to the selected UI theme.
+* _[Fixed]_ Chart properties slide pane should not obscure charting area.
+* _[Fixed]_ Stroke width slider is grayed out for line and scatter point charts.
+* _[Fixed]_ Suggest popup on data adapter dialog doesn't adapt to longer URLs/paths.
+
 ### [binjr v2.4.0](https://github.com/binjr/binjr/releases/tag/v2.4.0)
 Released on Fri, 29 Mar 2019
 
