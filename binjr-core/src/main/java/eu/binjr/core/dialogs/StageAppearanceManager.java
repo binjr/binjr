@@ -18,12 +18,18 @@ package eu.binjr.core.dialogs;
 
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
-import eu.binjr.core.preferences.OsFamily;
+import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -35,7 +41,8 @@ import java.util.stream.Collectors;
  */
 public class StageAppearanceManager {
     /**
-     * Defines a set of options that governs that what degree a the appearance of a registered {@link Stage} should be affected
+     * Defines a set of options that governs that what degree a the appearance of a registered {@link Stage} should be
+     * affected.
      */
     public enum AppearanceOptions {
         /**
@@ -50,6 +57,10 @@ public class StageAppearanceManager {
          * Indicates that the theme should be changed.
          */
         SET_THEME,
+        /**
+         * Indicates that "curtains" should be used to hide the stage until the theme is fully applied.
+         */
+        USE_STAGE_CURTAIN,
         /**
          * Indicates that all appearance changes should be applied
          */
@@ -105,6 +116,39 @@ public class StageAppearanceManager {
         logger.trace(this::dumpRegisteredStages);
     }
 
+    private Node installCurtain(Stage stage) {
+        if (stage.getScene() != null &&  stage.getScene().getRoot() instanceof Pane) {
+            ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/eu/binjr/images/avatar_512.png")));
+            logo.setFitHeight(256.0);
+            logo.setFitWidth(256.0);
+            StackPane curtain = new StackPane(logo);
+            Pane root = (Pane) stage.getScene().getRoot();
+            curtain.setStyle("-fx-background-color: #204656;");
+            root.getChildren().add(curtain);
+            AnchorPane.setLeftAnchor(curtain, 0.0);
+            AnchorPane.setRightAnchor(curtain, 0.0);
+            AnchorPane.setTopAnchor(curtain, 0.0);
+            AnchorPane.setBottomAnchor(curtain, 0.0);
+            curtain.toFront();
+            return curtain;
+        }
+        return null;
+    }
+
+    private void raiseCurtain(Stage stage, Node curtain) {
+        if (curtain != null && stage.getScene().getRoot() instanceof Pane) {
+            Pane root = (Pane) stage.getScene().getRoot();
+            FadeTransition ft = new FadeTransition(Duration.millis(250), curtain);
+            ft.setDelay(Duration.millis(350));
+            ft.setFromValue(1.0);
+            ft.setToValue(0.0);
+            ft.play();
+            ft.setOnFinished(event -> {
+                root.getChildren().remove(curtain);
+            });
+        }
+    }
+
     /**
      * Registers a {@link Stage} so that its appearance can be altered by the manager.
      *
@@ -115,7 +159,8 @@ public class StageAppearanceManager {
     }
 
     /**
-     * Registers a {@link Stage} so that its appearance can be altered by the manager, according to the provided {@link AppearanceOptions}
+     * Registers a {@link Stage} so that its appearance can be altered by the manager, according to the provided
+     * {@link AppearanceOptions}
      *
      * @param stage   the {@link Stage} to register in the {@link StageAppearanceManager}
      * @param options Appearance {@link AppearanceOptions} to apply the the registered stage.
@@ -125,9 +170,14 @@ public class StageAppearanceManager {
             throw new IllegalArgumentException("Stage cannot be null");
         }
         Set<AppearanceOptions> optionsEnumSet = EnumSet.copyOf(Arrays.asList(options));
+        if (optionsEnumSet.contains(AppearanceOptions.SET_ALL) ||
+                optionsEnumSet.contains(AppearanceOptions.USE_STAGE_CURTAIN)) {
+            stage.setOnShown(event -> raiseCurtain(stage, installCurtain(stage)));
+        }
         this.registeredStages.put(stage, optionsEnumSet);
         logger.trace(this::dumpRegisteredStages);
-        Platform.runLater(() -> setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
+        Platform.runLater(() ->
+                setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
     }
 
     private String dumpRegisteredStages() {
@@ -172,8 +222,8 @@ public class StageAppearanceManager {
         });
     }
 
-    public static String getFontFamilyCssPath(){
-        switch(AppEnvironment.getInstance().getOsFamily()){
+    public static String getFontFamilyCssPath() {
+        switch (AppEnvironment.getInstance().getOsFamily()) {
             default:
             case WINDOWS:
                 return "/eu/binjr/css/Fonts-family-win.css";
@@ -184,7 +234,7 @@ public class StageAppearanceManager {
         }
     }
 
-    public void applyUiTheme(Scene scene){
+    public void applyUiTheme(Scene scene) {
         setUiTheme(scene, GlobalPreferences.getInstance().getUserInterfaceTheme());
     }
 }

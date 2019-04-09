@@ -58,9 +58,10 @@ public class Binjr extends Application {
         MainViewController mainViewController = loader.getController();
         mainViewController.setAssociatedFile(getAssociatedWorkspace(getParameters()));
         primaryStage.setTitle(AppEnvironment.APP_NAME);
-        StageAppearanceManager.getInstance().register(primaryStage);
+
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             primaryStage.setScene(new Scene(root));
+            StageAppearanceManager.getInstance().register(primaryStage);
         }
         try (Profiler p = Profiler.start("show", logger::trace)) {
             primaryStage.show();

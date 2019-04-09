@@ -158,6 +158,8 @@ public class MainViewController implements Initializable {
     private StackPane worksheetArea;
     @FXML
     private Menu addSourceMenu;
+    @FXML
+    private StackPane curtains;
 
 
     /**
@@ -254,6 +256,8 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
+
+
     }
 
     protected void runAfterInitialize() {
@@ -298,6 +302,18 @@ public class MainViewController implements Initializable {
                     this::onAvailableUpdate, null, null
             );
         }
+       // liftCurtains();
+    }
+
+    public void liftCurtains() {
+        FadeTransition ft = new FadeTransition(Duration.millis(250), curtains);
+        ft.setDelay(Duration.millis(400));
+        ft.setFromValue(1.0);
+        ft.setToValue(0.0);
+        ft.play();
+        ft.setOnFinished(event -> {
+            root.getChildren().remove(curtains);
+        });
     }
 
     private void registerStageKeyEvents(Stage stage) {
@@ -362,7 +378,6 @@ public class MainViewController implements Initializable {
             TranslateTransition openNav = new TranslateTransition(new Duration(350), settingsPane);
             openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
-            // showCommandBar();
             commandBar.expand();
 
         } catch (Exception ex) {
@@ -608,40 +623,6 @@ public class MainViewController implements Initializable {
         return (TreeView<TimeSeriesBinding>) sourcesPane.getExpandedPane().getContent();
     }
 
-//    private void showCommandBar() {
-//        if (hideTimeline != null) {
-//            hideTimeline.stop();
-//        }
-//        if (showTimeline != null && showTimeline.getStatus() == Animation.Status.RUNNING) {
-//            return;
-//        }
-//        Duration duration = Duration.millis(ANIMATION_DURATION);
-//        KeyFrame keyFrame = new KeyFrame(duration, new KeyValue(commandBarWidth, EXPANDED_WIDTH));
-//        showTimeline = new Timeline(keyFrame);
-//        showTimeline.setOnFinished(event -> new DelayedAction(
-//                () -> AnchorPane.setLeftAnchor(contentView, EXPANDED_WIDTH),
-//                Duration.millis(50)).submit()
-//        );
-//        showTimeline.play();
-//        commandBar.setExpanded(true);
-//    }
-//
-//    private void hideCommandBar() {
-//        if (showTimeline != null) {
-//            showTimeline.stop();
-//        }
-//        if (hideTimeline != null && hideTimeline.getStatus() == Animation.Status.RUNNING) {
-//            return;
-//        }
-//        if (commandBarWidth.get() <= COLLAPSED_WIDTH) {
-//            return;
-//        }
-//        Duration duration = Duration.millis(ANIMATION_DURATION);
-//        hideTimeline = new Timeline(new KeyFrame(duration, new KeyValue(commandBarWidth, COLLAPSED_WIDTH)));
-//        AnchorPane.setLeftAnchor(contentView, COLLAPSED_WIDTH);
-//        hideTimeline.play();
-//        commandBar.setExpanded(false);
-//    }
 
     private void slidePanel(int show, Duration delay) {
         TranslateTransition openNav = new TranslateTransition(new Duration(200), searchBarRoot);
