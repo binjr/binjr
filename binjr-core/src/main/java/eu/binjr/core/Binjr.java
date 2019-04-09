@@ -26,6 +26,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,6 +65,7 @@ public class Binjr extends Application {
             StageAppearanceManager.getInstance().register(primaryStage);
         }
         try (Profiler p = Profiler.start("show", logger::trace)) {
+            primaryStage.initStyle(AppEnvironment.getInstance().getWindowsStyle());
             primaryStage.show();
         }
         SplashScreen splash = SplashScreen.getSplashScreen();
@@ -109,6 +111,12 @@ public class Binjr extends Application {
     private void processCommandLineOptions(Parameters parameters) {
         parameters.getNamed().forEach((name, val) -> {
             switch (name.toLowerCase()) {
+                case "windows-style":
+                    try {
+                        AppEnvironment.getInstance().setWindowsStyle( StageStyle.valueOf(val.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Unknown windows style specified: " + val, e);
+                    }
                 case "resizable-dialogs":
                     AppEnvironment.getInstance().setResizableDialogs(Boolean.valueOf(val));
                     break;

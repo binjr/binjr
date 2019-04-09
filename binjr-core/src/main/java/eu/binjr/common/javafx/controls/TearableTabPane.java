@@ -20,6 +20,8 @@ package eu.binjr.common.javafx.controls;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -41,6 +43,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,6 +72,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
     private BindingManager bindingManager = new BindingManager();
+    private Property<StageStyle> detachedStageStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -454,6 +458,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         if (onOpenNewWindow != null) {
             onOpenNewWindow.handle(new WindowEvent(stage, WindowEvent.WINDOW_SHOWING));
         }
+        stage.initStyle(this.getDetachedStageStyle());
         stage.show();
         detachedTabPane.getSelectionModel().select(tab);
         stage.setOnCloseRequest(bindingManager.registerHandler(event -> {
@@ -466,6 +471,18 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         getTabs().forEach(tab -> tab.setContextMenu(null));
         logger.trace(() -> "Closing down TearableTabPane instance");
         bindingManager.close();
+    }
+
+    public StageStyle getDetachedStageStyle() {
+        return detachedStageStyle.getValue();
+    }
+
+    public Property<StageStyle> detachedStageStyleProperty() {
+        return detachedStageStyle;
+    }
+
+    public void setDetachedStageStyle(StageStyle detachedStageStyle) {
+        this.detachedStageStyle.setValue(detachedStageStyle);
     }
 
     /**

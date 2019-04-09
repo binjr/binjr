@@ -22,6 +22,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,6 +52,7 @@ public class AppEnvironment {
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty disableUpdateCheck = new SimpleBooleanProperty(false);
+    private Property<StageStyle> windowsStyle =  new SimpleObjectProperty<>(StageStyle.DECORATED);
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -328,6 +330,19 @@ public class AppEnvironment {
     public Boolean isDisableUpdateCheck() {
         return disableUpdateCheck.getValue();
     }
+
+    public void setWindowsStyle(StageStyle windowsStyle) {
+        this.windowsStyle.setValue(windowsStyle);
+    }
+
+    public Property<StageStyle> windowsStyleProperty(){
+        return windowsStyle;
+    }
+
+    public StageStyle getWindowsStyle() {
+        return windowsStyle.getValue();
+    }
+
 
     private String getHeapStats() {
         Runtime rt = Runtime.getRuntime();

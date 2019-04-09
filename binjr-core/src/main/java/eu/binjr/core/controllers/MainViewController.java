@@ -210,6 +210,7 @@ public class MainViewController implements Initializable {
                 });
 
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
+        worksheetTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
         worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
         worksheetTabPane.setTearable(true);

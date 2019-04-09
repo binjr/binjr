@@ -178,19 +178,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         AnchorPane.setBottomAnchor(settingsPane, 0.0);
         AnchorPane.setTopAnchor(settingsPane, 0.0);
         AnchorPane.setLeftAnchor(settingsPane, 0.0);
-
         settingsPane.getStyleClass().add("toolPane");
-//        settingsPane.setPrefWidth(200);
-//        settingsPane.setMinWidth(200);
-
-        //Platform.runLater(settingsPane::toFront);
-//        bindingManager.attachListener(propertiesController.hiddenProperty(),
-//                (ChangeListener<Boolean>) (observable, oldValue, newValue) ->{
-//                    double d = newValue ? 0.0 : 200.0;
-//                    new DelayedAction(
-//                            () -> AnchorPane.setRightAnchor(chartParent,d),
-//                            Duration.millis(d)).submit();
-//                } );
         return propertiesController;
     }
 
