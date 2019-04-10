@@ -21,10 +21,12 @@ import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
@@ -52,6 +54,7 @@ public class Binjr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        var prefs = GlobalPreferences.getInstance();
         processCommandLineOptions(getParameters());
         logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
@@ -61,6 +64,15 @@ public class Binjr extends Application {
         primaryStage.setTitle(AppEnvironment.APP_NAME);
 
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
+            if (Screen.getScreensForRectangle(
+                    prefs.getWindowLastPosition().getMinX(),
+                    prefs.getWindowLastPosition().getMinY(),
+                    10, 10).size() > 0) {
+                primaryStage.setX(prefs.getWindowLastPosition().getMinX());
+                primaryStage.setY(prefs.getWindowLastPosition().getMinY());
+                primaryStage.setWidth(prefs.getWindowLastPosition().getWidth());
+                primaryStage.setHeight(prefs.getWindowLastPosition().getHeight());
+            }
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);
         }
@@ -113,7 +125,7 @@ public class Binjr extends Application {
             switch (name.toLowerCase()) {
                 case "windows-style":
                     try {
-                        AppEnvironment.getInstance().setWindowsStyle( StageStyle.valueOf(val.toUpperCase()));
+                        AppEnvironment.getInstance().setWindowsStyle(StageStyle.valueOf(val.toUpperCase()));
                     } catch (IllegalArgumentException e) {
                         logger.error("Unknown windows style specified: " + val, e);
                     }

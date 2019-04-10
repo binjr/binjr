@@ -21,6 +21,13 @@ plugins {
     id "org.kordamp.markdown.convert" version "1.2.0"
     id 'io.codearte.nexus-staging' version '0.20.0'
     id "de.marcphilipp.nexus-publish" version "0.2.0" apply false
+    id 'idea'
+}
+
+idea {
+    module {
+        downloadJavadoc = true
+    }
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false

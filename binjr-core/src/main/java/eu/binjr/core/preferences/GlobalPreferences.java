@@ -18,6 +18,7 @@ package eu.binjr.core.preferences;
 
 import eu.binjr.core.dialogs.UserInterfaceThemes;
 import javafx.beans.property.*;
+import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,6 +59,10 @@ public class GlobalPreferences {
     private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
     private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairMarker";
     private static final String MAX_ASYNC_TASKS_PARALLELISM = "maxAsyncTasksParallelism";
+    private static final String WINDOW_LAST_POSITION_X = "windowLastPositionX";
+    private static final String WINDOW_LAST_POSITION_Y = "windowLastPositionY";
+    private static final String WINDOW_LAST_POSITION_HEIGHT = "windowLastPositionHeight";
+    private static final String WINDOW_LAST_POSITION_WIDTH = "windowLastPositionWidth";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -79,6 +84,7 @@ public class GlobalPreferences {
     private final IntegerProperty consoleMaxLineCapacity = new SimpleIntegerProperty();
     private final BooleanProperty fullHeightCrosshairMarker = new SimpleBooleanProperty();
     private final IntegerProperty maxAsyncTasksParallelism = new SimpleIntegerProperty();
+    private final Property<Rectangle2D> windowLastPosition = new SimpleObjectProperty<>();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -103,6 +109,14 @@ public class GlobalPreferences {
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
         fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
         maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
+        windowLastPosition.addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                prefs.putDouble(WINDOW_LAST_POSITION_X, newValue.getMinX());
+                prefs.putDouble(WINDOW_LAST_POSITION_Y, newValue.getMinY());
+                prefs.putDouble(WINDOW_LAST_POSITION_WIDTH, newValue.getWidth());
+                prefs.putDouble(WINDOW_LAST_POSITION_HEIGHT, newValue.getHeight());
+            }
+        });
     }
 
     /**
@@ -134,6 +148,12 @@ public class GlobalPreferences {
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
             fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, false));
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
+            windowLastPosition.setValue(new Rectangle2D(
+                    prefs.getDouble(WINDOW_LAST_POSITION_X, Double.MAX_VALUE),
+                    prefs.getDouble(WINDOW_LAST_POSITION_Y, Double.MAX_VALUE),
+                    prefs.getDouble(WINDOW_LAST_POSITION_WIDTH, 0),
+                    prefs.getDouble(WINDOW_LAST_POSITION_HEIGHT, 0)
+            ));
         } catch (Exception e) {
             logger.error("Error while loading application preferences", e);
         }
@@ -697,6 +717,19 @@ public class GlobalPreferences {
 
     public void setMaxAsyncTasksParallelism(int maxAsyncTasksParallelism) {
         this.maxAsyncTasksParallelism.set(maxAsyncTasksParallelism);
+    }
+
+
+    public Rectangle2D getWindowLastPosition() {
+        return windowLastPosition.getValue();
+    }
+
+    public Property<Rectangle2D> windowLastPositionProperty() {
+        return windowLastPosition;
+    }
+
+    public void setWindowLastPosition(Rectangle2D windowLastPosition) {
+        this.windowLastPosition.setValue(windowLastPosition);
     }
 
     private static class GlobalPreferencesHolder {

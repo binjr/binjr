@@ -48,10 +48,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.HPos;
-import javafx.geometry.Pos;
-import javafx.geometry.Side;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -208,7 +205,6 @@ public class MainViewController implements Initializable {
                         });
                     }
                 });
-
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
         worksheetTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
@@ -278,7 +274,7 @@ public class MainViewController implements Initializable {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
             } else {
-                Platform.exit();
+                saveWindowPositionAndQuit();
             }
         });
 
@@ -303,18 +299,6 @@ public class MainViewController implements Initializable {
                     this::onAvailableUpdate, null, null
             );
         }
-       // liftCurtains();
-    }
-
-    public void liftCurtains() {
-        FadeTransition ft = new FadeTransition(Duration.millis(250), curtains);
-        ft.setDelay(Duration.millis(400));
-        ft.setFromValue(1.0);
-        ft.setToValue(0.0);
-        ft.play();
-        ft.setOnFinished(event -> {
-            root.getChildren().remove(curtains);
-        });
     }
 
     private void registerStageKeyEvents(Stage stage) {
@@ -362,7 +346,7 @@ public class MainViewController implements Initializable {
     @FXML
     protected void handleQuitAction(ActionEvent event) {
         if (confirmAndClearWorkspace()) {
-            Platform.exit();
+            saveWindowPositionAndQuit();
         }
     }
 
@@ -389,7 +373,6 @@ public class MainViewController implements Initializable {
     @FXML
     public void handleExpandCommandBar(ActionEvent actionEvent) {
         commandBar.toggle();
-
     }
 
     @FXML
@@ -1336,6 +1319,19 @@ public class MainViewController implements Initializable {
             }
             event.consume();
         }
+    }
+
+    private void saveWindowPositionAndQuit() {
+        Stage stage = Dialogs.getStage(root);
+        if (stage != null) {
+            GlobalPreferences.getInstance().setWindowLastPosition(
+                    new Rectangle2D(
+                            stage.getX(),
+                            stage.getY(),
+                            stage.getWidth(),
+                            stage.getHeight()));
+        }
+        Platform.exit();
     }
 
     public WorksheetController getSelectedWorksheetController() {
