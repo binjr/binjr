@@ -26,6 +26,7 @@ import javafx.concurrent.Task;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -123,11 +124,12 @@ public class UpdateManager {
             return;
         }
         setLastCheckForUpdate(LocalDateTime.now());
-        Task<Optional<GithubRelease>> getLatestTask = new Task<Optional<GithubRelease>>() {
+        Task<Optional<GithubRelease>> getLatestTask = new Task<>() {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
+                GithubApi ghApi = GithubApi.getInstance();
+                return ghApi.getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
@@ -149,5 +151,15 @@ public class UpdateManager {
             }
         });
         AsyncTaskManager.getInstance().submit(getLatestTask);
+    }
+
+    private void asyncDownloadUpdatePackage(GithubRelease targetRelease) {
+        Task<Path> downloadTask = new Task<Path>() {
+            @Override
+            protected Path call() throws Exception {
+                return GithubApi.getInstance().downloadAsset(targetRelease, AppEnvironment.getInstance().getOsFamily());
+            }
+        };
+
     }
 }

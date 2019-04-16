@@ -19,6 +19,8 @@ package eu.binjr.common.github;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.binjr.core.preferences.OsFamily;
+import javafx.application.Platform;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -29,11 +31,13 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 /**
  * A series of helper methods to wrap some GitHub APIs
@@ -134,6 +138,28 @@ public class GithubApi {
                 return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubRelease>>() {
                 }.getType());
             }
+        });
+    }
+
+    public Map<OsFamily, Path> downloadAssets(GithubRelease release, OsFamily... platforms) throws IOException, URISyntaxException {
+        Map<OsFamily, Path> assets = new HashMap<>();
+        if (platforms != null && platforms.length > 0) {
+            for (OsFamily os : platforms) {
+                assets.put(os, downloadAsset(release, os));
+            }
+        }
+        return assets;
+    }
+
+    public Path downloadAsset(GithubRelease release, OsFamily os) throws IOException, URISyntaxException {
+        Path target = Files.createTempFile(Path.of("binjr", "updates", release.getVersion().toString()), "binjr_update", os.toString());
+        URIBuilder uriBuilder = new URIBuilder(release.getAssetsUrl());
+        HttpGet get = new HttpGet(uriBuilder.build());
+        return httpClient.execute(get, response -> {
+            try (var fos = new FileOutputStream(target.toFile())) {
+                response.getEntity().writeTo(fos);
+            }
+            return target;
         });
     }
 
