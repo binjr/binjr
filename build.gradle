@@ -384,7 +384,7 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     commandLine = [
             "${WIX_HOME}/bin/light.exe",
             "-sw","-sice:ICE38","-sice:ICE64",
-            "-out","${buildDir}/binjr-${BINJR_VERSION}.msi",
+            "-out","${buildDir}/${DISTRIBUTION_NAME}.msi",
             "${buildDir}/wix/obj/*.wixobj",
             "-ext","WixUtilExtension","-ext","WixUIExtension.dll"
     ]
