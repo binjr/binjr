@@ -2,7 +2,7 @@
 <installer-gui-script minSpecVersion="1">
 <title>binjr</title>
 <background file="binjr-background.png" mime-type="image/png" alignment="bottomleft"  scaling="none"/>
-<license file="/Volumes/diskE/Users/fred/Documents/binjr/binjr/target/jfx/app/LICENSE" mime-type="text/rtf"/>
+<license file="LICENSE" mime-type="text/rtf"/>
 <pkg-ref id="eu.binjr"/>
 <options customize="never" require-scripts="false"/>
 <choices-outline>

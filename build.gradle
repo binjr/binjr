@@ -32,7 +32,8 @@ idea {
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.BINJR_VERSION = "2.4.2${IS_RELEASE ? '' : '-SNAPSHOT'}"
+ext.BINJR_VERSION_STEM = "2.4.2"
+ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
@@ -75,6 +76,8 @@ ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
+
+ext.WIX_HOME = System.getenv("WIX")
 
 System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag:${System.getenv('IS_TAG')}")
@@ -349,9 +352,47 @@ task packageDistributionTar(type: Tar) {
     archiveName "${DISTRIBUTION_NAME}.tar.gz"
 }
 
+task wixRunHeat(type: Exec, dependsOn: [packageDistributionZip]) {
+    workingDir project.projectDir
+    commandLine = [
+            "${WIX_HOME}/bin/heat.exe",
+            "dir", "${DISTRIBUTION_PATH}",
+            "-cg", "binjrFiles",
+            "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
+            "-dr", "APPLICATIONFOLDER",
+            "-var", "var.buildSourceDir",
+            "-out", "${buildDir}/wix/binjrFiles.wxs"
+    ]
+}
+
+task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
+    workingDir project.projectDir
+    commandLine = [
+            "${WIX_HOME}/bin/candle.exe",
+            "-arch", "x64",
+            "-out", "${buildDir}/wix/obj/",
+            "${projectDir}/distribution/bundlers/windows/binjr.wxs",
+            "${buildDir}/wix/binjrFiles.wxs",
+            "-dbinjrVersion=${BINJR_VERSION_STEM}",
+            "-dbuildSourceDir=${DISTRIBUTION_PATH}",
+            "-dresourcesDir=${projectDir}/distribution"
+    ]
+}
+
+task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
+    workingDir project.projectDir
+    commandLine = [
+            "${WIX_HOME}/bin/light.exe",
+            "-sw","-sice:ICE38","-sice:ICE64",
+            "-out","${buildDir}/binjr-${BINJR_VERSION}.msi",
+            "${buildDir}/wix/obj/*.wixobj",
+            "-ext","WixUtilExtension","-ext","WixUIExtension.dll"
+    ]
+}
+
 task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
-        finalizedBy(packageDistributionZip)
+        finalizedBy(wixRunLight)
     } else {
         finalizedBy(packageDistributionTar)
     }

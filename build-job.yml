@@ -33,6 +33,7 @@ jobs:
         tag: $(Build.SourceBranchName)
         assets: |
           $(System.DefaultWorkingDirectory)/build/*.zip
+          $(System.DefaultWorkingDirectory)/build/*.msi
           $(System.DefaultWorkingDirectory)/build/*.tar.gz
         assetUploadMode: 'replace'
         releaseNotesSource: 'file'
