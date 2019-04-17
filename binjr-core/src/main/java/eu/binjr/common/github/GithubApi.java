@@ -20,8 +20,9 @@ package eu.binjr.common.github;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.core.preferences.OsFamily;
-import javafx.application.Platform;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.AbstractResponseHandler;
@@ -31,10 +32,11 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -49,7 +51,7 @@ public class GithubApi {
     private static final Logger logger = LogManager.getLogger(GithubApi.class);
     public static final String GITHUB_API_HOSTNAME = "api.github.com";
     public static final String URL_PROTOCOL = "https";
-    private String oauthToken;
+    private String userCredentials;
     private final CloseableHttpClient httpClient;
     private Gson gson;
 
@@ -69,6 +71,7 @@ public class GithubApi {
      */
     public static GithubApi getInstance() {
         return GithubApiHolder.instance;
+
     }
 
     /**
@@ -99,12 +102,20 @@ public class GithubApi {
                 .setScheme(URL_PROTOCOL)
                 .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases/" + id);
-        if (oauthToken != null) {
-            requestUrl.addParameter("access_token", oauthToken);
+        if (userCredentials != null) {
+            requestUrl.addParameter("client_Id", userCredentials);
         }
         logger.debug(() -> "requestUrl = " + requestUrl);
-        HttpGet httpget = new HttpGet(requestUrl.build());
+        HttpGet httpget = basicAuthGet(requestUrl.build());
         return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<GithubRelease>() {
+
+            @Override
+            public GithubRelease handleResponse(HttpResponse response) throws HttpResponseException, IOException {
+                logger.debug(() -> Arrays.toString(response.getHeaders("X-RateLimit-Limit")) + " " +
+                        Arrays.toString(response.getHeaders("X-RateLimit-Remaining")));
+                return super.handleResponse(response);
+            }
+
             @Override
             public GithubRelease handleEntity(HttpEntity entity) throws IOException {
                 return gson.fromJson(EntityUtils.toString(entity), GithubRelease.class);
@@ -127,11 +138,9 @@ public class GithubApi {
                 .setHost(GITHUB_API_HOSTNAME)
                 .setPath("/repos/" + owner + "/" + repo + "/releases")
                 .addParameter("per_page", "100");
-        if (oauthToken != null) {
-            requestUrl.addParameter("access_token", oauthToken);
-        }
         logger.debug(() -> "requestUrl = " + requestUrl);
-        HttpGet httpget = new HttpGet(requestUrl.build());
+        HttpGet httpget = basicAuthGet(requestUrl.build());
+
         return httpClient.execute(httpget, new AbstractResponseHandler<List<GithubRelease>>() {
             @Override
             public List<GithubRelease> handleEntity(HttpEntity entity) throws IOException {
@@ -141,20 +150,23 @@ public class GithubApi {
         });
     }
 
-    public Map<OsFamily, Path> downloadAssets(GithubRelease release, OsFamily... platforms) throws IOException, URISyntaxException {
-        Map<OsFamily, Path> assets = new HashMap<>();
-        if (platforms != null && platforms.length > 0) {
-            for (OsFamily os : platforms) {
-                assets.put(os, downloadAsset(release, os));
+    public List<GithubAsset> getAssets(GithubRelease release) throws URISyntaxException, IOException {
+        logger.debug(() -> "requestUrl = " + release.getAssetsUrl());
+        HttpGet httpget = basicAuthGet(release.getAssetsUrl().toURI());
+
+        return httpClient.execute(httpget, new AbstractResponseHandler<List<GithubAsset>>() {
+            @Override
+            public List<GithubAsset> handleEntity(HttpEntity entity) throws IOException {
+                return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubAsset>>() {
+                }.getType());
             }
-        }
-        return assets;
+        });
+
     }
 
-    public Path downloadAsset(GithubRelease release, OsFamily os) throws IOException, URISyntaxException {
-        Path target = Files.createTempFile(Path.of("binjr", "updates", release.getVersion().toString()), "binjr_update", os.toString());
-        URIBuilder uriBuilder = new URIBuilder(release.getAssetsUrl());
-        HttpGet get = new HttpGet(uriBuilder.build());
+    public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException {
+        Path target = Files.createTempDirectory("binjr-updates_").resolve(asset.getName());
+        HttpGet get =  new HttpGet(asset.getBrowserDownloadUrl().toURI());
         return httpClient.execute(get, response -> {
             try (var fos = new FileOutputStream(target.toFile())) {
                 response.getEntity().writeTo(fos);
@@ -164,11 +176,24 @@ public class GithubApi {
     }
 
     /**
-     * Set the OAuth2 api token.
+     * Set the user credentials for api authentication.
      *
-     * @param oauthToken the OAuth2 api token.
+     * @param username the user name
+     * @param token    a github personal access token.
      */
-    public void setOauthToken(String oauthToken) {
-        this.oauthToken = oauthToken;
+    public void setUserCredentials(String username, String token) {
+        if (username != null && token != null && username.trim().length() > 0) {
+            this.userCredentials = Base64.getEncoder().encodeToString((username + ":" + token).getBytes(StandardCharsets.UTF_8));
+        } else {
+            this.userCredentials = null;
+        }
+    }
+
+    private HttpGet basicAuthGet(URI requestUri) {
+        HttpGet httpget = new HttpGet(requestUri);
+        if (userCredentials != null) {
+            httpget.addHeader("Authorization", "Basic " + userCredentials);
+        }
+        return httpget;
     }
 }

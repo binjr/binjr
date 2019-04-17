@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.github.GithubApi;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
 import eu.binjr.core.dialogs.Dialogs;
@@ -204,6 +205,14 @@ public class PreferenceDialogController implements Initializable {
                     });
                     updateFlow.getChildren().add(latestReleaseLink);
                     btn.setDisable(false);
+                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
+                            githubRelease,
+                            path -> Dialogs.notifyInfo(
+                                    "Update download successful",
+                                    "Update package downloaded in " + path.toString(),
+                                    Pos.BOTTOM_RIGHT,
+                                    root),
+                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
                 },
                 version -> {
                     btn.setDisable(false);

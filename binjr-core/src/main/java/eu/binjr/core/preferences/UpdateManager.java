@@ -53,6 +53,15 @@ public class UpdateManager {
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
+        GlobalPreferences.getInstance().githubUserNameProperty().addListener((observable, oldValue, newValue) -> {
+            GithubApi.getInstance().setUserCredentials(newValue, GlobalPreferences.getInstance().getGithubAuthToken());
+        });
+        GlobalPreferences.getInstance().githubAuthTokenProperty().addListener((observable, oldValue, newValue) -> {
+            GithubApi.getInstance().setUserCredentials(GlobalPreferences.getInstance().getGithubUserName(), newValue);
+        });
+        GithubApi.getInstance().setUserCredentials(
+                GlobalPreferences.getInstance().getGithubUserName(),
+                GlobalPreferences.getInstance().getGithubAuthToken());
     }
 
     /**
@@ -128,8 +137,7 @@ public class UpdateManager {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                GithubApi ghApi = GithubApi.getInstance();
-                return ghApi.getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
+                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
@@ -153,13 +161,28 @@ public class UpdateManager {
         AsyncTaskManager.getInstance().submit(getLatestTask);
     }
 
-    private void asyncDownloadUpdatePackage(GithubRelease targetRelease) {
+    public void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
-                return GithubApi.getInstance().downloadAsset(targetRelease, AppEnvironment.getInstance().getOsFamily());
+                var asset = GithubApi.getInstance().getAssets(release)
+                        .stream()
+                        .filter(a -> a.getName().contains(AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()))
+                        .findFirst()
+                        .orElseThrow();
+                return GithubApi.getInstance().downloadAsset(asset);
             }
         };
 
+        downloadTask.setOnSucceeded(event -> onDownloadComplete.accept(downloadTask.getValue()));
+
+        downloadTask.setOnFailed(event -> {
+            logger.error("Error while downloading update package", downloadTask.getException());
+            if (onFailure != null) {
+                onFailure.accept(downloadTask.getException());
+            }
+        });
+        AsyncTaskManager.getInstance().submit(downloadTask);
     }
+
 }

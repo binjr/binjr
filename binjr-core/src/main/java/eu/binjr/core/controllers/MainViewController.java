@@ -1268,8 +1268,8 @@ public class MainViewController implements Initializable {
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
         n.action(new Action("Download", actionEvent -> {
-            String newReleaseUrl = githubRelease.getHtmlUrl();
-            if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
+            URL newReleaseUrl = githubRelease.getHtmlUrl();
+            if (newReleaseUrl != null) {
                 try {
                     Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
                 } catch (IOException | URISyntaxException e) {

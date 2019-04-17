@@ -22,9 +22,19 @@ package eu.binjr.core.preferences;
  * @author Frederic Thevenet
  */
 public enum OsFamily {
-    LINUX,
-    OSX,
-    UNSUPPORTED,
-    WINDOWS
+    LINUX("linux-amd64"),
+    OSX("mac-x86-64"),
+    UNSUPPORTED("unsupported"),
+    WINDOWS("windows-amd64");
+
+    private String platformClassifier;
+
+    OsFamily(String platformClassifier){
+        this.platformClassifier = platformClassifier;
+    }
+
+    public String getPlatformClassifier() {
+        return platformClassifier;
+    }
 }
 
