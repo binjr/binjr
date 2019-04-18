@@ -21,18 +21,11 @@ plugins {
     id "org.kordamp.markdown.convert" version "1.2.0"
     id 'io.codearte.nexus-staging' version '0.20.0'
     id "de.marcphilipp.nexus-publish" version "0.2.0" apply false
-    id 'idea'
-}
-
-idea {
-    module {
-        downloadJavadoc = true
-    }
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.BINJR_VERSION_STEM = "2.4.2"
+ext.BINJR_VERSION_STEM = "2.5.0"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'

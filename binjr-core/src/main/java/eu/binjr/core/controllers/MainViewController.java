@@ -183,14 +183,12 @@ public class MainViewController implements Initializable {
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
-
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
-
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
                     boolean expandRequiered = true;
@@ -253,8 +251,6 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
-
-
     }
 
     protected void runAfterInitialize() {
@@ -296,7 +292,7 @@ public class MainViewController implements Initializable {
 
         if (prefs.isCheckForUpdateOnStartUp()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
-                    this::onAvailableUpdate, null, null
+                    release -> UpdateManager.getInstance().showUpdateNotification(release, root), null, null
             );
         }
     }
@@ -364,7 +360,6 @@ public class MainViewController implements Initializable {
             openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
             commandBar.expand();
-
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
         }
@@ -1258,29 +1253,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void onAvailableUpdate(GithubRelease githubRelease) {
-        Notifications n = Notifications.create()
-                .title("New release available!")
-                .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
-                        AppEnvironment.getInstance().getVersion() +
-                        "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
-                .hideAfter(Duration.seconds(20))
-                .position(Pos.BOTTOM_RIGHT)
-                .owner(root);
-        n.action(new Action("Download", actionEvent -> {
-            URL newReleaseUrl = githubRelease.getHtmlUrl();
-            if (newReleaseUrl != null) {
-                try {
-                    Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
-                } catch (IOException | URISyntaxException e) {
-                    logger.error("Failed to launch url in browser " + newReleaseUrl, e);
-                }
-            }
-            n.hideAfter(Duration.seconds(0));
-        }));
-        n.showInformation();
-    }
-
     private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
@@ -1331,6 +1303,7 @@ public class MainViewController implements Initializable {
                             stage.getWidth(),
                             stage.getHeight()));
         }
+        UpdateManager.getInstance().startUpdate();
         Platform.exit();
     }
 

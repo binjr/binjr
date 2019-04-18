@@ -20,12 +20,29 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.common.github.GithubApi;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.version.Version;
+import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.dialogs.StageAppearanceManager;
+import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
+import javafx.event.ActionEvent;
+import javafx.event.EventType;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.PopupControl;
+import javafx.stage.Popup;
+import javafx.stage.WindowEvent;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.Notifications;
+import org.controlsfx.control.action.Action;
 
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -44,6 +61,7 @@ public class UpdateManager {
     private static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
     private static final String BINJR_UPDATE = "binjr/update";
     private Property<LocalDateTime> lastCheckForUpdate;
+    private Path updatePackage;
 
     private static class UpdateManagerHolder {
         private final static UpdateManager instance = new UpdateManager();
@@ -184,5 +202,104 @@ public class UpdateManager {
         });
         AsyncTaskManager.getInstance().submit(downloadTask);
     }
+
+    public void startUpdate() {
+        if (!AppEnvironment.getInstance().isDisableUpdateCheck() && updatePackage != null) {
+            try {
+                ProcessBuilder processBuilder = new ProcessBuilder();
+                switch (AppEnvironment.getInstance().getOsFamily()) {
+                    case WINDOWS:
+                        processBuilder.command(
+                                "msiexec",
+                                "/passive",
+                                "/log", updatePackage.getParent().resolve("binjr-install.log").toString(),
+                                "/i", updatePackage.toString());
+                        break;
+                    case OSX:
+                    case LINUX:
+                    case UNSUPPORTED:
+                    default:
+                        return;
+                }
+                processBuilder.start();
+            } catch (IOException e) {
+                logger.error("Error starting update", e);
+            }
+        }
+    }
+
+    public void showUpdateNotification(GithubRelease release, Node root) {
+        Notifications n = Notifications.create()
+                .title("New release available!")
+                .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
+                        AppEnvironment.getInstance().getVersion() +
+                        "\t\t.\nVersion " + release.getVersion() + " is now available.")
+                .hideAfter(Duration.seconds(20))
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(root);
+        n.action(new Action("More Info", event -> {
+                    URL newReleaseUrl = release.getHtmlUrl();
+                    if (newReleaseUrl != null) {
+                        try {
+                            Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
+                        } catch (IOException | URISyntaxException e) {
+                            logger.error("Failed to launch url in browser " + newReleaseUrl, e);
+                        }
+                    }
+                }),
+                new Action("Install When I Exit", event -> {
+                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
+                            release,
+                            path -> {
+                                Dialogs.notifyInfo(
+                                        "Update download successful",
+                                        "binjr will be updated upon quiting the application.",
+                                        Pos.BOTTOM_RIGHT,
+                                        root);
+                                updatePackage = path;
+                            },
+                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
+                    closeNotificationPopup((Node) event.getSource());
+                }),
+                new Action("Install Now", event -> {
+                    var stage = Dialogs.getStage(root);
+                    Dialogs.notifyInfo(
+                            "Downloading update...",
+                            "binjr will exit and the update will start once the download is complete",
+                            Pos.BOTTOM_RIGHT,
+                            root);
+                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
+                            release,
+                            path -> {
+                                updatePackage = path;
+                                if (stage != null) {
+                                    var handler = stage.getOnCloseRequest();
+                                    if (handler != null) {
+                                        handler.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+                                    }
+                                }
+                            },
+                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
+                    closeNotificationPopup((Node) event.getSource());
+                }));
+        n.showInformation();
+    }
+
+    // This is pretty nasty (and probably won't work in a modular app),
+    // but couldn't find another way to close the notification popup.
+    private void closeNotificationPopup(Node n) {
+        if (n == null) {
+            //couldn't find NotificationBar, giving up.
+            return;
+        }
+        if (n instanceof NotificationBar) {
+            // found it, hide the popup.
+            ((NotificationBar) n).hide();
+            return;
+        }
+        // keep looking.
+        closeNotificationPopup(n.getParent());
+    }
+
 
 }

@@ -205,14 +205,7 @@ public class PreferenceDialogController implements Initializable {
                     });
                     updateFlow.getChildren().add(latestReleaseLink);
                     btn.setDisable(false);
-                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
-                            githubRelease,
-                            path -> Dialogs.notifyInfo(
-                                    "Update download successful",
-                                    "Update package downloaded in " + path.toString(),
-                                    Pos.BOTTOM_RIGHT,
-                                    root),
-                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
+                    UpdateManager.getInstance().showUpdateNotification(githubRelease, root);
                 },
                 version -> {
                     btn.setDisable(false);
