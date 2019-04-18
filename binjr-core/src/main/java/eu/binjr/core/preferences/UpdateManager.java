@@ -217,12 +217,18 @@ public class UpdateManager {
                         break;
                     case OSX:
                     case LINUX:
+                        processBuilder.command(
+                                "bash",
+                                "-c",
+                                "echo 'TODO: extract update package downloaded at " +  updatePackage.toString()+"'");
+                        break;
                     case UNSUPPORTED:
                     default:
                         return;
                 }
+                logger.debug(()-> "Launching update command: " + processBuilder.command());
                 processBuilder.start();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 logger.error("Error starting update", e);
             }
         }
@@ -233,7 +239,7 @@ public class UpdateManager {
                 .title("New release available!")
                 .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
                         AppEnvironment.getInstance().getVersion() +
-                        "\t\t.\nVersion " + release.getVersion() + " is now available.")
+                        "\t\t\nVersion " + release.getVersion() + " is now available.")
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
