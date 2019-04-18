@@ -209,7 +209,7 @@ configure(subprojects) {
 
 task publishArtifacts(dependsOn: subprojects.publishToNexus) {
     if (IS_RELEASE) {
-        finalizedBy(closeAndReleaseRepository)
+      //  finalizedBy(closeAndReleaseRepository)
     }
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
