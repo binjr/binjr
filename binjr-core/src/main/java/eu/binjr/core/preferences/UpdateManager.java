@@ -254,7 +254,7 @@ public class UpdateManager {
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
-        n.action(new Action("More Info", event -> {
+        n.action(new Action("More info", event -> {
                     URL newReleaseUrl = release.getHtmlUrl();
                     if (newReleaseUrl != null) {
                         try {
@@ -264,7 +264,7 @@ public class UpdateManager {
                         }
                     }
                 }),
-                new Action("Download Update", event -> {
+                new Action("Download update", event -> {
                     UpdateManager.getInstance().asyncDownloadUpdatePackage(
                             release,
                             path -> {
@@ -284,8 +284,8 @@ public class UpdateManager {
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
-        n.action(new Action("Restart & Update Now", event -> restartApp(root)),
-                new Action("Update When I exit", event -> {
+        n.action(new Action("Restart & update now", event -> restartApp(root)),
+                new Action("Update when I exit", event -> {
                     dismissNotificationPopup((Node) event.getSource());
                 }));
         n.showInformation();
