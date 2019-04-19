@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.github.GithubApi;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
 import eu.binjr.core.dialogs.Dialogs;

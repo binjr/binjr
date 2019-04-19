@@ -123,6 +123,9 @@ public class Binjr extends Application {
     private void processCommandLineOptions(Parameters parameters) {
         parameters.getNamed().forEach((name, val) -> {
             switch (name.toLowerCase()) {
+                case "update-repo":
+                    AppEnvironment.getInstance().setUpdateRepoSlug(val);
+                    break;
                 case "windows-style":
                     try {
                         AppEnvironment.getInstance().setWindowsStyle(StageStyle.valueOf(val.toUpperCase()));

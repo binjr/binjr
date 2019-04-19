@@ -17,22 +17,16 @@
 package eu.binjr.core.preferences;
 
 import eu.binjr.core.data.async.AsyncTaskManager;
-import eu.binjr.common.github.GithubApi;
+import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.dialogs.StageAppearanceManager;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
-import javafx.event.ActionEvent;
-import javafx.event.EventType;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.PopupControl;
-import javafx.stage.Popup;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
@@ -56,28 +50,29 @@ import java.util.prefs.Preferences;
  */
 public class UpdateManager {
     private static final Logger logger = LogManager.getLogger(UpdateManager.class);
-    private static final String GITHUB_OWNER = "binjr";
-    private static final String GITHUB_REPO = "binjr";
     private static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
     private static final String BINJR_UPDATE = "binjr/update";
     private Property<LocalDateTime> lastCheckForUpdate;
-    private Path updatePackage;
+    private Path updatePackage = null;
+    private boolean restartRequested = false;
+    private final GithubApiHelper github;
 
     private static class UpdateManagerHolder {
         private final static UpdateManager instance = new UpdateManager();
     }
 
     private UpdateManager() {
+        this.github = GithubApiHelper.createCloseable();
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
         GlobalPreferences.getInstance().githubUserNameProperty().addListener((observable, oldValue, newValue) -> {
-            GithubApi.getInstance().setUserCredentials(newValue, GlobalPreferences.getInstance().getGithubAuthToken());
+            github.setUserCredentials(newValue, GlobalPreferences.getInstance().getGithubAuthToken());
         });
         GlobalPreferences.getInstance().githubAuthTokenProperty().addListener((observable, oldValue, newValue) -> {
-            GithubApi.getInstance().setUserCredentials(GlobalPreferences.getInstance().getGithubUserName(), newValue);
+            github.setUserCredentials(GlobalPreferences.getInstance().getGithubUserName(), newValue);
         });
-        GithubApi.getInstance().setUserCredentials(
+        github.setUserCredentials(
                 GlobalPreferences.getInstance().getGithubUserName(),
                 GlobalPreferences.getInstance().getGithubAuthToken());
     }
@@ -155,7 +150,9 @@ public class UpdateManager {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
-                return GithubApi.getInstance().getLatestRelease(GITHUB_OWNER, GITHUB_REPO).filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
+                return github
+                        .getLatestRelease(AppEnvironment.getInstance().getUpdateRepoSlug())
+                        .filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
@@ -183,12 +180,12 @@ public class UpdateManager {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
-                var asset = GithubApi.getInstance().getAssets(release)
+                var asset = github.getAssets(release)
                         .stream()
                         .filter(a -> a.getName().contains(AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()))
                         .findFirst()
                         .orElseThrow();
-                return GithubApi.getInstance().downloadAsset(asset);
+                return github.downloadAsset(asset);
             }
         };
 
@@ -212,6 +209,7 @@ public class UpdateManager {
                         processBuilder.command(
                                 "msiexec",
                                 "/passive",
+                                "LAUNCHREQUESTED=" + (restartRequested ? "1" : "0"),
                                 "/log", updatePackage.getParent().resolve("binjr-install.log").toString(),
                                 "/i", updatePackage.toString());
                         break;
@@ -220,13 +218,13 @@ public class UpdateManager {
                         processBuilder.command(
                                 "bash",
                                 "-c",
-                                "echo 'TODO: extract update package downloaded at " +  updatePackage.toString()+"'");
+                                "echo 'TODO: extract update package downloaded at " + updatePackage.toString() + "'");
                         break;
                     case UNSUPPORTED:
                     default:
                         return;
                 }
-                logger.debug(()-> "Launching update command: " + processBuilder.command());
+                logger.debug(() -> "Launching update command: " + processBuilder.command());
                 processBuilder.start();
             } catch (Exception e) {
                 logger.error("Error starting update", e);
@@ -277,6 +275,7 @@ public class UpdateManager {
                     UpdateManager.getInstance().asyncDownloadUpdatePackage(
                             release,
                             path -> {
+                                restartRequested = true;
                                 updatePackage = path;
                                 if (stage != null) {
                                     var handler = stage.getOnCloseRequest();
@@ -291,7 +290,7 @@ public class UpdateManager {
         n.showInformation();
     }
 
-    // This is pretty nasty (and probably won't work in a modular app),
+    // This is pretty nasty (and probably will cause problem with Jigsaw),
     // but couldn't find another way to close the notification popup.
     private void closeNotificationPopup(Node n) {
         if (n == null) {

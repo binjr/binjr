@@ -19,7 +19,6 @@ package eu.binjr.common.github;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import eu.binjr.core.preferences.OsFamily;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -32,6 +31,7 @@ import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -47,31 +47,46 @@ import java.util.*;
  *
  * @author Frederic Thevenet
  */
-public class GithubApi {
-    private static final Logger logger = LogManager.getLogger(GithubApi.class);
+public class GithubApiHelper {
+    private static final Logger logger = LogManager.getLogger(GithubApiHelper.class);
     public static final String GITHUB_API_HOSTNAME = "api.github.com";
     public static final String URL_PROTOCOL = "https";
-    private String userCredentials;
-    private final CloseableHttpClient httpClient;
-    private Gson gson;
+    protected String userCredentials;
+    protected final CloseableHttpClient httpClient;
+    protected Gson gson;
 
     private static class GithubApiHolder {
-        private final static GithubApi instance = new GithubApi();
+        private final static GithubApiHelper instance = new GithubApiHelper();
     }
 
-    private GithubApi() {
+    private GithubApiHelper() {
         gson = new Gson();
         httpClient = HttpClients.createDefault();
     }
 
     /**
-     * Returns the singleton instance of {@link GithubApi}
+     * Returns the singleton instance of {@link GithubApiHelper}
      *
-     * @return the singleton instance of {@link GithubApi}
+     * @return the singleton instance of {@link GithubApiHelper}
      */
-    public static GithubApi getInstance() {
+    private static GithubApiHelper getDefault() {
         return GithubApiHolder.instance;
+    }
 
+    /**
+     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     *
+     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     */
+    public static ClosableGitHubApiHelper createCloseable() {
+        return new ClosableGitHubApiHelper();
+    }
+
+    public static class ClosableGitHubApiHelper extends GithubApiHelper implements Closeable {
+        @Override
+        public void close() throws IOException {
+            httpClient.close();
+        }
     }
 
     /**
@@ -88,6 +103,18 @@ public class GithubApi {
     }
 
     /**
+     * Returns the latest release from the specified repository.
+     *
+     * @param slug the repository's slug (owner/name)
+     * @return An {@link Optional} that contains the latest release if it could be found.
+     * @throws IOException        if an IO error occurs while communicating with GiHub
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
+    public Optional<GithubRelease> getLatestRelease(String slug) throws IOException, URISyntaxException {
+        return getRelease(slug, "latest");
+    }
+
+    /**
      * Returns a specific release from the specified repository.
      *
      * @param owner the repository's owner
@@ -98,17 +125,26 @@ public class GithubApi {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public Optional<GithubRelease> getRelease(String owner, String repo, String id) throws IOException, URISyntaxException {
+        return getRelease(owner + "/" + repo, id);
+    }
+
+    /**
+     * Returns a specific release from the specified repository.
+     *
+     * @param slug the repository's slug (owner/name)
+     * @param id   the id of the release to retrieve
+     * @return An {@link Optional} that contains the specified release if it could be found.
+     * @throws IOException        if an IO error occurs while communicating with GitHub.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
+    public Optional<GithubRelease> getRelease(String slug, String id) throws IOException, URISyntaxException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(URL_PROTOCOL)
                 .setHost(GITHUB_API_HOSTNAME)
-                .setPath("/repos/" + owner + "/" + repo + "/releases/" + id);
-        if (userCredentials != null) {
-            requestUrl.addParameter("client_Id", userCredentials);
-        }
+                .setPath("/repos/" + slug + "/releases/" + id);
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
-        return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<GithubRelease>() {
-
+        return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<>() {
             @Override
             public GithubRelease handleResponse(HttpResponse response) throws HttpResponseException, IOException {
                 logger.debug(() -> Arrays.toString(response.getHeaders("X-RateLimit-Limit")) + " " +
@@ -133,15 +169,27 @@ public class GithubApi {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public List<GithubRelease> getAllReleases(String owner, String repo) throws IOException, URISyntaxException {
+        return getAllReleases(owner + "/" + repo);
+    }
+
+    /**
+     * Returns a list of all release from the specified repository.
+     *
+     * @param slug the repository's slug (owner/name)
+     * @return a list of all release from the specified repository.
+     * @throws IOException        if an IO error occurs while communicating with GitHub.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
+    public List<GithubRelease> getAllReleases(String slug) throws IOException, URISyntaxException {
         URIBuilder requestUrl = new URIBuilder()
                 .setScheme(URL_PROTOCOL)
                 .setHost(GITHUB_API_HOSTNAME)
-                .setPath("/repos/" + owner + "/" + repo + "/releases")
+                .setPath("/repos/" + slug + "/releases")
                 .addParameter("per_page", "100");
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
 
-        return httpClient.execute(httpget, new AbstractResponseHandler<List<GithubRelease>>() {
+        return httpClient.execute(httpget, new AbstractResponseHandler<>() {
             @Override
             public List<GithubRelease> handleEntity(HttpEntity entity) throws IOException {
                 return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubRelease>>() {
@@ -150,23 +198,38 @@ public class GithubApi {
         });
     }
 
+    /**
+     * Returns a list of all {@link GithubAsset} instances associated to a a {@link GithubRelease} instance.
+     *
+     * @param release The {@link GithubRelease} instance to get the assets from.
+     * @return a list of all {@link GithubAsset} instances associated to a a {@link GithubRelease} instance.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     * @throws IOException        if an IO error occurs while communicating with GitHub.
+     */
     public List<GithubAsset> getAssets(GithubRelease release) throws URISyntaxException, IOException {
         logger.debug(() -> "requestUrl = " + release.getAssetsUrl());
         HttpGet httpget = basicAuthGet(release.getAssetsUrl().toURI());
 
-        return httpClient.execute(httpget, new AbstractResponseHandler<List<GithubAsset>>() {
+        return httpClient.execute(httpget, new AbstractResponseHandler<>() {
             @Override
             public List<GithubAsset> handleEntity(HttpEntity entity) throws IOException {
                 return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubAsset>>() {
                 }.getType());
             }
         });
-
     }
 
+    /**
+     * Download to disk the payload of the specified github asset
+     *
+     * @param asset the asset to download.
+     * @return the {@link Path} where it was downloaded.
+     * @throws IOException        if an IO error occurs while attempting to download the file.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
     public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException {
         Path target = Files.createTempDirectory("binjr-updates_").resolve(asset.getName());
-        HttpGet get =  new HttpGet(asset.getBrowserDownloadUrl().toURI());
+        HttpGet get = new HttpGet(asset.getBrowserDownloadUrl().toURI());
         return httpClient.execute(get, response -> {
             try (var fos = new FileOutputStream(target.toFile())) {
                 response.getEntity().writeTo(fos);
@@ -189,7 +252,7 @@ public class GithubApi {
         }
     }
 
-    private HttpGet basicAuthGet(URI requestUri) {
+    protected HttpGet basicAuthGet(URI requestUri) {
         HttpGet httpget = new HttpGet(requestUri);
         if (userCredentials != null) {
             httpget.addHeader("Authorization", "Basic " + userCredentials);

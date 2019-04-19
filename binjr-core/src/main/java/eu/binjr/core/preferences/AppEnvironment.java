@@ -18,10 +18,7 @@ package eu.binjr.core.preferences;
 
 import eu.binjr.core.dialogs.ConsoleStage;
 import eu.binjr.common.version.Version;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -52,7 +49,8 @@ public class AppEnvironment {
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty disableUpdateCheck = new SimpleBooleanProperty(false);
-    private Property<StageStyle> windowsStyle =  new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -335,7 +333,7 @@ public class AppEnvironment {
         this.windowsStyle.setValue(windowsStyle);
     }
 
-    public Property<StageStyle> windowsStyleProperty(){
+    public Property<StageStyle> windowsStyleProperty() {
         return windowsStyle;
     }
 
@@ -343,6 +341,17 @@ public class AppEnvironment {
         return windowsStyle.getValue();
     }
 
+    public String getUpdateRepoSlug() {
+        return updateRepoSlug.get();
+    }
+
+    public StringProperty updateRepoSlugProperty() {
+        return updateRepoSlug;
+    }
+
+    public void setUpdateRepoSlug(String updateRepoSlug) {
+        this.updateRepoSlug.set(updateRepoSlug);
+    }
 
     private String getHeapStats() {
         Runtime rt = Runtime.getRuntime();
