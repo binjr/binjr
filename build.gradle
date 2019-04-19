@@ -209,7 +209,7 @@ configure(subprojects) {
 
 task publishArtifacts(dependsOn: subprojects.publishToNexus) {
     if (IS_RELEASE) {
-      //  finalizedBy(closeAndReleaseRepository)
+        //  finalizedBy(closeAndReleaseRepository)
     }
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
@@ -332,13 +332,22 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
+task listPackageContent(type: Exec) {
+    workingDir DISTRIBUTION_PATH
+    commandLine = [
+            "bash",
+            "-c",
+            'du -a | grep -oi  \\.\\/.*\$ > .installed'
+    ]
+}
+
 task packageDistributionZip(type: Zip) {
     from DISTRIBUTION_PATH
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageDistributionTar(type: Tar) {
+task packageDistributionTar(type: Tar, dependsOn: [listPackageContent]) {
     compression Compression.GZIP
     from DISTRIBUTION_PATH
     destinationDir buildDir
@@ -376,10 +385,10 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/light.exe",
-            "-sw","-sice:ICE38","-sice:ICE64",
-            "-out","${buildDir}/${DISTRIBUTION_NAME}.msi",
+            "-sw", "-sice:ICE38", "-sice:ICE64",
+            "-out", "${buildDir}/${DISTRIBUTION_NAME}.msi",
             "${buildDir}/wix/obj/*.wixobj",
-            "-ext","WixUtilExtension","-ext","WixUIExtension.dll"
+            "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
     ]
 }
 
