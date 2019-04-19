@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -65,8 +64,6 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
-import org.controlsfx.control.Notifications;
-import org.controlsfx.control.action.Action;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -292,7 +289,7 @@ public class MainViewController implements Initializable {
 
         if (prefs.isCheckForUpdateOnStartUp()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
-                    release -> UpdateManager.getInstance().showUpdateNotification(release, root), null, null
+                    release -> UpdateManager.getInstance().showUpdateAvailableNotification(release, root), null, null
             );
         }
     }

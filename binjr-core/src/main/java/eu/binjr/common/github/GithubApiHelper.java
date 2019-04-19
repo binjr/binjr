@@ -22,6 +22,8 @@ import com.google.gson.reflect.TypeToken;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.AbstractResponseHandler;
@@ -61,7 +63,10 @@ public class GithubApiHelper {
 
     private GithubApiHelper() {
         gson = new Gson();
-        httpClient = HttpClients.createDefault();
+        httpClient = HttpClients
+                .custom()
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .build();
     }
 
     /**

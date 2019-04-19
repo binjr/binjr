@@ -177,6 +177,7 @@ public class UpdateManager {
     }
 
     public void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
+
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
@@ -185,11 +186,15 @@ public class UpdateManager {
                         .filter(a -> a.getName().contains(AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()))
                         .findFirst()
                         .orElseThrow();
+                logger.info("Downloading update from " + asset.getBrowserDownloadUrl());
                 return github.downloadAsset(asset);
             }
         };
 
-        downloadTask.setOnSucceeded(event -> onDownloadComplete.accept(downloadTask.getValue()));
+        downloadTask.setOnSucceeded(event -> {
+            logger.info("Update download complete (" + downloadTask.getValue() + ")");
+            onDownloadComplete.accept(downloadTask.getValue());
+        });
 
         downloadTask.setOnFailed(event -> {
             logger.error("Error while downloading update package", downloadTask.getException());
@@ -232,7 +237,15 @@ public class UpdateManager {
         }
     }
 
-    public void showUpdateNotification(GithubRelease release, Node root) {
+    public Optional<Path> getUpdatePackagePath() {
+        return updatePackage == null ? Optional.empty() : Optional.of(updatePackage);
+    }
+
+    public void showUpdateAvailableNotification(GithubRelease release, Node root) {
+        if (updatePackage != null) {
+            showUpdateReadyNotification(root);
+            return;
+        }
         Notifications n = Notifications.create()
                 .title("New release available!")
                 .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
@@ -251,48 +264,47 @@ public class UpdateManager {
                         }
                     }
                 }),
-                new Action("Install When I Exit", event -> {
+                new Action("Download Update", event -> {
                     UpdateManager.getInstance().asyncDownloadUpdatePackage(
                             release,
                             path -> {
-                                Dialogs.notifyInfo(
-                                        "Update download successful",
-                                        "binjr will be updated upon quiting the application.",
-                                        Pos.BOTTOM_RIGHT,
-                                        root);
                                 updatePackage = path;
+                                showUpdateReadyNotification(root);
                             },
                             exception -> Dialogs.notifyException("Error downloading update", exception, root));
-                    closeNotificationPopup((Node) event.getSource());
-                }),
-                new Action("Install Now", event -> {
-                    var stage = Dialogs.getStage(root);
-                    Dialogs.notifyInfo(
-                            "Downloading update...",
-                            "binjr will exit and the update will start once the download is complete",
-                            Pos.BOTTOM_RIGHT,
-                            root);
-                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
-                            release,
-                            path -> {
-                                restartRequested = true;
-                                updatePackage = path;
-                                if (stage != null) {
-                                    var handler = stage.getOnCloseRequest();
-                                    if (handler != null) {
-                                        handler.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-                                    }
-                                }
-                            },
-                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
-                    closeNotificationPopup((Node) event.getSource());
+                    dismissNotificationPopup((Node) event.getSource());
                 }));
         n.showInformation();
     }
 
-    // This is pretty nasty (and probably will cause problem with Jigsaw),
+    private void showUpdateReadyNotification(Node root) {
+        Notifications n = Notifications.create()
+                .title("binjr is now ready to be updated!")
+                .text("The update package has been downloaded successfully.")
+                .hideAfter(Duration.seconds(20))
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(root);
+        n.action(new Action("Restart & Update Now", event -> restartApp(root)),
+                new Action("Update When I exit", event -> {
+                    dismissNotificationPopup((Node) event.getSource());
+                }));
+        n.showInformation();
+    }
+
+    private void restartApp(Node root) {
+        var stage = Dialogs.getStage(root);
+        restartRequested = true;
+        if (stage != null) {
+            var handler = stage.getOnCloseRequest();
+            if (handler != null) {
+                handler.handle(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
+            }
+        }
+    }
+
+    // This is pretty nasty (and probably breaks with Jigsaw),
     // but couldn't find another way to close the notification popup.
-    private void closeNotificationPopup(Node n) {
+    private void dismissNotificationPopup(Node n) {
         if (n == null) {
             //couldn't find NotificationBar, giving up.
             return;
@@ -303,7 +315,7 @@ public class UpdateManager {
             return;
         }
         // keep looking.
-        closeNotificationPopup(n.getParent());
+        dismissNotificationPopup(n.getParent());
     }
 
 
