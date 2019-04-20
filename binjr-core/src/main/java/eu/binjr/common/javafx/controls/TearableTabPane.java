@@ -71,14 +71,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private EventHandler<ActionEvent> onAddNewTab;
     private EventHandler<WindowEvent> onOpenNewWindow;
     private EventHandler<WindowEvent> onClosingWindow;
-    private BindingManager bindingManager = new BindingManager();
-    private Property<StageStyle> detachedStageStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private final BindingManager bindingManager = new BindingManager();
+    private final Property<StageStyle> detachedStageStyle;
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
      */
     public TearableTabPane() {
-        this(new TabPaneManager(), false, false, (Tab[]) null);
+        this(new TabPaneManager(), false, false,StageStyle.DECORATED, (Tab[]) null);
     }
 
     /**
@@ -89,11 +89,12 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      * @param tearable    true if tabs are teared away from the pane, false otherwise.
      * @param tabs        tabs to attached to the TabPane.
      */
-    public TearableTabPane(TabPaneManager manager, boolean reorderable, boolean tearable, Tab... tabs) {
+    public TearableTabPane(TabPaneManager manager, boolean reorderable, boolean tearable, StageStyle style, Tab... tabs) {
         super(tabs);
         this.manager = manager;
         this.tearable = tearable;
         this.reorderable = reorderable;
+        this.detachedStageStyle = new SimpleObjectProperty<>(style);
         bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>)
 
                 (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue)
@@ -430,7 +431,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     }
 
     private void tearOffTab(Tab tab) {
-        TearableTabPane detachedTabPane = new TearableTabPane(this.manager, false, true);
+        TearableTabPane detachedTabPane = new TearableTabPane(this.manager, false, true, this.getDetachedStageStyle());
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
         this.getTabs().remove(tab);
