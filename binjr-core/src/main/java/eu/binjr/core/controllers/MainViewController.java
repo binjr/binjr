@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -65,8 +64,6 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
-import org.controlsfx.control.Notifications;
-import org.controlsfx.control.action.Action;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -183,14 +180,12 @@ public class MainViewController implements Initializable {
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
-
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
-
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
                     boolean expandRequiered = true;
@@ -253,8 +248,6 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
-
-
     }
 
     protected void runAfterInitialize() {
@@ -296,7 +289,7 @@ public class MainViewController implements Initializable {
 
         if (prefs.isCheckForUpdateOnStartUp()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
-                    this::onAvailableUpdate, null, null
+                    release -> UpdateManager.getInstance().showUpdateAvailableNotification(release, root), null, null
             );
         }
     }
@@ -364,7 +357,6 @@ public class MainViewController implements Initializable {
             openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
             commandBar.expand();
-
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
         }
@@ -1258,29 +1250,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void onAvailableUpdate(GithubRelease githubRelease) {
-        Notifications n = Notifications.create()
-                .title("New release available!")
-                .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
-                        AppEnvironment.getInstance().getVersion() +
-                        "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
-                .hideAfter(Duration.seconds(20))
-                .position(Pos.BOTTOM_RIGHT)
-                .owner(root);
-        n.action(new Action("Download", actionEvent -> {
-            String newReleaseUrl = githubRelease.getHtmlUrl();
-            if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
-                try {
-                    Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
-                } catch (IOException | URISyntaxException e) {
-                    logger.error("Failed to launch url in browser " + newReleaseUrl, e);
-                }
-            }
-            n.hideAfter(Duration.seconds(0));
-        }));
-        n.showInformation();
-    }
-
     private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
@@ -1331,6 +1300,7 @@ public class MainViewController implements Initializable {
                             stage.getWidth(),
                             stage.getHeight()));
         }
+        UpdateManager.getInstance().startUpdate();
         Platform.exit();
     }
 

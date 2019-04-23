@@ -60,6 +60,8 @@ public class AppEnvironment {
     private Optional<String> associatedWorkspace;
 
 
+    private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -376,7 +378,7 @@ public class AppEnvironment {
         this.windowsStyle.setValue(windowsStyle);
     }
 
-    public Property<StageStyle> windowsStyleProperty(){
+    public Property<StageStyle> windowsStyleProperty() {
         return windowsStyle;
     }
 
@@ -384,6 +386,17 @@ public class AppEnvironment {
         return windowsStyle.getValue();
     }
 
+    public String getUpdateRepoSlug() {
+        return updateRepoSlug.get();
+    }
+
+    public StringProperty updateRepoSlugProperty() {
+        return updateRepoSlug;
+    }
+
+    public void setUpdateRepoSlug(String updateRepoSlug) {
+        this.updateRepoSlug.set(updateRepoSlug);
+    }
 
     private String getHeapStats() {
         Runtime rt = Runtime.getRuntime();

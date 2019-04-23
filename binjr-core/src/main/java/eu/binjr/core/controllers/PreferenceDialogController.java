@@ -204,6 +204,7 @@ public class PreferenceDialogController implements Initializable {
                     });
                     updateFlow.getChildren().add(latestReleaseLink);
                     btn.setDisable(false);
+                    UpdateManager.getInstance().showUpdateAvailableNotification(githubRelease, root);
                 },
                 version -> {
                     btn.setDisable(false);

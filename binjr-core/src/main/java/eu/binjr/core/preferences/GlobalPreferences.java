@@ -64,6 +64,8 @@ public class GlobalPreferences {
     private static final String WINDOW_LAST_POSITION_HEIGHT = "windowLastPositionHeight";
     private static final String WINDOW_LAST_POSITION_WIDTH = "windowLastPositionWidth";
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
+    private static final String GITHUB_USER_NAME = "githubUserName";
+    private static final String GITHUB_AUTH_TOKEN = "githubAuthToken";
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
@@ -85,6 +87,8 @@ public class GlobalPreferences {
     private final BooleanProperty fullHeightCrosshairMarker = new SimpleBooleanProperty();
     private final IntegerProperty maxAsyncTasksParallelism = new SimpleIntegerProperty();
     private final Property<Rectangle2D> windowLastPosition = new SimpleObjectProperty<>();
+    private final StringProperty githubUserName = new SimpleStringProperty();
+    private final StringProperty githubAuthToken = new SimpleStringProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -109,6 +113,9 @@ public class GlobalPreferences {
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
         fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
         maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
+        githubUserName.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_USER_NAME, newValue));
+        githubAuthToken.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_AUTH_TOKEN, newValue));
+
         windowLastPosition.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.putDouble(WINDOW_LAST_POSITION_X, newValue.getMinX());
@@ -148,6 +155,8 @@ public class GlobalPreferences {
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
             fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, false));
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
+            githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
+            githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
             windowLastPosition.setValue(new Rectangle2D(
                     prefs.getDouble(WINDOW_LAST_POSITION_X, Double.MAX_VALUE),
                     prefs.getDouble(WINDOW_LAST_POSITION_Y, Double.MAX_VALUE),
@@ -730,6 +739,30 @@ public class GlobalPreferences {
 
     public void setWindowLastPosition(Rectangle2D windowLastPosition) {
         this.windowLastPosition.setValue(windowLastPosition);
+    }
+
+    public String getGithubUserName() {
+        return githubUserName.get();
+    }
+
+    public StringProperty githubUserNameProperty() {
+        return githubUserName;
+    }
+
+    public void setGithubUserName(String githubUserName) {
+        this.githubUserName.set(githubUserName);
+    }
+
+    public String getGithubAuthToken() {
+        return githubAuthToken.get();
+    }
+
+    public StringProperty githubAuthTokenProperty() {
+        return githubAuthToken;
+    }
+
+    public void setGithubAuthToken(String githubAuthToken) {
+        this.githubAuthToken.set(githubAuthToken);
     }
 
     private static class GlobalPreferencesHolder {

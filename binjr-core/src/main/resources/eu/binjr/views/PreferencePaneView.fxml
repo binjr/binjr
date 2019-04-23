@@ -204,7 +204,7 @@
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <Button fx:id="resetPrefs" mnemonicParsing="false"
                                     onAction="#handleResetSettings" styleClass="border-button"
-                                    text="Restore to Default"/>
+                                    text="Restore to default"/>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -221,10 +221,9 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="updateCheckBox" prefWidth="1.0"/>
                             </VBox>
-                            <Label text="Check for updates now" wrapText="true"/>
                             <Button alignment="CENTER" mnemonicParsing="false"
                                     onAction="#handleCheckForUpdate" styleClass="border-button"
-                                    text="Check now"/>
+                                    text="Check for updates"/>
                             <TextFlow fx:id="updateFlow"/>
                         </VBox>
                     </AnchorPane>
