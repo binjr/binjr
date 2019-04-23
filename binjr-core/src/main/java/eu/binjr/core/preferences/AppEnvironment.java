@@ -18,6 +18,7 @@ package eu.binjr.core.preferences;
 
 import eu.binjr.core.dialogs.ConsoleStage;
 import eu.binjr.common.version.Version;
+import javafx.application.Application;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -30,8 +31,11 @@ import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.jar.Manifest;
 
 /**
@@ -53,6 +57,9 @@ public class AppEnvironment {
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty disableUpdateCheck = new SimpleBooleanProperty(false);
     private Property<StageStyle> windowsStyle =  new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private Optional<String> associatedWorkspace;
+
+
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -93,6 +100,40 @@ public class AppEnvironment {
      */
     public Version getVersion() {
         return getVersion(this.manifest);
+    }
+
+    public void processCommandLineOptions(Application.Parameters parameters) {
+        this.associatedWorkspace = parameters.getUnnamed()
+                .stream()
+                .filter(s -> s.endsWith(".bjr"))
+                .filter(s -> Files.exists(Paths.get(s)))
+                .findFirst();
+
+        parameters.getNamed().forEach((name, val) -> {
+            switch (name.toLowerCase()) {
+                case "windows-style":
+                    try {
+                        this.setWindowsStyle(StageStyle.valueOf(val.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Unknown windows style specified: " + val, e);
+                    }
+                case "resizable-dialogs":
+                    this.setResizableDialogs(Boolean.valueOf(val));
+                    break;
+                case "disable-update-check":
+                    this.setDisableUpdateCheck(Boolean.valueOf(val));
+                    break;
+                case "log-level":
+                    this.setLogLevel(Level.toLevel(val, Level.INFO));
+                    break;
+                case "log-file":
+                    break;
+            }
+        });
+    }
+
+    public Optional<String> getAssociatedWorkspace() {
+        return associatedWorkspace;
     }
 
     /**
