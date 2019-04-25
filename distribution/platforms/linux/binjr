@@ -21,7 +21,11 @@ JAVACMD="$BASEDIR/runtime/bin/java"
 exec $JAVACMD \
   -splash:"./resources/images/splashscreen.png" \
   -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
-  -Xmx768M \
+  -Xmx2048M \
+  -XX:+UnlockExperimentalVMOptions \
+  -XX:+UseShenandoahGC \
+  -XX:ShenandoahGCHeuristics=compact \
+  -XX:ShenandoahAllocationThreshold=20 \
   -Dprism.verbose=true \
   -Djdk.gtk.version=2 \
   -Dapp.name="binjr" \
