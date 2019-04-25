@@ -97,18 +97,23 @@ configure(subprojects) {
     group GROUP_ID
     version BINJR_VERSION
     sourceCompatibility = 11
+    targetCompatibility = 11
     description 'Flexible Time Series Visualization'
     compileJava.options.encoding = 'UTF-8'
 
     if (project != project(':binjr-app')) {
+        project.javadoc {
+            options.encoding = 'UTF-8'
+            options.tags = ["XmlJavaTypeAdapter", "XmlJavaTypeAdapters"]
+        }
 
         task javadocJar(type: Jar) {
-            classifier = 'javadoc'
+            archiveClassifier = 'javadoc'
             from javadoc
         }
 
         task sourcesJar(type: Jar) {
-            classifier = 'sources'
+            archiveClassifier = 'sources'
             from sourceSets.main.allSource
         }
 
@@ -399,6 +404,3 @@ task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources,
         finalizedBy(packageDistributionTar)
     }
 }
-
-
-

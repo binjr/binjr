@@ -24,7 +24,7 @@ jobs:
       name: app_bundle_mac
       platform: mac
       pool:
-        vmImage: 'macOS-10.13'
+        vmImage: 'macOS-10.14'
 
   # Windows app bundle job
   - template: build-job.yml
@@ -60,7 +60,7 @@ jobs:
         inputs:
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
-          jdkVersionOption: '1.11'
+          jdkVersionOption: '1.12'
           jdkArchitectureOption: 'x64'
           publishJUnitResults: false
           tasks: 'publishArtifacts '

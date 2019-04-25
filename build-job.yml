@@ -11,7 +11,13 @@ jobs:
         echo '##vso[task.setvariable variable=isTag;]true'
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
+    - ${{ if eq(parameters.platform, 'win') }}:
+      - powershell: |
+          choco install zulu12
+          New-Item 'HKLM:\SOFTWARE\JavaSoft\Java Development Kit\1.12' -Force | New-ItemProperty -Name JavaHome -Value "C:\Program Files\Zulu\zulu-12" -Force
+
     - task: Gradle@2
+      condition: succeeded()
       env:
         IS_TAG: $(isTag)
         REPO_TAG_NAME: $(Build.SourceBranchName)
@@ -19,7 +25,7 @@ jobs:
         options: '--parallel'
         gradleWrapperFile: 'gradlew'
         javaHomeOption: 'JDKVersion'
-        jdkVersionOption: '1.11'
+        jdkVersionOption: '1.12'
         jdkArchitectureOption: 'x64'
         publishJUnitResults: false
         tasks: 'packageDistribution'

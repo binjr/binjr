@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import com.sun.istack.Nullable;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -53,8 +54,9 @@ public class EditableTab extends Tab {
      * Initializes a new instance of the {@link EditableTab} instance.
      *
      * @param text the title for the tab.
+     * @param  closeButton A custom {@link Button} instance used to close the tab
      */
-    public EditableTab(String text, Button closeButton) {
+    public EditableTab(String text, @Nullable Button closeButton) {
         super();
         label = new Label(text);
         label.textProperty();
