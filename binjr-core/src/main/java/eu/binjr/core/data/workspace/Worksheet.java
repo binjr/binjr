@@ -17,11 +17,11 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.core.controllers.WorksheetNavigationHistory;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
-import eu.binjr.common.javafx.charts.XYChartSelection;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -46,7 +46,7 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Worksheet")
-public class Worksheet implements Dirtyable, AutoCloseable {
+public class Worksheet implements Dirtyable {
     private static final Logger logger = LogManager.getLogger(Worksheet.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     @IsDirtyable
@@ -477,9 +477,12 @@ public class Worksheet implements Dirtyable, AutoCloseable {
     // region Closeable
     @Override
     public void close() {
+        logger.debug(()-> "Closing Worksheet " + this.toString());
         IOUtils.closeCollectionElements(charts);
         this.status.close();
     }
     // endregion
+
+
 }
 

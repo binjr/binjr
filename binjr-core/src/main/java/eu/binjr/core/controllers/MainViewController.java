@@ -32,12 +32,15 @@ import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.UpdateManager;
-import javafx.animation.*;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -655,7 +658,6 @@ public class MainViewController implements Initializable {
         });
         sourcesAdapters.clear();
         workspace.close();
-        //   workspace = new Workspace();
     }
 
     private void openWorkspaceFromFile() {
@@ -833,11 +835,8 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-
                 p.setOnDragOver(current.getBindingManager().registerHandler(this::handleDragOverWorksheetView));
-                //p.setOnDragOver(this::handleDragOverWorksheetView);
                 p.setOnDragDropped(current.getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
-                //   p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }

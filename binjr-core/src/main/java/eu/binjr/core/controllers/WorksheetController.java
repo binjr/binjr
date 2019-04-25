@@ -1064,8 +1064,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (!closed.get()) {
                             worksheetMaskerPane.setVisible(false);
                             viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                            // Force a redraw of the charts and their Y Axis considering their proper width.
-                            new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                            if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                                // Force a redraw of the charts and their Y Axis considering their proper width.
+                                new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                            }
                         }
                     },
                     event -> {

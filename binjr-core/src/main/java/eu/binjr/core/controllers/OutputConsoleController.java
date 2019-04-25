@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -81,11 +82,11 @@ public class OutputConsoleController implements Initializable {
         consoleMaxLinesText.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().consoleMaxLineCapacityProperty());
 
-        if (DEBUG_CONSOLE_APPENDER == null){
+        if (DEBUG_CONSOLE_APPENDER == null) {
             Text log = new Text("<ERROR: The debug console appender is unavailable!>\n");
             log.getStyleClass().add("log-error");
             textOutput.getChildren().add(log);
-        }else {
+        } else {
             DEBUG_CONSOLE_APPENDER.setTextFlow(textOutput);
         }
         Platform.runLater(() -> {
@@ -108,7 +109,6 @@ public class OutputConsoleController implements Initializable {
     public ToggleButton getAlwaysOnTopToggle() {
         return alwaysOnTopToggle;
     }
-
 
 
     @FXML
@@ -134,7 +134,6 @@ public class OutputConsoleController implements Initializable {
                     Dialogs.notifyException("Error writing log message to file", e, scrollPane);
                 }
                 GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.toPath());
-
             }
         } catch (Exception e) {
             Dialogs.notifyException("Failed to save console output to file", e, scrollPane);
@@ -153,15 +152,15 @@ public class OutputConsoleController implements Initializable {
     }
 
     public void handleDebugForceGC(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
-        System.gc();
-        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
-
+        try (Profiler p = Profiler.start("Force GC", e -> Binjr.runtimeDebuggingFeatures.debug(e.toString() + " - " + getJvmHeapStats()))) {
+            System.gc();
+        }
     }
 
     public void handleDebugRunFinalization(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
-        System.runFinalization();
+        try (Profiler p = Profiler.start("Force runFinalization", Binjr.runtimeDebuggingFeatures::debug)) {
+            System.runFinalization();
+        }
     }
 
     public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
