@@ -26,7 +26,6 @@ exec $JAVACMD \
   -XX:+UseShenandoahGC \
   -XX:ShenandoahGCHeuristics=compact \
   -XX:ShenandoahAllocationThreshold=20 \
-  -Dprism.verbose=true \
   -Djdk.gtk.version=2 \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
