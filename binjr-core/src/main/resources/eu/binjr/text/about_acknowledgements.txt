@@ -36,3 +36,8 @@ Licensed under the Apache License Version 2.0 (http://www.apache.org/licenses/LI
 Copyright 2013 Jason Winnebeck
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
+^bRRD4J
+Copyright (c) 2011-2019 The RRD4J Authors
+Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+
