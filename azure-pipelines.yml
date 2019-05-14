@@ -6,6 +6,8 @@ trigger:
     include:
       - v*
 
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
 variables:
   system.debug: false
 

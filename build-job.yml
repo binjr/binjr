@@ -19,6 +19,7 @@ jobs:
     - task: Gradle@2
       condition: succeeded()
       env:
+        BINJR_BUILD_NUMBER: $(Build.BuildNumber)
         IS_TAG: $(isTag)
         REPO_TAG_NAME: $(Build.SourceBranchName)
       inputs:
