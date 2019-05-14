@@ -209,19 +209,19 @@ public class AppEnvironment {
      *
      * @return the build number from the manifest
      */
-    public Long getBuildNumber() {
+    public String getBuildNumber() {
         if (manifest != null) {
             String value = manifest.getMainAttributes().getValue("Build-Number");
-            if (value != null) {
+            if (value != null && value.trim().length() > 0) {
                 try {
-                    return Long.valueOf(value);
+                    return value;
                 } catch (NumberFormatException e) {
                     logger.error("Could not decode build number: " + value + ": " + e.getMessage());
                     logger.debug(() -> "Full stack", e);
                 }
             }
         }
-        return 0L;
+        return "0";
     }
 
     /**
@@ -231,7 +231,7 @@ public class AppEnvironment {
      */
     public List<SysInfoProperty> getSysInfoProperties() {
         List<SysInfoProperty> sysInfo = new ArrayList<>();
-        sysInfo.add(new SysInfoProperty("Version", getVersion().toString() + " (build #" + getBuildNumber().toString() + ")"));
+        sysInfo.add(new SysInfoProperty("Version", getVersion().toString() + " (build #" + getBuildNumber() + ")"));
         sysInfo.add(new SysInfoProperty("Java Version", System.getProperty("java.version")));
         sysInfo.add(new SysInfoProperty("JavaFX Version", System.getProperty("javafx.version")));
         sysInfo.add(new SysInfoProperty("Java Vendor", System.getProperty("java.vendor")));
