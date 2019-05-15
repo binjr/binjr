@@ -20,6 +20,9 @@ Licensed under the 3-Clause BSD License (https://opensource.org/licenses/BSD-3-C
 Copyright (c) 2013, Christian Schudt.
 Licensed under the MIT License (https://opensource.org/licenses/MIT)
 
+^bEclipse Implementation of JAXB
+Licensed under the Eclipse Distribution License v. 1.0 (https://www.eclipse.org/org/documents/edl-v10.html).
+
 ^bFont Awesome Free
 by @fontawesome - https://fontawesome.com
 License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
