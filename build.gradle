@@ -289,7 +289,7 @@ markdownToHtml {
                     "<head>\n" +
                     "    <title>" + (file.name - ".html") + "</title>\n" +
                     "    <meta charset=\"utf-8\"/>\n" +
-                    "    <link rel=\"stylesheet\" href=\"./resources/css/air.css\">\n" +
+                    "    <link rel=\"stylesheet\" href=\"./resources/css/plain.css\">\n" +
                     "</head>"
             newFile << file.getText("utf-8")
             if (!file.name.startsWith("LICENSE")) {
