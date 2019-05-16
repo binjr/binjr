@@ -10,6 +10,8 @@ name: $(Date:yyyyMMdd)$(Rev:.r)
 
 variables:
   system.debug: false
+  isTag: 'false'
+  isSnapshot: 'false'
 
 jobs:
   # Linux app bundle job

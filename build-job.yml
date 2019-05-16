@@ -11,6 +11,10 @@ jobs:
         echo '##vso[task.setvariable variable=isTag;]true'
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
+    - bash: |
+        echo '##vso[task.setvariable variable=isSnapshot;]true'
+      condition: and(succeeded(), endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
+
     - ${{ if eq(parameters.platform, 'win') }}:
       - powershell: |
           choco install zulu12
@@ -34,7 +38,7 @@ jobs:
     - task: GithubRelease@0
       condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
       inputs:
-        githubConnection: gh_release
+        gitHubConnection: gh_release
         repositoryName: binjr/binjr
         action: edit
         tag: $(Build.SourceBranchName)
@@ -45,3 +49,4 @@ jobs:
         releaseNotesSource: 'file'
         releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
         addChangeLog: false
+        isPreRelease: $(isSnapshot)
