@@ -66,6 +66,7 @@ public class GlobalPreferences {
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
     private static final String GITHUB_USER_NAME = "githubUserName";
     private static final String GITHUB_AUTH_TOKEN = "githubAuthToken";
+    private static final String  MAX_SERIES_PER_CHART_BEFORE_WARNING = "maxSeriesPerChartBeforeWarning";
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
@@ -89,6 +90,7 @@ public class GlobalPreferences {
     private final Property<Rectangle2D> windowLastPosition = new SimpleObjectProperty<>();
     private final StringProperty githubUserName = new SimpleStringProperty();
     private final StringProperty githubAuthToken = new SimpleStringProperty();
+    private final IntegerProperty maxSeriesPerChartBeforeWarning = new SimpleIntegerProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
@@ -115,6 +117,7 @@ public class GlobalPreferences {
         maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
         githubUserName.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_USER_NAME, newValue));
         githubAuthToken.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_AUTH_TOKEN, newValue));
+        maxSeriesPerChartBeforeWarning.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, newValue.intValue()));
 
         windowLastPosition.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -157,6 +160,7 @@ public class GlobalPreferences {
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
             githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
             githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
+            maxSeriesPerChartBeforeWarning.setValue(prefs.getInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, 50));
             windowLastPosition.setValue(new Rectangle2D(
                     prefs.getDouble(WINDOW_LAST_POSITION_X, Double.MAX_VALUE),
                     prefs.getDouble(WINDOW_LAST_POSITION_Y, Double.MAX_VALUE),
@@ -763,6 +767,18 @@ public class GlobalPreferences {
 
     public void setGithubAuthToken(String githubAuthToken) {
         this.githubAuthToken.set(githubAuthToken);
+    }
+
+    public int getMaxSeriesPerChartBeforeWarning() {
+        return maxSeriesPerChartBeforeWarning.get();
+    }
+
+    public IntegerProperty maxSeriesPerChartBeforeWarningProperty() {
+        return maxSeriesPerChartBeforeWarning;
+    }
+
+    public void setMaxSeriesPerChartBeforeWarning(int maxSeriesPerChartBeforeWarning) {
+        this.maxSeriesPerChartBeforeWarning.set(maxSeriesPerChartBeforeWarning);
     }
 
     private static class GlobalPreferencesHolder {

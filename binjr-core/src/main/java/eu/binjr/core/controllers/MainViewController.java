@@ -1058,6 +1058,14 @@ public class MainViewController implements Initializable {
             );
             List<TimeSeriesBinding> bindings = new ArrayList<>();
             getAllBindingsFromBranch(treeItem, bindings);
+            if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()){
+                if (Dialogs.confirmDialog(root,
+                        "This action will add " +bindings.size() +" series on a single chart." ,
+                        "Are you sure you want to proceed?",
+                        ButtonType.YES,ButtonType.NO) != ButtonType.YES){
+                    return;
+                }
+            }
             for (TimeSeriesBinding b : bindings) {
                 chart.addSeries(TimeSeriesInfo.fromBinding(b));
             }

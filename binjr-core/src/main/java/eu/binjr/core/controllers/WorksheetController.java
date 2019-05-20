@@ -771,7 +771,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
-      //  bindingManager.bind(chartProperties.expandedProperty(),editButtonsGroup.selectedToggleProperty().isNotNull());
         bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
             if(newValue != null){
                 chartProperties.expand();
@@ -797,7 +796,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (editButtonsGroup.getSelectedToggle() != null) {
                             nv.getDataStore().setShowProperties(true);
                         }
-
                     });
                     if ((expandRequiered) && (oldPane != null)) {
                         getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
@@ -953,6 +951,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
+        if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()){
+            if (Dialogs.confirmDialog(root,
+                    "This action will add " +bindings.size() +" series on a single chart." ,
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES,ButtonType.NO) != ButtonType.YES){
+                return;
+            }
+        }
         InvalidationListener isVisibleListener = (observable) -> {
             viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
                 boolean andAll = true;
