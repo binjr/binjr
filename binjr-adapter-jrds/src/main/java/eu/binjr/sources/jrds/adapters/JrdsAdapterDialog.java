@@ -68,7 +68,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
     @Override
     protected DataAdapter getDataAdapter() throws DataAdapterException {
         return JrdsDataAdapter.fromUrl(
-                this.uriField.getText(),
+                this.uriField.getValue(),
                 ZoneId.of(this.timezoneField.getText()),
                 this.tabsChoiceBox.getValue(),
                 this.extraArgumentTextField.getText());

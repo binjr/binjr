@@ -87,7 +87,7 @@
 }
 
 /**********************************************/
-
+.combo-box-base > .arrow-button,
 .choice-box,
 .button {
     -fx-background-color: -binjr-button-background-color;
@@ -99,12 +99,14 @@
     -fx-alignment: center;
 }
 
+.combo-box-base > .arrow-button:hover,
 .choice-box:hover,
 .button:hover{
     -fx-border-color: -binjr-dark-blue-color;
     -fx-background-color: -binjr-dark-blue-color;
 }
 
+.combo-box-base > .arrow-button:disabled,
 .button:disabled,
 .choice-box:disabled {
     -fx-opacity: .4;
@@ -125,12 +127,14 @@
     -fx-alignment: center;
 }
 
+.combo-box-base > .arrow-button:hover,
 .dialog-button:hover,
 .toggle-button:hover,
 .menu-button:hover {
     -fx-background-color: -binjr-control-hover-color;
 }
 
+.combo-box-base > .arrow-button:hover:pressed,
 .choice-box:pressed:hover,
 .dialog-button:hover:pressed,
 .button:hover:pressed,
@@ -148,12 +152,14 @@
   -fx-text-fill: -fx-text-background-color;
 }
 
+.combo-box-base > .arrow-button:selected,
 .toggle-button:selected,
 .menu-button:selected {
     -fx-background-color:  -binjr-control-hilite-color;
     -fx-text-fill: -fx-text-background-color;
 }
 
+.combo-box-base > .arrow-button:selected:hover,
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
     -fx-background-color:  -binjr-control-hilite-color;
@@ -268,6 +274,7 @@
    /*  -fx-background-color: white;*/
  }
 
+.combo-box-popup > .list-view,
 .interval-picker-popup,
 .date-picker-popup {
     -fx-border-color: -binjr-control-border-color;
@@ -1038,15 +1045,41 @@
     -fx-opacity: .4;
 }
 
-
-
 .command-bar .choice-box .arrow {
      -fx--padding: 2 4.5;
  }
 
+.combo-box-base .arrow,
 .choice-box .arrow {
      -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
  }
+
+.combo-box-base {
+   -fx-effect: null;
+   -fx-background-color: transparent;
+   -fx-background-radius: 0, 0, 0, 0;
+   -fx-padding: 0;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-effect: null;
+
+    -fx-background-color: -binjr-window-background-color;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:hover{
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected{
+    -fx-background-color: derive(-fx-accent, 90%);
+    -fx-text-fill: #111;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover{
+    -fx-background-color: derive(-fx-accent, 70%);
+}
 
 /*****************************************************************/
 

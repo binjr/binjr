@@ -82,11 +82,11 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
 
     @Override
     protected DataAdapter getDataAdapter() throws DataAdapterException {
-        if (!Files.exists(Paths.get(uriField.getText()))) {
-            throw new CannotInitializeDataAdapterException("Cannot find " + uriField.getText());
+        if (!Files.exists(Paths.get(uriField.getValue()))) {
+            throw new CannotInitializeDataAdapterException("Cannot find " + uriField.getValue());
         }
         return new CsvFileAdapter(
-                uriField.getText(),
+                uriField.getValue(),
                 ZoneId.of(this.timezoneField.getText()),
                 encodingField.getText(),
                 dateFormatPattern.getText(),
