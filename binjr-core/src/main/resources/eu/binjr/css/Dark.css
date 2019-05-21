@@ -13,6 +13,7 @@
     -binjr-control-hilite-color: -binjr-blue-color;
     -binjr-control-border-color: #808080;
 
+    -binjr-control-border-hilite-color:#bababa;
     -binjr-color-dark-gray: white;
     -binjr-color-darker-gray: white;
     -binjr-color-red: #E81123;
@@ -216,7 +217,8 @@
 
  .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
    /*     -fx-background-color: #5c5c5c, -binjr-tool-button-background-color;*/
-     -fx-border-color: -binjr-control-border-color;
+    /* -fx-border-color: -binjr-control-border-color;*/
+      -fx-border-color: -binjr-control-border-hilite-color;
    /*  -fx-text-fill: black;*/
  }
 
@@ -274,6 +276,7 @@
    /*  -fx-background-color: white;*/
  }
 
+.auto-complete-popup  > .list-view,
 .combo-box-popup > .list-view,
 .interval-picker-popup,
 .date-picker-popup {
@@ -1059,6 +1062,28 @@
    -fx-background-color: transparent;
    -fx-background-radius: 0, 0, 0, 0;
    -fx-padding: 0;
+}
+
+
+.combo-box-base > .text-input {
+  -fx-background-radius: 0, 0;
+  -fx-border-width:0;
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+}
+
+.combo-box-base {
+
+   -fx-border-color:-binjr-control-border-color;
+   -fx-background-color: -binjr-button-background-color;
+   -fx-border-width:1;
+   -fx-effect: null;
+   -fx-background-radius: 0, 0, 0, 0;
+   -fx-padding: 0;
+}
+
+.combo-box-base:focused {
+   -fx-border-color: -binjr-control-border-hilite-color;
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
