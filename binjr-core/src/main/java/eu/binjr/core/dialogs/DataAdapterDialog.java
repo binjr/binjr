@@ -58,13 +58,13 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     private DataAdapter result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final Set<String> suggestedUrls;
-    protected final Button browseButton;
-    protected final Label uriLabel;
-    protected final ComboBox<String> uriField;
-    protected final TextField timezoneField;
-    protected final DialogPane parent;
-    protected final Button okButton;
-    protected final GridPane paramsGridPane;
+    private final Button browseButton;
+    private final Label uriLabel;
+    private final ComboBox<String> uriField;
+    private final TextField timezoneField;
+    private final DialogPane parent;
+    private final Button okButton;
+    private final GridPane paramsGridPane;
 
     protected enum Mode {
         PATH,
@@ -179,5 +179,33 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         }
         autoCompletionBinding = TextFields.bindAutoCompletion(uriField.getEditor(), suggestedUrls);
         autoCompletionBinding.setPrefWidth(uriField.getPrefWidth());
+    }
+
+    public String getSourceUri(){
+        return this.uriField.getValue();
+    }
+
+    public void setSourceUri(String value){
+        this.uriField.setValue(value);
+    }
+
+    public String getSourceTimezone(){
+        return this.timezoneField.getText();
+    }
+
+    public void setSourceTimezone(String value){
+        this.timezoneField.setText(value);
+    }
+
+    public String getDialogHeaderText(){
+        return this.parent.getHeaderText();
+    }
+
+    public void setDialogHeaderText(String value){
+        this.parent.setHeaderText(value);
+    }
+
+    public GridPane getParamsGridPane() {
+        return paramsGridPane;
     }
 }

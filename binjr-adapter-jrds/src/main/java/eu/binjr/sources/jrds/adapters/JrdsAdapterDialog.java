@@ -50,28 +50,28 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
      */
     public JrdsAdapterDialog(Node owner) {
         super(owner, Mode.URL);
-        this.parent.setHeaderText("Connect to a JRDS source");
+        this.setDialogHeaderText("Connect to a JRDS source");
         this.tabsChoiceBox = new ChoiceBox<>();
         tabsChoiceBox.getItems().addAll(JrdsTreeViewTab.values());
         this.extraArgumentTextField = new TextField();
         HBox.setHgrow(extraArgumentTextField, Priority.ALWAYS);
         HBox hBox = new HBox(tabsChoiceBox, extraArgumentTextField);
         hBox.setSpacing(10);
+
         GridPane.setConstraints(hBox, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         tabsChoiceBox.getSelectionModel().select(JrdsTreeViewTab.HOSTS_TAB);
         Label tabsLabel = new Label("Sorted By:");
         GridPane.setConstraints(tabsLabel, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        this.paramsGridPane.getChildren().addAll(tabsLabel, hBox);
+        getParamsGridPane().getChildren().addAll(tabsLabel, hBox);
         extraArgumentTextField.visibleProperty().bind(Bindings.createBooleanBinding(() -> this.tabsChoiceBox.valueProperty().get().getArgument() != null, this.tabsChoiceBox.valueProperty()));
     }
 
     @Override
     protected DataAdapter getDataAdapter() throws DataAdapterException {
         return JrdsDataAdapter.fromUrl(
-                this.uriField.getValue(),
-                ZoneId.of(this.timezoneField.getText()),
+                getSourceUri(),
+                ZoneId.of(getSourceTimezone()),
                 this.tabsChoiceBox.getValue(),
                 this.extraArgumentTextField.getText());
-
     }
 }
