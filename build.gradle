@@ -144,7 +144,7 @@ configure(subprojects) {
                 }
                 pom {
                     name = project.name
-                    description = 'Flexible Time Series Visualization'
+                    description = 'A Time Series Data Browser'
                     url = 'https://binjr.eu'
                     if (project == project(':binjr-app')) {
                         packaging = 'pom'
@@ -281,7 +281,6 @@ markdownToHtml {
     doLast {
         ConfigurableFileTree tree = fileTree(dir: "$DISTRIBUTION_PATH")
         tree.include '**/*.html'
-
         tree.each { File file ->
             String path = file.path
             File newFile = new File("${DISTRIBUTION_PATH}/tmp_${file.name}")
