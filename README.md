@@ -128,6 +128,7 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew build` to build the JAR for the all the modules.
 * `./gradlew run` to build and start the application straight away.
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
+> Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in the same environement.
   
 ## Getting help
 
