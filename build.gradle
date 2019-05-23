@@ -339,9 +339,9 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
 task listPackageContent(type: Exec) {
     workingDir DISTRIBUTION_PATH
     commandLine = [
-            "bash",
-            "-c",
-            'du -a | grep -oi  \\.\\/.*\$ > .installed'
+            "find",
+            "-mindepth", "1",
+            "-fprintf", ".installed", "%P\n"
     ]
 }
 
