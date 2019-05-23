@@ -39,7 +39,7 @@
         <VBox>
             <children>
                 <AnchorPane minWidth="0.0">
-                    <ImageView fitHeight="300.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                    <ImageView fitHeight="264.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                         <Image url="@../images/logo_med.png" />
                     </ImageView>
                     <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="205.0">
@@ -59,7 +59,7 @@
             <children>
                 <Accordion fx:id="detailsPane" prefWidth="600.0" styleClass="skinnable-pane-border">
                     <panes>
-                        <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT" text="System Information">
+                        <TitledPane fx:id="sysInfoPane" animated="false" contentDisplay="RIGHT" text="System Information" >
                             <TableView fx:id="sysInfoListTable" maxWidth="-Infinity" minHeight="0.0" minWidth="-Infinity" prefHeight="220.0" prefWidth="578.0">
                                 <columns>
                                     <TableColumn editable="false" prefWidth="150.0" resizable="false" sortable="false" text="C1">

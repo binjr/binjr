@@ -4,8 +4,12 @@
     -binjr-blue-color: #4BACC6;
     -binjr-light-blue-color: #92CDDC;
     -binjr-lighter-blue-color: #B7DEE8;
-    -binjr-foreground-color: #DAEEF3;
+    -binjr-foreground-color:  #DAEEF3;
     -fx-background-color:  transparent;
+  /*  -fx-base: -binjr-background-color;*/
+}
+.text{
+    -fx-font-smoothing-type: lcd;
 }
 
 .content,
@@ -16,7 +20,7 @@
 .web-view,
 .table-row-cell,
 .root {
-    -fx-background-color: -binjr-foreground-color;
+    -fx-background-color: -binjr-background-color;
 }
 
 .table-row-cell:selected {
@@ -27,19 +31,46 @@
     -fx-text-fill: white;
 
 }
-
+/*
 .arrow {
-    -fx-background-color: -binjr-background-color;
+    -fx-background-color: -binjr-foreground-color;
+
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+
+    -fx-effect: null;
+}
+
+*/
+.titled-pane > .title > .arrow-button .arrow {
+    -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
+  -fx-background-color: -binjr-foreground-color;
+     -fx-padding: 4 5;
+ }
+
+ .titled-pane:focused > .title > .arrow-button .arrow {
+    -fx-effect:null;
+
+}
+
+.titled-pane:focused > .title > .arrow-button > .arrow {
+    -fx-background-insets: 0;
+    -fx-translate-x: 0;
+    -fx-translate-y: 0;
+    -fx-effect: null;
+}
+
+.accordion > .first-titled-pane > .title {
+    -fx-background-insets: 0;
 }
 
 .about-text{
-    -fx-text-fill: -binjr-dark-blue-color;
+    -fx-text-fill:  -binjr-light-blue-color;
     -fx-font-size: 11pt;
 }
 
 .titled-pane {
     -fx-border-size:0;
-    -fx-text-fill:-binjr-background-color;
+    -fx-text-fill: -binjr-foreground-color;
     -fx-font-size: 14pt;
 }
 
@@ -50,7 +81,7 @@
 .cell,
 .content {
     -fx-border-size:0;
-    -fx-text-fill: -binjr-background-color;
+    -fx-text-fill: -binjr-foreground-color;
     -fx-font-size: 9pt;
     -fx-font-weight:normal;
   }
@@ -80,19 +111,19 @@
  }
 */
  .scroll-bar > .track {
-     -fx-background-color: -binjr-foreground-color;
+     -fx-background-color: -binjr-background-color;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
      -fx-border-size:0;
  }
  .scroll-bar > .track-background {
-     -fx-background-color: -binjr-foreground-color;
+     -fx-background-color: -binjr-background-color;
      -fx-background-insets: 0;
  }
 
  .scroll-bar > .increment-button,
  .scroll-bar > .decrement-button {
-     -fx-background-color: -binjr-foreground-color;
+     -fx-background-color: -binjr-background-color;
      -fx-background-insets: 0;
      -fx-background-radius: 0;
 
@@ -113,7 +144,7 @@
  .scroll-bar > .decrement-button > .decrement-arrow,
  .scroll-bar > .increment-button > .increment-arrow{
      -fx-background-insets: 1 0 -1 0, 0;
-     -fx-background-color: transparent, -binjr-background-color;
+     -fx-background-color: transparent, -binjr-foreground-color;
      -fx-effect: null;
  }
 /*
@@ -143,7 +174,7 @@
  }
 
  .button{
-    -fx-text-fill: white;
+    -fx-text-fill: -binjr-foreground-color;
     -fx-background-color: -binjr-blue-color;
     -fx-border-color: -binjr-blue-color;
     -fx-border-width:2;
@@ -160,7 +191,7 @@
 .button:default:hover:pressed {
      -fx-background-color:-binjr-background-color;
      -fx-border-color: -binjr-background-color;
-     -fx-text-fill: white;
+     -fx-text-fill: -binjr-foreground-color;
  }
 
 .skinnable-pane-border * {
