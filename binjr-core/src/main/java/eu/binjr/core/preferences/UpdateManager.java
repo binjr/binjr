@@ -34,10 +34,14 @@ import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -220,10 +224,29 @@ public class UpdateManager {
                         break;
                     case OSX:
                     case LINUX:
+                        File jar = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
+                        File directory = jar.getParentFile().getParentFile();
+                        File fileList = new File(directory, ".installed");
+                        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileList))) {
+                            for (String line;
+                                 (line = fileReader.readLine()) != null;
+                                 ) {
+                                File file = new File(directory, line);
+                                if (!file.isDirectory() && !file.delete()) {
+                                    logger.error(() -> "Unable to remove file before upgrade: '" + file.getAbsolutePath() + "'");
+                                    logger.info(() -> "Consider deleting all files listed in '" + fileList.getAbsolutePath() + "' and installing again from '" + updatePackage.toString() + "'");
+                                    return;
+                                }
+                            }
+                        }
+                        String command = "cd \"" + directory.getPath() + "\" && tar xzf \"" + updatePackage.toString() + "\" && rm \"" + updatePackage.toAbsolutePath() + "\"";
+                        if (restartRequested) {
+                            command += " ; " + new File(directory, "binjr").getPath();
+                        }
                         processBuilder.command(
-                                "bash",
-                                "-c",
-                                "echo 'TODO: extract update package downloaded at " + updatePackage.toString() + "'");
+                            "sh",
+                            "-c",
+                            command);
                         break;
                     case UNSUPPORTED:
                     default:
