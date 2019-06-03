@@ -64,7 +64,8 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
-ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
+ext.DISTRIBUTION_ROOT = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
+ext.DISTRIBUTION_PATH = IS_WINDOWS ? "${DISTRIBUTION_ROOT}" : "${DISTRIBUTION_ROOT}/${BINJR_VERSION}"
 
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
@@ -346,16 +347,24 @@ task listPackageContent(type: Exec) {
 }
 
 task packageDistributionZip(type: Zip) {
-    from DISTRIBUTION_PATH
+    from DISTRIBUTION_ROOT
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageDistributionTar(type: Tar, dependsOn: [listPackageContent]) {
+task compressDistributionTar(type: Tar, dependsOn: [listPackageContent]) {
     compression Compression.GZIP
-    from DISTRIBUTION_PATH
+    from DISTRIBUTION_ROOT
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.tar.gz"
+}
+
+task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
+        workingDir DISTRIBUTION_ROOT
+	commandLine = [
+		"ln", "-s", "${BINJR_VERSION}/binjr", "binjr"
+	]
+        finalizedBy(compressDistributionTar)
 }
 
 task wixRunHeat(type: Exec, dependsOn: [packageDistributionZip]) {
