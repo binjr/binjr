@@ -38,9 +38,7 @@ import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -96,9 +94,6 @@ public class MainViewController implements Initializable {
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final double TOOL_BUTTON_SIZE = 20;
-    //    private static final double COLLAPSED_WIDTH = 48;
-//    private static final double EXPANDED_WIDTH = 200;
-//    private static final int ANIMATION_DURATION = 50;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
 
@@ -131,11 +126,7 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
-//    private Timeline showTimeline;
-//    private Timeline hideTimeline;
 
-    private Property<TimeRangePicker.TimeRange> linkedTimeRange =
-            new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     private MenuItem refreshMenuItem;
@@ -157,7 +148,6 @@ public class MainViewController implements Initializable {
     private Menu addSourceMenu;
     @FXML
     private StackPane curtains;
-
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -841,17 +831,29 @@ public class MainViewController implements Initializable {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
+            current.getBindingManager().attachListener(current.selectedRangeProperty(),
+                    (ChangeListener<TimeRangePicker.TimeRange>) (observable, oldValue, newValue) -> {
+                        if (getSelectedWorksheetController().equals(current) && current.getWorksheet().isTimeRangeLinked()) {
+                            seriesControllers.values().forEach(i -> {
+                                if (!i.equals(current) && i.getWorksheet().isTimeRangeLinked()) {
+                                    i.selectedRangeProperty().setValue(TimeRangePicker.TimeRange.of(newValue));
+                                }
+                            });
+                        }
+                    }
+            );
             current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                         if (newValue) {
-                            current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
-                        } else {
-                            current.getBindingManager().unbindBidirectionnal(current.selectedRangeProperty(), linkedTimeRange);
+                            seriesControllers.values()
+                                    .stream()
+                                    .filter(c -> !c.equals(current) && c.getWorksheet().isTimeRangeLinked())
+                                    .map(c -> c.selectedRangeProperty().getValue())
+                                    .findFirst()
+                                    .ifPresent(timeRange -> current.selectedRangeProperty().setValue(timeRange));
                         }
-                    });
-            if (current.getWorksheet().isTimeRangeLinked()) {
-                current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
-            }
+                    }
+            );
             current.getBindingManager().bindBidirectional(newTab.nameProperty(), worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
@@ -1058,11 +1060,11 @@ public class MainViewController implements Initializable {
             );
             List<TimeSeriesBinding> bindings = new ArrayList<>();
             getAllBindingsFromBranch(treeItem, bindings);
-            if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()){
+            if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
                 if (Dialogs.confirmDialog(root,
-                        "This action will add " +bindings.size() +" series on a single chart." ,
+                        "This action will add " + bindings.size() + " series on a single chart.",
                         "Are you sure you want to proceed?",
-                        ButtonType.YES,ButtonType.NO) != ButtonType.YES){
+                        ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
                     return;
                 }
             }

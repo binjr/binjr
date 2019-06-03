@@ -400,6 +400,10 @@ public class TimeRangePicker extends ToggleButton {
         private final Duration duration;
         private final ZoneId zoneId;
 
+        public static TimeRange of(TimeRange range) {
+            return new TimeRange(range.getBeginning(), range.getEnd());
+        }
+
         public static TimeRange of(ZonedDateTime beginning, ZonedDateTime end) {
             return new TimeRange(beginning, end);
         }
