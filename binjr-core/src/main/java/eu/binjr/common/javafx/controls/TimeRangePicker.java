@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -22,6 +22,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
@@ -35,6 +36,7 @@ import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
 import java.io.IOException;
@@ -44,12 +46,13 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 public class TimeRangePicker extends ToggleButton {
     private static final Logger logger = LogManager.getLogger(TimeRangePicker.class);
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
-    private final Property<ZoneId> zoneId = new SimpleObjectProperty<>(ZoneId.systemDefault());
+    private final Property<ZoneId> zoneId;
     private final Property<TimeRange> timeRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private final ObjectProperty<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private final BindingManager bindingManager = new BindingManager();
@@ -80,12 +83,10 @@ public class TimeRangePicker extends ToggleButton {
 
         timeRangePickerController.startDate.setDateTimeValue(selectedRange.getValue().getBeginning());
         timeRangePickerController.endDate.setDateTimeValue(selectedRange.getValue().getEnd());
-
+        zoneId = timeRangePickerController.endDate.zoneIdProperty();
         bindingManager.bind(timeRangePickerController.startDate.zoneIdProperty(), zoneId);
-        bindingManager.bind(timeRangePickerController.endDate.zoneIdProperty(), zoneId);
         bindingManager.bindBidirectional(timeRangePickerController.zoneIdProperty(), zoneId);
         bindingManager.attachListener(zoneId, (observable, oldValue, newValue) -> updateText());
-
         bindingManager.attachListener(selectedRange, (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 bindingManager.suspend();
@@ -225,7 +226,7 @@ public class TimeRangePicker extends ToggleButton {
         private Button nextIntervalBtn;
 
         @FXML
-        private TextField timezoneField;
+        private ComboBox<String> timezoneField;
 
         @FXML
         private Button last6Hours;
@@ -267,6 +268,7 @@ public class TimeRangePicker extends ToggleButton {
         private ToggleButton linkTimeRangeButton;
 
         private TextFormatter<ZoneId> formatter;
+        private AutoCompletionBinding<String> autoCompletionBinding;
 
         private BiConsumer<ZonedDateTime, ZonedDateTime> applyNewTimeRange = (start, end) -> {
             startDate.dateTimeValueProperty().setValue(start);
@@ -280,6 +282,16 @@ public class TimeRangePicker extends ToggleButton {
         private void last(Duration duration) {
             ZonedDateTime end = ZonedDateTime.now(zoneId.getValue());
             applyNewTimeRange.accept(end.minus(duration), end);
+        }
+
+
+        private void updateAutoCompletionBinding() {
+            if (autoCompletionBinding != null) {
+                autoCompletionBinding.dispose();
+            }
+            autoCompletionBinding = TextFields.bindAutoCompletion(timezoneField.getEditor(),
+                    ZoneId.getAvailableZoneIds().stream().sorted().collect(Collectors.toList()));
+            autoCompletionBinding.setPrefWidth(200);
         }
 
         @FXML
@@ -298,8 +310,16 @@ public class TimeRangePicker extends ToggleButton {
                     return ZoneId.of(string);
                 }
             });
-            TextFields.bindAutoCompletion(timezoneField, ZoneId.getAvailableZoneIds());
-            timezoneField.setTextFormatter(formatter);
+            updateAutoCompletionBinding();
+            timezoneField.getEditor().setTextFormatter(formatter);
+            timezoneField.setItems(FXCollections.observableArrayList(ZoneId.getAvailableZoneIds().stream().sorted().collect(Collectors.toList())));
+            timezoneField.showingProperty().addListener((observable, oldValue, newValue) -> {
+                if (newValue) {
+                    autoCompletionBinding.dispose();
+                } else {
+                    updateAutoCompletionBinding();
+                }
+            });
             nextIntervalBtn.setOnAction(event -> {
                 stepBy(Duration.between(startDate.getDateTimeValue(), endDate.getDateTimeValue()));
             });

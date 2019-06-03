@@ -5,4 +5,5 @@
 * _[New]_ Warn end-users when trying to add a large number of series to a single chart at once.
 * _[New]_ History of previously opened sources is now accessible via a combo box on the selection dialog (as well as through the existing auto-completion feature).
 * _[Fixed]_ Unsightly UI theme application on start-up or when detaching tabs.
-* _[Fixed]_ If "Span crosshair over all charts" is true and "auto scale Y axis" is off, then selecting a new time range using the mouse results in incorrectly changing the Y axis scale. 
+* _[Fixed]_ If "Span crosshair over all charts" is true and "auto scale Y axis" is off, then selecting a new time range using the mouse results in incorrectly changing the Y axis scale.
+* _[Fixed]_ Selecting a timezone in time picker sometime doesn't register.
