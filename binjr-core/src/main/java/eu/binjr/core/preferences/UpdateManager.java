@@ -58,6 +58,7 @@ public class UpdateManager {
     private static final String BINJR_UPDATE = "binjr/update";
     private Property<LocalDateTime> lastCheckForUpdate;
     private Path updatePackage = null;
+    private Version updateVersion = null;
     private boolean restartRequested = false;
     private final GithubApiHelper github;
 
@@ -225,28 +226,26 @@ public class UpdateManager {
                     case OSX:
                     case LINUX:
                         File jar = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
-                        File directory = jar.getParentFile().getParentFile();
-                        File fileList = new File(directory, ".installed");
-                        try (BufferedReader fileReader = new BufferedReader(new FileReader(fileList))) {
-                            for (String line;
-                                 (line = fileReader.readLine()) != null;
-                                 ) {
-                                File file = new File(directory, line);
-                                if (!file.isDirectory() && !file.delete()) {
-                                    logger.error(() -> "Unable to remove file before upgrade: '" + file.getAbsolutePath() + "'");
-                                    logger.info(() -> "Consider deleting all files listed in '" + fileList.getAbsolutePath() + "' and installing again from '" + updatePackage.toString() + "'");
-                                    return;
-                                }
-                            }
-                        }
-                        String command = "cd \"" + directory.getPath() + "\" && tar xzf \"" + updatePackage.toString() + "\" && rm \"" + updatePackage.toAbsolutePath() + "\"";
+                        File versionDirectory = jar.getParentFile().getParentFile();
+                        File rootDirectory = versionDirectory.getParentFile();
+                        final StringBuilder command = new StringBuilder();
+                        command.append("(");
+                        command.append("cd \"").append(rootDirectory.getPath()).append("\" && ");
+                        command.append("cp -rl \"").append(versionDirectory.getAbsolutePath()).append("\" \"").append(updateVersion).append("\" && ");
+                        command.append("while read file; do test -f \"./").append(updateVersion).append("/$file\" && rm \"./").append(updateVersion).append("/$file\"; done < \"").append(versionDirectory.getAbsolutePath()).append("/.installed\" && ");
+                        command.append("tar xzf \"").append(updatePackage).append("\" \"").append(updateVersion).append("\" && ");
+                        command.append("ln -s \"").append(updateVersion).append("/binjr\" \"new_binjr").append("\" && ");
+                        command.append("mv \"new_binjr\" \"binjr\" && "); // atomic upgrade
+                        command.append("rm -rf \"").append(versionDirectory.getAbsolutePath()).append("\" && ");
+                        command.append("rm \"").append(updatePackage.toAbsolutePath()).append("\"");
+                        command.append(") > ").append(new File(rootDirectory, "binjr-install.log").getAbsolutePath()).append(" 2>&1");
                         if (restartRequested) {
-                            command += " ; " + new File(directory, "binjr").getPath();
+                            command.append(" ; ").append(new File(rootDirectory, "binjr").getPath());
                         }
                         processBuilder.command(
                             "sh",
                             "-c",
-                            command);
+                            command.toString());
                         break;
                     case UNSUPPORTED:
                     default:
@@ -292,6 +291,7 @@ public class UpdateManager {
                             release,
                             path -> {
                                 updatePackage = path;
+                                updateVersion = release.getVersion();
                                 showUpdateReadyNotification(root);
                             },
                             exception -> Dialogs.notifyException("Error downloading update", exception, root));
