@@ -340,10 +340,12 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
 task listPackageContent(type: Exec) {
     workingDir DISTRIBUTION_PATH
     commandLine = [
-            "find",
-            "-mindepth", "1",
-            "-fprintf", ".installed", "%P\n"
+            "find", ".",
+            "-mindepth", "1"
     ]
+    doFirst {
+        standardOutput new FileOutputStream("${DISTRIBUTION_PATH}/.installed")
+    }
 }
 
 task packageDistributionZip(type: Zip) {
