@@ -52,10 +52,12 @@ public class AppEnvironment {
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
-    private final BooleanProperty disableUpdateCheck = new SimpleBooleanProperty(false);
+    private final BooleanProperty updateCheckDisabled = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
     private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
+    private final  BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
+
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
@@ -120,7 +122,10 @@ public class AppEnvironment {
                     this.setResizableDialogs(Boolean.valueOf(val));
                     break;
                 case "disable-update-check":
-                    this.setDisableUpdateCheck(Boolean.valueOf(val));
+                    this.setUpdateCheckDisabled(Boolean.valueOf(val));
+                    break;
+                case "disable-signature-verification":
+                    this.setSignatureVerificationDisabled(!Boolean.valueOf(val));
                     break;
                 case "log-level":
                     this.setLogLevel(Level.toLevel(val, Level.INFO));
@@ -347,19 +352,19 @@ public class AppEnvironment {
      * <p>Set to true to prevent binjr from checking for update</p>
      * <p><b>Remark:</b> This setting overrides the user preference to check for updates.</p>
      *
-     * @param disableUpdateCheck true to prevent binjr from checking for update
+     * @param updateCheckDisabled true to prevent binjr from checking for update
      */
-    public void setDisableUpdateCheck(Boolean disableUpdateCheck) {
-        this.disableUpdateCheck.setValue(disableUpdateCheck);
+    public void setUpdateCheckDisabled(Boolean updateCheckDisabled) {
+        this.updateCheckDisabled.setValue(updateCheckDisabled);
     }
 
     /**
-     * Returns he disableUpdateCheck property.
+     * Returns he updateCheckDisabled property.
      *
-     * @return The disableUpdateCheck property.
+     * @return The updateCheckDisabled property.
      */
-    public BooleanProperty disableUpdateCheckProperty() {
-        return disableUpdateCheck;
+    public BooleanProperty updateCheckDisabledProperty() {
+        return updateCheckDisabled;
     }
 
     /**
@@ -368,7 +373,7 @@ public class AppEnvironment {
      * @return true if binjr is prevented from checking for update, false otherwise.
      */
     public Boolean isDisableUpdateCheck() {
-        return disableUpdateCheck.getValue();
+        return updateCheckDisabled.getValue();
     }
 
     public void setWindowsStyle(StageStyle windowsStyle) {
@@ -393,6 +398,18 @@ public class AppEnvironment {
 
     public void setUpdateRepoSlug(String updateRepoSlug) {
         this.updateRepoSlug.set(updateRepoSlug);
+    }
+
+    public void setSignatureVerificationDisabled(boolean value) {
+        signatureVerificationDisabled.setValue(value);
+    }
+
+    public boolean isSignatureVerificationDisabled() {
+        return signatureVerificationDisabled.get();
+    }
+
+    public BooleanProperty signatureVerificationDisabledProperty() {
+        return signatureVerificationDisabled;
     }
 
     private String getHeapStats() {

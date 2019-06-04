@@ -16,10 +16,10 @@
 
 package eu.binjr.core.preferences;
 
-import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.version.Version;
+import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
@@ -31,18 +31,27 @@ import javafx.stage.WindowEvent;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.bouncycastle.openpgp.*;
+import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
+import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
+import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProvider;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.security.Security;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
@@ -65,6 +74,7 @@ public class UpdateManager {
     }
 
     private UpdateManager() {
+        Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         this.github = GithubApiHelper.createCloseable();
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
@@ -180,17 +190,15 @@ public class UpdateManager {
     }
 
     public void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
-
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
-                var asset = github.getAssets(release)
-                        .stream()
-                        .filter(a -> a.getName().contains(AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()))
-                        .findFirst()
-                        .orElseThrow();
-                logger.info("Downloading update from " + asset.getBrowserDownloadUrl());
-                return github.downloadAsset(asset);
+                var packagePath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), false);
+                if (!AppEnvironment.getInstance().isSignatureVerificationDisabled()) {
+                    var sigPath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), true);
+                    verifyUpdatePackage(packagePath, sigPath);
+                }
+                return packagePath;
             }
         };
 
@@ -241,9 +249,9 @@ public class UpdateManager {
                             command.append(" ; ").append(new File(rootDirectory, "binjr").getPath());
                         }
                         processBuilder.command(
-                            "sh",
-                            "-c",
-                            command.toString());
+                                "sh",
+                                "-c",
+                                command.toString());
                         break;
                     case UNSUPPORTED:
                     default:
@@ -298,6 +306,25 @@ public class UpdateManager {
         n.showInformation();
     }
 
+    private Path downloadAsset(GithubRelease release, OsFamily os, boolean isSignature) throws IOException, URISyntaxException {
+        var asset = github.getAssets(release)
+                .stream()
+                .filter(a -> a.getName().equalsIgnoreCase(
+                        String.format("binjr-%s_%s.%s%s",
+                                release.getVersion(),
+                                os.getPlatformClassifier(),
+                                os.getBundleExtension(),
+                                (isSignature ? ".asc" : ""))))
+                .findAny()
+                .orElseThrow(() -> new NoSuchElementException("Failed to find " +
+                        (isSignature ? "signature" : "package") + " for release " +
+                        release.getName() +
+                        " / platform " +
+                        AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()));
+        logger.info("Downloading asset from " + asset.getBrowserDownloadUrl());
+        return github.downloadAsset(asset);
+    }
+
     private void showUpdateReadyNotification(Node root) {
         Notifications n = Notifications.create()
                 .title("binjr is now ready to be updated!")
@@ -323,6 +350,34 @@ public class UpdateManager {
         }
     }
 
+    private void verifyUpdatePackage(Path updatePath, Path sigPath) throws IOException, PGPException {
+        try (var packageStream = Files.newInputStream(updatePath, StandardOpenOption.READ)) {
+            try (var sigStream = Files.newInputStream(sigPath, StandardOpenOption.READ)) {
+                try (var keyStream = this.getClass().getResourceAsStream("/eu/binjr/pubkey/B326EB92.asc")) {
+                    if (!verifyOpenPGP(packageStream, sigStream, keyStream)) {
+                        throw new UnsupportedOperationException("Update package's signature could not be verified.");
+                    }
+                }
+            }
+        }
+    }
+
+    private boolean verifyOpenPGP(InputStream in, InputStream signature, InputStream keyIn) throws IOException, PGPException {
+        signature = PGPUtil.getDecoderStream(signature);
+        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(signature);
+        PGPSignature sig = ((PGPSignatureList) pgpFact.nextObject()).get(0);
+        PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
+                new JcaKeyFingerprintCalculator());
+        PGPPublicKey key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
+        sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
+        byte[] buff = new byte[1024];
+        int read = 0;
+        while ((read = in.read(buff)) != -1) {
+            sig.update(buff, 0, read);
+        }
+        return sig.verify();
+    }
+
     // This is pretty nasty (and probably breaks with Jigsaw),
     // but couldn't find another way to close the notification popup.
     private void dismissNotificationPopup(Node n) {
@@ -338,6 +393,4 @@ public class UpdateManager {
         // keep looking.
         dismissNotificationPopup(n.getParent());
     }
-
-
 }

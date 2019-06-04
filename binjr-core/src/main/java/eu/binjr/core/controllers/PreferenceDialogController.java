@@ -184,7 +184,7 @@ public class PreferenceDialogController implements Initializable {
         });
         updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
         showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
-        updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().disableUpdateCheckProperty()));
+        updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
     }
 
     public void handleCheckForUpdate(ActionEvent actionEvent) {
