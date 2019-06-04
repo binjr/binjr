@@ -352,19 +352,12 @@ task packageDistributionZip(type: Zip) {
     archiveName "${DISTRIBUTION_NAME}.zip"
 }
 
-task compressDistributionTar(type: Tar, dependsOn: [listPackageContent]) {
-    compression Compression.GZIP
-    from DISTRIBUTION_ROOT
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.tar.gz"
-}
-
 task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
         workingDir DISTRIBUTION_ROOT
 	commandLine = [
-		"ln", "-s", "${BINJR_VERSION}/binjr", "binjr"
+		"sh", "-c",
+		"ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
 	]
-        finalizedBy(compressDistributionTar)
 }
 
 task wixRunHeat(type: Exec, dependsOn: [packageDistributionZip]) {
