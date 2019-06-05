@@ -1,3 +1,6 @@
+import org.gradle.api.internal.file.copy.CopyAction
+import org.gradle.api.internal.file.copy.CopyActionProcessingStream
+
 import java.text.SimpleDateFormat
 
 /*
@@ -21,6 +24,7 @@ plugins {
     id "org.kordamp.markdown.convert" version "1.2.0"
     id 'io.codearte.nexus-staging' version '0.21.0'
     id "de.marcphilipp.nexus-publish" version "0.2.0" apply false
+    id "signing"
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
@@ -66,12 +70,11 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.DISTRIBUTION_ROOT = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 ext.DISTRIBUTION_PATH = IS_WINDOWS ? "${DISTRIBUTION_ROOT}" : "${DISTRIBUTION_ROOT}/${BINJR_VERSION}"
-
-ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
-ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
-ext."signing.password" = System.getenv('GPG_PASSPHRASE')
-
+ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : "tar.gz"
 ext.WIX_HOME = System.getenv("WIX")
+ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
+ext."signing.secretKeyRingFile" = "${projectDir}/distribution/publishing/keyring.gpg"
+ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag:${System.getenv('IS_TAG')}")
@@ -92,9 +95,8 @@ configure(subprojects) {
         apply plugin: 'application'
     else
         apply plugin: 'java-library'
-    apply plugin: 'signing'
     apply plugin: "de.marcphilipp.nexus-publish"
-
+    apply plugin: "signing"
     group GROUP_ID
     version BINJR_VERSION
     sourceCompatibility = 11
@@ -222,9 +224,9 @@ task publishArtifacts(dependsOn: subprojects.publishToNexus) {
     }
 }
 
-task clean(type: Delete) {
-    delete buildDir
-}
+//task clean(type: Delete) {
+//    delete buildDir
+//}
 
 task copyAppLibs(type: Copy) {
     into "$DISTRIBUTION_PATH/libs"
@@ -400,10 +402,36 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
+task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
     } else {
         finalizedBy(packageDistributionTar)
+    }
+}
+
+task packageDistribution(type:WrapTaskForSigning, dependsOn: [makeAppBundle] ){
+    from "${buildDir}/${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+}
+
+signing {
+    sign packageDistribution
+}
+
+class WrapTaskForSigning extends AbstractArchiveTask {
+
+    @Override
+    protected CopyAction createCopyAction() {
+        return new noopCopyAction();
+    }
+}
+
+class noopCopyAction implements CopyAction {
+
+    @Override
+    WorkResult execute(CopyActionProcessingStream stream) {
+        return WorkResults.didWork(true);
     }
 }
