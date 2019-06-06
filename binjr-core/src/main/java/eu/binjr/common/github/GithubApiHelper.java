@@ -40,6 +40,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
 import java.util.*;
 
@@ -225,7 +226,7 @@ public class GithubApiHelper {
     }
 
     /**
-     * Download to disk the payload of the specified github asset
+     * Download the payload of the specified github asset to a temporary location.
      *
      * @param asset the asset to download.
      * @return the {@link Path} where it was downloaded.
@@ -233,7 +234,23 @@ public class GithubApiHelper {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException {
-        Path target = Files.createTempDirectory("binjr-updates_").resolve(asset.getName());
+        return downloadAsset(asset, Files.createTempDirectory("binjr-updates_"));
+    }
+
+    /**
+     * Download the payload of the specified github asset into the specified directory.
+     *
+     * @param asset     the asset to download.
+     * @param targetDir the target directory to download the asset to.
+     * @return the {@link Path} where it was downloaded.
+     * @throws IOException        if an IO error occurs while attempting to download the file.
+     * @throws URISyntaxException if the crafted URI is incorrect.
+     */
+    public Path downloadAsset(GithubAsset asset, Path targetDir) throws IOException, URISyntaxException {
+        if (!Files.isDirectory(targetDir)) {
+            throw new NotDirectoryException(targetDir.toString());
+        }
+        Path target = targetDir.resolve(asset.getName());
         HttpGet get = new HttpGet(asset.getBrowserDownloadUrl().toURI());
         return httpClient.execute(get, response -> {
             try (var fos = new FileOutputStream(target.toFile())) {

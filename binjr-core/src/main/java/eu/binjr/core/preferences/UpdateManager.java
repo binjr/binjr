@@ -38,22 +38,20 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.FileAttribute;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.NoSuchElementException;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
@@ -194,9 +192,10 @@ public class UpdateManager {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
-                var packagePath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), false);
+                var targetDir = Files.createTempDirectory("binjr-update_");
+                var packagePath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), false, targetDir);
                 if (!AppEnvironment.getInstance().isSignatureVerificationDisabled()) {
-                    var sigPath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), true);
+                    var sigPath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), true, targetDir);
                     verifyUpdatePackage(packagePath, sigPath);
                 }
                 return packagePath;
@@ -223,12 +222,19 @@ public class UpdateManager {
                 ProcessBuilder processBuilder = new ProcessBuilder();
                 switch (AppEnvironment.getInstance().getOsFamily()) {
                     case WINDOWS:
+                        Path installLauncherPath = Files.createTempFile("binjr-install-", ".bat");
+                        List<String> lines = new ArrayList<>();
+                        lines.add("echo off");
+                        lines.add("call msiexec /passive LAUNCHREQUESTED=" + (restartRequested ? "1" : "0") +
+                                " /log " + updatePackage.getParent().resolve("binjr-install.log").toString() +
+                                " /i " + updatePackage.toString());
+                        lines.add("del /Q /F " + updatePackage.toString() + "*");
+                        lines.add("(goto) 2>nul & del \"%~f0\"");
+                        Files.write(installLauncherPath, lines, StandardCharsets.US_ASCII);
                         processBuilder.command(
-                                "msiexec",
-                                "/passive",
-                                "LAUNCHREQUESTED=" + (restartRequested ? "1" : "0"),
-                                "/log", updatePackage.getParent().resolve("binjr-install.log").toString(),
-                                "/i", updatePackage.toString());
+                                "cmd.exe",
+                                "/C",
+                                installLauncherPath.toString());
                         break;
                     case OSX:
                     case LINUX:
@@ -307,7 +313,7 @@ public class UpdateManager {
         n.showInformation();
     }
 
-    private Path downloadAsset(GithubRelease release, OsFamily os, boolean isSignature) throws IOException, URISyntaxException {
+    private Path downloadAsset(GithubRelease release, OsFamily os, boolean isSignature, Path targetDir) throws IOException, URISyntaxException {
         var asset = github.getAssets(release)
                 .stream()
                 .filter(a -> a.getName().equalsIgnoreCase(
@@ -323,7 +329,7 @@ public class UpdateManager {
                         " / platform " +
                         AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()));
         logger.info("Downloading asset from " + asset.getBrowserDownloadUrl());
-        return github.downloadAsset(asset);
+        return github.downloadAsset(asset, targetDir);
     }
 
     private void showUpdateReadyNotification(Node root) {
