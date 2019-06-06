@@ -224,10 +224,6 @@ task publishArtifacts(dependsOn: subprojects.publishToNexus) {
     }
 }
 
-//task clean(type: Delete) {
-//    delete buildDir
-//}
-
 task copyAppLibs(type: Copy) {
     into "$DISTRIBUTION_PATH/libs"
     from(project(":binjr-core").configurations.runtimeClasspath) {
@@ -260,6 +256,11 @@ task copyLauncher(type: Copy) {
 task copyResources(type: Copy) {
     into "$DISTRIBUTION_PATH/resources"
     from "${projectDir}/distribution/resources"
+}
+
+task copyPubKey(type: Copy) {
+    into "${buildDir}"
+    from "${projectDir}/distribution/publishing/Public key - 412EC8A85400AC3F.asc"
 }
 
 task copyInfo(type: Copy) {
@@ -364,7 +365,7 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
 	]
 }
 
-task wixRunHeat(type: Exec, dependsOn: [packageDistributionZip]) {
+task wixRunHeat(type: Exec/*, dependsOn: [packageDistributionZip]*/) {
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/heat.exe",
@@ -402,7 +403,7 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
+task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
     } else {
