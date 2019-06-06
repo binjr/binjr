@@ -421,18 +421,30 @@ signing {
     sign packageDistribution
 }
 
+
+/**
+ * This class is a no-op copy task whose purpose is to allow using the 
+ * standard gradle signing plugin to sign any arbitrary file.
+ * The idea is to piggy-back on the existing support for signing
+ * of tasks extending AbstractArchiveTask; to use it, simply declare a 
+ * task of that type and use the path to the file to be signed both as 
+ * the source and target of the archive.
+ * NB: No copy/move/archiving will actually take place.
+ */
 class WrapTaskForSigning extends AbstractArchiveTask {
 
     @Override
     protected CopyAction createCopyAction() {
         return new noopCopyAction();
     }
-}
+    
+    class noopCopyAction implements CopyAction {
 
-class noopCopyAction implements CopyAction {
-
-    @Override
-    WorkResult execute(CopyActionProcessingStream stream) {
-        return WorkResults.didWork(true);
+        @Override
+        WorkResult execute(CopyActionProcessingStream stream) {
+            return WorkResults.didWork(true);
+        }
     }
 }
+
+

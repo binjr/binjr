@@ -52,6 +52,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.prefs.Preferences;
@@ -353,7 +354,7 @@ public class UpdateManager {
     private void verifyUpdatePackage(Path updatePath, Path sigPath) throws IOException, PGPException {
         try (var packageStream = Files.newInputStream(updatePath, StandardOpenOption.READ)) {
             try (var sigStream = Files.newInputStream(sigPath, StandardOpenOption.READ)) {
-                try (var keyStream = this.getClass().getResourceAsStream("/eu/binjr/pubkey/B326EB92.asc")) {
+                try (var keyStream = this.getClass().getResourceAsStream("/eu/binjr/pubkey/5400AC3F.asc")) {
                     if (!verifyOpenPGP(packageStream, sigStream, keyStream)) {
                         throw new UnsupportedOperationException("Update package's signature could not be verified.");
                     }
@@ -363,6 +364,9 @@ public class UpdateManager {
     }
 
     private boolean verifyOpenPGP(InputStream in, InputStream signature, InputStream keyIn) throws IOException, PGPException {
+        Objects.requireNonNull(in, "File input stream cannot be null");
+        Objects.requireNonNull(signature, "Signature input stream cannot be null");
+        Objects.requireNonNull(keyIn, "Key input stream cannot be null");
         signature = PGPUtil.getDecoderStream(signature);
         JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(signature);
         PGPSignature sig = ((PGPSignatureList) pgpFact.nextObject()).get(0);
