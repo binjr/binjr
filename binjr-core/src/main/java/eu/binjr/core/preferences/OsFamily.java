@@ -23,7 +23,7 @@ package eu.binjr.core.preferences;
  */
 public enum OsFamily {
     LINUX("linux-amd64", "tar.gz"),
-    OSX("mac-x86-64", "tar.gz"),
+    OSX("mac-x86_64", "tar.gz"),
     UNSUPPORTED("unsupported", "unsupported"),
     WINDOWS("windows-amd64", "msi");
 
