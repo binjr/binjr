@@ -260,7 +260,7 @@ task copyResources(type: Copy) {
 
 task copyPubKey(type: Copy) {
     into "${buildDir}"
-    from "${projectDir}/distribution/publishing/Public key - 412EC8A85400AC3F.asc"
+    from "${projectDir}/distribution/publishing/Public_key-412EC8A85400AC3F.asc"
 }
 
 task copyInfo(type: Copy) {
