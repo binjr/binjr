@@ -35,6 +35,7 @@
 
     -fx-base: black;
     -fx-accent: -binjr-dark-blue-color;
+    -fx-accent-translucide: rgba(65,142,173,0.2);
     /****/
 
 }
@@ -1575,8 +1576,6 @@
 .dialog-pane .header-panel .graphic-container .dialog-icon {
     -icon-color:  -fx-text-background-color;
 }
-
-
 
 .dialog-pane {
     -fx-background-color: -binjr-window-background-color;

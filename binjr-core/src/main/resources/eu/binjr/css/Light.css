@@ -24,6 +24,7 @@
     SCROLL_BAR_TRACK: #f0f0f0;
 
     -fx-accent: /*-binjr-foreground-color;*/  -binjr-lighter-blue-color;
+    -fx-accent-translucide: rgba(183,222,232,0.2);
 
 }
 

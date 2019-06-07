@@ -306,10 +306,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setFocusTraversable(true);
             viewPort.setLegendVisible(false);
             viewPort.setAnimated(false);
-
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
-
-
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
                 for (int i = 0; i < viewPorts.size(); i++) {
                     if (viewPorts.get(i).getChart() == viewPort) {
@@ -428,14 +425,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
-            int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
-            DoubleBinding n = Bindings.createDoubleBinding(
-                    () -> viewPorts.stream()
-                            .filter(c -> !c.getChart().equals(chart))
-                            .map(c -> c.getChart().getYAxis().getWidth())
-                            .reduce(Double::sum).orElse(0.0) + (Y_AXIS_SEPARATION * nbAdditionalCharts),
-                    viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)
-            );
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
             VBox.setVgrow(chart, Priority.ALWAYS);
