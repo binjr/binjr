@@ -343,12 +343,9 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
 task listPackageContent(type: Exec) {
     workingDir DISTRIBUTION_PATH
     commandLine = [
-            "find", ".",
-            "-mindepth", "1"
+            "sh", "-c",
+            "find . -mindepth 1 | sed -n 's@^\\./@@p' > .installed"
     ]
-    doFirst {
-        standardOutput new FileOutputStream("${DISTRIBUTION_PATH}/.installed")
-    }
 }
 
 task packageDistributionZip(type: Zip) {
@@ -359,10 +356,10 @@ task packageDistributionZip(type: Zip) {
 
 task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
         workingDir DISTRIBUTION_ROOT
-	commandLine = [
-		"sh", "-c",
-		"ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
-	]
+        commandLine = [
+                "sh", "-c",
+                "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
+        ]
 }
 
 task wixRunHeat(type: Exec/*, dependsOn: [packageDistributionZip]*/) {
@@ -446,5 +443,3 @@ class WrapTaskForSigning extends AbstractArchiveTask {
         }
     }
 }
-
-
