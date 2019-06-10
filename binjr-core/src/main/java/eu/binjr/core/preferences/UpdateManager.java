@@ -46,6 +46,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.FileAttribute;
 import java.security.Security;
 import java.time.LocalDateTime;
@@ -239,29 +240,17 @@ public class UpdateManager {
                     case OSX:
                     case LINUX:
                         File jar = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
-                        File versionDirectory = jar.getParentFile().getParentFile();
-                        File rootDirectory = versionDirectory.getParentFile();
-                        final StringBuilder command = new StringBuilder();
-                        command.append("(");
-                        command.append("echo \"[$(date --iso-8601=seconds)] Updating binjr to version ").append(updateVersion).append("...\" &&");
-                        command.append("cd \"").append(rootDirectory.getPath()).append("\" && ");
-                        command.append("cp -rl \"").append(versionDirectory.getAbsolutePath()).append("\" \"").append(updateVersion).append("\" && ");
-                        command.append("while read file; do test -f \"./").append(updateVersion).append("/$file\" && rm \"./").append(updateVersion).append("/$file\"; done < \"").append(versionDirectory.getAbsolutePath()).append("/.installed\" && ");
-                        command.append("tar xzf \"").append(updatePackage).append("\" \"").append(updateVersion).append("\" && ");
-                        command.append("ln -s \"").append(updateVersion).append("/binjr\" \"new_binjr").append("\" && ");
-                        command.append("mv \"new_binjr\" \"binjr\" && "); // atomic upgrade
-                        command.append("rm -rf \"").append(versionDirectory.getAbsolutePath()).append("\" && ");
-                        command.append("rm \"").append(updatePackage.toAbsolutePath()).append("\" &&");
-                        command.append("echo \"[$(date --iso-8601=seconds)] binjr succesfully updated to version ").append(updateVersion).append("\" ||");
-                        command.append("echo \"[$(date --iso-8601=seconds)] Unable to update binjr to version ").append(updateVersion).append("\"");
-                        command.append(") >> ").append(new File(rootDirectory, "binjr-install.log").getAbsolutePath()).append(" 2>&1");
-                        if (restartRequested) {
-                            command.append(" ; ").append(new File(rootDirectory, "binjr").getPath());
-                        }
-                        processBuilder.command(
-                                "sh",
-                                "-c",
-                                command.toString());
+                        File oldVersionDirectory = jar.getParentFile().getParentFile();
+                        File rootDirectory = oldVersionDirectory.getParentFile();
+                        File upgradeFile = new File(rootDirectory, "upgrade");
+                        Files.copy(new File(oldVersionDirectory, "resources/scripts/upgrade.sh").toPath(), upgradeFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+                        processBuilder.directory();
+                        Map<String, String> environment = processBuilder.environment();
+                        environment.put("OLD_VERSION", oldVersionDirectory.getName());
+                        environment.put("NEW_VERSION", updateVersion.toString());
+                        environment.put("PACKAGE", updatePackage.toString());
+                        environment.put("RESTART", restartRequested ? "true" : "false");
+                        processBuilder.command(upgradeFile.getPath());
                         break;
                     case UNSUPPORTED:
                     default:
