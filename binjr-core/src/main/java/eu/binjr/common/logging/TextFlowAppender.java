@@ -19,8 +19,8 @@ package eu.binjr.common.logging;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -36,6 +36,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
 
 /**
  * TextFlowAppender for Log4j 2
@@ -48,11 +49,17 @@ import java.util.concurrent.locks.ReentrantLock;
         elementType = "appender",
         printObject = true)
 public final class TextFlowAppender extends AbstractAppender {
-    private TextFlow textArea;
-    private final Lock textAreaLock = new ReentrantLock();
+    private final Lock renderTextLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
+
+    public Set<Text> getLogBuffer() {
+        return logBuffer.keySet();
+    }
+
     private final LogBuffer<Text, Object> logBuffer = new LogBuffer<>();
+
+    private Consumer<Set<Text>> renderTextDelegate;
 
     protected TextFlowAppender(String name, Filter filter,
                                Layout<? extends Serializable> layout,
@@ -100,18 +107,8 @@ public final class TextFlowAppender extends AbstractAppender {
         return new TextFlowAppender(name, filter, layout, true);
     }
 
-    /**
-     * Set TextFlow to append
-     *
-     * @param textFlow TextFlow to append
-     */
-    public void setTextFlow(TextFlow textFlow) {
-        textAreaLock.lock();
-        try {
-            this.textArea = textFlow;
-        } finally {
-            textAreaLock.unlock();
-        }
+    public void setRenderTextDelegate(Consumer<Set<Text>> delegate){
+        this.renderTextDelegate = delegate;
     }
 
     /**
@@ -130,24 +127,24 @@ public final class TextFlowAppender extends AbstractAppender {
     public synchronized void append(LogEvent event) {
         new String(getLayout().toByteArray(event)).lines().forEach(
                 message -> {
-                    Text log = new Text(message + "\n");
+                    Text log = new Text(message);
+                    log.setFontSmoothingType(FontSmoothingType.LCD);
                     log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
                     logBuffer.put(log, null);
                 });
     }
 
     private void refreshTextFlow() {
-        if (textAreaLock.tryLock()) {
+        if (renderTextLock.tryLock()) {
             try {
-                if (textArea != null && logBuffer.isDirty()) {
+                if (renderTextDelegate != null && logBuffer.isDirty()) {
                     logBuffer.clean();
                     Dialogs.runOnFXThread(() -> {
-                        textArea.getChildren().clear();
-                        textArea.getChildren().addAll(logBuffer.keySet());
+                        renderTextDelegate.accept(logBuffer.keySet());
                     });
                 }
             } finally {
-                textAreaLock.unlock();
+                renderTextLock.unlock();
             }
         }
     }

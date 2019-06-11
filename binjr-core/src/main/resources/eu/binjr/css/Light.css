@@ -1457,16 +1457,6 @@
 }
 
 
-.console-pane .viewport{
-  -fx-background-color:  white;
-}
-
-
-.console-pane .scroll-pane{
- -fx-border-color:  -binjr-color-light-gray;
-  -fx-background-color:  white;
-}
-
 
 .log-trace {
     -fx-fill: GRAY;

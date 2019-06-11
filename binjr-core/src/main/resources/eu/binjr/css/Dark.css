@@ -685,7 +685,6 @@
 
 
 
-
  /****************************
   Command bar
   ***************************/
@@ -1099,12 +1098,12 @@
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected{
-    -fx-background-color: derive(-fx-accent, 90%);
+    -fx-background-color: derive(-fx-accent, -40%);
     -fx-text-fill: #111;
 }
 
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover{
-    -fx-background-color: derive(-fx-accent, 70%);
+    -fx-background-color: derive(-fx-accent, -20%);
 }
 
 /*****************************************************************/
@@ -1583,7 +1582,7 @@
 }
 
 .console-pane .viewport,
-.console-pane .scroll-pane{
+.console-pane .stack-pane {
   -fx-background-color: -binjr-pane-background-color;
 }
 
@@ -1613,8 +1612,25 @@
 }
 
 .log-fatal {
-
     -fx-fill: RED;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-background-color: transparent;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:hover{
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected{
+    -fx-background-color: derive(-fx-accent, -40%);
+    -fx-text-fill: #111;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover{
+    -fx-background-color: derive(-fx-accent, -20%);
 }
 
 .auto-complete-popup > .list-view {
@@ -1643,7 +1659,7 @@
 .auto-complete-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover,
 .auto-complete-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background: -fx-accent;
-      -fx-text-fill: -fx-text-background-color;
+    -fx-text-fill: -fx-text-background-color;
     -fx-background-color: -fx-selection-bar;
 }
 .auto-complete-popup > .list-view > .placeholder > .label {

@@ -48,3 +48,13 @@
     -fx-border-width: 0;
 }
 
+.console-pane > .list-view  {
+    -fx-background-color: transparent;
+    -fx-border-width:0;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-padding: 0px;
+    /*-fx-effect: null;*/
+}
+
