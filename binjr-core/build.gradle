@@ -17,11 +17,11 @@
 
 dependencies {
     api 'org.apache.logging.log4j:log4j-core:2.11.2'
-    api 'org.apache.httpcomponents:httpclient:4.5.8'
+    api 'org.apache.httpcomponents:httpclient:4.5.9'
     api 'org.controlsfx:controlsfx:11.0.0'
     api 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.8.5'
-    api 'org.apache.commons:commons-csv:1.6'
+    api 'org.apache.commons:commons-csv:1.7'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.2'
     api 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
     api "org.bouncycastle:bcpg-jdk15on:1.62"
