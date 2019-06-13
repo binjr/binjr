@@ -24,6 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -60,6 +61,8 @@ public class GithubRelease {
     @SerializedName("published_at")
     private Date publishedAt;
     private GithubUser author;
+    @SerializedName("assets")
+    private List<GithubAsset> assets;
 
     /**
      * Returns the url associated to the release.
@@ -398,6 +401,14 @@ public class GithubRelease {
         }
     }
 
+    public List<GithubAsset> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(List<GithubAsset> assets) {
+        this.assets = assets;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GithubRelease{");
@@ -420,4 +431,6 @@ public class GithubRelease {
         sb.append('}');
         return sb.toString();
     }
+
+
 }

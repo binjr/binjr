@@ -306,7 +306,7 @@ public class UpdateManager {
     }
 
     private Path downloadAsset(GithubRelease release, OsFamily os, boolean isSignature, Path targetDir) throws IOException, URISyntaxException {
-        var asset = github.getAssets(release)
+        var asset = release.getAssets()
                 .stream()
                 .filter(a -> a.getName().equalsIgnoreCase(
                         String.format("binjr-%s_%s.%s%s",
