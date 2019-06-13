@@ -52,18 +52,25 @@ import java.util.*;
  */
 public class GithubApiHelper {
     private static final Logger logger = LogManager.getLogger(GithubApiHelper.class);
-    public static final String GITHUB_API_HOSTNAME = "api.github.com";
-    public static final String URL_PROTOCOL = "https";
     protected String userCredentials;
     protected final CloseableHttpClient httpClient;
     protected Gson gson;
+    private final URI apiEndpoint;
 
     private static class GithubApiHolder {
         private final static GithubApiHelper instance = new GithubApiHelper();
     }
+    private GithubApiHelper(){
+        this(null);
+    }
 
-    private GithubApiHelper() {
+    private GithubApiHelper(URI apiEndpoint) {
         gson = new Gson();
+        if (apiEndpoint == null){
+                this.apiEndpoint = URI.create("https://api.github.com");
+        }else{
+            this.apiEndpoint = apiEndpoint;
+        }
         httpClient = HttpClients
                 .custom()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
@@ -84,11 +91,27 @@ public class GithubApiHelper {
      *
      * @return a new instance of the {@link ClosableGitHubApiHelper} class.
      */
+    public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint) {
+        return new ClosableGitHubApiHelper(apiEndpoint);
+    }
+
+    /**
+     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     *
+     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     */
     public static ClosableGitHubApiHelper createCloseable() {
         return new ClosableGitHubApiHelper();
     }
 
     public static class ClosableGitHubApiHelper extends GithubApiHelper implements Closeable {
+        public ClosableGitHubApiHelper() {
+        }
+
+        public ClosableGitHubApiHelper(URI apiEndpoint) {
+            super(apiEndpoint);
+        }
+
         @Override
         public void close() throws IOException {
             httpClient.close();
@@ -144,9 +167,7 @@ public class GithubApiHelper {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public Optional<GithubRelease> getRelease(String slug, String id) throws IOException, URISyntaxException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(URL_PROTOCOL)
-                .setHost(GITHUB_API_HOSTNAME)
+        URIBuilder requestUrl = new URIBuilder(apiEndpoint)
                 .setPath("/repos/" + slug + "/releases/" + id);
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
@@ -187,9 +208,7 @@ public class GithubApiHelper {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public List<GithubRelease> getAllReleases(String slug) throws IOException, URISyntaxException {
-        URIBuilder requestUrl = new URIBuilder()
-                .setScheme(URL_PROTOCOL)
-                .setHost(GITHUB_API_HOSTNAME)
+        URIBuilder requestUrl = new URIBuilder(apiEndpoint)
                 .setPath("/repos/" + slug + "/releases")
                 .addParameter("per_page", "100");
         logger.debug(() -> "requestUrl = " + requestUrl);

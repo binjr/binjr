@@ -38,16 +38,14 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.attribute.FileAttribute;
+import java.nio.file.*;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -75,7 +73,7 @@ public class UpdateManager {
 
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.github = GithubApiHelper.createCloseable();
+        this.github = GithubApiHelper.createCloseable( URI.create("https://binjr.eu"));
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
