@@ -70,6 +70,7 @@ jobs:
       - bash: |
           git clone https://github.com/binjr/binjr.github.io build/tmp/binjr.github.io
           cd  build/tmp/binjr.github.io
+          cp ../info/CHANGELOG.md CHANGELOG.md
           git config credential.helper store
           echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
           git config user.email "binjr.bot@free.fr"

@@ -10,3 +10,4 @@
 * _[Fixed]_ Selecting a timezone in time picker sometime doesn't register.
 * _[Fixed]_ Synchronizing timelines across worksheets is broken.
 * _[Fixed]_ UI becomes unresponsive when output console displays  a large number of lines (>20000).
+* _[Fixed]_ Check for a new versions fails due to Github API rate limit being reached.
