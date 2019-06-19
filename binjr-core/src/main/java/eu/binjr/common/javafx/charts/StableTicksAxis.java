@@ -16,16 +16,15 @@
 
 package eu.binjr.common.javafx.charts;
 
+import eu.binjr.common.javafx.controls.DrawerPane;
 import eu.binjr.common.text.PrefixFormatter;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
 import javafx.animation.Timeline;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Side;
 import javafx.scene.chart.ValueAxis;
@@ -43,14 +42,46 @@ import java.util.List;
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
 
+    private static class SelectableRegion extends Region {
+        private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
+
+        private BooleanProperty selected = new BooleanPropertyBase(false) {
+            public void invalidated() {
+                pseudoClassStateChanged(SELECTED_PSEUDO_CLASS, get());
+            }
+
+            @Override
+            public Object getBean() {
+                return SelectableRegion.this;
+            }
+
+            @Override
+            public String getName() {
+                return "selected";
+            }
+        };
+
+        public boolean isSelected() {
+            return selected.get();
+        }
+
+        public BooleanProperty selectedProperty() {
+            return selected;
+        }
+
+        public void setSelected(boolean selected) {
+            this.selected.set(selected);
+        }
+    }
+
     /**
      * Possible tick spacing at the 10^1 level. These numbers must be &gt;= 1 and &lt; 10.
      */
     private static final int NUM_MINOR_TICKS = 3;
     public static final int BTN_WITDTH = 21;
+    private final SelectableRegion selectionMarker = new SelectableRegion();
+    private final BooleanProperty selected = selectionMarker.selectedProperty(); //new SimpleBooleanProperty(false);
 
-    private final BooleanProperty selected = new SimpleBooleanProperty(false);
-    private final Region selectionMarker = new Region();
     private final Timeline animationTimeline = new Timeline();
     private final WritableValue<Double> scaleValue = new WritableValue<>() {
         @Override
@@ -89,8 +120,10 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
         getStyleClass().setAll("axis");
 
         selectionMarker.getStyleClass().add("selection-marker");
-        selectionMarker.visibleProperty().bind(selectedProperty());
+        var states = selectionMarker.getPseudoClassStates();
+        // selectionMarker.visibleProperty().bind(selectedProperty());
         this.getChildren().add(selectionMarker);
+
 
         this.axisTickFormatter = new AxisTickFormatter() {
             @Override
@@ -181,19 +214,21 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
         super.layoutChildren();
         Side side = getSide();
         if (side.isVertical()) {
+            double xShift = side == Side.LEFT ? -10 : 0;
             double contentX = this.getLayoutX();
             double contentY = this.getLayoutY();
-            double contentWidth = this.getWidth();
+            double contentWidth = this.getWidth() + 10;//(xShift * -1);
             double contentHeight = this.getHeight();
 
-            this.selectionMarker.setPrefWidth(4.0);
+            this.selectionMarker.setPrefWidth(contentWidth);
             this.selectionMarker.setPrefHeight(contentHeight);
-            double actualXpos = side == Side.LEFT ? -10 : contentWidth;
+
             selectionMarker.resizeRelocate(
-                    snapPositionX(actualXpos),
+                    snapPositionX(xShift),
                     snapPositionY(0),
-                    snapSizeX(4.0),
+                    snapSizeX(contentWidth),
                     snapSizeY(contentHeight));
+            selectionMarker.toFront();
         }
     }
 

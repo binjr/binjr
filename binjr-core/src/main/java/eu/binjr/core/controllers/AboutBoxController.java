@@ -32,6 +32,7 @@ import javafx.scene.effect.Bloom;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
@@ -171,8 +172,9 @@ public class AboutBoxController implements Initializable {
                     s = s.replace("^b", "");
                     licText.setStyle("-fx-font-weight: bold");
                 }
+                licText.setFontSmoothingType(FontSmoothingType.LCD);
                 licText.setText(s + "\n");
-                licText.setFill(Color.valueOf("#204656"));
+                licText.setFill(Color.valueOf("#DAEEF3"));
                 textFlow.getChildren().add(licText);
             });
             textFlow.setTextAlignment(TextAlignment.LEFT);

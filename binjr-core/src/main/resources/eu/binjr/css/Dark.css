@@ -13,6 +13,7 @@
     -binjr-control-hilite-color: -binjr-blue-color;
     -binjr-control-border-color: #808080;
 
+    -binjr-control-border-hilite-color:#bababa;
     -binjr-color-dark-gray: white;
     -binjr-color-darker-gray: white;
     -binjr-color-red: #E81123;
@@ -34,6 +35,7 @@
 
     -fx-base: black;
     -fx-accent: -binjr-dark-blue-color;
+    -fx-accent-translucide: rgba(65,142,173,0.2);
     /****/
 
 }
@@ -87,7 +89,7 @@
 }
 
 /**********************************************/
-
+.combo-box-base > .arrow-button,
 .choice-box,
 .button {
     -fx-background-color: -binjr-button-background-color;
@@ -99,12 +101,14 @@
     -fx-alignment: center;
 }
 
+.combo-box-base > .arrow-button:hover,
 .choice-box:hover,
 .button:hover{
     -fx-border-color: -binjr-dark-blue-color;
     -fx-background-color: -binjr-dark-blue-color;
 }
 
+.combo-box-base > .arrow-button:disabled,
 .button:disabled,
 .choice-box:disabled {
     -fx-opacity: .4;
@@ -125,12 +129,14 @@
     -fx-alignment: center;
 }
 
+.combo-box-base > .arrow-button:hover,
 .dialog-button:hover,
 .toggle-button:hover,
 .menu-button:hover {
     -fx-background-color: -binjr-control-hover-color;
 }
 
+.combo-box-base > .arrow-button:hover:pressed,
 .choice-box:pressed:hover,
 .dialog-button:hover:pressed,
 .button:hover:pressed,
@@ -148,12 +154,14 @@
   -fx-text-fill: -fx-text-background-color;
 }
 
+.combo-box-base > .arrow-button:selected,
 .toggle-button:selected,
 .menu-button:selected {
     -fx-background-color:  -binjr-control-hilite-color;
     -fx-text-fill: -fx-text-background-color;
 }
 
+.combo-box-base > .arrow-button:selected:hover,
 .toggle-button:selected:hover,
 .menu-button:selected:hover {
     -fx-background-color:  -binjr-control-hilite-color;
@@ -210,7 +218,8 @@
 
  .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
    /*     -fx-background-color: #5c5c5c, -binjr-tool-button-background-color;*/
-     -fx-border-color: -binjr-control-border-color;
+    /* -fx-border-color: -binjr-control-border-color;*/
+      -fx-border-color: -binjr-control-border-hilite-color;
    /*  -fx-text-fill: black;*/
  }
 
@@ -268,6 +277,8 @@
    /*  -fx-background-color: white;*/
  }
 
+.auto-complete-popup  > .list-view,
+.combo-box-popup > .list-view,
 .interval-picker-popup,
 .date-picker-popup {
     -fx-border-color: -binjr-control-border-color;
@@ -674,7 +685,6 @@
 
 
 
-
  /****************************
   Command bar
   ***************************/
@@ -1038,15 +1048,63 @@
     -fx-opacity: .4;
 }
 
-
-
 .command-bar .choice-box .arrow {
      -fx--padding: 2 4.5;
  }
 
+.combo-box-base .arrow,
 .choice-box .arrow {
      -fx-shape:"m 80.512719,84.877147 c 0.04221,0.0422 0.09346,0.0633 0.153747,0.0633 0.06029,-3e-6 0.111536,-0.02111 0.153749,-0.0633 l 1.754534,-1.754535 c 0.04221,-0.04221 0.0633,-0.09345 0.0633,-0.153748 -3e-6,-0.06029 -0.02111,-0.111548 -0.0633,-0.153748 l -0.198968,-0.208012 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.0603,0 -0.111547,0.02111 -0.153748,0.0633 l -1.401819,1.392775 -1.401818,-1.392775 c -0.04221,-0.04221 -0.09345,-0.0633 -0.153748,-0.0633 -0.06029,0 -0.111548,0.02111 -0.153747,0.0633 l -0.198969,0.208012 c -0.04221,0.04221 -0.0633,0.09346 -0.0633,0.153748 0,0.06029 0.02111,0.111547 0.0633,0.153748 z";
  }
+
+.combo-box-base {
+   -fx-effect: null;
+   -fx-background-color: transparent;
+   -fx-background-radius: 0, 0, 0, 0;
+   -fx-padding: 0;
+}
+
+
+.combo-box-base > .text-input {
+  -fx-background-radius: 0, 0;
+  -fx-border-width:0;
+  -fx-background-color: transparent;
+  -fx-background-insets: 0;
+}
+
+.combo-box-base {
+
+   -fx-border-color:-binjr-control-border-color;
+   -fx-background-color: -binjr-button-background-color;
+   -fx-border-width:1;
+   -fx-effect: null;
+   -fx-background-radius: 0, 0, 0, 0;
+   -fx-padding: 0;
+}
+
+.combo-box-base:focused {
+   -fx-border-color: -binjr-control-border-hilite-color;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-effect: null;
+
+    -fx-background-color: -binjr-window-background-color;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:hover{
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected{
+    -fx-background-color: derive(-fx-accent, -40%);
+    -fx-text-fill: #111;
+}
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover{
+    -fx-background-color: derive(-fx-accent, -20%);
+}
 
 /*****************************************************************/
 
@@ -1518,15 +1576,13 @@
     -icon-color:  -fx-text-background-color;
 }
 
-
-
 .dialog-pane {
     -fx-background-color: -binjr-window-background-color;
     -fx-padding: 0;
 }
 
 .console-pane .viewport,
-.console-pane .scroll-pane{
+.console-pane .stack-pane {
   -fx-background-color: -binjr-pane-background-color;
 }
 
@@ -1556,8 +1612,25 @@
 }
 
 .log-fatal {
-
     -fx-fill: RED;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-background-color: transparent;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:hover{
+    -fx-background-color: -fx-accent;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected{
+    -fx-background-color: derive(-fx-accent, -40%);
+    -fx-text-fill: #111;
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover{
+    -fx-background-color: derive(-fx-accent, -20%);
 }
 
 .auto-complete-popup > .list-view {
@@ -1586,7 +1659,7 @@
 .auto-complete-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover,
 .auto-complete-popup  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:selected:hover {
     -fx-background: -fx-accent;
-      -fx-text-fill: -fx-text-background-color;
+    -fx-text-fill: -fx-text-background-color;
     -fx-background-color: -fx-selection-bar;
 }
 .auto-complete-popup > .list-view > .placeholder > .label {

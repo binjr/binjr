@@ -29,7 +29,7 @@ public enum UserInterfaceThemes {
     CLASSIC("Classic", "/eu/binjr/css/Classic.css");
 
     private final String cssPath;
-    private String label;
+    private final String label;
 
     UserInterfaceThemes(String label, String cssPath) {
         this.label = label;

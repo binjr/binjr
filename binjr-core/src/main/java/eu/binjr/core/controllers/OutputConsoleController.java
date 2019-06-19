@@ -19,19 +19,19 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
@@ -59,9 +59,7 @@ public class OutputConsoleController implements Initializable {
     public TextField consoleMaxLinesText;
     public VBox root;
     @FXML
-    private TextFlow textOutput;
-    @FXML
-    private ScrollPane scrollPane;
+    private ListView<Text> textOutput;
     @FXML
     private ChoiceBox<Level> logLevelChoice;
     @FXML
@@ -70,23 +68,19 @@ public class OutputConsoleController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        textOutput.getChildren().addListener(
-                (ListChangeListener<Node>) ((change) -> {
-                    textOutput.layout();
-                    scrollPane.layout();
-                    scrollPane.setVvalue(1.0f);
-                }));
-
-        final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
+        final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter());
         consoleMaxLinesText.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().consoleMaxLineCapacityProperty());
-
-        if (DEBUG_CONSOLE_APPENDER == null){
+        if (DEBUG_CONSOLE_APPENDER == null) {
             Text log = new Text("<ERROR: The debug console appender is unavailable!>\n");
             log.getStyleClass().add("log-error");
-            textOutput.getChildren().add(log);
-        }else {
-            DEBUG_CONSOLE_APPENDER.setTextFlow(textOutput);
+            textOutput.getItems().add(log);
+
+        } else {
+            DEBUG_CONSOLE_APPENDER.setRenderTextDelegate(msgSet -> {
+                textOutput.getItems().clear();
+                textOutput.getItems().addAll(msgSet);
+            });
         }
         Platform.runLater(() -> {
             logLevelChoice.getItems().setAll(Level.values());
@@ -110,7 +104,6 @@ public class OutputConsoleController implements Initializable {
     }
 
 
-
     @FXML
     private void handleClearConsole(ActionEvent actionEvent) {
         if (DEBUG_CONSOLE_APPENDER != null) {
@@ -126,18 +119,17 @@ public class OutputConsoleController implements Initializable {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
             fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
             fileChooser.setInitialFileName("binjr_console_output.txt");
-            File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(scrollPane));
+            File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
                 try (Writer writer = new BufferedWriter(new FileWriter(selectedFile))) {
-                    textOutput.getChildren().stream().map(node -> ((Text) node).getText()).forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
+                    textOutput.getItems().stream().map(node -> ((Text) node).getText()).forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
                 } catch (IOException e) {
-                    Dialogs.notifyException("Error writing log message to file", e, scrollPane);
+                    Dialogs.notifyException("Error writing log message to file", e, textOutput);
                 }
                 GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.toPath());
-
             }
         } catch (Exception e) {
-            Dialogs.notifyException("Failed to save console output to file", e, scrollPane);
+            Dialogs.notifyException("Failed to save console output to file", e, textOutput);
         }
     }
 
@@ -145,23 +137,23 @@ public class OutputConsoleController implements Initializable {
     private void handleCopyConsoleOutput(ActionEvent actionEvent) {
         try {
             final ClipboardContent content = new ClipboardContent();
-            content.putString(textOutput.getChildren().stream().map(node -> ((Text) node).getText()).collect(Collectors.joining()));
+            content.putString(textOutput.getItems().stream().map(node -> ((Text) node).getText()).collect(Collectors.joining()));
             Clipboard.getSystemClipboard().setContent(content);
         } catch (Exception e) {
-            Dialogs.notifyException("Failed to copy console output to clipboard", e, scrollPane);
+            Dialogs.notifyException("Failed to copy console output to clipboard", e, textOutput);
         }
     }
 
     public void handleDebugForceGC(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force GC");
-        System.gc();
-        Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
-
+        try (Profiler p = Profiler.start("Force GC", e -> Binjr.runtimeDebuggingFeatures.debug(e.toString() + " - " + getJvmHeapStats()))) {
+            System.gc();
+        }
     }
 
     public void handleDebugRunFinalization(ActionEvent actionEvent) {
-        Binjr.runtimeDebuggingFeatures.debug(() -> "Force runFinalization");
-        System.runFinalization();
+        try (Profiler p = Profiler.start("Force runFinalization", Binjr.runtimeDebuggingFeatures::debug)) {
+            System.runFinalization();
+        }
     }
 
     public void handleDebugDumpHeapStats(ActionEvent actionEvent) {

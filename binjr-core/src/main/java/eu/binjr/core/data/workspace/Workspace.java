@@ -190,13 +190,17 @@ public class Workspace implements Dirtyable {
      * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
      */
     public void removeWorksheets(Worksheet... worksheetsToRemove) {
-        this.worksheets.removeAll(worksheetsToRemove);
+        for (var w : worksheetsToRemove) {
+            w.close();
+            this.worksheets.remove(w);
+        }
     }
 
     /**
      * Clear the {@link Worksheet} list
      */
     public void clearWorksheets() {
+        worksheets.forEach(Worksheet::close);
         worksheets.clear();
     }
 
@@ -204,6 +208,7 @@ public class Workspace implements Dirtyable {
      * Clear the {@link Source} list
      */
     public void clearSources() {
+        sources.forEach(Source::close);
         this.sources.clear();
     }
 
@@ -329,6 +334,7 @@ public class Workspace implements Dirtyable {
     }
 
     public void close() {
+        logger.debug("Closing Workspace " + this.toString());
         try {
             IOUtils.closeCollectionElements(worksheets);
             IOUtils.closeCollectionElements(sources);

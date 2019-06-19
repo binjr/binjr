@@ -19,22 +19,42 @@
     -icon-scale-y: 2.5;
 }
 
-.tool-bar{
+.tool-bar {
     -fx-padding: 0;
-    -fx-background-color:  none;
+    -fx-background-color: none;
 }
 
 .tool-bar-overflow-button {
-    -fx-padding: 12,0,0,0;
+    -fx-padding: 12, 0, 0, 0;
 }
 
 .selection-marker {
-     -fx-background-color: -fx-accent;
+    -fx-background-color: transparent;
 }
 
- .chart,
- .chart-plot-background{
-    -fx-background-color:  transparent;
+.selection-marker:selected {
+    -fx-border-width: 0 0 0 4;
+    -fx-border-color: -fx-accent;
+}
+
+.selection-marker:selected:hover,
+.selection-marker:hover {
+    -fx-background-color: -fx-accent-translucide;
+}
+
+.chart,
+.chart-plot-background {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+}
+
+.console-pane > .list-view  {
+    -fx-background-color: transparent;
     -fx-border-width:0;
- }
+}
+
+.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+    -fx-padding: 0px;
+    /*-fx-effect: null;*/
+}
 

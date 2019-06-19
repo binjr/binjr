@@ -28,7 +28,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,9 +36,6 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Optional;
 
 /**
  * The entry point fo the application.
@@ -51,40 +47,6 @@ public class Binjr extends Application {
     private static final Logger logger = LogManager.getLogger(Binjr.class);
     // initialize the debug console appender early to start capturing logs ASAP.
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER = initTextFlowAppender();
-
-    @Override
-    public void start(Stage primaryStage) throws Exception {
-        var prefs = GlobalPreferences.getInstance();
-        processCommandLineOptions(getParameters());
-        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
-        Parent root = loader.load();
-        MainViewController mainViewController = loader.getController();
-        mainViewController.setAssociatedFile(getAssociatedWorkspace(getParameters()));
-        primaryStage.setTitle(AppEnvironment.APP_NAME);
-
-        try (Profiler p = Profiler.start("Set scene", logger::trace)) {
-            if (Screen.getScreensForRectangle(
-                    prefs.getWindowLastPosition().getMinX(),
-                    prefs.getWindowLastPosition().getMinY(),
-                    10, 10).size() > 0) {
-                primaryStage.setX(prefs.getWindowLastPosition().getMinX());
-                primaryStage.setY(prefs.getWindowLastPosition().getMinY());
-                primaryStage.setWidth(prefs.getWindowLastPosition().getWidth());
-                primaryStage.setHeight(prefs.getWindowLastPosition().getHeight());
-            }
-            primaryStage.setScene(new Scene(root));
-            StageAppearanceManager.getInstance().register(primaryStage);
-        }
-        try (Profiler p = Profiler.start("show", logger::trace)) {
-            primaryStage.initStyle(AppEnvironment.getInstance().getWindowsStyle());
-            primaryStage.show();
-        }
-        SplashScreen splash = SplashScreen.getSplashScreen();
-        if (splash != null) {
-            splash.close();
-        }
-    }
 
     /**
      * The entry point fo the application.
@@ -120,37 +82,38 @@ public class Binjr extends Application {
         return null;
     }
 
-    private void processCommandLineOptions(Parameters parameters) {
-        parameters.getNamed().forEach((name, val) -> {
-            switch (name.toLowerCase()) {
-                case "windows-style":
-                    try {
-                        AppEnvironment.getInstance().setWindowsStyle(StageStyle.valueOf(val.toUpperCase()));
-                    } catch (IllegalArgumentException e) {
-                        logger.error("Unknown windows style specified: " + val, e);
-                    }
-                case "resizable-dialogs":
-                    AppEnvironment.getInstance().setResizableDialogs(Boolean.valueOf(val));
-                    break;
-                case "disable-update-check":
-                    AppEnvironment.getInstance().setDisableUpdateCheck(Boolean.valueOf(val));
-                    break;
-                case "log-level":
-                    AppEnvironment.getInstance().setLogLevel(Level.toLevel(val, Level.INFO));
-                    break;
-                case "log-file":
-                    break;
+    @Override
+    public void start(Stage primaryStage) throws Exception {
+        var prefs = GlobalPreferences.getInstance();
+        var env = AppEnvironment.getInstance();
+        env.processCommandLineOptions(getParameters());
+        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
+        Parent root = loader.load();
+        MainViewController mainViewController = loader.getController();
+        mainViewController.setAssociatedFile(env.getAssociatedWorkspace());
+        primaryStage.setTitle(AppEnvironment.APP_NAME);
+
+        try (Profiler p = Profiler.start("Set scene", logger::trace)) {
+            if (Screen.getScreensForRectangle(
+                    prefs.getWindowLastPosition().getMinX(),
+                    prefs.getWindowLastPosition().getMinY(),
+                    10, 10).size() > 0) {
+                primaryStage.setX(prefs.getWindowLastPosition().getMinX());
+                primaryStage.setY(prefs.getWindowLastPosition().getMinY());
+                primaryStage.setWidth(prefs.getWindowLastPosition().getWidth());
+                primaryStage.setHeight(prefs.getWindowLastPosition().getHeight());
             }
-        });
+            primaryStage.setScene(new Scene(root));
+            StageAppearanceManager.getInstance().register(primaryStage);
+        }
+        try (Profiler p = Profiler.start("show", logger::trace)) {
+            primaryStage.initStyle(AppEnvironment.getInstance().getWindowsStyle());
+            primaryStage.show();
+        }
+        SplashScreen splash = SplashScreen.getSplashScreen();
+        if (splash != null) {
+            splash.close();
+        }
     }
-
-    private Optional<String> getAssociatedWorkspace(Parameters parameters) {
-        return parameters.getUnnamed()
-                .stream()
-                .filter(s -> s.endsWith(".bjr"))
-                .filter(s -> Files.exists(Paths.get(s)))
-                .findFirst();
-    }
-
-
 }

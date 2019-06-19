@@ -22,7 +22,9 @@ import eu.binjr.common.version.Version;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.URL;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -32,17 +34,17 @@ import java.util.Date;
  */
 public class GithubRelease {
     private static final Logger logger = LogManager.getLogger(GithubRelease.class);
-    private String url;
+    private URL url;
     @SerializedName("html_url")
-    private String htmlUrl;
+    private URL htmlUrl;
     @SerializedName("assets_url")
-    private String assetsUrl;
+    private URL assetsUrl;
     @SerializedName("upload_url")
-    private String uploadUrl;
+    private URL uploadUrl;
     @SerializedName("tarball_url")
-    private String tarballUrl;
+    private URL tarballUrl;
     @SerializedName("zipball_url")
-    private String zipballUrl;
+    private URL zipballUrl;
     private long id;
     @SerializedName("tag_name")
     private String tagName;
@@ -59,13 +61,15 @@ public class GithubRelease {
     @SerializedName("published_at")
     private Date publishedAt;
     private GithubUser author;
+    @SerializedName("assets")
+    private List<GithubAsset> assets;
 
     /**
      * Returns the url associated to the release.
      *
      * @return the url associated to the release.
      */
-    public String getUrl() {
+    public URL getUrl() {
         return url;
     }
 
@@ -75,7 +79,7 @@ public class GithubRelease {
      * @param url the url associated to the release.
      * @return this release
      */
-    public GithubRelease setUrl(String url) {
+    public GithubRelease setUrl(URL url) {
         this.url = url;
         return this;
     }
@@ -85,7 +89,7 @@ public class GithubRelease {
      *
      * @return htmlUrl the url associated to the html page.
      */
-    public String getHtmlUrl() {
+    public URL getHtmlUrl() {
         return htmlUrl;
     }
 
@@ -95,7 +99,7 @@ public class GithubRelease {
      * @param htmlUrl the url associated to the html page.
      * @return this release
      */
-    public GithubRelease setHtmlUrl(String htmlUrl) {
+    public GithubRelease setHtmlUrl(URL htmlUrl) {
         this.htmlUrl = htmlUrl;
         return this;
     }
@@ -105,7 +109,7 @@ public class GithubRelease {
      *
      * @return the assets url
      */
-    public String getAssetsUrl() {
+    public URL getAssetsUrl() {
         return assetsUrl;
     }
 
@@ -115,7 +119,7 @@ public class GithubRelease {
      * @param assetsUrl the assets url
      * @return this release
      */
-    public GithubRelease setAssetsUrl(String assetsUrl) {
+    public GithubRelease setAssetsUrl(URL assetsUrl) {
         this.assetsUrl = assetsUrl;
         return this;
     }
@@ -125,7 +129,7 @@ public class GithubRelease {
      *
      * @return the upload url
      */
-    public String getUploadUrl() {
+    public URL getUploadUrl() {
         return uploadUrl;
     }
 
@@ -135,7 +139,7 @@ public class GithubRelease {
      * @param uploadUrl the upload url
      * @return this release
      */
-    public GithubRelease setUploadUrl(String uploadUrl) {
+    public GithubRelease setUploadUrl(URL uploadUrl) {
         this.uploadUrl = uploadUrl;
         return this;
     }
@@ -145,7 +149,7 @@ public class GithubRelease {
      *
      * @return the tarball url
      */
-    public String getTarballUrl() {
+    public URL getTarballUrl() {
         return tarballUrl;
     }
 
@@ -155,7 +159,7 @@ public class GithubRelease {
      * @param tarballUrl the tarball url
      * @return this release
      */
-    public GithubRelease setTarballUrl(String tarballUrl) {
+    public GithubRelease setTarballUrl(URL tarballUrl) {
         this.tarballUrl = tarballUrl;
         return this;
     }
@@ -165,7 +169,7 @@ public class GithubRelease {
      *
      * @return zipballUrl the zip url.
      */
-    public String getZipballUrl() {
+    public URL getZipballUrl() {
         return zipballUrl;
     }
 
@@ -175,7 +179,7 @@ public class GithubRelease {
      * @param zipballUrl the zip url.
      * @return this release
      */
-    public GithubRelease setZipballUrl(String zipballUrl) {
+    public GithubRelease setZipballUrl(URL zipballUrl) {
         this.zipballUrl = zipballUrl;
         return this;
     }
@@ -397,6 +401,14 @@ public class GithubRelease {
         }
     }
 
+    public List<GithubAsset> getAssets() {
+        return assets;
+    }
+
+    public void setAssets(List<GithubAsset> assets) {
+        this.assets = assets;
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("GithubRelease{");
@@ -419,4 +431,6 @@ public class GithubRelease {
         sb.append('}');
         return sb.toString();
     }
+
+
 }

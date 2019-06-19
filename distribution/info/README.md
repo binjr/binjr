@@ -1,5 +1,8 @@
-# ![binjr](./resources/images/binjr_logo.png)
-##### _Version ${version}, Released on ${releaseDate}_ 
+# binjr
+###### A Time Series Data Browser
+*_Version ${version}, Released on ${releaseDate}_* 
+
+---
 
 ***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically editable charts and provides many features to navigate through the data in a natural and fluent fashion (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
  
@@ -22,7 +25,7 @@ transparency for each individual series.
 The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
 
-### Features
+## Features
 
 #### Data source agnostic
   * Standalone, client-side application.
@@ -30,29 +33,29 @@ with someone else.
   * Communicates though the APIs exposed by the source. 
   * Supports for data sources is expendable via plugins.
    
-####  Designed for ad-hoc view composition
+#### Designed for ad-hoc view composition
   * Drag and drop series from any sources directly on the chart view.
   * Mix series from different sources on the same view.
   * Allows charts overlay: create charts with several Y axis and a shared time line.
   * Highly customizable; choose chart types, change series colours, transparency, legends, etc...
   * The whole working session can be saved to a file at any time, to reopen later or to share it with someone else.  
    
-####  Fluent navigation 
+#### Fluent navigation 
   * Drag and drop driven zoom of both X and Y axis.
   * Browser-like, forward & backward navigation of zoom history.
   * Advanced time-range selection widget.
   * Create many charts views in detachable tabs, which you can synchronize to the same time line.
   
-####  Fast, responsive & aesthetically pleasing visuals
+#### Fast, responsive & aesthetically pleasing visuals
   * Built on top of [JavaFX](https://openjfx.io/) for a modern look and cross-platform, hardware accelerated graphics.
   * Offers three different UI themes, to better integrate with host OS and fit user preferences.
     
-####  Java based application 
+#### Java based application 
   * Cross-platform: works great on Linux, macOS and Windows desktops!
   * Strong performances, even under heavy load (dozens of charts with dozens of series and thousands of samples). s 
 
   
-### Supported data sources
+## Supported data sources
 
 ***binjr*** can consume time series data provided by the following data sources:
 
@@ -60,7 +63,7 @@ with someone else.
 * Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
 * Comma Separated Values (CSV) files.
 
-### Getting started
+## Getting started
 
 This package contains contains everything needed to run ***binjr***, including a copy of the Java runtime specially
  crafted to only include the required components and save disk space.
@@ -69,14 +72,14 @@ Make sure you've downloaded the right package for the OS you intend to run ***bi
  [release page](https://github.com/binjr/binjr/releases/latest) for more), unpack it and run `binjr` to start!
 
   
-### Getting help
+## Getting help
 
 The documentation can be found [here](https://github.com/binjr/binjr/wiki).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
 
-### How is it licensed?
+## How is it licensed?
 
 ***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
 

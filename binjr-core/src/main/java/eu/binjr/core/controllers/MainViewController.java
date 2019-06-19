@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -33,12 +32,13 @@ import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.UpdateManager;
-import javafx.animation.*;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -65,8 +65,6 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
-import org.controlsfx.control.Notifications;
-import org.controlsfx.control.action.Action;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -96,9 +94,6 @@ public class MainViewController implements Initializable {
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final double TOOL_BUTTON_SIZE = 20;
-    //    private static final double COLLAPSED_WIDTH = 48;
-//    private static final double EXPANDED_WIDTH = 200;
-//    private static final int ANIMATION_DURATION = 50;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
 
@@ -131,11 +126,7 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
-//    private Timeline showTimeline;
-//    private Timeline hideTimeline;
 
-    private Property<TimeRangePicker.TimeRange> linkedTimeRange =
-            new SimpleObjectProperty<>(TimeRangePicker.TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     private MenuItem refreshMenuItem;
@@ -157,7 +148,6 @@ public class MainViewController implements Initializable {
     private Menu addSourceMenu;
     @FXML
     private StackPane curtains;
-
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -183,14 +173,12 @@ public class MainViewController implements Initializable {
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
-
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
-
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
                     boolean expandRequiered = true;
@@ -253,8 +241,6 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
-
-
     }
 
     protected void runAfterInitialize() {
@@ -296,7 +282,7 @@ public class MainViewController implements Initializable {
 
         if (prefs.isCheckForUpdateOnStartUp()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
-                    this::onAvailableUpdate, null, null
+                    release -> UpdateManager.getInstance().showUpdateAvailableNotification(release, root), null, null
             );
         }
     }
@@ -364,7 +350,6 @@ public class MainViewController implements Initializable {
             openNav.setToX(SETTINGS_PANE_DISTANCE);
             openNav.play();
             commandBar.expand();
-
         } catch (Exception ex) {
             Dialogs.notifyException("Failed to display preference dialog", ex, root);
         }
@@ -663,7 +648,6 @@ public class MainViewController implements Initializable {
         });
         sourcesAdapters.clear();
         workspace.close();
-        //   workspace = new Workspace();
     }
 
     private void openWorkspaceFromFile() {
@@ -841,26 +825,35 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-
                 p.setOnDragOver(current.getBindingManager().registerHandler(this::handleDragOverWorksheetView));
-                //p.setOnDragOver(this::handleDragOverWorksheetView);
                 p.setOnDragDropped(current.getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
-                //   p.setOnDragDropped(this::handleDragDroppedOnWorksheetView);
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
+            current.getBindingManager().attachListener(current.selectedRangeProperty(),
+                    (ChangeListener<TimeRangePicker.TimeRange>) (observable, oldValue, newValue) -> {
+                        if (getSelectedWorksheetController().equals(current) && current.getWorksheet().isTimeRangeLinked()) {
+                            seriesControllers.values().forEach(i -> {
+                                if (!i.equals(current) && i.getWorksheet().isTimeRangeLinked()) {
+                                    i.selectedRangeProperty().setValue(TimeRangePicker.TimeRange.of(newValue));
+                                }
+                            });
+                        }
+                    }
+            );
             current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                         if (newValue) {
-                            current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
-                        } else {
-                            current.getBindingManager().unbindBidirectionnal(current.selectedRangeProperty(), linkedTimeRange);
+                            seriesControllers.values()
+                                    .stream()
+                                    .filter(c -> !c.equals(current) && c.getWorksheet().isTimeRangeLinked())
+                                    .map(c -> c.selectedRangeProperty().getValue())
+                                    .findFirst()
+                                    .ifPresent(timeRange -> current.selectedRangeProperty().setValue(timeRange));
                         }
-                    });
-            if (current.getWorksheet().isTimeRangeLinked()) {
-                current.getBindingManager().bindBidirectional(current.selectedRangeProperty(), linkedTimeRange);
-            }
+                    }
+            );
             current.getBindingManager().bindBidirectional(newTab.nameProperty(), worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
@@ -1067,6 +1060,14 @@ public class MainViewController implements Initializable {
             );
             List<TimeSeriesBinding> bindings = new ArrayList<>();
             getAllBindingsFromBranch(treeItem, bindings);
+            if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                if (Dialogs.confirmDialog(root,
+                        "This action will add " + bindings.size() + " series on a single chart.",
+                        "Are you sure you want to proceed?",
+                        ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                    return;
+                }
+            }
             for (TimeSeriesBinding b : bindings) {
                 chart.addSeries(TimeSeriesInfo.fromBinding(b));
             }
@@ -1258,29 +1259,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private void onAvailableUpdate(GithubRelease githubRelease) {
-        Notifications n = Notifications.create()
-                .title("New release available!")
-                .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
-                        AppEnvironment.getInstance().getVersion() +
-                        "\t\t.\nVersion " + githubRelease.getVersion() + " is now available.")
-                .hideAfter(Duration.seconds(20))
-                .position(Pos.BOTTOM_RIGHT)
-                .owner(root);
-        n.action(new Action("Download", actionEvent -> {
-            String newReleaseUrl = githubRelease.getHtmlUrl();
-            if (newReleaseUrl != null && newReleaseUrl.trim().length() > 0) {
-                try {
-                    Dialogs.launchUrlInExternalBrowser(newReleaseUrl);
-                } catch (IOException | URISyntaxException e) {
-                    logger.error("Failed to launch url in browser " + newReleaseUrl, e);
-                }
-            }
-            n.hideAfter(Duration.seconds(0));
-        }));
-        n.showInformation();
-    }
-
     private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
@@ -1331,6 +1309,7 @@ public class MainViewController implements Initializable {
                             stage.getWidth(),
                             stage.getHeight()));
         }
+        UpdateManager.getInstance().startUpdate();
         Platform.exit();
     }
 

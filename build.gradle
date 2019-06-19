@@ -1,3 +1,6 @@
+import org.gradle.api.internal.file.copy.CopyAction
+import org.gradle.api.internal.file.copy.CopyActionProcessingStream
+
 import java.text.SimpleDateFormat
 
 /*
@@ -19,20 +22,14 @@ import java.text.SimpleDateFormat
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id 'io.codearte.nexus-staging' version '0.20.0'
+    id 'io.codearte.nexus-staging' version '0.21.0'
     id "de.marcphilipp.nexus-publish" version "0.2.0" apply false
-    id 'idea'
-}
-
-idea {
-    module {
-        downloadJavadoc = true
-    }
+    id "signing"
 }
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.BINJR_VERSION_STEM = "2.4.2"
+ext.BINJR_VERSION_STEM = "2.5.0"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
@@ -47,7 +44,7 @@ ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "12"
+ext.OPENJFX_VERSION = "12.0.1"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
 ext.JLINK_ADD_MODULES = "javafx.controls," +
@@ -71,13 +68,13 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
-ext.DISTRIBUTION_PATH = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
-
-ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
-ext."signing.secretKeyRingFile" = "${System.getProperty("user.home")}/.gnupg/secring.gpg"
-ext."signing.password" = System.getenv('GPG_PASSPHRASE')
-
+ext.DISTRIBUTION_ROOT = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
+ext.DISTRIBUTION_PATH = IS_WINDOWS ? "${DISTRIBUTION_ROOT}" : "${DISTRIBUTION_ROOT}/${BINJR_VERSION}"
+ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : "tar.gz"
 ext.WIX_HOME = System.getenv("WIX")
+ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
+ext."signing.secretKeyRingFile" = "${projectDir}/distribution/publishing/keyring.gpg"
+ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag:${System.getenv('IS_TAG')}")
@@ -98,24 +95,28 @@ configure(subprojects) {
         apply plugin: 'application'
     else
         apply plugin: 'java-library'
-    apply plugin: 'signing'
     apply plugin: "de.marcphilipp.nexus-publish"
-
+    apply plugin: "signing"
     group GROUP_ID
     version BINJR_VERSION
     sourceCompatibility = 11
+    targetCompatibility = 11
     description 'Flexible Time Series Visualization'
     compileJava.options.encoding = 'UTF-8'
 
     if (project != project(':binjr-app')) {
+        project.javadoc {
+            options.encoding = 'UTF-8'
+            options.tags = ["XmlJavaTypeAdapter", "XmlJavaTypeAdapters"]
+        }
 
         task javadocJar(type: Jar) {
-            classifier = 'javadoc'
+            archiveClassifier = 'javadoc'
             from javadoc
         }
 
         task sourcesJar(type: Jar) {
-            classifier = 'sources'
+            archiveClassifier = 'sources'
             from sourceSets.main.allSource
         }
 
@@ -146,7 +147,7 @@ configure(subprojects) {
                 }
                 pom {
                     name = project.name
-                    description = 'Flexible Time Series Visualization'
+                    description = 'A Time Series Data Browser'
                     url = 'https://binjr.eu'
                     if (project == project(':binjr-app')) {
                         packaging = 'pom'
@@ -216,15 +217,11 @@ configure(subprojects) {
 
 task publishArtifacts(dependsOn: subprojects.publishToNexus) {
     if (IS_RELEASE) {
-        finalizedBy(closeAndReleaseRepository)
+        //  finalizedBy(closeAndReleaseRepository)
     }
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
     }
-}
-
-task clean(type: Delete) {
-    delete buildDir
 }
 
 task copyAppLibs(type: Copy) {
@@ -261,6 +258,11 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
+task copyPubKey(type: Copy) {
+    into "${buildDir}"
+    from "${projectDir}/distribution/publishing/Public_key-412EC8A85400AC3F.asc"
+}
+
 task copyInfo(type: Copy) {
     from "${projectDir}/distribution/info"
     into "${buildDir}/tmp/info"
@@ -283,7 +285,6 @@ markdownToHtml {
     doLast {
         ConfigurableFileTree tree = fileTree(dir: "$DISTRIBUTION_PATH")
         tree.include '**/*.html'
-
         tree.each { File file ->
             String path = file.path
             File newFile = new File("${DISTRIBUTION_PATH}/tmp_${file.name}")
@@ -291,7 +292,7 @@ markdownToHtml {
                     "<head>\n" +
                     "    <title>" + (file.name - ".html") + "</title>\n" +
                     "    <meta charset=\"utf-8\"/>\n" +
-                    "    <link rel=\"stylesheet\" href=\"./resources/css/air.css\">\n" +
+                    "    <link rel=\"stylesheet\" href=\"./resources/css/plain.css\">\n" +
                     "</head>"
             newFile << file.getText("utf-8")
             if (!file.name.startsWith("LICENSE")) {
@@ -339,20 +340,29 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
+task listPackageContent(type: Exec) {
+    workingDir DISTRIBUTION_PATH
+    commandLine = [
+            "sh", "-c",
+            "find . -mindepth 1 | sed -n 's@^\\./@@p' > .installed"
+    ]
+}
+
 task packageDistributionZip(type: Zip) {
-    from DISTRIBUTION_PATH
+    from DISTRIBUTION_ROOT
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageDistributionTar(type: Tar) {
-    compression Compression.GZIP
-    from DISTRIBUTION_PATH
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.tar.gz"
+task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
+        workingDir DISTRIBUTION_ROOT
+        commandLine = [
+                "sh", "-c",
+                "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
+        ]
 }
 
-task wixRunHeat(type: Exec, dependsOn: [packageDistributionZip]) {
+task wixRunHeat(type: Exec/*, dependsOn: [packageDistributionZip]*/) {
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/heat.exe",
@@ -383,14 +393,14 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/light.exe",
-            "-sw","-sice:ICE38","-sice:ICE64",
-            "-out","${buildDir}/${DISTRIBUTION_NAME}.msi",
+            "-sw", "-sice:ICE38", "-sice:ICE64",
+            "-out", "${buildDir}/${DISTRIBUTION_NAME}.msi",
             "${buildDir}/wix/obj/*.wixobj",
-            "-ext","WixUtilExtension","-ext","WixUIExtension.dll"
+            "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
     ]
 }
 
-task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyLauncher, markdownToHtml, createRuntimeImage]) {
+task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyLauncher, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
     } else {
@@ -398,5 +408,38 @@ task packageDistribution(dependsOn: [copyAppLibs, copyPluginLibs, copyResources,
     }
 }
 
+task packageDistribution(type:WrapTaskForSigning, dependsOn: [makeAppBundle] ){
+    from "${buildDir}/${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+}
+
+signing {
+    sign packageDistribution
+}
 
 
+/**
+ * This class is a no-op copy task whose purpose is to allow using the 
+ * standard gradle signing plugin to sign any arbitrary file.
+ * The idea is to piggy-back on the existing support for signing
+ * of tasks extending AbstractArchiveTask; to use it, simply declare a 
+ * task of that type and use the path to the file to be signed both as 
+ * the source and target of the archive.
+ * NB: No copy/move/archiving will actually take place.
+ */
+class WrapTaskForSigning extends AbstractArchiveTask {
+
+    @Override
+    protected CopyAction createCopyAction() {
+        return new noopCopyAction();
+    }
+    
+    class noopCopyAction implements CopyAction {
+
+        @Override
+        WorkResult execute(CopyActionProcessingStream stream) {
+            return WorkResults.didWork(true);
+        }
+    }
+}

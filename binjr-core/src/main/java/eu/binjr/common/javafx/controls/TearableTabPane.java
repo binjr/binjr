@@ -87,6 +87,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      * @param manager     the {@link TabPaneManager} manager instance
      * @param reorderable true if tabs can be reordered, false otherwise.
      * @param tearable    true if tabs are teared away from the pane, false otherwise.
+     * @param style       the {@link StageStyle} for the detached tab window.
      * @param tabs        tabs to attached to the TabPane.
      */
     public TearableTabPane(TabPaneManager manager, boolean reorderable, boolean tearable, StageStyle style, Tab... tabs) {

@@ -23,6 +23,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
@@ -57,13 +58,13 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     private DataAdapter result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final Set<String> suggestedUrls;
-    protected final Button browseButton;
-    protected final Label uriLabel;
-    protected final TextField uriField;
-    protected final TextField timezoneField;
-    protected final DialogPane parent;
-    protected final Button okButton;
-    protected final GridPane paramsGridPane;
+    private final Button browseButton;
+    private final Label uriLabel;
+    private final ComboBox<String> uriField;
+    private final TextField timezoneField;
+    private final DialogPane parent;
+    private final Button okButton;
+    private final GridPane paramsGridPane;
 
     protected enum Mode {
         PATH,
@@ -92,9 +93,16 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         }
         this.setDialogPane(parent);
         browseButton = (Button) parent.lookup("#browseButton");
-
         uriLabel = (Label) parent.lookup("#uriLabel");
-        uriField = (TextField) parent.lookup("#uriField");
+        uriField = (ComboBox<String>) parent.lookup("#uriField");
+        uriField.setItems(FXCollections.observableArrayList(suggestedUrls));
+        uriField.showingProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue){
+                autoCompletionBinding.dispose();
+            }else{
+                updateUriAutoCompletionBinding();
+            }
+        });
         timezoneField = (TextField) parent.lookup("#timezoneField");
         paramsGridPane = (GridPane) parent.lookup("#paramsGridPane");
         uriHBox = (HBox) parent.lookup("#uriHBox");
@@ -106,14 +114,12 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
             this.browseButton.setPrefWidth(-1);
             this.uriLabel.setText("Path:");
         }
-
         this.browseButton.setOnAction(event -> {
             File selectedFile = displayFileChooser((Node) event.getSource());
             if (selectedFile != null) {
-                uriField.setText(selectedFile.getPath());
+                uriField.setValue(selectedFile.getPath());
             }
         });
-
         okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
         Platform.runLater(uriField::requestFocus);
         updateUriAutoCompletionBinding();
@@ -121,7 +127,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapter();
-                suggestedUrls.add(uriField.getText());
+                suggestedUrls.add(uriField.getValue());
                 updateUriAutoCompletionBinding();
             } catch (DateTimeException e) {
                 Dialogs.notifyError("Invalid Timezone", e, Pos.CENTER, timezoneField);
@@ -152,7 +158,6 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         this.setResizable(AppEnvironment.getInstance().isResizableDialogs());
     }
 
-
     /**
      * Returns an instance of {@link SerializedDataAdapter}
      *
@@ -172,7 +177,35 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         if (autoCompletionBinding != null) {
             autoCompletionBinding.dispose();
         }
-        autoCompletionBinding = TextFields.bindAutoCompletion(uriField, suggestedUrls);
+        autoCompletionBinding = TextFields.bindAutoCompletion(uriField.getEditor(), suggestedUrls);
         autoCompletionBinding.setPrefWidth(uriField.getPrefWidth());
+    }
+
+    public String getSourceUri(){
+        return this.uriField.getValue();
+    }
+
+    public void setSourceUri(String value){
+        this.uriField.setValue(value);
+    }
+
+    public String getSourceTimezone(){
+        return this.timezoneField.getText();
+    }
+
+    public void setSourceTimezone(String value){
+        this.timezoneField.setText(value);
+    }
+
+    public String getDialogHeaderText(){
+        return this.parent.getHeaderText();
+    }
+
+    public void setDialogHeaderText(String value){
+        this.parent.setHeaderText(value);
+    }
+
+    public GridPane getParamsGridPane() {
+        return paramsGridPane;
     }
 }

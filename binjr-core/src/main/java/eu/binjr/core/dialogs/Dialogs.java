@@ -36,6 +36,7 @@ import java.awt.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -185,17 +186,28 @@ public class Dialogs {
     /**
      * Launches the system default browser to browse the provided URL
      *
-     * @param url a string that represent the url to point the browser at
+     * @param url                 the url to point the browser at.
      * @throws IOException        if the default browser is not found or fails to be launched
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
     public static void launchUrlInExternalBrowser(String url) throws IOException, URISyntaxException {
+        launchUrlInExternalBrowser(new URL(url));
+    }
+
+    /**
+     * Launches the system default browser to browse the provided URL
+     *
+     * @param url a string that represent the url to point the browser at
+     * @throws IOException        if the default browser is not found or fails to be launched
+     * @throws URISyntaxException if the string could not be transform into a proper URI
+     */
+    public static void launchUrlInExternalBrowser(URL url) throws IOException, URISyntaxException {
         switch (AppEnvironment.getInstance().getOsFamily()) {
             case WINDOWS:
                 if (Desktop.isDesktopSupported()) {
                     Desktop desktop = Desktop.getDesktop();
                     if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                        desktop.browse(new URI(url));
+                        desktop.browse(url.toURI());
                     } else {
                         logger.warn("Action Desktop.Action.BROWSE is not supported on this platform");
                     }
@@ -205,14 +217,14 @@ public class Dialogs {
                 break;
             case LINUX:
                 if (Runtime.getRuntime().exec(new String[]{"which", "xdg-open"}).getInputStream().read() != -1) {
-                    Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                    Runtime.getRuntime().exec(new String[]{"xdg-open", url.toExternalForm()});
                 } else {
                     logger.warn("Failed to find location for xdg-open");
                 }
                 break;
             case OSX:
                 if (Runtime.getRuntime().exec(new String[]{"which", "open"}).getInputStream().read() != -1) {
-                    Runtime.getRuntime().exec(new String[]{"open", url});
+                    Runtime.getRuntime().exec(new String[]{"open", url.toExternalForm()});
                 } else {
                     logger.warn("Failed to find location for open");
                 }

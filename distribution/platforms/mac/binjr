@@ -19,9 +19,13 @@ BASEDIR=`cd "$PRGDIR" >/dev/null; pwd`
 JAVACMD="$BASEDIR/runtime/bin/java"
 
 exec $JAVACMD \
-  -splash:"./resources/images/splashscreen.png" \
+  -splash:"$BASEDIR/resources/images/splashscreen.png" \
   -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
-  -Xmx768M \
+  -Xmx2048M \
+  -XX:+UnlockExperimentalVMOptions \
+  -XX:+UseShenandoahGC \
+  -XX:ShenandoahGCHeuristics=compact \
+  -XX:ShenandoahAllocationThreshold=20 \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \

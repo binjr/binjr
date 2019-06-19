@@ -247,15 +247,13 @@ public class XYChartCrosshair<X, Y> {
 
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
-            Map<XYChart<X, Y>, XYChartSelection<X, Y>> s = new HashMap<>();
-            charts.forEach((c, f) -> s.put(
-                    c,
-                    new XYChartSelection<X, Y>(
-                            getValueFromXcoord(selection.getX() - 0.5),
-                            getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
-                            getValueFromYcoord(c, selection.getY() + selection.getHeight() - 0.5),
-                            getValueFromYcoord(c, selection.getY() - 0.5),
-                            selection.getHeight() != chartInfo.getPlotArea().getHeight())));
+            var s = new HashMap<XYChart<X, Y>, XYChartSelection<X, Y>>();
+            charts.forEach((c, f) -> s.put(c, new XYChartSelection<>(
+                    getValueFromXcoord(selection.getX() - 0.5),
+                    getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
+                    getValueFromYcoord(c, Math.min(chartInfo.getPlotArea().getMaxY(), (selection.getY() + selection.getHeight()) - 0.5)),
+                    getValueFromYcoord(c, Math.max(chartInfo.getPlotArea().getMinY(), (selection.getY() - 0.5))),
+                    selection.getHeight() != chartInfo.getPlotArea().getHeight())));
             selectionDoneEvent.accept(s);
         }
     }
@@ -328,7 +326,6 @@ public class XYChartCrosshair<X, Y> {
             isSelecting.set(true);
             drawSelection();
         }
-
     }
 
     private void drawSelection() {
@@ -339,7 +336,7 @@ public class XYChartCrosshair<X, Y> {
             double height = horizontalMarker.getStartY() - selectionStart.getY();
             selection.setY(height < 0 ? horizontalMarker.getStartY() : selectionStart.getY());
             selection.setHeight(Math.abs(height));
-        }  else {
+        } else {
             selection.setY(verticalMarker.getStartY());
             selection.setHeight(verticalMarker.getEndY() - verticalMarker.getStartY());
         }
@@ -352,7 +349,6 @@ public class XYChartCrosshair<X, Y> {
             selection.setX(horizontalMarker.getStartX());
             selection.setWidth(horizontalMarker.getEndX() - horizontalMarker.getStartX());
         }
-
     }
 
     private Label newAxisLabel() {

@@ -20,6 +20,8 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.DatePicker;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +49,6 @@ public class ZonedDateTimePicker extends DatePicker {
     public ZonedDateTimePicker() {
         this(ZoneId.systemDefault());
     }
-
 
     public ZonedDateTimePicker(ZoneId zoneId) {
         this(new SimpleObjectProperty<>(zoneId));
@@ -104,7 +105,10 @@ public class ZonedDateTimePicker extends DatePicker {
 
         getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
             if (!newValue) {
-                getEditor().commitValue();
+                KeyEvent ke = new KeyEvent(KeyEvent.KEY_RELEASED,
+                        KeyCode.ENTER.toString(), KeyCode.ENTER.toString(),
+                        KeyCode.ENTER, false, false, false, false);
+                getEditor().getParent().fireEvent(ke);
             }
         });
 

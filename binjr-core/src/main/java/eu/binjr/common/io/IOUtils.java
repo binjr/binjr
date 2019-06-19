@@ -104,12 +104,12 @@ public class IOUtils {
 
     public static  void closeCollectionElements(Collection<? extends AutoCloseable> collection) {
         Objects.requireNonNull(collection, "Argument collection must not be null");
-        collection.forEach(worksheet -> {
-            if (worksheet != null) {
+        collection.forEach(closeable -> {
+            if (closeable != null) {
                 try {
-                    worksheet.close();
+                    closeable.close();
                 } catch (Exception e) {
-                    logger.warn("An error occurred while closing element" + worksheet + " in collection " + collection);
+                    logger.warn("An error occurred while closing element" + closeable + " in collection " + collection);
                 }
             }
         });

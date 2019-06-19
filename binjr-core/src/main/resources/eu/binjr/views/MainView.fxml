@@ -368,15 +368,4 @@
     <StackPane fx:id="settingsPane" maxWidth="250" prefWidth="200" styleClass="command-bar" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-252" AnchorPane.topAnchor="0">
         <fx:include source="PreferencePaneView.fxml" />
     </StackPane>
-<!--    <StackPane fx:id="curtains" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"-->
-<!--              AnchorPane.leftAnchor="0" AnchorPane.bottomAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0"-->
-<!--               style="-fx-background-color: #204656;">-->
-<!--        <children>-->
-<!--            <ImageView fitHeight="256.0" fitWidth="256.0" pickOnBounds="true" preserveRatio="true">-->
-<!--                <image>-->
-<!--                    <Image url="@../images/avatar_512.png" />-->
-<!--                </image>-->
-<!--            </ImageView>-->
-<!--        </children>-->
-<!--    </StackPane>-->
 </AnchorPane>

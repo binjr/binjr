@@ -2,12 +2,17 @@ trigger:
   branches:
     include:
       - master
+      - '*-dev'
   tags:
     include:
       - v*
 
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
 variables:
   system.debug: false
+  isTag: 'false'
+  isSnapshot: 'false'
 
 jobs:
   # Linux app bundle job
@@ -24,7 +29,7 @@ jobs:
       name: app_bundle_mac
       platform: mac
       pool:
-        vmImage: 'macOS-10.13'
+        vmImage: 'macOS-10.14'
 
   # Windows app bundle job
   - template: build-job.yml
@@ -47,8 +52,6 @@ jobs:
       - script: |
           echo '##vso[task.setvariable variable=isTag;]true'
         condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-      - script: |
-          gpg --fast-import ./distribution/publishing/codesigning.asc
       - task: Gradle@2
         env:
           IS_TAG: $(isTag)
@@ -60,7 +63,22 @@ jobs:
         inputs:
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
-          jdkVersionOption: '1.11'
+          jdkVersionOption: '1.12'
           jdkArchitectureOption: 'x64'
           publishJUnitResults: false
           tasks: 'publishArtifacts '
+      - bash: |
+          git clone https://github.com/binjr/binjr.github.io build/tmp/binjr.github.io
+          cd  build/tmp/binjr.github.io
+          cp ../info/CHANGELOG.md CHANGELOG.md
+          git config credential.helper store
+          echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
+          git config user.email "binjr.bot@free.fr"
+          git config user.name "binjr-bot"
+          wget https://api.github.com/repos/binjr/binjr/releases/latest -O repos/binjr/binjr/releases/latest
+          git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
+          git push
+        env:
+          GH_ACCESS_TOKEN: $(gh.access.token)
+        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+

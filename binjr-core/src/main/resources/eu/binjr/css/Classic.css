@@ -6,6 +6,8 @@
     -binjr-lighter-blue-color: #B7DEE8;
     -binjr-foreground-color: #DAEEF3;
     -binjr-warning-color:tomato;
+    -fx-accent-translucide: rgba(183,222,232,0.2);
+
 }
 
 /********************************

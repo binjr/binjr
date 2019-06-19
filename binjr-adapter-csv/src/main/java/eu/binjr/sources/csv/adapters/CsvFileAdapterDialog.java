@@ -56,7 +56,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
      */
     public CsvFileAdapterDialog(Node owner) {
         super(owner, Mode.PATH);
-        this.parent.setHeaderText("Add a csv file");
+        this.setDialogHeaderText("Add a csv file");
         addParamField(this.dateFormatPattern, "Date Format:");
         addParamField(this.encodingField, "Encoding:");
         addParamField(this.separatorField, "Separator:");
@@ -66,7 +66,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
         GridPane.setConstraints(field, 1, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         Label tabsLabel = new Label(label);
         GridPane.setConstraints(tabsLabel, 0, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        this.paramsGridPane.getChildren().addAll(field, tabsLabel);
+        getParamsGridPane().getChildren().addAll(field, tabsLabel);
         pos++;
     }
 
@@ -82,12 +82,12 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
 
     @Override
     protected DataAdapter getDataAdapter() throws DataAdapterException {
-        if (!Files.exists(Paths.get(uriField.getText()))) {
-            throw new CannotInitializeDataAdapterException("Cannot find " + uriField.getText());
+        if (!Files.exists(Paths.get(getSourceUri()))) {
+            throw new CannotInitializeDataAdapterException("Cannot find " + getSourceUri());
         }
         return new CsvFileAdapter(
-                uriField.getText(),
-                ZoneId.of(this.timezoneField.getText()),
+                getSourceUri(),
+                ZoneId.of(getSourceTimezone()),
                 encodingField.getText(),
                 dateFormatPattern.getText(),
                 separatorField.getText().charAt(0));

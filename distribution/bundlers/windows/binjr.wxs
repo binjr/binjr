@@ -42,14 +42,18 @@
         <Property Id="ARPURLINFOABOUT" Value="https://binjr.eu"/>
         <Property Id="ARPURLUPDATEINFO" Value="https://github.com/binjr/binjr/releases"/>
         <Property Id="PREVIOUSVERSIONSINSTALLED" Secure="yes"/>
+        <Property Id="LAUNCHREQUESTED" Value="0"/>
 
         <Upgrade Id="6362B9A7-06AA-42CB-8A81-5743B319CE23">
             <UpgradeVersion Property="PREVIOUSVERSIONSINSTALLED"
-                            IncludeMinimum="yes" IncludeMaximum="no"
-                            Minimum="2.0.0.0" Maximum="3.0.0.0"/>
+                            IncludeMinimum="yes" IncludeMaximum="yes"
+                            Minimum="2.0.0.0" Maximum="99.99.99.99"/>
         </Upgrade>
         <InstallExecuteSequence>
             <RemoveExistingProducts After="InstallInitialize"/>
+            <Custom Action="LaunchApplication" After="InstallFinalize">
+                (LAUNCHREQUESTED = 1) and (NOT Installed)
+            </Custom>
         </InstallExecuteSequence>
 
         <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
@@ -84,7 +88,6 @@
                     </Component>
                 </Directory>
             </Directory>
-            <!--            ProgramFiles64Folder-->
             <Directory Id="LocalAppDataFolder" Name="PFiles">
                 <Directory Id="APPLICATIONFOLDER" Name="binjr">
                     <Component Id="binjrDir" DiskId="1" Guid="8584B94D-8E65-4D5F-AAD9-C542BFB0CF5A" Win64="yes">
@@ -114,16 +117,10 @@
         <Property Id="WIXUI_INSTALLDIR" Value="APPLICATIONFOLDER"/>
         <Property Id="ApplicationFolderName" Value="binjr"/>
         <Property Id="WixAppFolder" Value="WixPerUserFolder"/>
-        <!--        <Property Id="ALLUSERS" Value="0"/>-->
-        <!--        <WixVariable Id="WixUISupportPerUser" Value="1"/>-->
         <WixVariable Id="WixUISupportPerMachine" Value="0"/>
         <WixVariable Id="WixUIBannerBmp" Value="$(var.resourcesDir)\bundlers\windows\Install_Banner.jpg"/>
-        <WixVariable Id="WixUIDialogBmp" Value="$(var.resourcesDir)\bundlers\windows\Install_Splash.jpg"/>
-        <!--        <UIRef Id="WixUI_InstallDir"/>-->
-        <!--        <UIRef Id="WixUI_Advanced"/>-->
-        <!--        <UIRef Id="WixUI_FeatureTree"/>-->
-        <!--                <UIRef Id="WixUI_Minimal"/>-->
-        <!--        <UIRef Id="WixUI_Mondo"/>-->
+        <WixVariable Id="WixUIDialogBmp" Value="$(var.resourcesDir)\bundlers\windows\Install_Splash.png"/>
+        <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch binjr"/>
         <UI Id="WixUI_InstallDir">
             <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>
             <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12"/>
@@ -191,7 +188,15 @@
                 1
             </Publish>
             <Property Id="ARPNOMODIFY" Value="1"/>
+            <Publish Dialog="ExitDialog"
+                     Control="Finish"
+                     Event="DoAction"
+                     Value="LaunchApplication">WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
+            </Publish>
         </UI>
         <UIRef Id="WixUI_Common"/>
+        <Property Id="WixShellExecTarget" Value="[#binjr.exe]"/>
+        <CustomAction Id="LaunchApplication" BinaryKey="WixCA" DllEntry="WixShellExec" Impersonate="yes"/>
+
     </Product>
 </Wix>

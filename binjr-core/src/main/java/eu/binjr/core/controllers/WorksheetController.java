@@ -306,10 +306,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setFocusTraversable(true);
             viewPort.setLegendVisible(false);
             viewPort.setAnimated(false);
-
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
-
-
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
                 for (int i = 0; i < viewPorts.size(); i++) {
                     if (viewPorts.get(i).getChart() == viewPort) {
@@ -428,14 +425,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
-            int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
-            DoubleBinding n = Bindings.createDoubleBinding(
-                    () -> viewPorts.stream()
-                            .filter(c -> !c.getChart().equals(chart))
-                            .map(c -> c.getChart().getYAxis().getWidth())
-                            .reduce(Double::sum).orElse(0.0) + (Y_AXIS_SEPARATION * nbAdditionalCharts),
-                    viewPorts.stream().map(c -> c.getChart().getYAxis().widthProperty()).toArray(ReadOnlyDoubleProperty[]::new)
-            );
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
             VBox.setVgrow(chart, Priority.ALWAYS);
@@ -771,7 +760,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             seriesTableContainer.getPanes().add(newPane);
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
-      //  bindingManager.bind(chartProperties.expandedProperty(),editButtonsGroup.selectedToggleProperty().isNotNull());
         bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
             if(newValue != null){
                 chartProperties.expand();
@@ -797,7 +785,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (editButtonsGroup.getSelectedToggle() != null) {
                             nv.getDataStore().setShowProperties(true);
                         }
-
                     });
                     if ((expandRequiered) && (oldPane != null)) {
                         getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
@@ -953,6 +940,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
+        if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()){
+            if (Dialogs.confirmDialog(root,
+                    "This action will add " +bindings.size() +" series on a single chart." ,
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES,ButtonType.NO) != ButtonType.YES){
+                return;
+            }
+        }
         InvalidationListener isVisibleListener = (observable) -> {
             viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
                 boolean andAll = true;
@@ -1064,8 +1059,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (!closed.get()) {
                             worksheetMaskerPane.setVisible(false);
                             viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                            // Force a redraw of the charts and their Y Axis considering their proper width.
-                            new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                            if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                                // Force a redraw of the charts and their Y Axis considering their proper width.
+                                new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                            }
                         }
                     },
                     event -> {
