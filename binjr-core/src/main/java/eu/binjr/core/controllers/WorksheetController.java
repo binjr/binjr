@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import com.sun.javafx.charts.Legend;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.charts.*;
@@ -33,6 +34,7 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -127,7 +129,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private Button snapshotButton;
     @FXML
-    private Button toggleTableViewButton;
+    private Button toggleChartDisplayModeButton;
     @FXML
     private ToggleButton vCrosshair;
     @FXML
@@ -222,28 +224,38 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                setChartsLegendvisibilty(newValue);
+                setEditChartMode(newValue);
             });
-            setChartsLegendvisibilty(getWorksheet().isChartLegendsVisible());
-
+            setEditChartMode(getWorksheet().isChartLegendsVisible());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
     }
 
-    private void setChartsLegendvisibilty(Boolean newValue) {
+    private void setEditChartMode(Boolean newValue) {
         if (!newValue) {
             splitPane.setDividerPositions(1.0, 0.0);
-            toggleTableViewButton.setText("Show Charts Legends");
+            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
+            toggleChartDisplayModeButton.setGraphic(getIconNode("settings-icon"));
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
         } else {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
-            toggleTableViewButton.setText("Hide Charts Legends");
+            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'View' mode (Ctrl+M)");
+            toggleChartDisplayModeButton.setGraphic(getIconNode("eye-icon"));
             splitPane.setDividerPositions(0.7, 0.3);
-
         }
+        setShowPropertiesPane(newValue);
+    }
+
+    private Node getIconNode(String iconName){
+        Region r = new Region();
+        r.getStyleClass().add(iconName);
+        HBox box = new HBox(r);
+        box.setAlignment(Pos.CENTER);
+        box.getStyleClass().add("icon-container");
+        return box;
     }
 
     private ZonedDateTimeAxis buildTimeAxis() {
@@ -304,7 +316,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setCacheHint(CacheHint.SPEED);
             viewPort.setCacheShape(true);
             viewPort.setFocusTraversable(true);
-            viewPort.setLegendVisible(false);
+            viewPort.legendVisibleProperty().bind(worksheet.chartLegendsVisibleProperty()
+                    .not()
+                    .and(Bindings.equal(ChartLayout.STACKED, (ObjectProperty) worksheet.chartLayoutProperty())));
+            viewPort.setLegendSide(Side.BOTTOM);
+
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
@@ -432,6 +448,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chart.getYAxis().setPrefWidth(60.0);
             chart.getYAxis().setMinWidth(60.0);
             chart.getYAxis().setMaxWidth(60.0);
+//            if (i <viewPorts.size()-1) {
+//                chart.getXAxis().tickLabelsVisibleProperty().bind(worksheet.chartLegendsVisibleProperty().not());
+//                chart.getXAxis().tickMarkVisibleProperty().bind(worksheet.chartLegendsVisibleProperty().not());
+//            }
         }
         chartParent.getChildren().add(new ScrollPane(vBox));
         // setup crosshair
@@ -489,7 +509,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         forwardButton.setOnAction(bindingManager.registerHandler(this::handleHistoryForward));
         refreshButton.setOnAction(bindingManager.registerHandler(this::handleRefresh));
         snapshotButton.setOnAction(bindingManager.registerHandler(this::handleTakeSnapshot));
-        toggleTableViewButton.setOnAction(bindingManager.registerHandler(this::handleToggleTableViewButton));
+        toggleChartDisplayModeButton.setOnAction(bindingManager.registerHandler(this::handleToggleTableViewButton));
         bindingManager.bind(backButton.disableProperty(), getWorksheet().getBackwardHistory().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
@@ -761,14 +781,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
         bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
-            if(newValue != null){
+            if (newValue != null) {
                 chartProperties.expand();
-            }else{
+            } else {
                 chartProperties.collapse();
             }
         });
         chartProperties.setSibling(chartParent);
-        if (editButtonsGroup.getSelectedToggle()!=null){
+        if (editButtonsGroup.getSelectedToggle() != null) {
             chartProperties.expand();
         }
 
@@ -940,11 +960,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
-        if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()){
+        if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
             if (Dialogs.confirmDialog(root,
-                    "This action will add " +bindings.size() +" series on a single chart." ,
+                    "This action will add " + bindings.size() + " series on a single chart.",
                     "Are you sure you want to proceed?",
-                    ButtonType.YES,ButtonType.NO) != ButtonType.YES){
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
                 return;
             }
         }
@@ -963,7 +983,13 @@ public class WorksheetController implements Initializable, AutoCloseable {
         };
         for (TimeSeriesBinding b : bindings) {
             TimeSeriesInfo newSeries = TimeSeriesInfo.fromBinding(b);
-            bindingManager.attachListener(newSeries.selectedProperty(), (observable, oldValue, newValue) -> viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> invalidate(v, false, false)));
+            bindingManager.attachListener(newSeries.selectedProperty(),
+                    (observable, oldValue, newValue) ->
+                            viewPorts.stream()
+                                    .filter(v -> v.getDataStore().equals(targetChart))
+                                    .findFirst()
+                                    .ifPresent(v -> invalidate(v, false, false))
+            );
             bindingManager.attachListener(newSeries.selectedProperty(), isVisibleListener);
             targetChart.addSeries(newSeries);
             // Explicitly call the listener to initialize the proper status of the checkbox
@@ -1006,6 +1032,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     protected void handleToggleTableViewButton(ActionEvent actionEvent) {
         getWorksheet().setChartLegendsVisible(!getWorksheet().isChartLegendsVisible());
+
     }
     //endregion
 
@@ -1059,6 +1086,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         if (!closed.get()) {
                             worksheetMaskerPane.setVisible(false);
                             viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                            for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
+                                if (n instanceof Legend) {
+                                    int i = 0;
+                                    for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
+                                        legendItem.getSymbol().setStyle("-fx-background-color: " + colortoRgbaString(viewPort.getDataStore().getSeries().get(i).getDisplayColor()));
+                                        i++;
+                                    }
+                                }
+                            }
                             if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
                                 // Force a redraw of the charts and their Y Axis considering their proper width.
                                 new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
@@ -1077,6 +1113,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
+            newSeries.setName(series.getDisplayName());
+            var r = new Region();
+            r.setPrefSize(10, 10);
+            r.setMaxSize(10, 10);
+            r.setMinSize(10, 10);
+            r.setBackground(new Background(new BackgroundFill(series.getDisplayColor(), null, null)));
+
+            newSeries.setNode(r);
             newSeries.getData().setAll(series.getProcessor().getData());
             if (currentChart.getChartType() == ChartType.SCATTER) {
                 for (var data : newSeries.getData()) {
@@ -1229,5 +1273,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return bindingManager;
     }
 
+    private static String colortoRgbaString(Color c) {
+        return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
+    }
     //endregion
 }

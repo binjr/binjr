@@ -283,20 +283,20 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">
-                    <graphic>
-                        <HBox styleClass="icon-container">
-                            <Region styleClass="settings-icon" />
-                        </HBox>
-                    </graphic>
-                </MenuItem>
-                <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">
-                    <graphic>
-                        <HBox styleClass="icon-container">
-                            <Region styleClass="refresh-icon" />
-                        </HBox>
-                    </graphic>
-                </MenuItem>
+<!--                <MenuItem fx:id="chartPropertiesMenuItem" mnemonicParsing="false" onAction="#handleDisplayChartProperties" text="Chart Properties">-->
+<!--                    <graphic>-->
+<!--                        <HBox styleClass="icon-container">-->
+<!--                            <Region styleClass="settings-icon" />-->
+<!--                        </HBox>-->
+<!--                    </graphic>-->
+<!--                </MenuItem>-->
+<!--                <MenuItem fx:id="refreshMenuItem" accelerator="F5" mnemonicParsing="false" onAction="#handleRefreshAction" text="Refresh">-->
+<!--                    <graphic>-->
+<!--                        <HBox styleClass="icon-container">-->
+<!--                            <Region styleClass="refresh-icon" />-->
+<!--                        </HBox>-->
+<!--                    </graphic>-->
+<!--                </MenuItem>-->
             </items>
         </MenuButton>
         <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">

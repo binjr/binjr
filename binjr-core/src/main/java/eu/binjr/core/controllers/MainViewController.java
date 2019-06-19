@@ -126,10 +126,7 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
-
     private Optional<String> associatedFile = Optional.empty();
-    @FXML
-    private MenuItem refreshMenuItem;
     @FXML
     private Accordion sourcesPane;
     @FXML
@@ -175,7 +172,6 @@ public class MainViewController implements Initializable {
         assert contentView != null : "fx:id\"contentView\" was not injected!";
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
-        refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
@@ -294,8 +290,11 @@ public class MainViewController implements Initializable {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
-            if (e.getCode() == KeyCode.B && e.isControlDown()) {
-                handleToggleChartLegendVisibility();
+            if (e.getCode() == KeyCode.F5) {
+                handleRefreshAction();
+            }
+            if (e.getCode() == KeyCode.M && e.isControlDown()) {
+                handleToggleChartDisplayMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 handleDisplayChartProperties(null);
@@ -336,8 +335,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    @FXML
-    protected void handleRefreshAction(ActionEvent actionEvent) {
+    private void handleRefreshAction() {
         if (getSelectedWorksheetController() != null) {
             getSelectedWorksheetController().refresh();
         }
@@ -1352,7 +1350,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void handleToggleChartLegendVisibility() {
+    public void handleToggleChartDisplayMode() {
         if (getSelectedWorksheetController() != null) {
             var worksheet = getSelectedWorksheetController().getWorksheet();
             if (worksheet != null) {

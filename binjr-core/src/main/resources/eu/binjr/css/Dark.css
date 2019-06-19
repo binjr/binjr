@@ -1689,3 +1689,13 @@
     -fx-background-color: -binjr-background-color;
     -fx-font-size:9pt;
 }
+
+.chart-legend {
+    -fx-background-color: -binjr-pane-background-color;
+    -fx-background-radius: 0;
+    -fx-padding: 6px;
+}
+
+.chart-legend-item {
+    -fx-font-smoothing-type: lcd;
+}

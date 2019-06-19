@@ -182,14 +182,32 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
+<!--                        <Button fx:id="toggleChartPropertiesButton" styleClass="dialog-button"-->
+<!--                                contentDisplay="GRAPHIC_ONLY"-->
+<!--                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"-->
+<!--                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"-->
+<!--                                text="Hide/Show Charts Properties">-->
+<!--                            <tooltip>-->
+<!--                                <Tooltip text="Hide/Show Charts Properties (Ctrl+P)">-->
+<!--                                    <font>-->
+<!--                                        <Font size="11.0"/>-->
+<!--                                    </font>-->
+<!--                                </Tooltip>-->
+<!--                            </tooltip>-->
+<!--                            <graphic>-->
+<!--                                <HBox alignment="CENTER" styleClass="icon-container">-->
+<!--                                    <Region styleClass="settings-icon"/>-->
+<!--                                </HBox>-->
+<!--                            </graphic>-->
+<!--                        </Button>-->
 
-                        <Button fx:id="toggleTableViewButton" styleClass="dialog-button"
+                        <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
                                 contentDisplay="GRAPHIC_ONLY"
                                 maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                 minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                text="Hide Charts Legends">
+                                text="Toggle charts display mode">
                             <tooltip>
-                                <Tooltip text="Hide/Show Charts Legends">
+                                <Tooltip text="Switch to edit mode (Ctrl+M)">
                                     <font>
                                         <Font size="11.0"/>
                                     </font>
@@ -197,7 +215,7 @@
                             </tooltip>
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="table-view-icon"/>
+                                    <Region styleClass="settings-icon"/>
                                 </HBox>
                             </graphic>
                         </Button>
