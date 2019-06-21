@@ -297,7 +297,9 @@ public class MainViewController implements Initializable {
                 handleToggleChartDisplayMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
-                handleDisplayChartProperties(null);
+                if (getSelectedWorksheetController()!= null){
+                    getSelectedWorksheetController().saveSnapshot();
+                }
             }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));

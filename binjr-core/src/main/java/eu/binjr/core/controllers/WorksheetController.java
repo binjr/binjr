@@ -54,6 +54,7 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -73,6 +74,7 @@ import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
 
 import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -148,9 +150,18 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private AnchorPane chartsLegendsPane;
     @FXML
     private DrawerPane chartProperties;
-
+    @FXML
+    private ToolBar chartsToolbar;
+    @FXML
+    private HBox navigationToolbar;
     private ChartViewportsState currentState;
     private String name;
+    @FXML
+    private Label worksheetTitle;
+    @FXML
+    private Label worksheetTimeRange;
+    @FXML
+    private Pane worksheetTitleBlock;
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -226,6 +237,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 setEditChartMode(newValue);
             });
+            bindingManager.bind(worksheetTitle.textProperty(), getWorksheet().nameProperty());
+            bindingManager.bind(worksheetTimeRange.textProperty(), timeRangePicker.textProperty());
             setEditChartMode(getWorksheet().isChartLegendsVisible());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
@@ -249,7 +262,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         setShowPropertiesPane(newValue);
     }
 
-    private Node getIconNode(String iconName){
+    private Node getIconNode(String iconName) {
         Region r = new Region();
         r.getStyleClass().add(iconName);
         HBox box = new HBox(r);
@@ -448,10 +461,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chart.getYAxis().setPrefWidth(60.0);
             chart.getYAxis().setMinWidth(60.0);
             chart.getYAxis().setMaxWidth(60.0);
-//            if (i <viewPorts.size()-1) {
-//                chart.getXAxis().tickLabelsVisibleProperty().bind(worksheet.chartLegendsVisibleProperty().not());
-//                chart.getXAxis().tickMarkVisibleProperty().bind(worksheet.chartLegendsVisibleProperty().not());
-//            }
         }
         chartParent.getChildren().add(new ScrollPane(vBox));
         // setup crosshair
@@ -934,11 +943,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 } else {
                     if (!preventReload) {
                         if (c.wasAdded()) {
+                            worksheet.setChartLegendsVisible(true);
                             List<? extends Chart> added = c.getAddedSubList();
                             Chart chart = added.get(added.size() - 1);
                             int chartIndex = worksheet.getCharts().indexOf(chart);
                             worksheet.setSelectedChart(chartIndex);
-                            chart.setShowProperties(true);
                         }
                         if (c.wasRemoved()) {
                             if (worksheet.getSelectedChart() == c.getFrom()) {
@@ -1165,8 +1174,21 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void saveSnapshot() {
-        WritableImage snapImg = root.snapshot(null, null);
+    public void saveSnapshot() {
+        WritableImage snapImg;
+        try {
+            worksheetTitleBlock.setManaged(true);
+            worksheetTitleBlock.setVisible(true);
+            navigationToolbar.setManaged(false);
+            navigationToolbar.setVisible(false);
+            snapImg = root.snapshot(null, null);
+        } finally {
+            navigationToolbar.setManaged(true);
+            navigationToolbar.setVisible(true);
+            worksheetTitleBlock.setManaged(false);
+            worksheetTitleBlock.setVisible(false);
+
+        }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
@@ -1276,5 +1298,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static String colortoRgbaString(Color c) {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
     }
+
     //endregion
 }
