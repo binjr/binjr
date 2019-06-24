@@ -35,43 +35,7 @@
                 </VBox.margin>
                 <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0"
                       AnchorPane.rightAnchor="0.0">
-                    <HBox fx:id="worksheetTitleBlock"
-                          alignment="CENTER_LEFT"
-                          minHeight="40" maxWidth="Infinity"
-                          visible="false"
-                          managed="false">
-                        <Label fx:id="worksheetTitle"
-                               text="New Worksheet"
-                              maxWidth="Infinity"
-                               graphicTextGap="16.0"
-                               HBox.hgrow="NEVER">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" styleClass="icon-container">
-                                    <Region styleClass="chart-icon"/>
-                                </HBox>
-                            </graphic>
-                            <font>
-                                <Font size="16.0"/>
-                            </font>
-                            <padding>
-                                <Insets left="16.0" right="10"/>
-                            </padding>
-                        </Label>
-                        <Label fx:id="worksheetTimeRange"
-                               styleClass="pane-title"
-                               text="From ... to ... (Std/UTC)"
-                               graphicTextGap="16.0"
-                               HBox.hgrow="NEVER">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" styleClass="icon-container">
-                                    <Region styleClass="time-icon"/>
-                                </HBox>
-                            </graphic>
-                            <padding>
-                                <Insets left="16.0"/>
-                            </padding>
-                        </Label>
-                    </HBox>
+
                     <HBox fx:id="navigationToolbar" HBox.hgrow="SOMETIMES">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                 maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"

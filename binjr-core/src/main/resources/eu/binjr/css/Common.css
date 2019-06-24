@@ -62,3 +62,22 @@
     -fx-background-radius: 0;
     -fx-border-width: 0;
 }
+
+.worksheet-title-block  {
+    -fx-padding: 15 10 15 16;
+    -fx-border-insets: 5 10 10 10;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #808080;
+}
+
+.worksheet-title-block  > .title-text {
+    -fx-graphic-text-gap: 20;
+    -fx-font-size: 14pt;
+}
+
+.worksheet-title-block  > .range-text {
+    -fx-graphic-text-gap: 20;
+    -fx-font-size: 10pt;
+}
