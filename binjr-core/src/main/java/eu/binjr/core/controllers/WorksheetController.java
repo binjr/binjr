@@ -47,10 +47,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.HPos;
-import javafx.geometry.Pos;
-import javafx.geometry.Side;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -162,6 +159,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private Label worksheetTimeRange;
     @FXML
     private Pane worksheetTitleBlock;
+    private ScrollPane chartScrollPane;
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -456,13 +454,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
             XYChart<ZonedDateTime, Double> chart = v.getChart();
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
+            chart.minHeightProperty().bind(Bindings.createDoubleBinding(
+                    () -> worksheet.isChartLegendsVisible() ? 150.0 : 250.0,
+                    worksheet.chartLegendsVisibleProperty()
+            ));
             VBox.setVgrow(chart, Priority.ALWAYS);
             chart.getYAxis().setSide(Side.LEFT);
             chart.getYAxis().setPrefWidth(60.0);
             chart.getYAxis().setMinWidth(60.0);
             chart.getYAxis().setMaxWidth(60.0);
         }
-        chartParent.getChildren().add(new ScrollPane(vBox));
+        chartScrollPane = new ScrollPane(vBox);
+      //  chartScrollPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.NEVER);
+        chartParent.getChildren().add(chartScrollPane);
         // setup crosshair
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
