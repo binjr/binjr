@@ -16,7 +16,6 @@
 
 package eu.binjr.common.javafx.charts;
 
-import eu.binjr.common.javafx.controls.DrawerPane;
 import eu.binjr.common.text.PrefixFormatter;
 import javafx.animation.KeyFrame;
 import javafx.animation.KeyValue;
@@ -41,7 +40,6 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
-
     private static class SelectableRegion extends Region {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
 
@@ -80,6 +78,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     private static final int NUM_MINOR_TICKS = 3;
     public static final int BTN_WITDTH = 21;
     private final SelectableRegion selectionMarker = new SelectableRegion();
+    private final  BooleanProperty selectionMarkerVisible = selectionMarker.visibleProperty();
     private final BooleanProperty selected = selectionMarker.selectedProperty(); //new SimpleBooleanProperty(false);
 
     private final Timeline animationTimeline = new Timeline();
@@ -121,7 +120,6 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
 
         selectionMarker.getStyleClass().add("selection-marker");
         var states = selectionMarker.getPseudoClassStates();
-        // selectionMarker.visibleProperty().bind(selectedProperty());
         this.getChildren().add(selectionMarker);
 
 
@@ -411,6 +409,19 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     public BooleanProperty selectedProperty() {
         return selected;
     }
+
+    public boolean getSelectionMarkerVisible() {
+        return selectionMarkerVisible.get();
+    }
+
+    public BooleanProperty selectionMarkerVisibleProperty() {
+        return selectionMarkerVisible;
+    }
+
+    public void setSelectionMarkerVisible(boolean selectionMarkerVisible) {
+        this.selectionMarkerVisible.set(selectionMarkerVisible);
+    }
+
 
     private static class Range {
         public final double low;

@@ -340,6 +340,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     }
                 }
             }));
+            bindingManager.bind(((StableTicksAxis)viewPort.getYAxis()).selectionMarkerVisibleProperty(), getWorksheet().chartLegendsVisibleProperty());
         }
         bindingManager.bind(selectChartLayout.disableProperty(),
                 Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
