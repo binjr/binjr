@@ -477,7 +477,7 @@ public class Worksheet implements Dirtyable {
     // region Closeable
     @Override
     public void close() {
-        logger.debug(()-> "Closing Worksheet " + this.toString());
+        logger.debug(() -> "Closing Worksheet " + this.toString());
         IOUtils.closeCollectionElements(charts);
         this.status.close();
     }

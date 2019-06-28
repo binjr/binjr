@@ -252,8 +252,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         } else {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
-            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'View' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(getIconNode("eye-icon", Pos.CENTER));
+            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
+            toggleChartDisplayModeButton.setGraphic(getIconNode("screen-icon", Pos.CENTER));
             splitPane.setDividerPositions(0.7, 0.3);
         }
         setShowPropertiesPane(newValue);
@@ -340,7 +340,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     }
                 }
             }));
-            bindingManager.bind(((StableTicksAxis)viewPort.getYAxis()).selectionMarkerVisibleProperty(), getWorksheet().chartLegendsVisibleProperty());
+            bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), getWorksheet().chartLegendsVisibleProperty());
         }
         bindingManager.bind(selectChartLayout.disableProperty(),
                 Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());

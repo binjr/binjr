@@ -1321,6 +1321,10 @@ public class MainViewController implements Initializable {
         return seriesControllers.get(selectedTab);
     }
 
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
     public void refreshAllWorksheets() {
         seriesControllers.values().forEach(WorksheetController::refresh);
     }

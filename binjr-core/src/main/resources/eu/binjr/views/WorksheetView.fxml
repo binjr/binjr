@@ -94,7 +94,6 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-<!--                    </HBox>-->
                         <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
                                          maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
                                          minWidth="425"
@@ -114,7 +113,6 @@
                                 </Tooltip>
                             </tooltip>
                         </TimeRangePicker>
-<!--                    </HBox>-->
                     <ToolBar fx:id="chartsToolbar" >
                         <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
                                 maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
@@ -130,6 +128,24 @@
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="camera-icon"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
+                                contentDisplay="GRAPHIC_ONLY"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                text="Toggle charts display mode">
+                            <tooltip>
+                                <Tooltip text="Switch to edit mode (Ctrl+M)">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="settings-icon"/>
                                 </HBox>
                             </graphic>
                         </Button>
@@ -187,25 +203,6 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-                        <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
-                                contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                text="Toggle charts display mode">
-                            <tooltip>
-                                <Tooltip text="Switch to edit mode (Ctrl+M)">
-                                    <font>
-                                        <Font size="11.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="settings-icon"/>
-                                </HBox>
-                            </graphic>
-                        </Button>
-
                         <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
