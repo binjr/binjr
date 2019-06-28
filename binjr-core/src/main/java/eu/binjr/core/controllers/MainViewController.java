@@ -174,6 +174,16 @@ public class MainViewController implements Initializable {
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
+        workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
+            for (var w : workspace.getWorksheets()) {
+                w.setChartLegendsVisible(!newValue);
+            }
+            workspace.setSourcePaneVisible(!newValue);
+        });
+        for (var w : workspace.getWorksheets()) {
+            w.setChartLegendsVisible(!workspace.isPresentationMode());
+        }
+        workspace.setSourcePaneVisible(!workspace.isPresentationMode());
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
@@ -297,7 +307,7 @@ public class MainViewController implements Initializable {
                 handleToggleChartDisplayMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
-                if (getSelectedWorksheetController()!= null){
+                if (getSelectedWorksheetController() != null) {
                     getSelectedWorksheetController().saveSnapshot();
                 }
             }
@@ -745,6 +755,7 @@ public class MainViewController implements Initializable {
             Source newSource = Source.of(da);
             TitledPane newSourcePane = newSourcePane(newSource);
             sourceMaskerPane.setVisible(true);
+            workspace.setPresentationMode(false);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
@@ -868,6 +879,7 @@ public class MainViewController implements Initializable {
     }
 
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
+        workspace.setPresentationMode(false);
         Button closeTabButton = (Button) newToolBarButton(
                 Button::new,
                 "Close", "Close Tab",
@@ -1357,12 +1369,13 @@ public class MainViewController implements Initializable {
     }
 
     public void handleToggleChartDisplayMode() {
-        if (getSelectedWorksheetController() != null) {
-            var worksheet = getSelectedWorksheetController().getWorksheet();
-            if (worksheet != null) {
-                worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
-            }
-        }
+        workspace.setPresentationMode(!workspace.isPresentationMode());
+//        if (getSelectedWorksheetController() != null) {
+//            var worksheet = getSelectedWorksheetController().getWorksheet();
+//            if (worksheet != null) {
+//                worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
+//            }
+//        }
     }
 
     //endregion

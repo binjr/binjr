@@ -79,6 +79,9 @@ public class Workspace implements Dirtyable {
     @XmlAttribute(name = "producerInfo", required = false)
     private final String producerInfo;
     private transient final BindingManager bindingManager = new BindingManager();
+    @XmlTransient
+    private final BooleanProperty presentationMode;
+
 
     //    @IsDirtyable
 //    @XmlAttribute(name = "sourcePaneVisible")
@@ -105,6 +108,7 @@ public class Workspace implements Dirtyable {
         this.status = new ChangeWatcher(this);
         this.producerInfo = AppEnvironment.getInstance().getAppDescription();
         this.sourcePaneVisible = new SimpleBooleanProperty(true);
+        this.presentationMode = new SimpleBooleanProperty(false);
     }
 
     /**
@@ -406,5 +410,17 @@ public class Workspace implements Dirtyable {
 
     public void setSourcePaneVisible(boolean value) {
         sourcePaneVisible.setValue(value);
+    }
+
+    public boolean isPresentationMode() {
+        return presentationMode.get();
+    }
+
+    public BooleanProperty presentationModeProperty() {
+        return presentationMode;
+    }
+
+    public void setPresentationMode(boolean presentationMode) {
+        this.presentationMode.set(presentationMode);
     }
 }

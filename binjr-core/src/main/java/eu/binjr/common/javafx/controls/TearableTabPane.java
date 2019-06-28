@@ -20,7 +20,9 @@ package eu.binjr.common.javafx.controls;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -73,6 +75,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private EventHandler<WindowEvent> onClosingWindow;
     private final BindingManager bindingManager = new BindingManager();
     private final Property<StageStyle> detachedStageStyle;
+
 
     /**
      * Initializes a new instance of the {@link TearableTabPane} class.
@@ -375,6 +378,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             tabHeaderBg.getChildren().remove(newTabButton);
         }
         newTabButton = new Button();
+        newTabButton.visibleProperty().bind(manager.newTabButtonVisible);
         newTabButton.setId("newTabButton");
         newTabButton.setFocusTraversable(false);
         Pane headersRegion = (Pane) this.lookup(".headers-region");
@@ -487,6 +491,18 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.detachedStageStyle.setValue(detachedStageStyle);
     }
 
+    public boolean isNewTabButtonVisible() {
+        return manager.newTabButtonVisible.get();
+    }
+
+    public BooleanProperty newTabButtonVisibleProperty() {
+        return manager.newTabButtonVisible;
+    }
+
+    public void setNewTabButtonVisible(boolean newTabButtonVisible) {
+        manager.newTabButtonVisible.set(newTabButtonVisible);
+    }
+
     /**
      * Represents the state of a single tab
      */
@@ -517,6 +533,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         private final AtomicBoolean dndComplete;
         private Tab selectedTab;
         private boolean movingTab;
+        private final BooleanProperty newTabButtonVisible = new SimpleBooleanProperty(true);
 
         public TabPaneManager() {
             tabToPaneMap = FXCollections.observableMap(new HashMap<>());
