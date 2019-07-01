@@ -1370,12 +1370,6 @@ public class MainViewController implements Initializable {
 
     public void handleToggleChartDisplayMode() {
         workspace.setPresentationMode(!workspace.isPresentationMode());
-//        if (getSelectedWorksheetController() != null) {
-//            var worksheet = getSelectedWorksheetController().getWorksheet();
-//            if (worksheet != null) {
-//                worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
-//            }
-//        }
     }
 
     //endregion

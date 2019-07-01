@@ -1066,8 +1066,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     protected void handleToggleTableViewButton(ActionEvent actionEvent) {
         parentController.handleToggleChartDisplayMode();
-        //getWorksheet().setChartLegendsVisible(!getWorksheet().isChartLegendsVisible());
-
     }
     //endregion
 
