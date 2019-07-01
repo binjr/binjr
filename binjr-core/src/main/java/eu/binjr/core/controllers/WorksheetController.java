@@ -61,8 +61,6 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -968,7 +966,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 } else {
                     if (!preventReload) {
                         if (c.wasAdded()) {
-                            worksheet.setChartLegendsVisible(true);
+                            parentController.getWorkspace().setPresentationMode(false);
                             List<? extends Chart> added = c.getAddedSubList();
                             Chart chart = added.get(added.size() - 1);
                             int chartIndex = worksheet.getCharts().indexOf(chart);
@@ -1065,7 +1063,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @FXML
     protected void handleToggleTableViewButton(ActionEvent actionEvent) {
-        parentController.handleToggleChartDisplayMode();
+        parentController.handleTogglePresentationMode();
     }
     //endregion
 

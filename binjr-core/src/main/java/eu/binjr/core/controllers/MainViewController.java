@@ -304,7 +304,7 @@ public class MainViewController implements Initializable {
                 handleRefreshAction();
             }
             if (e.getCode() == KeyCode.M && e.isControlDown()) {
-                handleToggleChartDisplayMode();
+                handleTogglePresentationMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 if (getSelectedWorksheetController() != null) {
@@ -1368,7 +1368,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void handleToggleChartDisplayMode() {
+    public void handleTogglePresentationMode() {
         workspace.setPresentationMode(!workspace.isPresentationMode());
     }
 
