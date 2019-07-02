@@ -34,10 +34,7 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
@@ -474,7 +471,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(viewPorts.get(0).getChart(), viewPorts.get(0).getPrefixFormatter()::format);
         var crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
-        crossHair.displayFullHeightMarkerProperty().bind(GlobalPreferences.getInstance().fullHeightCrosshairMarkerProperty());
+        var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
+        var crosshairHeightBinding = GlobalPreferences
+                .getInstance()
+                .fullHeightCrosshairMarkerProperty()
+                .and(Bindings.greaterThan(nbChartObs, 1));
+        bindingManager.bind(crossHair.displayFullHeightMarkerProperty(), crosshairHeightBinding);
         viewPorts.get(0).setCrosshair(crossHair);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -496,7 +498,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
             XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m, chartParent, dateTimeFormatter::format);
-            ch.displayFullHeightMarkerProperty().bind(GlobalPreferences.getInstance().fullHeightCrosshairMarkerProperty());
+            ch.displayFullHeightMarkerProperty().bind(crosshairHeightBinding);
             ch.onSelectionDone(s -> {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());
                 currentState.setSelection(convertSelection(s), true);
@@ -1201,16 +1203,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
         boolean wasModeEdit = getWorksheet().isChartLegendsVisible();
         try {
             getWorksheet().setChartLegendsVisible(false);
-            //   var bounds = chartScrollPane.getViewportBounds();
             worksheetTitleBlock.setManaged(true);
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
-            //   var params = new SnapshotParameters();
-            // params.setViewport(new Rectangle2D(0, 0, root.getWidth(), 1500.00));
-
             snapImg = screenshotCanvas.snapshot(null, null);
-            //    snapImg = root.snapshot(null, null);
         } finally {
             getWorksheet().setChartLegendsVisible(wasModeEdit);
             navigationToolbar.setManaged(true);
