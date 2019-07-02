@@ -42,7 +42,8 @@
 
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.image.Image?>
-<AnchorPane fx:id="root"  prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
+<?import javafx.scene.control.SeparatorMenuItem?>
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
     <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.3382608695652174" focusTraversable="true" nodeOrientation="LEFT_TO_RIGHT" prefHeight="-1.0" prefWidth="-1.0" styleClass="binjr-content-view" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="48" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0" HBox.hgrow="ALWAYS">
         <AnchorPane fx:id="sourcePane" minWidth="0.0" styleClass="skinnable-pane-border" SplitPane.resizableWithParent="false">
             <StackPane fx:id="sourceArea" minWidth="0.0" prefWidth="335.0" AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0" AnchorPane.topAnchor="0">
@@ -259,7 +260,10 @@
                 </MenuItem>
             </items>
         </MenuButton>
-        <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0" styleClass="command-bar-pinned-item" text="Worksheets" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
+        <MenuButton fx:id="worksheetMenu" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                    mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" prefWidth="40.0"
+                    styleClass="command-bar-pinned-item" text="Worksheets"
+                    AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="135.0">
             <graphic>
                 <HBox styleClass="icon-container">
                     <Region styleClass="chart-icon" />
@@ -283,6 +287,7 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
+                <SeparatorMenuItem></SeparatorMenuItem>
             </items>
         </MenuButton>
         <MenuButton maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" popupSide="RIGHT" prefHeight="40.0" styleClass="command-bar-pinned-item" text="Help" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="180.0">
