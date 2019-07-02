@@ -429,7 +429,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         viewPorts.forEach(v -> map.put(v.getChart(), v.getPrefixFormatter()::format));
-        var crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
+        var crossHair = new XYChartCrosshair<>(map, pane, dateTimeFormatter::format);
         viewPorts.forEach(v -> v.setCrosshair(crossHair));
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
