@@ -1123,7 +1123,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                 if (n instanceof Legend) {
                                     int i = 0;
                                     for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
-                                        legendItem.getSymbol().setStyle("-fx-background-color: " + colortoRgbaString(viewPort.getDataStore().getSeries().get(i).getDisplayColor()));
+                                        legendItem.getSymbol().setStyle("-fx-background-color: " +
+                                                colortoRgbaString(viewPort.getDataStore()
+                                                        .getSeries()
+                                                        .stream()
+                                                        .filter(TimeSeriesInfo::isSelected)
+                                                        .collect(Collectors.toList())
+                                                        .get(i)
+                                                        .getDisplayColor()));
                                         i++;
                                     }
                                 }
