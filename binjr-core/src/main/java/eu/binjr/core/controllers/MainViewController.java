@@ -888,12 +888,18 @@ public class MainViewController implements Initializable {
         workspace.setPresentationMode(false);
         Button closeTabButton = (Button) newToolBarButton(
                 Button::new,
-                "Close", "Close Tab",
+                "Close", "Close Worksheet",
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"});
-        EditableTab newTab = new EditableTab("New worksheet", closeTabButton);
+        ToggleButton linkTabButton = (ToggleButton)newToolBarButton(
+                ToggleButton::new,
+                "Link", "Link Worksheet Timeline",
+                new String[]{"link"},
+                new String[]{"link-icon", "small-icon"});
+        EditableTab newTab = new EditableTab("New worksheet",linkTabButton, closeTabButton);
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
+        linkTabButton.selectedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         return newTab;
     }
 

@@ -81,3 +81,10 @@
     -fx-graphic-text-gap: 20;
     -fx-font-size: 10pt;
 }
+
+.editable-tab-tool-bar {
+    -fx-min-height: 0;
+    -fx-min-width: 0;
+    -fx-border-insets: 0;
+    -fx-background-insets: 0;
+}
