@@ -19,7 +19,7 @@
     -binjr-foreground-color: #DAEEF3;
     -binjr-gray-border-color: #C8C8C8;
     -binjr-warning-color:TOMATO;
-    -icon-color: black;
+    -icon-color: #494949;
     SCROLL_BAR_THUMB: #BABABA;
     SCROLL_BAR_TRACK: #f0f0f0;
 
@@ -27,7 +27,6 @@
     -fx-accent-translucide: rgba(183,222,232,0.2);
 
 }
-
 
 
 .column-bold-text{
@@ -1506,4 +1505,14 @@
     -fx-text-fill: white;
     -fx-background-color: -binjr-background-color;
     -fx-font-size:9pt;
+}
+
+.chart-legend {
+    -fx-background-color: white;
+    -fx-background-radius: 0;
+    -fx-padding: 6px;
+}
+
+.chart-legend-item {
+    -fx-font-smoothing-type: lcd;
 }

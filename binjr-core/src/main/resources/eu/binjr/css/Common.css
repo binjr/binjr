@@ -48,13 +48,43 @@
     -fx-border-width: 0;
 }
 
-.console-pane > .list-view  {
+.console-pane > .list-view {
     -fx-background-color: transparent;
-    -fx-border-width:0;
+    -fx-border-width: 0;
 }
 
-.console-pane  > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell{
+.console-pane > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
     -fx-padding: 0px;
     /*-fx-effect: null;*/
 }
 
+.chart-legend-item-symbol {
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+}
+
+.worksheet-title-block  {
+    -fx-padding: 15 10 15 16;
+    -fx-border-insets: 5 10 10 10;
+    -fx-spacing: 10;
+    -fx-alignment: center-left;
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: #808080;
+}
+
+.worksheet-title-block  > .title-text {
+    -fx-graphic-text-gap: 20;
+    -fx-font-size: 14pt;
+}
+
+.worksheet-title-block  > .range-text {
+    -fx-graphic-text-gap: 20;
+    -fx-font-size: 10pt;
+}
+
+.editable-tab-tool-bar {
+    -fx-min-height: 0;
+    -fx-min-width: 0;
+    -fx-border-insets: 0;
+    -fx-background-insets: 0;
+}

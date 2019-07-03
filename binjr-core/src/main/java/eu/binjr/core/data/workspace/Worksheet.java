@@ -63,8 +63,8 @@ public class Worksheet implements Dirtyable {
     private Property<ChartLayout> chartLayout;
     @IsDirtyable
     private Property<Boolean> timeRangeLinked;
-    @IsDirtyable
-    private Property<Boolean> chartLegendsVisible;
+
+    private transient BooleanProperty chartLegendsVisible;
 
     private transient Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState;
     private transient final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
@@ -444,11 +444,12 @@ public class Worksheet implements Dirtyable {
         this.timeRangeLinked.setValue(timeRangeLinked);
     }
 
+    @XmlTransient
     public Boolean isChartLegendsVisible() {
         return chartLegendsVisible.getValue();
     }
 
-    public Property<Boolean> chartLegendsVisibleProperty() {
+    public BooleanProperty chartLegendsVisibleProperty() {
         return chartLegendsVisible;
     }
 
@@ -477,7 +478,7 @@ public class Worksheet implements Dirtyable {
     // region Closeable
     @Override
     public void close() {
-        logger.debug(()-> "Closing Worksheet " + this.toString());
+        logger.debug(() -> "Closing Worksheet " + this.toString());
         IOUtils.closeCollectionElements(charts);
         this.status.close();
     }

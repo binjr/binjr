@@ -46,26 +46,31 @@ public class EditableTab extends Tab {
         label.textProperty().setValue(tabName);
     }
 
-    public EditableTab(String text){
+    public EditableTab(String text) {
         this(text, null);
     }
 
     /**
      * Initializes a new instance of the {@link EditableTab} instance.
      *
-     * @param text the title for the tab.
-     * @param  closeButton A custom {@link Button} instance used to close the tab
+     * @param text    the title for the tab.
+     * @param buttons A custom {@link Button} instance used to close the tab
      */
-    public EditableTab(String text, @Nullable Button closeButton) {
+    public EditableTab(String text, @Nullable ButtonBase... buttons) {
         super();
         label = new Label(text);
         label.textProperty();
         setGraphic(label);
-        if (closeButton != null){
+        if (buttons != null) {
             setClosable(false);
-            label.setGraphic(closeButton);
+            var tb = new ToolBar();
+            tb.getStyleClass().add("editable-tab-tool-bar");
+            tb.getItems().addAll(buttons);
+
+            label.setGraphic(tb);
             label.setContentDisplay(ContentDisplay.RIGHT);
         }
+
 
         editable.addListener((observable, oldValue, newValue) -> {
             if (newValue) {

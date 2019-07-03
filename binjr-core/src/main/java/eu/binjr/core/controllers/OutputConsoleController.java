@@ -122,7 +122,7 @@ public class OutputConsoleController implements Initializable {
             File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
                 try (Writer writer = new BufferedWriter(new FileWriter(selectedFile))) {
-                    textOutput.getItems().stream().map(node -> ((Text) node).getText()).forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
+                    textOutput.getItems().stream().map(text -> text.getText() + "\n").forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
                 } catch (IOException e) {
                     Dialogs.notifyException("Error writing log message to file", e, textOutput);
                 }
@@ -137,7 +137,7 @@ public class OutputConsoleController implements Initializable {
     private void handleCopyConsoleOutput(ActionEvent actionEvent) {
         try {
             final ClipboardContent content = new ClipboardContent();
-            content.putString(textOutput.getItems().stream().map(node -> ((Text) node).getText()).collect(Collectors.joining()));
+            content.putString(textOutput.getItems().stream().map(Text::getText).collect(Collectors.joining("\n")));
             Clipboard.getSystemClipboard().setContent(content);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, textOutput);

@@ -6,6 +6,8 @@
 .date-picker-popup > * > .week-number-cell {
     -fx-font-family: "Segoe UI Semibold";
 }
+
+.worksheet-title-block,
 .command-bar .pane-title,
 .toolPane .pane-title,
 .about-text,

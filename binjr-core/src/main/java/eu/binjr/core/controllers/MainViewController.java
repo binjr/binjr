@@ -41,7 +41,9 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -96,6 +98,8 @@ public class MainViewController implements Initializable {
     private static final double TOOL_BUTTON_SIZE = 20;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
+    @FXML
+    private MenuButton worksheetMenu;
 
     private Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
@@ -126,10 +130,7 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
-
     private Optional<String> associatedFile = Optional.empty();
-    @FXML
-    private MenuItem refreshMenuItem;
     @FXML
     private Accordion sourcesPane;
     @FXML
@@ -175,9 +176,18 @@ public class MainViewController implements Initializable {
         assert contentView != null : "fx:id\"contentView\" was not injected!";
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
-        refreshMenuItem.disableProperty().bind(selectWorksheetPresent);
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
+        workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
+            for (var w : workspace.getWorksheets()) {
+                w.setChartLegendsVisible(!newValue);
+            }
+            workspace.setSourcePaneVisible(!newValue);
+        });
+        for (var w : workspace.getWorksheets()) {
+            w.setChartLegendsVisible(!workspace.isPresentationMode());
+        }
+        workspace.setSourcePaneVisible(!workspace.isPresentationMode());
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
@@ -241,6 +251,8 @@ public class MainViewController implements Initializable {
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
         Platform.runLater(this::runAfterInitialize);
+
+
     }
 
     protected void runAfterInitialize() {
@@ -294,11 +306,16 @@ public class MainViewController implements Initializable {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
-            if (e.getCode() == KeyCode.B && e.isControlDown()) {
-                handleToggleChartLegendVisibility();
+            if (e.getCode() == KeyCode.F5) {
+                handleRefreshAction();
+            }
+            if (e.getCode() == KeyCode.M && e.isControlDown()) {
+                handleTogglePresentationMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
-                handleDisplayChartProperties(null);
+                if (getSelectedWorksheetController() != null) {
+                    getSelectedWorksheetController().saveSnapshot();
+                }
             }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));
@@ -336,8 +353,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    @FXML
-    protected void handleRefreshAction(ActionEvent actionEvent) {
+    private void handleRefreshAction() {
         if (getSelectedWorksheetController() != null) {
             getSelectedWorksheetController().refresh();
         }
@@ -745,6 +761,7 @@ public class MainViewController implements Initializable {
             Source newSource = Source.of(da);
             TitledPane newSourcePane = newSourcePane(newSource);
             sourceMaskerPane.setVisible(true);
+            workspace.setPresentationMode(false);
             AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                     event -> {
                         sourceMaskerPane.setVisible(false);
@@ -859,7 +876,7 @@ public class MainViewController implements Initializable {
                 logger.trace("Toggle edit mode for worksheet");
                 current.setShowPropertiesPane(true);
             }
-            newTab.setContextMenu(getTabMenu(newTab, worksheet, current.getBindingManager()));
+            newTab.setContextMenu(getTabContextMenu(newTab, worksheet, current.getBindingManager()));
             return current;
         } catch (Exception e) {
             Dialogs.notifyException("Error loading worksheet into new tab", e, root);
@@ -868,14 +885,21 @@ public class MainViewController implements Initializable {
     }
 
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
+        workspace.setPresentationMode(false);
         Button closeTabButton = (Button) newToolBarButton(
                 Button::new,
-                "Close", "Close Tab",
+                "Close", "Close Worksheet",
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"});
-        EditableTab newTab = new EditableTab("New worksheet", closeTabButton);
+        ToggleButton linkTabButton = (ToggleButton)newToolBarButton(
+                ToggleButton::new,
+                "Link", "Link Worksheet Timeline",
+                new String[]{"link"},
+                new String[]{"link-icon", "small-icon"});
+        EditableTab newTab = new EditableTab("New worksheet",linkTabButton, closeTabButton);
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
+        linkTabButton.selectedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         return newTab;
     }
 
@@ -890,12 +914,26 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getTabMenu(EditableTab tab, Worksheet worksheet, BindingManager manager) {
-        MenuItem close = new MenuItem("Close Tab");
+    private MenuItem getWorksheetMenuItem(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+        var worksheetItem = new Menu();
+        worksheetItem.setUserData(worksheet);
+        manager.bind(worksheetItem.textProperty(), worksheet.nameProperty());
+        worksheetItem.getItems().addAll(makeWorksheetMenuItem(tab, worksheet, manager));
+        return worksheetItem;
+    }
+
+    private ContextMenu getTabContextMenu(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+        var m = new ContextMenu();
+        m.getItems().addAll(makeWorksheetMenuItem(tab, worksheet, manager));
+        return m;
+    }
+
+    private ObservableList<MenuItem> makeWorksheetMenuItem(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+        MenuItem close = new MenuItem("Close Worksheet");
         close.setOnAction(manager.registerHandler(event -> closeWorksheetTab(tab)));
-        MenuItem closeOthers = new MenuItem("Close Other Tabs");
+        MenuItem closeOthers = new MenuItem("Close Other Worksheets");
         closeOthers.setOnAction(manager.registerHandler(event -> {
-            if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all tabs except for '" + tab.getName() + "'?",
+            if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all worksheets except for '" + tab.getName() + "'?",
                     "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
@@ -904,13 +942,13 @@ public class MainViewController implements Initializable {
                 );
             }
         }));
-        MenuItem edit = new MenuItem("Edit Tab");
+        MenuItem edit = new MenuItem("Rename Worksheet");
         edit.setOnAction(manager.registerHandler(event -> tab.setEditable(true)));
-        MenuItem duplicate = new MenuItem("Duplicate Tab");
+        MenuItem duplicate = new MenuItem("Duplicate Worksheet");
         duplicate.setOnAction(manager.registerHandler(event -> {
             editWorksheet(new Worksheet(worksheet));
         }));
-        MenuItem detach = new MenuItem("Detach Tab");
+        MenuItem detach = new MenuItem("Detach Worksheet");
         detach.setOnAction(manager.registerHandler(event -> {
             TearableTabPane pane = (TearableTabPane) tab.getTabPane();
             pane.detachTab(tab);
@@ -922,7 +960,7 @@ public class MainViewController implements Initializable {
         link.setOnAction(manager.registerHandler(event -> {
             worksheet.setTimeRangeLinked(!worksheet.isTimeRangeLinked());
         }));
-        return new ContextMenu(
+        return FXCollections.observableArrayList(
                 close,
                 closeOthers,
                 new SeparatorMenuItem(),
@@ -1180,7 +1218,13 @@ public class MainViewController implements Initializable {
     private void onWorksheetTabChanged(ListChangeListener.Change<? extends Tab> c) {
         while (c.next()) {
             if (c.wasAdded()) {
-                workspace.addWorksheets(c.getAddedSubList().stream().map(t -> seriesControllers.get(t).getWorksheet()).collect(Collectors.toList()));
+                c.getAddedSubList().forEach(tab -> {
+                    workspace.addWorksheets(seriesControllers.get(tab).getWorksheet());
+                    worksheetMenu.getItems().add(
+                            getWorksheetMenuItem((EditableTab) tab,
+                                    seriesControllers.get(tab).getWorksheet(),
+                                    seriesControllers.get(tab).getBindingManager()));
+                });
             }
             if (c.wasRemoved()) {
                 c.getRemoved().forEach((t -> {
@@ -1189,6 +1233,12 @@ public class MainViewController implements Initializable {
                     t.setContent(null);
                     t.setContextMenu(null);
                     if (ctlr != null) {
+                        worksheetMenu.getItems()
+                                .stream()
+                                .filter(menuItem -> menuItem.getUserData() == ctlr.getWorksheet())
+                                .findFirst()
+                                .ifPresent(item -> worksheetMenu.getItems().remove(item));
+
                         workspace.removeWorksheets(ctlr.getWorksheet());
                         seriesControllers.remove(t);
                         ctlr.close();
@@ -1321,6 +1371,10 @@ public class MainViewController implements Initializable {
         return seriesControllers.get(selectedTab);
     }
 
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
     public void refreshAllWorksheets() {
         seriesControllers.values().forEach(WorksheetController::refresh);
     }
@@ -1352,13 +1406,8 @@ public class MainViewController implements Initializable {
         }
     }
 
-    public void handleToggleChartLegendVisibility() {
-        if (getSelectedWorksheetController() != null) {
-            var worksheet = getSelectedWorksheetController().getWorksheet();
-            if (worksheet != null) {
-                worksheet.setChartLegendsVisible(!worksheet.isChartLegendsVisible());
-            }
-        }
+    public void handleTogglePresentationMode() {
+        workspace.setPresentationMode(!workspace.isPresentationMode());
     }
 
     //endregion

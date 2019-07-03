@@ -35,82 +35,85 @@
                 </VBox.margin>
                 <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0"
                       AnchorPane.rightAnchor="0.0">
-                    <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                            mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="back"
-                            textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="backArrow-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Go back">
-                                <font>
-                                    <Font size="10.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                            mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="forward"
-                            textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="forwardArrow-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Go forward">
-                                <font>
-                                    <Font size="10.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                            mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="refresh"
-                            textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="refresh-icon"/>
-                            </HBox>
-                        </graphic>
-                        <font>
-                            <Font size="10.0"/>
-                        </font>
-                        <tooltip>
-                            <Tooltip text="Refresh">
-                                <font>
-                                    <Font size="10.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
-                                     maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
-                                     minWidth="425"
-                                     styleClass="dialog-button"
-                                     text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
-                        <graphic>
-                            <HBox alignment="CENTER_LEFT" styleClass="icon-container">
-                                <Region styleClass="time-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Edit the time range for the current worksheet.">
-                                <font>
-                                    <Font size="10.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </TimeRangePicker>
-                    <ToolBar>
+
+                    <HBox fx:id="navigationToolbar" HBox.hgrow="SOMETIMES">
+                        <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="back"
+                                textAlignment="CENTER">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="backArrow-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Go back">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="forward"
+                                textAlignment="CENTER">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="forwardArrow-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Go forward">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+                                mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
+                                text="refresh"
+                                textAlignment="CENTER">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="refresh-icon"/>
+                                </HBox>
+                            </graphic>
+                            <font>
+                                <Font size="10.0"/>
+                            </font>
+                            <tooltip>
+                                <Tooltip text="Refresh">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </Button>
+                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
+                                         maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
+                                         minWidth="425"
+                                         minHeight="40"
+                                         styleClass="dialog-button"
+                                         text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
+                            <graphic>
+                                <HBox alignment="CENTER_LEFT" styleClass="icon-container">
+                                    <Region styleClass="time-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip text="Edit the time range for the current worksheet.">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                        </TimeRangePicker>
+                    <ToolBar fx:id="chartsToolbar" >
                         <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
                                 maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                 minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
@@ -125,6 +128,24 @@
                             <graphic>
                                 <HBox alignment="CENTER" styleClass="icon-container">
                                     <Region styleClass="camera-icon"/>
+                                </HBox>
+                            </graphic>
+                        </Button>
+                        <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
+                                contentDisplay="GRAPHIC_ONLY"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                text="Toggle charts display mode">
+                            <tooltip>
+                                <Tooltip text="Switch to edit mode (Ctrl+M)">
+                                    <font>
+                                        <Font size="11.0"/>
+                                    </font>
+                                </Tooltip>
+                            </tooltip>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="settings-icon"/>
                                 </HBox>
                             </graphic>
                         </Button>
@@ -182,26 +203,6 @@
                                 </Tooltip>
                             </tooltip>
                         </Button>
-
-                        <Button fx:id="toggleTableViewButton" styleClass="dialog-button"
-                                contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                text="Hide Charts Legends">
-                            <tooltip>
-                                <Tooltip text="Hide/Show Charts Legends">
-                                    <font>
-                                        <Font size="11.0"/>
-                                    </font>
-                                </Tooltip>
-                            </tooltip>
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="table-view-icon"/>
-                                </HBox>
-                            </graphic>
-                        </Button>
-
                         <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
@@ -222,6 +223,7 @@
                             </graphic>
                         </MenuButton>
                     </ToolBar>
+                    </HBox>
                 </HBox>
             </AnchorPane>
         </VBox>

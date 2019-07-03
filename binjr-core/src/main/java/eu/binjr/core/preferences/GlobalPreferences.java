@@ -57,7 +57,7 @@ public class GlobalPreferences {
     private static final String NOTIFICATION_POPUP_DURATION = "notificationPopupDuration";
     private static final String LOAD_PLUGINS_FROM_EXTERNAL_LOCATION = "loadPluginsFromExternalLocation";
     private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
-    private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairMarker";
+    private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairVerticalMarker";
     private static final String MAX_ASYNC_TASKS_PARALLELISM = "maxAsyncTasksParallelism";
     private static final String WINDOW_LAST_POSITION_X = "windowLastPositionX";
     private static final String WINDOW_LAST_POSITION_Y = "windowLastPositionY";
@@ -156,7 +156,7 @@ public class GlobalPreferences {
             notificationPopupDuration.setValue(Duration.seconds(prefs.getDouble(NOTIFICATION_POPUP_DURATION, DEFAULT_NOTIFICATION_POPUP_DURATION.toSeconds())));
             pluginsLocation.setValue(Paths.get(prefs.get(PLUGINS_LOCATION, DEFAULT_PLUGINS_LOCATION)));
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
-            fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, false));
+            fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, true));
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
             githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
             githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
@@ -731,7 +731,6 @@ public class GlobalPreferences {
     public void setMaxAsyncTasksParallelism(int maxAsyncTasksParallelism) {
         this.maxAsyncTasksParallelism.set(maxAsyncTasksParallelism);
     }
-
 
     public Rectangle2D getWindowLastPosition() {
         return windowLastPosition.getValue();
