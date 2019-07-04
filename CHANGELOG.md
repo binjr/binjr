@@ -1,3 +1,22 @@
+## [binjr v2.5.0](https://github.com/binjr/binjr/releases/tag/v2.5.0)
+Released on Wed, 06 Jul 2019
+
+* _[New]_ Updates can now be downloaded and applied from within the application.
+* _[New]_ binjr now remembers its main window's screen position in-between sessions.
+* _[New]_ Added a new "Presentation Mode" that maximize the amount of space dedicated to the visualization of charts by hiding the source pane, chart settings pane and displays the chart legends in a condensed view.
+* _[New]_ The snapshot functionality has been enhanced to automatically take a snapshot of the whole charts display area of a worksheet, even if this area requires scrolling when displayed in the application. 
+* _[New]_ Embedded OpenJDK in application bundle has been updated to version 12.
+* _[New]_ Defaults to the new Shenandoah garbage collector with the "compact" heuristics, which allows for a larger maximum heap size while keeping actual memory usage reasonable when a large heap is no longer required.   
+* _[New]_ Warn end-users when trying to add a large number of series to a single chart at once.
+* _[New]_ History of previously opened sources is now accessible via a combo box on the selection dialog (as well as through the existing auto-completion feature).
+* _[New]_ Charts vertical axis label are now hilited on mouse-over, to better indicate that they are clickable (clicking on an axis selects the chart as the one currently editable when more than one chart are present on a worksheet).
+* _[Fixed]_ Unsightly UI theme application on start-up or when detaching tabs.
+* _[Fixed]_ If "Span crosshair over all charts" is true and "auto scale Y axis" is off, then selecting a new time range using the mouse results in incorrectly changing the Y axis scale.
+* _[Fixed]_ Selecting a timezone in time picker sometime doesn't register.
+* _[Fixed]_ Synchronizing timelines across worksheets is broken.
+* _[Fixed]_ UI becomes unresponsive when output console displays  a large number of lines (>20000).
+* _[Fixed]_ Check for a new versions fails due to Github API rate limit being reached.
+
 ## [binjr v2.4.1](https://github.com/binjr/binjr/releases/tag/v2.4.1)
 Released on Mon, 08 Apr 2019
 
