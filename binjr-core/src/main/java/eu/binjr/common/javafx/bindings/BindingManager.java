@@ -217,6 +217,24 @@ public class BindingManager implements AutoCloseable {
         boundProperties.forEach(Property::bind);
     }
 
+    public synchronized void suspend(Property<?>... properties){
+        for (var p : properties){
+           if (!boundProperties.containsKey(p) ){
+               throw new IllegalArgumentException("Property " + p.getName() + " is not managed by this instance of BindingManager");
+           }
+           p.unbind();
+        }
+    }
+
+    public synchronized void resume(Property<?>... properties){
+        for (var p : properties){
+            if (!boundProperties.containsKey(p) ){
+                throw new IllegalArgumentException("Property " + p.getName() + " is not managed by this instance of BindingManager");
+            }
+            p.bind(boundProperties.get(p));
+        }
+    }
+
     public <T extends Event> WeakEventHandler<T> registerHandler(EventHandler<T> handler) {
         // Store strong ref to handler, so it doesn't get collected prematurely.
         registeredHandlers.add(handler);

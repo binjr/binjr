@@ -239,7 +239,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            splitPane.setDividerPositions(1.0, 0.0);
+            bindingManager.suspend(getWorksheet().dividerPositionProperty());
+            splitPane.setDividerPositions(1.0);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
             toggleChartDisplayModeButton.setGraphic(getIconNode("settings-icon", Pos.CENTER));
             chartsLegendsPane.setVisible(false);
@@ -249,7 +250,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             chartsLegendsPane.setVisible(true);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
             toggleChartDisplayModeButton.setGraphic(getIconNode("screen-icon", Pos.CENTER));
-            splitPane.setDividerPositions(0.7, 0.3);
+            splitPane.setDividerPositions(getWorksheet().getDividerPosition());
+            bindingManager.resume(getWorksheet().dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
     }
@@ -847,6 +849,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         });
                     }
                 });
+        splitPane.setDividerPositions(getWorksheet().getDividerPosition());
+        bindingManager.bind(getWorksheet().dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
 
     private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
@@ -1124,7 +1128,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                     int i = 0;
                                     for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
                                         legendItem.getSymbol().setStyle("-fx-background-color: " +
-                                                colortoRgbaString(viewPort.getDataStore()
+                                                colorToRgbaString(viewPort.getDataStore()
                                                         .getSeries()
                                                         .stream()
                                                         .filter(TimeSeriesInfo::isSelected)
@@ -1329,7 +1333,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return bindingManager;
     }
 
-    private static String colortoRgbaString(Color c) {
+    private static String colorToRgbaString(Color c) {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
     }
 

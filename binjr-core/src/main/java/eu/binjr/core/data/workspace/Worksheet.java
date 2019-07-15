@@ -63,6 +63,8 @@ public class Worksheet implements Dirtyable {
     private Property<ChartLayout> chartLayout;
     @IsDirtyable
     private Property<Boolean> timeRangeLinked;
+    @IsDirtyable
+    private DoubleProperty dividerPosition;
 
     private transient BooleanProperty chartLegendsVisible;
 
@@ -70,7 +72,6 @@ public class Worksheet implements Dirtyable {
     private transient final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
     private transient final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
     private transient Property<Integer> selectedChart;
-
     private transient final ChangeWatcher status;
 
     /**
@@ -166,7 +167,7 @@ public class Worksheet implements Dirtyable {
         this.timeRangeLinked = new SimpleBooleanProperty(timeRangeLinked);
         this.selectedChart = new SimpleObjectProperty<>(0);
         this.chartLegendsVisible = new SimpleBooleanProperty(chartLegendsVisible);
-
+        this.dividerPosition = new SimpleDoubleProperty(0.7);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -442,6 +443,19 @@ public class Worksheet implements Dirtyable {
      */
     public void setTimeRangeLinked(Boolean timeRangeLinked) {
         this.timeRangeLinked.setValue(timeRangeLinked);
+    }
+
+    @XmlAttribute
+    public Double getDividerPosition() {
+        return dividerPosition.getValue();
+    }
+
+    public DoubleProperty dividerPositionProperty() {
+        return dividerPosition;
+    }
+
+    public void setDividerPosition(Double dividerPosition) {
+        this.dividerPosition.setValue(dividerPosition);
     }
 
     @XmlTransient

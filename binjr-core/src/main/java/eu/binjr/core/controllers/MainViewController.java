@@ -176,6 +176,10 @@ public class MainViewController implements Initializable {
         assert contentView != null : "fx:id\"contentView\" was not injected!";
         Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
+        contentView.getDividers().stream().findFirst().ifPresent(divider -> {
+            divider.setPosition(getWorkspace().getDividerPosition());
+            getWorkspace().getBindingManager().bind(getWorkspace().dividerPositionProperty(), divider.positionProperty());
+        });
         sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
@@ -198,9 +202,7 @@ public class MainViewController implements Initializable {
                         }
                     }
                     if ((expandRequiered) && (oldPane != null)) {
-                        Platform.runLater(() -> {
-                            sourcesPane.setExpandedPane(oldPane);
-                        });
+                        Platform.runLater(() -> sourcesPane.setExpandedPane(oldPane));
                     }
                 });
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
@@ -250,9 +252,8 @@ public class MainViewController implements Initializable {
             findNext();
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
+
         Platform.runLater(this::runAfterInitialize);
-
-
     }
 
     protected void runAfterInitialize() {
@@ -663,7 +664,7 @@ public class MainViewController implements Initializable {
             }
         });
         sourcesAdapters.clear();
-        workspace.close();
+        workspace.clear();
     }
 
     private void openWorkspaceFromFile() {
@@ -692,9 +693,11 @@ public class MainViewController implements Initializable {
                         return wsFromfile;
                     },
                     event -> {
+                        Workspace loadedWorkspace = (Workspace) event.getSource().getValue();
                         workspace.setPath(file.toPath());
+                        contentView.getDividers().stream().findFirst().ifPresent(d -> d.setPosition(loadedWorkspace.getDividerPosition()));
                         sourceMaskerPane.setVisible(false);
-                        loadWorksheets((Workspace) event.getSource().getValue());
+                        loadWorksheets(loadedWorkspace);
                     }, event -> {
                         sourceMaskerPane.setVisible(false);
                         Dialogs.notifyException("An error occurred while loading workspace from file " +
@@ -891,12 +894,12 @@ public class MainViewController implements Initializable {
                 "Close", "Close Worksheet",
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"});
-        ToggleButton linkTabButton = (ToggleButton)newToolBarButton(
+        ToggleButton linkTabButton = (ToggleButton) newToolBarButton(
                 ToggleButton::new,
                 "Link", "Link Worksheet Timeline",
                 new String[]{"link"},
                 new String[]{"link-icon", "small-icon"});
-        EditableTab newTab = new EditableTab("New worksheet",linkTabButton, closeTabButton);
+        EditableTab newTab = new EditableTab("New worksheet", linkTabButton, closeTabButton);
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
         linkTabButton.selectedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
@@ -1393,7 +1396,8 @@ public class MainViewController implements Initializable {
 
     private void toggleSourcePaneVisibilty(Boolean newValue) {
         if (!newValue) {
-            contentView.setDividerPositions(0.0, 1.0);
+            getWorkspace().getBindingManager().suspend(getWorkspace().dividerPositionProperty());
+            contentView.setDividerPositions(0.0);
             hideSourcePaneMenu.setText("Show Source Pane");
             sourcePane.setVisible(false);
             sourcePane.setMaxWidth(0.0);
@@ -1401,8 +1405,8 @@ public class MainViewController implements Initializable {
             sourcePane.setMaxWidth(Double.MAX_VALUE);
             sourcePane.setVisible(true);
             hideSourcePaneMenu.setText("Hide Source Pane");
-            contentView.setDividerPositions(0.35, 0.65);
-
+            contentView.setDividerPositions(getWorkspace().getDividerPosition());
+            getWorkspace().getBindingManager().resume();
         }
     }
 

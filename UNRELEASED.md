@@ -1,0 +1,1 @@
+* _[New]_ The position and size of the various resizable panes in the UI are now saved alongside the rest of a workspace, so that its appearance can be fully restored on reload. 

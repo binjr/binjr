@@ -26,10 +26,7 @@ import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.CannotLoadWorkspaceException;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.apache.logging.log4j.LogManager;
@@ -72,6 +69,9 @@ public class Workspace implements Dirtyable {
     @XmlElements(@XmlElement(name = "Worksheet"))
     @IsDirtyable
     private final ObservableList<Worksheet> worksheets;
+    @XmlAttribute
+    @IsDirtyable
+    private final SimpleDoubleProperty dividerPosition;
     @XmlTransient
     private final ChangeWatcher status;
     @XmlAttribute(name = "schemaVersion", required = false)
@@ -81,7 +81,6 @@ public class Workspace implements Dirtyable {
     private transient final BindingManager bindingManager = new BindingManager();
     @XmlTransient
     private final BooleanProperty presentationMode;
-
 
     //    @IsDirtyable
 //    @XmlAttribute(name = "sourcePaneVisible")
@@ -104,11 +103,14 @@ public class Workspace implements Dirtyable {
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
-        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
-        this.status = new ChangeWatcher(this);
+        this.dividerPosition = new SimpleDoubleProperty(0.3);
+
         this.producerInfo = AppEnvironment.getInstance().getAppDescription();
         this.sourcePaneVisible = new SimpleBooleanProperty(true);
         this.presentationMode = new SimpleBooleanProperty(false);
+
+        // Change watcher must be initialized after dirtyable properties or they will not be tracked.
+        this.status = new ChangeWatcher(this);
     }
 
     /**
@@ -330,20 +332,16 @@ public class Workspace implements Dirtyable {
      * Clear all the properties of the {@link Workspace} instance
      */
     public void clear() {
-        clearWorksheets();
-        clearSources();
+        IOUtils.closeCollectionElements(worksheets);
+        IOUtils.closeCollectionElements(sources);
         cleanUp();
         this.setPath(Paths.get("Untitled"));
-        this.status.close();
     }
 
     public void close() {
         logger.debug("Closing Workspace " + this.toString());
         try {
-            IOUtils.closeCollectionElements(worksheets);
-            IOUtils.closeCollectionElements(sources);
-            cleanUp();
-            this.setPath(Paths.get("Untitled"));
+            clear();
             this.status.close();
             bindingManager.close();
         } catch (Exception e) {
@@ -422,5 +420,18 @@ public class Workspace implements Dirtyable {
 
     public void setPresentationMode(boolean presentationMode) {
         this.presentationMode.set(presentationMode);
+    }
+
+    public DoubleProperty dividerPositionProperty() {
+        return dividerPosition;
+    }
+
+    // @XmlAttribute
+    public Double getDividerPosition() {
+        return dividerPosition.getValue();
+    }
+
+    public void setDividerPosition(Double dividerPosition) {
+        this.dividerPosition.setValue(dividerPosition);
     }
 }

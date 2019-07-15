@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,18 +26,16 @@
         @XmlJavaTypeAdapter(type = Color.class,
                 value = ColorXmlAdapter.class),
         @XmlJavaTypeAdapter(type = Version.class,
-                value = VersionXmlAdapter.class)
+                value = VersionXmlAdapter.class),
+        @XmlJavaTypeAdapter(type = SimpleDoubleProperty.class,
+                value = SimpleDoublePropertyXmlAdapter.class)
 
 })
 package eu.binjr.core.data.workspace;
 
-import eu.binjr.common.xml.adapters.InstantXmlAdapter;
-import eu.binjr.common.xml.adapters.LocalDateTimeXmlAdapter;
-import eu.binjr.common.xml.adapters.ZoneIdXmlAdapter;
-import eu.binjr.common.xml.adapters.ZonedDateTimeXmlAdapter;
+import eu.binjr.common.xml.adapters.*;
 import eu.binjr.common.version.Version;
-import eu.binjr.common.xml.adapters.VersionXmlAdapter;
-import eu.binjr.common.xml.adapters.ColorXmlAdapter;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
