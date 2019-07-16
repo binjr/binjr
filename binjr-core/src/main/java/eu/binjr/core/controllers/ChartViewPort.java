@@ -134,7 +134,7 @@ public class ChartViewPort implements Closeable {
             seriesTable.setRowFactory(null);
             seriesTable.getColumns().clear();
             seriesTable.setItems(null);
-            if (crosshair!= null){
+            if (crosshair != null) {
                 crosshair.dispose();
             }
         }

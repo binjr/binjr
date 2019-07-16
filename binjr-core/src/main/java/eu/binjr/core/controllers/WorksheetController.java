@@ -717,8 +717,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
+            TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
-            newPane.setMinHeight(80.0);
+            newPane.setMinHeight(90.0);
             newPane.setOnDragOver(bindingManager.registerHandler(this::handleDragOverWorksheetView));
             newPane.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedOnWorksheetView));
             newPane.setUserData(currentViewPort);
