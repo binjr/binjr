@@ -1090,29 +1090,39 @@ public class MainViewController implements Initializable {
     }
 
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
+        List<TreeItem<TimeSeriesBinding>> l = new ArrayList<>();
+        l.add(treeItem);
+        addToNewChartInCurrentWorksheet(l);
+    }
+
+    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
         try {
             Worksheet worksheet = getSelectedWorksheetController().getWorksheet();
-            TimeSeriesBinding binding = treeItem.getValue();
-            Chart chart = new Chart(
-                    binding.getLegend(),
-                    binding.getGraphType(),
-                    binding.getUnitName(),
-                    binding.getUnitPrefix()
-            );
-            List<TimeSeriesBinding> bindings = new ArrayList<>();
-            getAllBindingsFromBranch(treeItem, bindings);
-            if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                if (Dialogs.confirmDialog(root,
-                        "This action will add " + bindings.size() + " series on a single chart.",
-                        "Are you sure you want to proceed?",
-                        ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                    return;
+            var charts = new ArrayList<Chart>();
+            for (var treeItem:treeItems) {
+                TimeSeriesBinding binding = treeItem.getValue();
+                Chart chart = new Chart(
+                        binding.getLegend(),
+                        binding.getGraphType(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix()
+                );
+                List<TimeSeriesBinding> bindings = new ArrayList<>();
+                getAllBindingsFromBranch(treeItem, bindings);
+                if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                    if (Dialogs.confirmDialog(root,
+                            "This action will add " + bindings.size() + " series on a single chart.",
+                            "Are you sure you want to proceed?",
+                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                        return;
+                    }
                 }
+                for (TimeSeriesBinding b : bindings) {
+                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                }
+                charts.add(chart);
             }
-            for (TimeSeriesBinding b : bindings) {
-                chart.addSeries(TimeSeriesInfo.fromBinding(b));
-            }
-            worksheet.getCharts().add(chart);
+            worksheet.getCharts().addAll(charts);
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e, root);
         }
@@ -1315,8 +1325,20 @@ public class MainViewController implements Initializable {
     private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+            event.acceptTransferModes(TransferMode.ANY);
             event.consume();
+        }
+    }
+
+
+    //FIXME: The following implementation assumes that a leaf node cannot have a sibling which isn't also a leaf.
+    private <T> void getAllLevel1FromBranch(TreeItem<T> branch, List<TreeItem<T>> level1Items) {
+        if (!branch.isLeaf() & branch.getChildren().get(0).isLeaf()) {
+            level1Items.add(branch);
+        } else {
+            for (TreeItem<T> t : branch.getChildren()) {
+                getAllLevel1FromBranch(t, level1Items);
+            }
         }
     }
 
@@ -1332,13 +1354,17 @@ public class MainViewController implements Initializable {
                         targetStage.requestFocus();
                     }
                     if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
-                        addToNewChartInCurrentWorksheet(item);
+                        List<TreeItem<TimeSeriesBinding>> level1Items = new ArrayList<>();
+                        getAllLevel1FromBranch(item, level1Items);
+                        addToNewChartInCurrentWorksheet(level1Items);
                     } else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                         if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {
                             getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
                         } else {
                             addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), getSelectedWorksheetController().getWorksheet().getDefaultChart());
                         }
+                    } else if (TransferMode.LINK.equals(event.getAcceptedTransferMode())) {
+                        addToNewChartInCurrentWorksheet(item);
                     } else {
                         logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
                     }
