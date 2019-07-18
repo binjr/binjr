@@ -28,3 +28,7 @@ dependencies {
 }
 
 mainClassName = 'eu.binjr.core.Bootstrap'
+
+run {
+    systemProperties System.getProperties()
+}
