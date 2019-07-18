@@ -75,4 +75,38 @@ public class TreeViewUtils {
         }
         return found;
     }
+
+    public static <T> List<T> flattenLeaves(TreeItem<T> branch) {
+        List<T> leaves = new ArrayList<>();
+        flattenLeaves(branch, leaves);
+        return leaves;
+    }
+
+    private static <T> void flattenLeaves(TreeItem<T> branch, List<T> leaves) {
+        if (!branch.isLeaf()) {
+            for (TreeItem<T> t : branch.getChildren()) {
+                flattenLeaves(t, leaves);
+            }
+        } else {
+            leaves.add(branch.getValue());
+        }
+    }
+
+    public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch) {
+        List<TreeItem<T>> level1Items = new ArrayList<>();
+        splitAboveLeaves(branch, level1Items);
+        return level1Items;
+    }
+
+    //FIXME: The following implementation assumes that a leaf node cannot have a sibling which isn't also a leaf.
+    private static <T> void splitAboveLeaves(TreeItem<T> branch, List<TreeItem<T>> level1Items) {
+        if (!branch.isLeaf() & branch.getChildren().get(0).isLeaf()) {
+            level1Items.add(branch);
+        } else {
+            for (TreeItem<T> t : branch.getChildren()) {
+                splitAboveLeaves(t, level1Items);
+            }
+        }
+    }
+
 }

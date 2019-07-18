@@ -906,9 +906,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             TitledPane droppedPane = (TitledPane) event.getSource();
                             droppedPane.setExpanded(true);
                             ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                            List<TimeSeriesBinding> bindings = new ArrayList<>();
-                            parentController.getAllBindingsFromBranch(item, bindings);
-                            addBindings(bindings, viewPort.getDataStore());
+                            addBindings(TreeViewUtils.flattenLeaves(item), viewPort.getDataStore());
                         } catch (Exception e) {
                             Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                         }
