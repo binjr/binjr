@@ -40,7 +40,7 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
-    private static class SelectableRegion extends Region {
+    public static class SelectableRegion extends Region {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
 
         private BooleanProperty selected = new BooleanPropertyBase(false) {
@@ -422,6 +422,9 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
         this.selectionMarkerVisible.set(selectionMarkerVisible);
     }
 
+    public SelectableRegion getSelectionMarker() {
+        return selectionMarker;
+    }
 
     private static class Range {
         public final double low;

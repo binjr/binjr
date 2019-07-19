@@ -845,8 +845,6 @@ public class MainViewController implements Initializable {
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
-                p.setOnDragOver(current.getBindingManager().registerHandler(this::handleDragOverWorksheetView));
-                p.setOnDragDropped(current.getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
             } catch (IOException ex) {
                 logger.error("Error loading time series", ex);
             }
@@ -1000,6 +998,9 @@ public class MainViewController implements Initializable {
             bindingTreeCell.itemProperty().addListener((observable, oldValue, newValue) -> bindingTreeCell.setText(newValue == null ? null : newValue.toString()));
             bindingTreeCell.setOnDragDetected(event -> {
                 try {
+                    if (getSelectedWorksheetController()!=null){
+                        getSelectedWorksheetController().setNewChartDropTargetEnabled(true);
+                    }
                     if (bindingTreeCell.getItem() != null) {
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
@@ -1012,6 +1013,11 @@ public class MainViewController implements Initializable {
                     }
                 } finally {
                     event.consume();
+                }
+            });
+            bindingTreeCell.setOnDragDone(event -> {
+                if (getSelectedWorksheetController()!=null){
+                    getSelectedWorksheetController().setNewChartDropTargetEnabled(false);
                 }
             });
             return bindingTreeCell;
@@ -1053,26 +1059,12 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding> treeView) {
-        ContextMenu contextMenu = new ContextMenu(getSelectedWorksheetController().getWorksheet().getCharts()
-                .stream()
-                .map(c -> {
-                    MenuItem m = new MenuItem(c.getName());
-                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), c));
-                    return m;
-                })
-                .toArray(MenuItem[]::new));
 
-        MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
-        contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
-        return contextMenu;
-    }
 
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
-        addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getChartListContextMenu(treeView).getItems()));
+        addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getSelectedWorksheetController().getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(treeView.getSelectionModel().getSelectedItem()));
         ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
@@ -1080,60 +1072,10 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
-        List<TreeItem<TimeSeriesBinding>> l = new ArrayList<>();
-        l.add(treeItem);
-        addToNewChartInCurrentWorksheet(l);
-    }
 
-    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
-        try {
-            int totalBindings = treeItems.stream()
-                    .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem).size())
-                    .reduce(0, Integer::sum);
-            if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                if (Dialogs.confirmDialog(root,
-                        "This action will add " + totalBindings + " series on a single worksheet.",
-                        "Are you sure you want to proceed?",
-                        ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                    return;
-                }
-            }
-
-            Worksheet worksheet = getSelectedWorksheetController().getWorksheet();
-            var charts = new ArrayList<Chart>();
-            for (var treeItem : treeItems) {
-                TimeSeriesBinding binding = treeItem.getValue();
-                Chart chart = new Chart(
-                        binding.getLegend(),
-                        binding.getGraphType(),
-                        binding.getUnitName(),
-                        binding.getUnitPrefix()
-                );
-                for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem)) {
-                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
-                }
-                charts.add(chart);
-            }
-            worksheet.getCharts().addAll(charts);
-        } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to new chart", e, root);
-        }
-    }
-
-    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem, Chart targetChart) {
-        try {
-            if (getSelectedWorksheetController() != null && treeItem != null) {
-                getSelectedWorksheetController().addBindings(TreeViewUtils.flattenLeaves(treeItem), targetChart);
-            }
-        } catch (Exception e) {
-            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
-        }
-    }
 
     private void addToNewWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
-        // Schedule for later execution in order to let other UI components worksheetTabFactory refreshed
-        // before modal dialog gets displayed (fixes unsightly UI glitches on Linux)
+        // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
                 TimeSeriesBinding binding = treeItem.getValue();
@@ -1318,37 +1260,7 @@ public class MainViewController implements Initializable {
     }
 
 
-    private void handleDragDroppedOnWorksheetView(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding> treeView = getSelectedTreeView();
-            if (treeView != null) {
-                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
-                if (item != null) {
-                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    if (targetStage != null) {
-                        targetStage.requestFocus();
-                    }
-                    if (TransferMode.COPY.equals(event.getAcceptedTransferMode())) {
-                        addToNewChartInCurrentWorksheet(TreeViewUtils.splitAboveLeaves(item));
-                    } else if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                        if (getSelectedWorksheetController().getWorksheet().getCharts().size() > 1) {
-                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
-                        } else {
-                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), getSelectedWorksheetController().getWorksheet().getDefaultChart());
-                        }
-                    } else {
-                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
-                    }
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
-                }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
-            event.consume();
-        }
-    }
+
 
     private void saveWindowPositionAndQuit() {
         Stage stage = Dialogs.getStage(root);

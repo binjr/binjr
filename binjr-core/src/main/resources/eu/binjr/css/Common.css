@@ -42,6 +42,17 @@
     -fx-background-color: -fx-accent-translucide;
 }
 
+.drop-zone {
+    -fx-border-insets: 5;
+    -fx-background-color:  -binjr-pane-background-color;
+    -fx-border-color: -binjr-control-border-color;
+    -fx-border-width: 1;
+    -fx-border-style: dotted;
+}
+
+.drop-zone:hover {
+    -fx-background-color: -fx-accent-translucide;
+}
 .chart,
 .chart-plot-background {
     -fx-background-color: transparent;

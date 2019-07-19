@@ -85,6 +85,7 @@ public class TreeViewUtils {
     private static <T> void flattenLeaves(TreeItem<T> branch, List<T> leaves) {
         if (!branch.isLeaf()) {
             for (TreeItem<T> t : branch.getChildren()) {
+
                 flattenLeaves(t, leaves);
             }
         } else {

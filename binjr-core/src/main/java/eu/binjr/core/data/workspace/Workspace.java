@@ -70,7 +70,7 @@ public class Workspace implements Dirtyable {
     @IsDirtyable
     private final ObservableList<Worksheet> worksheets;
     @XmlAttribute
-    @IsDirtyable
+  //  @IsDirtyable
     private final SimpleDoubleProperty dividerPosition;
     @XmlTransient
     private final ChangeWatcher status;

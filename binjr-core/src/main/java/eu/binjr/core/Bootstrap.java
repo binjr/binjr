@@ -42,7 +42,10 @@ public final class Bootstrap {
         try {
             if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX) {
                 // Force openJfx to fall back to gtk 2 to workaround issue with Wayland
-                System.setProperty("jdk.gtk.version", "2");
+                // unless its been explicitly set in the command line
+                if (System.getProperty("jdk.gtk.version") == null) {
+                    System.setProperty("jdk.gtk.version", "2");
+                }
                 args = appendToArray(args, "--resizable-dialogs=true");
             }
             Binjr.main(args);

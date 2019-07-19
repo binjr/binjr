@@ -39,6 +39,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -103,9 +104,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private volatile boolean preventReload = false;
     private AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
-    private AnchorPane chartParent;
+    private Pane chartParent;
     @FXML
     private AnchorPane chartViewport;
+    @FXML
+    Pane newChartDropTarget;
     @FXML
     private TextField yMinRange;
     @FXML
@@ -232,6 +235,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 setEditChartMode(newValue);
             });
             setEditChartMode(getWorksheet().isChartLegendsVisible());
+            newChartDropTarget.setOnDragOver(bindingManager.registerHandler(this::handleDragOverNewChartTarget));
+            newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
+
+            newChartDropTarget.setOnDragEntered(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
+            newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
+
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
@@ -338,7 +347,25 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             }));
             bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), getWorksheet().chartLegendsVisibleProperty());
+            viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
+            viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
+
+            viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
+                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                    ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+                }else{
+                    viewPort.setStyle("-fx-background-color:  -fx-accent-translucide;");
+                }
+            }));
+            viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
+                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                    ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+                }else{
+                    viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
+                }
+            }));
         }
+
         bindingManager.bind(selectChartLayout.disableProperty(),
                 Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
         selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
@@ -469,6 +496,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         var scrollPane = new ScrollPane(vBox);
         scrollPane.setFitToWidth(true);
+        scrollPane.getStyleClass().add("skinnable-pane-border");
         chartParent.getChildren().add(scrollPane);
         // setup crosshair
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
@@ -721,7 +749,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);
             newPane.setOnDragOver(bindingManager.registerHandler(this::handleDragOverWorksheetView));
-            newPane.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedOnWorksheetView));
+            newPane.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedOnLegendTitledPane));
             newPane.setUserData(currentViewPort);
 
             GridPane titleRegion = new GridPane();
@@ -890,6 +918,51 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
+
+    private void handleDragOverNewChartTarget(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+            event.acceptTransferModes(TransferMode.COPY);
+            event.consume();
+        }
+    }
+
+    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+
+    private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    if (targetStage != null) {
+                        targetStage.requestFocus();
+                    }
+                    // if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
+                    try {
+                        TitledPane droppedPane = (TitledPane) event.getSource();
+                        droppedPane.setExpanded(true);
+                        ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
+                        addBindings(TreeViewUtils.flattenLeaves(item), viewPort.getDataStore());
+                    } catch (Exception e) {
+                        Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
+                    }
+                    logger.debug("dropped to " + event.toString());
+//                    } else {
+//                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
+//                    }
+                } else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            } else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
+    }
+
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
@@ -901,19 +974,21 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
-                        try {
-                            TitledPane droppedPane = (TitledPane) event.getSource();
-                            droppedPane.setExpanded(true);
-                            ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                            addBindings(TreeViewUtils.flattenLeaves(item), viewPort.getDataStore());
-                        } catch (Exception e) {
-                            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
+                    Chart targetChart = null;
+                    if (event.getSource() instanceof XYChart<?, ?>) {
+                        for (var v : viewPorts) {
+                            if (v.getChart().equals(event.getSource())) {
+                                targetChart = v.getDataStore();
+                            }
                         }
-                        logger.debug("dropped to " + event.toString());
-                    } else {
-                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
                     }
+                    if (targetChart == null) {
+                        getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                    } else {
+                        addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
+                    }
+
+
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -922,6 +997,117 @@ public class WorksheetController implements Initializable, AutoCloseable {
             }
             event.consume();
         }
+    }
+
+
+    private void handleDragDroppedONewChartTarget(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    if (targetStage != null) {
+                        targetStage.requestFocus();
+                    }
+
+                    //        if (GlobalPreferences.getInstance().isCtrlPressed()) {
+                    addToNewChartInCurrentWorksheet(TreeViewUtils.splitAboveLeaves(item));
+//                    } else {
+//                        Chart targetChart = null;
+//                        if (event.getSource() instanceof XYChart<?, ?>) {
+//                            for (var v : viewPorts) {
+//                                if (v.getChart().equals(event.getSource())) {
+//                                    targetChart = v.getDataStore();
+//                                }
+//                            }
+//                        }
+//                        if (GlobalPreferences.getInstance().isShiftPressed() || targetChart == null) {
+//                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+//                        } else {
+//                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
+//                        }
+//                    }
+                } else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            } else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
+    }
+
+
+    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
+        List<TreeItem<TimeSeriesBinding>> l = new ArrayList<>();
+        l.add(treeItem);
+        addToNewChartInCurrentWorksheet(l);
+    }
+
+    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+        // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
+        Platform.runLater(() -> {
+            try {
+                int totalBindings = treeItems.stream()
+                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem).size())
+                        .reduce(0, Integer::sum);
+                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                    if (Dialogs.confirmDialog(root,
+                            "This action will add " + totalBindings + " series on a single worksheet.",
+                            "Are you sure you want to proceed?",
+                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                        return;
+                    }
+                }
+
+
+                var charts = new ArrayList<Chart>();
+                for (var treeItem : treeItems) {
+                    TimeSeriesBinding binding = treeItem.getValue();
+                    Chart chart = new Chart(
+                            binding.getLegend(),
+                            binding.getGraphType(),
+                            binding.getUnitName(),
+                            binding.getUnitPrefix()
+                    );
+                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem)) {
+                        chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                    }
+                    charts.add(chart);
+                }
+                getWorksheet().getCharts().addAll(charts);
+            } catch (Exception e) {
+                Dialogs.notifyException("Error adding bindings to new chart", e, root);
+            }
+        });
+    }
+
+    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem, Chart targetChart) {
+        try {
+            if (treeItem != null) {
+                addBindings(TreeViewUtils.flattenLeaves(treeItem), targetChart);
+            }
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
+        }
+    }
+
+    public ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding> treeView) {
+        ContextMenu contextMenu = new ContextMenu(getWorksheet().getCharts()
+                .stream()
+                .map(c -> {
+                    MenuItem m = new MenuItem(c.getName());
+                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), c));
+                    return m;
+                })
+                .toArray(MenuItem[]::new));
+
+        MenuItem newChart = new MenuItem("Add to new chart");
+        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
+        return contextMenu;
     }
 
     @Override
@@ -1336,6 +1522,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private static String colorToRgbaString(Color c) {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
+    }
+
+    public void setNewChartDropTargetEnabled(boolean value) {
+        newChartDropTarget.setManaged(value);
+        newChartDropTarget.setVisible(value);
     }
 
     //endregion
