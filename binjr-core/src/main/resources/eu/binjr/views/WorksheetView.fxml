@@ -234,21 +234,6 @@
                 <Insets/>
             </VBox.margin>
             <VBox>
-                <StackPane fx:id="newChartDropTarget"
-                           minHeight="44"
-                           maxHeight="44"
-                           prefHeight="44"
-                           visible="false"
-                           managed="false"
-                           styleClass="drop-zone">
-                    <Label text="New chart" graphicTextGap="18" contentDisplay="GRAPHIC_ONLY">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="addWorksheet-icon"/>
-                            </HBox>
-                        </graphic>
-                    </Label>
-                </StackPane>
                 <AnchorPane  fx:id="chartViewport" minHeight="0.0" minWidth="0.0" VBox.vgrow="SOMETIMES" styleClass="skinnable-pane-border">
                     <cursor>
                         <Cursor fx:constant="DEFAULT"/>
@@ -269,6 +254,21 @@
                                 AnchorPane.topAnchor="0.0">
                     </DrawerPane>
                 </AnchorPane>
+                <StackPane fx:id="newChartDropTarget"
+                           minHeight="44"
+                           maxHeight="44"
+                           prefHeight="44"
+                           visible="false"
+                           managed="false"
+                           styleClass="drop-zone">
+                    <Label text="New chart" graphicTextGap="18" contentDisplay="GRAPHIC_ONLY">
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="addWorksheet-icon"/>
+                            </HBox>
+                        </graphic>
+                    </Label>
+                </StackPane>
             </VBox>
             <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <ScrollPane id="chartLegendScoll" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
