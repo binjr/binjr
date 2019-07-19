@@ -95,13 +95,17 @@ public class TreeViewUtils {
 
     public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch) {
         List<TreeItem<T>> level1Items = new ArrayList<>();
-        splitAboveLeaves(branch, level1Items);
+        if (branch.isLeaf()){
+            level1Items.add(branch);
+        }else {
+            splitAboveLeaves(branch, level1Items);
+        }
         return level1Items;
     }
 
     //FIXME: The following implementation assumes that a leaf node cannot have a sibling which isn't also a leaf.
     private static <T> void splitAboveLeaves(TreeItem<T> branch, List<TreeItem<T>> level1Items) {
-        if (!branch.isLeaf() & branch.getChildren().get(0).isLeaf()) {
+        if (!branch.isLeaf() && branch.getChildren().get(0).isLeaf()) {
             level1Items.add(branch);
         } else {
             for (TreeItem<T> t : branch.getChildren()) {

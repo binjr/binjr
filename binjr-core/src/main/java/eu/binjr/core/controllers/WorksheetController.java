@@ -940,7 +940,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    // if (TransferMode.MOVE.equals(event.getAcceptedTransferMode())) {
                     try {
                         TitledPane droppedPane = (TitledPane) event.getSource();
                         droppedPane.setExpanded(true);
@@ -950,9 +949,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                     }
                     logger.debug("dropped to " + event.toString());
-//                    } else {
-//                        logger.warn("Unsupported drag and drop transfer mode: " + event.getAcceptedTransferMode());
-//                    }
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -987,8 +983,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     } else {
                         addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
                     }
-
-
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1011,24 +1005,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-
-                    //        if (GlobalPreferences.getInstance().isCtrlPressed()) {
                     addToNewChartInCurrentWorksheet(TreeViewUtils.splitAboveLeaves(item));
-//                    } else {
-//                        Chart targetChart = null;
-//                        if (event.getSource() instanceof XYChart<?, ?>) {
-//                            for (var v : viewPorts) {
-//                                if (v.getChart().equals(event.getSource())) {
-//                                    targetChart = v.getDataStore();
-//                                }
-//                            }
-//                        }
+
 //                        if (GlobalPreferences.getInstance().isShiftPressed() || targetChart == null) {
 //                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
 //                        } else {
 //                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
 //                        }
-//                    }
+
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }

@@ -1041,7 +1041,6 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT:
@@ -1059,8 +1058,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-
-
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
@@ -1071,8 +1068,6 @@ public class MainViewController implements Initializable {
         contextMenu.setOnShowing(event -> expandBranch(treeView.getSelectionModel().getSelectedItem()));
         return contextMenu;
     }
-
-
 
     private void addToNewWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
