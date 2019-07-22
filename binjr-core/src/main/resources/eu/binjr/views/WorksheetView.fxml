@@ -233,43 +233,52 @@
             <VBox.margin>
                 <Insets/>
             </VBox.margin>
-            <VBox>
-                <AnchorPane  fx:id="chartViewport" minHeight="0.0" minWidth="0.0" VBox.vgrow="SOMETIMES" styleClass="skinnable-pane-border">
-                    <cursor>
-                        <Cursor fx:constant="DEFAULT"/>
-                    </cursor>
-                    <AnchorPane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE"
-                                prefHeight="429.0"
-                                prefWidth="670.0" styleClass="skinnable-pane-border,chart-viewport-parent"
-                                AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                                AnchorPane.topAnchor="0.0">
-                    </AnchorPane>
-                    <DrawerPane fx:id="chartProperties" cache="true" cacheHint="SPEED"
-                                collapsedWidth="0"
-                                expandedWidth="200"
-                                side="RIGHT"
-                                animation="SLIDE"
-                                AnchorPane.bottomAnchor="0.0"
-                                AnchorPane.rightAnchor="-200.0"
-                                AnchorPane.topAnchor="0.0">
-                    </DrawerPane>
+
+            <AnchorPane fx:id="chartViewport" minHeight="0.0" minWidth="0.0" VBox.vgrow="SOMETIMES"
+                        styleClass="skinnable-pane-border">
+                <cursor>
+                    <Cursor fx:constant="DEFAULT"/>
+                </cursor>
+                <AnchorPane fx:id="chartView" cache="true" cacheHint="SPEED" depthTest="DISABLE"
+                            VBox.vgrow="ALWAYS"
+                            styleClass="skinnable-pane-border,chart-viewport-parent"
+                            AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                            AnchorPane.topAnchor="0.0">
+                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
+                        <Pane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE"
+                                   maxHeight="1.7976931348623157E308"
+                                    VBox.vgrow="ALWAYS"
+                                    styleClass="skinnable-pane-border,chart-viewport-parent">
+                        </Pane>
+                        <StackPane fx:id="newChartDropTarget"
+                                   minHeight="44"
+                                   maxHeight="44"
+                                   prefHeight="44"
+                                   visible="false"
+                                   managed="false"
+                                   styleClass="drop-zone">
+                            <Label text="New chart" graphicTextGap="18" contentDisplay="GRAPHIC_ONLY">
+                                <graphic>
+                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                        <Region styleClass="addWorksheet-icon"/>
+                                    </HBox>
+                                </graphic>
+                            </Label>
+                        </StackPane>
+                    </VBox>
                 </AnchorPane>
-                <StackPane fx:id="newChartDropTarget"
-                           minHeight="44"
-                           maxHeight="44"
-                           prefHeight="44"
-                           visible="false"
-                           managed="false"
-                           styleClass="drop-zone">
-                    <Label text="New chart" graphicTextGap="18" contentDisplay="GRAPHIC_ONLY">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="addWorksheet-icon"/>
-                            </HBox>
-                        </graphic>
-                    </Label>
-                </StackPane>
-            </VBox>
+                <DrawerPane fx:id="chartProperties" cache="true" cacheHint="SPEED"
+                            collapsedWidth="0"
+                            expandedWidth="200"
+                            side="RIGHT"
+                            animation="SLIDE"
+                            AnchorPane.bottomAnchor="0.0"
+                            AnchorPane.rightAnchor="-200.0"
+                            AnchorPane.topAnchor="0.0">
+                </DrawerPane>
+            </AnchorPane>
+
+
             <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <ScrollPane id="chartLegendScoll" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"

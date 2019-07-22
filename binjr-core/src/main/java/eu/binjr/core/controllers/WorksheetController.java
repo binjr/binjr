@@ -110,6 +110,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     Pane newChartDropTarget;
     @FXML
+    private AnchorPane chartView;
+    @FXML
     private TextField yMinRange;
     @FXML
     private TextField yMaxRange;
@@ -854,7 +856,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 chartProperties.collapse();
             }
         });
-        chartProperties.setSibling(chartParent);
+        chartProperties.setSibling(chartView);
         if (editButtonsGroup.getSelectedToggle() != null) {
             chartProperties.expand();
         }
