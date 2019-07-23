@@ -1040,8 +1040,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         return;
                     }
                 }
-
-
                 var charts = new ArrayList<Chart>();
                 for (var treeItem : treeItems) {
                     TimeSeriesBinding binding = treeItem.getValue();

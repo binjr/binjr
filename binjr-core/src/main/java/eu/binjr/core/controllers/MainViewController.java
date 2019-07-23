@@ -1065,11 +1065,19 @@ public class MainViewController implements Initializable {
         return contextMenu;
     }
 
-    private void addToNewWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
+    private void addToNewWorksheet(TreeItem<TimeSeriesBinding> rootItem) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                TimeSeriesBinding binding = treeItem.getValue();
+                int totalBindings = TreeViewUtils.flattenLeaves(rootItem).size();
+                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                    if (Dialogs.confirmDialog(root,
+                            "This action will add " + totalBindings + " series on a single worksheet.",
+                            "Are you sure you want to proceed?",
+                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                        return;
+                    }
+                }
                 ZonedDateTime toDateTime;
                 ZonedDateTime fromDateTime;
                 ZoneId zoneId;
@@ -1083,15 +1091,18 @@ public class MainViewController implements Initializable {
                     zoneId = ZoneId.systemDefault();
                 }
                 List<Chart> chartList = new ArrayList<>();
-                var chart = new Chart(
-                        binding.getLegend(),
-                        binding.getGraphType(),
-                        binding.getUnitName(),
-                        binding.getUnitPrefix());
-
-                TreeViewUtils.flattenLeaves(treeItem).forEach(b -> chart.addSeries(TimeSeriesInfo.fromBinding(b)));
-                chartList.add(chart);
-                Worksheet worksheet = new Worksheet(binding.getLegend(),
+                for (var t : TreeViewUtils.splitAboveLeaves(rootItem)) {
+                    TimeSeriesBinding n = t.getValue();
+                    Chart chart = new Chart(
+                            n.getLegend(),
+                            n.getGraphType(),
+                            n.getUnitName(),
+                            n.getUnitPrefix()
+                    );
+                    TreeViewUtils.flattenLeaves(t).forEach(b -> chart.addSeries(TimeSeriesInfo.fromBinding(b)));
+                    chartList.add(chart);
+                }
+                Worksheet worksheet = new Worksheet(rootItem.getValue().getLegend(),
                         chartList,
                         zoneId,
                         fromDateTime,
