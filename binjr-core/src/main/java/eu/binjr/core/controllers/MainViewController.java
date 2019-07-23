@@ -999,9 +999,7 @@ public class MainViewController implements Initializable {
             bindingTreeCell.setOnDragDetected(event -> {
                 try {
                     if (bindingTreeCell.getItem() != null) {
-                        if (getSelectedWorksheetController() != null) {
-                            getSelectedWorksheetController().setNewChartDropTargetEnabled(true);
-                        }
+                        seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(true));
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
                         db.setDragView(renderTextTooltip(bindingTreeCell.getItem().toString()));
@@ -1016,9 +1014,7 @@ public class MainViewController implements Initializable {
                 }
             });
             bindingTreeCell.setOnDragDone(event -> {
-                if (getSelectedWorksheetController() != null) {
-                    getSelectedWorksheetController().setNewChartDropTargetEnabled(false);
-                }
+                seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(false));
             });
             return bindingTreeCell;
         };
