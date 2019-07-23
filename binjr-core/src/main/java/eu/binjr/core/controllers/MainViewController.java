@@ -482,28 +482,6 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory,
-                                        String text, String tooltipMsg,
-                                        String[] styleClass,
-                                        String[] iconStyleClass) {
-        ButtonBase btn = btnFactory.get();
-        btn.setText(text);
-        btn.setPrefHeight(TOOL_BUTTON_SIZE);
-        btn.setMaxHeight(TOOL_BUTTON_SIZE);
-        btn.setMinHeight(TOOL_BUTTON_SIZE);
-        btn.setPrefWidth(TOOL_BUTTON_SIZE);
-        btn.setMaxWidth(TOOL_BUTTON_SIZE);
-        btn.setMinWidth(TOOL_BUTTON_SIZE);
-        btn.getStyleClass().addAll(styleClass);
-        btn.setAlignment(Pos.CENTER);
-        Region icon = new Region();
-        icon.getStyleClass().addAll(iconStyleClass);
-        btn.setGraphic(icon);
-        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        btn.setTooltip(new Tooltip(tooltipMsg));
-        return btn;
-    }
-
     private TitledPane newSourcePane(Source source) {
         TitledPane newPane = new TitledPane();
         Label label = new Label();
@@ -521,7 +499,7 @@ public class MainViewController implements Initializable {
         HBox toolbar = new HBox();
         toolbar.getStyleClass().add("title-pane-tool-bar");
         toolbar.setAlignment(Pos.CENTER);
-        Button closeButton = (Button) newToolBarButton(Button::new,
+        Button closeButton = (Button) Dialogs.newToolBarButton(Button::new,
                 "Close", "Close the connection to this source.",
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"}
@@ -561,7 +539,7 @@ public class MainViewController implements Initializable {
         editFieldsGroup.getChildren().add(sourceNameField);
 
 
-        ToggleButton editButton = (ToggleButton) newToolBarButton(
+        ToggleButton editButton = (ToggleButton) Dialogs.newToolBarButton(
                 ToggleButton::new,
                 "Settings", "Edit the source's settings",
                 new String[]{"dialog-button"},
@@ -887,12 +865,12 @@ public class MainViewController implements Initializable {
 
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
         workspace.setPresentationMode(false);
-        Button closeTabButton = (Button) newToolBarButton(
+        Button closeTabButton = (Button) Dialogs.newToolBarButton(
                 Button::new,
                 "Close", "Close Worksheet",
                 new String[]{"exit"},
                 new String[]{"cross-icon", "small-icon"});
-        ToggleButton linkTabButton = (ToggleButton) newToolBarButton(
+        ToggleButton linkTabButton = (ToggleButton) Dialogs.newToolBarButton(
                 ToggleButton::new,
                 "Link", "Link Worksheet Timeline",
                 new String[]{"link"},

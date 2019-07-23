@@ -23,10 +23,15 @@ import javafx.animation.Timeline;
 import javafx.beans.property.*;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
 import javafx.geometry.Side;
 import javafx.scene.chart.ValueAxis;
+import javafx.scene.control.Button;
+import javafx.scene.control.ToolBar;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
@@ -40,9 +45,8 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
-    public static class SelectableRegion extends Region {
+    public static class SelectableRegion extends Pane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
-
         private BooleanProperty selected = new BooleanPropertyBase(false) {
             public void invalidated() {
                 pseudoClassStateChanged(SELECTED_PSEUDO_CLASS, get());
@@ -70,6 +74,10 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
         public void setSelected(boolean selected) {
             this.selected.set(selected);
         }
+
+
+        public SelectableRegion() {
+        }
     }
 
     /**
@@ -78,7 +86,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     private static final int NUM_MINOR_TICKS = 3;
     public static final int BTN_WITDTH = 21;
     private final SelectableRegion selectionMarker = new SelectableRegion();
-    private final  BooleanProperty selectionMarkerVisible = selectionMarker.visibleProperty();
+    private final BooleanProperty selectionMarkerVisible = selectionMarker.visibleProperty();
     private final BooleanProperty selected = selectionMarker.selectedProperty(); //new SimpleBooleanProperty(false);
 
     private final Timeline animationTimeline = new Timeline();

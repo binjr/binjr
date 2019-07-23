@@ -91,7 +91,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    private static final double TOOL_BUTTON_SIZE = 20;
+
+    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final MainViewController parentController;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
@@ -355,17 +356,33 @@ public class WorksheetController implements Initializable, AutoCloseable {
             viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
                 if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
-                }else{
+                } else {
                     viewPort.setStyle("-fx-background-color:  -fx-accent-translucide;");
                 }
             }));
             viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
                 if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
-                }else{
+                } else {
                     viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
                 }
             }));
+            // Add a close button to chart axis
+            var toolBar = new ToolBar((Button) Dialogs.newToolBarButton(
+                    Button::new,
+                    "Close",
+                    "Remove this chart from the worksheet.",
+                    new String[]{"exit"},
+                    new String[]{"cross-icon", "small-icon"},
+                    bindingManager.registerHandler(event -> {
+                        if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentChart.getName() + "\"?",
+                                "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                            worksheet.getCharts().remove(currentChart);
+                        }
+                    })));
+            toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
+            yAxis.getSelectionMarker().getChildren().add(toolBar);
+
         }
 
         bindingManager.bind(selectChartLayout.disableProperty(),
@@ -793,22 +810,27 @@ public class WorksheetController implements Initializable, AutoCloseable {
             HBox toolbar = new HBox();
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
-            Button closeButton = (Button) newToolBarButton(Button::new, "Close", "Remove this chart from the worksheet.", new String[]{"exit"}, new String[]{"cross-icon", "small-icon"});
-            closeButton.setOnAction(bindingManager.registerHandler(event -> {
-                if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
-                        "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
-                    worksheet.getCharts().remove(currentViewPort.getDataStore());
-                }
-            }));
+            Button closeButton = (Button) Dialogs.newToolBarButton(
+                    Button::new,
+                    "Close",
+                    "Remove this chart from the worksheet.",
+                    new String[]{"exit"},
+                    new String[]{"cross-icon", "small-icon"},
+                    bindingManager.registerHandler(event -> {
+                        if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + currentViewPort.getDataStore().getName() + "\"?",
+                                "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                            worksheet.getCharts().remove(currentViewPort.getDataStore());
+                        }
+                    }));
             bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
 
-            ToggleButton editButton = (ToggleButton) newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
+            ToggleButton editButton = (ToggleButton) Dialogs.newToolBarButton(ToggleButton::new, "Settings", "Edit the chart's settings", new String[]{"dialog-button"}, new String[]{"settings-icon", "small-icon"});
             editButton.selectedProperty().bindBidirectional(currentViewPort.getDataStore().showPropertiesProperty());
             editButton.setOnAction(bindingManager.registerHandler(event -> newPane.setExpanded(true)));
 
             editButtonsGroup.getToggles().add(editButton);
 
-            Button moveUpButton = (Button) newToolBarButton(Button::new, "Up", "Move the chart up the list.", new String[]{"dialog-button"}, new String[]{"upArrow-icon", "small-icon"});
+            Button moveUpButton = (Button) Dialogs.newToolBarButton(Button::new, "Up", "Move the chart up the list.", new String[]{"dialog-button"}, new String[]{"upArrow-icon", "small-icon"});
             bindingManager.bind(moveUpButton.disableProperty(),
                     Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()));
             bindingManager.bind(moveUpButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
@@ -823,7 +845,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 worksheet.getCharts().add(idx - 1, currentViewPort.getDataStore());
             }));
 
-            Button moveDownButton = (Button) newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
+            Button moveDownButton = (Button)Dialogs.newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
             bindingManager.bind(moveDownButton.disableProperty(), Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()));
             bindingManager.bind(moveDownButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             moveDownButton.setOnAction(bindingManager.registerHandler(event -> {
@@ -886,24 +908,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(getWorksheet().dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
 
-    private ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
-        ButtonBase btn = btnFactory.get();
-        btn.setText(text);
-        btn.setPrefHeight(TOOL_BUTTON_SIZE);
-        btn.setMaxHeight(TOOL_BUTTON_SIZE);
-        btn.setMinHeight(TOOL_BUTTON_SIZE);
-        btn.setPrefWidth(TOOL_BUTTON_SIZE);
-        btn.setMaxWidth(TOOL_BUTTON_SIZE);
-        btn.setMinWidth(TOOL_BUTTON_SIZE);
-        btn.getStyleClass().addAll(styleClass);
-        btn.setAlignment(Pos.CENTER);
-        Region icon = new Region();
-        icon.getStyleClass().addAll(iconStyleClass);
-        btn.setGraphic(icon);
-        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        btn.setTooltip(new Tooltip(tooltipMsg));
-        return btn;
-    }
+
 
     Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
         if (pane != null && (pane.getUserData() instanceof ChartViewPort)) {
@@ -929,7 +934,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
 
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();

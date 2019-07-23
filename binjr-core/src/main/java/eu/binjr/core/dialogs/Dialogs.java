@@ -19,9 +19,14 @@ package eu.binjr.core.dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
+import javafx.event.EventHandler;
+import javafx.event.WeakEventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.ButtonType;
+import javafx.scene.control.*;
+import javafx.scene.control.Button;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
@@ -37,6 +42,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.function.Supplier;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -45,6 +51,7 @@ import java.net.URL;
  */
 public class Dialogs {
     private static final Logger logger = LogManager.getLogger(Dialogs.class);
+    private static final double TOOL_BUTTON_SIZE = 20;
 
     /**
      * Displays an error notification
@@ -322,5 +329,32 @@ public class Dialogs {
         } else {
             logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
         }
+    }
+
+
+    public static ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
+       return Dialogs.newToolBarButton(btnFactory, text, tooltipMsg, styleClass, iconStyleClass, null);
+    }
+
+    public static ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass, EventHandler<ActionEvent> action) {
+        ButtonBase btn = btnFactory.get();
+        btn.setText(text);
+        btn.setPrefHeight(TOOL_BUTTON_SIZE);
+        btn.setMaxHeight(TOOL_BUTTON_SIZE);
+        btn.setMinHeight(TOOL_BUTTON_SIZE);
+        btn.setPrefWidth(TOOL_BUTTON_SIZE);
+        btn.setMaxWidth(TOOL_BUTTON_SIZE);
+        btn.setMinWidth(TOOL_BUTTON_SIZE);
+        btn.getStyleClass().addAll(styleClass);
+        btn.setAlignment(Pos.CENTER);
+        Region icon = new Region();
+        icon.getStyleClass().addAll(iconStyleClass);
+        btn.setGraphic(icon);
+        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        btn.setTooltip(new Tooltip(tooltipMsg));
+        if (action!=null) {
+            btn.setOnAction(action);
+        }
+        return btn;
     }
 }
