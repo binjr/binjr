@@ -1008,13 +1008,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         targetStage.requestFocus();
                     }
                     addToNewChartInCurrentWorksheet(TreeViewUtils.splitAboveLeaves(item));
-
-//                        if (GlobalPreferences.getInstance().isShiftPressed() || targetChart == null) {
-//                            getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
-//                        } else {
-//                            addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
-//                        }
-
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1072,9 +1065,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem, Chart targetChart) {
         try {
-            if (treeItem != null) {
-                addBindings(TreeViewUtils.flattenLeaves(treeItem), targetChart);
-            }
+            // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
+            Platform.runLater(() -> {
+                if (treeItem != null) {
+                    addBindings(TreeViewUtils.flattenLeaves(treeItem), targetChart);
+                }
+            });
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
         }
@@ -1171,6 +1167,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
+
         if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
             if (Dialogs.confirmDialog(root,
                     "This action will add " + bindings.size() + " series on a single chart.",
