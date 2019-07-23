@@ -45,7 +45,10 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.*;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -77,7 +80,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -101,6 +103,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     public AnchorPane root;
     protected List<ChartViewPort> viewPorts = new ArrayList<>();
+    @FXML
+    Pane newChartDropTarget;
     private Worksheet worksheet;
     private volatile boolean preventReload = false;
     private AtomicBoolean closed = new AtomicBoolean(false);
@@ -108,8 +112,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private Pane chartParent;
     @FXML
     private AnchorPane chartViewport;
-    @FXML
-    Pane newChartDropTarget;
     @FXML
     private AnchorPane chartView;
     @FXML
@@ -181,6 +183,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
+    private static String colorToRgbaString(Color c) {
+        return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
+    }
+
     private ChartPropertiesController buildChartPropertiesController(Chart chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ChartPropertiesView.fxml"));
         ChartPropertiesController propertiesController = new ChartPropertiesController(getWorksheet(), chart);
@@ -199,11 +205,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
     public String getName() {
         return name;
     }
+    //endregion
 
     public void setName(String name) {
         this.name = name;
     }
-    //endregion
 
     /**
      * Returns the {@link Worksheet} instance associated with this controller
@@ -368,7 +374,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 }
             }));
             // Add a close button to chart axis
-            var toolBar = new ToolBar((Button) Dialogs.newToolBarButton(
+            Button closeButton = (Button) Dialogs.newToolBarButton(
                     Button::new,
                     "Close",
                     "Remove this chart from the worksheet.",
@@ -379,10 +385,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                 "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
                             worksheet.getCharts().remove(currentChart);
                         }
-                    })));
+                    }));
+            bindingManager.bind(closeButton.disableProperty(), Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
+            var toolBar = new ToolBar(closeButton);
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
             yAxis.getSelectionMarker().getChildren().add(toolBar);
-
+            StackPane.setAlignment(toolBar, Pos.TOP_CENTER);
         }
 
         bindingManager.bind(selectChartLayout.disableProperty(),
@@ -493,7 +501,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         vBox.getChildren().add(pane);
         chartParent.getChildren().add(vBox);
     }
-
 
     private void setupStackedChartLayout(VBox vBox) {
         bindingManager.bind(vBox.prefHeightProperty(), chartParent.heightProperty());
@@ -845,7 +852,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 worksheet.getCharts().add(idx - 1, currentViewPort.getDataStore());
             }));
 
-            Button moveDownButton = (Button)Dialogs.newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
+            Button moveDownButton = (Button) Dialogs.newToolBarButton(Button::new, "Down", "Move the chart down the list.", new String[]{"dialog-button"}, new String[]{"downArrow-icon", "small-icon"});
             bindingManager.bind(moveDownButton.disableProperty(), Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()));
             bindingManager.bind(moveDownButton.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             moveDownButton.setOnAction(bindingManager.registerHandler(event -> {
@@ -908,8 +915,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(getWorksheet().dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
 
-
-
     Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
         if (pane != null && (pane.getUserData() instanceof ChartViewPort)) {
             return Optional.of((ChartViewPort) pane.getUserData());
@@ -925,7 +930,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-
     private void handleDragOverNewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
@@ -933,7 +937,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             event.consume();
         }
     }
-
 
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
@@ -999,7 +1002,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
@@ -1021,7 +1023,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             event.consume();
         }
     }
-
 
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
         List<TreeItem<TimeSeriesBinding>> l = new ArrayList<>();
@@ -1238,12 +1239,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
     }
+    //endregion
 
     @FXML
     protected void handleToggleTableViewButton(ActionEvent actionEvent) {
         parentController.handleTogglePresentationMode();
     }
-    //endregion
 
     //region [Private Members]
     void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
@@ -1503,10 +1504,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     BindingManager getBindingManager() {
         return bindingManager;
-    }
-
-    private static String colorToRgbaString(Color c) {
-        return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
     }
 
     public void setNewChartDropTargetEnabled(boolean value) {

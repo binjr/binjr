@@ -27,12 +27,16 @@ import javafx.collections.ObservableSet;
 import javafx.collections.SetChangeListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
+import javafx.geometry.Pos;
 import javafx.geometry.Side;
+import javafx.scene.Node;
 import javafx.scene.chart.ValueAxis;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
 
@@ -45,7 +49,7 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
-    public static class SelectableRegion extends Pane {
+    public static class SelectableRegion extends StackPane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
         private BooleanProperty selected = new BooleanPropertyBase(false) {
             public void invalidated() {
@@ -75,9 +79,6 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
             this.selected.set(selected);
         }
 
-
-        public SelectableRegion() {
-        }
     }
 
     /**
@@ -124,6 +125,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
      */
     public StableTicksAxis(PrefixFormatter prefixFormatter) {
         super();
+        this.getSelectionMarker().prefWidthProperty().bind(prefWidthProperty());
         getStyleClass().setAll("axis");
 
         selectionMarker.getStyleClass().add("selection-marker");
@@ -226,7 +228,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
             double contentWidth = this.getWidth() + 10;//(xShift * -1);
             double contentHeight = this.getHeight();
 
-            this.selectionMarker.setPrefWidth(contentWidth);
+           // this.selectionMarker.setPrefWidth(contentWidth);
             this.selectionMarker.setPrefHeight(contentHeight);
 
             selectionMarker.resizeRelocate(
