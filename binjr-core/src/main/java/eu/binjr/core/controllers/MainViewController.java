@@ -499,19 +499,19 @@ public class MainViewController implements Initializable {
         HBox toolbar = new HBox();
         toolbar.getStyleClass().add("title-pane-tool-bar");
         toolbar.setAlignment(Pos.CENTER);
-        Button closeButton = (Button) Dialogs.newToolBarButton(Button::new,
-                "Close", "Close the connection to this source.",
-                new String[]{"exit"},
-                new String[]{"cross-icon", "small-icon"}
-        );
-        closeButton.setOnAction(event -> {
-            if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
-                    "WARNING: This will remove all associated series from existing worksheets.",
-                    ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
-                sourcesPane.getPanes().remove(newPane);
-            }
-        });
 
+        Button closeButton = new ToolButtonBuilder<Button>()
+                .setText("Close")
+                .setTooltip("Close the connection to this source.")
+                .setStyleClass("exit")
+                .setIconStyleClass("cross-icon", "small-icon")
+                .setAction(event -> {
+                    if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
+                            "WARNING: This will remove all associated series from existing worksheets.",
+                            ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                        sourcesPane.getPanes().remove(newPane);
+                    }
+                }).build(Button::new);
         HBox hBox = new HBox();
         hBox.setAlignment(Pos.CENTER);
         GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
@@ -538,15 +538,14 @@ public class MainViewController implements Initializable {
         source.getBindingManager().bindBidirectional(sourceNameField.textProperty(), source.nameProperty());
         editFieldsGroup.getChildren().add(sourceNameField);
 
-
-        ToggleButton editButton = (ToggleButton) Dialogs.newToolBarButton(
-                ToggleButton::new,
-                "Settings", "Edit the source's settings",
-                new String[]{"dialog-button"},
-                new String[]{"settings-icon", "small-icon"});
-        source.getBindingManager().bindBidirectional(editButton.selectedProperty(), source.editableProperty());
-        editButton.setOnAction(event -> newPane.setExpanded(true));
-
+        ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(source.getBindingManager())
+                .setText("Settings")
+                .setTooltip("Edit the source's settings")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("settings-icon", "small-icon")
+                .setAction(event -> newPane.setExpanded(true))
+                .bindBidirectionnal(ToggleButton::selectedProperty, source.editableProperty())
+                .build(ToggleButton::new);
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
         toolbar.getChildren().addAll(editButton, closeButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
@@ -865,20 +864,22 @@ public class MainViewController implements Initializable {
 
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
         workspace.setPresentationMode(false);
-        Button closeTabButton = (Button) Dialogs.newToolBarButton(
-                Button::new,
-                "Close", "Close Worksheet",
-                new String[]{"exit"},
-                new String[]{"cross-icon", "small-icon"});
-        ToggleButton linkTabButton = (ToggleButton) Dialogs.newToolBarButton(
-                ToggleButton::new,
-                "Link", "Link Worksheet Timeline",
-                new String[]{"link"},
-                new String[]{"link-icon", "small-icon"});
+        Button closeTabButton = new ToolButtonBuilder<Button>()
+                .setText("Close")
+                .setTooltip("Close Worksheet")
+                .setStyleClass("exit")
+                .setIconStyleClass("cross-icon", "small-icon")
+                .build(Button::new);
+        ToggleButton linkTabButton = new ToolButtonBuilder<ToggleButton>()
+                .setText("link")
+                .setTooltip("Link Worksheet Timeline")
+                .setStyleClass("link")
+                .setIconStyleClass("link-icon", "small-icon")
+                .bindBidirectionnal(ToggleButton::selectedProperty, worksheet.timeRangeLinkedProperty())
+                .build(ToggleButton::new);
         EditableTab newTab = new EditableTab("New worksheet", linkTabButton, closeTabButton);
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
-        linkTabButton.selectedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         return newTab;
     }
 

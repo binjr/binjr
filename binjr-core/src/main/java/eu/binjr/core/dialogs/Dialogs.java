@@ -330,31 +330,4 @@ public class Dialogs {
             logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
         }
     }
-
-
-    public static ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass) {
-       return Dialogs.newToolBarButton(btnFactory, text, tooltipMsg, styleClass, iconStyleClass, null);
-    }
-
-    public static ButtonBase newToolBarButton(Supplier<ButtonBase> btnFactory, String text, String tooltipMsg, String[] styleClass, String[] iconStyleClass, EventHandler<ActionEvent> action) {
-        ButtonBase btn = btnFactory.get();
-        btn.setText(text);
-        btn.setPrefHeight(TOOL_BUTTON_SIZE);
-        btn.setMaxHeight(TOOL_BUTTON_SIZE);
-        btn.setMinHeight(TOOL_BUTTON_SIZE);
-        btn.setPrefWidth(TOOL_BUTTON_SIZE);
-        btn.setMaxWidth(TOOL_BUTTON_SIZE);
-        btn.setMinWidth(TOOL_BUTTON_SIZE);
-        btn.getStyleClass().addAll(styleClass);
-        btn.setAlignment(Pos.CENTER);
-        Region icon = new Region();
-        icon.getStyleClass().addAll(iconStyleClass);
-        btn.setGraphic(icon);
-        btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        btn.setTooltip(new Tooltip(tooltipMsg));
-        if (action!=null) {
-            btn.setOnAction(action);
-        }
-        return btn;
-    }
 }
