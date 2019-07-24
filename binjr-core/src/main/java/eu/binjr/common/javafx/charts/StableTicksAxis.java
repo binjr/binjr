@@ -49,7 +49,7 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
-    public static class SelectableRegion extends StackPane {
+    public static class SelectableRegion extends Pane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
         private BooleanProperty selected = new BooleanPropertyBase(false) {
             public void invalidated() {
@@ -125,7 +125,8 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
      */
     public StableTicksAxis(PrefixFormatter prefixFormatter) {
         super();
-        this.getSelectionMarker().prefWidthProperty().bind(prefWidthProperty());
+//        this.getSelectionMarker().setMaxWidth(100);
+//        this.getSelectionMarker().prefWidthProperty().bind(widthProperty());
         getStyleClass().setAll("axis");
 
         selectionMarker.getStyleClass().add("selection-marker");

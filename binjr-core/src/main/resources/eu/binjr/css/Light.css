@@ -1440,6 +1440,10 @@
     -fx-background-color:  rgba(32,70,86,0.8);
 }
 
+.worksheet-tool-bar{
+    -fx-background-color:-binjr-control-background-color ;
+}
+
  .worksheet-tool-bar .menu-button .arrow-button {
       -fx-padding:-2;
        visibility: hidden;

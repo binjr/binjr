@@ -378,15 +378,23 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Button closeButton = new ToolButtonBuilder<Button>(bindingManager)
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
-                    .setStyleClass("exit")
+                   .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
                     .setAction(event -> warnAndRemoveChart(currentChart))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
-            var toolBar = new ToolBar(closeButton);
+
+            ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
+                    .setText("Settings")
+                    .setTooltip("Edit the chart's settings")
+                    .setStyleClass("dialog-button")
+                    .setIconStyleClass("settings-icon", "small-icon")
+                    .bindBidirectionnal(ToggleButton::selectedProperty,currentChart.showPropertiesProperty())
+                    .build(ToggleButton::new);
+            var toolBar = new ToolBar(editButton,closeButton);
+            toolBar.getStyleClass().add("worksheet-tool-bar");
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
             yAxis.getSelectionMarker().getChildren().add(toolBar);
-            StackPane.setAlignment(toolBar, Pos.TOP_CENTER);
         }
 
         bindingManager.bind(selectChartLayout.disableProperty(),
