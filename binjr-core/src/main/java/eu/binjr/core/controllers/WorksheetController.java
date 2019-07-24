@@ -371,24 +371,23 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
                 }
             }));
-            // Add a close button to chart axis
+            // Add buttons to chart axis
             Button closeButton = new ToolButtonBuilder<Button>(bindingManager)
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
-                   .setStyleClass("exit")
+                    .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
                     .setAction(event -> warnAndRemoveChart(currentChart))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
-
             ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
                     .setText("Settings")
                     .setTooltip("Edit the chart's settings")
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("settings-icon", "small-icon")
-                    .bindBidirectionnal(ToggleButton::selectedProperty,currentChart.showPropertiesProperty())
+                    .bindBidirectionnal(ToggleButton::selectedProperty, currentChart.showPropertiesProperty())
                     .build(ToggleButton::new);
-            var toolBar = new ToolBar(editButton,closeButton);
+            var toolBar = new ToolBar(editButton, closeButton);
             toolBar.getStyleClass().add("worksheet-tool-bar");
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
             yAxis.getSelectionMarker().getChildren().add(toolBar);
@@ -851,7 +850,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     .setTooltip("Move the chart down the list.")
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("downArrow-icon", "small-icon")
-                    .bind(Button::disableProperty,  Bindings.createBooleanBinding(
+                    .bind(Button::disableProperty, Bindings.createBooleanBinding(
                             () -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), 1))
                     .build(Button::new);
