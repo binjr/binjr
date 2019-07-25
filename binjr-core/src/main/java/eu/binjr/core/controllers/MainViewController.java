@@ -44,6 +44,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.event.Event;
 import javafx.event.EventHandler;
@@ -78,7 +79,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -92,20 +92,22 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
+    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
-    private static final double TOOL_BUTTON_SIZE = 20;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
-    @FXML
-    private MenuButton worksheetMenu;
+    public StackPane newWorksheetDropTarget;
 
     private Workspace workspace;
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
+
+    @FXML
+    private MenuButton worksheetMenu;
     @FXML
     public DrawerPane commandBar;
     @FXML
@@ -158,6 +160,7 @@ public class MainViewController implements Initializable {
         this.workspace = new Workspace();
     }
 
+    @FXML
     private void worksheetAreaOnDragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
@@ -224,8 +227,8 @@ public class MainViewController implements Initializable {
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         commandBar.setSibling(contentView);
 
-        worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
-        worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
+//        worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
+//        worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -978,7 +981,7 @@ public class MainViewController implements Initializable {
             bindingTreeCell.setOnDragDetected(event -> {
                 try {
                     if (bindingTreeCell.getItem() != null) {
-                        seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(true));
+                        showDragAndDropZones(!worksheetTabPane.getTabs().isEmpty());
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
                         db.setDragView(renderTextTooltip(bindingTreeCell.getItem().toString()));
@@ -993,7 +996,7 @@ public class MainViewController implements Initializable {
                 }
             });
             bindingTreeCell.setOnDragDone(event -> {
-                seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(false));
+                showDragAndDropZones(false);
             });
             return bindingTreeCell;
         };
@@ -1014,6 +1017,14 @@ public class MainViewController implements Initializable {
             }
         }
         return Optional.empty();
+    }
+
+    private void showDragAndDropZones(boolean value) {
+        if (!value || !worksheetTabPane.getTabs().isEmpty()) {
+            newWorksheetDropTarget.setManaged(value);
+            newWorksheetDropTarget.setVisible(value);
+        }
+        seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(value));
     }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
@@ -1214,6 +1225,7 @@ public class MainViewController implements Initializable {
         return Optional.of(loadWorksheetInTab(new Worksheet(), true));
     }
 
+    @FXML
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
@@ -1231,15 +1243,6 @@ public class MainViewController implements Initializable {
             event.consume();
         }
     }
-
-    private void handleDragOverWorksheetView(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            event.acceptTransferModes(TransferMode.ANY);
-            event.consume();
-        }
-    }
-
 
     private void saveWindowPositionAndQuit() {
         Stage stage = Dialogs.getStage(root);
@@ -1301,6 +1304,15 @@ public class MainViewController implements Initializable {
 
     public void handleTogglePresentationMode() {
         workspace.setPresentationMode(!workspace.isPresentationMode());
+    }
+
+    @FXML
+    private void handleOnDragExitedNewWorksheet(DragEvent event){
+        ((Region)event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+    }
+    @FXML
+    private void handleOnDragEnteredNewWorksheet(DragEvent event) {
+        ((Region)event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
     }
 
     //endregion
