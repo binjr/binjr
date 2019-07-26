@@ -216,9 +216,9 @@ public class StageAppearanceManager {
             Application.setUserAgentStylesheet(null);
             scene.getStylesheets().addAll(
                     getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
-                    getClass().getResource("/eu/binjr/css/Common.css").toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
-                    getClass().getResource(theme.getCssPath()).toExternalForm());
+                    getClass().getResource(theme.getCssPath()).toExternalForm(),
+                    getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
         });
     }
 
