@@ -231,8 +231,8 @@ public class MainViewController implements Initializable {
             AnchorPane.setTopAnchor(newPaneDropZone, 0.0);
             AnchorPane.setLeftAnchor(newPaneDropZone, 0.0);
             AnchorPane.setRightAnchor(newPaneDropZone, 0.0);
-            newPaneDropZone.setPrefHeight(30);
-            newPaneDropZone.setMaxHeight(30);
+            newPaneDropZone.setPrefHeight(34);
+            newPaneDropZone.setMaxHeight(34);
             newPaneDropZone.managedProperty().bind(treeItemDragAndDropInProgressProperty());
             newPaneDropZone.visibleProperty().bind(treeItemDragAndDropInProgressProperty());
             ((Pane) stage.getScene().getRoot()).getChildren().add(newPaneDropZone);

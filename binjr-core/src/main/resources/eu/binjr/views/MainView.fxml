@@ -150,9 +150,9 @@
                 </tooltip>
             </Label>
             <StackPane fx:id="newWorksheetDropTarget" styleClass="chart-viewport-parent"
-                       minHeight="30"
-                       maxHeight="30"
-                       prefHeight="30"
+                       minHeight="34"
+                       maxHeight="34"
+                       prefHeight="34"
                        maxWidth="Infinity"
                        visible="false"
                        managed="false"

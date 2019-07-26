@@ -154,13 +154,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private HBox navigationToolbar;
     private ChartViewportsState currentState;
     private String name;
-    //    @FXML
-//    private Label worksheetTitle;
-//    @FXML
-//    private Label worksheetTimeRange;
-    //@FXML
     private Pane worksheetTitleBlock;
-    //private ScrollPane chartScrollPane;
     private VBox screenshotCanvas;
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
@@ -271,8 +265,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
         setShowPropertiesPane(newValue);
     }
-
-
 
     private ZonedDateTimeAxis buildTimeAxis() {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
