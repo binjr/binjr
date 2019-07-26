@@ -244,10 +244,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
             setEditChartMode(getWorksheet().isChartLegendsVisible());
             newChartDropTarget.setOnDragOver(bindingManager.registerHandler(this::handleDragOverNewChartTarget));
             newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
-
-            newChartDropTarget.setOnDragEntered(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
-            newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
-
+            newChartDropTarget.setOnDragEntered(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
+            newChartDropTarget.setOnDragExited(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
+            bindingManager.bind(newChartDropTarget.managedProperty(),parentController.treeItemDragAndDropInProgressProperty());
+            bindingManager.bind(newChartDropTarget.visibleProperty(),parentController.treeItemDragAndDropInProgressProperty());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
@@ -258,28 +258,21 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.suspend(getWorksheet().dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(getIconNode("settings-icon", Pos.CENTER));
+            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "settings-icon"));
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
         } else {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(getIconNode("screen-icon", Pos.CENTER));
+            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "screen-icon"));
             splitPane.setDividerPositions(getWorksheet().getDividerPosition());
             bindingManager.resume(getWorksheet().dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
     }
 
-    private Node getIconNode(String iconName, Pos position) {
-        Region r = new Region();
-        r.getStyleClass().add(iconName);
-        HBox box = new HBox(r);
-        box.setAlignment(position);
-        box.getStyleClass().add("icon-container");
-        return box;
-    }
+
 
     private ZonedDateTimeAxis buildTimeAxis() {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
@@ -361,6 +354,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
                 } else {
+                    //FIXME WARNING: Caught 'java.lang.ClassCastException: class java.lang.String cannot be cast to class javafx.scene.paint.Paint
+                    // (java.lang.String is in module java.base of loader 'bootstrap'; javafx.scene.paint.Paint is in unnamed module of loader 'app')'
+                    // while converting value for '-fx-background-color' from inline style on StackedAreaChart@d8b1439[styleClass=chart]
                     viewPort.setStyle("-fx-background-color:  -fx-accent-translucide;");
                 }
             }));
@@ -583,11 +579,11 @@ public class WorksheetController implements Initializable, AutoCloseable {
         Label title = new Label();
         title.getStyleClass().add("title-text");
         title.textProperty().bind(getWorksheet().nameProperty());
-        title.setGraphic(getIconNode("chart-icon", Pos.CENTER_LEFT));
+        title.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER_LEFT, "chart-icon"));
         Label range = new Label();
         range.getStyleClass().add("range-text");
         range.textProperty().bind(timeRangePicker.textProperty());
-        range.setGraphic(getIconNode("time-icon", Pos.CENTER_LEFT));
+        range.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER_LEFT, "time-icon"));
         titleBlock.getChildren().addAll(title, range);
         return titleBlock;
     }
@@ -1512,10 +1508,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return bindingManager;
     }
 
-    public void setNewChartDropTargetEnabled(boolean value) {
-        newChartDropTarget.setManaged(value);
-        newChartDropTarget.setVisible(value);
-    }
+
 
     //endregion
 }

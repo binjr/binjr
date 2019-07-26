@@ -136,7 +136,7 @@ public class MainViewController implements Initializable {
     @FXML
     private Accordion sourcesPane;
     @FXML
-    private TearableTabPane worksheetTabPane;
+    private TearableTabPane tearableTabPane;
     @FXML
     private MenuItem saveMenuItem;
     @FXML
@@ -151,6 +151,8 @@ public class MainViewController implements Initializable {
     private Menu addSourceMenu;
     @FXML
     private StackPane curtains;
+
+    private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -172,12 +174,12 @@ public class MainViewController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
-        assert worksheetTabPane != null : "fx:id\"worksheetTabPane\" was not injected!";
+        assert tearableTabPane != null : "fx:id\"tearableTabPane\" was not injected!";
         assert sourcesPane != null : "fx:id\"sourceTabPane\" was not injected!";
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
-        Binding<Boolean> selectWorksheetPresent = Bindings.size(worksheetTabPane.getTabs()).isEqualTo(0);
+        Binding<Boolean> selectWorksheetPresent = Bindings.size(tearableTabPane.getTabs()).isEqualTo(0);
         Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
         contentView.getDividers().stream().findFirst().ifPresent(divider -> {
             divider.setPosition(getWorkspace().getDividerPosition());
@@ -209,27 +211,40 @@ public class MainViewController implements Initializable {
                     }
                 });
         addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
-        worksheetTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
-        worksheetTabPane.setNewTabFactory(this::worksheetTabFactory);
-        worksheetTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
-        worksheetTabPane.setTearable(true);
-        worksheetTabPane.setOnOpenNewWindow(event -> {
+        tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
+        tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
+        tearableTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
+        tearableTabPane.setTearable(true);
+        tearableTabPane.setOnOpenNewWindow(event -> {
             Stage stage = (Stage) event.getSource();
             stage.setTitle(AppEnvironment.APP_NAME);
             registerStageKeyEvents(stage);
+
+            StackPane dropZone = new StackPane(ToolButtonBuilder.makeIconNode(Pos.CENTER, "new-tab-icon"));
+            dropZone.getStyleClass().add("drop-zone");
+            dropZone.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
+            dropZone.setOnDragOver(this::worksheetAreaOnDragOver);
+            dropZone.setOnDragExited(this::handleOnDragExitedNewWorksheet);
+            dropZone.setOnDragEntered(this::handleOnDragEnteredNewWorksheet);
+            var newPaneDropZone = new StackPane(dropZone);
+            newPaneDropZone.getStyleClass().add("chart-viewport-parent");
+            AnchorPane.setTopAnchor(newPaneDropZone, 0.0);
+            AnchorPane.setLeftAnchor(newPaneDropZone, 0.0);
+            AnchorPane.setRightAnchor(newPaneDropZone, 0.0);
+            newPaneDropZone.setPrefHeight(30);
+            newPaneDropZone.setMaxHeight(30);
+            newPaneDropZone.managedProperty().bind(treeItemDragAndDropInProgressProperty());
+            newPaneDropZone.visibleProperty().bind(treeItemDragAndDropInProgressProperty());
+            ((Pane) stage.getScene().getRoot()).getChildren().add(newPaneDropZone);
             StageAppearanceManager.getInstance().register(stage);
         });
-        worksheetTabPane.setOnClosingWindow(event -> {
+        tearableTabPane.setOnClosingWindow(event -> {
             StageAppearanceManager.getInstance().unregister((Stage) event.getSource());
             unregisterStageKeyEvents((Stage) event.getSource());
         });
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         commandBar.setSibling(contentView);
-
-//        worksheetArea.setOnDragOver(this::worksheetAreaOnDragOver);
-//        worksheetArea.setOnDragDropped(this::handleDragDroppedOnWorksheetArea);
-
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 invalidateSearchResults();
@@ -255,6 +270,11 @@ public class MainViewController implements Initializable {
             findNext();
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
+
+        newWorksheetDropTarget.managedProperty()
+                .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
+        newWorksheetDropTarget.visibleProperty()
+                .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
 
         Platform.runLater(this::runAfterInitialize);
     }
@@ -632,9 +652,8 @@ public class MainViewController implements Initializable {
 
     private void closeWorkspace() {
         logger.debug(() -> "Clearing workspace");
-        worksheetTabPane.clearAllTabs();
+        tearableTabPane.clearAllTabs();
         sourcesPane.getPanes().clear();
-        //sourcesPane = new Accordion();
         seriesControllers.clear();
         sourcesAdapters.values().forEach(source -> {
             try {
@@ -789,8 +808,8 @@ public class MainViewController implements Initializable {
 
     private boolean loadWorksheet(Worksheet worksheet) {
         EditableTab newTab = loadWorksheetInTab(worksheet, false);
-        worksheetTabPane.getTabs().add(newTab);
-        worksheetTabPane.getSelectionModel().select(newTab);
+        tearableTabPane.getTabs().add(newTab);
+        tearableTabPane.getSelectionModel().select(newTab);
         return false;
     }
 
@@ -956,7 +975,10 @@ public class MainViewController implements Initializable {
     }
 
     private boolean editWorksheet(Worksheet worksheet) {
-        TabPane targetTabPane = worksheetTabPane.getSelectedTabPane();
+        return editWorksheet(tearableTabPane.getSelectedTabPane(), worksheet);
+    }
+
+    private boolean editWorksheet(TabPane targetTabPane, Worksheet worksheet) {
         var newTab = loadWorksheetInTab(worksheet, true);
         targetTabPane.getTabs().add(newTab);
         targetTabPane.getSelectionModel().select(newTab);
@@ -981,7 +1003,7 @@ public class MainViewController implements Initializable {
             bindingTreeCell.setOnDragDetected(event -> {
                 try {
                     if (bindingTreeCell.getItem() != null) {
-                        showDragAndDropZones(!worksheetTabPane.getTabs().isEmpty());
+                        treeItemDragAndDropInProgress.setValue(true);
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
                         db.setDragView(renderTextTooltip(bindingTreeCell.getItem().toString()));
@@ -996,7 +1018,7 @@ public class MainViewController implements Initializable {
                 }
             });
             bindingTreeCell.setOnDragDone(event -> {
-                showDragAndDropZones(false);
+                treeItemDragAndDropInProgress.setValue(false);
             });
             return bindingTreeCell;
         };
@@ -1019,14 +1041,6 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-    private void showDragAndDropZones(boolean value) {
-        if (!value || !worksheetTabPane.getTabs().isEmpty()) {
-            newWorksheetDropTarget.setManaged(value);
-            newWorksheetDropTarget.setVisible(value);
-        }
-        seriesControllers.values().forEach(c -> c.setNewChartDropTargetEnabled(value));
-    }
-
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT:
@@ -1046,16 +1060,16 @@ public class MainViewController implements Initializable {
 
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
-        addToCurrent.disableProperty().bind(Bindings.size(worksheetTabPane.getTabs()).lessThanOrEqualTo(0));
+        addToCurrent.disableProperty().bind(Bindings.size(tearableTabPane.getTabs()).lessThanOrEqualTo(0));
         addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getSelectedWorksheetController().getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
-        addToNew.setOnAction(event -> addToNewWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        addToNew.setOnAction(event -> addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItem()));
         ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
         contextMenu.setOnShowing(event -> expandBranch(treeView.getSelectionModel().getSelectedItem()));
         return contextMenu;
     }
 
-    private void addToNewWorksheet(TreeItem<TimeSeriesBinding> rootItem) {
+    private void addToNewWorksheet(TabPane tabPane, TreeItem<TimeSeriesBinding> rootItem) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
@@ -1097,7 +1111,7 @@ public class MainViewController implements Initializable {
                         zoneId,
                         fromDateTime,
                         toDateTime);
-                editWorksheet(worksheet);
+                editWorksheet(tabPane, worksheet);
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }
@@ -1233,7 +1247,8 @@ public class MainViewController implements Initializable {
             if (treeView != null) {
                 TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
-                    addToNewWorksheet(item);
+                    var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
+                    addToNewWorksheet(currentTabPane != null ? currentTabPane:tearableTabPane.getSelectedTabPane(), item);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1259,7 +1274,7 @@ public class MainViewController implements Initializable {
     }
 
     public WorksheetController getSelectedWorksheetController() {
-        Tab selectedTab = worksheetTabPane.getSelectedTab();
+        Tab selectedTab = tearableTabPane.getSelectedTab();
         if (selectedTab == null) {
             return null;
         }
@@ -1307,12 +1322,25 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    private void handleOnDragExitedNewWorksheet(DragEvent event){
-        ((Region)event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+    private void handleOnDragExitedNewWorksheet(DragEvent event) {
+        ((Region) event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
     }
+
     @FXML
     private void handleOnDragEnteredNewWorksheet(DragEvent event) {
-        ((Region)event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+        ((Region) event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+    }
+
+    public boolean isTreeItemDragAndDropInProgress() {
+        return treeItemDragAndDropInProgress.get();
+    }
+
+    public BooleanProperty treeItemDragAndDropInProgressProperty() {
+        return treeItemDragAndDropInProgress;
+    }
+
+    public void setTreeItemDragAndDropInProgress(boolean treeItemDragAndDropInProgress) {
+        this.treeItemDragAndDropInProgress.set(treeItemDragAndDropInProgress);
     }
 
     //endregion

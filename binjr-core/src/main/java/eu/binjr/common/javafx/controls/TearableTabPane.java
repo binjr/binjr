@@ -19,16 +19,11 @@ package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
+import javafx.collections.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -75,6 +70,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     private EventHandler<WindowEvent> onClosingWindow;
     private final BindingManager bindingManager = new BindingManager();
     private final Property<StageStyle> detachedStageStyle;
+    private final ReadOnlyBooleanWrapper empty = new ReadOnlyBooleanWrapper(true);
 
 
     /**
@@ -100,7 +96,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         this.reorderable = reorderable;
         this.detachedStageStyle = new SimpleObjectProperty<>(style);
         bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>)
-
                 (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue)
         );
         bindingManager.attachListener(this.getTabs(), (ListChangeListener<Tab>) c -> {
@@ -222,6 +217,10 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                         positionNewTabButton();
                     }
                 });
+
+        this.getTabs().addListener((InvalidationListener)  observable -> {
+            empty.setValue(this.getTabs().size() == 0);
+        });
     }
 
 
@@ -363,6 +362,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         return manager.dragAndDropFormat;
     }
 
+    public boolean isEmpty() {
+        return empty.get();
+    }
+
+    public ReadOnlyBooleanProperty emptyProperty() {
+        return empty.getReadOnlyProperty();
+    }
+
     private void positionNewTabButton() {
         Pane tabHeaderBg = (Pane) this.lookup(".tab-header-background");
         if (tabHeaderBg == null) {
@@ -437,6 +444,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
 
     private void tearOffTab(Tab tab) {
         TearableTabPane detachedTabPane = new TearableTabPane(this.manager, false, true, this.getDetachedStageStyle());
+        detachedTabPane.setId("tearableTabPane");
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
         this.getTabs().remove(tab);
@@ -535,12 +543,14 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         private boolean movingTab;
         private final BooleanProperty newTabButtonVisible = new SimpleBooleanProperty(true);
 
+
         public TabPaneManager() {
             tabToPaneMap = FXCollections.observableMap(new HashMap<>());
             idToTabMap = new HashMap<>();
             globalTabList = FXCollections.observableList(new ArrayList<>());
             dragAndDropFormat = new DataFormat(UUID.randomUUID().toString());
             dndComplete = new AtomicBoolean(true);
+
         }
 
         public void startDragAndDrop() {
@@ -608,5 +618,8 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     .collect(Collectors.toList())
                     .forEach(p -> p.getTabs().clear());
         }
+
+
+
     }
 }

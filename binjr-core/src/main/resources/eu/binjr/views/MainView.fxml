@@ -126,7 +126,7 @@
             </AnchorPane>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
-            <TearableTabPane fx:id="worksheetTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0"
+            <TearableTabPane fx:id="tearableTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0"
                              side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <tabs>

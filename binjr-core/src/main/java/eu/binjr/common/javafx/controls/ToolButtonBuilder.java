@@ -70,7 +70,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 
 import java.util.ArrayList;
@@ -186,6 +188,15 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     public T build(Supplier<T> generator) {
         return buildButton(generator.get());
+    }
+
+    public static Node makeIconNode(Pos position, String... iconStyles) {
+        Region r = new Region();
+        r.getStyleClass().addAll(iconStyles);
+        HBox box = new HBox(r);
+        box.setAlignment(position);
+        box.getStyleClass().add("icon-container");
+        return box;
     }
 
 }
