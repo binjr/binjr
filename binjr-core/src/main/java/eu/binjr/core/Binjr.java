@@ -54,6 +54,8 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
+        AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
             System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
@@ -87,7 +89,6 @@ public class Binjr extends Application {
         var prefs = GlobalPreferences.getInstance();
         var env = AppEnvironment.getInstance();
         env.processCommandLineOptions(getParameters());
-        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
         Parent root = loader.load();
         MainViewController mainViewController = loader.getController();

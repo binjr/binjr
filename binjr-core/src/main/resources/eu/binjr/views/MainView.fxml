@@ -74,56 +74,61 @@
                 </Accordion>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
             </StackPane>
-            <AnchorPane fx:id="searchBarRoot" focusTraversable="true" prefHeight="40.0" styleClass="toolPane"
-                        AnchorPane.bottomAnchor="-40.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                <TextField fx:id="searchField" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0"
-                           AnchorPane.rightAnchor="100.0" AnchorPane.topAnchor="5.0"/>
-                <HBox alignment="CENTER" layoutX="280.0" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                      AnchorPane.topAnchor="0.0">
-                    <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                    </padding>
-                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
-                            onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"
-                            styleClass="dialog-button">
-                        <graphic>
-                            <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Find next occurrence">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                    <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString=""
-                                  graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
-                        <tooltip>
-                            <Tooltip text="Toggle case sensitivity">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </ToggleButton>
-                    <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
-                            onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="exit">
-                        <graphic>
-                            <Region styleClass="cross-icon"/>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip text="Hide the search bar">
-                                <font>
-                                    <Font size="11.0"/>
-                                </font>
-                            </Tooltip>
-                        </tooltip>
-                    </Button>
-                </HBox>
-                <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                           AnchorPane.topAnchor="0.0"/>
-            </AnchorPane>
+            <HBox fx:id="searchBarRoot"
+                  alignment="CENTER"
+                  focusTraversable="true"
+                  prefHeight="40.0" styleClass="toolPane"
+                  AnchorPane.bottomAnchor="-40.0"
+                  AnchorPane.leftAnchor="0.0"
+                  AnchorPane.rightAnchor="0.0">
+
+                <!--                <HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"-->
+                <!--                      AnchorPane.topAnchor="0.0">-->
+                <padding>
+                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                </padding>
+                <TextField fx:id="searchField" maxWidth="Infinity" prefHeight="30" HBox.hgrow="SOMETIMES"/>
+                <!--                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"-->
+                <!--                            onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"-->
+                <!--                            styleClass="dialog-button">-->
+                <!--                        <graphic>-->
+                <!--                            <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>-->
+                <!--                        </graphic>-->
+                <!--                        <tooltip>-->
+                <!--                            <Tooltip text="Find next occurrence">-->
+                <!--                                <font>-->
+                <!--                                    <Font size="11.0"/>-->
+                <!--                                </font>-->
+                <!--                            </Tooltip>-->
+                <!--                        </tooltip>-->
+                <!--                    </Button>-->
+                <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString=""
+                              graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
+                    <tooltip>
+                        <Tooltip text="Toggle case sensitivity">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </ToggleButton>
+                <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
+                        onAction="#handleHidePanel" prefHeight="30.0" prefWidth="30.0" styleClass="exit">
+                    <graphic>
+                        <Region styleClass="cross-icon"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Hide the search bar">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
+                <!--                </HBox>-->
+                <!--                <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"-->
+                <!--                           AnchorPane.topAnchor="0.0"/>-->
+            </HBox>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
             <TearableTabPane fx:id="tearableTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0"

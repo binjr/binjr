@@ -20,6 +20,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.control.TreeItem;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -39,7 +40,7 @@ public interface DataAdapter extends AutoCloseable {
      * @return a hierarchical view of all the individual bindings exposed by the underlying source.
      * @throws DataAdapterException if an error occurs while retrieving bindings.
      */
-    TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException;
+    FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException;
 
     /**
      * Gets decoded data from the source as a map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.

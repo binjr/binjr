@@ -68,6 +68,8 @@ import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
+import org.eclipse.fx.ui.controls.tree.TreeItemPredicate;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -119,11 +121,11 @@ public class MainViewController implements Initializable {
     @FXML
     public MaskerPane worksheetMaskerPane;
     @FXML
-    public AnchorPane searchBarRoot;
+    public Pane searchBarRoot;
     @FXML
     public TextField searchField;
-    @FXML
-    public Button searchButton;
+//    @FXML
+//    public Button searchButton;
     @FXML
     public Button hideSearchBarButton;
     @FXML
@@ -245,12 +247,16 @@ public class MainViewController implements Initializable {
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         commandBar.setSibling(contentView);
-        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                invalidateSearchResults();
-                findNext();
-            }
-        });
+//        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+//            if (newValue != null) {
+//                invalidateSearchResults();
+//                findNext();
+//            }
+//        });
+//        searchCaseSensitiveToggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
+//            invalidateSearchResults();
+//            findNext();
+//        });
         searchBarVisible.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 searchField.requestFocus();
@@ -265,17 +271,11 @@ public class MainViewController implements Initializable {
                 }
             }
         });
-        searchCaseSensitiveToggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
-            invalidateSearchResults();
-            findNext();
-        });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
-
         newWorksheetDropTarget.managedProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         newWorksheetDropTarget.visibleProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
-
         Platform.runLater(this::runAfterInitialize);
     }
 
@@ -460,6 +460,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     public void handleHidePanel(ActionEvent actionEvent) {
+        this.searchField.clear();
         this.searchBarVisible.setValue(false);
     }
 
@@ -793,8 +794,7 @@ public class MainViewController implements Initializable {
             newSourcePane.setContent(treeView.get());
             sourcesAdapters.put(newSourcePane, source);
         } else {
-            TreeItem<TimeSeriesBinding> i = new TreeItem<>();
-            i.setValue(new TimeSeriesBinding());
+            FilterableTreeItem<TimeSeriesBinding> i = new FilterableTreeItem<>(new TimeSeriesBinding());
             Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
@@ -1025,7 +1025,18 @@ public class MainViewController implements Initializable {
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
             dp.onStart();
-            TreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
+            FilterableTreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
+            bindingTree.predicateProperty().bind(Bindings.createObjectBinding(() -> {
+                        if (searchField.getText() == null || searchField.getText().isEmpty())
+                            return null;
+                        return TreeItemPredicate.create(seriesBinding ->
+                                seriesBinding != null && stringContains(
+                                        seriesBinding.getTreeHierarchy(),
+                                        searchField.getText(),
+                                        searchCaseSensitiveToggle.isSelected()));
+                    },
+                    searchField.textProperty(),
+                    searchCaseSensitiveToggle.selectedProperty()));
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
@@ -1039,6 +1050,22 @@ public class MainViewController implements Initializable {
             }
         }
         return Optional.empty();
+    }
+
+    private boolean stringContains(String str, String searchStr, boolean caseSensistive) {
+        if (str == null || searchStr == null) return false;
+        if (caseSensistive) {
+            return str.contains(searchStr);
+        }
+        final int length = searchStr.length();
+        if (length == 0)
+            return true;
+
+        for (int i = str.length() - length; i >= 0; i--) {
+            if (str.regionMatches(true, i, searchStr, 0, length))
+                return true;
+        }
+        return false;
     }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
@@ -1248,7 +1275,7 @@ public class MainViewController implements Initializable {
                 TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
-                    addToNewWorksheet(currentTabPane != null ? currentTabPane:tearableTabPane.getSelectedTabPane(), item);
+                    addToNewWorksheet(currentTabPane != null ? currentTabPane : tearableTabPane.getSelectedTabPane(), item);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }

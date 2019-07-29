@@ -40,6 +40,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
@@ -138,12 +139,12 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     //region [DataAdapter Members]
 
     @Override
-    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
         Gson gson = new Gson();
         try {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-            TreeItem<TimeSeriesBinding> tree = new TreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
             for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
@@ -244,14 +245,14 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         }
     }
 
-    private void attachNode(TreeItem<TimeSeriesBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
+    private void attachNode(FilterableTreeItem<TimeSeriesBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
         JsonJrdsItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        TreeItem<TimeSeriesBinding> newBranch = new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
+        FilterableTreeItem<TimeSeriesBinding> newBranch = new FilterableTreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
         if (JRDS_FILTER.equals(n.type)) {
             // add a dummy node so that the branch can be expanded
-            newBranch.getChildren().add(new TreeItem<>(null));
+            newBranch.getInternalChildren().add(new FilterableTreeItem<>(null));
             // add a listener that will get the treeview filtered according to the selected filter/tag
             newBranch.expandedProperty().addListener(new FilteredViewListener(n, newBranch));
         } else {
@@ -261,13 +262,13 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                 }
             } else {
                 // add a dummy node so that the branch can be expanded
-                newBranch.getChildren().add(new TreeItem<>(null));
+                newBranch.getInternalChildren().add(new FilterableTreeItem<>(null));
                 // add a listener so that bindings for individual datastore are added lazily to avoid
                 // dozens of individual call to "graphdesc" when the tree is built.
                 newBranch.expandedProperty().addListener(new GraphDescListener(currentPath, newBranch, tree));
             }
         }
-        tree.getChildren().add(newBranch);
+        tree.getInternalChildren().add(newBranch);
     }
 
     private String normalizeId(String id) {
@@ -348,10 +349,10 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     private class GraphDescListener implements ChangeListener<Boolean> {
         private final String currentPath;
-        private final TreeItem<TimeSeriesBinding> newBranch;
-        private final TreeItem<TimeSeriesBinding> tree;
+        private final FilterableTreeItem<TimeSeriesBinding> newBranch;
+        private final FilterableTreeItem<TimeSeriesBinding> tree;
 
-        public GraphDescListener(String currentPath, TreeItem<TimeSeriesBinding> newBranch, TreeItem<TimeSeriesBinding> tree) {
+        public GraphDescListener(String currentPath, FilterableTreeItem<TimeSeriesBinding> newBranch, FilterableTreeItem<TimeSeriesBinding> tree) {
             this.currentPath = currentPath;
             this.newBranch = newBranch;
             this.tree = tree;
@@ -366,11 +367,11 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                     for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                         String graphType = graphdesc.seriesDescList.get(i).graphType;
                         if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                            newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(newBranch.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
+                            newBranch.getInternalChildren().add(new FilterableTreeItem<>(bindingFactory.of(newBranch.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
                         }
                     }
                     //remove dummy node
-                    newBranch.getChildren().remove(0);
+                    newBranch.getInternalChildren().remove(0);
                     // remove the listener so it isn't executed next time node is expanded
                     newBranch.expandedProperty().removeListener(this);
                 } catch (Exception e) {
@@ -382,9 +383,9 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     private class FilteredViewListener implements ChangeListener<Boolean> {
         private final JsonJrdsItem n;
-        private final TreeItem<TimeSeriesBinding> newBranch;
+        private final FilterableTreeItem<TimeSeriesBinding> newBranch;
 
-        public FilteredViewListener(JsonJrdsItem n, TreeItem<TimeSeriesBinding> newBranch) {
+        public FilteredViewListener(JsonJrdsItem n, FilterableTreeItem<TimeSeriesBinding> newBranch) {
             this.n = n;
             this.newBranch = newBranch;
         }
@@ -399,7 +400,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                         attachNode(newBranch, branch.id, m);
                     }
                     //remove dummy node
-                    newBranch.getChildren().remove(0);
+                    newBranch.getInternalChildren().remove(0);
                     // remove the listener so it isn't executed next time node is expanded
                     newBranch.expandedProperty().removeListener(this);
                 } catch (Exception e) {

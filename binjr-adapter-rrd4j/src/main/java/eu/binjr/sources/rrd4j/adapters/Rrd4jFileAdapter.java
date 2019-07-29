@@ -29,6 +29,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import org.rrd4j.ConsolFun;
 import org.rrd4j.core.*;
 
@@ -75,8 +76,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        TreeItem<TimeSeriesBinding> tree = new TreeItem<>(
+    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+        FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding(
                         "",
                         "/",
@@ -89,7 +90,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         for (Path rrdPath : rrdPaths) {
             try {
                 String rrdFileName = rrdPath.getFileName().toString();
-                var rrdNode = new TreeItem<>(new TimeSeriesBinding(
+                var rrdNode = new FilterableTreeItem<>(new TimeSeriesBinding(
                         rrdFileName,
                         rrdFileName,
                         null,
@@ -102,7 +103,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                 RrdDb rrd = openRrdDb(rrdPath);
                 rrdDbMap.put(rrdPath, rrd);
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs()).map(ArcDef::getConsolFun).collect(Collectors.toSet())) {
-                    var consolFunNode = new TreeItem<>(new TimeSeriesBinding(
+                    var consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding(
                             consolFun.toString(),
                             rrdPath.resolve(consolFun.toString()).toString(),
                             null,
@@ -112,9 +113,9 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                             "-",
                             rrdNode.getValue().getTreeHierarchy() + "/" + consolFun.toString(),
                             this));
-                    rrdNode.getChildren().add(consolFunNode);
+                    rrdNode.getInternalChildren().add(consolFunNode);
                     for (String ds : rrd.getDsNames()) {
-                        consolFunNode.getChildren().add(new TreeItem<>(new TimeSeriesBinding(
+                        consolFunNode.getInternalChildren().add(new TreeItem<>(new TimeSeriesBinding(
                                 ds,
                                 consolFunNode.getValue().getPath(),
                                 null,
@@ -126,7 +127,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                                 this)));
                     }
                 }
-                tree.getChildren().add(rrdNode);
+                tree.getInternalChildren().add(rrdNode);
             } catch (IOException e) {
                 throw new DataAdapterException("Failed to open rrd db", e);
             }

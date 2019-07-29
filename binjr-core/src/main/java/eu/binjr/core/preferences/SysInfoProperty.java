@@ -87,5 +87,8 @@ public class SysInfoProperty {
         this.value.setValue(value);
     }
 
-
+    @Override
+    public String toString() {
+        return key.getValue() + "=" + value.getValue();
+    }
 }

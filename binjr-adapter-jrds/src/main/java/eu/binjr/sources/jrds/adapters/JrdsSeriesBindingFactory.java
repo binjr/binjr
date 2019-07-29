@@ -57,7 +57,8 @@ public class JrdsSeriesBindingFactory {
                 DEFAULT_PREFIX,
                 ChartType.STACKED,
                 "-",
-                parentName + "/" + label, adapter);
+                parentName + "/" + label,
+                adapter);
     }
 
     /**

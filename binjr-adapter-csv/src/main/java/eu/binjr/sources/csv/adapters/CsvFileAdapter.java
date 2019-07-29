@@ -34,6 +34,7 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,8 +120,8 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public TreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        TreeItem<TimeSeriesBinding> tree = new TreeItem<>(
+    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+        FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding(
                         "",
                         "/",
@@ -143,7 +144,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
                         "-",
                         "/" + getSourceName() + "/" + header,
                         this);
-                tree.getChildren().add(new TreeItem<>(b));
+                tree.getInternalChildren().add(new TreeItem<>(b));
             }
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException(e);
