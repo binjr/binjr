@@ -366,7 +366,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                     for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                         String graphType = graphdesc.seriesDescList.get(i).graphType;
                         if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                            newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
+                            newBranch.getChildren().add(new TreeItem<>(bindingFactory.of(newBranch.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
                         }
                     }
                     //remove dummy node
