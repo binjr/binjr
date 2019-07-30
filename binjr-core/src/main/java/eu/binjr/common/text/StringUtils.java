@@ -50,4 +50,20 @@ public class StringUtils {
 
         return text.substring(0, end) + "...";
     }
+
+    public static boolean contains(String str, String searchStr, boolean caseSensistive) {
+        if (str == null || searchStr == null) return false;
+        if (caseSensistive) {
+            return str.contains(searchStr);
+        }
+        final int length = searchStr.length();
+        if (length == 0)
+            return true;
+
+        for (int i = str.length() - length; i >= 0; i--) {
+            if (str.regionMatches(true, i, searchStr, 0, length))
+                return true;
+        }
+        return false;
+    }
 }

@@ -514,9 +514,9 @@ public class MainViewController implements Initializable {
         GridPane titleRegion = new GridPane();
         titleRegion.setHgap(5);
         titleRegion.getColumnConstraints().add(
-                new ColumnConstraints(45, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
+                new ColumnConstraints(65, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
         titleRegion.getColumnConstraints().add(
-                new ColumnConstraints(45, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
+                new ColumnConstraints(65, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
         source.getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
         source.getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
 
@@ -571,8 +571,16 @@ public class MainViewController implements Initializable {
                 .setAction(event -> newPane.setExpanded(true))
                 .bindBidirectionnal(ToggleButton::selectedProperty, source.editableProperty())
                 .build(ToggleButton::new);
+        ToggleButton filterButton = new ToolButtonBuilder<ToggleButton>(source.getBindingManager())
+                .setText("Filter")
+                .setTooltip("Filter the source tree")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("filter-icon", "small-icon")
+                .setAction(event -> newPane.setExpanded(true))
+                .bindBidirectionnal(ToggleButton::selectedProperty, source.filterableProperty())
+                .build(ToggleButton::new);
         HBox.setHgrow(sourceNameField, Priority.ALWAYS);
-        toolbar.getChildren().addAll(editButton, closeButton);
+        toolbar.getChildren().addAll(filterButton, editButton, closeButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
 
         titleRegion.setOnMouseClicked(event -> {
@@ -608,9 +616,9 @@ public class MainViewController implements Initializable {
         if (sourcesPane == null || sourcesPane.getExpandedPane() == null) {
             return null;
         }
-        return (TreeView<TimeSeriesBinding>) sourcesPane.getExpandedPane().getContent();
+        var treeView = sourcesPane.getExpandedPane().getContent().lookup("#sourceTreeView");
+        return (TreeView<TimeSeriesBinding>) treeView;
     }
-
 
     private void slidePanel(int show, Duration delay) {
         TranslateTransition openNav = new TranslateTransition(new Duration(200), searchBarRoot);
@@ -772,7 +780,7 @@ public class MainViewController implements Initializable {
                         Optional<TreeView<TimeSeriesBinding>> treeView =
                                 (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
                         if (treeView.isPresent()) {
-                            newSourcePane.setContent(treeView.get());
+                            newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
                             sourcesAdapters.put(newSourcePane, newSource);
                             sourcesPane.getPanes().add(newSourcePane);
                             newSourcePane.setExpanded(true);
@@ -791,20 +799,68 @@ public class MainViewController implements Initializable {
         TitledPane newSourcePane = newSourcePane(source);
         Optional<TreeView<TimeSeriesBinding>> treeView;
         treeView = buildTreeViewForTarget(source.getAdapter());
-        if (treeView.isPresent()) {
-            newSourcePane.setContent(treeView.get());
-            sourcesAdapters.put(newSourcePane, source);
-        } else {
+        newSourcePane.setContent(buildSourcePaneContent((treeView.orElseGet(() -> {
             FilterableTreeItem<TimeSeriesBinding> i = new FilterableTreeItem<>(new TimeSeriesBinding());
             Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
-            newSourcePane.setContent(new TreeView<>(i));
-        }
+            return new TreeView<>(i);
+        })), source));
+        sourcesAdapters.put(newSourcePane, source);
         Platform.runLater(() -> {
             sourcesPane.getPanes().add(newSourcePane);
             newSourcePane.setExpanded(true);
         });
+    }
+
+    private Node buildSourcePaneContent(TreeView<TimeSeriesBinding> treeView, Source source) {
+        TextField filterField = new TextField();
+        filterField.setPromptText("Type in text to filter the tree view.");
+        HBox.setHgrow(filterField, Priority.ALWAYS);
+        filterField.setMaxWidth(Double.MAX_VALUE);
+        var clearFilterbutton = new ToolButtonBuilder<Button>()
+                .setText("Clear")
+                .setTooltip("Clear filter")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("trash-icon", "small-icon")
+                .setAction(event -> filterField.clear())
+                .build(Button::new);
+        var filterCaseSensitiveToggle = new ToolButtonBuilder<ToggleButton>()
+                .setText("Aa")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("match-case-icon")
+                .setTooltip("Match Case")
+                .build(ToggleButton::new);
+        var filterBar = new HBox(filterField, filterCaseSensitiveToggle, clearFilterbutton);
+        filterBar.setSpacing(5.0);
+        filterBar.setAlignment(Pos.CENTER_LEFT);
+        filterBar.managedProperty().bind(source.filterableProperty());
+        filterBar.visibleProperty().bind(filterBar.managedProperty());
+        VBox.setMargin(filterBar, new Insets(10, 5, 5, 15));
+        VBox sourcePaneContent = new VBox(filterBar);
+        sourcePaneContent.getStyleClass().addAll("skinnable-pane-border", "chart-viewport-parent");
+        AnchorPane.setBottomAnchor(sourcePaneContent, 0.0);
+        AnchorPane.setLeftAnchor(sourcePaneContent, 0.0);
+        AnchorPane.setRightAnchor(sourcePaneContent, 0.0);
+        AnchorPane.setTopAnchor(sourcePaneContent, 0.0);
+
+        VBox.setVgrow(treeView, Priority.ALWAYS);
+        treeView.setMaxHeight(Double.MAX_VALUE);
+        treeView.setId("sourceTreeView");
+        ((FilterableTreeItem<TimeSeriesBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
+                    if (!source.isFilterable() || filterField.getText() == null || filterField.getText().isEmpty())
+                        return null;
+                    return TreeItemPredicate.create(seriesBinding ->
+                            seriesBinding != null && StringUtils.contains(
+                                    seriesBinding.getTreeHierarchy(),
+                                    filterField.getText(),
+                                    filterCaseSensitiveToggle.isSelected()));
+                },
+                source.filterableProperty(),
+                filterField.textProperty(),
+                filterCaseSensitiveToggle.selectedProperty()));
+        sourcePaneContent.getChildren().addAll(treeView);
+        return sourcePaneContent;
     }
 
     private boolean loadWorksheet(Worksheet worksheet) {
@@ -1036,17 +1092,6 @@ public class MainViewController implements Initializable {
         try {
             dp.onStart();
             FilterableTreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
-//            bindingTree.predicateProperty().bind(Bindings.createObjectBinding(() -> {
-//                        if (searchField.getText() == null || searchField.getText().isEmpty())
-//                            return null;
-//                        return TreeItemPredicate.create(seriesBinding ->
-//                                seriesBinding != null && stringContains(
-//                                        seriesBinding.getTreeHierarchy(),
-//                                        searchField.getText(),
-//                                        searchCaseSensitiveToggle.isSelected()));
-//                    },
-//                    searchField.textProperty(),
-//                    searchCaseSensitiveToggle.selectedProperty()));
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
@@ -1062,21 +1107,6 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-    private boolean stringContains(String str, String searchStr, boolean caseSensistive) {
-        if (str == null || searchStr == null) return false;
-        if (caseSensistive) {
-            return str.contains(searchStr);
-        }
-        final int length = searchStr.length();
-        if (length == 0)
-            return true;
-
-        for (int i = str.length() - length; i >= 0; i--) {
-            if (str.regionMatches(true, i, searchStr, 0, length))
-                return true;
-        }
-        return false;
-    }
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
@@ -1289,18 +1319,8 @@ public class MainViewController implements Initializable {
             if (treeView != null) {
                 var items = treeView.getSelectionModel().getSelectedItems();
                 if (items != null && !items.isEmpty()) {
-//                    TreeItem<TimeSeriesBinding>fakeTreeNode;
-//                   if (items.size() > 1){
-//                       fakeTreeNode = new TreeItem<>(new TimeSeriesBinding());
-//                       fakeTreeNode.getChildren().setAll(items);
-//                   }else{
-//                       fakeTreeNode = items.get(0);
-//                   }
-
                     var currentTabPane = (TabPane) ((Node) event.getGestureTarget()).getScene().lookup("#tearableTabPane");
                     addToNewWorksheet(currentTabPane != null ? currentTabPane : tearableTabPane.getSelectedTabPane(), items);
-
-
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }

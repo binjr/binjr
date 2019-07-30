@@ -53,6 +53,7 @@ public class Source implements Dirtyable, Closeable {
     private Map<String, String> adapterParams;
     private DataAdapter adapter;
     private Property<Boolean> editable = new SimpleBooleanProperty();
+    private Property<Boolean> filterable = new SimpleBooleanProperty();
 
     /**
      * Initializes a new instance of the {@link Source} class
@@ -234,6 +235,19 @@ public class Source implements Dirtyable, Closeable {
         this.editable.setValue(editable);
     }
 
+    @XmlTransient
+    public Boolean isFilterable() {
+        return filterable.getValue();
+    }
+
+    public Property<Boolean> filterableProperty() {
+        return filterable;
+    }
+
+    public void setFilterable(Boolean filterable) {
+        this.filterable.setValue(filterable);
+    }
+
     //region Private members.
     private void setAdapterClassName(String adapterClassName) {
         this.adapterClassName = adapterClassName;
@@ -242,5 +256,6 @@ public class Source implements Dirtyable, Closeable {
     private void setAdapterParams(Map<String, String> adapterParams) {
         this.adapterParams = adapterParams;
     }
+
     //endregion
 }

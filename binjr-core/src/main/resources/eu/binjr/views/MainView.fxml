@@ -68,6 +68,7 @@
                 </padding>
                 <TextField fx:id="searchField" maxWidth="Infinity" prefHeight="30" HBox.hgrow="SOMETIMES"/>
                 <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
+                        contentDisplay="GRAPHIC_ONLY"
                         onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"
                         styleClass="dialog-button">
                     <graphic>
@@ -81,8 +82,12 @@
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString=""
-                              graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
+                <ToggleButton fx:id="searchCaseSensitiveToggle"
+                              styleClass="dialog-button"
+                              prefHeight="30.0" prefWidth="30.0" text="Aa" contentDisplay="GRAPHIC_ONLY">
+                    <graphic>
+                        <Region styleClass="match-case-icon"/>
+                    </graphic>
                     <tooltip>
                         <Tooltip text="Toggle case sensitivity">
                             <font>

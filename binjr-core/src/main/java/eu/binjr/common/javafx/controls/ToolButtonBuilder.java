@@ -115,12 +115,14 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         if (styleClass != null) {
             btn.getStyleClass().addAll(styleClass);
         }
-        if (iconStyleClass != null) {
+        if (iconStyleClass != null && !iconStyleClass.isEmpty()) {
             Region icon = new Region();
             icon.getStyleClass().addAll(iconStyleClass);
             btn.setGraphic(icon);
             btn.setAlignment(Pos.CENTER);
             btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+        }else{
+            btn.setContentDisplay(ContentDisplay.TEXT_ONLY);
         }
         if (action != null) {
             btn.setOnAction(bindingManager != null ? bindingManager.registerHandler(action) : action);
