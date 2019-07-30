@@ -240,8 +240,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
             newChartDropTarget.setOnDragEntered(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
             newChartDropTarget.setOnDragExited(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
-            bindingManager.bind(newChartDropTarget.managedProperty(),parentController.treeItemDragAndDropInProgressProperty());
-            bindingManager.bind(newChartDropTarget.visibleProperty(),parentController.treeItemDragAndDropInProgressProperty());
+            bindingManager.bind(newChartDropTarget.managedProperty(), parentController.treeItemDragAndDropInProgressProperty());
+            bindingManager.bind(newChartDropTarget.visibleProperty(), parentController.treeItemDragAndDropInProgressProperty());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
@@ -984,7 +984,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetChart == null) {
                         getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
                     } else {
-                        addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), targetChart);
+                        addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), targetChart);
                     }
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
@@ -1001,13 +1001,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
             TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
-                if (item != null) {
+                var items = treeView.getSelectionModel().getSelectedItems();
+                if (items != null && !items.isEmpty()) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    addToNewChartInCurrentWorksheet(TreeViewUtils.splitAboveLeaves(item));
+                    var itemList = items.stream()
+                            .flatMap(item -> TreeViewUtils.splitAboveLeaves(item).stream())
+                            .collect(Collectors.toList());
+                    addToNewChartInCurrentWorksheet(itemList);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1060,12 +1063,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
         });
     }
 
-    private void addToCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem, Chart targetChart) {
+    private void addToCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems, Chart targetChart) {
         try {
             // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
             Platform.runLater(() -> {
-                if (treeItem != null) {
-                    addBindings(TreeViewUtils.flattenLeaves(treeItem), targetChart);
+                if (treeItems != null && !treeItems.isEmpty()) {
+                    addBindings(treeItems.stream().flatMap(item -> TreeViewUtils.flattenLeaves(item).stream()).collect(Collectors.toList()), targetChart);
                 }
             });
         } catch (Exception e) {
@@ -1078,7 +1081,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 .stream()
                 .map(c -> {
                     MenuItem m = new MenuItem(c.getName());
-                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItem(), c));
+                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), c));
                     return m;
                 })
                 .toArray(MenuItem[]::new));
@@ -1499,7 +1502,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     BindingManager getBindingManager() {
         return bindingManager;
     }
-
 
 
     //endregion
