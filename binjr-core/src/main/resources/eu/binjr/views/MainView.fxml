@@ -19,31 +19,12 @@
 <?import eu.binjr.common.javafx.controls.DrawerPane?>
 <?import eu.binjr.common.javafx.controls.TearableTabPane?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Accordion?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Menu?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.Separator?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TextField?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.input.KeyCodeCombination?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.input.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
-
-<?import javafx.scene.image.ImageView?>
-<?import javafx.scene.image.Image?>
-<?import javafx.scene.control.SeparatorMenuItem?>
-<?import javafx.scene.layout.Pane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
     <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.3382608695652174"
@@ -70,38 +51,36 @@
                 <Accordion fx:id="sourcesPane" minWidth="0.0" mouseTransparent="true" prefHeight="798.0"
                            prefWidth="416.0" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-
                 </Accordion>
                 <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
             </StackPane>
             <HBox fx:id="searchBarRoot"
                   alignment="CENTER"
                   focusTraversable="true"
-                  prefHeight="40.0" styleClass="toolPane"
+                  prefHeight="40.0"
+                  styleClass="worksheet-tool-bar"
+                  spacing="5"
                   AnchorPane.bottomAnchor="-40.0"
                   AnchorPane.leftAnchor="0.0"
                   AnchorPane.rightAnchor="0.0">
-
-                <!--                <HBox alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.rightAnchor="0.0"-->
-                <!--                      AnchorPane.topAnchor="0.0">-->
                 <padding>
                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                 </padding>
                 <TextField fx:id="searchField" maxWidth="Infinity" prefHeight="30" HBox.hgrow="SOMETIMES"/>
-                <!--                    <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"-->
-                <!--                            onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"-->
-                <!--                            styleClass="dialog-button">-->
-                <!--                        <graphic>-->
-                <!--                            <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>-->
-                <!--                        </graphic>-->
-                <!--                        <tooltip>-->
-                <!--                            <Tooltip text="Find next occurrence">-->
-                <!--                                <font>-->
-                <!--                                    <Font size="11.0"/>-->
-                <!--                                </font>-->
-                <!--                            </Tooltip>-->
-                <!--                        </tooltip>-->
-                <!--                    </Button>-->
+                <Button fx:id="searchButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
+                        onAction="#handleFindNextInTreeView" prefHeight="30.0" prefWidth="30.0"
+                        styleClass="dialog-button">
+                    <graphic>
+                        <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip text="Find next occurrence">
+                            <font>
+                                <Font size="11.0"/>
+                            </font>
+                        </Tooltip>
+                    </tooltip>
+                </Button>
                 <ToggleButton fx:id="searchCaseSensitiveToggle" alignment="BASELINE_LEFT" ellipsisString=""
                               graphicTextGap="10.0" prefHeight="30.0" prefWidth="30.0" text="Aa" textOverrun="CLIP">
                     <tooltip>
@@ -125,9 +104,6 @@
                         </Tooltip>
                     </tooltip>
                 </Button>
-                <!--                </HBox>-->
-                <!--                <Separator prefWidth="200.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"-->
-                <!--                           AnchorPane.topAnchor="0.0"/>-->
             </HBox>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">

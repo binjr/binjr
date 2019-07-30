@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -124,8 +125,8 @@ public class MainViewController implements Initializable {
     public Pane searchBarRoot;
     @FXML
     public TextField searchField;
-    //    @FXML
-//    public Button searchButton;
+    @FXML
+    public Button searchButton;
     @FXML
     public Button hideSearchBarButton;
     @FXML
@@ -247,16 +248,16 @@ public class MainViewController implements Initializable {
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         commandBar.setSibling(contentView);
-//        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
-//            if (newValue != null) {
-//                invalidateSearchResults();
-//                findNext();
-//            }
-//        });
-//        searchCaseSensitiveToggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
-//            invalidateSearchResults();
-//            findNext();
-//        });
+        searchField.textProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                invalidateSearchResults();
+                findNext();
+            }
+        });
+        searchCaseSensitiveToggle.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            invalidateSearchResults();
+            findNext();
+        });
         searchBarVisible.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 searchField.requestFocus();
@@ -1007,10 +1008,17 @@ public class MainViewController implements Initializable {
                         treeItemDragAndDropInProgress.setValue(true);
                         expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
-                        db.setDragView(renderTextTooltip(bindingTreeCell.getItem().toString()));
+
+                        var toolTipText = StringUtils.ellipsize(
+                                treeView.getSelectionModel()
+                                        .getSelectedItems()
+                                        .stream()
+                                        .map(t -> t.getValue().getLegend())
+                                        .collect(Collectors.joining(", ")),
+                                100);
+                        db.setDragView(renderTextTooltip(toolTipText));
                         ClipboardContent content = new ClipboardContent();
                         treeView.getSelectionModel().getSelectedItems().forEach(s -> content.put(TIME_SERIES_BINDING_FORMAT, s.getValue().getTreeHierarchy()));
-                        //  content.put(TIME_SERIES_BINDING_FORMAT, bindingTreeCell.getItem().getTreeHierarchy());
                         db.setContent(content);
                     } else {
                         logger.debug("No TreeItem selected: canceling drag and drop");
@@ -1028,17 +1036,17 @@ public class MainViewController implements Initializable {
         try {
             dp.onStart();
             FilterableTreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
-            bindingTree.predicateProperty().bind(Bindings.createObjectBinding(() -> {
-                        if (searchField.getText() == null || searchField.getText().isEmpty())
-                            return null;
-                        return TreeItemPredicate.create(seriesBinding ->
-                                seriesBinding != null && stringContains(
-                                        seriesBinding.getTreeHierarchy(),
-                                        searchField.getText(),
-                                        searchCaseSensitiveToggle.isSelected()));
-                    },
-                    searchField.textProperty(),
-                    searchCaseSensitiveToggle.selectedProperty()));
+//            bindingTree.predicateProperty().bind(Bindings.createObjectBinding(() -> {
+//                        if (searchField.getText() == null || searchField.getText().isEmpty())
+//                            return null;
+//                        return TreeItemPredicate.create(seriesBinding ->
+//                                seriesBinding != null && stringContains(
+//                                        seriesBinding.getTreeHierarchy(),
+//                                        searchField.getText(),
+//                                        searchCaseSensitiveToggle.isSelected()));
+//                    },
+//                    searchField.textProperty(),
+//                    searchCaseSensitiveToggle.selectedProperty()));
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
@@ -1102,7 +1110,7 @@ public class MainViewController implements Initializable {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                for (var rootItem:rootItems) {
+                for (var rootItem : rootItems) {
                     int totalBindings = TreeViewUtils.flattenLeaves(rootItem).size();
                     if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
                         if (Dialogs.confirmDialog(root,
@@ -1126,7 +1134,7 @@ public class MainViewController implements Initializable {
                     zoneId = ZoneId.systemDefault();
                 }
                 List<Chart> chartList = new ArrayList<>();
-                for (var rootItem :rootItems) {
+                for (var rootItem : rootItems) {
                     for (var t : TreeViewUtils.splitAboveLeaves(rootItem)) {
                         TimeSeriesBinding n = t.getValue();
                         Chart chart = new Chart(
@@ -1139,7 +1147,7 @@ public class MainViewController implements Initializable {
                         chartList.add(chart);
                     }
                 }
-                Worksheet worksheet = new Worksheet( rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(",")),
+                Worksheet worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
                         chartList,
                         zoneId,
                         fromDateTime,
@@ -1177,10 +1185,11 @@ public class MainViewController implements Initializable {
             if (currentSearchHit > searchResultSet.size() - 1) {
                 currentSearchHit = 0;
             }
+            selectedTreeView.getSelectionModel().clearSelection();
             selectedTreeView.getSelectionModel().select(searchResultSet.get(currentSearchHit));
             selectedTreeView.scrollTo(selectedTreeView.getRow(searchResultSet.get(currentSearchHit)));
         } else {
-            searchField.setStyle("-fx-background-color: #ffcccc;");
+            searchField.setStyle("-fx-background-color: #FF002040;");
         }
         logger.trace(() -> "Search for " + searchField.getText() + " yielded " + searchResultSet.size() + " match(es)");
     }
