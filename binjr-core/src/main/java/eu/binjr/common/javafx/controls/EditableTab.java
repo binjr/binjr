@@ -36,7 +36,7 @@ public class EditableTab extends Tab {
         return label.textProperty().getValue();
     }
 
-    final TextField textField = new TextField();
+    private final TextField textField = new TextField();
 
     public Property<String> nameProperty() {
         return label.textProperty();
@@ -47,7 +47,7 @@ public class EditableTab extends Tab {
     }
 
     public EditableTab(String text) {
-        this(text, null);
+        this(text, (ButtonBase) null);
     }
 
     /**
