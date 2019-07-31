@@ -947,7 +947,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         TitledPane droppedPane = (TitledPane) event.getSource();
                         droppedPane.setExpanded(true);
                         ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                        addBindings(TreeViewUtils.flattenLeaves(item), viewPort.getDataStore());
+                        addBindings(TreeViewUtils.flattenLeaves(item, true), viewPort.getDataStore());
                     } catch (Exception e) {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                     }
@@ -1008,7 +1008,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                         targetStage.requestFocus();
                     }
                     var itemList = items.stream()
-                            .flatMap(item -> TreeViewUtils.splitAboveLeaves(item).stream())
+                            .flatMap(item -> TreeViewUtils.splitAboveLeaves(item, true).stream())
                             .collect(Collectors.toList());
                     addToNewChartInCurrentWorksheet(itemList);
                 } else {
@@ -1032,7 +1032,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         Platform.runLater(() -> {
             try {
                 int totalBindings = treeItems.stream()
-                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem).size())
+                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem, true).size())
                         .reduce(0, Integer::sum);
                 if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
                     if (Dialogs.confirmDialog(root,
@@ -1051,7 +1051,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             binding.getUnitName(),
                             binding.getUnitPrefix()
                     );
-                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem)) {
+                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem, true)) {
                         chart.addSeries(TimeSeriesInfo.fromBinding(b));
                     }
                     charts.add(chart);
@@ -1068,7 +1068,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
             Platform.runLater(() -> {
                 if (treeItems != null && !treeItems.isEmpty()) {
-                    addBindings(treeItems.stream().flatMap(item -> TreeViewUtils.flattenLeaves(item).stream()).collect(Collectors.toList()), targetChart);
+                    addBindings(treeItems.stream().flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream()).collect(Collectors.toList()), targetChart);
                 }
             });
         } catch (Exception e) {
@@ -1167,7 +1167,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
-
         if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
             if (Dialogs.confirmDialog(root,
                     "This action will add " + bindings.size() + " series on a single chart.",

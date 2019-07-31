@@ -628,18 +628,6 @@ public class MainViewController implements Initializable {
         openNav.setOnFinished(event -> AnchorPane.setBottomAnchor(sourceArea, show > 0 ? SEARCH_BAR_PANE_DISTANCE : 0));
     }
 
-    private void expandBranch(TreeItem<TimeSeriesBinding> branch) {
-        if (branch == null) {
-            return;
-        }
-        branch.setExpanded(true);
-        if (branch.getChildren() != null) {
-            for (TreeItem<TimeSeriesBinding> item : branch.getChildren()) {
-                expandBranch(item);
-            }
-        }
-    }
-
     private boolean confirmAndClearWorkspace() {
         if (!workspace.isDirty()) {
             closeWorkspace();
@@ -843,18 +831,22 @@ public class MainViewController implements Initializable {
         AnchorPane.setLeftAnchor(sourcePaneContent, 0.0);
         AnchorPane.setRightAnchor(sourcePaneContent, 0.0);
         AnchorPane.setTopAnchor(sourcePaneContent, 0.0);
-
         VBox.setVgrow(treeView, Priority.ALWAYS);
         treeView.setMaxHeight(Double.MAX_VALUE);
         treeView.setId("sourceTreeView");
         ((FilterableTreeItem<TimeSeriesBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() || filterField.getText() == null || filterField.getText().isEmpty())
                         return null;
-                    return TreeItemPredicate.create(seriesBinding ->
-                            seriesBinding != null && StringUtils.contains(
-                                    seriesBinding.getTreeHierarchy(),
-                                    filterField.getText(),
-                                    filterCaseSensitiveToggle.isSelected()));
+                    return (TreeItemPredicate<TimeSeriesBinding>) (parent, seriesBinding) -> {
+                        var isMatch = seriesBinding != null && StringUtils.contains(
+                                seriesBinding.getTreeHierarchy(),
+                                filterField.getText(),
+                                filterCaseSensitiveToggle.isSelected());
+                        if (isMatch) {
+                            TreeViewUtils.expandBranch(parent, TreeViewUtils.ExpandDirection.UP);
+                        }
+                        return isMatch;
+                    };
                 },
                 source.filterableProperty(),
                 filterField.textProperty(),
@@ -1062,9 +1054,7 @@ public class MainViewController implements Initializable {
                 try {
                     if (bindingTreeCell.getItem() != null) {
                         treeItemDragAndDropInProgress.setValue(true);
-                        expandBranch(bindingTreeCell.getTreeItem());
                         Dragboard db = bindingTreeCell.startDragAndDrop(TransferMode.COPY_OR_MOVE);
-
                         var toolTipText = StringUtils.ellipsize(
                                 treeView.getSelectionModel()
                                         .getSelectedItems()
@@ -1126,14 +1116,17 @@ public class MainViewController implements Initializable {
     }
 
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
+        MenuItem expandBranch = new MenuItem("Expand Branch");
+        expandBranch.setOnAction(event -> TreeViewUtils.expandBranch(treeView.getSelectionModel().getSelectedItem(), TreeViewUtils.ExpandDirection.DOWN));
+        MenuItem collapseBranch = new MenuItem("Collapse Branch");
+        collapseBranch.setOnAction(event -> TreeViewUtils.collapseBranch(treeView.getSelectionModel().getSelectedItem(), TreeViewUtils.ExpandDirection.DOWN));
+
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(tearableTabPane.getTabs()).lessThanOrEqualTo(0));
         addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getSelectedWorksheetController().getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
-        ContextMenu contextMenu = new ContextMenu(addToCurrent, addToNew);
-        contextMenu.setOnShowing(event -> expandBranch(treeView.getSelectionModel().getSelectedItem()));
-        return contextMenu;
+        return new ContextMenu(expandBranch, collapseBranch,new SeparatorMenuItem(), addToCurrent, addToNew);
     }
 
     private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<TimeSeriesBinding>> rootItems) {
@@ -1141,7 +1134,7 @@ public class MainViewController implements Initializable {
         Platform.runLater(() -> {
             try {
                 for (var rootItem : rootItems) {
-                    int totalBindings = TreeViewUtils.flattenLeaves(rootItem).size();
+                    int totalBindings = TreeViewUtils.flattenLeaves(rootItem, true).size();
                     if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
                         if (Dialogs.confirmDialog(root,
                                 "This action will add " + totalBindings + " series on a single worksheet.",
@@ -1165,7 +1158,7 @@ public class MainViewController implements Initializable {
                 }
                 List<Chart> chartList = new ArrayList<>();
                 for (var rootItem : rootItems) {
-                    for (var t : TreeViewUtils.splitAboveLeaves(rootItem)) {
+                    for (var t : TreeViewUtils.splitAboveLeaves(rootItem, true)) {
                         TimeSeriesBinding n = t.getValue();
                         Chart chart = new Chart(
                                 n.getLegend(),
@@ -1173,7 +1166,7 @@ public class MainViewController implements Initializable {
                                 n.getUnitName(),
                                 n.getUnitPrefix()
                         );
-                        TreeViewUtils.flattenLeaves(t).forEach(b -> chart.addSeries(TimeSeriesInfo.fromBinding(b)));
+                        TreeViewUtils.flattenLeaves(t, true).forEach(b -> chart.addSeries(TimeSeriesInfo.fromBinding(b)));
                         chartList.add(chart);
                     }
                 }

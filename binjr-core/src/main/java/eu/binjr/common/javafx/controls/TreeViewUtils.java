@@ -19,9 +19,12 @@ package eu.binjr.common.javafx.controls;
 import javafx.scene.control.TreeItem;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+
+import static java.util.EnumSet.of;
 
 /**
  * Helper methods to walk JavaFX TreeViews
@@ -29,6 +32,12 @@ import java.util.function.Predicate;
  * @author Frederic Thevenet
  */
 public class TreeViewUtils {
+    public enum ExpandDirection {
+        UP,
+        DOWN,
+        BOTH
+    }
+
     /**
      * Finds the first tree item that matches the provided predicate.
      *
@@ -76,42 +85,87 @@ public class TreeViewUtils {
         return found;
     }
 
-    public static <T> List<T> flattenLeaves(TreeItem<T> branch) {
+    public static <T> List<T> flattenLeaves(TreeItem<T> branch, boolean expand) {
         List<T> leaves = new ArrayList<>();
-        flattenLeaves(branch, leaves);
+        flattenLeaves(branch, leaves, expand);
         return leaves;
     }
 
-    private static <T> void flattenLeaves(TreeItem<T> branch, List<T> leaves) {
+    private static <T> void flattenLeaves(TreeItem<T> branch, List<T> leaves, boolean expand) {
+        if (expand) {
+            branch.setExpanded(true);
+        }
         if (!branch.isLeaf()) {
             for (TreeItem<T> t : branch.getChildren()) {
-
-                flattenLeaves(t, leaves);
+                flattenLeaves(t, leaves, expand);
             }
         } else {
             leaves.add(branch.getValue());
         }
     }
 
-    public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch) {
+    public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch, boolean expand) {
         List<TreeItem<T>> level1Items = new ArrayList<>();
-        if (branch.isLeaf()){
+        if (branch.isLeaf()) {
             level1Items.add(branch);
-        }else {
-            splitAboveLeaves(branch, level1Items);
+        } else {
+            splitAboveLeaves(branch, level1Items, expand);
         }
         return level1Items;
     }
 
     //FIXME: The following implementation assumes that a leaf node cannot have a sibling which isn't also a leaf.
-    private static <T> void splitAboveLeaves(TreeItem<T> branch, List<TreeItem<T>> level1Items) {
+    private static <T> void splitAboveLeaves(TreeItem<T> branch, List<TreeItem<T>> level1Items, boolean expand) {
+        if (expand) {
+            branch.setExpanded(true);
+        }
         if (!branch.isLeaf() && branch.getChildren().get(0).isLeaf()) {
             level1Items.add(branch);
         } else {
+            branch.setExpanded(true);
             for (TreeItem<T> t : branch.getChildren()) {
-                splitAboveLeaves(t, level1Items);
+                splitAboveLeaves(t, level1Items, expand);
             }
         }
     }
+
+    public static <T> void expandBranch(TreeItem<T> branch, ExpandDirection direction) {
+        if (EnumSet.of(ExpandDirection.BOTH, ExpandDirection.UP).contains(direction)) {
+            climbUpFromBranch(branch, true);
+        }
+        if (EnumSet.of(ExpandDirection.BOTH, ExpandDirection.DOWN).contains(direction)) {
+            climbDownFromBranch(branch, true);
+        }
+    }
+
+    public static <T> void collapseBranch(TreeItem<T> branch, ExpandDirection direction) {
+        if (EnumSet.of(ExpandDirection.BOTH, ExpandDirection.UP).contains(direction)) {
+            climbUpFromBranch(branch, false);
+        }
+        if (EnumSet.of(ExpandDirection.BOTH, ExpandDirection.DOWN).contains(direction)) {
+            climbDownFromBranch(branch, false);
+        }
+    }
+
+    private static <T> void climbUpFromBranch(TreeItem<T> branch, boolean expanded) {
+        if (branch == null) {
+            return;
+        }
+        branch.setExpanded(expanded);
+        climbUpFromBranch(branch.getParent(), expanded);
+    }
+
+    private static <T> void climbDownFromBranch(TreeItem<T> branch, boolean expanded) {
+        if (branch == null) {
+            return;
+        }
+        branch.setExpanded(expanded);
+        if (branch.getChildren() != null) {
+            for (TreeItem<?> item : branch.getChildren()) {
+                climbDownFromBranch(item, expanded);
+            }
+        }
+    }
+
 
 }
