@@ -822,6 +822,11 @@ public class MainViewController implements Initializable {
         var filterBar = new HBox(filterField, filterCaseSensitiveToggle, clearFilterbutton);
         filterBar.setSpacing(5.0);
         filterBar.setAlignment(Pos.CENTER_LEFT);
+        source.filterableProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue){
+                filterField.requestFocus();
+            }
+        });
         filterBar.managedProperty().bind(source.filterableProperty());
         filterBar.visibleProperty().bind(filterBar.managedProperty());
         VBox.setMargin(filterBar, new Insets(10, 5, 5, 15));
