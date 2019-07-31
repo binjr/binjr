@@ -21,6 +21,8 @@ import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.scene.control.TableView;
 
 public final class TableViewUtils {
+    //FIXME try and retrieve the actual scrollbar width at runtime
+    private static final double SCROLL_BAR_WIDTH = 20.0;
 
     public static void autoFillTableWidthWithLastColumn(TableView<?> table) {
         int lastIdx = table.getColumns().size() - 1;
@@ -31,7 +33,7 @@ public final class TableViewUtils {
             }
             widthProperties[lastIdx] = table.widthProperty();
             table.getColumns().get(lastIdx).prefWidthProperty().bind(Bindings.createDoubleBinding(() -> {
-                double width = widthProperties[lastIdx].getValue() - 14.0;
+                double width = widthProperties[lastIdx].getValue() - SCROLL_BAR_WIDTH;
                 for (int i = 0; i < lastIdx; i++) {
                     width -= widthProperties[i].getValue();
                 }
