@@ -1007,7 +1007,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    addToNewChartInCurrentWorksheet(items);
+                    // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
+                    Platform.runLater(() -> addToNewChart(items));
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1018,46 +1019,47 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
-        addToNewChartInCurrentWorksheet(Collections.singletonList(treeItem));
+    private void addToNewChart(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+        try {
+            treeItemsAsChartList(treeItems).ifPresent(charts -> worksheet.getCharts().addAll(charts));
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to new chart", e, null);
+        }
     }
 
-    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> items) {
-        // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
-        Platform.runLater(() -> {
-            try {
-                var treeItems = items.stream()
-                        .flatMap(item -> TreeViewUtils.splitAboveLeaves(item, true).stream())
-                        .collect(Collectors.toList());
-                var charts = new ArrayList<Chart>();
-                var totalBindings = 0;
-                for (var treeItem : treeItems) {
-                    TimeSeriesBinding binding = treeItem.getValue();
-                    Chart chart = new Chart(
-                            binding.getLegend(),
-                            binding.getGraphType(),
-                            binding.getUnitName(),
-                            binding.getUnitPrefix()
-                    );
-                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem)) {
-                        chart.addSeries(TimeSeriesInfo.fromBinding(b));
-                        totalBindings++;
-                    }
-                    charts.add(chart);
-                }
-                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                    if (Dialogs.confirmDialog(root,
-                            "This action will add " + totalBindings + " series on a single worksheet.",
-                            "Are you sure you want to proceed?",
-                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                        return;
-                    }
-                }
-                getWorksheet().getCharts().addAll(charts);
-            } catch (Exception e) {
-                Dialogs.notifyException("Error adding bindings to new chart", e, root);
+    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+        var charts = new ArrayList<Chart>();
+        var totalBindings = 0;
+        Node dlgRoot = null;
+        for (var treeItem : treeItems) {
+            //FIXME Find root node to attach dialog
+            if (dlgRoot == null){
+                dlgRoot =treeItem.getGraphic();
             }
-        });
+            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
+                TimeSeriesBinding binding = t.getValue();
+                Chart chart = new Chart(
+                        binding.getLegend(),
+                        binding.getGraphType(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix()
+                );
+                for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
+                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                    totalBindings++;
+                }
+                charts.add(chart);
+            }
+        }
+        if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+            if (Dialogs.confirmDialog(dlgRoot,
+                    "This action will add " + totalBindings + " series on a single worksheet.",
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(charts);
     }
 
     private void addToCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems, Chart targetChart) {
@@ -1084,7 +1086,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 .toArray(MenuItem[]::new));
 
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItems()));
+        newChart.setOnAction(event -> addToNewChart(treeView.getSelectionModel().getSelectedItems()));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }

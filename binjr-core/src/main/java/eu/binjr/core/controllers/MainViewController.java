@@ -1157,38 +1157,14 @@ public class MainViewController implements Initializable {
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                     zoneId = ZoneId.systemDefault();
                 }
-                List<Chart> chartList = new ArrayList<>();
-                int totalBindings = 0;
-                for (var rootItem : rootItems) {
-                    for (var t : TreeViewUtils.splitAboveLeaves(rootItem, true)) {
-                        TimeSeriesBinding n = t.getValue();
-                        Chart chart = new Chart(
-                                n.getLegend(),
-                                n.getGraphType(),
-                                n.getUnitName(),
-                                n.getUnitPrefix()
-                        );
-                        for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
-                            chart.addSeries(TimeSeriesInfo.fromBinding(b));
-                            totalBindings++;
-                        }
-                        chartList.add(chart);
-                    }
-                }
-                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                    if (Dialogs.confirmDialog(root,
-                            "This action will add " + totalBindings + " series on a single worksheet.",
-                            "Are you sure you want to proceed?",
-                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                        return;
-                    }
-                }
-                Worksheet worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
-                        chartList,
-                        zoneId,
-                        fromDateTime,
-                        toDateTime);
-                editWorksheet(tabPane, worksheet);
+                WorksheetController.treeItemsAsChartList(rootItems).ifPresent(
+                        charts -> editWorksheet(tabPane,
+                                new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
+                                        charts,
+                                        zoneId,
+                                        fromDateTime,
+                                        toDateTime))
+                );
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }
