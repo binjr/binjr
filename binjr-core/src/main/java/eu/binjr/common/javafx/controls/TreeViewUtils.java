@@ -85,6 +85,10 @@ public class TreeViewUtils {
         return found;
     }
 
+    public static <T> List<T> flattenLeaves(TreeItem<T> branch) {
+        return flattenLeaves(branch, false);
+    }
+
     public static <T> List<T> flattenLeaves(TreeItem<T> branch, boolean expand) {
         List<T> leaves = new ArrayList<>();
         flattenLeaves(branch, leaves, expand);
@@ -102,6 +106,10 @@ public class TreeViewUtils {
         } else {
             leaves.add(branch.getValue());
         }
+    }
+
+    public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch) {
+        return splitAboveLeaves(branch, false);
     }
 
     public static <T> List<TreeItem<T>> splitAboveLeaves(TreeItem<T> branch, boolean expand) {

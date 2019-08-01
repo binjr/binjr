@@ -823,7 +823,7 @@ public class MainViewController implements Initializable {
         filterBar.setSpacing(5.0);
         filterBar.setAlignment(Pos.CENTER_LEFT);
         source.filterableProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue){
+            if (newValue) {
                 filterField.requestFocus();
             }
         });
@@ -1122,33 +1122,29 @@ public class MainViewController implements Initializable {
 
     private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
         MenuItem expandBranch = new MenuItem("Expand Branch");
-        expandBranch.setOnAction(event -> TreeViewUtils.expandBranch(treeView.getSelectionModel().getSelectedItem(), TreeViewUtils.ExpandDirection.DOWN));
+        expandBranch.setOnAction(event -> treeView.getSelectionModel().getSelectedItems().forEach(item -> TreeViewUtils.expandBranch(item, TreeViewUtils.ExpandDirection.DOWN)));
         MenuItem collapseBranch = new MenuItem("Collapse Branch");
-        collapseBranch.setOnAction(event -> TreeViewUtils.collapseBranch(treeView.getSelectionModel().getSelectedItem(), TreeViewUtils.ExpandDirection.DOWN));
+        collapseBranch.setOnAction(event -> {
+            // It is necessary to clone the list of selected nodes prior to start collapsing them as it resets
+            // the selection, leading to a NoSuchElementException while iterating  getSelectedItems directly.
+            var items = treeView.getSelectionModel().getSelectedItems().toArray(TreeItem<?>[]::new);
+            for (var item : items) {
+                TreeViewUtils.collapseBranch(item, TreeViewUtils.ExpandDirection.DOWN);
+            }
+        });
 
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(tearableTabPane.getTabs()).lessThanOrEqualTo(0));
         addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getSelectedWorksheetController().getChartListContextMenu(treeView).getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event -> addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
-        return new ContextMenu(expandBranch, collapseBranch,new SeparatorMenuItem(), addToCurrent, addToNew);
+        return new ContextMenu(expandBranch, collapseBranch, new SeparatorMenuItem(), addToCurrent, addToNew);
     }
 
     private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<TimeSeriesBinding>> rootItems) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                for (var rootItem : rootItems) {
-                    int totalBindings = TreeViewUtils.flattenLeaves(rootItem, true).size();
-                    if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                        if (Dialogs.confirmDialog(root,
-                                "This action will add " + totalBindings + " series on a single worksheet.",
-                                "Are you sure you want to proceed?",
-                                ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                            return;
-                        }
-                    }
-                }
                 ZonedDateTime toDateTime;
                 ZonedDateTime fromDateTime;
                 ZoneId zoneId;
@@ -1162,6 +1158,7 @@ public class MainViewController implements Initializable {
                     zoneId = ZoneId.systemDefault();
                 }
                 List<Chart> chartList = new ArrayList<>();
+                int totalBindings = 0;
                 for (var rootItem : rootItems) {
                     for (var t : TreeViewUtils.splitAboveLeaves(rootItem, true)) {
                         TimeSeriesBinding n = t.getValue();
@@ -1171,8 +1168,19 @@ public class MainViewController implements Initializable {
                                 n.getUnitName(),
                                 n.getUnitPrefix()
                         );
-                        TreeViewUtils.flattenLeaves(t, true).forEach(b -> chart.addSeries(TimeSeriesInfo.fromBinding(b)));
+                        for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
+                            chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                            totalBindings++;
+                        }
                         chartList.add(chart);
+                    }
+                }
+                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                    if (Dialogs.confirmDialog(root,
+                            "This action will add " + totalBindings + " series on a single worksheet.",
+                            "Are you sure you want to proceed?",
+                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                        return;
                     }
                 }
                 Worksheet worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),

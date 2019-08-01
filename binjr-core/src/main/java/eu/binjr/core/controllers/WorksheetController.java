@@ -1005,10 +1005,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    var itemList = items.stream()
-                            .flatMap(item -> TreeViewUtils.splitAboveLeaves(item, true).stream())
-                            .collect(Collectors.toList());
-                    addToNewChartInCurrentWorksheet(itemList);
+                    addToNewChartInCurrentWorksheet(items);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1020,27 +1017,22 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     private void addToNewChartInCurrentWorksheet(TreeItem<TimeSeriesBinding> treeItem) {
-        List<TreeItem<TimeSeriesBinding>> l = new ArrayList<>();
-        l.add(treeItem);
-        addToNewChartInCurrentWorksheet(l);
+        addToNewChartInCurrentWorksheet(Collections.singletonList(treeItem));
     }
 
-    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+    private void addToNewChartInCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> items) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                int totalBindings = treeItems.stream()
-                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem, true).size())
-                        .reduce(0, Integer::sum);
-                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-                    if (Dialogs.confirmDialog(root,
-                            "This action will add " + totalBindings + " series on a single worksheet.",
-                            "Are you sure you want to proceed?",
-                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                        return;
-                    }
-                }
+                var treeItems = items.stream()
+                        .flatMap(item -> TreeViewUtils.splitAboveLeaves(item, true).stream())
+                        .collect(Collectors.toList());
+//                var totalBindings = treeItems.stream()
+//                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem, true).size())
+//                        .reduce(0, Integer::sum);
+
                 var charts = new ArrayList<Chart>();
+                var totalBindings = 0;
                 for (var treeItem : treeItems) {
                     TimeSeriesBinding binding = treeItem.getValue();
                     Chart chart = new Chart(
@@ -1049,10 +1041,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
                             binding.getUnitName(),
                             binding.getUnitPrefix()
                     );
-                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem, true)) {
+                    for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(treeItem)) {
                         chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                        totalBindings++;
                     }
                     charts.add(chart);
+                }
+                if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+                    if (Dialogs.confirmDialog(root,
+                            "This action will add " + totalBindings + " series on a single worksheet.",
+                            "Are you sure you want to proceed?",
+                            ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                        return;
+                    }
                 }
                 getWorksheet().getCharts().addAll(charts);
             } catch (Exception e) {
@@ -1085,7 +1086,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 .toArray(MenuItem[]::new));
 
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItem()));
+        newChart.setOnAction(event -> addToNewChartInCurrentWorksheet(treeView.getSelectionModel().getSelectedItems()));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }
