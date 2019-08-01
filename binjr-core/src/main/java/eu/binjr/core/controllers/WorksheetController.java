@@ -375,7 +375,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     .setIconStyleClass("settings-icon", "small-icon")
                     .bindBidirectionnal(ToggleButton::selectedProperty, currentChart.showPropertiesProperty())
                     .build(ToggleButton::new);
-            var toolBar = new ToolBar(editButton, closeButton);
+            var toolBar = new HBox(editButton, closeButton);
             toolBar.getStyleClass().add("worksheet-tool-bar");
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
             yAxis.getSelectionMarker().getChildren().add(toolBar);
@@ -635,7 +635,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
             visibleColumn.setSortable(false);
             visibleColumn.setResizable(false);
             visibleColumn.setPrefWidth(32);
-
             InvalidationListener isVisibleListener = (observable) -> {
                 boolean andAll = true;
                 boolean orAll = false;
@@ -678,7 +677,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
                 r.changed(null, null, null);
                 currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
-
             }));
 
             DecimalFormatTableCellFactory<TimeSeriesInfo, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
