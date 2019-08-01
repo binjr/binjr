@@ -828,7 +828,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     .setTooltip("Move the chart up the list.")
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("upArrow-icon", "small-icon")
-                    .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()))
+                    .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
+                    .bind(Node::disableProperty, Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), -1))
                     .build(Button::new);
             Button moveDownButton = new ToolButtonBuilder<Button>(bindingManager)
@@ -836,7 +837,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     .setTooltip("Move the chart down the list.")
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("downArrow-icon", "small-icon")
-                    .bind(Button::disableProperty, Bindings.createBooleanBinding(
+                    .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
+                    .bind(Node::disableProperty, Bindings.createBooleanBinding(
                             () -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), 1))
                     .build(Button::new);
@@ -1027,10 +1029,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 var treeItems = items.stream()
                         .flatMap(item -> TreeViewUtils.splitAboveLeaves(item, true).stream())
                         .collect(Collectors.toList());
-//                var totalBindings = treeItems.stream()
-//                        .map(treeItem -> TreeViewUtils.flattenLeaves(treeItem, true).size())
-//                        .reduce(0, Integer::sum);
-
                 var charts = new ArrayList<Chart>();
                 var totalBindings = 0;
                 for (var treeItem : treeItems) {
