@@ -1157,7 +1157,7 @@ public class MainViewController implements Initializable {
                     fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
                     zoneId = ZoneId.systemDefault();
                 }
-                WorksheetController.treeItemsAsChartList(rootItems).ifPresent(
+                WorksheetController.treeItemsAsChartList(rootItems, root).ifPresent(
                         charts -> editWorksheet(tabPane,
                                 new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
                                         charts,

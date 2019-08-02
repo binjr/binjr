@@ -1021,21 +1021,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void addToNewChart(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
         try {
-            treeItemsAsChartList(treeItems).ifPresent(charts -> worksheet.getCharts().addAll(charts));
+            treeItemsAsChartList(treeItems, root).ifPresent(charts -> worksheet.getCharts().addAll(charts));
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e, null);
         }
     }
 
-    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
         var charts = new ArrayList<Chart>();
         var totalBindings = 0;
-        Node dlgRoot = null;
         for (var treeItem : treeItems) {
-            //FIXME Find root node to attach dialog
-            if (dlgRoot == null){
-                dlgRoot =treeItem.getGraphic();
-            }
             for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
                 TimeSeriesBinding binding = t.getValue();
                 Chart chart = new Chart(
