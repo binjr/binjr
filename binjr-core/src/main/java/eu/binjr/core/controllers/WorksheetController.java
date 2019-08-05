@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import com.sun.glass.ui.Screen;
 import com.sun.javafx.charts.Legend;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
@@ -50,6 +51,7 @@ import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -91,6 +93,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
+    public static final int MAX_TEXTURE_SIZE = 8192;
 
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
@@ -1382,6 +1385,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
             snapImg = screenshotCanvas.snapshot(null, null);
+        } catch (Exception e) {
+            Dialogs.notifyException("Failed to create snapshot", e, root);
+            return;
         } finally {
             getWorksheet().setChartLegendsVisible(wasModeEdit);
             navigationToolbar.setManaged(true);
