@@ -416,14 +416,6 @@
     -fx-border-width: 0;
 }
 
-
-.skinnable-pane-border {
-    -fx-border-color: -binjr-pane-background-color;
-    -fx-border-width: 0;
-    -fx-padding: -1;
-    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
-}
-
 .table-view .column-header-background {
     -fx-border-width: 0;
     -fx-border-color: -binjr-gray-border-color;

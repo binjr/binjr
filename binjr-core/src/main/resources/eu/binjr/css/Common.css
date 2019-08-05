@@ -99,3 +99,11 @@
     -fx-border-insets: 0;
     -fx-background-insets: 0;
 }
+
+.skinnable-pane-border {
+    -fx-border-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: -1;
+    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
+}
+
