@@ -36,7 +36,7 @@
                  Platform="x64"
                  Compressed="yes"/>
 
-        <Icon Id="binjr.ico" SourceFile="$(var.resourcesDir)\resources\icons\binjr.ico"/>
+        <Icon Id="binjr.ico" SourceFile="$(var.resourcesDir)\platforms\windows\resources\icons\binjr.ico"/>
         <Property Id="ARPPRODUCTICON" Value="binjr.ico"/>
         <Property Id="ARPHELPLINK" Value="https://github.com/binjr/binjr/wiki"/>
         <Property Id="ARPURLINFOABOUT" Value="https://binjr.eu"/>
