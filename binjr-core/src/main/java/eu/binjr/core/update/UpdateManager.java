@@ -1,4 +1,20 @@
 /*
+ *    Copyright 2019 Frederic Thevenet
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+/*
  *    Copyright 2017-2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,13 +30,16 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.preferences;
+package eu.binjr.core.update;
 
 import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.OsFamily;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -66,6 +85,7 @@ public class UpdateManager {
     private Version updateVersion = null;
     private boolean restartRequested = false;
     private final GithubApiHelper github;
+    private final PlatformUpdater platformUpdater;
 
     private static class UpdateManagerHolder {
         private final static UpdateManager instance = new UpdateManager();
@@ -73,7 +93,7 @@ public class UpdateManager {
 
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.github = GithubApiHelper.createCloseable( URI.create("https://binjr.eu"));
+        this.github = GithubApiHelper.createCloseable(URI.create("https://binjr.eu"));
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
@@ -86,6 +106,19 @@ public class UpdateManager {
         github.setUserCredentials(
                 GlobalPreferences.getInstance().getGithubUserName(),
                 GlobalPreferences.getInstance().getGithubAuthToken());
+        switch (AppEnvironment.getInstance().getOsFamily()) {
+            case LINUX:
+                platformUpdater = new LinuxUpdater();
+                break;
+            case WINDOWS:
+                platformUpdater = new WindowsUpdater();
+                break;
+            case OSX:
+            case UNSUPPORTED:
+            default:
+                platformUpdater = new UnsupportedUpdater();
+                break;
+        }
     }
 
     /**
@@ -187,7 +220,7 @@ public class UpdateManager {
         AsyncTaskManager.getInstance().submit(getLatestTask);
     }
 
-    public void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
+    private void asyncDownloadUpdatePackage(GithubRelease release, Consumer<Path> onDownloadComplete, Consumer<Throwable> onFailure) {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
@@ -218,44 +251,7 @@ public class UpdateManager {
     public void startUpdate() {
         if (!AppEnvironment.getInstance().isDisableUpdateCheck() && updatePackage != null) {
             try {
-                ProcessBuilder processBuilder = new ProcessBuilder();
-                switch (AppEnvironment.getInstance().getOsFamily()) {
-                    case WINDOWS:
-                        Path installLauncherPath = Files.createTempFile("binjr-install-", ".bat");
-                        List<String> lines = new ArrayList<>();
-                        lines.add("echo off");
-                        lines.add("call msiexec /passive LAUNCHREQUESTED=" + (restartRequested ? "1" : "0") +
-                                " /log " + updatePackage.getParent().resolve("binjr-install.log").toString() +
-                                " /i " + updatePackage.toString());
-                        lines.add("del /Q /F " + updatePackage.toString() + "*");
-                        lines.add("(goto) 2>nul & del \"%~f0\"");
-                        Files.write(installLauncherPath, lines, StandardCharsets.US_ASCII);
-                        processBuilder.command(
-                                "cmd.exe",
-                                "/C",
-                                installLauncherPath.toString());
-                        break;
-                    case OSX:
-                    case LINUX:
-                        File jar = Paths.get(this.getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).toFile();
-                        File oldVersionDirectory = jar.getParentFile().getParentFile();
-                        File rootDirectory = oldVersionDirectory.getParentFile();
-                        File upgradeFile = new File(rootDirectory, "upgrade");
-                        Files.copy(new File(oldVersionDirectory, "resources/scripts/upgrade.sh").toPath(), upgradeFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
-                        processBuilder.directory();
-                        Map<String, String> environment = processBuilder.environment();
-                        environment.put("OLD_VERSION", oldVersionDirectory.getName());
-                        environment.put("NEW_VERSION", updateVersion.toString());
-                        environment.put("PACKAGE", updatePackage.toString());
-                        environment.put("RESTART", restartRequested ? "true" : "false");
-                        processBuilder.command(upgradeFile.getPath());
-                        break;
-                    case UNSUPPORTED:
-                    default:
-                        return;
-                }
-                logger.debug(() -> "Launching update command: " + processBuilder.command());
-                processBuilder.start();
+                platformUpdater.launchUpdater(updatePackage, updateVersion, restartRequested);
             } catch (Exception e) {
                 logger.error("Error starting update", e);
             }
@@ -279,7 +275,9 @@ public class UpdateManager {
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(root);
-        n.action(new Action("More info", event -> {
+        List<Action> actions = new ArrayList<>();
+        actions.add(
+                new Action("More info", event -> {
                     URL newReleaseUrl = release.getHtmlUrl();
                     if (newReleaseUrl != null) {
                         try {
@@ -288,18 +286,21 @@ public class UpdateManager {
                             logger.error("Failed to launch url in browser " + newReleaseUrl, e);
                         }
                     }
-                }),
-                new Action("Download update", event -> {
-                    UpdateManager.getInstance().asyncDownloadUpdatePackage(
-                            release,
-                            path -> {
-                                updatePackage = path;
-                                updateVersion = release.getVersion();
-                                showUpdateReadyNotification(root);
-                            },
-                            exception -> Dialogs.notifyException("Error downloading update", exception, root));
-                    dismissNotificationPopup((Node) event.getSource());
                 }));
+        if (platformUpdater.isInAppUpdateSupported()) {
+            actions.add(new Action("Download update", event -> {
+                this.asyncDownloadUpdatePackage(
+                        release,
+                        path -> {
+                            updatePackage = path;
+                            updateVersion = release.getVersion();
+                            showUpdateReadyNotification(root);
+                        },
+                        exception -> Dialogs.notifyException("Error downloading update", exception, root));
+                dismissNotificationPopup((Node) event.getSource());
+            }));
+        }
+        n.action(actions.toArray(Action[]::new));
         n.showInformation();
     }
 

@@ -56,7 +56,7 @@ public class AppEnvironment {
     private Optional<String> associatedWorkspace;
     private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
-    private final  BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
+    private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
 
 
     private static class EnvironmentHolder {
@@ -83,9 +83,9 @@ public class AppEnvironment {
     }
 
     /**
-     * Get the singleton instance for the {@link UpdateManager} class.
+     * Get the singleton instance for the {@link AppEnvironment} class.
      *
-     * @return the singleton instance for the {@link UpdateManager} class.
+     * @return the singleton instance for the {@link AppEnvironment} class.
      */
     public static AppEnvironment getInstance() {
         return EnvironmentHolder.instance;

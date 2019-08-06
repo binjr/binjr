@@ -23,7 +23,7 @@ import eu.binjr.core.dialogs.UserInterfaceThemes;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.NotificationDurationChoices;
-import eu.binjr.core.preferences.UpdateManager;
+import eu.binjr.core.update.UpdateManager;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;

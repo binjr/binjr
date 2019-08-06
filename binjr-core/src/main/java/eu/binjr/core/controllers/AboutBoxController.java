@@ -20,7 +20,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.SysInfoProperty;
-import eu.binjr.core.preferences.UpdateManager;
+import eu.binjr.core.update.UpdateManager;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
