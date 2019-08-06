@@ -248,7 +248,7 @@ task copyPluginLibs(type: Copy) {
     from project(":binjr-adapter-rrd4j").jar
 }
 
-task copyLauncher(type: Copy) {
+task copyPlatformSpecific(type: Copy) {
     into DISTRIBUTION_PATH
     from "${projectDir}/distribution/platforms/${OS_FAMILY}"
 }
@@ -400,7 +400,7 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyLauncher, markdownToHtml, createRuntimeImage]) {
+task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
     } else {

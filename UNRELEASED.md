@@ -1,1 +1,2 @@
 * _[Fixed]_ Prevent update check from proposing to download and install an update on macOS, as in-application installation does not work on this platform at the moment.
+* _[Fixed]_ Stop deploying all platform specific resources across all platform application bundles. 
