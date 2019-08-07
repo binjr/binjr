@@ -1,7 +1,7 @@
 #! /bin/sh
 
 (
-    echo "[$(date -Iseconds)] Updating binjr to version ${NEW_VERSION}" &&
+    echo "[$(date '+%Y-%m-%dT%H:%M:%S%z')] Updating binjr to version ${NEW_VERSION}" &&
         tar xzf "${PACKAGE}" "${NEW_VERSION}" &&
         (
             cd "./${OLD_VERSION}" &&
@@ -21,8 +21,8 @@
         rm -rf "./${OLD_VERSION}" &&
         rm "./upgrade" &&
         rm "${PACKAGE}" &&
-        echo "[$(date -Iseconds)] binjr succesfully updated to version ${NEW_VERSION}" ||
-        echo "[$(date -Iseconds)] Unable to update binjr to version ${NEW_VERSION}"
+        echo "[$(date '+%Y-%m-%dT%H:%M:%S%z')] binjr succesfully updated to version ${NEW_VERSION}" ||
+        echo "[$(date '+%Y-%m-%dT%H:%M:%S%z')] Unable to update binjr to version ${NEW_VERSION}"
 ) >> "binjr-install.log" 2>&1
 
 if "${RESTART}"; then
