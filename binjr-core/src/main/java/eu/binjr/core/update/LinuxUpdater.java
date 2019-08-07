@@ -41,7 +41,7 @@ public class LinuxUpdater implements PlatformUpdater {
         File oldVersionDirectory = jar.getParentFile().getParentFile();
         File rootDirectory = oldVersionDirectory.getParentFile();
         File upgradeFile = new File(rootDirectory, "upgrade");
-        Files.copy(new File(oldVersionDirectory, "resources/scripts/upgrade.sh").toPath(), upgradeFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+        Files.copy(new File(oldVersionDirectory, "resources/scripts/upgrade.sh").toPath(), upgradeFile.toPath(), StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
         processBuilder.directory();
         Map<String, String> environment = processBuilder.environment();
         environment.put("OLD_VERSION", oldVersionDirectory.getName());
