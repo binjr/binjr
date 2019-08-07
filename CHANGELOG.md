@@ -1,3 +1,9 @@
+## [binjr v2.6.1](https://github.com/binjr/binjr/releases/tag/v2.6.1)
+Released on Tue, 06 Aug 2019
+
+* _[Fixed]_ Prevent update check from proposing to download and install an update on macOS, as in-application installation does not work on this platform at the moment.
+* _[Fixed]_ Stop deploying all platform specific resources across all platform application bundles. 
+
 ## [binjr v2.6.0](https://github.com/binjr/binjr/releases/tag/v2.6.0)
 Released on Mon, 05 Aug 2019
 
