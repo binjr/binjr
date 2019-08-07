@@ -1,0 +1,1 @@
+* _[Fixed]_ Regression from 2.6.1 preventing the application to propose to download a new version and update on Linux.

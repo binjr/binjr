@@ -31,7 +31,7 @@ public class LinuxUpdater implements PlatformUpdater {
     private static final Logger logger = LogManager.getLogger(LinuxUpdater.class);
     @Override
     public boolean isInAppUpdateSupported() {
-        return false;
+        return true;
     }
 
     @Override
