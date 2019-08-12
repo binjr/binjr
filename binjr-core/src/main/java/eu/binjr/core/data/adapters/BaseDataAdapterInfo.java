@@ -41,6 +41,10 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final Class<? extends Dialog<DataAdapter>> adapterDialog;
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
 
+    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, null);
+    }
+
     protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends Dialog<DataAdapter>> dialogClass) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass);
     }
@@ -64,7 +68,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         Objects.requireNonNull(license);
         Objects.requireNonNull(siteUrl);
         Objects.requireNonNull(adapterClass);
-        Objects.requireNonNull(dialogClass);
+       // Objects.requireNonNull(dialogClass);
 
         this.name = name;
         this.description = description;

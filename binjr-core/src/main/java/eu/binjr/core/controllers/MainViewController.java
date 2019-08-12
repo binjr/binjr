@@ -600,7 +600,11 @@ public class MainViewController implements Initializable {
             MenuItem menuItem = new MenuItem(adapterInfo.getName());
             menuItem.setOnAction(eventHandler -> {
                 try {
-                    showAdapterDialog(DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root));
+                    if (adapterInfo.getAdapterDialog() != null) {
+                        DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root).showAndWait().ifPresent(this::addSource);
+                    }else{
+                        addSource(DataAdapterFactory.getInstance().newAdapter(adapterInfo.getKey()));
+                    }
                 } catch (NoAdapterFoundException e) {
                     Dialogs.notifyException("Could not find source adapter " + adapterInfo.getName(), e, root);
                 } catch (CannotInitializeDataAdapterException e) {
@@ -756,8 +760,8 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void showAdapterDialog(Dialog<DataAdapter> dlg) {
-        dlg.showAndWait().ifPresent(da -> {
+    private void addSource(DataAdapter da) {
+      //  dlg.showAndWait().ifPresent(da -> {
             Source newSource = Source.of(da);
             TitledPane newSourcePane = newSourcePane(newSource);
             sourceMaskerPane.setVisible(true);
@@ -780,7 +784,7 @@ public class MainViewController implements Initializable {
                                 event.getSource().getException(),
                                 root);
                     });
-        });
+      //  });
     }
 
     private void loadSource(Source source) throws DataAdapterException {
