@@ -27,7 +27,9 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.workspace.*;
+import eu.binjr.core.data.workspace.Source;
+import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.Workspace;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.dialogs.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -95,22 +97,18 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
-    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final String BINJR_FILE_PATTERN = "*.bjr";
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
-    public AnchorPane sourcePane;
-    public MenuItem hideSourcePaneMenu;
-    public StackPane newWorksheetDropTarget;
-
-    private Workspace workspace;
+    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
-
-    @FXML
-    private MenuButton worksheetMenu;
+    private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
+    public AnchorPane sourcePane;
+    public MenuItem hideSourcePaneMenu;
+    public StackPane newWorksheetDropTarget;
     @FXML
     public DrawerPane commandBar;
     @FXML
@@ -135,6 +133,9 @@ public class MainViewController implements Initializable {
     public StackPane sourceArea;
     List<TreeItem<TimeSeriesBinding>> searchResultSet;
     int currentSearchHit = -1;
+    private Workspace workspace;
+    @FXML
+    private MenuButton worksheetMenu;
     private Optional<String> associatedFile = Optional.empty();
     @FXML
     private Accordion sourcesPane;
@@ -154,8 +155,6 @@ public class MainViewController implements Initializable {
     private Menu addSourceMenu;
     @FXML
     private StackPane curtains;
-
-    private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -602,7 +601,7 @@ public class MainViewController implements Initializable {
                 try {
                     if (adapterInfo.getAdapterDialog() != null) {
                         DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root).showAndWait().ifPresent(this::addSource);
-                    }else{
+                    } else {
                         addSource(DataAdapterFactory.getInstance().newAdapter(adapterInfo.getKey()));
                     }
                 } catch (NoAdapterFoundException e) {
@@ -761,30 +760,28 @@ public class MainViewController implements Initializable {
     }
 
     private void addSource(DataAdapter da) {
-      //  dlg.showAndWait().ifPresent(da -> {
-            Source newSource = Source.of(da);
-            TitledPane newSourcePane = newSourcePane(newSource);
-            sourceMaskerPane.setVisible(true);
-            workspace.setPresentationMode(false);
-            AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
-                    event -> {
-                        sourceMaskerPane.setVisible(false);
-                        Optional<TreeView<TimeSeriesBinding>> treeView =
-                                (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
-                        if (treeView.isPresent()) {
-                            newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
-                            sourcesAdapters.put(newSourcePane, newSource);
-                            sourcesPane.getPanes().add(newSourcePane);
-                            newSourcePane.setExpanded(true);
-                        }
-                    },
-                    event -> {
-                        sourceMaskerPane.setVisible(false);
-                        Dialogs.notifyException("Unexpected error getting data adapter:",
-                                event.getSource().getException(),
-                                root);
-                    });
-      //  });
+        Source newSource = Source.of(da);
+        TitledPane newSourcePane = newSourcePane(newSource);
+        sourceMaskerPane.setVisible(true);
+        workspace.setPresentationMode(false);
+        AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
+                event -> {
+                    sourceMaskerPane.setVisible(false);
+                    Optional<TreeView<TimeSeriesBinding>> treeView =
+                            (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
+                    if (treeView.isPresent()) {
+                        newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
+                        sourcesAdapters.put(newSourcePane, newSource);
+                        sourcesPane.getPanes().add(newSourcePane);
+                        newSourcePane.setExpanded(true);
+                    }
+                },
+                event -> {
+                    sourceMaskerPane.setVisible(false);
+                    Dialogs.notifyException("Unexpected error getting data adapter:",
+                            event.getSource().getException(),
+                            root);
+                });
     }
 
     private void loadSource(Source source) throws DataAdapterException {
@@ -1393,12 +1390,12 @@ public class MainViewController implements Initializable {
         return treeItemDragAndDropInProgress.get();
     }
 
-    public BooleanProperty treeItemDragAndDropInProgressProperty() {
-        return treeItemDragAndDropInProgress;
-    }
-
     public void setTreeItemDragAndDropInProgress(boolean treeItemDragAndDropInProgress) {
         this.treeItemDragAndDropInProgress.set(treeItemDragAndDropInProgress);
+    }
+
+    public BooleanProperty treeItemDragAndDropInProgressProperty() {
+        return treeItemDragAndDropInProgress;
     }
 
     //endregion
