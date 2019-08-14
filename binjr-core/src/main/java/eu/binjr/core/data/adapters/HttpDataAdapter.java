@@ -16,10 +16,9 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.core.data.codec.Decoder;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.common.logging.Profiler;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthSchemeProvider;
@@ -29,6 +28,8 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.CookieSpecs;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.RegistryBuilder;
@@ -63,8 +64,8 @@ import java.util.*;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
-    private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
+    private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
     private final CloseableHttpClient httpClient;
     private URL baseAddress;
 
@@ -88,6 +89,35 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
         super();
         this.baseAddress = baseAddress;
         httpClient = httpClientFactory();
+    }
+
+    protected static SSLContext createSslCustomContext() {
+        // Load platform specific Trusted CA keystore
+        String keystoreType;
+        switch (AppEnvironment.getInstance().getOsFamily()) {
+            case WINDOWS:
+                keystoreType = "Windows-ROOT";
+                break;
+            case OSX:
+                keystoreType = "KeychainStore";
+                break;
+            case LINUX:
+            case UNSUPPORTED:
+            default:
+                logger.trace("No attempt to load system keystore on OS=" + AppEnvironment.getInstance().getOsFamily());
+                return SSLContexts.createSystemDefault();
+        }
+        try {
+            logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
+            KeyStore tks = KeyStore.getInstance(keystoreType);
+            tks.load(null, null);
+            return SSLContexts.custom().loadTrustMaterial(tks, null).build();
+        } catch (KeyStoreException e) {
+            logger.debug("Could not find the requested OS specific keystore", e);
+        } catch (Exception e) {
+            logger.debug("Error loading OS specific keystore", e);
+        }
+        return SSLContexts.createSystemDefault();
     }
 
     @Override
@@ -124,6 +154,7 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                     }
                 });
     }
+    //endregion
 
     @Override
     public void close() {
@@ -134,14 +165,13 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
         }
         super.close();
     }
-    //endregion
 
     protected <R> R doHttpGet(URI requestUri, ResponseHandler<R> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::trace)) {
             logger.debug(() -> "requestUri = " + requestUri);
             HttpGet httpget = new HttpGet(requestUri);
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", AppEnvironment.APP_NAME +"/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
+            httpget.setHeader("User-Agent", AppEnvironment.APP_NAME + "/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             R result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
                 throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() + "\" is null.");
@@ -180,35 +210,6 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
         }
     }
 
-    protected static SSLContext createSslCustomContext() {
-        // Load platform specific Trusted CA keystore
-        String keystoreType;
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            case WINDOWS:
-                keystoreType = "Windows-ROOT";
-                break;
-            case OSX:
-                keystoreType = "KeychainStore";
-                break;
-            case LINUX:
-            case UNSUPPORTED:
-            default:
-                logger.trace("No attempt to load system keystore on OS=" + AppEnvironment.getInstance().getOsFamily());
-                return SSLContexts.createSystemDefault();
-        }
-        try {
-            logger.trace(() -> "Available Java Security providers: " + Arrays.toString(Security.getProviders()));
-            KeyStore tks = KeyStore.getInstance(keystoreType);
-            tks.load(null, null);
-            return SSLContexts.custom().loadTrustMaterial(tks, null).build();
-        } catch (KeyStoreException e) {
-            logger.debug("Could not find the requested OS specific keystore", e);
-        } catch (Exception e) {
-            logger.debug("Error loading OS specific keystore", e);
-        }
-        return SSLContexts.createSystemDefault();
-    }
-
     protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
@@ -237,6 +238,7 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                     .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
                     .setDefaultCredentialsProvider(credsProvider)
                     .setSSLSocketFactory(csf)
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
                     .build();
         } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
