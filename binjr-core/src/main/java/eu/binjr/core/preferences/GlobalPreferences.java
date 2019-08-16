@@ -16,6 +16,7 @@
 
 package eu.binjr.core.preferences;
 
+import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.dialogs.UserInterfaceThemes;
 import javafx.beans.property.*;
 import javafx.geometry.Rectangle2D;
@@ -59,6 +60,7 @@ public class GlobalPreferences {
     private static final String CONSOLE_MAX_LINE_CAPACITY = "consoleMaxLineCapacity";
     private static final String FULL_HEIGHT_CROSSHAIR_MARKER = "fullHeightCrosshairVerticalMarker";
     private static final String MAX_ASYNC_TASKS_PARALLELISM = "maxAsyncTasksParallelism";
+    private static final String MAX_SUB_TASKS_PARALLELISM = "maxSubTasksParallelism";
     private static final String WINDOW_LAST_POSITION_X = "windowLastPositionX";
     private static final String WINDOW_LAST_POSITION_Y = "windowLastPositionY";
     private static final String WINDOW_LAST_POSITION_HEIGHT = "windowLastPositionHeight";
@@ -67,6 +69,10 @@ public class GlobalPreferences {
     private static final String GITHUB_USER_NAME = "githubUserName";
     private static final String GITHUB_AUTH_TOKEN = "githubAuthToken";
     private static final String  MAX_SERIES_PER_CHART_BEFORE_WARNING = "maxSeriesPerChartBeforeWarning";
+    private static final String ASYNC_THREAD_POOL_POLICY = "asyncThreadPoolPolicy";
+    private static final String SUB_TASKS_THREAD_POOL_POLICY = "subTasksThreadPoolPolicy";
+    private static final String ASYNC_TASKS_TIME_OUT_MS = "asyncTasksTimeOutMs";
+
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
     private final BooleanProperty downSamplingEnabled = new SimpleBooleanProperty();
@@ -86,14 +92,19 @@ public class GlobalPreferences {
     private final BooleanProperty loadPluginsFromExternalLocation = new SimpleBooleanProperty();
     private final IntegerProperty consoleMaxLineCapacity = new SimpleIntegerProperty();
     private final BooleanProperty fullHeightCrosshairMarker = new SimpleBooleanProperty();
+    private final Property<ThreadPoolPolicy> asyncThreadPoolPolicy = new SimpleObjectProperty<>();
+    private final Property<ThreadPoolPolicy> subTasksThreadPoolPolicy = new SimpleObjectProperty<>();
     private final IntegerProperty maxAsyncTasksParallelism = new SimpleIntegerProperty();
+    private final IntegerProperty maxSubTasksParallelism = new SimpleIntegerProperty();
     private final Property<Rectangle2D> windowLastPosition = new SimpleObjectProperty<>();
     private final StringProperty githubUserName = new SimpleStringProperty();
     private final StringProperty githubAuthToken = new SimpleStringProperty();
     private final IntegerProperty maxSeriesPerChartBeforeWarning = new SimpleIntegerProperty();
+    private final LongProperty asyncTasksTimeOutMs = new SimpleLongProperty();
 
     private final Preferences prefs;
     private Deque<String> recentFiles;
+
 
     private GlobalPreferences() {
         this.prefs = Preferences.userRoot().node(BINJR_GLOBAL);
@@ -114,11 +125,14 @@ public class GlobalPreferences {
         loadPluginsFromExternalLocation.addListener((observable, oldValue, newValue) -> prefs.putBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, newValue));
         checkForUpdateOnStartUp.addListener((observable, oldValue, newValue) -> prefs.putBoolean(CHECK_FOR_UPDATE_ON_START_UP, newValue));
         fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
+        maxSubTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SUB_TASKS_PARALLELISM, newValue.intValue()));
         maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
+        subTasksThreadPoolPolicy.addListener((observable, oldValue, newValue) -> prefs.put(SUB_TASKS_THREAD_POOL_POLICY, newValue.name()));
+        asyncThreadPoolPolicy.addListener((observable, oldValue, newValue) -> prefs.put(ASYNC_THREAD_POOL_POLICY, newValue.name()));
         githubUserName.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_USER_NAME, newValue));
         githubAuthToken.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_AUTH_TOKEN, newValue));
         maxSeriesPerChartBeforeWarning.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, newValue.intValue()));
-
+        asyncTasksTimeOutMs.addListener((observable, oldValue, newValue) -> prefs.putLong(ASYNC_TASKS_TIME_OUT_MS, newValue.longValue()));
         windowLastPosition.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.putDouble(WINDOW_LAST_POSITION_X, newValue.getMinX());
@@ -158,6 +172,10 @@ public class GlobalPreferences {
             loadPluginsFromExternalLocation.setValue(prefs.getBoolean(LOAD_PLUGINS_FROM_EXTERNAL_LOCATION, false));
             fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, true));
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
+            maxSubTasksParallelism.setValue(prefs.getInt(MAX_SUB_TASKS_PARALLELISM, 4));
+            asyncTasksTimeOutMs.setValue(prefs.getLong(ASYNC_TASKS_TIME_OUT_MS,120000 ));
+            asyncThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(ASYNC_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
+            subTasksThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(SUB_TASKS_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
             githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
             githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
             maxSeriesPerChartBeforeWarning.setValue(prefs.getInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, 50));
@@ -778,6 +796,54 @@ public class GlobalPreferences {
 
     public void setMaxSeriesPerChartBeforeWarning(int maxSeriesPerChartBeforeWarning) {
         this.maxSeriesPerChartBeforeWarning.set(maxSeriesPerChartBeforeWarning);
+    }
+
+    public ThreadPoolPolicy getAsyncThreadPoolPolicy() {
+        return asyncThreadPoolPolicy.getValue();
+    }
+
+    public Property<ThreadPoolPolicy> asyncThreadPoolPolicyProperty() {
+        return asyncThreadPoolPolicy;
+    }
+
+    public void setAsyncThreadPoolPolicy(ThreadPoolPolicy asyncThreadPoolPolicy) {
+        this.asyncThreadPoolPolicy.setValue(asyncThreadPoolPolicy);
+    }
+
+    public ThreadPoolPolicy getSubTasksThreadPoolPolicy() {
+        return subTasksThreadPoolPolicy.getValue();
+    }
+
+    public Property<ThreadPoolPolicy> subTasksThreadPoolPolicyProperty() {
+        return subTasksThreadPoolPolicy;
+    }
+
+    public void setSubTasksThreadPoolPolicy(ThreadPoolPolicy subTasksThreadPoolPolicy) {
+        this.subTasksThreadPoolPolicy.setValue(subTasksThreadPoolPolicy);
+    }
+
+    public int getMaxSubTasksParallelism() {
+        return maxSubTasksParallelism.get();
+    }
+
+    public IntegerProperty maxSubTasksParallelismProperty() {
+        return maxSubTasksParallelism;
+    }
+
+    public void setMaxSubTasksParallelism(int maxSubTasksParallelism) {
+        this.maxSubTasksParallelism.set(maxSubTasksParallelism);
+    }
+
+    public long getAsyncTasksTimeOutMs() {
+        return asyncTasksTimeOutMs.get();
+    }
+
+    public LongProperty asyncTasksTimeOutMsProperty() {
+        return asyncTasksTimeOutMs;
+    }
+
+    public void setAsyncTasksTimeOutMs(long asyncTasksTimeOutMs) {
+        this.asyncTasksTimeOutMs.set(asyncTasksTimeOutMs);
     }
 
     private static class GlobalPreferencesHolder {

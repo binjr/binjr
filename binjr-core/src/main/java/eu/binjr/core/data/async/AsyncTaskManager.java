@@ -33,21 +33,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class AsyncTaskManager {
     private static final Logger logger = LogManager.getLogger(AsyncTaskManager.class);
-    private final ExecutorService threadPool;
+    private final ExecutorService mainthreadPool;
+    private final ExecutorService subTaskThreadPool;
 
     private AsyncTaskManager() {
-        ThreadFactory threadFactory = new ThreadFactory() {
-            final AtomicInteger threadNum = new AtomicInteger();
-
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread thread = new Thread(r);
-                thread.setName("binjr-async-thread-" + threadNum.incrementAndGet());
-                thread.setDaemon(true);
-                return thread;
-            }
-        };
-        threadPool = Executors.newFixedThreadPool(GlobalPreferences.getInstance().getMaxAsyncTasksParallelism(), threadFactory);
+        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        mainthreadPool = threadPoolFactory("binjr-async",
+                prefs.getAsyncThreadPoolPolicy(),
+                prefs.getMaxAsyncTasksParallelism());
+        subTaskThreadPool = threadPoolFactory("binjr-sub-tasks",
+                prefs.getSubTasksThreadPoolPolicy(),
+                prefs.getMaxSubTasksParallelism());
     }
 
     /**
@@ -68,7 +64,7 @@ public class AsyncTaskManager {
      */
     public <V> Future<?> submit(Task<V> task) {
         logger.trace(() -> "Task " + task.toString() + " submitted");
-        return threadPool.submit(task);
+        return mainthreadPool.submit(task);
     }
 
     /**
@@ -91,9 +87,44 @@ public class AsyncTaskManager {
         t.setOnFailed(onFailed);
         logger.trace(() -> "Task " + t.toString() + " submitted");
 
-        return threadPool.submit(t);
+        return mainthreadPool.submit(t);
     }
 
+    public Future<?> submitSubTask(Runnable action) {
+        logger.trace(() -> "Submiting runnable directly on the thread pool");
+        return subTaskThreadPool.submit(action);
+    }
+
+    private ExecutorService threadPoolFactory(String name, ThreadPoolPolicy policy, int parallelism) {
+        ThreadFactory threadFactory = new ThreadFactory() {
+            final AtomicInteger threadNum = new AtomicInteger();
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread thread = new Thread(r);
+                thread.setName(name + "-thread-" + threadNum.incrementAndGet());
+                thread.setDaemon(true);
+                return thread;
+            }
+        };
+        ExecutorService threadPool;
+        switch (policy) {
+            case FIXED:
+                threadPool = Executors.newFixedThreadPool(parallelism, threadFactory);
+                logger.trace(() -> name + " fixed pool thread started with " + parallelism + "  threads");
+                break;
+            case WORK_STEALING:
+                threadPool = Executors.newWorkStealingPool(parallelism);
+                logger.trace(() -> name + " work stealing pool thread started with parallelism level: " +parallelism);
+                break;
+            default:
+            case CACHED:
+                threadPool = Executors.newCachedThreadPool(threadFactory);
+                logger.trace(() -> name + "cached pool thread started");
+                break;
+        }
+        return threadPool;
+    }
 
     private static class AsyncTaskManagerHolder {
         private static final AsyncTaskManager instance = new AsyncTaskManager();

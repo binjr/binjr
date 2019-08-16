@@ -878,12 +878,15 @@ public class MainViewController implements Initializable {
                 tab = entry.getKey();
             }
         }
+        Worksheet worksheet = worksheetCtrl.getWorksheet();
+        if (worksheet == null) {
+            throw new IllegalStateException("WorksheetController is not associated to a valid Worksheet");
+        }
         if (tab == null) {
-            throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheetCtrl.getName());
+            throw new IllegalStateException("cannot find associated tab or WorksheetController for " + worksheet.getName());
         }
         seriesControllers.remove(tab);
         tab.setContent(null);
-        Worksheet worksheet = worksheetCtrl.getWorksheet();
         worksheetCtrl.close();
         loadWorksheet(worksheet, tab, false);
     }

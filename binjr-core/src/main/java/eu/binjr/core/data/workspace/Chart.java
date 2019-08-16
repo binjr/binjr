@@ -17,6 +17,7 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
@@ -31,9 +32,12 @@ import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -49,7 +53,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class Chart implements Dirtyable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-
+    private transient final ChangeWatcher status;
     @IsDirtyable
     private ObservableList<TimeSeriesInfo> series;
     @IsDirtyable
@@ -72,9 +76,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     private DoubleProperty yAxisMinValue;
     @IsDirtyable
     private DoubleProperty yAxisMaxValue;
-
     private transient BooleanProperty showProperties;
-    private transient final ChangeWatcher status;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -193,21 +195,48 @@ public class Chart implements Dirtyable, AutoCloseable {
             var adapter = byAdapterEntry.getKey();
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            var latch = new CountDownLatch(bindingsByPath.entrySet().size());
+            var errors = new ArrayList<DataAdapterException>();
             for (var byPathEntry : bindingsByPath.entrySet()) {
-                String path = byPathEntry.getKey();
-                // Get data from the adapter
-                var data = adapter.fetchData(
-                        path,
-                        startTime.toInstant(),
-                        endTime.toInstant(),
-                        byPathEntry.getValue(),
-                        bypassCache);
-                // Applying sample reduction
-                data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                //Update timeSeries data
-                for (var seriesInfo : data.keySet()) {
-                    seriesInfo.setProcessor(data.get(seriesInfo));
+                AsyncTaskManager.getInstance().submitSubTask(
+                        () -> {
+                            try {
+                                String path = byPathEntry.getKey();
+                                logger.trace("Fetch sub-task '" + path + "' started");
+                                // Get data from the adapter
+                                var data = adapter.fetchData(
+                                        path,
+                                        startTime.toInstant(),
+                                        endTime.toInstant(),
+                                        byPathEntry.getValue(),
+                                        bypassCache);
+                                // Applying sample reduction
+                                data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
+                                //Update timeSeries data
+                                for (var seriesInfo : data.keySet()) {
+                                    seriesInfo.setProcessor(data.get(seriesInfo));
+                                }
+                            } catch (DataAdapterException t) {
+                                logger.error(t);
+                                errors.add(t);
+                            } finally {
+                                logger.trace("Fetch sub-task 'for path'" + byPathEntry.getKey() + "' done");
+                                latch.countDown();
+                            }
+                        });
+            }
+            try {
+                if (!latch.await(GlobalPreferences.getInstance().getAsyncTasksTimeOutMs(), TimeUnit.MILLISECONDS)) {
+                    throw new DataAdapterException("Waiting for fetch sub-tasks to complete aborted");
                 }
+                if (!errors.isEmpty()) {
+                    for (var t : errors) {
+                        //FIXME only first exception is rethrown
+                        throw t;
+                    }
+                }
+            } catch (InterruptedException e) {
+                throw new DataAdapterException("Async fetch task interrupted", e);
             }
         }
     }
@@ -260,19 +289,19 @@ public class Chart implements Dirtyable, AutoCloseable {
     /**
      * The name of the {@link Worksheet}
      *
-     * @return An instance of {@link Property} for the name of the {@link Worksheet}
+     * @param name the name of the {@link Worksheet}
      */
-    public Property<String> nameProperty() {
-        return name;
+    public void setName(String name) {
+        this.name.setValue(name);
     }
 
     /**
      * The name of the {@link Worksheet}
      *
-     * @param name the name of the {@link Worksheet}
+     * @return An instance of {@link Property} for the name of the {@link Worksheet}
      */
-    public void setName(String name) {
-        this.name.setValue(name);
+    public Property<String> nameProperty() {
+        return name;
     }
 
     /**
@@ -301,19 +330,19 @@ public class Chart implements Dirtyable, AutoCloseable {
     /**
      * The type of chart hosted by the  {@link Worksheet}
      *
-     * @return An instance of {@link Property} for the type of chart hosted by the  {@link Worksheet}
+     * @param chartType the type of chart hosted by the {@link Worksheet}
      */
-    public Property<ChartType> chartTypeProperty() {
-        return chartType;
+    public void setChartType(ChartType chartType) {
+        this.chartType.setValue(chartType);
     }
 
     /**
      * The type of chart hosted by the  {@link Worksheet}
      *
-     * @param chartType the type of chart hosted by the {@link Worksheet}
+     * @return An instance of {@link Property} for the type of chart hosted by the  {@link Worksheet}
      */
-    public void setChartType(ChartType chartType) {
-        this.chartType.setValue(chartType);
+    public Property<ChartType> chartTypeProperty() {
+        return chartType;
     }
 
     /**
@@ -329,19 +358,19 @@ public class Chart implements Dirtyable, AutoCloseable {
     /**
      * The unit for the {@link Worksheet}'s times series Y axis
      *
-     * @return An instance of {@link Property} for the unit for the {@link Worksheet}'s times series Y axis
+     * @param unit the unit for the {@link Worksheet}'s times series Y axis
      */
-    public Property<String> unitProperty() {
-        return unit;
+    public void setUnit(String unit) {
+        this.unit.setValue(unit);
     }
 
     /**
      * The unit for the {@link Worksheet}'s times series Y axis
      *
-     * @param unit the unit for the {@link Worksheet}'s times series Y axis
+     * @return An instance of {@link Property} for the unit for the {@link Worksheet}'s times series Y axis
      */
-    public void setUnit(String unit) {
-        this.unit.setValue(unit);
+    public Property<String> unitProperty() {
+        return unit;
     }
 
     /**
@@ -357,19 +386,19 @@ public class Chart implements Dirtyable, AutoCloseable {
     /**
      * The unit prefix for the {@link Worksheet}'s times series Y axis
      *
-     * @return An instance of {@link Property} for the unit prefix for the {@link Worksheet}'s times series Y axis
+     * @param unitPrefixes the unit prefix for the {@link Worksheet}'s times series Y axis
      */
-    public Property<UnitPrefixes> unitPrefixesProperty() {
-        return unitPrefixes;
+    public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
+        this.unitPrefixes.setValue(unitPrefixes);
     }
 
     /**
      * The unit prefix for the {@link Worksheet}'s times series Y axis
      *
-     * @param unitPrefixes the unit prefix for the {@link Worksheet}'s times series Y axis
+     * @return An instance of {@link Property} for the unit prefix for the {@link Worksheet}'s times series Y axis
      */
-    public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
-        this.unitPrefixes.setValue(unitPrefixes);
+    public Property<UnitPrefixes> unitPrefixesProperty() {
+        return unitPrefixes;
     }
 
     /**
@@ -383,21 +412,21 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The graphOpacity property
-     *
-     * @return the graphOpacity property
-     */
-    public DoubleProperty graphOpacityProperty() {
-        return graphOpacity;
-    }
-
-    /**
      * Sets the opacity factor to apply the the graph
      *
      * @param graphOpacity the opacity factor to apply the the graph
      */
     public void setGraphOpacity(double graphOpacity) {
         this.graphOpacity.set(graphOpacity);
+    }
+
+    /**
+     * The graphOpacity property
+     *
+     * @return the graphOpacity property
+     */
+    public DoubleProperty graphOpacityProperty() {
+        return graphOpacity;
     }
 
     /**
@@ -411,21 +440,21 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The showAreaOutline property
-     *
-     * @return The showAreaOutline property
-     */
-    public BooleanProperty showAreaOutlineProperty() {
-        return showAreaOutline;
-    }
-
-    /**
      * Set to true if area charts should display an outline stroke, false otherwise
      *
      * @param showAreaOutline true if area charts should display an outline stroke, false otherwise
      */
     public void setShowAreaOutline(boolean showAreaOutline) {
         this.showAreaOutline.set(showAreaOutline);
+    }
+
+    /**
+     * The showAreaOutline property
+     *
+     * @return The showAreaOutline property
+     */
+    public BooleanProperty showAreaOutlineProperty() {
+        return showAreaOutline;
     }
 
     /**
@@ -492,12 +521,12 @@ public class Chart implements Dirtyable, AutoCloseable {
         return autoScaleYAxis.get();
     }
 
-    public BooleanProperty autoScaleYAxisProperty() {
-        return autoScaleYAxis;
-    }
-
     public void setAutoScaleYAxis(boolean autoScaleYAxis) {
         this.autoScaleYAxis.set(autoScaleYAxis);
+    }
+
+    public BooleanProperty autoScaleYAxisProperty() {
+        return autoScaleYAxis;
     }
 
     @XmlAttribute
@@ -505,12 +534,12 @@ public class Chart implements Dirtyable, AutoCloseable {
         return yAxisMinValue.getValue();
     }
 
-    public DoubleProperty yAxisMinValueProperty() {
-        return yAxisMinValue;
-    }
-
     public void setyAxisMinValue(double yAxisMinValue) {
         this.yAxisMinValue.setValue(yAxisMinValue);
+    }
+
+    public DoubleProperty yAxisMinValueProperty() {
+        return yAxisMinValue;
     }
 
     @XmlAttribute
@@ -518,12 +547,12 @@ public class Chart implements Dirtyable, AutoCloseable {
         return yAxisMaxValue.getValue();
     }
 
-    public DoubleProperty yAxisMaxValueProperty() {
-        return yAxisMaxValue;
-    }
-
     public void setyAxisMaxValue(double yAxisMaxValue) {
         this.yAxisMaxValue.setValue(yAxisMaxValue);
+    }
+
+    public DoubleProperty yAxisMaxValueProperty() {
+        return yAxisMaxValue;
     }
 
     @XmlTransient
@@ -531,12 +560,12 @@ public class Chart implements Dirtyable, AutoCloseable {
         return showProperties.get();
     }
 
-    public BooleanProperty showPropertiesProperty() {
-        return showProperties;
-    }
-
     public void setShowProperties(boolean showProperties) {
         this.showProperties.set(showProperties);
+    }
+
+    public BooleanProperty showPropertiesProperty() {
+        return showProperties;
     }
 }
 

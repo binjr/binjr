@@ -154,9 +154,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
     @FXML
     private HBox navigationToolbar;
     private ChartViewportsState currentState;
-    private String name;
+
     private Pane worksheetTitleBlock;
     private VBox screenshotCanvas;
+    private Profiler worksheetRefreshProfiler = null;
 
     public WorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -224,14 +225,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return propertiesController;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     /**
      * Returns the {@link Worksheet} instance associated with this controller
      *
@@ -256,6 +249,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
         try {
             worksheetMaskerPane.visibleProperty().bind(nbBusyPlotTasks.greaterThan(0));
+            worksheetMaskerPane.visibleProperty().addListener((observable, oldValue, newValue) -> {
+                if (!oldValue & newValue) {
+                    worksheetRefreshProfiler = Profiler.start(
+                            "Worksheet " + getWorksheet().getName() + " refresh total elapsed time",
+                            logger::info);
+                } else if (oldValue & !newValue) {
+                    worksheetRefreshProfiler.close();
+                }
+            });
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();

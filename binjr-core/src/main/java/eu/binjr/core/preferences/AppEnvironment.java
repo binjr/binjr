@@ -16,8 +16,8 @@
 
 package eu.binjr.core.preferences;
 
-import eu.binjr.core.dialogs.ConsoleStage;
 import eu.binjr.common.version.Version;
+import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.stage.StageStyle;
@@ -37,6 +37,8 @@ import java.util.jar.Manifest;
 
 /**
  * Provides access to the application's environmental properties
+ *
+ * @author Frederic Thevenet
  */
 public class AppEnvironment {
     public static final String APP_NAME = "binjr";
@@ -46,22 +48,18 @@ public class AppEnvironment {
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2019 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
+    private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
+    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
     private final Property<Level> logLevel = new SimpleObjectProperty<>();
-    private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private final Manifest manifest;
-    private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty updateCheckDisabled = new SimpleBooleanProperty(false);
-    private Optional<String> associatedWorkspace;
     private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
     private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
+    private Optional<String> associatedWorkspace;
 
-
-    private static class EnvironmentHolder {
-        private final static AppEnvironment instance = new AppEnvironment();
-    }
 
     private AppEnvironment() {
         this.manifest = getManifest();
@@ -268,21 +266,21 @@ public class AppEnvironment {
     }
 
     /**
-     * Set to true to enable debug mode, set to false to disable it.
-     *
-     * @param value true to enable debug mode, set to false to disable it.
-     */
-    public void setDebugMode(boolean value) {
-        debugMode.setValue(value);
-    }
-
-    /**
      * Returns true is debug mode is enabled, false otherwise.
      *
      * @return true is debug mode is enabled, false otherwise.
      */
     public boolean isDebugMode() {
         return debugMode.get();
+    }
+
+    /**
+     * Set to true to enable debug mode, set to false to disable it.
+     *
+     * @param value true to enable debug mode, set to false to disable it.
+     */
+    public void setDebugMode(boolean value) {
+        debugMode.setValue(value);
     }
 
     /**
@@ -304,6 +302,15 @@ public class AppEnvironment {
     }
 
     /**
+     * Sets the root log level.
+     *
+     * @param logLevel the root log level.
+     */
+    public void setLogLevel(Level logLevel) {
+        this.logLevel.setValue(logLevel);
+    }
+
+    /**
      * The logLevel property.
      *
      * @return The logLevel property.
@@ -322,15 +329,6 @@ public class AppEnvironment {
     }
 
     /**
-     * The resizableDialogs property.
-     *
-     * @return the resizableDialogs property.
-     */
-    public BooleanProperty resizableDialogsProperty() {
-        return resizableDialogs;
-    }
-
-    /**
      * Set to true if modal dialogs should be resizable, false otherwise.
      *
      * @param value true if modal dialogs should be resizable, false otherwise.
@@ -340,12 +338,12 @@ public class AppEnvironment {
     }
 
     /**
-     * Sets the root log level.
+     * The resizableDialogs property.
      *
-     * @param logLevel the root log level.
+     * @return the resizableDialogs property.
      */
-    public void setLogLevel(Level logLevel) {
-        this.logLevel.setValue(logLevel);
+    public BooleanProperty resizableDialogsProperty() {
+        return resizableDialogs;
     }
 
     /**
@@ -376,10 +374,6 @@ public class AppEnvironment {
         return updateCheckDisabled.getValue();
     }
 
-    public void setWindowsStyle(StageStyle windowsStyle) {
-        this.windowsStyle.setValue(windowsStyle);
-    }
-
     public Property<StageStyle> windowsStyleProperty() {
         return windowsStyle;
     }
@@ -388,24 +382,28 @@ public class AppEnvironment {
         return windowsStyle.getValue();
     }
 
-    public String getUpdateRepoSlug() {
-        return updateRepoSlug.get();
+    public void setWindowsStyle(StageStyle windowsStyle) {
+        this.windowsStyle.setValue(windowsStyle);
     }
 
-    public StringProperty updateRepoSlugProperty() {
-        return updateRepoSlug;
+    public String getUpdateRepoSlug() {
+        return updateRepoSlug.get();
     }
 
     public void setUpdateRepoSlug(String updateRepoSlug) {
         this.updateRepoSlug.set(updateRepoSlug);
     }
 
-    public void setSignatureVerificationDisabled(boolean value) {
-        signatureVerificationDisabled.setValue(value);
+    public StringProperty updateRepoSlugProperty() {
+        return updateRepoSlug;
     }
 
     public boolean isSignatureVerificationDisabled() {
         return signatureVerificationDisabled.get();
+    }
+
+    public void setSignatureVerificationDisabled(boolean value) {
+        signatureVerificationDisabled.setValue(value);
     }
 
     public BooleanProperty signatureVerificationDisabledProperty() {
@@ -423,5 +421,9 @@ public class AppEnvironment {
                 committedMB,
                 usedMB
         );
+    }
+
+    private static class EnvironmentHolder {
+        private final static AppEnvironment instance = new AppEnvironment();
     }
 }
