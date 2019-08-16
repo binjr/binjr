@@ -52,13 +52,7 @@ public final class TextFlowAppender extends AbstractAppender {
     private final Lock renderTextLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
-
-    public Set<Text> getLogBuffer() {
-        return logBuffer.keySet();
-    }
-
     private final LogBuffer<Text, Object> logBuffer = new LogBuffer<>();
-
     private Consumer<Set<Text>> renderTextDelegate;
 
     protected TextFlowAppender(String name, Filter filter,
@@ -107,7 +101,11 @@ public final class TextFlowAppender extends AbstractAppender {
         return new TextFlowAppender(name, filter, layout, true);
     }
 
-    public void setRenderTextDelegate(Consumer<Set<Text>> delegate){
+    public Set<Text> getLogBuffer() {
+        return logBuffer.keySet();
+    }
+
+    public void setRenderTextDelegate(Consumer<Set<Text>> delegate) {
         this.renderTextDelegate = delegate;
     }
 
@@ -135,18 +133,18 @@ public final class TextFlowAppender extends AbstractAppender {
     }
 
     private void refreshTextFlow() {
-        if (renderTextLock.tryLock()) {
-            try {
-                if (renderTextDelegate != null && logBuffer.isDirty()) {
-                    logBuffer.clean();
-                    Dialogs.runOnFXThread(() -> {
+        Dialogs.runOnFXThread(() -> {
+            if (renderTextLock.tryLock()) {
+                try {
+                    if (renderTextDelegate != null && logBuffer.isDirty()) {
+                        logBuffer.clean();
                         renderTextDelegate.accept(logBuffer.keySet());
-                    });
+                    }
+                } finally {
+                    renderTextLock.unlock();
                 }
-            } finally {
-                renderTextLock.unlock();
             }
-        }
+        });
     }
 
     private class LogBuffer<K, V> extends LinkedHashMap<K, V> {
