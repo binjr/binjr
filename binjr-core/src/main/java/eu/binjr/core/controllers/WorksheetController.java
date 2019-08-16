@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import com.sun.glass.ui.Screen;
 import com.sun.javafx.charts.Legend;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
@@ -30,7 +29,6 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -47,11 +45,13 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
-import javafx.geometry.*;
+import javafx.geometry.HPos;
+import javafx.geometry.Pos;
+import javafx.geometry.Side;
+import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -93,14 +93,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    public static final int MAX_TEXTURE_SIZE = 8192;
-
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
     private final MainViewController parentController;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final BindingManager bindingManager = new BindingManager();
-
+    private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
     @FXML
     public AnchorPane root;
     protected List<ChartViewPort> viewPorts = new ArrayList<>();
@@ -182,6 +180,36 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
     }
 
+    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
+        var charts = new ArrayList<Chart>();
+        var totalBindings = 0;
+        for (var treeItem : treeItems) {
+            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
+                TimeSeriesBinding binding = t.getValue();
+                Chart chart = new Chart(
+                        binding.getLegend(),
+                        binding.getGraphType(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix()
+                );
+                for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
+                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
+                    totalBindings++;
+                }
+                charts.add(chart);
+            }
+        }
+        if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+            if (Dialogs.confirmDialog(dlgRoot,
+                    "This action will add " + totalBindings + " series on a single worksheet.",
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(charts);
+    }
+
     private ChartPropertiesController buildChartPropertiesController(Chart chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ChartPropertiesView.fxml"));
         ChartPropertiesController propertiesController = new ChartPropertiesController(getWorksheet(), chart);
@@ -196,11 +224,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return propertiesController;
     }
 
-    //region [Properties]
     public String getName() {
         return name;
     }
-    //endregion
 
     public void setName(String name) {
         this.name = name;
@@ -229,6 +255,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
 
         try {
+            worksheetMaskerPane.visibleProperty().bind(nbBusyPlotTasks.greaterThan(0));
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();
@@ -597,9 +624,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
         addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
-        for (ChartViewPort viewPort : viewPorts) {
-            currentState.get(viewPort.getDataStore()).ifPresent(state -> plotChart(viewPort, state.asSelection(), true));
-        }
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
         timeRangePicker.initSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
@@ -1030,36 +1054,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
-        var charts = new ArrayList<Chart>();
-        var totalBindings = 0;
-        for (var treeItem : treeItems) {
-            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
-                TimeSeriesBinding binding = t.getValue();
-                Chart chart = new Chart(
-                        binding.getLegend(),
-                        binding.getGraphType(),
-                        binding.getUnitName(),
-                        binding.getUnitPrefix()
-                );
-                for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
-                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
-                    totalBindings++;
-                }
-                charts.add(chart);
-            }
-        }
-        if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
-            if (Dialogs.confirmDialog(dlgRoot,
-                    "This action will add " + totalBindings + " series on a single worksheet.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                return Optional.empty();
-            }
-        }
-        return Optional.of(charts);
-    }
-
     private void addToCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems, Chart targetChart) {
         try {
             // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
@@ -1082,7 +1076,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     return m;
                 })
                 .toArray(MenuItem[]::new));
-
         MenuItem newChart = new MenuItem("Add to new chart");
         newChart.setOnAction(event -> addToNewChart(treeView.getSelectionModel().getSelectedItems()));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
@@ -1266,7 +1259,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void plotChart(ChartViewPort viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::trace)) {
-            worksheetMaskerPane.setVisible(true);
+            nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
             AsyncTaskManager.getInstance().submit(() -> {
                         viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
                         return viewPort.getDataStore().getSeries()
@@ -1286,34 +1279,38 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                 .collect(Collectors.toList());
                     },
                     event -> {
-                        if (!closed.get()) {
-                            worksheetMaskerPane.setVisible(false);
-                            viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                            for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
-                                if (n instanceof Legend) {
-                                    int i = 0;
-                                    for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
-                                        legendItem.getSymbol().setStyle("-fx-background-color: " +
-                                                colorToRgbaString(viewPort.getDataStore()
-                                                        .getSeries()
-                                                        .stream()
-                                                        .filter(TimeSeriesInfo::isSelected)
-                                                        .collect(Collectors.toList())
-                                                        .get(i)
-                                                        .getDisplayColor()));
-                                        i++;
+                        try {
+                            if (!closed.get()) {
+                                nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
+                                viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                                for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
+                                    if (n instanceof Legend) {
+                                        int i = 0;
+                                        for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
+                                            legendItem.getSymbol().setStyle("-fx-background-color: " +
+                                                    colorToRgbaString(viewPort.getDataStore()
+                                                            .getSeries()
+                                                            .stream()
+                                                            .filter(TimeSeriesInfo::isSelected)
+                                                            .collect(Collectors.toList())
+                                                            .get(i)
+                                                            .getDisplayColor()));
+                                            i++;
+                                        }
                                     }
                                 }
+                                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                                    // Force a redraw of the charts and their Y Axis considering their proper width.
+                                    new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                                }
                             }
-                            if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
-                                // Force a redraw of the charts and their Y Axis considering their proper width.
-                                new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
-                            }
+                        } catch (Exception e) {
+                            Dialogs.notifyException("Unexpected error while plotting data", e, root);
                         }
                     },
                     event -> {
                         if (!closed.get()) {
-                            worksheetMaskerPane.setVisible(false);
+                            nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
                             Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
                         }
                     });
