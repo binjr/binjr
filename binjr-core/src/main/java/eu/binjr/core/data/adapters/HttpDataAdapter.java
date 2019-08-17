@@ -39,6 +39,7 @@ import org.apache.http.impl.client.AbstractResponseHandler;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -233,8 +234,11 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                             return null;
                         }
                     });
-
+            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+            cm.setDefaultMaxPerRoute(16);
+            cm.setMaxTotal(100);
             return HttpClients.custom()
+                    .setConnectionManager(cm)
                     .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
                     .setDefaultCredentialsProvider(credsProvider)
                     .setSSLSocketFactory(csf)
