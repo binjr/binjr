@@ -72,6 +72,7 @@ public class GlobalPreferences {
     private static final String ASYNC_THREAD_POOL_POLICY = "asyncThreadPoolPolicy";
     private static final String SUB_TASKS_THREAD_POOL_POLICY = "subTasksThreadPoolPolicy";
     private static final String ASYNC_TASKS_TIME_OUT_MS = "asyncTasksTimeOutMs";
+    private static final String MIN_CHARS_TREE_FILTERING = "minCharsTreeFiltering";
 
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -101,7 +102,7 @@ public class GlobalPreferences {
     private final StringProperty githubAuthToken = new SimpleStringProperty();
     private final IntegerProperty maxSeriesPerChartBeforeWarning = new SimpleIntegerProperty();
     private final LongProperty asyncTasksTimeOutMs = new SimpleLongProperty();
-
+    private final IntegerProperty minCharsTreeFiltering = new SimpleIntegerProperty();
     private final Preferences prefs;
     private Deque<String> recentFiles;
 
@@ -127,6 +128,7 @@ public class GlobalPreferences {
         fullHeightCrosshairMarker.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, newValue));
         maxSubTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SUB_TASKS_PARALLELISM, newValue.intValue()));
         maxAsyncTasksParallelism.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_ASYNC_TASKS_PARALLELISM, newValue.intValue()));
+        minCharsTreeFiltering.addListener((observable, oldValue, newValue) -> prefs.putInt(MIN_CHARS_TREE_FILTERING, newValue.intValue()));
         subTasksThreadPoolPolicy.addListener((observable, oldValue, newValue) -> prefs.put(SUB_TASKS_THREAD_POOL_POLICY, newValue.name()));
         asyncThreadPoolPolicy.addListener((observable, oldValue, newValue) -> prefs.put(ASYNC_THREAD_POOL_POLICY, newValue.name()));
         githubUserName.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_USER_NAME, newValue));
@@ -173,6 +175,7 @@ public class GlobalPreferences {
             fullHeightCrosshairMarker.setValue(prefs.getBoolean(FULL_HEIGHT_CROSSHAIR_MARKER, true));
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
             maxSubTasksParallelism.setValue(prefs.getInt(MAX_SUB_TASKS_PARALLELISM, 4));
+            minCharsTreeFiltering.setValue(prefs.getInt(MIN_CHARS_TREE_FILTERING, 3));
             asyncTasksTimeOutMs.setValue(prefs.getLong(ASYNC_TASKS_TIME_OUT_MS,120000 ));
             asyncThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(ASYNC_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
             subTasksThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(SUB_TASKS_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
@@ -844,6 +847,18 @@ public class GlobalPreferences {
 
     public void setAsyncTasksTimeOutMs(long asyncTasksTimeOutMs) {
         this.asyncTasksTimeOutMs.set(asyncTasksTimeOutMs);
+    }
+
+    public int getMinCharsTreeFiltering() {
+        return minCharsTreeFiltering.get();
+    }
+
+    public IntegerProperty minCharsTreeFilteringProperty() {
+        return minCharsTreeFiltering;
+    }
+
+    public void setMinCharsTreeFiltering(int minCharsTreeFiltering) {
+        this.minCharsTreeFiltering.set(minCharsTreeFiltering);
     }
 
     private static class GlobalPreferencesHolder {

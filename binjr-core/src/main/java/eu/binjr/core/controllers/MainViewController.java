@@ -841,7 +841,9 @@ public class MainViewController implements Initializable {
         treeView.setMaxHeight(Double.MAX_VALUE);
         treeView.setId("sourceTreeView");
         ((FilterableTreeItem<TimeSeriesBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
-                    if (!source.isFilterable() || filterField.getText() == null || filterField.getText().isEmpty())
+                    if (!source.isFilterable() ||
+                            filterField.getText() == null ||
+                            filterField.getText().length() < GlobalPreferences.getInstance().getMinCharsTreeFiltering())
                         return null;
                     return (TreeItemPredicate<TimeSeriesBinding>) (parent, seriesBinding) -> {
                         var isMatch = seriesBinding != null && StringUtils.contains(
