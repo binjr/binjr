@@ -52,6 +52,9 @@ Licensed under the [MIT License](https://opensource.org/licenses/MIT)
 **Eclipse Implementation of JAXB**  
 Licensed under the [Eclipse Distribution License v. 1.0](https://www.eclipse.org/org/documents/edl-v10.html).
 
+**e(fx)clipse**  
+Licensed under the [Eclipse Distribution License v. 1.0](https://www.eclipse.org/org/documents/edl-v10.html).
+
 **Font Awesome Free**  
 by @fontawesome - https://fontawesome.com  
 License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
