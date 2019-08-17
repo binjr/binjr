@@ -203,9 +203,9 @@ configure(subprojects) {
         }
     }
 
-    signing {
-        sign publishing.publications.mavenJava
-    }
+//    signing {
+//        sign publishing.publications.mavenJava
+//    }
 
     nexusPublishing {
         packageGroup = rootProject.nexusStaging.packageGroup

@@ -157,8 +157,8 @@ public class GlobalPreferences {
     private void load() {
         try {
             recentFiles = Arrays.stream(prefs.get(RECENT_FILES, "").split("\\|")).filter(s -> s != null && s.trim().length() > 0).collect(Collectors.toCollection(ArrayDeque::new));
-            showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, false));
-            defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.8d));
+            showAreaOutline.setValue(prefs.getBoolean(SHOW_AREA_OUTLINE, true));
+            defaultGraphOpacity.setValue(prefs.getDouble(DEFAULT_GRAPH_OPACITY, 0.45d));
             verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
             horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
             checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
