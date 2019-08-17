@@ -18,6 +18,7 @@ package eu.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.adapters.HttpDataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -27,7 +28,6 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.sources.jrds.adapters.json.JsonJrdsItem;
 import eu.binjr.sources.jrds.adapters.json.JsonJrdsTree;
-import eu.binjr.common.xml.XmlUtils;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import org.apache.http.HttpEntity;
@@ -66,16 +66,16 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class JrdsDataAdapter extends HttpDataAdapter {
-    private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
-    private static final char DELIMITER = ',';
     public static final String JRDS_FILTER = "filter";
     public static final String JRDS_TREE = "tree";
-
     protected static final String ENCODING_PARAM_NAME = "encoding";
     protected static final String ZONE_ID_PARAM_NAME = "zoneId";
     protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
-    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
+    private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
+    private static final char DELIMITER = ',';
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
+    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
+    private CsvDecoder decoder;
     private String filter;
     private ZoneId zoneId;
     private String encoding;
@@ -107,6 +107,13 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
         this.filter = filter;
+        this.decoder = new CsvDecoder(getEncoding(), DELIMITER,
+                DoubleTimeSeriesProcessor::new,
+                s -> {
+                    Double val = Double.parseDouble(s);
+                    return val.isNaN() ? 0 : val;
+                },
+                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
     }
 
     /**
@@ -217,14 +224,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     @Override
     public CsvDecoder getDecoder() {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(getTimeZoneId());
-        return new CsvDecoder(getEncoding(), DELIMITER,
-                DoubleTimeSeriesProcessor::new,
-                s -> {
-                    Double val = Double.parseDouble(s);
-                    return val.isNaN() ? 0 : val;
-                },
-                s -> ZonedDateTime.parse(s, formatter));
+       return decoder;
     }
 
     @Override
