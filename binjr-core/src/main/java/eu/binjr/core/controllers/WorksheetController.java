@@ -253,7 +253,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 if (!oldValue & newValue) {
                     worksheetRefreshProfiler = Profiler.start(
                             "Worksheet " + getWorksheet().getName() + " refresh total elapsed time",
-                            logger::info);
+                            logger::trace);
                 } else if (oldValue & !newValue) {
                     worksheetRefreshProfiler.close();
                 }
