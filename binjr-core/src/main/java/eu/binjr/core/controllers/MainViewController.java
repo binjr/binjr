@@ -98,7 +98,7 @@ public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-    private static final String BINJR_FILE_PATTERN = "*.bjr";
+    private static final String[] BINJR_FILE_PATTERN = new String[]{ "*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
@@ -743,7 +743,7 @@ public class MainViewController implements Initializable {
         fileChooser.setTitle("Save Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
         fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
-        fileChooser.setInitialFileName(BINJR_FILE_PATTERN);
+        fileChooser.setInitialFileName(BINJR_FILE_PATTERN[0]);
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
