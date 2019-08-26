@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,8 +14,9 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.dialogs;
+package eu.binjr.core.appearance;
 
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.animation.FadeTransition;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
  * Manages the appearance of registered {@link Stage} instances.
  */
 public class StageAppearanceManager {
+
     /**
      * Defines a set of options that governs that what degree a the appearance of a registered {@link Stage} should be
      * affected.
@@ -115,6 +117,8 @@ public class StageAppearanceManager {
         registeredStages.remove(stage);
         logger.trace(this::dumpRegisteredStages);
     }
+
+
 
     private Node installCurtain(Stage stage) {
         if (stage.getScene() != null &&  stage.getScene().getRoot() instanceof Pane) {
@@ -217,7 +221,7 @@ public class StageAppearanceManager {
             scene.getStylesheets().addAll(
                     getClass().getResource(getFontFamilyCssPath()).toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
-                    getClass().getResource(theme.getCssPath()).toExternalForm(),
+                    theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
         });
     }
@@ -233,6 +237,7 @@ public class StageAppearanceManager {
                 return "/eu/binjr/css/Fonts-family-mac.css";
         }
     }
+
 
     public void applyUiTheme(Scene scene) {
         setUiTheme(scene, GlobalPreferences.getInstance().getUserInterfaceTheme());

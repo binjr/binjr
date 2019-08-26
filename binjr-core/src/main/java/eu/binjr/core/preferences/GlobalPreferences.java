@@ -17,7 +17,8 @@
 package eu.binjr.core.preferences;
 
 import eu.binjr.core.data.async.ThreadPoolPolicy;
-import eu.binjr.core.dialogs.UserInterfaceThemes;
+import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
+import eu.binjr.core.appearance.UserInterfaceThemes;
 import javafx.beans.property.*;
 import javafx.geometry.Rectangle2D;
 import javafx.util.Duration;
@@ -162,7 +163,7 @@ public class GlobalPreferences {
             verticalMarkerOn.setValue(prefs.getBoolean(VERTICAL_MARKER_ON, true));
             horizontalMarkerOn.setValue(prefs.getBoolean(HORIZONTAL_MARKER_ON, false));
             checkForUpdateOnStartUp.setValue(prefs.getBoolean(CHECK_FOR_UPDATE_ON_START_UP, true));
-            userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, ""), UserInterfaceThemes.LIGHT));
+            userInterfaceTheme.setValue(UserInterfaceThemes.valueOf(prefs.get(UI_THEME_NAME, ""), BuiltInUserInterfaceThemes.LIGHT));
             loadLastWorkspaceOnStartup.setValue(prefs.getBoolean(LOAD_LAST_WORKSPACE_ON_STARTUP, true));
             mostRecentSavedWorkspace.setValue(Paths.get(prefs.get(MOST_RECENT_SAVED_WORKSPACE, "Untitled")));
             downSamplingThreshold.setValue(prefs.getInt(DOWN_SAMPLING_THRESHOLD, 3000));

@@ -19,7 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.dialogs.UserInterfaceThemes;
+import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.preferences.NotificationDurationChoices;

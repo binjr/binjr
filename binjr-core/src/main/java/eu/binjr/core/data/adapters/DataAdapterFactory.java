@@ -169,7 +169,7 @@ public class DataAdapterFactory {
             loadFromServiceLoader(
                     ServiceLoader.load(
                             DataAdapterInfo.class,
-                            new URLClassLoader(urls.toArray(new URL[0]),Thread.currentThread().getContextClassLoader())
+                            new URLClassLoader(urls.toArray(URL[]::new),Thread.currentThread().getContextClassLoader())
                     )
             );
         }

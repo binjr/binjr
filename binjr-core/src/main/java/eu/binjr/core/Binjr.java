@@ -19,7 +19,7 @@ package eu.binjr.core;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.controllers.MainViewController;
-import eu.binjr.core.dialogs.StageAppearanceManager;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Application;

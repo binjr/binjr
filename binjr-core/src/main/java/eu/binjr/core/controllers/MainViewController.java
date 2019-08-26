@@ -31,7 +31,7 @@ import eu.binjr.core.data.workspace.Source;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.Workspace;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.dialogs.StageAppearanceManager;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import eu.binjr.core.update.UpdateManager;

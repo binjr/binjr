@@ -18,6 +18,7 @@ package eu.binjr.core.dialogs;
 
 import eu.binjr.core.controllers.OutputConsoleController;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;

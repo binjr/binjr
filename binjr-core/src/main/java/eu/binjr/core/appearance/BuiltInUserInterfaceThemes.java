@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2019 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,16 +14,16 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.dialogs;
+package eu.binjr.core.appearance;
 
 import java.util.Objects;
 
 /**
- * An enumeration of supported user interface themes
+ * An enumeration of built-in user interface themes
  *
  * @author Frederic Thevenet
  */
-public enum UserInterfaceThemes {
+public enum BuiltInUserInterfaceThemes implements UserInterfaceThemes {
     LIGHT("Light", "/eu/binjr/css/Light.css"),
     DARK("Dark", "/eu/binjr/css/Dark.css"),
     CLASSIC("Classic", "/eu/binjr/css/Classic.css");
@@ -31,7 +31,7 @@ public enum UserInterfaceThemes {
     private final String cssPath;
     private final String label;
 
-    UserInterfaceThemes(String label, String cssPath) {
+    BuiltInUserInterfaceThemes(String label, String cssPath) {
         this.label = label;
         this.cssPath = cssPath;
     }
@@ -57,10 +57,10 @@ public enum UserInterfaceThemes {
      * @param defaultValue the default to return is no entry matches the provided name.
      * @return the enum entry corresponding to the provided string is it exists, otherwise returns the specified default.
      */
-    public static UserInterfaceThemes valueOf(String name, UserInterfaceThemes defaultValue) {
+    public static BuiltInUserInterfaceThemes valueOf(String name, BuiltInUserInterfaceThemes defaultValue) {
         Objects.requireNonNull(defaultValue, "Default value cannot be null.");
         try {
-            return UserInterfaceThemes.valueOf(name);
+            return BuiltInUserInterfaceThemes.valueOf(name);
         } catch (IllegalArgumentException e) {
             return defaultValue;
         }
