@@ -74,6 +74,7 @@ public class GlobalPreferences {
     private static final String SUB_TASKS_THREAD_POOL_POLICY = "subTasksThreadPoolPolicy";
     private static final String ASYNC_TASKS_TIME_OUT_MS = "asyncTasksTimeOutMs";
     private static final String MIN_CHARS_TREE_FILTERING = "minCharsTreeFiltering";
+    private static final String HTTP_POOLING_ENABLED = "httpPoolingEnabled";
 
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -104,6 +105,7 @@ public class GlobalPreferences {
     private final IntegerProperty maxSeriesPerChartBeforeWarning = new SimpleIntegerProperty();
     private final LongProperty asyncTasksTimeOutMs = new SimpleLongProperty();
     private final IntegerProperty minCharsTreeFiltering = new SimpleIntegerProperty();
+    private final BooleanProperty httpPoolingEnabled = new SimpleBooleanProperty();
     private final Preferences prefs;
     private Deque<String> recentFiles;
 
@@ -136,6 +138,7 @@ public class GlobalPreferences {
         githubAuthToken.addListener((observable, oldValue, newValue) -> prefs.put(GITHUB_AUTH_TOKEN, newValue));
         maxSeriesPerChartBeforeWarning.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, newValue.intValue()));
         asyncTasksTimeOutMs.addListener((observable, oldValue, newValue) -> prefs.putLong(ASYNC_TASKS_TIME_OUT_MS, newValue.longValue()));
+        httpPoolingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HTTP_POOLING_ENABLED, newValue));
         windowLastPosition.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.putDouble(WINDOW_LAST_POSITION_X, newValue.getMinX());
@@ -183,6 +186,7 @@ public class GlobalPreferences {
             githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
             githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
             maxSeriesPerChartBeforeWarning.setValue(prefs.getInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, 50));
+            httpPoolingEnabled.setValue(prefs.getBoolean(HTTP_POOLING_ENABLED, true));
             windowLastPosition.setValue(new Rectangle2D(
                     prefs.getDouble(WINDOW_LAST_POSITION_X, Double.MAX_VALUE),
                     prefs.getDouble(WINDOW_LAST_POSITION_Y, Double.MAX_VALUE),
@@ -860,6 +864,18 @@ public class GlobalPreferences {
 
     public void setMinCharsTreeFiltering(int minCharsTreeFiltering) {
         this.minCharsTreeFiltering.set(minCharsTreeFiltering);
+    }
+
+    public boolean isHttpPoolingEnabled() {
+        return httpPoolingEnabled.get();
+    }
+
+    public BooleanProperty httpPoolingEnabledProperty() {
+        return httpPoolingEnabled;
+    }
+
+    public void setHttpPoolingEnabled(boolean httpPoolingEnabled) {
+        this.httpPoolingEnabled.set(httpPoolingEnabled);
     }
 
     private static class GlobalPreferencesHolder {

@@ -19,6 +19,7 @@ package eu.binjr.core.data.adapters;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.GlobalPreferences;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthSchemeProvider;
@@ -32,7 +33,10 @@ import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.conn.socket.ConnectionSocketFactory;
+import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.auth.SPNegoSchemeFactory;
 import org.apache.http.impl.client.AbstractResponseHandler;
@@ -146,12 +150,14 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
         baseAddress = validateParameter(params, BASE_ADDRESS_PARAM_NAME,
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter " + BASE_ADDRESS_PARAM_NAME + " is missing in adapter " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter " + BASE_ADDRESS_PARAM_NAME +
+                                " is missing in adapter " + getSourceName());
                     }
                     try {
                         return baseAddress = new URL(s);
                     } catch (MalformedURLException e) {
-                        throw new InvalidAdapterParameterException("Value provided for parameter " + BASE_ADDRESS_PARAM_NAME + " is not valid in adapter " + getSourceName(), e);
+                        throw new InvalidAdapterParameterException("Value provided for parameter " +
+                                BASE_ADDRESS_PARAM_NAME + " is not valid in adapter " + getSourceName(), e);
                     }
                 });
     }
@@ -175,7 +181,8 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
             httpget.setHeader("User-Agent", AppEnvironment.APP_NAME + "/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             R result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
-                throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() + "\" is null.");
+                throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() +
+                        "\" is null.");
             }
             return result;
         } catch (HttpResponseException e) {
@@ -191,7 +198,8 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                     msg = "The resource at \"" + requestUri.toString() + "\" could not be found.";
                     break;
                 case 500:
-                    msg = "A server-side error has occurred while trying to access the resource at \"" + requestUri.toString() + "\": " + e.getMessage();
+                    msg = "A server-side error has occurred while trying to access the resource at \""
+                            + requestUri.toString() + "\": " + e.getMessage();
                     break;
                 default:
                     msg = "Error executing HTTP request \"" + requestUri.toString() + "\": " + e.getMessage();
@@ -201,11 +209,14 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
         } catch (UnknownHostException e) {
-            throw new SourceCommunicationException("Host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\" could not be found.", e);
+            throw new SourceCommunicationException("Host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":"
+                    + baseAddress.getPort() : "") + "\" could not be found.", e);
         } catch (SSLHandshakeException e) {
-            throw new SourceCommunicationException("An error occurred while negotiating connection security: " + e.getMessage(), e);
+            throw new SourceCommunicationException("An error occurred while negotiating connection security: " +
+                    e.getMessage(), e);
         } catch (IOException e) {
-            throw new SourceCommunicationException("IO error while communicating with host \"" + baseAddress.getHost() + (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\": " + e.getMessage(), e);
+            throw new SourceCommunicationException("IO error while communicating with host \"" + baseAddress.getHost() +
+                    (baseAddress.getPort() > 0 ? ":" + baseAddress.getPort() : "") + "\": " + e.getMessage(), e);
         } catch (Exception e) {
             throw new SourceCommunicationException("Unexpected error in HTTP GET: " + e.getMessage(), e);
         }
@@ -234,18 +245,30 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                             return null;
                         }
                     });
-            PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
-            cm.setDefaultMaxPerRoute(16);
-            cm.setMaxTotal(100);
-            return HttpClients.custom()
-                    .setConnectionManager(cm)
+
+            var clientBuilder = HttpClients.custom()
                     .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
                     .setDefaultCredentialsProvider(credsProvider)
                     .setSSLSocketFactory(csf)
-                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
-                    .build();
+                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
+
+            if (GlobalPreferences.getInstance().isHttpPoolingEnabled()) {
+                Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
+                        .<ConnectionSocketFactory>create()
+                        .register("https", csf)
+                        .register("http", new PlainConnectionSocketFactory())
+                        .build();
+                PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
+                cm.setDefaultMaxPerRoute(16);
+                cm.setMaxTotal(100);
+                clientBuilder.setConnectionManager(cm);
+                logger.trace("Http client connection pooling is enabled");
+            }
+            return clientBuilder.build();
+
         } catch (Exception e) {
-            throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" + this.getSourceName() + "': " + e.getMessage(), e);
+            throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" +
+                    this.getSourceName() + "': " + e.getMessage(), e);
         }
     }
 
