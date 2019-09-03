@@ -22,6 +22,11 @@ import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 
+/**
+ * The implementation of {@link PlatformUpdater} for unsupported platforms.
+ *
+ * @author Frederic Thevenet
+ */
 public class UnsupportedUpdater implements PlatformUpdater {
     private static final Logger logger = LogManager.getLogger(UnsupportedUpdater.class);
 

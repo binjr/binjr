@@ -39,6 +39,8 @@ import java.util.stream.Collectors;
 
 /**
  * Manages the appearance of registered {@link Stage} instances.
+ *
+ * @author Frederic Thevenet
  */
 public class StageAppearanceManager {
 

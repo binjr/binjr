@@ -25,6 +25,8 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 /**
  * Represents a single parameter used to confidure a {@link DataAdapter} instance.
+ *
+ * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "parameter")

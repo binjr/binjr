@@ -27,6 +27,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The implementation of {@link PlatformUpdater} for the Windows platform.
+ *
+ * @author Frederic Thevenet
+ */
 public class WindowsUpdater implements PlatformUpdater {
     private static final Logger logger = LogManager.getLogger(WindowsUpdater.class);
 

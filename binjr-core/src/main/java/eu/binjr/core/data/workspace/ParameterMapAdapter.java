@@ -22,6 +22,8 @@ import java.util.stream.Collectors;
 
 /**
  * An {@link XmlAdapter} used to marshal/unmarchal {@link DataAdapterParameters} instance to and from XML.
+ *
+ * @author Frederic Thevenet
  */
 public class ParameterMapAdapter extends XmlAdapter<DataAdapterParameters, Map<String, String>> {
     public ParameterMapAdapter() {

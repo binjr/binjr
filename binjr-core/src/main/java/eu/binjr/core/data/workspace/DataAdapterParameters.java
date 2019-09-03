@@ -23,6 +23,8 @@ import java.util.List;
 
 /**
  * Wraps a collection of of {@link DataAdapterParameter} instances.
+ *
+ * @author Frederic Thevenet
  */
 public class DataAdapterParameters {
     @XmlElements(@XmlElement(name = "AdapterParameter"))

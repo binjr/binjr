@@ -27,8 +27,14 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
+/**
+ * The implementation of {@link PlatformUpdater} for the Linux platform.
+ *
+ * @author Frederic Thevenet
+ */
 public class LinuxUpdater implements PlatformUpdater {
     private static final Logger logger = LogManager.getLogger(LinuxUpdater.class);
+
     @Override
     public boolean isInAppUpdateSupported() {
         return true;

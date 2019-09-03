@@ -22,6 +22,8 @@ import java.util.Map;
 
 /**
  * Represents a single sample/record from a csv file
+ *
+ * @author Frederic Thevenet
  */
 public class DataSample {
     private final ZonedDateTime timeStamp;
