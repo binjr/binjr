@@ -119,9 +119,8 @@ public class StageAppearanceManager {
     }
 
 
-
     private Node installCurtain(Stage stage) {
-        if (stage.getScene() != null &&  stage.getScene().getRoot() instanceof Pane) {
+        if (stage.getScene() != null && stage.getScene().getRoot() instanceof Pane) {
             ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/eu/binjr/images/avatar_512.png")));
             logo.setFitHeight(256.0);
             logo.setFitWidth(256.0);

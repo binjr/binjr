@@ -17,6 +17,7 @@
 package eu.binjr.core.data.adapters;
 
 
+import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
@@ -53,9 +54,13 @@ public class DataAdapterFactory {
      */
     private DataAdapterFactory() {
         registeredAdapters = new HashMap<>();
-        // An exception here could present the app from  starting
+        // An exception here could prevent the app from  starting
         try {
-            this.loadAdapters();
+            for (var dataAdapterInfo : ServiceLoaderHelper.load(DataAdapterInfo.class,
+                    GlobalPreferences.getInstance().getPluginsLocation(),
+                    GlobalPreferences.getInstance().isLoadPluginsFromExternalLocation())) {
+                registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
+            }
         } catch (Throwable e) {
             logger.error("Error loading adapters", e);
         }
@@ -131,60 +136,6 @@ public class DataAdapterFactory {
             return retrieveAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of adapter " + key, e);
-        }
-    }
-
-    private void loadAdapters() {
-        // Load plugins from classpath
-        loadFromServiceLoader(ServiceLoader.load(DataAdapterInfo.class));
-        //Load plugin from external folder
-        if (GlobalPreferences.getInstance().isLoadPluginsFromExternalLocation()) {
-            List<URL> urls = new ArrayList<>();
-            if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
-                logger.info(() -> "Looking for plugins in " + GlobalPreferences.getInstance().getPluginsLocation());
-                PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
-                try {
-                    Files.walkFileTree(GlobalPreferences.getInstance().getPluginsLocation(),
-                            EnumSet.noneOf(FileVisitOption.class),
-                            1,
-                            new SimpleFileVisitor<Path>() {
-                                @Override
-                                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                                    if (jarMatcher.matches(file)) {
-                                        logger.debug(() -> "Inspecting " + file.getFileName() + " for DataAdapter service implementations");
-                                        urls.add(file.toUri().toURL());
-                                    }
-                                    return FileVisitResult.CONTINUE;
-                                }
-                            });
-                } catch (IOException e) {
-                    logger.error("Error while scanning for plugins: " + e.getMessage());
-                    if (logger.isDebugEnabled()) {
-                        logger.debug("Stack trace", e);
-                    }
-                }
-            } else {
-                logger.warn("Plugins location " + GlobalPreferences.getInstance().getPluginsLocation() + " does not exist.");
-            }
-            loadFromServiceLoader(
-                    ServiceLoader.load(
-                            DataAdapterInfo.class,
-                            new URLClassLoader(urls.toArray(URL[]::new),Thread.currentThread().getContextClassLoader())
-                    )
-            );
-        }
-    }
-
-    private void loadFromServiceLoader(ServiceLoader<DataAdapterInfo> sl) {
-        for (DataAdapterInfo dataAdapterInfo : sl) {
-            try {
-                registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
-                logger.debug(() -> "Successfully registered DataAdapterInfo " + dataAdapterInfo.toString() + " from external JAR.");
-            } catch (ServiceConfigurationError sce) {
-                logger.error("Failed to load DataAdapter", sce);
-            } catch (Exception e) {
-                logger.error("Unexpected error while loading DataAdapter", e);
-            }
         }
     }
 

@@ -16,6 +16,8 @@
 
 package eu.binjr.core.appearance;
 
+import eu.binjr.common.plugins.ServiceLoaderHelper;
+import eu.binjr.core.preferences.GlobalPreferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,27 +29,27 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 public interface UserInterfaceThemes {
-    static final Logger logger = LogManager.getLogger(UserInterfaceThemes.class);
-    Set<UserInterfaceThemes> registeredUiThemes = loadUiThemes();
+    Logger logger = LogManager.getLogger(UserInterfaceThemes.class);
 
-    private static Set<UserInterfaceThemes> loadUiThemes() {
-        Set<UserInterfaceThemes> themes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
-        try {
-            for (UserInterfaceThemes userInterfaceTheme : ServiceLoader.load(UserInterfaceThemes.class)) {
-                try {
-                    themes.add(userInterfaceTheme);
-                    logger.debug(() -> "Successfully registered UserInterfaceTheme " + userInterfaceTheme.toString());
-                } catch (ServiceConfigurationError sce) {
-                    logger.error("Failed to load UserInterfaceTheme", sce);
-                } catch (Exception e) {
-                    logger.error("Unexpected error while loading UserInterfaceTheme", e);
-                }
+    class UiThemesHolder {
+        private final static Set<UserInterfaceThemes> instance = loadUiThemes();
+
+        private static Set<UserInterfaceThemes> loadUiThemes() {
+            Set<UserInterfaceThemes> themes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
+            try {
+                themes.addAll(ServiceLoaderHelper.load(UserInterfaceThemes.class,
+                        GlobalPreferences.getInstance().getPluginsLocation(),
+                        GlobalPreferences.getInstance().isLoadPluginsFromExternalLocation()));
+            } catch (Throwable t) {
+                logger.error("Failed to load UserInterfaceThemes from plugin: " + t.getMessage());
+                logger.debug(() -> "Complete stack", t);
             }
-        } catch (Throwable t) {
-            logger.error("Failed to load UserInterfaceThemes from plugin: " + t.getMessage());
-            logger.debug(() -> "Complete stack", t);
+            return themes;
         }
-        return themes;
+    }
+
+    static Set<UserInterfaceThemes> getRegisteredUiThemes() {
+        return UiThemesHolder.instance;
     }
 
     /**
@@ -56,7 +58,7 @@ public interface UserInterfaceThemes {
      * @return all the registered instance of the {@link UserInterfaceThemes} interface.
      */
     static UserInterfaceThemes[] values() {
-        return registeredUiThemes.toArray(UserInterfaceThemes[]::new);
+        return getRegisteredUiThemes().toArray(UserInterfaceThemes[]::new);
     }
 
     /**
@@ -71,7 +73,7 @@ public interface UserInterfaceThemes {
         try {
             return BuiltInUserInterfaceThemes.valueOf(name);
         } catch (IllegalArgumentException e) {
-            for (var t : registeredUiThemes) {
+            for (var t : getRegisteredUiThemes()) {
                 if (t.name().equals(name)) {
                     return t;
                 }
