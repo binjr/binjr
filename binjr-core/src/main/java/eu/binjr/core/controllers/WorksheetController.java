@@ -248,16 +248,18 @@ public class WorksheetController implements Initializable, AutoCloseable {
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
 
         try {
-            worksheetMaskerPane.visibleProperty().bind(nbBusyPlotTasks.greaterThan(0));
-            worksheetMaskerPane.visibleProperty().addListener((observable, oldValue, newValue) -> {
-                if (!oldValue & newValue) {
-                    worksheetRefreshProfiler = Profiler.start(
-                            "Worksheet " + getWorksheet().getName() + " refresh total elapsed time",
-                            logger::trace);
-                } else if (oldValue & !newValue) {
-                    worksheetRefreshProfiler.close();
-                }
-            });
+            bindingManager.bind(worksheetMaskerPane.visibleProperty(), nbBusyPlotTasks.greaterThan(0));
+            bindingManager.attachListener(worksheetMaskerPane.visibleProperty(),
+                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                        if (!oldValue & newValue) {
+                            worksheetRefreshProfiler = Profiler.start(
+                                    "Worksheet " + getWorksheet().getName() + " refresh total elapsed time",
+                                    logger::trace);
+                        } else if (oldValue & !newValue) {
+                            worksheetRefreshProfiler.close();
+                        }
+                    }
+            );
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();
@@ -1074,12 +1076,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 .stream()
                 .map(c -> {
                     MenuItem m = new MenuItem(c.getName());
-                    m.setOnAction(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), c));
+                    m.setOnAction(bindingManager.registerHandler(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), c)));
                     return m;
                 })
                 .toArray(MenuItem[]::new));
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction(event -> addToNewChart(treeView.getSelectionModel().getSelectedItems()));
+        newChart.setOnAction((bindingManager.registerHandler(event -> addToNewChart(treeView.getSelectionModel().getSelectedItems()))));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }

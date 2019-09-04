@@ -19,14 +19,9 @@ package eu.binjr.core.dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.application.Platform;
-import javafx.event.ActionEvent;
-import javafx.event.Event;
-import javafx.event.EventHandler;
-import javafx.event.WeakEventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
-import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
@@ -39,10 +34,8 @@ import org.controlsfx.dialog.ExceptionDialog;
 
 import java.awt.*;
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.function.Supplier;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -104,7 +97,7 @@ public class Dialogs {
         runOnFXThread(() -> {
             ExceptionDialog dlg = new ExceptionDialog(e);
             dlg.initStyle(StageStyle.UTILITY);
-            dlg.initOwner(getStage(owner));
+            dlg.initOwner(org.controlsfx.tools.Utils.getWindow(owner));
             dlg.getDialogPane().setHeaderText(header);
             dlg.showAndWait();
         });
