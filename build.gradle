@@ -22,8 +22,7 @@ import java.text.SimpleDateFormat
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id 'io.codearte.nexus-staging' version '0.21.0'
-    id "de.marcphilipp.nexus-publish" version "0.2.0" apply false
+    id "de.marcphilipp.nexus-publish" version "0.3.1" apply false
     id "signing"
 }
 
@@ -82,12 +81,6 @@ System.out.println("Tag name:${System.getenv('REPO_TAG_NAME')}")
 
 if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
-}
-
-nexusStaging {
-    username = System.getenv('OSSRH_JIRA_USERNAME')
-    password = System.getenv('OSSRH_JIRA_PASSWORD')
-    packageGroup = GROUP_ID
 }
 
 configure(subprojects) {
@@ -208,17 +201,16 @@ configure(subprojects) {
     }
 
     nexusPublishing {
-        packageGroup = rootProject.nexusStaging.packageGroup
-        stagingProfileId = rootProject.nexusStaging.stagingProfileId
-        username = rootProject.nexusStaging.username
-        password = rootProject.nexusStaging.password
+        repositories {
+            sonatype {
+                username = System.getenv('OSSRH_JIRA_USERNAME')
+                password = System.getenv('OSSRH_JIRA_PASSWORD')
+            }
+        }
     }
 }
 
-task publishArtifacts(dependsOn: subprojects.publishToNexus) {
-    if (IS_RELEASE) {
-        //  finalizedBy(closeAndReleaseRepository)
-    }
+task publishArtifacts(dependsOn: subprojects.publishToSonatype) {
     doLast {
         System.out.println("Done publishing artifacts from subprojects.")
     }
@@ -355,11 +347,11 @@ task packageDistributionZip(type: Zip) {
 }
 
 task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
-        workingDir DISTRIBUTION_ROOT
-        commandLine = [
-                "sh", "-c",
-                "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
-        ]
+    workingDir DISTRIBUTION_ROOT
+    commandLine = [
+            "sh", "-c",
+            "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
+    ]
 }
 
 task wixRunHeat(type: Exec/*, dependsOn: [packageDistributionZip]*/) {
@@ -408,7 +400,7 @@ task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyP
     }
 }
 
-task packageDistribution(type:WrapTaskForSigning, dependsOn: [makeAppBundle] ){
+task packageDistribution(type: WrapTaskForSigning, dependsOn: [makeAppBundle]) {
     from "${buildDir}/${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
@@ -434,7 +426,7 @@ class WrapTaskForSigning extends AbstractArchiveTask {
     protected CopyAction createCopyAction() {
         return new noopCopyAction();
     }
-    
+
     class noopCopyAction implements CopyAction {
 
         @Override
