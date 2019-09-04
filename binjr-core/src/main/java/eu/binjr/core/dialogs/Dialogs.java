@@ -82,8 +82,18 @@ public class Dialogs {
                 .text(e.getMessage())
                 .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
                 .position(Pos.BOTTOM_RIGHT)
-                .action(new Action("Details", ae -> displayException(title, e, owner)))
+                .action(new Action("Details", ae -> displayException(title, e)))
                 .owner(owner).showError());
+    }
+
+    /**
+     * Displays a modal dialog box to shows details about an {@link Exception}.
+     *
+     * @param header the header text for the dialog
+     * @param e      the exception to display
+     */
+    private static void displayException(String header, Throwable e) {
+        Dialogs.displayException(header, e, null);
     }
 
     /**
@@ -186,7 +196,7 @@ public class Dialogs {
     /**
      * Launches the system default browser to browse the provided URL
      *
-     * @param url                 the url to point the browser at.
+     * @param url the url to point the browser at.
      * @throws IOException        if the default browser is not found or fails to be launched
      * @throws URISyntaxException if the string could not be transform into a proper URI
      */
