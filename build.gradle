@@ -2,6 +2,7 @@ import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
 import java.text.SimpleDateFormat
+import java.time.Duration
 
 /*
  *    Copyright 2018-2019 Frederic Thevenet
@@ -205,6 +206,7 @@ configure(subprojects) {
             sonatype {
                 username = System.getenv('OSSRH_JIRA_USERNAME')
                 password = System.getenv('OSSRH_JIRA_PASSWORD')
+                clientTimeout= Duration.ofSeconds(300)
             }
         }
     }
