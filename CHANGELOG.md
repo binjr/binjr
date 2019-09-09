@@ -1,5 +1,11 @@
+## [binjr v2.8.1](https://github.com/binjr/binjr/releases/tag/v2.8.1)
+Released on Wed, 04 Sep 2019
+
+* _[Fixed]_ Memory leak: a closed worksheet controller remains reachable if an error notification popup is displayed and user preference _"Discard notification after:"_ is set to _"Never"_.
+
+
 ## [binjr v2.8.0](https://github.com/binjr/binjr/releases/tag/v2.8.0)
-Released on tue, 03 Sep 2019
+Released on Tue, 03 Sep 2019
 
 * _[New]_ Now supports the addition of custom UI themes via external plugins.
 * _[New]_ Accepts '.xml' as a valid extension for saved workspaces, in addition to '.bjr'
