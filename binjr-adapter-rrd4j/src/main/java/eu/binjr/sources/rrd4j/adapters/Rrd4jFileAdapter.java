@@ -153,7 +153,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                 for (TimeSeriesInfo info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
                     XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val.isNaN() ? 0 : val);
-                    TimeSeriesProcessor seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
+                    TimeSeriesProcessor seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor(info));
                     seriesProcessor.addSample(point);
                 }
             }

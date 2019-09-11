@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.timeseries;
 
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
 import java.util.OptionalDouble;
@@ -30,8 +31,8 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
     /**
      * Initializes a new instance of the {@link DoubleTimeSeriesProcessor} class with the provided binding.
      */
-    public DoubleTimeSeriesProcessor() {
-        super();
+    public DoubleTimeSeriesProcessor(TimeSeriesInfo info) {
+        super(info);
     }
 
     @Override

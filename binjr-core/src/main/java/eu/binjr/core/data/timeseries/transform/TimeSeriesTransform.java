@@ -19,10 +19,17 @@ package eu.binjr.core.data.timeseries.transform;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.common.logging.Profiler;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.ZonedDateTime;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * The base class for time series transformation functions.
@@ -32,6 +39,7 @@ import java.util.Map;
 public abstract class TimeSeriesTransform {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
     private final String name;
+    private final BooleanProperty enabled = new SimpleBooleanProperty(true);
 
     /**
      * Base constructor for {@link TimeSeriesTransform} instances.
@@ -42,31 +50,37 @@ public abstract class TimeSeriesTransform {
         this.name = name;
     }
 
+//    /**
+//     * The actual transform implementation
+//     *
+//     * @param series the time series to apply the transform to.
+//     * @return A map of the transformed series.
+//     */
+//    protected abstract Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> series);
+
     /**
      * The actual transform implementation
      *
-     * @param series the time series to apply the transform to.
-     * @return A map of the transformed series.
+     * @param info The series info metadata
+     * @return
      */
-    protected abstract Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> series);
+    protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data);
+
 
     /**
      * Applies the transform function to the provided series
      *
-     * @param series  the time series to apply the transform to.
-     * @param enabled true if the transform should be applied, false otherwise.
      * @return A map of the transformed series.
      */
-    public Map<TimeSeriesInfo, TimeSeriesProcessor> transform(Map<TimeSeriesInfo, TimeSeriesProcessor> series, boolean enabled) {
-        String names = series.keySet().stream().map(tTimeSeriesInfo -> tTimeSeriesInfo.getBinding().getLabel()).reduce((s, s2) -> s + " " + s2).orElse("null");
-        if (enabled) {
-            try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + names, logger::trace)) {
-                return apply(series);
+    public List<XYChart.Data<ZonedDateTime, Double>> transform(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+        if (isEnabled()) {
+            try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + info.getDisplayName(), logger::trace)) {
+                return apply(info, data);
             }
         } else {
-            logger.debug(() -> "Transform " + getName() + " on series " + names + " is disabled.");
+            logger.debug(() -> "Transform " + getName() + " on series " + info.getDisplayName() + " is disabled.");
         }
-        return series;
+        return data;
     }
 
     /**
@@ -76,5 +90,17 @@ public abstract class TimeSeriesTransform {
      */
     public String getName() {
         return name;
+    }
+
+    public boolean isEnabled() {
+        return enabled.get();
+    }
+
+    public BooleanProperty enabledProperty() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled.set(enabled);
     }
 }

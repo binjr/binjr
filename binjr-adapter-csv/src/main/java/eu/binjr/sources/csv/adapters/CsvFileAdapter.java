@@ -161,7 +161,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         Map<String, TimeSeriesInfo> rDict = new HashMap<>();
         for (TimeSeriesInfo info : seriesInfo) {
             rDict.put(info.getBinding().getLabel(), info);
-            series.put(info, new DoubleTimeSeriesProcessor());
+            series.put(info, new DoubleTimeSeriesProcessor(info));
         }
 
         for (DataSample sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
@@ -184,15 +184,6 @@ public class CsvFileAdapter extends BaseDataAdapter {
     public ZoneId getTimeZoneId() {
         return zoneId;
     }
-
-
-//    public CsvDecoder<Double> getDecoder() {
-//        if (decoder == null) {
-//            // setup the CSV decoder
-//
-//        }
-//        return decoder;
-//    }
 
     @Override
     public String getSourceName() {
@@ -266,5 +257,4 @@ public class CsvFileAdapter extends BaseDataAdapter {
         }
         return dataStore;
     }
-
 }

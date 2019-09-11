@@ -46,26 +46,23 @@ public class DecimationTransform extends TimeSeriesTransform {
     }
 
     @Override
-    public Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> m) {
-        return m.entrySet()
-                .parallelStream()
-                .collect(Collectors.toMap(Map.Entry::getKey, o -> {
-                    if (threshold > 0 && o.getValue().size() > threshold) {
-                        o.getValue().setData(decimate(o.getValue(), threshold));
-                    }
-                    return o.getValue();
-                }));
+    public List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+        if (threshold > 0 && data.size() > threshold) {
+            return decimate(data, threshold);
+        }
+        return data;
     }
 
-    private Collection<XYChart.Data<ZonedDateTime, Double>> decimate(TimeSeriesProcessor data, int threshold) {
+
+    private List<XYChart.Data<ZonedDateTime, Double>> decimate(List<XYChart.Data<ZonedDateTime, Double>> data, int threshold) {
         int dataLength = data.size();
         List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>(threshold);
         double every = (double) (dataLength - 2) / (threshold - 2);
-        sampled.add(data.getSample(0)); // Always add the first point
+        sampled.add(data.get(0)); // Always add the first point
         for (int i = 1; i < threshold - 1; i++) {
-            sampled.add(data.getSample(Math.min(dataLength - 1, (int) Math.round(i * every))));
+            sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));
         }
-        sampled.add(data.getSample(dataLength - 1));
+        sampled.add(data.get(dataLength - 1));
         return sampled;
     }
 }

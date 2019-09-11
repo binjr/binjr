@@ -121,6 +121,10 @@ public interface DataAdapter extends AutoCloseable {
      */
     boolean isClosed();
 
+    default boolean isSortingRequired(){
+        return false;
+    }
+
     @Override
     void close();
 }

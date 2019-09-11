@@ -1,0 +1,2 @@
+* _[Fixed]_ Charts do no honor the exact time range specified by the user.
+* _[Fixed]_ An offset on the time axis between two or more charts may occurs if the sources for them have different resolutions.

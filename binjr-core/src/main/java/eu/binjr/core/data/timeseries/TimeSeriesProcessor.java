@@ -18,6 +18,8 @@ package eu.binjr.core.data.timeseries;
 
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
+import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
@@ -34,11 +36,15 @@ import java.util.Optional;
 public abstract class TimeSeriesProcessor {
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, Double>> data;
+    protected final TimeSeriesInfo info;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
+     *
+     * @param info
      */
-    public TimeSeriesProcessor() {
+    public TimeSeriesProcessor(TimeSeriesInfo info) {
+        this.info = info;
         this.data = new ArrayList<>();
     }
 
@@ -79,7 +85,7 @@ public abstract class TimeSeriesProcessor {
      */
     public Optional<Double> tryGetNearestValue(ZonedDateTime xValue) {
         // If the lock is already acquired, just abandon the request and return Optional.empty
-        return monitor.read().tryLock(this::unsafeGetNearestValue, xValue);
+        return monitor.read().tryLock(this::unsyncedGetNearestValue, xValue);
     }
 
     /**
@@ -91,7 +97,7 @@ public abstract class TimeSeriesProcessor {
      * @return the value for the time position nearest to the one requested.
      */
     public Double getNearestValue(ZonedDateTime xValue) {
-        return monitor.read().lock(this::unsafeGetNearestValue, xValue);
+        return monitor.read().lock(this::unsyncedGetNearestValue, xValue);
     }
 
     /**
@@ -99,7 +105,7 @@ public abstract class TimeSeriesProcessor {
      *
      * <p><b>Remark:</b> the returned collection is a shallow copy of the the processor's own backing collection,
      * so it can be iterated through without risking a concurrent access error even if content is being added or
-     * removed to the processor on a seperate thread. However, the the actual data for individual samples  are
+     * removed to the processor on a separate thread. However, the the actual data for individual samples  are
      * not guarded against concurrent access in any capacity.</p>
      *
      * @return the data of the {@link TimeSeriesProcessor}
@@ -145,13 +151,19 @@ public abstract class TimeSeriesProcessor {
         monitor.write().lock(() -> this.data.add(sample));
     }
 
+    public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
+        for (var t: seriesTransforms) {
+            setData(monitor.read().lock(() -> t.transform(info, data)));
+        }
+    }
+
     protected abstract Double computeMinValue();
 
     protected abstract Double computeAverageValue();
 
     protected abstract Double computeMaxValue();
 
-    private Double unsafeGetNearestValue(ZonedDateTime xValue) {
+    private Double unsyncedGetNearestValue(ZonedDateTime xValue) {
         Double value = null;
         if (xValue != null && data != null) {
             for (XYChart.Data<ZonedDateTime, Double> sample : data) {

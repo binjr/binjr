@@ -23,6 +23,8 @@ import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.transform.DecimationTransform;
+import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
+import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -187,12 +189,16 @@ public class Chart implements Dirtyable, AutoCloseable {
             }
             return false;
         });
-        // Define the reduction transform to apply
+        // Define the transforms to apply
         var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
+        reducer.enabledProperty().bind(GlobalPreferences.getInstance().downSamplingEnabledProperty());
+        var aligner = new AlignBoundariesTransform(startTime, endTime);
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             var adapter = byAdapterEntry.getKey();
+            var sorter = new SortTransform();
+            sorter.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var latch = new CountDownLatch(bindingsByPath.entrySet().size());
@@ -203,6 +209,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                             try {
                                 String path = byPathEntry.getKey();
                                 logger.trace("Fetch sub-task '" + path + "' started");
+
                                 // Get data from the adapter
                                 var data = adapter.fetchData(
                                         path,
@@ -210,12 +217,15 @@ public class Chart implements Dirtyable, AutoCloseable {
                                         endTime.toInstant(),
                                         byPathEntry.getValue(),
                                         bypassCache);
-                                // Applying sample reduction
-                                data = reducer.transform(data, GlobalPreferences.getInstance().getDownSamplingEnabled());
-                                //Update timeSeries data
-                                for (var seriesInfo : data.keySet()) {
-                                    seriesInfo.setProcessor(data.get(seriesInfo));
-                                }
+
+                                data.entrySet().parallelStream().forEach(entry -> {
+                                    var info = entry.getKey();
+                                    var proc = entry.getValue();
+                                    // Applying sample transforms
+                                    proc.applyTransforms(sorter, reducer, aligner);
+                                    //Update timeSeries data
+                                    info.setProcessor(proc);
+                                });
                             } catch (DataAdapterException t) {
                                 logger.error(t);
                                 errors.add(t);
