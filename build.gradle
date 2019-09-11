@@ -198,6 +198,7 @@ configure(subprojects) {
     }
 
     signing {
+        required { gradle.taskGraph.hasTask("publishArtifacts") }
         sign publishing.publications.mavenJava
     }
 
@@ -206,7 +207,7 @@ configure(subprojects) {
             sonatype {
                 username = System.getenv('OSSRH_JIRA_USERNAME')
                 password = System.getenv('OSSRH_JIRA_PASSWORD')
-                clientTimeout= Duration.ofSeconds(300)
+                clientTimeout = Duration.ofSeconds(300)
             }
         }
     }
