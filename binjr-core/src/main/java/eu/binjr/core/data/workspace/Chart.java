@@ -202,7 +202,7 @@ public class Chart implements Dirtyable, AutoCloseable {
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var latch = new CountDownLatch(bindingsByPath.entrySet().size());
-            var errors = new ArrayList<DataAdapterException>();
+            var errors = new ArrayList<Throwable>();
             for (var byPathEntry : bindingsByPath.entrySet()) {
                 AsyncTaskManager.getInstance().submitSubTask(
                         () -> {
@@ -226,7 +226,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                                     //Update timeSeries data
                                     info.setProcessor(proc);
                                 });
-                            } catch (DataAdapterException t) {
+                            } catch (Throwable t) {
                                 logger.error(t);
                                 errors.add(t);
                             } finally {
@@ -242,7 +242,11 @@ public class Chart implements Dirtyable, AutoCloseable {
                 if (!errors.isEmpty()) {
                     for (var t : errors) {
                         //FIXME only first exception is rethrown
-                        throw t;
+                        if (t instanceof DataAdapterException) {
+                            throw (DataAdapterException)t;
+                        } else{
+                            throw new DataAdapterException("Unexpected error while retrieving data from adapter: " + t.getMessage(), t);
+                        }
                     }
                 }
             } catch (InterruptedException e) {
