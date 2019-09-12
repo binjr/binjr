@@ -16,10 +16,12 @@
 
 package eu.binjr.core.data.timeseries;
 
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
+import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
 import javafx.scene.chart.XYChart;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -33,12 +35,12 @@ import java.util.Optional;
  * @author Frederic Thevenet
  */
 public abstract class TimeSeriesProcessor {
+    private static final Logger logger = LogManager.getLogger(TimeSeriesProcessor.class);
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, Double>> data;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
-     *
      */
     public TimeSeriesProcessor() {
         this.data = new ArrayList<>();
@@ -148,8 +150,12 @@ public abstract class TimeSeriesProcessor {
     }
 
     public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
-        for (var t: seriesTransforms) {
-            setData(monitor.read().lock(() -> t.transform(data)));
+        if (!data.isEmpty()) {
+            for (var t : seriesTransforms) {
+                setData(monitor.read().lock(() -> t.transform(data)));
+            }
+        } else {
+            logger.trace("Don't apply transform on empty data store");
         }
     }
 

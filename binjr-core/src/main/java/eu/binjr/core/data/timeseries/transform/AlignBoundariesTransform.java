@@ -16,7 +16,6 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
@@ -49,6 +48,9 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
+        if (data.isEmpty()){
+            return data;
+        }
         //Align the lower (earlier) boundary of the series
         var iterator = data.iterator();
         XYChart.Data<ZonedDateTime, Double> firstSample = iterator.next();
@@ -67,8 +69,8 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
                 firstSample = iterator.next();
             }
             // use the known sample right before start time to interpolate the value of inserted sample
-            var lowerBound  =  new XYChart.Data<>(startTime, interpolate(previous, firstSample, startTime));
-            data.add(0,lowerBound);
+            var lowerBound = new XYChart.Data<>(startTime, interpolate(previous, firstSample, startTime));
+            data.add(0, lowerBound);
         }
 
         // Align the higher (later) boundary of the series
@@ -76,7 +78,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         XYChart.Data<ZonedDateTime, Double> lastSample = lastIterator.previous();
         if (lastSample.getXValue().isBefore(endTime)) {
             data.add(new XYChart.Data<>(lastSample.getXValue().plus(1, ChronoUnit.NANOS), 0.0));
-            data.add(new XYChart.Data<>(endTime,  0.0));
+            data.add(new XYChart.Data<>(endTime, 0.0));
         } else if (lastSample.getXValue().isAfter(endTime)) {
             var next = lastSample;
             while (lastIterator.hasPrevious() && lastSample.getXValue().isAfter(endTime)) {
@@ -84,7 +86,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
                 lastIterator.remove();
                 lastSample = lastIterator.previous();
             }
-            var upperBound  = new XYChart.Data<>(endTime, interpolate(lastSample, next, endTime));
+            var upperBound = new XYChart.Data<>(endTime, interpolate(lastSample, next, endTime));
             data.add(upperBound);
         }
         return data;
