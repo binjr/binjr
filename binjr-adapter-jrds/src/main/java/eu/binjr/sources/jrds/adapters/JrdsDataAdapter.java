@@ -81,14 +81,13 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     private String encoding;
     private JrdsTreeViewTab treeViewTab;
 
-
     /**
      * Initialises a new instance of the {@link JrdsDataAdapter} class.
      *
      * @throws DataAdapterException if an error occurs while initializing the adapter.
      */
     public JrdsDataAdapter() throws DataAdapterException {
-        super();
+        this(null, ZoneId.systemDefault(), "utf-8", JrdsTreeViewTab.HOSTS_TAB, "");
     }
 
     /**
@@ -107,13 +106,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         this.encoding = encoding;
         this.treeViewTab = treeViewTab;
         this.filter = filter;
-        this.decoder = new CsvDecoder(getEncoding(), DELIMITER,
-                DoubleTimeSeriesProcessor::new,
-                s -> {
-                    Double val = Double.parseDouble(s);
-                    return val.isNaN() ? 0 : val;
-                },
-                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
+        this.decoder = decoderFactory(zoneId);
     }
 
     /**
@@ -210,6 +203,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                 });
         treeViewTab = validateParameter(params, TREE_VIEW_TAB_PARAM_NAME, s -> s == null ? JrdsTreeViewTab.valueOf(params.get(TREE_VIEW_TAB_PARAM_NAME)) : JrdsTreeViewTab.HOSTS_TAB);
         this.filter = params.get(JRDS_FILTER);
+        this.decoder = decoderFactory(zoneId);
     }
 
     @Override
@@ -224,7 +218,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     @Override
     public CsvDecoder getDecoder() {
-       return decoder;
+        return decoder;
     }
 
     @Override
@@ -407,5 +401,15 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                 }
             }
         }
+    }
+
+    private CsvDecoder decoderFactory(ZoneId zoneId) {
+        return new CsvDecoder(getEncoding(), DELIMITER,
+                DoubleTimeSeriesProcessor::new,
+                s -> {
+                    Double val = Double.parseDouble(s);
+                    return val.isNaN() ? 0 : val;
+                },
+                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
     }
 }
