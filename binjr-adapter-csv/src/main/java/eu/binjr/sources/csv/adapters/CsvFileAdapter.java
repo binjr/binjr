@@ -105,18 +105,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         this.encoding = encoding;
         this.dateTimePattern = dateTimePattern;
         this.delimiter = delimiter;
-        this.csvDecoder = new CsvDecoder(encoding, delimiter,
-                DoubleTimeSeriesProcessor::new,
-                s -> {
-                    try {
-                        Double val = Double.parseDouble(s);
-                        return val.isNaN() ? 0 : val;
-                    } catch (NumberFormatException e) {
-                        logger.debug(() -> "Cannot format value as a number", e);
-                        return 0.0;
-                    }
-                },
-                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(zoneId)));
+        this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
     }
 
     @Override
@@ -220,7 +209,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
                 });
         String path = validateParameterNullity(params, "csvPath");
         delimiter = validateParameter(params, "delimiter", s -> {
-            if (s == null || s.isEmpty() || s.length() > 1) {
+            if (s == null || s.length() != 1) {
                 throw new InvalidAdapterParameterException("Parameter 'delimiter' is missing for adapter " + this.getSourceName());
             }
             return s.charAt(0);
@@ -228,6 +217,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         encoding = validateParameterNullity(params, "encoding");
         dateTimePattern = validateParameterNullity(params, "dateTimePattern");
         this.csvPath = Paths.get(path);
+        this.csvDecoder = decoderFactory(zoneId, encoding, dateTimePattern, delimiter);
     }
 
     @Override
@@ -247,6 +237,21 @@ public class CsvFileAdapter extends BaseDataAdapter {
             }
         }
         return sortedDataStore;
+    }
+
+    private CsvDecoder decoderFactory(ZoneId zoneId, String encoding, String dateTimePattern, char delimiter) {
+        return new CsvDecoder(encoding, delimiter,
+                DoubleTimeSeriesProcessor::new,
+                s -> {
+                    try {
+                        Double val = Double.parseDouble(s);
+                        return val.isNaN() ? 0 : val;
+                    } catch (NumberFormatException e) {
+                        logger.debug(() -> "Cannot format value as a number", e);
+                        return 0.0;
+                    }
+                },
+                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(zoneId)));
     }
 
     private SortedMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
