@@ -59,7 +59,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
             // add a sample 1ns after last sample with a 0 value then another sample at start time in order to
             // simulate a brick-wall filter, as NaN isn't well supported by JavaFX Charts
             data.add(new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), 0.0));
-            data.add(0, new XYChart.Data<>(startTime, Double.NaN));
+            data.add(0, new XYChart.Data<>(startTime, 0.0));
         } else if (firstSample.getXValue().isBefore(startTime)) {
             // remove all samples with timestamps occurring before the requested start time.
             var previous = firstSample;
