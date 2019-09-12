@@ -31,5 +31,5 @@ public interface TimeSeriesProcessorFactory {
      *
      * @return a new instance of the {@link TimeSeriesProcessor} class
      */
-    TimeSeriesProcessor create(TimeSeriesInfo info);
+    TimeSeriesProcessor create();
 }

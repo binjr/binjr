@@ -150,7 +150,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         Map<String, TimeSeriesInfo> rDict = new HashMap<>();
         for (TimeSeriesInfo info : seriesInfo) {
             rDict.put(info.getBinding().getLabel(), info);
-            series.put(info, new DoubleTimeSeriesProcessor(info));
+            series.put(info, new DoubleTimeSeriesProcessor());
         }
 
         for (DataSample sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {

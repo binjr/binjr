@@ -34,7 +34,7 @@ public class SortTransform extends TimeSeriesTransform {
     }
 
     @Override
-    protected List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+    protected List<XYChart.Data<ZonedDateTime, Double>> apply( List<XYChart.Data<ZonedDateTime, Double>> data) {
         data.sort(Comparator.comparing(XYChart.Data::getXValue));
         return data;
     }

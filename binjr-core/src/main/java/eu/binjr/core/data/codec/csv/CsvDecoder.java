@@ -111,7 +111,7 @@ public class CsvDecoder implements Decoder {
                     for (TimeSeriesInfo info : seriesInfo) {
                         Double val = numberParser.apply(csvRecord.get(info.getBinding().getLabel()));
                         XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
-                        TimeSeriesProcessor l = series.computeIfAbsent(info, k -> timeSeriesFactory.create(info));
+                        TimeSeriesProcessor l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
                         l.addSample(point);
                     }
                 }

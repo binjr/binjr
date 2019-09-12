@@ -31,8 +31,8 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
     /**
      * Initializes a new instance of the {@link DoubleTimeSeriesProcessor} class with the provided binding.
      */
-    public DoubleTimeSeriesProcessor(TimeSeriesInfo info) {
-        super(info);
+    public DoubleTimeSeriesProcessor() {
+        super();
     }
 
     @Override

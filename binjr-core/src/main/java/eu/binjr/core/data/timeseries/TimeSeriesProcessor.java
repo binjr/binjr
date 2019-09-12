@@ -19,7 +19,6 @@ package eu.binjr.core.data.timeseries;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
@@ -36,15 +35,12 @@ import java.util.Optional;
 public abstract class TimeSeriesProcessor {
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, Double>> data;
-    protected final TimeSeriesInfo info;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
      *
-     * @param info
      */
-    public TimeSeriesProcessor(TimeSeriesInfo info) {
-        this.info = info;
+    public TimeSeriesProcessor() {
         this.data = new ArrayList<>();
     }
 
@@ -153,7 +149,7 @@ public abstract class TimeSeriesProcessor {
 
     public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
         for (var t: seriesTransforms) {
-            setData(monitor.read().lock(() -> t.transform(info, data)));
+            setData(monitor.read().lock(() -> t.transform(data)));
         }
     }
 

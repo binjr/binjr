@@ -61,10 +61,9 @@ public abstract class TimeSeriesTransform {
     /**
      * The actual transform implementation
      *
-     * @param info The series info metadata
      * @return
      */
-    protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data);
+    protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data);
 
 
     /**
@@ -72,13 +71,13 @@ public abstract class TimeSeriesTransform {
      *
      * @return A map of the transformed series.
      */
-    public List<XYChart.Data<ZonedDateTime, Double>> transform(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+    public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (isEnabled()) {
-            try (Profiler ignored = Profiler.start("Applying transform" + getName() + " to series " + info.getDisplayName(), logger::trace)) {
-                return apply(info, data);
+            try (Profiler ignored = Profiler.start("Applying transform" + getName(), logger::trace)) {
+                return apply(data);
             }
         } else {
-            logger.debug(() -> "Transform " + getName() + " on series " + info.getDisplayName() + " is disabled.");
+            logger.debug(() -> "Transform " + getName() + " is disabled.");
         }
         return data;
     }

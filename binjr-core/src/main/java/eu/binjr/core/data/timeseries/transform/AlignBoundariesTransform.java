@@ -48,7 +48,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
     }
 
     @Override
-    protected List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+    protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         //Align the lower (earlier) boundary of the series
         var iterator = data.iterator();
         XYChart.Data<ZonedDateTime, Double> firstSample = iterator.next();

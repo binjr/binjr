@@ -47,7 +47,7 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
     }
 
     @Override
-    protected List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+    protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (threshold > 0 && data.size() > threshold) {
             return applyLTTBReduction(data, threshold);
         }

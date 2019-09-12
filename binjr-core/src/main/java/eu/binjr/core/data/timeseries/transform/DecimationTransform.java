@@ -46,7 +46,7 @@ public class DecimationTransform extends TimeSeriesTransform {
     }
 
     @Override
-    public List<XYChart.Data<ZonedDateTime, Double>> apply(TimeSeriesInfo info, List<XYChart.Data<ZonedDateTime, Double>> data) {
+    public List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (threshold > 0 && data.size() > threshold) {
             return decimate(data, threshold);
         }
