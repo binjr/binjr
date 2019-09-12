@@ -37,19 +37,28 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
 
     @Override
     public Double computeMinValue() {
-        OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).min();
-        return res.isPresent() ? res.getAsDouble() : Double.NaN;
+        return this.data.stream()
+                .mapToDouble(XYChart.Data::getYValue)
+                .filter(d ->!Double.isNaN(d))
+                .min()
+                .orElse(Double.NaN);
     }
 
     @Override
     public Double computeAverageValue() {
-        OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).average();
-        return res.isPresent() ? res.getAsDouble() : Double.NaN;
+       return this.data.stream()
+               .mapToDouble(XYChart.Data::getYValue)
+               .filter(d ->!Double.isNaN(d))
+               .average()
+               .orElse(Double.NaN);
     }
 
     @Override
     public Double computeMaxValue() {
-        OptionalDouble res = this.data.stream().mapToDouble(XYChart.Data::getYValue).max();
-        return res.isPresent() ? res.getAsDouble() : Double.NaN;
+       return this.data.stream()
+               .mapToDouble(XYChart.Data::getYValue)
+               .filter(d ->!Double.isNaN(d))
+               .max()
+               .orElse(Double.NaN);
     }
 }
