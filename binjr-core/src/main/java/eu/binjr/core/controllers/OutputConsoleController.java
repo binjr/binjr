@@ -178,7 +178,7 @@ public class OutputConsoleController implements Initializable {
 
     public void handleDebugDumpClassHistogram(ActionEvent actionEvent) {
         try {
-            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpClassHistogram());
+            Binjr.runtimeDebuggingFeatures.debug("\n" + DiagnosticCommand.dumpClassHistogram());
         } catch (DiagnosticException e) {
             Dialogs.notifyException("Error running diagnostic command", e, root);
         }
@@ -217,4 +217,8 @@ public class OutputConsoleController implements Initializable {
         }
     }
 
+    public void handleReloadGloblPrefs(ActionEvent actionEvent) {
+        GlobalPreferences.getInstance().reload();
+        Binjr.runtimeDebuggingFeatures.debug("Global preferences reloaded from backing store\n" + GlobalPreferences.getInstance().toString());
+    }
 }

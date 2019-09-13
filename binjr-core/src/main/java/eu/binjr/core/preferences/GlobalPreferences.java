@@ -69,7 +69,7 @@ public class GlobalPreferences {
     private static final Duration DEFAULT_NOTIFICATION_POPUP_DURATION = Duration.seconds(10);
     private static final String GITHUB_USER_NAME = "githubUserName";
     private static final String GITHUB_AUTH_TOKEN = "githubAuthToken";
-    private static final String  MAX_SERIES_PER_CHART_BEFORE_WARNING = "maxSeriesPerChartBeforeWarning";
+    private static final String MAX_SERIES_PER_CHART_BEFORE_WARNING = "maxSeriesPerChartBeforeWarning";
     private static final String ASYNC_THREAD_POOL_POLICY = "asyncThreadPoolPolicy";
     private static final String SUB_TASKS_THREAD_POOL_POLICY = "subTasksThreadPoolPolicy";
     private static final String ASYNC_TASKS_TIME_OUT_MS = "asyncTasksTimeOutMs";
@@ -184,7 +184,7 @@ public class GlobalPreferences {
             maxAsyncTasksParallelism.setValue(prefs.getInt(MAX_ASYNC_TASKS_PARALLELISM, 4));
             maxSubTasksParallelism.setValue(prefs.getInt(MAX_SUB_TASKS_PARALLELISM, 4));
             minCharsTreeFiltering.setValue(prefs.getInt(MIN_CHARS_TREE_FILTERING, 3));
-            asyncTasksTimeOutMs.setValue(prefs.getLong(ASYNC_TASKS_TIME_OUT_MS,120000 ));
+            asyncTasksTimeOutMs.setValue(prefs.getLong(ASYNC_TASKS_TIME_OUT_MS, 120000));
             asyncThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(ASYNC_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
             subTasksThreadPoolPolicy.setValue(ThreadPoolPolicy.valueOf(prefs.get(SUB_TASKS_THREAD_POOL_POLICY, ThreadPoolPolicy.WORK_STEALING.toString())));
             githubUserName.setValue(prefs.get(GITHUB_USER_NAME, ""));
@@ -210,6 +210,13 @@ public class GlobalPreferences {
      */
     public void reset() throws BackingStoreException {
         prefs.clear();
+        this.load();
+    }
+
+    /**
+     * Reload all prefs from the backing store
+     */
+    public void reload() {
         this.load();
     }
 
@@ -893,5 +900,41 @@ public class GlobalPreferences {
 
     private static class GlobalPreferencesHolder {
         private final static GlobalPreferences instance = new GlobalPreferences();
+    }
+
+    @Override
+    public String toString() {
+        return "loadLastWorkspaceOnStartup=" + loadLastWorkspaceOnStartup +
+                "\ndownSamplingEnabled=" + downSamplingEnabled +
+                "\ndownSamplingThreshold=" + downSamplingThreshold +
+                "\nmostRecentSaveFolder=" + mostRecentSaveFolder +
+                "\nmostRecentSavedWorkspace=" + mostRecentSavedWorkspace +
+                "\ncheckForUpdateOnStartUp=" + checkForUpdateOnStartUp +
+                "\nuserInterfaceTheme=" + userInterfaceTheme +
+                "\nhorizontalMarkerOn=" + horizontalMarkerOn +
+                "\nverticalMarkerOn=" + verticalMarkerOn +
+                "\nshowAreaOutline=" + showAreaOutline +
+                "\ndefaultGraphOpacity=" + defaultGraphOpacity +
+                "\nshiftPressed=" + shiftPressed +
+                "\nctrlPressed=" + ctrlPressed +
+                "\npluginsLocation=" + pluginsLocation +
+                "\nnotificationPopupDuration=" + notificationPopupDuration +
+                "\nloadPluginsFromExternalLocation=" + loadPluginsFromExternalLocation +
+                "\nconsoleMaxLineCapacity=" + consoleMaxLineCapacity +
+                "\nfullHeightCrosshairMarker=" + fullHeightCrosshairMarker +
+                "\nasyncThreadPoolPolicy=" + asyncThreadPoolPolicy +
+                "\nsubTasksThreadPoolPolicy=" + subTasksThreadPoolPolicy +
+                "\nmaxAsyncTasksParallelism=" + maxAsyncTasksParallelism +
+                "\nmaxSubTasksParallelism=" + maxSubTasksParallelism +
+                "\nwindowLastPosition=" + windowLastPosition +
+                "\ngithubUserName=" + githubUserName +
+                "\ngithubAuthToken=" + githubAuthToken +
+                "\nmaxSeriesPerChartBeforeWarning=" + maxSeriesPerChartBeforeWarning +
+                "\nasyncTasksTimeOutMs=" + asyncTasksTimeOutMs +
+                "\nminCharsTreeFiltering=" + minCharsTreeFiltering +
+                "\nhttpPoolingEnabled=" + httpPoolingEnabled +
+                "\nforceNanToZero=" + forceNanToZero +
+                "\nprefs=" + prefs +
+                "\nrecentFiles=" + recentFiles;
     }
 }
