@@ -244,8 +244,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
                 DoubleTimeSeriesProcessor::new,
                 s -> {
                     try {
-                        Double val = Double.parseDouble(s);
-                        return val.isNaN() ? 0 : val;
+                        return Double.parseDouble(s);
                     } catch (NumberFormatException e) {
                         logger.debug(() -> "Cannot format value as a number", e);
                         return 0.0;

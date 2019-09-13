@@ -75,6 +75,7 @@ public class GlobalPreferences {
     private static final String ASYNC_TASKS_TIME_OUT_MS = "asyncTasksTimeOutMs";
     private static final String MIN_CHARS_TREE_FILTERING = "minCharsTreeFiltering";
     private static final String HTTP_POOLING_ENABLED = "httpPoolingEnabled";
+    private static final String FORCE_NAN_TO_ZERO = "forceNanToZero";
 
 
     private final BooleanProperty loadLastWorkspaceOnStartup = new SimpleBooleanProperty();
@@ -106,6 +107,7 @@ public class GlobalPreferences {
     private final LongProperty asyncTasksTimeOutMs = new SimpleLongProperty();
     private final IntegerProperty minCharsTreeFiltering = new SimpleIntegerProperty();
     private final BooleanProperty httpPoolingEnabled = new SimpleBooleanProperty();
+    private final BooleanProperty forceNanToZero = new SimpleBooleanProperty();
     private final Preferences prefs;
     private Deque<String> recentFiles;
 
@@ -139,6 +141,8 @@ public class GlobalPreferences {
         maxSeriesPerChartBeforeWarning.addListener((observable, oldValue, newValue) -> prefs.putInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, newValue.intValue()));
         asyncTasksTimeOutMs.addListener((observable, oldValue, newValue) -> prefs.putLong(ASYNC_TASKS_TIME_OUT_MS, newValue.longValue()));
         httpPoolingEnabled.addListener((observable, oldValue, newValue) -> prefs.putBoolean(HTTP_POOLING_ENABLED, newValue));
+        forceNanToZero.addListener((observable, oldValue, newValue) -> prefs.putBoolean(FORCE_NAN_TO_ZERO, newValue));
+
         windowLastPosition.addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 prefs.putDouble(WINDOW_LAST_POSITION_X, newValue.getMinX());
@@ -187,6 +191,7 @@ public class GlobalPreferences {
             githubAuthToken.setValue(prefs.get(GITHUB_AUTH_TOKEN, ""));
             maxSeriesPerChartBeforeWarning.setValue(prefs.getInt(MAX_SERIES_PER_CHART_BEFORE_WARNING, 50));
             httpPoolingEnabled.setValue(prefs.getBoolean(HTTP_POOLING_ENABLED, true));
+            forceNanToZero.setValue(prefs.getBoolean(FORCE_NAN_TO_ZERO, true));
             windowLastPosition.setValue(new Rectangle2D(
                     prefs.getDouble(WINDOW_LAST_POSITION_X, Double.MAX_VALUE),
                     prefs.getDouble(WINDOW_LAST_POSITION_Y, Double.MAX_VALUE),
@@ -876,6 +881,14 @@ public class GlobalPreferences {
 
     public void setHttpPoolingEnabled(boolean httpPoolingEnabled) {
         this.httpPoolingEnabled.set(httpPoolingEnabled);
+    }
+
+    public boolean getForceNanToZero() {
+        return forceNanToZero.get();
+    }
+
+    public BooleanProperty forceNanToZeroProperty() {
+        return forceNanToZero;
     }
 
     private static class GlobalPreferencesHolder {

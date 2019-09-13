@@ -34,7 +34,7 @@ import java.util.List;
  */
 public class AlignBoundariesTransform extends TimeSeriesTransform {
 
-    public static final double SUBSTITUTE_VALUE = 0.0;
+    public static final double SUBSTITUTE_VALUE = Double.NaN;
     private final ZonedDateTime startTime;
     private final ZonedDateTime endTime;
 
@@ -57,8 +57,8 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         XYChart.Data<ZonedDateTime, Double> firstSample = iterator.next();
         if (firstSample.getXValue().isAfter(startTime)) {
             // if the first available sample is later than the requested start time,
-            // add a sample 1ns after last sample with a 0 value then another sample at start time in order to
-            // simulate a brick-wall filter, as NaN isn't well supported by JavaFX Charts
+            // add a sample 1ns after last sample with a substitute value then another sample at start time in order to
+            // create an abrupt truncation.
             data.add(new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), SUBSTITUTE_VALUE));
             data.add(0, new XYChart.Data<>(startTime, SUBSTITUTE_VALUE));
         } else if (firstSample.getXValue().isBefore(startTime)) {
@@ -99,6 +99,9 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         var y1 = val1.getYValue();
         var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
         var y2 = val2.getYValue();
+        if (y1 == null || y2 == null){
+            return Double.NaN;
+        }
         return (y2 - y1) / (x2 - x1) * (x3 - x1) + y1;
     }
 }

@@ -406,10 +406,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     private CsvDecoder decoderFactory(ZoneId zoneId) {
         return new CsvDecoder(getEncoding(), DELIMITER,
                 DoubleTimeSeriesProcessor::new,
-                s -> {
-                    Double val = Double.parseDouble(s);
-                    return val.isNaN() ? 0 : val;
-                },
+                Double::parseDouble,
                 s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
     }
 }

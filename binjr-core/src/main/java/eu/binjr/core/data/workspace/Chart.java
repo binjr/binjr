@@ -24,6 +24,7 @@ import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
+import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.GlobalPreferences;
 import javafx.beans.property.*;
@@ -193,6 +194,9 @@ public class Chart implements Dirtyable, AutoCloseable {
         var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
         reducer.enabledProperty().bind(GlobalPreferences.getInstance().downSamplingEnabledProperty());
         var aligner = new AlignBoundariesTransform(startTime, endTime);
+        var cleaner  = new NanToZeroTransform();
+        cleaner.enabledProperty().bind(GlobalPreferences.getInstance().forceNanToZeroProperty());
+
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -222,7 +226,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                                     var info = entry.getKey();
                                     var proc = entry.getValue();
                                     // Applying sample transforms
-                                    proc.applyTransforms(sorter, reducer, aligner);
+                                    proc.applyTransforms(cleaner, sorter, reducer, aligner);
                                     //Update timeSeries data
                                     info.setProcessor(proc);
                                 });

@@ -234,7 +234,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return this.worksheet;
     }
 
-    //region [Initializable Members]
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id\"root\" was not injected!";
@@ -343,7 +342,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                     ((AreaChart) viewPort).setCreateSymbols(false);
                     break;
                 case STACKED:
-                    viewPort = new StackedAreaChart<>(xAxis, yAxis);
+                    viewPort = new NaNStackedAreaChart<>(xAxis, yAxis);
                     ((StackedAreaChart) viewPort).setCreateSymbols(false);
                     break;
                 case SCATTER:
@@ -1159,7 +1158,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         bindingManager.attachListener(worksheet.getCharts(), chartListListener);
     }
 
-    //region *** protected members ***
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
         if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
             if (Dialogs.confirmDialog(root,
@@ -1229,14 +1227,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
     protected void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
     }
-    //endregion
 
     @FXML
     protected void handleToggleTableViewButton(ActionEvent actionEvent) {
         parentController.handleTogglePresentationMode();
     }
 
-    //region [Private Members]
     void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         if (saveToHistory) {
             getWorksheet().getBackwardHistory().push(getWorksheet().getPreviousState());
@@ -1503,6 +1499,4 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return bindingManager;
     }
 
-
-    //endregion
 }

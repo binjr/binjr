@@ -38,17 +38,18 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
     @Override
     public Double computeMinValue() {
         return this.data.stream()
-                .mapToDouble(XYChart.Data::getYValue)
-                .filter(d ->!Double.isNaN(d))
-                .min()
+                .map(XYChart.Data::getYValue)
+                .filter(d -> d != null && !Double.isNaN(d))
+                .min(Double::compareTo)
                 .orElse(Double.NaN);
     }
 
     @Override
     public Double computeAverageValue() {
        return this.data.stream()
-               .mapToDouble(XYChart.Data::getYValue)
-               .filter(d ->!Double.isNaN(d))
+               .map(XYChart.Data::getYValue)
+               .filter(d -> d != null && !Double.isNaN(d))
+               .mapToDouble(value -> value)
                .average()
                .orElse(Double.NaN);
     }
@@ -56,9 +57,9 @@ public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
     @Override
     public Double computeMaxValue() {
        return this.data.stream()
-               .mapToDouble(XYChart.Data::getYValue)
-               .filter(d ->!Double.isNaN(d))
-               .max()
+               .map(XYChart.Data::getYValue)
+               .filter(d -> d != null && !Double.isNaN(d))
+               .max(Double::compareTo)
                .orElse(Double.NaN);
     }
 }

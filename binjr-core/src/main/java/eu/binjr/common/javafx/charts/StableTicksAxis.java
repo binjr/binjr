@@ -41,6 +41,7 @@ import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -49,6 +50,9 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis extends ValueAxis<Double> {
+    private double dataMaxValue;
+    private double dataMinValue;
+
     public static class SelectableRegion extends Pane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
         private BooleanProperty selected = new BooleanPropertyBase(false) {
@@ -229,7 +233,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
             double contentWidth = this.getWidth() + 10;//(xShift * -1);
             double contentHeight = this.getHeight();
 
-           // this.selectionMarker.setPrefWidth(contentWidth);
+            // this.selectionMarker.setPrefWidth(contentWidth);
             this.selectionMarker.setPrefHeight(contentHeight);
 
             selectionMarker.resizeRelocate(
@@ -242,7 +246,19 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     }
 
     @Override
+    public void invalidateRange(List<Double> data) {
+        // Calculate min and max value not taking NaN values into account
+        dataMaxValue = data.stream().filter(d -> d != null && !Double.isNaN(d)).max(Double::compareTo).orElse(getUpperBound());
+        dataMinValue = data.stream().filter(d -> d != null && !Double.isNaN(d)).min(Double::compareTo).orElse(getUpperBound());
+        // Invoke super with an empty list so that requestLayout is called while avoiding iterating the sample list again.
+        super.invalidateRange(Collections.emptyList());
+    }
+
+    @Override
     protected Range autoRange(double minValue, double maxValue, double length, double labelSize) {
+        // By fthevenet: Override the provided min and max values by those calculated by our override.
+        minValue = dataMinValue;
+        maxValue = dataMaxValue;
         //By dweil: if the range is very small, display it like a flat line, the scaling doesn't work very well at these
         //values. 1e-300 was chosen arbitrarily.
         if (Math.abs(minValue - maxValue) < 1e-300) {
@@ -436,6 +452,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     public SelectableRegion getSelectionMarker() {
         return selectionMarker;
     }
+
 
     private static class Range {
         public final double low;

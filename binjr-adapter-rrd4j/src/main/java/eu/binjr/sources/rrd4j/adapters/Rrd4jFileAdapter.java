@@ -152,7 +152,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                 ZonedDateTime timeStamp = Instant.ofEpochSecond(data.getTimestamps()[i]).atZone(getTimeZoneId());
                 for (TimeSeriesInfo info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
-                    XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val.isNaN() ? 0 : val);
+                    XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
                     TimeSeriesProcessor seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
                     seriesProcessor.addSample(point);
                 }
