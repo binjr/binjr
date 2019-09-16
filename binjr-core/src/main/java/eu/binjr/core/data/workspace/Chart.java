@@ -22,8 +22,8 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
+import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.GlobalPreferences;
@@ -213,12 +213,13 @@ public class Chart implements Dirtyable, AutoCloseable {
                             try {
                                 String path = byPathEntry.getKey();
                                 logger.trace("Fetch sub-task '" + path + "' started");
-
+                                var rbd = adapter.getFetchReadBehindDuration(startTime);
+                                var rad = adapter.getFetchReadAheadDuration(endTime);
                                 // Get data from the adapter
                                 var data = adapter.fetchData(
                                         path,
-                                        startTime.toInstant(),
-                                        endTime.toInstant(),
+                                        startTime.toInstant().minus(rbd),
+                                        endTime.toInstant().plus(rad),
                                         byPathEntry.getValue(),
                                         bypassCache);
 

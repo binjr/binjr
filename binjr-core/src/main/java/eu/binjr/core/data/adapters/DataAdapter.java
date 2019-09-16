@@ -22,8 +22,10 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.control.TreeItem;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -121,8 +123,16 @@ public interface DataAdapter extends AutoCloseable {
      */
     boolean isClosed();
 
-    default boolean isSortingRequired(){
+    default boolean isSortingRequired() {
         return false;
+    }
+
+    default Duration getFetchReadAheadDuration(ZonedDateTime dateTime) {
+        return Duration.ZERO;
+    }
+
+    default Duration getFetchReadBehindDuration(ZonedDateTime dateTime) {
+        return Duration.ZERO;
     }
 
     @Override

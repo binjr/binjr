@@ -49,7 +49,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
-        if (data.isEmpty()){
+        if (data.isEmpty()) {
             return data;
         }
         //Align the lower (earlier) boundary of the series
@@ -64,10 +64,14 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         } else if (firstSample.getXValue().isBefore(startTime)) {
             // remove all samples with timestamps occurring before the requested start time.
             var previous = firstSample;
-            while (iterator.hasNext() && firstSample.getXValue().isBefore(startTime)) {
+            while (firstSample.getXValue().isBefore(startTime)) {
                 previous = firstSample;
                 iterator.remove();
-                firstSample = iterator.next();
+                if (iterator.hasNext()) {
+                    firstSample = iterator.next();
+                } else {
+                    break;
+                }
             }
             // use the known sample right before start time to interpolate the value of inserted sample
             var lowerBound = new XYChart.Data<>(startTime, interpolate(previous, firstSample, startTime));
@@ -82,10 +86,15 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
             data.add(new XYChart.Data<>(endTime, SUBSTITUTE_VALUE));
         } else if (lastSample.getXValue().isAfter(endTime)) {
             var next = lastSample;
-            while (lastIterator.hasPrevious() && lastSample.getXValue().isAfter(endTime)) {
+            //FIXME
+            while (lastSample.getXValue().isAfter(endTime)) {
                 next = lastSample;
                 lastIterator.remove();
-                lastSample = lastIterator.previous();
+                if (lastIterator.hasPrevious()) {
+                    lastSample = lastIterator.previous();
+                } else {
+                    break;
+                }
             }
             var upperBound = new XYChart.Data<>(endTime, interpolate(lastSample, next, endTime));
             data.add(upperBound);
@@ -99,7 +108,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         var y1 = val1.getYValue();
         var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
         var y2 = val2.getYValue();
-        if (y1 == null || y2 == null){
+        if (y1 == null || y2 == null) {
             return Double.NaN;
         }
         return (y2 - y1) / (x2 - x1) * (x3 - x1) + y1;
