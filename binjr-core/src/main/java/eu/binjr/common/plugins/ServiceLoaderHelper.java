@@ -36,6 +36,17 @@ public final class ServiceLoaderHelper {
     private static final Logger logger = LogManager.getLogger(ServiceLoaderHelper.class);
 
     /**
+     * A helper method to load and return service implementations from the classpath.
+     *
+     * @param clazz the type of service to load and return
+     * @param <T>   the type of service to load and return
+     * @return A {@link Set} of loaded service implementations
+     */
+    public static <T> Set<T> load(Class<T> clazz) {
+        return load(clazz, null, false);
+    }
+
+    /**
      * A helper method to load and return service implementations from the classpath and/or external jars
      *
      * @param clazz            the type of service to load and return
@@ -52,7 +63,7 @@ public final class ServiceLoaderHelper {
         if (loadFromExternal) {
             List<URL> urls = new ArrayList<>();
             if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
-                logger.info(() -> "Looking for services of type "+ clazz.getName() +" in " + externalLocation);
+                logger.info(() -> "Looking for services of type " + clazz.getName() + " in " + externalLocation);
                 PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
                 try {
                     Files.walkFileTree(externalLocation,
