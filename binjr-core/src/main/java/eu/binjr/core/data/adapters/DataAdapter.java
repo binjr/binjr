@@ -123,14 +123,39 @@ public interface DataAdapter extends AutoCloseable {
      */
     boolean isClosed();
 
+    /**
+     * Return true to indicate that the adapter cannot guarantee that samples will be ordered by monotonaly increasing
+     * timestamps, false otherwise.
+     *
+     * @return true to indicate that the adapter cannot guarantee that samples will be ordered by monotonaly increasing
+     * timestamps, false otherwise.
+     */
     default boolean isSortingRequired() {
         return false;
     }
 
+    /**
+     * Returns a {@link Duration} that will be added to the upper bound of requested time interval.
+     * <p>
+     * This allows {@link eu.binjr.core.data.timeseries.transform.TimeSeriesTransform} to better interpolate the value
+     * of  missing samples.
+     *
+     * @param dateTime The requested upper bound of requested time interval.
+     * @return a {@link Duration} that will be added to the upper bound of requested time interval.
+     */
     default Duration getFetchReadAheadDuration(ZonedDateTime dateTime) {
         return Duration.ZERO;
     }
 
+    /**
+     * Returns a {@link Duration} that will be subtracted to the lower bound of requested time interval.
+     * <p>
+     * This allows {@link eu.binjr.core.data.timeseries.transform.TimeSeriesTransform} to better interpolate the value
+     * of  missing samples.
+     *
+     * @param dateTime The requested lower bound of requested time interval.
+     * @return a {@link Duration} that will be subtracted to the lower bound of requested time interval.
+     */
     default Duration getFetchReadBehindDuration(ZonedDateTime dateTime) {
         return Duration.ZERO;
     }

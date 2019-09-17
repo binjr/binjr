@@ -196,7 +196,6 @@ public class Chart implements Dirtyable, AutoCloseable {
         var aligner = new AlignBoundariesTransform(startTime, endTime);
         var cleaner  = new NanToZeroTransform();
         cleaner.enabledProperty().bind(GlobalPreferences.getInstance().forceNanToZeroProperty());
-
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -213,16 +212,13 @@ public class Chart implements Dirtyable, AutoCloseable {
                             try {
                                 String path = byPathEntry.getKey();
                                 logger.trace("Fetch sub-task '" + path + "' started");
-                                var rbd = adapter.getFetchReadBehindDuration(startTime);
-                                var rad = adapter.getFetchReadAheadDuration(endTime);
                                 // Get data from the adapter
                                 var data = adapter.fetchData(
                                         path,
-                                        startTime.toInstant().minus(rbd),
-                                        endTime.toInstant().plus(rad),
+                                        startTime.toInstant().minus(adapter.getFetchReadBehindDuration(startTime)),
+                                        endTime.toInstant().plus(adapter.getFetchReadAheadDuration(endTime)),
                                         byPathEntry.getValue(),
                                         bypassCache);
-
                                 data.entrySet().parallelStream().forEach(entry -> {
                                     var info = entry.getKey();
                                     var proc = entry.getValue();
