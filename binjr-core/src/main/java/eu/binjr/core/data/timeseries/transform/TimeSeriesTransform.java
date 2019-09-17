@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 public abstract class TimeSeriesTransform {
     private static final Logger logger = LogManager.getLogger(TimeSeriesTransform.class);
     private final String name;
-    private final BooleanProperty enabled = new SimpleBooleanProperty(true);
+    private volatile boolean enabled = true;
 
     /**
      * Base constructor for {@link TimeSeriesTransform} instances.
@@ -50,21 +50,12 @@ public abstract class TimeSeriesTransform {
         this.name = name;
     }
 
-//    /**
-//     * The actual transform implementation
-//     *
-//     * @param series the time series to apply the transform to.
-//     * @return A map of the transformed series.
-//     */
-//    protected abstract Map<TimeSeriesInfo, TimeSeriesProcessor> apply(Map<TimeSeriesInfo, TimeSeriesProcessor> series);
-
     /**
      * The actual transform implementation
      *
      * @return
      */
     protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data);
-
 
     /**
      * Applies the transform function to the provided series
@@ -92,14 +83,10 @@ public abstract class TimeSeriesTransform {
     }
 
     public boolean isEnabled() {
-        return enabled.get();
-    }
-
-    public BooleanProperty enabledProperty() {
         return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        this.enabled.set(enabled);
+        this.enabled = enabled;
     }
 }

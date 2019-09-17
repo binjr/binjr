@@ -192,10 +192,10 @@ public class Chart implements Dirtyable, AutoCloseable {
         });
         // Define the transforms to apply
         var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
-        reducer.enabledProperty().bind(GlobalPreferences.getInstance().downSamplingEnabledProperty());
+        reducer.setEnabled(GlobalPreferences.getInstance().isDownSamplingEnabled());
         var aligner = new AlignBoundariesTransform(startTime, endTime);
         var cleaner  = new NanToZeroTransform();
-        cleaner.enabledProperty().bind(GlobalPreferences.getInstance().forceNanToZeroProperty());
+        cleaner.setEnabled(GlobalPreferences.getInstance().isForceNanToZero());
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {

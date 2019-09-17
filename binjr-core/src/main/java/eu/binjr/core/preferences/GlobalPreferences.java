@@ -225,7 +225,7 @@ public class GlobalPreferences {
      *
      * @return true if series down-sampling is enabled, false otherwise.
      */
-    public Boolean getDownSamplingEnabled() {
+    public Boolean isDownSamplingEnabled() {
         return downSamplingEnabled.getValue();
     }
 
@@ -890,7 +890,7 @@ public class GlobalPreferences {
         this.httpPoolingEnabled.set(httpPoolingEnabled);
     }
 
-    public boolean getForceNanToZero() {
+    public boolean isForceNanToZero() {
         return forceNanToZero.get();
     }
 
