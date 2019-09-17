@@ -34,17 +34,20 @@ import java.util.List;
  */
 public class AlignBoundariesTransform extends TimeSeriesTransform {
 
-    public static final double SUBSTITUTE_VALUE = Double.NaN;
+    private double substituteValue = Double.NaN;
     private final ZonedDateTime startTime;
     private final ZonedDateTime endTime;
 
     /**
      * Base constructor for {@link TimeSeriesTransform} instances.
      */
-    public AlignBoundariesTransform(ZonedDateTime startTime, ZonedDateTime endTime) {
+    public AlignBoundariesTransform(ZonedDateTime startTime, ZonedDateTime endTime, boolean chartSupportsNaN) {
         super("AlignBoundariesTransform");
         this.startTime = startTime;
         this.endTime = endTime;
+        if (!chartSupportsNaN) {
+            substituteValue = 0.0;
+        }
     }
 
     @Override
@@ -59,8 +62,8 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
             // if the first available sample is later than the requested start time,
             // add a sample 1ns after last sample with a substitute value then another sample at start time in order to
             // create an abrupt truncation.
-            data.add(0, new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), SUBSTITUTE_VALUE));
-            data.add(0, new XYChart.Data<>(startTime, SUBSTITUTE_VALUE));
+            data.add(0, new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), substituteValue));
+            data.add(0, new XYChart.Data<>(startTime, substituteValue));
         } else if (firstSample.getXValue().isBefore(startTime)) {
             // remove all samples with timestamps occurring before the requested start time.
             var previous = firstSample;
@@ -82,8 +85,8 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         var lastIterator = data.listIterator(data.size());
         XYChart.Data<ZonedDateTime, Double> lastSample = lastIterator.previous();
         if (lastSample.getXValue().isBefore(endTime)) {
-            data.add(new XYChart.Data<>(lastSample.getXValue().plus(1, ChronoUnit.NANOS), SUBSTITUTE_VALUE));
-            data.add(new XYChart.Data<>(endTime, SUBSTITUTE_VALUE));
+            data.add(new XYChart.Data<>(lastSample.getXValue().plus(1, ChronoUnit.NANOS), substituteValue));
+            data.add(new XYChart.Data<>(endTime, substituteValue));
         } else if (lastSample.getXValue().isAfter(endTime)) {
             var next = lastSample;
             while (lastSample.getXValue().isAfter(endTime)) {
@@ -108,7 +111,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
         var y2 = val2.getYValue();
         if (y1 == null || y2 == null) {
-            return SUBSTITUTE_VALUE;
+            return substituteValue;
         }
         return (y2 - y1) / (x2 - x1) * (x3 - x1) + y1;
     }

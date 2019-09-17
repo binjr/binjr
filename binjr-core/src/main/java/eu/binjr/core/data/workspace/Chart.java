@@ -193,8 +193,8 @@ public class Chart implements Dirtyable, AutoCloseable {
         // Define the transforms to apply
         var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
         reducer.setEnabled(GlobalPreferences.getInstance().isDownSamplingEnabled());
-        var aligner = new AlignBoundariesTransform(startTime, endTime);
-        var cleaner  = new NanToZeroTransform();
+        var aligner = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
+        var cleaner = new NanToZeroTransform();
         cleaner.setEnabled(GlobalPreferences.getInstance().isForceNanToZero());
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
@@ -244,8 +244,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                     for (var t : errors) {
                         //FIXME only first exception is rethrown
                         if (t instanceof DataAdapterException) {
-                            throw (DataAdapterException)t;
-                        } else{
+                            throw (DataAdapterException) t;
+                        } else {
                             throw new DataAdapterException("Unexpected error while retrieving data from adapter: " + t.getMessage(), t);
                         }
                     }
