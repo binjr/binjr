@@ -108,7 +108,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
         var x2 = (double) val2.getXValue().toInstant().toEpochMilli();
         var y2 = val2.getYValue();
         if (y1 == null || y2 == null) {
-            return Double.NaN;
+            return SUBSTITUTE_VALUE;
         }
         return (y2 - y1) / (x2 - x1) * (x3 - x1) + y1;
     }
