@@ -23,6 +23,7 @@ import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -168,12 +169,17 @@ public abstract class TimeSeriesProcessor {
     private Double unsyncedGetNearestValue(ZonedDateTime xValue) {
         Double value = null;
         if (xValue != null && data != null) {
-            for (XYChart.Data<ZonedDateTime, Double> sample : data) {
+            var previous = new XYChart.Data<>(xValue, 0.0);
+            for (var sample : data) {
                 value = sample.getYValue();
                 if (xValue.isBefore(sample.getXValue())) {
-                    //TODO check if previous value is nearer and return corresponding value instead
-                    return value;
+                    if (Duration.between(previous.getXValue(), xValue).abs().compareTo(Duration.between(xValue, sample.getXValue()).abs()) > 0) {
+                        return value;
+                    } else {
+                        return previous.getYValue();
+                    }
                 }
+                previous = sample;
             }
         }
         return value;
