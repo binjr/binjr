@@ -59,7 +59,7 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
             // if the first available sample is later than the requested start time,
             // add a sample 1ns after last sample with a substitute value then another sample at start time in order to
             // create an abrupt truncation.
-            data.add(new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), SUBSTITUTE_VALUE));
+            data.add(0, new XYChart.Data<>(firstSample.getXValue().minus(1, ChronoUnit.NANOS), SUBSTITUTE_VALUE));
             data.add(0, new XYChart.Data<>(startTime, SUBSTITUTE_VALUE));
         } else if (firstSample.getXValue().isBefore(startTime)) {
             // remove all samples with timestamps occurring before the requested start time.
@@ -86,7 +86,6 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
             data.add(new XYChart.Data<>(endTime, SUBSTITUTE_VALUE));
         } else if (lastSample.getXValue().isAfter(endTime)) {
             var next = lastSample;
-            //FIXME
             while (lastSample.getXValue().isAfter(endTime)) {
                 next = lastSample;
                 lastIterator.remove();
