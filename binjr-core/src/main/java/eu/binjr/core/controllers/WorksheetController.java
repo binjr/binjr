@@ -1299,10 +1299,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                         }
                                     }
                                 }
-                                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
-                                    // Force a redraw of the charts and their Y Axis considering their proper width.
-                                    new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
-                                }
                             }
                         } catch (Exception e) {
                             Dialogs.notifyException("Unexpected error while plotting data", e, root);
