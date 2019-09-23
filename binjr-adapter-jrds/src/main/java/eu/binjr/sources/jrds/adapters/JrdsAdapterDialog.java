@@ -31,6 +31,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+import java.net.URI;
 import java.time.ZoneId;
 
 
@@ -39,7 +40,7 @@ import java.time.ZoneId;
  *
  * @author Frederic Thevenet
  */
-public class JrdsAdapterDialog extends DataAdapterDialog {
+public class JrdsAdapterDialog extends DataAdapterDialog<URI> {
     private final ChoiceBox<JrdsTreeViewTab> tabsChoiceBox;
     private final TextField extraArgumentTextField;
 
@@ -49,7 +50,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
      * @param owner the owner window for the dialog
      */
     public JrdsAdapterDialog(Node owner) {
-        super(owner, Mode.URL, "mostRecentJrdsUrls");
+        super(owner, Mode.URI, "mostRecentJrdsUrls");
         this.setDialogHeaderText("Connect to a JRDS source");
         this.tabsChoiceBox = new ChoiceBox<>();
         tabsChoiceBox.getItems().addAll(JrdsTreeViewTab.values());

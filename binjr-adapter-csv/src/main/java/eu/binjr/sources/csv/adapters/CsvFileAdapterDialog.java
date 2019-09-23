@@ -46,7 +46,7 @@ import java.time.ZoneId;
  *
  * @author Frederic Thevenet
  */
-public class CsvFileAdapterDialog extends DataAdapterDialog {
+public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     private final TextField dateFormatPattern = new TextField("yyyy-MM-dd HH:mm:ss");
     private final TextField encodingField = new TextField("utf-8");
     private final TextField separatorField = new TextField(",");
@@ -80,7 +80,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
             fileChooser.setTitle("Open CSV file");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-            var initDir = Path.of(getMostRecentList().peek().orElse(Paths.get(System.getProperty("user.home")).toUri()));
+            var initDir = getMostRecentList().peek().orElse(Paths.get(System.getProperty("user.home")));
             if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
                 initDir = initDir.getParent();
             }
@@ -94,10 +94,11 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
 
     @Override
     protected DataAdapter getDataAdapter() throws DataAdapterException {
-        if (!Files.exists(Paths.get(getSourceUri()))) {
+        Path csvPath = Paths.get(getSourceUri());
+        if (!Files.exists(csvPath)) {
             throw new CannotInitializeDataAdapterException("Cannot find " + getSourceUri());
         }
-        getMostRecentList().push(URI.create(getSourceUri()));
+        getMostRecentList().push(csvPath);
         return new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
