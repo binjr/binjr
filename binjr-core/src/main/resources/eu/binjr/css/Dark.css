@@ -692,6 +692,27 @@
     */
 }
 
+.settings-button {
+    -fx-background-color:  -binjr-dark-blue-color;
+    -fx-background-radius: 0;
+    -fx-background-insets: 0;
+    -fx-border-color:  -binjr-dark-blue-color;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
+    -fx-alignment: center_left;
+}
+
+.settings-button:hover {
+    -fx-background-color: -binjr-dark-blue-color;
+    -fx-border-color:  -binjr-dark-blue-color;
+}
+
+.settings-button:hover:pressed {
+    -fx-background-color: -binjr-blue-color;
+    -fx-text-fill: -fx-text-background-color;
+}
+
+
 .command-bar .button,
 .command-bar .toggle-button,
 .command-bar .menu-button {
@@ -842,8 +863,9 @@
 }
 
 .command-bar .border-button {
+    -fx-background-color: -binjr-dark-blue-color;
+    -fx-border-color:  -binjr-dark-blue-color;
     -fx-border-width: 2;
-    -fx-border-color: white;
     -fx-font-size: 10pt;
 }
 

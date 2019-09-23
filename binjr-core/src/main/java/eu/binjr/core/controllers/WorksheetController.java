@@ -29,10 +29,12 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
@@ -65,7 +67,6 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -74,6 +75,7 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -94,7 +96,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     private static final Logger logger = LogManager.getLogger(WorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
-    private final GlobalPreferences globalPrefs = GlobalPreferences.getInstance();
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final MainViewController parentController;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final BindingManager bindingManager = new BindingManager();
@@ -200,7 +202,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
                 charts.add(chart);
             }
         }
-        if (totalBindings >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+        if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(dlgRoot,
                     "This action will add " + totalBindings + " series on a single worksheet.",
                     "Are you sure you want to proceed?",
@@ -263,8 +265,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidateAll(false, false, false));
-            bindingManager.attachListener(globalPrefs.downSamplingEnabledProperty(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(globalPrefs.downSamplingThresholdProperty(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.attachListener(UserPreferences.getInstance().downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.attachListener(UserPreferences.getInstance().downSamplingThreshold.property(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 setEditChartMode(newValue);
             });
@@ -509,16 +511,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
         });
-        hCrosshair.selectedProperty().bindBidirectional(globalPrefs.horizontalMarkerOnProperty());
-        vCrosshair.selectedProperty().bindBidirectional(globalPrefs.verticalMarkerOnProperty());
+        hCrosshair.selectedProperty().bindBidirectional(userPrefs.horizontalMarkerOn.property());
+        vCrosshair.selectedProperty().bindBidirectional(userPrefs.verticalMarkerOn.property());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
-                Bindings.createBooleanBinding(() -> globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                Bindings.createBooleanBinding(() -> userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
-                        globalPrefs.shiftPressedProperty()));
+                        userPrefs.shiftPressed.property()));
         bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
-                Bindings.createBooleanBinding(() -> globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                Bindings.createBooleanBinding(() -> userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
-                        globalPrefs.ctrlPressedProperty()));
+                        userPrefs.ctrlPressed.property()));
         vBox.getChildren().add(pane);
         chartParent.getChildren().add(vBox);
     }
@@ -551,9 +553,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         map.put(viewPorts.get(0).getChart(), viewPorts.get(0).getPrefixFormatter()::format);
         var crossHair = new XYChartCrosshair<>(map, chartParent, dateTimeFormatter::format);
         var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
-        var crosshairHeightBinding = GlobalPreferences
-                .getInstance()
-                .fullHeightCrosshairMarkerProperty()
+        var crosshairHeightBinding = BooleanBinding.booleanExpression(userPrefs.fullHeightCrosshairMarker.property())
                 .and(Bindings.greaterThan(nbChartObs, 1));
         bindingManager.bind(crossHair.displayFullHeightMarkerProperty(), crosshairHeightBinding);
         viewPorts.get(0).setCrosshair(crossHair);
@@ -561,18 +561,18 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
         });
-        bindingManager.bindBidirectional(hCrosshair.selectedProperty(), globalPrefs.horizontalMarkerOnProperty());
-        bindingManager.bindBidirectional(vCrosshair.selectedProperty(), globalPrefs.verticalMarkerOnProperty());
+        bindingManager.bindBidirectional(hCrosshair.selectedProperty(), userPrefs.horizontalMarkerOn.property());
+        bindingManager.bindBidirectional(vCrosshair.selectedProperty(), userPrefs.verticalMarkerOn.property());
         bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                                globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                                userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
-                        globalPrefs.shiftPressedProperty()));
+                        userPrefs.shiftPressed.property()));
         bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                                globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                                userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
-                        globalPrefs.ctrlPressedProperty()));
+                        userPrefs.ctrlPressed.property()));
         for (int i = 1; i < viewPorts.size(); i++) {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
@@ -584,14 +584,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
             });
             bindingManager.bind(ch.horizontalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                                    globalPrefs.isShiftPressed() || hCrosshair.isSelected(),
+                                    userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                             hCrosshair.selectedProperty(),
-                            globalPrefs.shiftPressedProperty()));
+                            userPrefs.shiftPressed.property()));
             bindingManager.bind(ch.verticalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                                    globalPrefs.isCtrlPressed() || vCrosshair.isSelected(),
+                                    userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
-                            globalPrefs.ctrlPressedProperty()));
+                            userPrefs.ctrlPressed.property()));
             viewPorts.get(i).setCrosshair(ch);
         }
     }
@@ -1091,8 +1091,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
             logger.debug(() -> "Closing worksheetController " + this.toString());
             bindingManager.close();
             currentState.close();
-            hCrosshair.selectedProperty().unbindBidirectional(globalPrefs.horizontalMarkerOnProperty());
-            vCrosshair.selectedProperty().unbindBidirectional(globalPrefs.verticalMarkerOnProperty());
+            hCrosshair.selectedProperty().unbindBidirectional(userPrefs.horizontalMarkerOn.property());
+            vCrosshair.selectedProperty().unbindBidirectional(userPrefs.verticalMarkerOn.property());
             currentState = null;
             this.seriesTableContainer.getPanes().forEach(pane -> {
                 pane.setUserData(null);
@@ -1159,7 +1159,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     protected void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
-        if (bindings.size() >= GlobalPreferences.getInstance().getMaxSeriesPerChartBeforeWarning()) {
+        if (bindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(root,
                     "This action will add " + bindings.size() + " series on a single chart.",
                     "Are you sure you want to proceed?",
@@ -1392,13 +1392,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        fileChooser.setInitialDirectory(globalPrefs.getMostRecentSaveFolder().toFile());
+        var recentDirPath = UserHistory.getInstance().mostRecentSaveFolders.peek()
+                .orElse(Paths.get(System.getProperty("user.home"))).toFile();
+        fileChooser.setInitialDirectory(recentDirPath);
         fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
                 if (selectedFile.getParent() != null) {
-                    globalPrefs.setMostRecentSaveFolder(selectedFile.toPath());
+                    UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.toPath());
                 }
                 ImageIO.write(
                         SwingFXUtils.fromFXImage(snapImg, null),

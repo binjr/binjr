@@ -16,16 +16,31 @@
   ~    limitations under the License.
   -->
 
-<?import javafx.geometry.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.control.cell.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import org.controlsfx.control.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Accordion?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.text.TextFlow?>
+<?import org.controlsfx.control.ToggleSwitch?>
+
+<?import javafx.scene.control.Tooltip?>
 <AnchorPane fx:id="root" focusTraversable="true" prefHeight="562.0" prefWidth="205.0"
-            xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1"
+            xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="eu.binjr.core.controllers.PreferenceDialogController">
-    <HBox AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0" spacing="5" alignment="CENTER_LEFT">
+    <HBox alignment="CENTER_LEFT" spacing="5" AnchorPane.leftAnchor="5.0" AnchorPane.topAnchor="0.0">
         <Button alignment="BASELINE_LEFT" graphicTextGap="10.0" onAction="#handleHideSettings" prefHeight="30.0"
                 prefWidth="30.0" styleClass="dialog-button">
             <graphic>
@@ -51,9 +66,8 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                     </padding>
                     <AnchorPane minHeight="0.0" minWidth="0.0">
-                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0"
-                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <Label text="Theme"/>
                             <ChoiceBox fx:id="uiThemeChoiceBox"/>
                             <Label text="Reload last workspace on start-up" wrapText="true"/>
@@ -77,8 +91,7 @@
                     </padding>
                     <AnchorPane>
                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                              AnchorPane.topAnchor="0.0">
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <Label text="Span crosshair over all charts" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="fullHeightCrosshair" prefWidth="1.0">
@@ -98,24 +111,20 @@
                             <Label text="Default chart area opacity" wrapText="true"/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
-                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1"
-                                            max="1.0" min="0"/>
+                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
                                     <Label fx:id="opacityText" text="100%"/>
                                 </HBox>
                             </VBox>
                             <Label text="Enable sample reduction" wrapText="true"/>
                             <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0"
-                                              selected="true">
+                                <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0" selected="true">
                                     <font>
                                         <Font size="10.0"/>
                                     </font>
                                 </ToggleSwitch>
                             </VBox>
-                            <Label fx:id="maxSampleLabel" text="Maximum number of samples"
-                                   wrapText="true"/>
-                            <TextField fx:id="downSamplingThreshold" prefHeight="25.0"
-                                       prefWidth="-1.0" text="1000"/>
+                            <Label fx:id="maxSampleLabel" text="Maximum number of samples" wrapText="true"/>
+                            <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="-1.0" text="1000"/>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -126,15 +135,15 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                     </padding>
                     <AnchorPane>
-                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308"
-                              spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                              AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308" spacing="10.0"
+                              AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                              AnchorPane.topAnchor="0.0">
                             <Label text="Available Data Adapters"/>
-                            <TableView fx:id="availableAdapterTable" editable="true"
-                                       maxHeight="1.7976931348623157E308" VBox.vgrow="ALWAYS">
+                            <TableView fx:id="availableAdapterTable" editable="true" maxHeight="1.7976931348623157E308"
+                                       VBox.vgrow="ALWAYS">
                                 <columns>
-                                    <TableColumn fx:id="enabledColumn" prefWidth="24.0"
-                                                 resizable="false" sortable="false">
+                                    <TableColumn fx:id="enabledColumn" prefWidth="24.0" resizable="false"
+                                                 sortable="false">
                                         <cellValueFactory>
                                             <PropertyValueFactory property="enabled"/>
                                         </cellValueFactory>
@@ -178,33 +187,85 @@
                                 </columns>
                             </TableView>
                             <Label text="Load from external location"/>
-                            <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT"
-                                          contentDisplay="GRAPHIC_ONLY" graphicTextGap="0.0"
-                                          prefHeight="18.0" prefWidth="0.0"/>
-                            <HBox maxHeight="1.7976931348623157E308"
-                                  maxWidth="1.7976931348623157E308" prefHeight="25.0" spacing="5.0">
-                                <TextField fx:id="pluginLocTextfield"
-                                           maxWidth="1.7976931348623157E308"
+                            <ToggleSwitch fx:id="loadExternalToggle" alignment="TOP_LEFT" contentDisplay="GRAPHIC_ONLY"
+                                          graphicTextGap="0.0" prefHeight="18.0" prefWidth="0.0"/>
+                            <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="25.0"
+                                  spacing="5.0">
+                                <TextField fx:id="pluginLocTextfield" maxWidth="1.7976931348623157E308"
                                            HBox.hgrow="ALWAYS"/>
                                 <Button fx:id="browsePluginLocButton" mnemonicParsing="false"
-                                        onAction="#handleBrowsePluginsFolder" prefWidth="25.0"
-                                        text="..."/>
+                                        onAction="#handleBrowsePluginsFolder" prefWidth="25.0" text="..."/>
                             </HBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
             </TitledPane>
             <TitledPane animated="false" text="Manage Settings">
-                <ScrollPane>
+                <ScrollPane fitToHeight="true" fitToWidth="true">
                     <padding>
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                     </padding>
-                    <AnchorPane minHeight="0.0" minWidth="0.0">
+                    <AnchorPane maxWidth="1.7976931348623157E308" minHeight="0.0" minWidth="0.0" prefHeight="95.0"
+                                prefWidth="184.0">
                         <VBox spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <Button fx:id="resetPrefs" mnemonicParsing="false"
+                            <Button fx:id="resetPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
                                     onAction="#handleResetSettings" styleClass="border-button"
-                                    text="Restore to default"/>
+                                    text="Restore to default">
+                                <graphic>
+                                    <Region styleClass="icon-container, recycle-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Restore all user settings to their default values">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
+                            <Button fx:id="exportPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                    onAction="#handleExportSettings" styleClass="border-button" text="Export settings">
+                                <graphic>
+                                    <Region styleClass="icon-container, download-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Export user settings to a file">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
+                            <Button fx:id="importPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                    onAction="#handleImportSettings" styleClass="border-button" text="Import settings">
+                                <graphic>
+                                    <Region styleClass="icon-container, upload-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip text="Import user settings from a file">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
+                            <Button fx:id="clearHistory" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
+                                    onAction="#handleClearHistory" styleClass="border-button" text="Clear History">
+                                <graphic>
+                                    <Region styleClass="icon-container, trash-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip
+                                            text="Clear all saved history (recently opened workspace, sources, etc...)">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
+                            <padding>
+                                <Insets left="8.0" right="8.0"/>
+                            </padding>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -221,9 +282,20 @@
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="updateCheckBox" prefWidth="1.0"/>
                             </VBox>
-                            <Button alignment="CENTER" mnemonicParsing="false"
-                                    onAction="#handleCheckForUpdate" styleClass="border-button"
-                                    text="Check for updates"/>
+                            <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleCheckForUpdate"
+                                    styleClass="border-button" text="Check for Updates...">
+                                <graphic>
+                                    <Region styleClass="icon-container, sync-icon"/>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip
+                                            text="Check if a more recent release of binjr is available">
+                                        <font>
+                                            <Font size="10.0"/>
+                                        </font>
+                                    </Tooltip>
+                                </tooltip>
+                            </Button>
                             <TextFlow fx:id="updateFlow"/>
                         </VBox>
                     </AnchorPane>

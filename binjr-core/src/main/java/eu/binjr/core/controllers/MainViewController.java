@@ -33,7 +33,8 @@ import eu.binjr.core.data.workspace.Workspace;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.update.UpdateManager;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
@@ -79,6 +80,9 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -98,7 +102,7 @@ public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
-    private static final String[] BINJR_FILE_PATTERN = new String[]{ "*.bjr", "*.xml"};
+    private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
@@ -280,7 +284,7 @@ public class MainViewController implements Initializable {
     }
 
     protected void runAfterInitialize() {
-        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        UserPreferences userPrefs = UserPreferences.getInstance();
         Stage stage = Dialogs.getStage(root);
         stage.titleProperty().bind(Bindings.createStringBinding(
                 () -> String.format("%s%s - %s",
@@ -291,7 +295,6 @@ public class MainViewController implements Initializable {
                 workspace.pathProperty(),
                 workspace.dirtyProperty())
         );
-
         stage.setOnCloseRequest(event -> {
             if (!confirmAndClearWorkspace()) {
                 event.consume();
@@ -299,15 +302,13 @@ public class MainViewController implements Initializable {
                 saveWindowPositionAndQuit();
             }
         });
-
         registerStageKeyEvents(stage);
-
         if (associatedFile.isPresent()) {
             logger.debug(() -> "Opening associated file " + associatedFile.get());
             loadWorkspace(new File(associatedFile.get()));
-        } else if (prefs.isLoadLastWorkspaceOnStartup()) {
-            prefs.getMostRecentSavedWorkspace().ifPresent(path -> {
-                File latestWorkspace = path.toFile();
+        } else if (userPrefs.loadLastWorkspaceOnStartup.get()) {
+            UserHistory.getInstance().mostRecentWorkspaces.peek().ifPresent(latestWorkspacePath -> {
+                File latestWorkspace = latestWorkspacePath.toFile();
                 if (latestWorkspace.exists()) {
                     loadWorkspace(latestWorkspace);
                 } else {
@@ -315,8 +316,7 @@ public class MainViewController implements Initializable {
                 }
             });
         }
-
-        if (prefs.isCheckForUpdateOnStartUp()) {
+        if (userPrefs.checkForUpdateOnStartUp.get()) {
             UpdateManager.getInstance().asyncCheckForUpdate(
                     release -> UpdateManager.getInstance().showUpdateAvailableNotification(release, root), null, null
             );
@@ -346,8 +346,8 @@ public class MainViewController implements Initializable {
         stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> handleControlKey(e, false)));
         manager.attachListener(stage.focusedProperty(), (observable, oldValue, newValue) -> {
             //main stage lost focus -> invalidates shift or ctrl pressed
-            GlobalPreferences.getInstance().setShiftPressed(false);
-            GlobalPreferences.getInstance().setCtrlPressed(false);
+            UserPreferences.getInstance().shiftPressed.set(false);
+            UserPreferences.getInstance().ctrlPressed.set(false);
         });
     }
 
@@ -491,10 +491,10 @@ public class MainViewController implements Initializable {
     @FXML
     protected void populateOpenRecentMenu(Event event) {
         Menu menu = (Menu) event.getSource();
-        Collection<String> recentPath = GlobalPreferences.getInstance().getRecentFiles();
+        Collection<Path> recentPath = UserHistory.getInstance().mostRecentWorkspaces.getAll();
         if (!recentPath.isEmpty()) {
             menu.getItems().setAll(recentPath.stream().map(s -> {
-                MenuItem m = new MenuItem(s);
+                MenuItem m = new MenuItem(s.toString());
                 m.setMnemonicParsing(false);
                 m.setOnAction(e -> loadWorkspace(new File(((MenuItem) e.getSource()).getText())));
                 return m;
@@ -671,7 +671,12 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
+        var initDir = UserHistory.getInstance().mostRecentWorkspaces.peek()
+                .orElse(Paths.get(System.getProperty("user.home")));
+        if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
+            initDir = initDir.getParent();
+        }
+        fileChooser.setInitialDirectory(initDir.toFile());
         File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             loadWorkspace(selectedFile);
@@ -714,8 +719,12 @@ public class MainViewController implements Initializable {
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
-            GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
-            logger.debug(() -> "Recently loaded workspaces: " + String.join(" ", GlobalPreferences.getInstance().getRecentFiles()));
+            UserHistory.getInstance().mostRecentWorkspaces.push(workspace.getPath());
+            logger.debug(() -> "Recently loaded workspaces: " +
+                    UserHistory.getInstance().mostRecentWorkspaces.getAll()
+                            .stream()
+                            .map(Path::toString)
+                            .collect(Collectors.joining(" ")));
 
         } catch (Exception e) {
             Dialogs.notifyException("Error loading workspace", e, root);
@@ -742,13 +751,18 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
+        var initDir = UserHistory.getInstance().mostRecentWorkspaces.peek()
+                .orElse(Paths.get(System.getProperty("user.home")));
+        if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
+            initDir = initDir.getParent();
+        }
+        fileChooser.setInitialDirectory(initDir.toFile());
         fileChooser.setInitialFileName(BINJR_FILE_PATTERN[0]);
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
                 workspace.save(selectedFile);
-                GlobalPreferences.getInstance().putToRecentFiles(workspace.getPath().toString());
+                UserHistory.getInstance().mostRecentWorkspaces.push(workspace.getPath());
                 return true;
             } catch (IOException e) {
                 Dialogs.notifyException("Failed to save snapshot to disk", e, root);
@@ -843,7 +857,7 @@ public class MainViewController implements Initializable {
         ((FilterableTreeItem<TimeSeriesBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() ||
                             filterField.getText() == null ||
-                            filterField.getText().length() < GlobalPreferences.getInstance().getMinCharsTreeFiltering())
+                            filterField.getText().length() < UserPreferences.getInstance().minCharsTreeFiltering.get().intValue())
                         return null;
                     return (TreeItemPredicate<TimeSeriesBinding>) (parent, seriesBinding) -> {
                         var isMatch = seriesBinding != null && StringUtils.contains(
@@ -1112,13 +1126,13 @@ public class MainViewController implements Initializable {
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT:
-                GlobalPreferences.getInstance().setShiftPressed(pressed);
+                UserPreferences.getInstance().shiftPressed.set(pressed);
                 event.consume();
                 break;
             case CONTROL:
             case META:
             case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
-                GlobalPreferences.getInstance().setCtrlPressed(pressed);
+                UserPreferences.getInstance().ctrlPressed.set(pressed);
                 event.consume();
                 break;
             default:
@@ -1322,7 +1336,7 @@ public class MainViewController implements Initializable {
     private void saveWindowPositionAndQuit() {
         Stage stage = Dialogs.getStage(root);
         if (stage != null) {
-            GlobalPreferences.getInstance().setWindowLastPosition(
+            UserPreferences.getInstance().windowLastPosition.set(
                     new Rectangle2D(
                             stage.getX(),
                             stage.getY(),

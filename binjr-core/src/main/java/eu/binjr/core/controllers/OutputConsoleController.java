@@ -23,7 +23,8 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,10 +32,8 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
@@ -43,7 +42,8 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.net.URL;
-import java.util.Locale;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -70,7 +70,7 @@ public class OutputConsoleController implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter());
         consoleMaxLinesText.setTextFormatter(formatter);
-        formatter.valueProperty().bindBidirectional(GlobalPreferences.getInstance().consoleMaxLineCapacityProperty());
+        formatter.valueProperty().bindBidirectional(UserPreferences.getInstance().consoleMaxLineCapacity.property());
         if (DEBUG_CONSOLE_APPENDER == null) {
             Text log = new Text("<ERROR: The debug console appender is unavailable!>\n");
             log.getStyleClass().add("log-error");
@@ -117,7 +117,8 @@ public class OutputConsoleController implements Initializable {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save console ouptut");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
-            fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
+            fileChooser.setInitialDirectory(UserHistory.getInstance().mostRecentSaveFolders.peek()
+                    .orElse(Paths.get(System.getProperty( System.getProperty("user.home")))).toFile());
             fileChooser.setInitialFileName("binjr_console_output.txt");
             File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
@@ -126,7 +127,7 @@ public class OutputConsoleController implements Initializable {
                 } catch (IOException e) {
                     Dialogs.notifyException("Error writing log message to file", e, textOutput);
                 }
-                GlobalPreferences.getInstance().setMostRecentSaveFolder(selectedFile.toPath());
+                UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.toPath());
             }
         } catch (Exception e) {
             Dialogs.notifyException("Failed to save console output to file", e, textOutput);
@@ -218,7 +219,39 @@ public class OutputConsoleController implements Initializable {
     }
 
     public void handleReloadGloblPrefs(ActionEvent actionEvent) {
-        GlobalPreferences.getInstance().reload();
-        Binjr.runtimeDebuggingFeatures.debug("Global preferences reloaded from backing store\n" + GlobalPreferences.getInstance().toString());
+        UserPreferences.getInstance().reload();
+        Binjr.runtimeDebuggingFeatures.debug("User preferences reloaded from backing store\n" + UserPreferences.getInstance().toString());
+    }
+
+    public void handleImportUserHistory(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import User History");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr user history", "*.xml"));
+        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        if (importPath != null) {
+            try {
+                UserHistory.getInstance().importFromFile(importPath.toPath());
+                Binjr.runtimeDebuggingFeatures.debug("User preferences successfully imported from " + importPath.toString());
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while importing user history: " + e.getMessage(), e, root);
+            }
+        }
+    }
+
+    public void handleExportUserHistory(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export User History");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr user history", "*.xml"));
+        fileChooser.setInitialFileName("binjr_history.xml");
+        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (exportPath != null) {
+            try {
+                Files.deleteIfExists(exportPath.toPath());
+                UserHistory.getInstance().exportToFile(exportPath.toPath());
+                Binjr.runtimeDebuggingFeatures.debug("User preferences successfully exported to " + exportPath.toString());
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while exporting user history: " + e.getMessage(), e, root);
+            }
+        }
     }
 }

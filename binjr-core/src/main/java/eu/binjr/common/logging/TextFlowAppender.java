@@ -18,7 +18,7 @@ package eu.binjr.common.logging;
 
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import org.apache.logging.log4j.Level;
@@ -168,7 +168,7 @@ public final class TextFlowAppender extends AbstractAppender {
 
         @Override
         protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-            return size() > GlobalPreferences.getInstance().getConsoleMaxLineCapacity();
+            return size() > UserPreferences.getInstance().consoleMaxLineCapacity.get().intValue();
         }
 
         public boolean isDirty() {

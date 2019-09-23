@@ -17,7 +17,6 @@
 package eu.binjr.core.appearance;
 
 import eu.binjr.common.plugins.ServiceLoaderHelper;
-import eu.binjr.core.preferences.GlobalPreferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

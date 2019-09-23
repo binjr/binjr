@@ -16,12 +16,13 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -33,7 +34,9 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
 import java.io.File;
+import java.net.URI;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
 
@@ -55,7 +58,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
      * @param owner the owner window for the dialog
      */
     public CsvFileAdapterDialog(Node owner) {
-        super(owner, Mode.PATH);
+        super(owner, Mode.PATH,"mostRecentCsvFiles");
         this.setDialogHeaderText("Add a csv file");
         addParamField(this.dateFormatPattern, "Date Format:");
         addParamField(this.encodingField, "Encoding:");
@@ -72,12 +75,21 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
 
     @Override
     protected File displayFileChooser(Node owner) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open CSV file");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
-        return fileChooser.showOpenDialog(Dialogs.getStage(owner));
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open CSV file");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            var initDir = Path.of(getMostRecentList().peek().orElse(Paths.get(System.getProperty("user.home")).toUri()));
+            if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
+                initDir = initDir.getParent();
+            }
+            fileChooser.setInitialDirectory(initDir.toFile());
+            return fileChooser.showOpenDialog(Dialogs.getStage(owner));
+        } catch (Exception e) {
+            Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);
+        }
+        return null;
     }
 
     @Override
@@ -85,6 +97,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog {
         if (!Files.exists(Paths.get(getSourceUri()))) {
             throw new CannotInitializeDataAdapterException("Cannot find " + getSourceUri());
         }
+        getMostRecentList().push(URI.create(getSourceUri()));
         return new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),

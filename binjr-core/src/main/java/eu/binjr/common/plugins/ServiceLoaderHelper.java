@@ -16,7 +16,7 @@
 
 package eu.binjr.common.plugins;
 
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,7 +62,7 @@ public final class ServiceLoaderHelper {
         //Load plugin from external folder
         if (loadFromExternal) {
             List<URL> urls = new ArrayList<>();
-            if (Files.exists(GlobalPreferences.getInstance().getPluginsLocation())) {
+            if (Files.exists(UserPreferences.getInstance().pluginsLocation.get())) {
                 logger.info(() -> "Looking for services of type " + clazz.getName() + " in " + externalLocation);
                 PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
                 try {

@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.async;
 
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
@@ -37,13 +37,13 @@ public class AsyncTaskManager {
     private final ExecutorService subTaskThreadPool;
 
     private AsyncTaskManager() {
-        GlobalPreferences prefs = GlobalPreferences.getInstance();
+        UserPreferences prefs = UserPreferences.getInstance();
         mainthreadPool = threadPoolFactory("binjr-async",
-                prefs.getAsyncThreadPoolPolicy(),
-                prefs.getMaxAsyncTasksParallelism());
+                prefs.asyncThreadPoolPolicy.get(),
+                prefs.maxAsyncTasksParallelism.get().intValue());
         subTaskThreadPool = threadPoolFactory("binjr-sub-tasks",
-                prefs.getSubTasksThreadPoolPolicy(),
-                prefs.getMaxSubTasksParallelism());
+                prefs.subTasksThreadPoolPolicy.get(),
+                prefs.maxSubTasksParallelism.get().intValue());
     }
 
     /**

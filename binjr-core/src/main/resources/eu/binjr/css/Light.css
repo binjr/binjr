@@ -778,8 +778,9 @@
 }
 
 .command-bar .border-button {
+    -fx-background-color: -binjr-dark-blue-color;
+    -fx-border-color:  -binjr-dark-blue-color;
     -fx-border-width: 2;
-    -fx-border-color: white;
     -fx-font-size: 10pt;
 }
 

@@ -19,7 +19,7 @@ package eu.binjr.core.data.adapters;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.AuthSchemeProvider;
@@ -252,7 +252,7 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
                     .setSSLSocketFactory(csf)
                     .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
 
-            if (GlobalPreferences.getInstance().isHttpPoolingEnabled()) {
+            if (UserPreferences.getInstance().httpPoolingEnabled.get()) {
                 Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
                         .<ConnectionSocketFactory>create()
                         .register("https", csf)

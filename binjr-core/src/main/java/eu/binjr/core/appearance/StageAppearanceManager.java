@@ -18,7 +18,7 @@ package eu.binjr.core.appearance;
 
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.FadeTransition;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -88,7 +88,7 @@ public class StageAppearanceManager {
      */
     private StageAppearanceManager() {
         registeredStages = new WeakHashMap<>();
-        GlobalPreferences.getInstance().userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+        UserPreferences.getInstance().userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 for (Map.Entry<Stage, Set<AppearanceOptions>> e : registeredStages.entrySet()) {
                     setAppearance(e.getKey(), newValue, e.getValue());
@@ -182,7 +182,7 @@ public class StageAppearanceManager {
         this.registeredStages.put(stage, optionsEnumSet);
         logger.trace(this::dumpRegisteredStages);
         Platform.runLater(() ->
-                setAppearance(stage, GlobalPreferences.getInstance().getUserInterfaceTheme(), optionsEnumSet));
+                setAppearance(stage, UserPreferences.getInstance().userInterfaceTheme.get(), optionsEnumSet));
     }
 
     private String dumpRegisteredStages() {
@@ -239,8 +239,7 @@ public class StageAppearanceManager {
         }
     }
 
-
     public void applyUiTheme(Scene scene) {
-        setUiTheme(scene, GlobalPreferences.getInstance().getUserInterfaceTheme());
+        setUiTheme(scene, UserPreferences.getInstance().userInterfaceTheme.get());
     }
 }

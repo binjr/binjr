@@ -16,12 +16,13 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -39,12 +40,14 @@ import org.controlsfx.control.textfield.TextFields;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import java.util.stream.Collectors;
 
 /**
  * A dialog box that returns a {@link SerializedDataAdapter} built according to user inputs.
@@ -53,11 +56,11 @@ import java.util.prefs.Preferences;
  */
 public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     private static final Logger logger = LogManager.getLogger(DataAdapterDialog.class);
-    private static final String BINJR_SOURCES = "binjr/sources";
+
     private final HBox uriHBox;
     private DataAdapter result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
-    private final Set<String> suggestedUrls;
+   // private final Set<String> suggestedUrls;
     private final Button browseButton;
     private final Label uriLabel;
     private final ComboBox<String> uriField;
@@ -66,6 +69,10 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     private final Button okButton;
     private final GridPane paramsGridPane;
 
+
+
+    private final MostRecentlyUsedList<URI> mostRecentList;
+
     protected enum Mode {
         PATH,
         URL;
@@ -73,18 +80,17 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
 
     /**
      * Initializes a new instance of the {@link DataAdapterDialog} class.
-     *
-     * @param owner the owner window for the dialog
+     *  @param owner the owner window for the dialog
      * @param mode  the mode (Path or URL) to use for the dialog.
+     * @param mostRecentListName
      */
-    public DataAdapterDialog(Node owner, Mode mode) {
+    public DataAdapterDialog(Node owner, Mode mode,String mostRecentListName) {
+        this.mostRecentList = UserHistory.getInstance().uriMostRecentlyUsedList(mostRecentListName, 20);
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
         this.setTitle("Source");
-        String mruKey = "mru_" + mode.toString();
-        Preferences prefs = Preferences.userRoot().node(BINJR_SOURCES);
-        suggestedUrls = new HashSet<>(Arrays.asList(prefs.get(mruKey, "").split(" ")));
+
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/DataAdapterView.fxml"));
         try {
             parent = fXMLLoader.load();
@@ -95,7 +101,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         browseButton = (Button) parent.lookup("#browseButton");
         uriLabel = (Label) parent.lookup("#uriLabel");
         uriField = (ComboBox<String>) parent.lookup("#uriField");
-        uriField.setItems(FXCollections.observableArrayList(suggestedUrls));
+        uriField.setItems(FXCollections.observableArrayList(mostRecentList.getAll().stream().map(URI::toString).collect(Collectors.toList())));
         uriField.showingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue){
                 autoCompletionBinding.dispose();
@@ -127,7 +133,8 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
                 result = getDataAdapter();
-                suggestedUrls.add(uriField.getValue());
+               // suggestedUrls.add(uriField.getValue());
+                mostRecentList.push(URI.create(uriField.getValue()));
                 updateUriAutoCompletionBinding();
             } catch (DateTimeException e) {
                 Dialogs.notifyError("Invalid Timezone", e, Pos.CENTER, timezoneField);
@@ -146,7 +153,7 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                     if (data == ButtonBar.ButtonData.OK_DONE) {
-                        suggestedUrls.stream().reduce((s, s2) -> s + " " + s2).ifPresent(s -> prefs.put(mruKey, s));
+                      //  suggestedUrls.stream().reduce((s, s2) -> s + " " + s2).ifPresent(s -> prefs.put(mruKey, s));
                         return result;
                     }
                     return null;
@@ -169,7 +176,8 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open");
-        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
+        //FIXME
+      //  fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 
@@ -177,7 +185,8 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
         if (autoCompletionBinding != null) {
             autoCompletionBinding.dispose();
         }
-        autoCompletionBinding = TextFields.bindAutoCompletion(uriField.getEditor(), suggestedUrls);
+        autoCompletionBinding = TextFields.bindAutoCompletion(uriField.getEditor(),
+                mostRecentList.getAll().stream().map(URI::toString).collect(Collectors.toList()));
         autoCompletionBinding.setPrefWidth(uriField.getPrefWidth());
     }
 
@@ -208,4 +217,9 @@ public abstract class DataAdapterDialog extends Dialog<DataAdapter> {
     public GridPane getParamsGridPane() {
         return paramsGridPane;
     }
+
+    protected MostRecentlyUsedList<URI> getMostRecentList() {
+        return mostRecentList;
+    }
+
 }

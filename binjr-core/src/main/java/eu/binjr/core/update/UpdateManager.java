@@ -22,7 +22,7 @@ import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.preferences.OsFamily;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
@@ -83,15 +83,15 @@ public class UpdateManager {
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
-        GlobalPreferences.getInstance().githubUserNameProperty().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(newValue, GlobalPreferences.getInstance().getGithubAuthToken());
+        UserPreferences.getInstance().githubUserName.property().addListener((observable, oldValue, newValue) -> {
+            github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get());
         });
-        GlobalPreferences.getInstance().githubAuthTokenProperty().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(GlobalPreferences.getInstance().getGithubUserName(), newValue);
+        UserPreferences.getInstance().githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
+            github.setUserCredentials(UserPreferences.getInstance().githubUserName.get(), newValue);
         });
         github.setUserCredentials(
-                GlobalPreferences.getInstance().getGithubUserName(),
-                GlobalPreferences.getInstance().getGithubAuthToken());
+                UserPreferences.getInstance().githubUserName.get(),
+                UserPreferences.getInstance().githubAuthToken.get());
         switch (AppEnvironment.getInstance().getOsFamily()) {
             case LINUX:
                 platformUpdater = new LinuxUpdater();

@@ -26,7 +26,7 @@ import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
 import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -90,8 +90,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                 FXCollections.observableList(new LinkedList<>()),
                 "-",
                 UnitPrefixes.METRIC,
-                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
+                UserPreferences.getInstance().defaultGraphOpacity.get().doubleValue(),
+                UserPreferences.getInstance().showAreaOutline.get(),
                 1.0,
                 true,
                 0.0,
@@ -112,8 +112,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                 FXCollections.observableList(new LinkedList<>()),
                 unitName,
                 prefix,
-                GlobalPreferences.getInstance().getDefaultGraphOpacity(),
-                GlobalPreferences.getInstance().isShowAreaOutline(),
+                UserPreferences.getInstance().defaultGraphOpacity.get().doubleValue(),
+                UserPreferences.getInstance().showAreaOutline.get(),
                 1.0,
                 true,
                 0.0,
@@ -191,11 +191,11 @@ public class Chart implements Dirtyable, AutoCloseable {
             return false;
         });
         // Define the transforms to apply
-        var reducer = new DecimationTransform(GlobalPreferences.getInstance().getDownSamplingThreshold());
-        reducer.setEnabled(GlobalPreferences.getInstance().isDownSamplingEnabled());
+        var reducer = new DecimationTransform(UserPreferences.getInstance().downSamplingThreshold.get().intValue());
+        reducer.setEnabled(UserPreferences.getInstance().downSamplingEnabled.get());
         var aligner = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
         var cleaner = new NanToZeroTransform();
-        cleaner.setEnabled(GlobalPreferences.getInstance().isForceNanToZero());
+        cleaner.setEnabled(UserPreferences.getInstance().forceNanToZero.get());
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -237,7 +237,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                         });
             }
             try {
-                if (!latch.await(GlobalPreferences.getInstance().getAsyncTasksTimeOutMs(), TimeUnit.MILLISECONDS)) {
+                if (!latch.await(UserPreferences.getInstance().asyncTasksTimeOutMs.get().longValue(), TimeUnit.MILLISECONDS)) {
                     throw new DataAdapterException("Waiting for fetch sub-tasks to complete aborted");
                 }
                 if (!errors.isEmpty()) {

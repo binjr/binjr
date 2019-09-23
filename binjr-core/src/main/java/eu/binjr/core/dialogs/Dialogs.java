@@ -17,7 +17,7 @@
 package eu.binjr.core.dialogs;
 
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -80,7 +80,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(e.getMessage())
-                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
                 .position(Pos.BOTTOM_RIGHT)
                 .action(new Action("Details", ae -> displayException(title, e)))
                 .owner(owner).showError());
@@ -126,7 +126,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
                 .position(position)
                 .owner(owner).showError());
     }
@@ -157,7 +157,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
                 .position(position)
                 .owner(owner).showWarning());
     }
@@ -175,7 +175,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(GlobalPreferences.getInstance().getNotificationPopupDuration())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
                 .position(position)
                 .owner(owner).showInformation());
     }

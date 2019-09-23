@@ -21,7 +21,7 @@ import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -86,7 +86,7 @@ public class Binjr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        var prefs = GlobalPreferences.getInstance();
+        var prefs = UserPreferences.getInstance();
         var env = AppEnvironment.getInstance();
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
@@ -97,13 +97,13 @@ public class Binjr extends Application {
 
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             if (Screen.getScreensForRectangle(
-                    prefs.getWindowLastPosition().getMinX(),
-                    prefs.getWindowLastPosition().getMinY(),
+                    prefs.windowLastPosition.get().getMinX(),
+                    prefs.windowLastPosition.get().getMinY(),
                     10, 10).size() > 0) {
-                primaryStage.setX(prefs.getWindowLastPosition().getMinX());
-                primaryStage.setY(prefs.getWindowLastPosition().getMinY());
-                primaryStage.setWidth(prefs.getWindowLastPosition().getWidth());
-                primaryStage.setHeight(prefs.getWindowLastPosition().getHeight());
+                primaryStage.setX(prefs.windowLastPosition.get().getMinX());
+                primaryStage.setY(prefs.windowLastPosition.get().getMinY());
+                primaryStage.setWidth(prefs.windowLastPosition.get().getWidth());
+                primaryStage.setHeight(prefs.windowLastPosition.get().getHeight());
             }
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);

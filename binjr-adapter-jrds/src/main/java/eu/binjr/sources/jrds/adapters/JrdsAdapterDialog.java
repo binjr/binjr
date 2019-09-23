@@ -49,7 +49,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog {
      * @param owner the owner window for the dialog
      */
     public JrdsAdapterDialog(Node owner) {
-        super(owner, Mode.URL);
+        super(owner, Mode.URL, "mostRecentJrdsUrls");
         this.setDialogHeaderText("Connect to a JRDS source");
         this.tabsChoiceBox = new ChoiceBox<>();
         tabsChoiceBox.getItems().addAll(JrdsTreeViewTab.values());

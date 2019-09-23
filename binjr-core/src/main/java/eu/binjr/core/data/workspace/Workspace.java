@@ -25,7 +25,7 @@ import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.CannotLoadWorkspaceException;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,7 +35,6 @@ import org.apache.logging.log4j.Logger;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
 import javax.xml.stream.XMLStreamException;
-import java.io.Closeable;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -293,7 +292,7 @@ public class Workspace implements Dirtyable {
         }
         this.path.setValue(path);
         if (hasPath()) {
-            GlobalPreferences.getInstance().setMostRecentSavedWorkspace(path);
+            UserHistory.getInstance().mostRecentWorkspaces.push(path);
         }
     }
 
@@ -376,7 +375,7 @@ public class Workspace implements Dirtyable {
         XmlUtils.serialize(this, file);
         setPath(file.toPath());
         cleanUp();
-        GlobalPreferences.getInstance().setMostRecentSaveFolder(file.toPath());
+        UserHistory.getInstance().mostRecentSaveFolders.push(file.toPath());
     }
 
     @Override

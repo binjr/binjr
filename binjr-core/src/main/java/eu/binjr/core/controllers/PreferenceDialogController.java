@@ -16,17 +16,16 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.appearance.UserInterfaceThemes;
-import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
-import eu.binjr.core.preferences.NotificationDurationChoices;
+import eu.binjr.core.preferences.*;
 import eu.binjr.core.update.UpdateManager;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -37,6 +36,7 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.text.TextFlow;
 import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
 import javafx.util.converter.NumberStringConverter;
@@ -110,16 +110,16 @@ public class PreferenceDialogController implements Initializable {
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
         assert showOutline != null : "fx:id\"showOutline\" was not injected!";
         assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
-        GlobalPreferences prefs = GlobalPreferences.getInstance();
-        graphOpacitySlider.valueProperty().bindBidirectional(prefs.defaultGraphOpacityProperty());
+        UserPreferences userPrefs = UserPreferences.getInstance();
+        graphOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultGraphOpacity.property());
         opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-        enableDownSampling.selectedProperty().bindBidirectional(prefs.downSamplingEnabledProperty());
+        enableDownSampling.selectedProperty().bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
 
-        fullHeightCrosshair.selectedProperty().bindBidirectional(prefs.fullHeightCrosshairMarkerProperty());
+        fullHeightCrosshair.selectedProperty().bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
 
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
             @Override
@@ -132,15 +132,15 @@ public class PreferenceDialogController implements Initializable {
                 return Paths.get(string);
             }
         });
-        pathFormatter.valueProperty().bindBidirectional(prefs.pluginsLocationProperty());
+        pathFormatter.valueProperty().bindBidirectional(userPrefs.pluginsLocation.property());
         pluginLocTextfield.setTextFormatter(pathFormatter);
-        prefs.pluginsLocationProperty().addListener((observable, oldValue, newValue) -> {
+        userPrefs.pluginsLocation.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !Files.exists(newValue)) {
                 Dialogs.notifyError("Invalid Plugins Folder Location",
                         "The selected path for the plugins folder location does not exists",
                         Pos.BOTTOM_RIGHT,
                         root);
-                Platform.runLater(() -> prefs.setPluginsLocation(oldValue));
+                Platform.runLater(() -> userPrefs.pluginsLocation.set(oldValue));
             } else {
                 Dialogs.notifyInfo(
                         "Plugins Folder Location Changed",
@@ -149,41 +149,42 @@ public class PreferenceDialogController implements Initializable {
                         root);
             }
         });
-        loadExternalToggle.selectedProperty().bindBidirectional(prefs.loadPluginsFromExternalLocationProperty());
-        browsePluginLocButton.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
-        pluginLocTextfield.disableProperty().bind(prefs.loadPluginsFromExternalLocationProperty().not());
-        enabledColumn.setCellFactory( CheckBoxTableCell.forTableColumn(enabledColumn));
+        loadExternalToggle.selectedProperty().bindBidirectional(userPrefs.loadPluginsFromExternalLocation.property());
+        browsePluginLocButton.disableProperty().bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
+        pluginLocTextfield.disableProperty().bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
+        enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
-        loadAtStartupCheckbox.selectedProperty().bindBidirectional(prefs.loadLastWorkspaceOnStartupProperty());
+        loadAtStartupCheckbox.selectedProperty().bindBidirectional(userPrefs.loadLastWorkspaceOnStartup.property());
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
-        formatter.valueProperty().bindBidirectional(prefs.downSamplingThresholdProperty());
+        formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
+
         uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
-        uiThemeChoiceBox.getSelectionModel().select(prefs.getUserInterfaceTheme());
-        prefs.userInterfaceThemeProperty().addListener((observable, oldValue, newValue) -> {
+        uiThemeChoiceBox.getSelectionModel().select(userPrefs.userInterfaceTheme.get());
+        userPrefs.userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 uiThemeChoiceBox.getSelectionModel().select(newValue);
             }
         });
         uiThemeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                prefs.setUserInterfaceTheme(newValue);
+                userPrefs.userInterfaceTheme.set(newValue);
             }
         });
         notifcationDurationChoiceBox.getItems().setAll(NotificationDurationChoices.values());
-        notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(prefs.getNotificationPopupDuration()));
-        prefs.notificationPopupDurationProperty().addListener((observable, oldValue, newValue) -> {
+        notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(userPrefs.notificationPopupDuration.get()));
+        userPrefs.notificationPopupDuration.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(newValue));
             }
         });
         notifcationDurationChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                prefs.setNotificationPopupDuration(newValue.getDuration());
+                userPrefs.notificationPopupDuration.set(newValue.getDuration());
             }
         });
-        updateCheckBox.selectedProperty().bindBidirectional(prefs.checkForUpdateOnStartUpProperty());
-        showOutline.selectedProperty().bindBidirectional(prefs.showAreaOutlineProperty());
+        updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
+        showOutline.selectedProperty().bindBidirectional(userPrefs.showAreaOutline.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
     }
 
@@ -245,7 +246,8 @@ public class PreferenceDialogController implements Initializable {
     public void handleResetSettings(ActionEvent actionEvent) {
         try {
             if (Dialogs.confirmDialog(root, "Restore all settings to their default value.", "Are you sure?") == ButtonType.YES) {
-                GlobalPreferences.getInstance().reset();
+                UserPreferences.getInstance().reset();
+                logger.info("User settings successfully reset to default");
             }
         } catch (BackingStoreException e) {
             Dialogs.notifyException("Could not restore settings to default", e, root);
@@ -266,6 +268,64 @@ public class PreferenceDialogController implements Initializable {
         File newPluginLocation = fileChooser.showDialog(Dialogs.getStage(root));
         if (newPluginLocation != null) {
             pluginLocTextfield.setText(newPluginLocation.getPath());
+        }
+    }
+
+    public void handleExportSettings(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Settings");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr settings", "*.xml"));
+        fileChooser.setInitialFileName("binjr_settings.xml");
+        try {
+            var recentDirPath = UserHistory.getInstance().mostRecentSaveFolders.peek()
+                    .orElse(Paths.get(System.getProperty("user.home"))).toFile();
+            fileChooser.setInitialDirectory(recentDirPath);
+        } catch (Exception e) {
+            logger.debug("Could not initialize working dir for FileChooser", e);
+        }
+        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (exportPath != null) {
+            try {
+                Files.deleteIfExists(exportPath.toPath());
+                UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
+                UserPreferences.getInstance().exportToFile(exportPath.toPath());
+                logger.info("User settings successfully exported to " + exportPath);
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while exporting settings: " + e.getMessage(), e, root);
+            }
+        }
+    }
+
+    public void handleImportSettings(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Settings");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr settings", "*.xml"));
+        try {
+            var recentDirPath = UserHistory.getInstance().mostRecentSaveFolders.peek()
+                    .orElse(Paths.get(System.getProperty("user.home"))).toFile();
+            fileChooser.setInitialDirectory(recentDirPath);
+        } catch (Exception e) {
+            logger.debug("Could not initialize working dir for FileChooser", e);
+        }
+        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        if (importPath != null) {
+            try {
+                UserPreferences.getInstance().importFromFile(importPath.toPath());
+                logger.info("User settings successfully imported to " + importPath);
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while importing settings: " + e.getMessage(), e, root);
+            }
+        }
+    }
+
+    public void handleClearHistory(ActionEvent actionEvent) {
+        try {
+            if (Dialogs.confirmDialog(root, "Clear all saved history (recently opened workspace, sources, etc...)", "Are you sure?") == ButtonType.YES) {
+                UserHistory.getInstance().reset();
+                logger.info("Saved history successfully reset");
+            }
+        } catch (BackingStoreException e) {
+            Dialogs.notifyException("Could not clear all saved history", e, root);
         }
     }
 }

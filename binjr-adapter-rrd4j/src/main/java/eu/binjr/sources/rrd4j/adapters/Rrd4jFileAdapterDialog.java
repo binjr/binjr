@@ -16,13 +16,13 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserHistory;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -35,9 +35,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,6 +52,8 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
     private static final String BINJR_SOURCES = "binjr/sources";
     private DataAdapter result = null;
     private final TextField pathsField;
+    private final MostRecentlyUsedList<Path> mostRecentRrdFiles =
+            UserHistory.getInstance().pathMostRecentlyUsedList("mostRecentRrdFiles", 20, false);
 
     /**
      * Initializes a new instance of the {@link Rrd4jFileAdapterDialog} class.
@@ -116,15 +118,23 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
     }
 
     private File displayFileChooser(Node owner) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Rrd4j File(s)");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD binary files", "*.rrd"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-        fileChooser.setInitialDirectory(GlobalPreferences.getInstance().getMostRecentSaveFolder().toFile());
-        List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
-        if (rrdFiles != null) {
-            pathsField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));
+        try {
+            FileChooser fileChooser = new FileChooser();
+            fileChooser.setTitle("Open Rrd4j File(s)");
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD binary files", "*.rrd"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+            var initDir = mostRecentRrdFiles.peek().orElse(Paths.get(System.getProperty("user.home")));
+            if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
+                initDir = initDir.getParent();
+            }
+            fileChooser.setInitialDirectory(initDir.toFile());
+            List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
+            if (rrdFiles != null) {
+                pathsField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));
+            }
+        } catch (Exception e) {
+            Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);
         }
         return null;
     }
@@ -137,9 +147,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
      */
     private DataAdapter getDataAdapter() throws DataAdapterException {
         List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());
-        rrdFiles.stream().findFirst().ifPresent(path -> {
-            GlobalPreferences.getInstance().setMostRecentSaveFolder(path.getParent());
-        });
+        rrdFiles.forEach(mostRecentRrdFiles::push);
         return new Rrd4jFileAdapter(rrdFiles);
 
     }

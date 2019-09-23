@@ -21,18 +21,13 @@ import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
-import eu.binjr.core.preferences.GlobalPreferences;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,8 +52,8 @@ public class DataAdapterFactory {
         // An exception here could prevent the app from  starting
         try {
             for (var dataAdapterInfo : ServiceLoaderHelper.load(DataAdapterInfo.class,
-                    GlobalPreferences.getInstance().getPluginsLocation(),
-                    GlobalPreferences.getInstance().isLoadPluginsFromExternalLocation())) {
+                    UserPreferences.getInstance().pluginsLocation.get(),
+                    UserPreferences.getInstance().loadPluginsFromExternalLocation.get())) {
                 registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
             }
         } catch (Throwable e) {
