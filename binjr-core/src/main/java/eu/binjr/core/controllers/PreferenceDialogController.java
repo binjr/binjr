@@ -249,7 +249,7 @@ public class PreferenceDialogController implements Initializable {
                 UserPreferences.getInstance().reset();
                 logger.info("User settings successfully reset to default");
                 for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
-                    di.getAdapterPreferences().reset();
+                    di.getPreferences().reset();
                     logger.info("User settings for adapter " + di.getName() + " successfully reset to default");
                 }
             }
@@ -317,7 +317,7 @@ public class PreferenceDialogController implements Initializable {
                 UserPreferences.getInstance().importFromFile(importPath.toPath());
                 // Reload imported settings to adapter preferences
                 for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
-                    di.getAdapterPreferences().reload();
+                    di.getPreferences().reload();
                 }
                 logger.info("User settings successfully imported to " + importPath);
             } catch (Exception e) {

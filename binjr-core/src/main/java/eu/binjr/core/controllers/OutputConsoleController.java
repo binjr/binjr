@@ -224,11 +224,11 @@ public class OutputConsoleController implements Initializable {
         Binjr.runtimeDebuggingFeatures.debug("User preferences reloaded from backing store\n" +
                 UserPreferences.getInstance().toString());
         for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
-            di.getAdapterPreferences().reload();
+            di.getPreferences().reload();
             Binjr.runtimeDebuggingFeatures.debug("Data Adapter" +
                     di.getName() +
                     " preferences reloaded from backing store\n" +
-                    di.getAdapterPreferences().toString());
+                    di.getPreferences().toString());
         }
     }
 

@@ -119,5 +119,5 @@ public interface DataAdapterInfo {
      */
     public void setEnabled(boolean enabled);
 
-    public PreferenceFactory getAdapterPreferences();
+    public PreferenceFactory getPreferences();
 }

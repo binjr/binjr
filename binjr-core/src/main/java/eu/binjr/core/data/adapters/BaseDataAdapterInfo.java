@@ -157,7 +157,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     }
 
     @Override
-    public PreferenceFactory getAdapterPreferences() {
+    public PreferenceFactory getPreferences() {
         return adapterPreferences;
     }
 
