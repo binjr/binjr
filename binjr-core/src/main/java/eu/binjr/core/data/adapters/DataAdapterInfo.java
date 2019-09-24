@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.Dialog;
@@ -117,4 +118,6 @@ public interface DataAdapterInfo {
      * @param enabled true to enable the adapter, false otherwise.
      */
     public void setEnabled(boolean enabled);
+
+    public PreferenceFactory getAdapterPreferences();
 }

@@ -248,6 +248,10 @@ public class PreferenceDialogController implements Initializable {
             if (Dialogs.confirmDialog(root, "Restore all settings to their default value.", "Are you sure?") == ButtonType.YES) {
                 UserPreferences.getInstance().reset();
                 logger.info("User settings successfully reset to default");
+                for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
+                    di.getAdapterPreferences().reset();
+                    logger.info("User settings for adapter " + di.getName() + " successfully reset to default");
+                }
             }
         } catch (BackingStoreException e) {
             Dialogs.notifyException("Could not restore settings to default", e, root);
@@ -311,6 +315,10 @@ public class PreferenceDialogController implements Initializable {
         if (importPath != null) {
             try {
                 UserPreferences.getInstance().importFromFile(importPath.toPath());
+                // Reload imported settings to adapter preferences
+                for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
+                    di.getAdapterPreferences().reload();
+                }
                 logger.info("User settings successfully imported to " + importPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing settings: " + e.getMessage(), e, root);

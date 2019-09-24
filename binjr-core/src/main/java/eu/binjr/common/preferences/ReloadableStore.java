@@ -52,11 +52,17 @@ public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
      * @throws BackingStoreException if an error occurs while reloading items from the backing store
      */
     public void reset() throws BackingStoreException {
-        backingStore.clear();
-        for (var n:backingStore.childrenNames()){
-            backingStore.node(n).removeNode();
-        };
+        clearSubTree(backingStore);
         storedItems.values().forEach(T::reload);
+    }
+
+    private void clearSubTree(Preferences node) throws BackingStoreException {
+        if (node.nodeExists("")) {
+            node.clear();
+            for (var n : node.childrenNames()) {
+                clearSubTree(node.node(n));
+            }
+        }
     }
 
     /**

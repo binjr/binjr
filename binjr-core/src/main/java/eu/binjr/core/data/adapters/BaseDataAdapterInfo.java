@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
@@ -23,6 +24,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Dialog;
 
 import java.util.Objects;
+import java.util.prefs.Preferences;
 
 /**
  * An immutable representation of a {@link SerializedDataAdapter}'s metadata
@@ -40,6 +42,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final Class<? extends DataAdapter> adapterClass;
     private final Class<? extends Dialog<DataAdapter>> adapterDialog;
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
+    private final PreferenceFactory adapterPreferences;
 
     protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, null);
@@ -84,6 +87,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
             this.version = version;
         }
         this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
+        adapterPreferences = new PreferenceFactory(Preferences.userRoot().node("binjr/global/adapters/" + getKey()));
+        enabled.bindBidirectional(adapterPreferences.booleanPreference("adapterEnabled", true).property());
     }
 
     /**
@@ -150,6 +155,11 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     @Override
     public void setEnabled(boolean enabled) {
         this.enabled.set(enabled);
+    }
+
+    @Override
+    public PreferenceFactory getAdapterPreferences() {
+        return adapterPreferences;
     }
 
     @Override

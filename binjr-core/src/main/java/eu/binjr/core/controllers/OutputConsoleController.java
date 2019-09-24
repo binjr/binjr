@@ -21,6 +21,7 @@ import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.Binjr;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
@@ -118,7 +119,7 @@ public class OutputConsoleController implements Initializable {
             fileChooser.setTitle("Save console ouptut");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
             fileChooser.setInitialDirectory(UserHistory.getInstance().mostRecentSaveFolders.peek()
-                    .orElse(Paths.get(System.getProperty( System.getProperty("user.home")))).toFile());
+                    .orElse(Paths.get(System.getProperty(System.getProperty("user.home")))).toFile());
             fileChooser.setInitialFileName("binjr_console_output.txt");
             File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
@@ -220,7 +221,15 @@ public class OutputConsoleController implements Initializable {
 
     public void handleReloadGloblPrefs(ActionEvent actionEvent) {
         UserPreferences.getInstance().reload();
-        Binjr.runtimeDebuggingFeatures.debug("User preferences reloaded from backing store\n" + UserPreferences.getInstance().toString());
+        Binjr.runtimeDebuggingFeatures.debug("User preferences reloaded from backing store\n" +
+                UserPreferences.getInstance().toString());
+        for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
+            di.getAdapterPreferences().reload();
+            Binjr.runtimeDebuggingFeatures.debug("Data Adapter" +
+                    di.getName() +
+                    " preferences reloaded from backing store\n" +
+                    di.getAdapterPreferences().toString());
+        }
     }
 
     public void handleImportUserHistory(ActionEvent actionEvent) {

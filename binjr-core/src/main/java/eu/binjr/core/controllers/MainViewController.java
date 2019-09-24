@@ -104,7 +104,7 @@ public class MainViewController implements Initializable {
     private static final Logger logger = LogManager.getLogger(MainViewController.class);
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
-    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
@@ -276,6 +276,7 @@ public class MainViewController implements Initializable {
             }
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
+        this.addSourceMenu.setOnShowing(event -> addSourceMenu.getItems().setAll(populateSourceMenu()));//getItems().addAll(populateSourceMenu());
         newWorksheetDropTarget.managedProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         newWorksheetDropTarget.visibleProperty()
@@ -612,7 +613,9 @@ public class MainViewController implements Initializable {
             });
             menuItems.add(menuItem);
         }
-        return menuItems;
+        var none = new MenuItem("None");
+        none.setDisable(true);
+        return menuItems.size() > 0 ? menuItems : Collections.singletonList(none);
     }
 
     TreeView<TimeSeriesBinding> getSelectedTreeView() {

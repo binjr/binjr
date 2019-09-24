@@ -53,7 +53,7 @@ public abstract class TimeSeriesTransform {
     /**
      * The actual transform implementation
      *
-     * @return
+     * @return the actual transform implementation
      */
     protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data);
 
