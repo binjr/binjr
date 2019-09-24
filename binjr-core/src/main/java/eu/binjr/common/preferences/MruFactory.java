@@ -16,27 +16,17 @@
 
 package eu.binjr.common.preferences;
 
-import com.google.gson.Gson;
-import javafx.beans.property.*;
+import javafx.beans.property.Property;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.InvalidPreferencesFormatException;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
 
 /**
  * A factory to create and manage preferences exposed as {@link Property} and backed by {@link Preferences}
@@ -45,8 +35,34 @@ import java.util.stream.Collectors;
  */
 public class MruFactory extends ReloadableStore<MostRecentlyUsedList<?>> {
     private static final Logger logger = LogManager.getLogger(MruFactory.class);
-    public MruFactory(Preferences backingStore){
+
+    public MruFactory(Preferences backingStore) {
         super(backingStore);
+    }
+
+    public MostRecentlyUsedList<String> stringMostRecentlyUsedList(String key, int capacity) {
+        var mru = new MostRecentlyUsedList<String>(key, capacity, backingStore) {
+            @Override
+            protected boolean validate(String value) {
+                return (value != null);
+            }
+
+            @Override
+            protected void saveToBackend(int index, String value) {
+                getBackingStore().node(getKey()).put("value_" + index, value);
+            }
+
+            @Override
+            protected Optional<String> loadFromBackend(int index) {
+                var p = getBackingStore().node(getKey()).get("value_" + index, null);
+                if (p != null) {
+                    return Optional.of(p);
+                }
+                return Optional.empty();
+            }
+        };
+        storedItems.put(key, mru);
+        return mru;
     }
 
     public MostRecentlyUsedList<URI> uriMostRecentlyUsedList(String key, int capacity) {
@@ -68,7 +84,7 @@ public class MruFactory extends ReloadableStore<MostRecentlyUsedList<?>> {
                     try {
                         return Optional.of(new URI(p));
                     } catch (URISyntaxException e) {
-                        logger.debug(()-> "Error reloading URI: " + e.getMessage(), e);
+                        logger.debug(() -> "Error reloading URI: " + e.getMessage(), e);
                     }
                 }
                 return Optional.empty();
