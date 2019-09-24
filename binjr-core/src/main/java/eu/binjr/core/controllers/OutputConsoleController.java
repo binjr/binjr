@@ -240,7 +240,7 @@ public class OutputConsoleController implements Initializable {
         if (importPath != null) {
             try {
                 UserHistory.getInstance().importFromFile(importPath.toPath());
-                Binjr.runtimeDebuggingFeatures.debug("User preferences successfully imported from " + importPath.toString());
+                Binjr.runtimeDebuggingFeatures.debug("User history successfully imported from " + importPath.toString());
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing user history: " + e.getMessage(), e, root);
             }
@@ -257,7 +257,7 @@ public class OutputConsoleController implements Initializable {
             try {
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().exportToFile(exportPath.toPath());
-                Binjr.runtimeDebuggingFeatures.debug("User preferences successfully exported to " + exportPath.toString());
+                Binjr.runtimeDebuggingFeatures.debug("User history successfully exported to " + exportPath.toString());
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while exporting user history: " + e.getMessage(), e, root);
             }
