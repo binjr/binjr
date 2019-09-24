@@ -264,7 +264,7 @@
                                 </tooltip>
                             </Button>
                             <padding>
-                                <Insets left="8.0" right="8.0"/>
+                                <Insets left="5.0" right="5.0"/>
                             </padding>
                         </VBox>
                     </AnchorPane>
