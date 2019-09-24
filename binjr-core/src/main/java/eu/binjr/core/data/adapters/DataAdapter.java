@@ -17,15 +17,13 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import javafx.scene.control.TreeItem;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -122,6 +120,14 @@ public interface DataAdapter extends AutoCloseable {
      * @return true is the adapter is closed, false otherwise.
      */
     boolean isClosed();
+
+    default DataAdapterInfo getAdapterInfo() {
+        try {
+            return DataAdapterFactory.getInstance().getDataAdapterInfo(this.getClass().getName());
+        } catch (NoAdapterFoundException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     /**
      * Return true to indicate that the adapter cannot guarantee that samples will be ordered by monotonally increasing

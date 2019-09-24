@@ -111,7 +111,7 @@ public class DataAdapterFactory {
      */
     public Dialog<DataAdapter> getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
-            return retrieveAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
+            return getDataAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
 
         } catch (NoSuchMethodException | InvocationTargetException | InstantiationException | IllegalAccessException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of DataAdapterDialog for " + key, e);
@@ -128,18 +128,25 @@ public class DataAdapterFactory {
      */
     public DataAdapter newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
-            return retrieveAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
+            return getDataAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             throw new CannotInitializeDataAdapterException("Could not create instance of adapter " + key, e);
         }
     }
 
-    private DataAdapterInfo retrieveAdapterInfo(String key) throws NoAdapterFoundException {
-        DataAdapterInfo info = registeredAdapters.get(Objects.requireNonNull(key, "The parameter 'key' cannot be null!"));
+    /**
+     * Returns the {@link DataAdapterInfo} for the specified key
+     *
+     * @param key the key that identifies the {@link DataAdapterInfo} to return.
+     * @return the {@link DataAdapterInfo} for the specified key
+     * @throws NoAdapterFoundException if no registered adapter could be found for the specified key.
+     */
+    public DataAdapterInfo getDataAdapterInfo(String key) throws NoAdapterFoundException {
+        Objects.requireNonNull(key, "The parameter 'key' cannot be null!");
+        DataAdapterInfo info = registeredAdapters.get(key);
         if (info == null) {
             throw new NoAdapterFoundException("Could not find a registered adapter for key " + key);
         }
         return info;
     }
-
 }
