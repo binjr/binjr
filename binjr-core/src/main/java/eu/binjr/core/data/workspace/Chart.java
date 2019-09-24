@@ -215,8 +215,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                                 // Get data from the adapter
                                 var data = adapter.fetchData(
                                         path,
-                                        startTime.toInstant().minus(adapter.getFetchReadBehindDuration(startTime)),
-                                        endTime.toInstant().plus(adapter.getFetchReadAheadDuration(endTime)),
+                                        startTime.toInstant(),
+                                        endTime.toInstant(),
                                         byPathEntry.getValue(),
                                         bypassCache);
                                 data.entrySet().parallelStream().forEach(entry -> {

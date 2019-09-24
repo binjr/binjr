@@ -71,7 +71,6 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         Objects.requireNonNull(license);
         Objects.requireNonNull(siteUrl);
         Objects.requireNonNull(adapterClass);
-       // Objects.requireNonNull(dialogClass);
 
         this.name = name;
         this.description = description;
