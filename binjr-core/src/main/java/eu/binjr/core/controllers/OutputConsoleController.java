@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
+import eu.binjr.common.diagnostic.HotSpotDiagnostic;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.Binjr;
@@ -45,6 +46,8 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -260,6 +263,37 @@ public class OutputConsoleController implements Initializable {
                 Binjr.runtimeDebuggingFeatures.debug("User history successfully exported to " + exportPath.toString());
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while exporting user history: " + e.getMessage(), e, root);
+            }
+        }
+    }
+
+    public void handleListHotspotVmOptions(ActionEvent actionEvent) {
+        try {
+            Binjr.runtimeDebuggingFeatures.debug("Hotspot VM Options\n" + HotSpotDiagnostic.listOption()
+                    .stream()
+                    .map(vmOption -> String.format("%s=%s (%s)",
+                            vmOption.getName(),
+                            vmOption.getValue(),
+                            vmOption.getOrigin()))
+                    .collect(Collectors.joining("\n")));
+        } catch (DiagnosticException e) {
+            logger.error("Error attempting to list Hotspot VM options", e);
+        }
+    }
+
+    public void handleDebugDumpHeap(ActionEvent actionEvent) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Dump Heap");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("heap dump", "*.hprof"));
+        fileChooser.setInitialFileName(String.format("binjr_jvm_pid%d.hprof", ProcessHandle.current().pid()));
+        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (exportPath != null) {
+            try {
+                Files.deleteIfExists(exportPath.toPath());
+                HotSpotDiagnostic.dumpHeap(exportPath.toPath());
+                Binjr.runtimeDebuggingFeatures.debug("JVM's heap successfully dumped to " + exportPath.toString());
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while dumping JVM's heap: " + e.getMessage(), e, root);
             }
         }
     }
