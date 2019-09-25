@@ -44,7 +44,7 @@
 
 .drop-zone {
     -fx-border-insets: 5;
-    -fx-background-color:  -binjr-pane-background-color;
+    -fx-background-color: -binjr-pane-background-color;
     -fx-border-color: -binjr-control-border-color;
     -fx-border-width: 1;
     -fx-border-style: dotted;
@@ -53,6 +53,7 @@
 .drop-zone:hover {
     -fx-background-color: -fx-accent-translucide;
 }
+
 .chart,
 .chart-plot-background {
     -fx-background-color: transparent;
@@ -74,7 +75,7 @@
     -fx-border-width: 0;
 }
 
-.worksheet-title-block  {
+.worksheet-title-block {
     -fx-padding: 15 10 15 16;
     -fx-border-insets: 5 10 10 10;
     -fx-spacing: 10;
@@ -83,12 +84,12 @@
     -fx-border-color: #808080;
 }
 
-.worksheet-title-block  > .title-text {
+.worksheet-title-block > .title-text {
     -fx-graphic-text-gap: 20;
     -fx-font-size: 14pt;
 }
 
-.worksheet-title-block  > .range-text {
+.worksheet-title-block > .range-text {
     -fx-graphic-text-gap: 20;
     -fx-font-size: 10pt;
 }
@@ -106,4 +107,19 @@
     -fx-padding: -1;
     -fx-background-insets: 0 0 -1 0, 0, 1, 2;
 }
+
+.series-table .titled-pane {
+    -fx-animated: false;
+}
+
+.property-sheet {
+    -fx-border-width: 0;
+    -fx-padding: 0 0 0 0;
+}
+
+.property-sheet .tool-bar {
+    -fx-spacing:5;
+    -fx-padding: 7;
+}
+
 

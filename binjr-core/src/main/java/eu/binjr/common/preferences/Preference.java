@@ -17,9 +17,18 @@
 package eu.binjr.common.preferences;
 
 import javafx.beans.property.Property;
+import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
+import javafx.scene.Node;
+import javafx.scene.control.TextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.PropertySheet;
+import org.controlsfx.property.editor.AbstractPropertyEditor;
+import org.controlsfx.property.editor.PropertyEditor;
 
+import java.nio.file.Path;
+import java.util.Optional;
 import java.util.prefs.Preferences;
 
 /**
@@ -102,6 +111,68 @@ public abstract class Preference<T> implements ReloadableStore.Reloadable {
             logger.error("Failed to load preference " + key + " from backend: " + t.getMessage(), t);
             return defaultValue;
         }
+    }
+
+
+    public PropertySheet.Item asPropertyItem(){
+        return new PropertySheet.Item() {
+            @Override
+            public Class<?> getType() {
+                return get().getClass();
+            }
+
+            @Override
+            public String getCategory() {
+                return backingStore.name();
+            }
+
+            @Override
+            public String getName() {
+                return key;
+            }
+
+            @Override
+            public String getDescription() {
+                return "";
+            }
+
+            @Override
+            public T getValue() {
+                return get();
+            }
+
+            @Override
+            public void setValue(Object value) {
+                set((T)value);
+            }
+
+            @Override
+            public Optional<ObservableValue<? extends Object>> getObservableValue() {
+                return Optional.of(property());
+            }
+
+//            @Override
+//            public Optional<Class<? extends PropertyEditor<?>>> getPropertyEditorClass() {
+//                if (innerType.equals(Path.class)) {
+//                    var ed = new AbstractPropertyEditor<String, TextField>(this, new TextField()) {
+//
+//                        { getEditor(); }
+//
+//                        @Override protected StringProperty getObservableValue() {
+//                            return getEditor().textProperty();
+//                        }
+//
+//                        @Override public void setValue(String value) {
+//                            getEditor().setText(value);
+//                        }
+//                    };
+//                    return Optional.of(ed);
+//                }else{
+//                    return Optional.empty();
+//                }
+//            }
+        };
+
     }
 
 }

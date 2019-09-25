@@ -20,7 +20,9 @@ import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnostic;
 import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.dialogs.Dialogs;
@@ -28,6 +30,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -41,6 +44,7 @@ import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.controlsfx.control.PropertySheet;
 
 import java.io.*;
 import java.net.URL;
@@ -48,6 +52,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -62,6 +67,7 @@ public class OutputConsoleController implements Initializable {
     private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
     public TextField consoleMaxLinesText;
     public VBox root;
+    public PropertySheet preferenceEditor;
     @FXML
     private ListView<Text> textOutput;
     @FXML
@@ -96,7 +102,21 @@ public class OutputConsoleController implements Initializable {
                 AppEnvironment.getInstance().setLogLevel(newValue);
             });
         });
+        preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory());
+        preferenceEditor.getItems().addAll(UserPreferences.getInstance()
+                .getAll()
+                .stream()
+                .map(Preference::asPropertyItem)
+                .collect(Collectors.toList()));
+        DataAdapterFactory.getInstance().getAllAdapters().forEach(di -> {
+            preferenceEditor.getItems().addAll(di.getPreferences()
+                    .getAll()
+                    .stream()
+                    .map(Preference::asPropertyItem)
+                    .collect(Collectors.toList()));
+        });
     }
+
 
     /**
      * Returns the alwaysOnTop toggle button.
@@ -219,19 +239,6 @@ public class OutputConsoleController implements Initializable {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmCommandLine());
         } catch (DiagnosticException e) {
             Dialogs.notifyException("Error running diagnostic command", e, root);
-        }
-    }
-
-    public void handleReloadGloblPrefs(ActionEvent actionEvent) {
-        UserPreferences.getInstance().reload();
-        Binjr.runtimeDebuggingFeatures.debug("User preferences reloaded from backing store\n" +
-                UserPreferences.getInstance().toString());
-        for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
-            di.getPreferences().reload();
-            Binjr.runtimeDebuggingFeatures.debug("Data Adapter" +
-                    di.getName() +
-                    " preferences reloaded from backing store\n" +
-                    di.getPreferences().toString());
         }
     }
 
