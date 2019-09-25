@@ -31,6 +31,7 @@ import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -104,16 +105,22 @@ public class OutputConsoleController implements Initializable {
         });
         preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory());
         preferenceEditor.getItems().addAll(UserPreferences.getInstance()
-                .getAll()
+                .getAll().values()
                 .stream()
                 .map(Preference::asPropertyItem)
                 .collect(Collectors.toList()));
         DataAdapterFactory.getInstance().getAllAdapters().forEach(di -> {
             preferenceEditor.getItems().addAll(di.getPreferences()
-                    .getAll()
+                    .getAll().values()
                     .stream()
                     .map(Preference::asPropertyItem)
                     .collect(Collectors.toList()));
+
+            di.getPreferences().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
+                if (c.wasAdded()){
+                    preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
+                }
+            });
         });
     }
 

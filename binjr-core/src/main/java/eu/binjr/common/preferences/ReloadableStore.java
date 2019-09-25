@@ -16,6 +16,10 @@
 
 package eu.binjr.common.preferences;
 
+import com.sun.javafx.scene.control.SelectedItemsReadOnlyObservableList;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +44,7 @@ import java.util.prefs.Preferences;
 public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
     private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
     protected final Preferences backingStore;
-    protected final Map<String, T> storedItems = new ConcurrentHashMap<>();
+    protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
 
     ReloadableStore(Preferences backingStore) {
         this.backingStore = backingStore;
@@ -105,8 +109,8 @@ public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
      *
      * @return all managed items.
      */
-    public Collection<T> getAll() {
-        return storedItems.values();
+    public ObservableMap<String, T> getAll() {
+        return FXCollections.unmodifiableObservableMap(storedItems);
     }
 
     /**
