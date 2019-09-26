@@ -22,6 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.*;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
 import java.util.stream.Collectors;
@@ -35,7 +36,7 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
     private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
 
     public PreferenceFactory(Preferences backingStore) {
-      super(backingStore);
+        super(backingStore);
     }
 
     public Preference<Boolean> booleanPreference(String key, Boolean defaultValue) {
@@ -208,6 +209,14 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         };
         storedItems.put(p.getKey(), p);
         return p;
+    }
+
+    public <U> Optional<Preference<U>> getByName(String name, Class<U> type) {
+        var p = storedItems.get(name);
+        if (p == null || !type.isAssignableFrom(p.getInnerType())) {
+            return Optional.empty();
+        }
+        return Optional.of((Preference<U>) p);
     }
 
     @Override

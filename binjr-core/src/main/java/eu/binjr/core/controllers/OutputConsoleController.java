@@ -106,7 +106,7 @@ public class OutputConsoleController implements Initializable {
                 .map(Preference::asPropertyItem)
                 .collect(Collectors.toList()));
         UserPreferences.getInstance().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
-            if (c.wasAdded()){
+            if (c.wasAdded()) {
                 preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
             }
         });
@@ -118,7 +118,7 @@ public class OutputConsoleController implements Initializable {
                     .collect(Collectors.toList()));
 
             di.getPreferences().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
-                if (c.wasAdded()){
+                if (c.wasAdded()) {
                     preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
                 }
             });

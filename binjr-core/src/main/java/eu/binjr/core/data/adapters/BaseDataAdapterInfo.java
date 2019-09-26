@@ -42,14 +42,45 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final Class<? extends DataAdapter> adapterClass;
     private final Class<? extends Dialog<DataAdapter>> adapterDialog;
     private BooleanProperty enabled = new SimpleBooleanProperty(true);
-    private final PreferenceFactory adapterPreferences;
+    private final DataAdapterPreferences adapterPreferences;
 
-    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, null);
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, null, null);
     }
 
-    protected BaseDataAdapterInfo(String name, String description, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends Dialog<DataAdapter>> dialogClass) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass);
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null);
+    }
+
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license, String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  DataAdapterPreferences preferences) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, null, preferences);
+    }
+
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  DataAdapterPreferences preferences) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences);
     }
 
     /**
@@ -64,7 +95,15 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @param adapterClass the class that implements the data adapter.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    protected BaseDataAdapterInfo(String name, String description, Version version, String copyright, String license, String siteUrl, Class<? extends DataAdapter> adapterClass, Class<? extends Dialog<DataAdapter>> dialogClass) {
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  Version version,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  DataAdapterPreferences preferences) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(description);
         Objects.requireNonNull(copyright);
@@ -86,8 +125,12 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
             this.version = version;
         }
         this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
-        adapterPreferences = new PreferenceFactory(Preferences.userRoot().node("binjr/global/adapters/" + getKey()));
-        enabled.bindBidirectional(adapterPreferences.booleanPreference("adapterEnabled", true).property());
+        if (preferences == null) {
+            adapterPreferences = new DataAdapterPreferences(adapterClass);
+        } else {
+            adapterPreferences = preferences;
+        }
+        enabled.bindBidirectional(adapterPreferences.enabled.property());
     }
 
     /**

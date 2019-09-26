@@ -38,6 +38,7 @@ import java.util.prefs.Preferences;
 public class UserPreferences extends PreferenceFactory {
     private static final Logger logger = LogManager.getLogger(UserPreferences.class);
     private static final Gson gson = new Gson();
+    public static final String BINJR_GLOBAL = "binjr/global";
 
     /**
      * True if series down-sampling is enabled, false otherwise.
@@ -208,7 +209,7 @@ public class UserPreferences extends PreferenceFactory {
 
 
     private UserPreferences() {
-        super(Preferences.userRoot().node("binjr/global"));
+        super(Preferences.userRoot().node(BINJR_GLOBAL));
     }
 
     public static UserPreferences getInstance() {
