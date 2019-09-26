@@ -30,7 +30,6 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -51,9 +50,6 @@ import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
-import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -109,6 +105,11 @@ public class OutputConsoleController implements Initializable {
                 .stream()
                 .map(Preference::asPropertyItem)
                 .collect(Collectors.toList()));
+        UserPreferences.getInstance().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
+            if (c.wasAdded()){
+                preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
+            }
+        });
         DataAdapterFactory.getInstance().getAllAdapters().forEach(di -> {
             preferenceEditor.getItems().addAll(di.getPreferences()
                     .getAll().values()
@@ -124,7 +125,6 @@ public class OutputConsoleController implements Initializable {
         });
     }
 
-
     /**
      * Returns the alwaysOnTop toggle button.
      *
@@ -133,7 +133,6 @@ public class OutputConsoleController implements Initializable {
     public ToggleButton getAlwaysOnTopToggle() {
         return alwaysOnTopToggle;
     }
-
 
     @FXML
     private void handleClearConsole(ActionEvent actionEvent) {

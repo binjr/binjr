@@ -17,17 +17,11 @@
 package eu.binjr.common.preferences;
 
 import javafx.beans.property.Property;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
-import javafx.scene.Node;
-import javafx.scene.control.TextField;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.PropertySheet;
-import org.controlsfx.property.editor.AbstractPropertyEditor;
-import org.controlsfx.property.editor.PropertyEditor;
 
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.prefs.Preferences;
 
@@ -38,7 +32,7 @@ import java.util.prefs.Preferences;
  * @param <T> The type of the inner value of the preference
  * @author Frederic Thevenet
  */
-public abstract class Preference<T> implements ReloadableStore.Reloadable {
+public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
     private static final Logger logger = LogManager.getLogger(Preference.class);
     private final String key;
     private final T defaultValue;
@@ -114,6 +108,17 @@ public abstract class Preference<T> implements ReloadableStore.Reloadable {
     }
 
 
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("Preference{");
+        sb.append("key='").append(key).append('\'');
+        sb.append(", defaultValue=").append(defaultValue);
+        sb.append(", value=").append(backingProperty.getValue());
+        sb.append(", innerType=").append(innerType);
+        sb.append('}');
+        return sb.toString();
+    }
+
     public PropertySheet.Item asPropertyItem(){
         return new PropertySheet.Item() {
             @Override
@@ -150,27 +155,6 @@ public abstract class Preference<T> implements ReloadableStore.Reloadable {
             public Optional<ObservableValue<? extends Object>> getObservableValue() {
                 return Optional.of(property());
             }
-
-//            @Override
-//            public Optional<Class<? extends PropertyEditor<?>>> getPropertyEditorClass() {
-//                if (innerType.equals(Path.class)) {
-//                    var ed = new AbstractPropertyEditor<String, TextField>(this, new TextField()) {
-//
-//                        { getEditor(); }
-//
-//                        @Override protected StringProperty getObservableValue() {
-//                            return getEditor().textProperty();
-//                        }
-//
-//                        @Override public void setValue(String value) {
-//                            getEditor().setText(value);
-//                        }
-//                    };
-//                    return Optional.of(ed);
-//                }else{
-//                    return Optional.empty();
-//                }
-//            }
         };
 
     }

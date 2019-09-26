@@ -17,7 +17,6 @@
 package eu.binjr.common.preferences;
 
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
-import eu.binjr.core.preferences.UserHistory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,7 +31,7 @@ import java.util.prefs.Preferences;
  * @param <T> The type of item to collect
  * @author Frederic Thevenet
  */
-public abstract class MostRecentlyUsedList<T> implements ReloadableStore.Reloadable {
+public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Reloadable {
     private static final Logger logger = LogManager.getLogger(MostRecentlyUsedList.class);
     private final int capacity;
     private final String key;

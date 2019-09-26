@@ -39,7 +39,7 @@
    <children>
       <TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
           <tabs>
-              <Tab closable="false" text="Console Output">
+              <Tab closable="false" text="Console">
                   <content>
                       <AnchorPane prefHeight="450.0" prefWidth="1000.0" styleClass="console-pane">
                           <children>
@@ -222,7 +222,7 @@
                       </AnchorPane>
                   </content>
               </Tab>
-              <Tab closable="false" text="Edit Preferences">
+              <Tab closable="false" text="Preferences">
                   <content>
                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" styleClass="worksheet-tool-bar">
                           <children>

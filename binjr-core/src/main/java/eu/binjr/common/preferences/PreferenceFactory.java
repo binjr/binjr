@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class PreferenceFactory extends ReloadableStore<Preference<?>> {
+public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
     private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
 
     public PreferenceFactory(Preferences backingStore) {

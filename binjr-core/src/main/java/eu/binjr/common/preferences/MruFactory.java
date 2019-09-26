@@ -33,7 +33,7 @@ import java.util.prefs.Preferences;
  *
  * @author Frederic Thevenet
  */
-public class MruFactory extends ReloadableStore<MostRecentlyUsedList<?>> {
+public class MruFactory extends ReloadableItemStore<MostRecentlyUsedList<?>> {
     private static final Logger logger = LogManager.getLogger(MruFactory.class);
 
     public MruFactory(Preferences backingStore) {

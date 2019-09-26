@@ -16,9 +16,8 @@
 
 package eu.binjr.common.preferences;
 
-import com.sun.javafx.scene.control.SelectedItemsReadOnlyObservableList;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +26,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.prefs.BackingStoreException;
@@ -41,13 +38,22 @@ import java.util.prefs.Preferences;
  * @param <T> The type of items managed by the store
  * @author Frederic Thevenet
  */
-public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
+public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadable> {
     private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
     protected final Preferences backingStore;
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
+    private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);;
 
-    ReloadableStore(Preferences backingStore) {
+    ReloadableItemStore(Preferences backingStore) {
         this.backingStore = backingStore;
+        storedItems.addListener((MapChangeListener<String, T>)c->{
+            if (c.wasAdded()){
+                logger.trace(()-> "Preference added to store: " + c.getValueAdded().toString());
+            }
+            if (c.wasRemoved()){
+                logger.trace(()-> "Preference removed from store: " + c.getValueAdded().toString());
+            }
+        });
     }
 
     /**
@@ -110,7 +116,7 @@ public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
      * @return all managed items.
      */
     public ObservableMap<String, T> getAll() {
-        return FXCollections.unmodifiableObservableMap(storedItems);
+        return readOnlyStoreItems;
     }
 
     /**
@@ -128,7 +134,7 @@ public abstract class ReloadableStore<T extends ReloadableStore.Reloadable> {
     }
 
     /**
-     * Defines a items whose value can be stored into  a {@link ReloadableStore} instance.
+     * Defines a items whose value can be stored into  a {@link ReloadableItemStore} instance.
      */
     public static interface Reloadable {
         /**
