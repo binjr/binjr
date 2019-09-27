@@ -172,15 +172,15 @@ public class PreferenceDialogController implements Initializable {
             }
         });
         notifcationDurationChoiceBox.getItems().setAll(NotificationDurationChoices.values());
-        notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(userPrefs.notificationPopupDuration.get()));
+        notifcationDurationChoiceBox.getSelectionModel().select(userPrefs.notificationPopupDuration.get());
         userPrefs.notificationPopupDuration.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                notifcationDurationChoiceBox.getSelectionModel().select(NotificationDurationChoices.valueOf(newValue));
+                notifcationDurationChoiceBox.getSelectionModel().select(newValue);
             }
         });
         notifcationDurationChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                userPrefs.notificationPopupDuration.set(newValue.getDuration());
+                userPrefs.notificationPopupDuration.set(newValue);
             }
         });
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());

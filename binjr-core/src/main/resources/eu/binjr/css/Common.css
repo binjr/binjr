@@ -122,4 +122,8 @@
     -fx-padding: 7;
 }
 
+/*.tooltip {*/
+/*    -fx-show-delay: 1000ms;*/
+/*}*/
+
 

@@ -58,11 +58,7 @@
                                                       </HBox>
                                                   </graphic>
                                                   <tooltip>
-                                                      <Tooltip text="Debugging options">
-                                                          <font>
-                                                              <Font size="11.0" />
-                                                          </font>
-                                                      </Tooltip>
+                                                     <Tooltip showDelay="500ms" text="Debugging options"/>
                                                   </tooltip>
                                                   <items>
                                                       <MenuItem mnemonicParsing="false" onAction="#handleDebugDumpHeapStats" text="Dump Heap Stats">
@@ -170,11 +166,7 @@
                                                       </HBox>
                                                   </graphic>
                                                   <tooltip>
-                                                      <Tooltip text="Clear console output">
-                                                          <font>
-                                                              <Font size="10.0" />
-                                                          </font>
-                                                      </Tooltip>
+                                                     <Tooltip showDelay="500ms" text="Clear console output"/>
                                                   </tooltip>
                                               </Button>
                                               <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleSaveConsoleOutput" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Save">
@@ -184,11 +176,7 @@
                                                       </HBox>
                                                   </graphic>
                                                   <tooltip>
-                                                      <Tooltip text="Save console output to file">
-                                                          <font>
-                                                              <Font size="10.0" />
-                                                          </font>
-                                                      </Tooltip>
+                                                     <Tooltip showDelay="500ms" text="Save console output to file"/>
                                                   </tooltip>
                                               </Button>
                                               <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleCopyConsoleOutput" prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Copy">
@@ -198,11 +186,7 @@
                                                       </HBox>
                                                   </graphic>
                                                   <tooltip>
-                                                      <Tooltip text="Copy console output to clipboard">
-                                                          <font>
-                                                              <Font size="10.0" />
-                                                          </font>
-                                                      </Tooltip>
+                                                     <Tooltip showDelay="500ms" text="Copy console output to clipboard"/>
                                                   </tooltip>
                                               </Button>
                                           </children>
@@ -242,11 +226,7 @@
                         </HBox>
                     </graphic>
                     <tooltip>
-                        <Tooltip text="Always on top">
-                            <font>
-                                <Font size="10.0" />
-                            </font>
-                        </Tooltip>
+                       <Tooltip showDelay="500ms" text="Always on top"/>
                     </tooltip>
                 </ToggleButton>
    </children>

@@ -48,11 +48,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Go back">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Go back"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
@@ -66,11 +62,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Go forward">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Go forward"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
@@ -87,11 +79,7 @@
                                 <Font size="10.0"/>
                             </font>
                             <tooltip>
-                                <Tooltip text="Refresh">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Refresh"/>
                             </tooltip>
                         </Button>
                         <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
@@ -106,11 +94,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Edit the time range for the current worksheet.">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
                             </tooltip>
                         </TimeRangePicker>
                         <ToolBar fx:id="chartsToolbar">
@@ -119,11 +103,7 @@
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
                                     text="Snapshot">
                                 <tooltip>
-                                    <Tooltip text="Save a screen capture of the current worksheet to disk">
-                                        <font>
-                                            <Font size="11.0"/>
-                                        </font>
-                                    </Tooltip>
+                                    <Tooltip showDelay="500ms" text="Save a screen capture of the current worksheet to disk"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
@@ -137,11 +117,7 @@
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
                                     text="Toggle charts display mode">
                                 <tooltip>
-                                    <Tooltip text="Switch to edit mode (Ctrl+M)">
-                                        <font>
-                                            <Font size="11.0"/>
-                                        </font>
-                                    </Tooltip>
+                                   <Tooltip showDelay="500ms" text="Switch to edit mode (Ctrl+M)"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
@@ -159,11 +135,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                    <Tooltip text="Toggle vertical crosshair marker">
-                                        <font>
-                                            <Font size="10.0"/>
-                                        </font>
-                                    </Tooltip>
+                                   <Tooltip showDelay="500ms" text="Toggle vertical crosshair marker"/>
                                 </tooltip>
                             </ToggleButton>
                             <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -177,11 +149,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                    <Tooltip text="Toggle horizontal crosshair marker">
-                                        <font>
-                                            <Font size="10.0"/>
-                                        </font>
-                                    </Tooltip>
+                                   <Tooltip showDelay="500ms" text="Toggle horizontal crosshair marker"/>
                                 </tooltip>
                             </ToggleButton>
                             <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -196,11 +164,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                    <Tooltip text="Add a new chart to the current worksheet.">
-                                        <font>
-                                            <Font size="10.0"/>
-                                        </font>
-                                    </Tooltip>
+                                   <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet."/>
                                 </tooltip>
                             </Button>
                             <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -210,11 +174,7 @@
                                         styleClass="dialog-button"
                                         text="Chart layout">
                                 <tooltip>
-                                    <Tooltip text="Select chart layout">
-                                        <font>
-                                            <Font size="11.0"/>
-                                        </font>
-                                    </Tooltip>
+                                   <Tooltip showDelay="500ms" text="Select chart layout"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
@@ -244,11 +204,12 @@
                             styleClass="skinnable-pane-border,chart-viewport-parent"
                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
-                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
+                    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+                          AnchorPane.topAnchor="0.0" VBox.vgrow="ALWAYS">
                         <Pane fx:id="chartParent" cache="true" cacheHint="SPEED" depthTest="DISABLE"
-                                   maxHeight="1.7976931348623157E308"
-                                    VBox.vgrow="ALWAYS"
-                                    styleClass="skinnable-pane-border,chart-viewport-parent">
+                              maxHeight="1.7976931348623157E308"
+                              VBox.vgrow="ALWAYS"
+                              styleClass="skinnable-pane-border,chart-viewport-parent">
                         </Pane>
                         <StackPane fx:id="newChartDropTarget"
                                    minHeight="44"

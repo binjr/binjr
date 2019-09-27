@@ -21,7 +21,7 @@ import javafx.beans.property.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.nio.file.*;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;

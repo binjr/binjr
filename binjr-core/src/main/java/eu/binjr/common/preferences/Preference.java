@@ -102,11 +102,11 @@ public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
         try {
             return loadFromBackend();
         } catch (Throwable t) {
-            logger.error("Failed to load preference " + key + " from backend: " + t.getMessage(), t);
+            logger.error("Failed to load preference " + key + " from backend: " + t.getMessage());
+            logger.debug("Call Stack:", t);
             return defaultValue;
         }
     }
-
 
     @Override
     public String toString() {
@@ -119,7 +119,7 @@ public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
         return sb.toString();
     }
 
-    public PropertySheet.Item asPropertyItem(){
+    public PropertySheet.Item asPropertyItem() {
         return new PropertySheet.Item() {
             @Override
             public Class<?> getType() {
@@ -148,7 +148,7 @@ public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
 
             @Override
             public void setValue(Object value) {
-                set((T)value);
+                set((T) value);
             }
 
             @Override

@@ -41,11 +41,7 @@
                         <Region styleClass="addSource-icon"/>
                     </graphic>
                     <tooltip>
-                        <Tooltip text="Click to add a new source">
-                            <font>
-                                <Font size="11.0"/>
-                            </font>
-                        </Tooltip>
+                       <Tooltip showDelay="500ms" text="Click to add a new source"/>
                     </tooltip>
                 </Label>
                 <Accordion fx:id="sourcesPane" minWidth="0.0" mouseTransparent="true" prefHeight="798.0"
@@ -75,11 +71,7 @@
                         <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
                     </graphic>
                     <tooltip>
-                        <Tooltip text="Find next occurrence">
-                            <font>
-                                <Font size="11.0"/>
-                            </font>
-                        </Tooltip>
+                       <Tooltip showDelay="500ms" text="Find next occurrence"/>
                     </tooltip>
                 </Button>
                 <ToggleButton fx:id="searchCaseSensitiveToggle"
@@ -89,11 +81,7 @@
                         <Region styleClass="match-case-icon"/>
                     </graphic>
                     <tooltip>
-                        <Tooltip text="Toggle case sensitivity">
-                            <font>
-                                <Font size="11.0"/>
-                            </font>
-                        </Tooltip>
+                       <Tooltip showDelay="500ms" text="Toggle case sensitivity"/>
                     </tooltip>
                 </ToggleButton>
                 <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
@@ -102,11 +90,7 @@
                         <Region styleClass="cross-icon"/>
                     </graphic>
                     <tooltip>
-                        <Tooltip text="Hide the search bar">
-                            <font>
-                                <Font size="11.0"/>
-                            </font>
-                        </Tooltip>
+                       <Tooltip showDelay="500ms" text="Hide the search bar"/>
                     </tooltip>
                 </Button>
             </HBox>
@@ -128,11 +112,7 @@
                             onDragEntered="#handleOnDragEnteredNewWorksheet"/>
                 </graphic>
                 <tooltip>
-                    <Tooltip text="Click to add a new worksheet">
-                        <font>
-                            <Font size="11.0"/>
-                        </font>
-                    </Tooltip>
+                   <Tooltip showDelay="500ms" text="Click to add a new worksheet"/>
                 </tooltip>
             </Label>
             <StackPane fx:id="newWorksheetDropTarget" styleClass="chart-viewport-parent"
@@ -171,11 +151,7 @@
                 prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0"
                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tooltip>
-                <Tooltip text="Expand">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Expand"/>
             </tooltip>
             <graphic>
                 <HBox styleClass="command-bar-menu-graphic">
@@ -192,11 +168,7 @@
                     text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="45.0">
             <tooltip>
-                <Tooltip text="Workspaces">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Workspaces"/>
             </tooltip>
             <graphic>
                 <HBox styleClass="icon-container">
@@ -266,11 +238,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-                <Tooltip text="Sources">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Sources"/>
             </tooltip>
             <items>
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
@@ -314,11 +282,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-                <Tooltip text="Worksheets">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Worksheets"/>
             </tooltip>
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
@@ -343,11 +307,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-                <Tooltip text="Help">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Help"/>
             </tooltip>
             <items>
                 <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
@@ -382,11 +342,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-                <Tooltip text="Settings">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Settings"/>
             </tooltip>
         </Button>
         <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0"
@@ -398,11 +354,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-                <Tooltip text="Exit">
-                    <font>
-                        <Font size="11.0"/>
-                    </font>
-                </Tooltip>
+               <Tooltip showDelay="500ms" text="Exit"/>
             </tooltip>
         </Button>
     </DrawerPane>

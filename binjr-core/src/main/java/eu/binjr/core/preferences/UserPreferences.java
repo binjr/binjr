@@ -23,7 +23,6 @@ import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import javafx.geometry.Rectangle2D;
-import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -113,21 +112,22 @@ public class UserPreferences extends PreferenceFactory {
     /**
      * The amount of time notification should over before being automatically dismissed.
      */
-    public final Preference<Duration> notificationPopupDuration = objectPreference(Duration.class,
-            "notificationPopupDuration",
-            Duration.seconds(10),
-            duration -> Double.toString(duration.toSeconds()),
-            s -> Duration.seconds(Double.parseDouble(s)));
-
+    public final Preference<NotificationDurationChoices> notificationPopupDuration =
+            enumPreference(NotificationDurationChoices.class,
+                    "notificationPopupDuration",
+                    NotificationDurationChoices.TEN_SECONDS);
     /**
      * The location to load plugins from in addition to those on the classpath.
      */
-    public final Preference<Path> pluginsLocation = pathPreference("pluginsLocation", Path.of(System.getProperty("user.home")));
+    public final Preference<Path> pluginsLocation =
+            pathPreference("pluginsLocation", Path.of(System.getProperty("user.home")));
 
     /**
-     * True if plugins from the location defined by "pluginsLocation" should be loaded in addition to those on the classpath.
+     * True if plugins from the location defined by "pluginsLocation" should be loaded in addition to those
+     * on the classpath.
      */
-    public final Preference<Boolean> loadPluginsFromExternalLocation = booleanPreference("loadPluginsFromExternalLocation", false);
+    public final Preference<Boolean> loadPluginsFromExternalLocation =
+            booleanPreference("loadPluginsFromExternalLocation", false);
 
     /**
      * The line buffer depth for the debug console.
@@ -135,8 +135,8 @@ public class UserPreferences extends PreferenceFactory {
     public final Preference<Number> consoleMaxLineCapacity = integerPreference("consoleMaxLineCapacity", 2000);
 
     /**
-     * True if the vertical maker should span over all stacked charts on a worksheet, false if it should only show over
-     * the focused chart.
+     * True if the vertical maker should span over all stacked charts on a worksheet, false if it should only show
+     * over the focused chart.
      */
     public final Preference<Boolean> fullHeightCrosshairMarker = booleanPreference("fullHeightCrosshairMarker", true);
 
@@ -175,7 +175,8 @@ public class UserPreferences extends PreferenceFactory {
      * Display a warning if the number of series a user attempts to drop onto a worksheet in a single operation
      * is greater than this value.
      */
-    public final Preference<Number> maxSeriesPerChartBeforeWarning = integerPreference("maxSeriesPerChartBeforeWarning", 50);
+    public final Preference<Number> maxSeriesPerChartBeforeWarning =
+            integerPreference("maxSeriesPerChartBeforeWarning", 50);
 
     /**
      * The timeout value in ms for asynchronous tasks (an exception will be thrown past this delay).
@@ -200,12 +201,18 @@ public class UserPreferences extends PreferenceFactory {
     /**
      * True if a heap dump should be generate on out of memory errors, false otherwise.
      */
-    public final Preference<Boolean> heapDumpOnOutOfMemoryError = booleanPreference("heapDumpOnOutOfMemoryError", false);
+    public final Preference<Boolean> heapDumpOnOutOfMemoryError =
+            booleanPreference("heapDumpOnOutOfMemoryError", false);
 
     /**
      * The path where to save heap dumps.
      */
     public final Preference<Path> heapDumpPath = pathPreference("heapDumpPath", Path.of(""));
+
+    /**
+     * The amount of time in ms the pointer must have hovered above a node before a tooltip is shown.
+     */
+    public final Preference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
 
 
     private UserPreferences() {

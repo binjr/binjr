@@ -39,25 +39,21 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Step Back">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Step Back"/>
                             </tooltip>
                         </Button>
                         <Label minWidth="-Infinity" text="From:"/>
                         <ZonedDateTimePicker fx:id="startDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
                                              HBox.hgrow="SOMETIMES">
                             <tooltip>
-                                <Tooltip text="Lower bound for the X axis"/>
+                               <Tooltip showDelay="500ms" text="Lower bound for the X axis"/>
                             </tooltip>
                         </ZonedDateTimePicker>
                         <Label minWidth="-Infinity" text="To:"/>
                         <ZonedDateTimePicker fx:id="endDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
                                              prefHeight="25.0" HBox.hgrow="SOMETIMES">
                             <tooltip>
-                                <Tooltip text="Upper bound for the X axis"/>
+                               <Tooltip showDelay="500ms" text="Upper bound for the X axis"/>
                             </tooltip>
                         </ZonedDateTimePicker>
                         <ComboBox editable="true" fx:id="timezoneField" HBox.hgrow="SOMETIMES" prefHeight="25.0"/>
@@ -74,11 +70,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Copy Time Range">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Copy Time Range"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="pasteTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
@@ -95,11 +87,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Paste Time Range">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Paste Time Range"/>
                             </tooltip>
                         </Button>
                         <ToggleButton fx:id="linkTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
@@ -115,11 +103,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Link Worksheet Time Line">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Link Worksheet Time Line"/>
                             </tooltip>
                         </ToggleButton>
                         <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308"
@@ -131,11 +115,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                                <Tooltip text="Step Forward">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </Tooltip>
+                               <Tooltip showDelay="500ms" text="Step Forward"/>
                             </tooltip>
                         </Button>
                     </children>

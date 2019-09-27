@@ -65,19 +65,23 @@
 package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonBase;
+import javafx.scene.control.ContentDisplay;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -105,7 +109,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     private T buildButton(T btn) {
         btn.setText(text);
-        btn.setTooltip(new Tooltip(tooltip));
+        btn.setTooltip(makeTooltip(tooltip));
         btn.setPrefHeight(height);
         btn.setMaxHeight(height);
         btn.setMinHeight(height);
@@ -121,7 +125,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
             btn.setGraphic(icon);
             btn.setAlignment(Pos.CENTER);
             btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
-        }else{
+        } else {
             btn.setContentDisplay(ContentDisplay.TEXT_ONLY);
         }
         if (action != null) {
@@ -199,6 +203,13 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         box.setAlignment(position);
         box.getStyleClass().add("icon-container");
         return box;
+    }
+
+    private Tooltip makeTooltip(String text) {
+        var tooltip = new Tooltip(text);
+        var delayProp = UserPreferences.getInstance().tooltipShowDelayMs.property();
+        tooltip.showDelayProperty().bind(Bindings.createObjectBinding(() -> Duration.millis(delayProp.getValue().doubleValue()), delayProp));
+        return tooltip;
     }
 
 }

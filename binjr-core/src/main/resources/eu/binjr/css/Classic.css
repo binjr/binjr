@@ -303,3 +303,7 @@
     -fx-padding: 0.083333em; /* 1 1 1 1 */
     -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 12, 0.0 , 0 , 8 );
 }
+
+.tooltip {
+    -fx-font-size: 9pt;
+}

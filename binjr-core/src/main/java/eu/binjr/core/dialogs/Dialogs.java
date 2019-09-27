@@ -80,7 +80,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(e.getMessage())
-                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .action(new Action("Details", ae -> displayException(title, e)))
                 .owner(owner).showError());
@@ -126,7 +126,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showError());
     }
@@ -157,7 +157,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showWarning());
     }
@@ -175,7 +175,7 @@ public class Dialogs {
         runOnFXThread(() -> Notifications.create()
                 .title(title)
                 .text(message)
-                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get())
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showInformation());
     }

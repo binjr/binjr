@@ -93,13 +93,13 @@
                             <children>
                                 <TextField fx:id="yMinRange" editable="true" minWidth="50.0" GridPane.columnIndex="2">
                                     <tooltip>
-                                        <Tooltip text="Lower bound for the Y axis"/>
+                                        <Tooltip showDelay="500ms" text="Lower bound for the Y axis"/>
                                     </tooltip>
                                 </TextField>
                                 <TextField fx:id="yMaxRange" editable="true" minWidth="50.0" GridPane.columnIndex="2"
                                            GridPane.rowIndex="1">
                                     <tooltip>
-                                        <Tooltip text="Upper bound for the Y axis"/>
+                                       <Tooltip showDelay="500ms" text="Upper bound for the Y axis"/>
                                     </tooltip>
                                 </TextField>
                                 <Label text="Min:" GridPane.columnIndex="1"/>
