@@ -60,15 +60,16 @@ public class GithubApiHelper {
     private static class GithubApiHolder {
         private final static GithubApiHelper instance = new GithubApiHelper();
     }
-    private GithubApiHelper(){
+
+    private GithubApiHelper() {
         this(null);
     }
 
     private GithubApiHelper(URI apiEndpoint) {
         gson = new Gson();
-        if (apiEndpoint == null){
-                this.apiEndpoint = URI.create("https://api.github.com");
-        }else{
+        if (apiEndpoint == null) {
+            this.apiEndpoint = URI.create("https://api.github.com");
+        } else {
             this.apiEndpoint = apiEndpoint;
         }
         httpClient = HttpClients
@@ -89,8 +90,10 @@ public class GithubApiHelper {
     /**
      * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
      *
+     * @param apiEndpoint the URI that specifies the API endpoint.
      * @return a new instance of the {@link ClosableGitHubApiHelper} class.
      */
+
     public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint) {
         return new ClosableGitHubApiHelper(apiEndpoint);
     }

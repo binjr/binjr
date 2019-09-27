@@ -82,7 +82,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
      *
      * @param owner              the owner window for the dialog
      * @param mode               the mode (Path or URL) to use for the dialog.
-     * @param mostRecentListName
+     * @param mostRecentListName the name of the {@link MostRecentlyUsedList} preference associated with this dialog.
      */
     public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName) {
         if (owner != null) {

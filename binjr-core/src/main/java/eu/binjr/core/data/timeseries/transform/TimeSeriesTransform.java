@@ -16,20 +16,13 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
-import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.common.logging.Profiler;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.XYChart;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * The base class for time series transformation functions.
@@ -53,13 +46,16 @@ public abstract class TimeSeriesTransform {
     /**
      * The actual transform implementation
      *
+     * @param data The data on which the transform should be applied.
      * @return the actual transform implementation
      */
+
     protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data);
 
     /**
      * Applies the transform function to the provided series
      *
+     * @param data The data on which the transform should be applied.
      * @return A map of the transformed series.
      */
     public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {

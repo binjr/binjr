@@ -17,14 +17,13 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.preferences.PreferenceFactory;
-import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.common.version.Version;
+import eu.binjr.core.preferences.AppEnvironment;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.Dialog;
 
 import java.util.Objects;
-import java.util.prefs.Preferences;
 
 /**
  * An immutable representation of a {@link SerializedDataAdapter}'s metadata
@@ -94,6 +93,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @param siteUrl      the version information related to the data adapter
      * @param adapterClass the class that implements the data adapter.
      * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
+     * @param preferences  An instance of {@link DataAdapterPreferences} for this adapter.
      */
     protected BaseDataAdapterInfo(String name,
                                   String description,

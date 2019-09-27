@@ -7,5 +7,5 @@
 * _[Fixed]_ An offset on the time axis between two or more charts may occurs if the sources for them have different resolutions.
 * _[Fixed]_ UI themes defined in external plugins aren't loaded if set as the current theme when binjr is started.
 * _[Fixed]_ Unexpected cache miss in http data adapters.
-* _[Fixed]_ Disabling a DataApdater in the settings section doesn't prevent it from being present in "Sources > New Sources..." menu.
-* _[Fixed]_ Enabled DataApdater settings are not persisted in between sessions 
+* _[Fixed]_ Disabling a DataAdapter in the settings section doesn't prevent it from being present in "Sources > New Sources..." menu.
+* _[Fixed]_ Enabled DataAdapter settings are not persisted in between sessions 

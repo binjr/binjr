@@ -40,6 +40,10 @@ public class AlignBoundariesTransform extends TimeSeriesTransform {
 
     /**
      * Base constructor for {@link TimeSeriesTransform} instances.
+     *
+     * @param startTime        The timestamp specifying the beginning of the time range on which to align.
+     * @param endTime          The timestamp specifying the end of the time range on which to align.
+     * @param chartSupportsNaN true if NaN is a valid value for the chart to display.
      */
     public AlignBoundariesTransform(ZonedDateTime startTime, ZonedDateTime endTime, boolean chartSupportsNaN) {
         super("AlignBoundariesTransform");
