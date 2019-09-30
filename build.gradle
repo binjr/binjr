@@ -23,7 +23,7 @@ import java.time.Duration
 plugins {
     id "de.undercouch.download" version "3.4.3"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id "de.marcphilipp.nexus-publish" version "0.3.1" apply false
+    id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
 
@@ -207,6 +207,7 @@ configure(subprojects) {
             sonatype {
                 username = System.getenv('OSSRH_JIRA_USERNAME')
                 password = System.getenv('OSSRH_JIRA_PASSWORD')
+                connectTimeout = Duration.ofSeconds(300)
                 clientTimeout = Duration.ofSeconds(300)
             }
         }
