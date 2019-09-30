@@ -67,6 +67,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
@@ -1298,6 +1299,10 @@ public class WorksheetController implements Initializable, AutoCloseable {
                                             i++;
                                         }
                                     }
+                                }
+                                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                                    // Force a redraw of the charts and their Y Axis considering their proper width.
+                                    new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
                                 }
                             }
                         } catch (Exception e) {
