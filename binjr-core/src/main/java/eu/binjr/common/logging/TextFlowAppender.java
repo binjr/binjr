@@ -52,8 +52,8 @@ public final class TextFlowAppender extends AbstractAppender {
     private final Lock renderTextLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
-    private final LogBuffer<Text, Object> logBuffer = new LogBuffer<>();
-    private Consumer<Set<Text>> renderTextDelegate;
+    private final LogBuffer<Log, Object> logBuffer = new LogBuffer<>();
+    private Consumer<Collection<Log>> renderTextDelegate;
 
     protected TextFlowAppender(String name, Filter filter,
                                Layout<? extends Serializable> layout,
@@ -101,11 +101,11 @@ public final class TextFlowAppender extends AbstractAppender {
         return new TextFlowAppender(name, filter, layout, true);
     }
 
-    public Set<Text> getLogBuffer() {
+    public Set<Log> getLogBuffer() {
         return logBuffer.keySet();
     }
 
-    public void setRenderTextDelegate(Consumer<Set<Text>> delegate) {
+    public void setRenderTextDelegate(Consumer<Collection<Log>> delegate) {
         this.renderTextDelegate = delegate;
     }
 
@@ -125,9 +125,7 @@ public final class TextFlowAppender extends AbstractAppender {
     public synchronized void append(LogEvent event) {
         new String(getLayout().toByteArray(event)).lines().forEach(
                 message -> {
-                    Text log = new Text(message);
-                    log.setFontSmoothingType(FontSmoothingType.LCD);
-                    log.getStyleClass().add(logColors.getOrDefault(event.getLevel(), defaultColor));
+                    Log log = new Log(message, logColors.getOrDefault(event.getLevel(), defaultColor));
                     logBuffer.put(log, null);
                 });
     }
@@ -145,6 +143,24 @@ public final class TextFlowAppender extends AbstractAppender {
                 }
             }
         });
+    }
+
+    public static class Log {
+        private final String message;
+        private final String styleClass;
+
+        private Log(String message, String styleClass) {
+            this.message = message;
+            this.styleClass = styleClass;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getStyleClass() {
+            return styleClass;
+        }
     }
 
     private class LogBuffer<K, V> extends LinkedHashMap<K, V> {

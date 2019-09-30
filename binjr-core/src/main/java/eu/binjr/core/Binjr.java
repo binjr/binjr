@@ -19,11 +19,12 @@ package eu.binjr.core;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnostic;
 import eu.binjr.common.function.CheckedConsumer;
+import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
 import eu.binjr.common.preferences.Preference;
-import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.appearance.StageAppearanceManager;
+import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
@@ -40,7 +41,7 @@ import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
-import java.util.function.Consumer;
+import java.io.PrintStream;
 
 /**
  * The entry point fo the application.
@@ -71,7 +72,7 @@ public class Binjr extends Application {
         launch(args);
     }
 
-    private static  <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
+    private static <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
         try {
             optionSetter.accept(pref.get());
         } catch (DiagnosticException e) {
@@ -89,6 +90,9 @@ public class Binjr extends Application {
     private static TextFlowAppender initTextFlowAppender() {
         try {
             Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
+            System.setErr(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stderr"), Level.ERROR), true));
+            System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
+
             TextFlowAppender appender = TextFlowAppender.createAppender(
                     "InternalConsole",
                     PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),

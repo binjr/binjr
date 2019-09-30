@@ -38,6 +38,7 @@ import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
@@ -86,7 +87,12 @@ public class OutputConsoleController implements Initializable {
         } else {
             DEBUG_CONSOLE_APPENDER.setRenderTextDelegate(msgSet -> {
                 textOutput.getItems().clear();
-                textOutput.getItems().addAll(msgSet);
+                msgSet.forEach(l -> {
+                    Text text = new Text(l.getMessage());
+                    text.setFontSmoothingType(FontSmoothingType.LCD);
+                    text.getStyleClass().add(l.getStyleClass());
+                    textOutput.getItems().add(text);
+                });
             });
         }
         Platform.runLater(() -> {
