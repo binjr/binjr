@@ -16,15 +16,14 @@
 
 package eu.binjr.core.preferences;
 
+import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.stage.StageStyle;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.Configurator;
 
 import java.io.IOException;
 import java.net.URL;
@@ -52,7 +51,6 @@ public class AppEnvironment {
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
-    private final Property<Level> logLevel = new SimpleObjectProperty<>();
     private final Manifest manifest;
     private final BooleanProperty updateCheckDisabled = new SimpleBooleanProperty(false);
     private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
@@ -63,12 +61,6 @@ public class AppEnvironment {
 
     private AppEnvironment() {
         this.manifest = getManifest();
-        logLevel.setValue(LogManager.getRootLogger().getLevel());
-        logLevel.addListener((observable, oldLevel, newLevel) -> {
-            Configurator.setRootLevel(newLevel);
-            logger.info("Root logger level set to " + newLevel);
-        });
-
         debugMode.addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 ConsoleStage.show();
@@ -126,7 +118,7 @@ public class AppEnvironment {
                     this.setSignatureVerificationDisabled(!Boolean.valueOf(val));
                     break;
                 case "log-level":
-                    this.setLogLevel(Level.toLevel(val, Level.INFO));
+                    UserPreferences.getInstance().rootLoggingLevel.set(Log4j2Level.valueOf(val, Log4j2Level.INFO));
                     break;
                 case "log-file":
                     break;
@@ -290,33 +282,6 @@ public class AppEnvironment {
      */
     public BooleanProperty debugModeProperty() {
         return debugMode;
-    }
-
-    /**
-     * Returns the root log level currently set.
-     *
-     * @return the root log level currently set.
-     */
-    public Level getLogLevel() {
-        return logLevel.getValue();
-    }
-
-    /**
-     * Sets the root log level.
-     *
-     * @param logLevel the root log level.
-     */
-    public void setLogLevel(Level logLevel) {
-        this.logLevel.setValue(logLevel);
-    }
-
-    /**
-     * The logLevel property.
-     *
-     * @return The logLevel property.
-     */
-    public Property<Level> logLevelProperty() {
-        return logLevel;
     }
 
     /**

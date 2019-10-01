@@ -37,11 +37,17 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.RollingFileAppender;
+import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
+import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.action.*;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
 import java.io.PrintStream;
+import java.nio.file.Path;
 
 /**
  * The entry point fo the application.
@@ -51,8 +57,72 @@ import java.io.PrintStream;
 public class Binjr extends Application {
     public static final Logger runtimeDebuggingFeatures = LogManager.getLogger("runtimeDebuggingFeatures");
     private static final Logger logger = LogManager.getLogger(Binjr.class);
-    // initialize the debug console appender early to start capturing logs ASAP.
-    public static final TextFlowAppender DEBUG_CONSOLE_APPENDER = initTextFlowAppender();
+    public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
+    private static final UserPreferences userPrefs = UserPreferences.getInstance();
+
+    static {
+        // initialize the debug console appender early to start capturing logs ASAP.
+        TextFlowAppender textFlowAppender = null;
+        try {
+            Configurator.setRootLevel(userPrefs.rootLoggingLevel.get().getLevel());
+            userPrefs.rootLoggingLevel.property().addListener((observable, oldLevel, newLevel) -> {
+                Configurator.setRootLevel(newLevel.getLevel());
+                logger.info("Root logger level set to " + newLevel);
+            });
+            if (userPrefs.redirectStdOutToLogs.get()) {
+                System.setErr(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stderr"), Level.ERROR), true));
+                System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
+            }
+            LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
+            if (userPrefs.persistLogsToFile.get()) {
+                Path basePath = userPrefs.logPath.get();
+                var rollingFileAppender = RollingFileAppender.newBuilder()
+                        .setName("RollingFileAppender")
+                        .setLayout(PatternLayout.newBuilder()
+                                .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build())
+                        .withFileName(basePath.resolve("binjr.log").toString())
+                        .withFilePattern(basePath.resolve("binjr").toString() + "-%d{YYYY-MM-dd}-%i.log")
+                        .withPolicy(TimeBasedTriggeringPolicy.newBuilder().withInterval(1).build())
+                        .withPolicy(SizeBasedTriggeringPolicy.createPolicy("10M"))
+                        .withStrategy(DefaultRolloverStrategy.newBuilder()
+                                .withCustomActions(new Action[]{
+                                        DeleteAction.createDeleteAction(
+                                                basePath.toString(),
+                                                false,
+                                                1,
+                                                false,
+                                                new PathSortByModificationTime(true),
+                                                new PathCondition[]{
+                                                        IfFileName.createNameCondition(
+                                                                "binjr-????-??-??-*.log", null, (PathCondition[]) null),
+                                                        IfAccumulatedFileCount.createFileCountCondition(
+                                                                userPrefs.rollOverLogFileMax.get().intValue())
+                                                },
+                                                null, loggerContext.getConfiguration())
+                                }).build())
+                        .build();
+                rollingFileAppender.start();
+                loggerContext.getRootLogger().addAppender(rollingFileAppender);
+            }
+
+            Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
+            textFlowAppender = TextFlowAppender.createAppender(
+                    "InternalConsole",
+                    PatternLayout.newBuilder()
+                            .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
+                            .build(), null);
+            textFlowAppender.start();
+
+            loggerContext.getConfiguration().addAppender(textFlowAppender);
+            loggerContext.getRootLogger()
+                    .addAppender(loggerContext.getConfiguration().getAppender(textFlowAppender.getName()));
+            loggerContext.updateLoggers();
+
+        } catch (Throwable t) {
+            logger.error("Failed to initialize debug console appender", t);
+        }
+        DEBUG_CONSOLE_APPENDER = textFlowAppender;
+    }
 
     /**
      * The entry point fo the application.
@@ -60,15 +130,17 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        logger.info(() -> "Starting " + AppEnvironment.APP_NAME);
+        logger.info(() -> "***********************************");
+        logger.info(() -> "*  Starting " + AppEnvironment.APP_NAME);
+        logger.info(() -> "***********************************");
         AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
         String jaasCfgPath = System.getProperty("java.security.auth.login.config");
         if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
             System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        bindPrefToVmOption(UserPreferences.getInstance().heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
-        bindPrefToVmOption(UserPreferences.getInstance().heapDumpPath, HotSpotDiagnostic::setHeapDumpPath);
+        bindPrefToVmOption(userPrefs.heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
+        bindPrefToVmOption(userPrefs.heapDumpPath, HotSpotDiagnostic::setHeapDumpPath);
         launch(args);
     }
 
@@ -87,32 +159,8 @@ public class Binjr extends Application {
         });
     }
 
-    private static TextFlowAppender initTextFlowAppender() {
-        try {
-            Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
-            System.setErr(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stderr"), Level.ERROR), true));
-            System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
-
-            TextFlowAppender appender = TextFlowAppender.createAppender(
-                    "InternalConsole",
-                    PatternLayout.newBuilder().withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build(),
-                    null
-            );
-            appender.start();
-            LoggerContext lc = (LoggerContext) LogManager.getContext(false);
-            lc.getConfiguration().addAppender(appender);
-            lc.getRootLogger().addAppender(lc.getConfiguration().getAppender(appender.getName()));
-            lc.updateLoggers();
-            return appender;
-        } catch (Throwable t) {
-            logger.error("Failed to initialize debug console appender", t);
-        }
-        return null;
-    }
-
     @Override
     public void start(Stage primaryStage) throws Exception {
-        var prefs = UserPreferences.getInstance();
         var env = AppEnvironment.getInstance();
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));
@@ -123,13 +171,13 @@ public class Binjr extends Application {
 
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             if (Screen.getScreensForRectangle(
-                    prefs.windowLastPosition.get().getMinX(),
-                    prefs.windowLastPosition.get().getMinY(),
+                    userPrefs.windowLastPosition.get().getMinX(),
+                    userPrefs.windowLastPosition.get().getMinY(),
                     10, 10).size() > 0) {
-                primaryStage.setX(prefs.windowLastPosition.get().getMinX());
-                primaryStage.setY(prefs.windowLastPosition.get().getMinY());
-                primaryStage.setWidth(prefs.windowLastPosition.get().getWidth());
-                primaryStage.setHeight(prefs.windowLastPosition.get().getHeight());
+                primaryStage.setX(userPrefs.windowLastPosition.get().getMinX());
+                primaryStage.setY(userPrefs.windowLastPosition.get().getMinY());
+                primaryStage.setWidth(userPrefs.windowLastPosition.get().getWidth());
+                primaryStage.setHeight(userPrefs.windowLastPosition.get().getHeight());
             }
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);

@@ -17,6 +17,7 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
+import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
@@ -214,6 +215,15 @@ public class UserPreferences extends PreferenceFactory {
      */
     public final Preference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
 
+    public final Preference<Log4j2Level> rootLoggingLevel = enumPreference(Log4j2Level.class, "rootLoggingLevel", Log4j2Level.INFO);
+
+    public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
+
+    public final Preference<Path> logPath = pathPreference("logPath", Path.of(""));
+
+    public final Preference<Number> rollOverLogFileMax = integerPreference("rollOverLogFileMax", 10);
+
+    public  Preference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", false);
 
     private UserPreferences() {
         super(Preferences.userRoot().node(BINJR_GLOBAL));

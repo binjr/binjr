@@ -21,12 +21,12 @@ import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnostic;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
+import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
@@ -42,7 +42,6 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.PropertySheet;
@@ -69,10 +68,9 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private ListView<Text> textOutput;
     @FXML
-    private ChoiceBox<Level> logLevelChoice;
+    private ChoiceBox<Log4j2Level> logLevelChoice;
     @FXML
     private ToggleButton alwaysOnTopToggle;
-
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -96,13 +94,13 @@ public class OutputConsoleController implements Initializable {
             });
         }
         Platform.runLater(() -> {
-            logLevelChoice.getItems().setAll(Level.values());
-            logLevelChoice.getSelectionModel().select(AppEnvironment.getInstance().getLogLevel());
-            AppEnvironment.getInstance().logLevelProperty().addListener((observable, oldValue, newValue) -> {
+            logLevelChoice.getItems().setAll(Log4j2Level.values());
+            logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
+            UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldValue, newValue) -> {
                 logLevelChoice.getSelectionModel().select(newValue);
             });
             logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                AppEnvironment.getInstance().setLogLevel(newValue);
+                UserPreferences.getInstance().rootLoggingLevel.set(newValue);
             });
         });
         preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory());
