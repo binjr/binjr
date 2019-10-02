@@ -219,7 +219,7 @@ public class UserPreferences extends PreferenceFactory {
 
     public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
 
-    public final Preference<Path> logPath = pathPreference("logPath", Path.of(""));
+    public final Preference<Path> logPath = pathPreference("logsDir", Path.of("./logs"));
 
     public final Preference<Number> rollOverLogFileMax = integerPreference("rollOverLogFileMax", 10);
 

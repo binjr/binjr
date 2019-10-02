@@ -39,8 +39,7 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.RollingFileAppender;
 import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
-import org.apache.logging.log4j.core.appender.rolling.SizeBasedTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.TimeBasedTriggeringPolicy;
+import org.apache.logging.log4j.core.appender.rolling.OnStartupTriggeringPolicy;
 import org.apache.logging.log4j.core.appender.rolling.action.*;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
@@ -79,12 +78,13 @@ public class Binjr extends Application {
                 var rollingFileAppender = RollingFileAppender.newBuilder()
                         .setName("RollingFileAppender")
                         .setLayout(PatternLayout.newBuilder()
-                                .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n").build())
+                                .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%pid] [%-5level] [%t] [%logger{36}] %msg%n")
+                                .build())
                         .withFileName(basePath.resolve("binjr.log").toString())
-                        .withFilePattern(basePath.resolve("binjr").toString() + "-%d{YYYY-MM-dd}-%i.log")
-                        .withPolicy(TimeBasedTriggeringPolicy.newBuilder().withInterval(1).build())
-                        .withPolicy(SizeBasedTriggeringPolicy.createPolicy("10M"))
+                        .withFilePattern(basePath.resolve("binjr").toString() + "-%d{YYYY-MM-dd_HH-mm-ss}.log.zip")
+                        .withPolicy(OnStartupTriggeringPolicy.createPolicy(1))
                         .withStrategy(DefaultRolloverStrategy.newBuilder()
+                                .withMax(Integer.toString(userPrefs.rollOverLogFileMax.get().intValue()))
                                 .withCustomActions(new Action[]{
                                         DeleteAction.createDeleteAction(
                                                 basePath.toString(),
@@ -94,7 +94,9 @@ public class Binjr extends Application {
                                                 new PathSortByModificationTime(true),
                                                 new PathCondition[]{
                                                         IfFileName.createNameCondition(
-                                                                "binjr-????-??-??-*.log", null, (PathCondition[]) null),
+                                                                null,
+                                                                "binjr-\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}.log.zip",
+                                                                (PathCondition[]) null),
                                                         IfAccumulatedFileCount.createFileCountCondition(
                                                                 userPrefs.rollOverLogFileMax.get().intValue())
                                                 },
