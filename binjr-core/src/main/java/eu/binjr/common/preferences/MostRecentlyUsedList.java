@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 /**
@@ -38,6 +39,11 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
     private final Preferences backingStore;
     ReadWriteLockHelper monitor = new ReadWriteLockHelper(new ReentrantReadWriteLock());
     private final Deque<T> mruList;
+    private Consumer<T> onItemEvicted;
+
+    public void setOnItemEvicted(Consumer<T> onItemEvicted) {
+        this.onItemEvicted = onItemEvicted;
+    }
 
     protected Preferences getBackingStore() {
         return backingStore;
@@ -71,7 +77,10 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
                 mruList.remove(value);
                 mruList.push(value);
                 if (mruList.size() > capacity) {
-                    mruList.removeLast();
+                    var evicted = mruList.pollLast();
+                    if (onItemEvicted != null && evicted != null) {
+                        onItemEvicted.accept(evicted);
+                    }
                 }
                 failSafeSave();
             });

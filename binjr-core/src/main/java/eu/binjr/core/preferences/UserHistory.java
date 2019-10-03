@@ -18,17 +18,21 @@ package eu.binjr.core.preferences;
 
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.MruFactory;
-import eu.binjr.common.preferences.PreferenceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.net.URI;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.prefs.Preferences;
 
 public class UserHistory extends MruFactory {
+    private static final Logger logger = LogManager.getLogger(UserHistory.class);
 
-    private final Map<String, MostRecentlyUsedList<?>> mrulMap;
+    public final MostRecentlyUsedList<Path> logFilesHistory =
+            pathMostRecentlyUsedList("logFilesHistory",
+                    UserPreferences.getInstance().rollOverLogFileMax.get().intValue(),
+                    false);
 
     public final MostRecentlyUsedList<Path> mostRecentWorkspaces =
             pathMostRecentlyUsedList("mostRecentWorkspaces", 20, false);
@@ -38,8 +42,17 @@ public class UserHistory extends MruFactory {
 
     private UserHistory() {
         super(Preferences.userRoot().node("binjr/history"));
-        mrulMap = new HashMap<>();
-        mrulMap.put("mostRecentWorkspaces", mostRecentWorkspaces);
+        logFilesHistory.setOnItemEvicted(path -> {
+            try {
+                Files.deleteIfExists(path);
+            } catch (SecurityException | IOException e) {
+                logger.error("An error occurred while attempting to delete log file " + path.toString() + ": " + e.getMessage());
+                logger.debug(() -> "Call Stack", e);
+            } catch (Throwable t) {
+                logger.error("An unexpected error occurred while attempting to delete log file " + path.toString() + ": " + t.getMessage());
+                logger.debug(() -> "Call Stack", t);
+            }
+        });
     }
 
     public static UserHistory getInstance() {
@@ -49,6 +62,4 @@ public class UserHistory extends MruFactory {
     private static class UserHistoryHolder {
         private final static UserHistory instance = new UserHistory();
     }
-
-
 }

@@ -26,6 +26,7 @@ import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -37,16 +38,15 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.RollingFileAppender;
-import org.apache.logging.log4j.core.appender.rolling.DefaultRolloverStrategy;
-import org.apache.logging.log4j.core.appender.rolling.OnStartupTriggeringPolicy;
-import org.apache.logging.log4j.core.appender.rolling.action.*;
+import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.awt.*;
 import java.io.PrintStream;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * The entry point fo the application.
@@ -58,6 +58,7 @@ public class Binjr extends Application {
     private static final Logger logger = LogManager.getLogger(Binjr.class);
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
     private static final UserPreferences userPrefs = UserPreferences.getInstance();
+
 
     static {
         // initialize the debug console appender early to start capturing logs ASAP.
@@ -74,37 +75,21 @@ public class Binjr extends Application {
             }
             LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
             if (userPrefs.persistLogsToFile.get()) {
-                Path basePath = userPrefs.logPath.get();
-                var rollingFileAppender = RollingFileAppender.newBuilder()
-                        .setName("RollingFileAppender")
+                Path basePath = userPrefs.logPath.get()
+                        .resolve("binjr_" +
+                                ProcessHandle.current().pid() +
+                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("_YYYY-MM-dd_HH-mm-ss")) +
+                                ".log");
+                var fileAppender = FileAppender.newBuilder()
+                        .setName("FileAppender")
                         .setLayout(PatternLayout.newBuilder()
-                                .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%pid] [%-5level] [%t] [%logger{36}] %msg%n")
+                                .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
                                 .build())
-                        .withFileName(basePath.resolve("binjr.log").toString())
-                        .withFilePattern(basePath.resolve("binjr").toString() + "-%d{YYYY-MM-dd_HH-mm-ss}.log.zip")
-                        .withPolicy(OnStartupTriggeringPolicy.createPolicy(1))
-                        .withStrategy(DefaultRolloverStrategy.newBuilder()
-                                .withMax(Integer.toString(userPrefs.rollOverLogFileMax.get().intValue()))
-                                .withCustomActions(new Action[]{
-                                        DeleteAction.createDeleteAction(
-                                                basePath.toString(),
-                                                false,
-                                                1,
-                                                false,
-                                                new PathSortByModificationTime(true),
-                                                new PathCondition[]{
-                                                        IfFileName.createNameCondition(
-                                                                null,
-                                                                "binjr-\\d{4}-\\d{2}-\\d{2}_\\d{2}-\\d{2}-\\d{2}.log.zip",
-                                                                (PathCondition[]) null),
-                                                        IfAccumulatedFileCount.createFileCountCondition(
-                                                                userPrefs.rollOverLogFileMax.get().intValue())
-                                                },
-                                                null, loggerContext.getConfiguration())
-                                }).build())
+                        .withFileName(basePath.toString())
                         .build();
-                rollingFileAppender.start();
-                loggerContext.getRootLogger().addAppender(rollingFileAppender);
+                fileAppender.start();
+                loggerContext.getRootLogger().addAppender(fileAppender);
+                UserHistory.getInstance().logFilesHistory.push(basePath.toRealPath());
             }
 
             Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
