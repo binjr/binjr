@@ -74,39 +74,46 @@ public class Binjr extends Application {
                 System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
             }
             LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-            if (userPrefs.persistLogsToFile.get()) {
-                Path basePath = userPrefs.logPath.get()
-                        .resolve("binjr_" +
-                                ProcessHandle.current().pid() +
-                                LocalDateTime.now().format(DateTimeFormatter.ofPattern("_YYYY-MM-dd_HH-mm-ss")) +
-                                ".log");
-                var fileAppender = FileAppender.newBuilder()
-                        .setName("FileAppender")
-                        .setLayout(PatternLayout.newBuilder()
+            try {
+                Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
+                textFlowAppender = TextFlowAppender.createAppender(
+                        "InternalConsole",
+                        PatternLayout.newBuilder()
                                 .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
-                                .build())
-                        .withFileName(basePath.toString())
-                        .build();
-                fileAppender.start();
-                loggerContext.getRootLogger().addAppender(fileAppender);
-                UserHistory.getInstance().logFilesHistory.push(basePath.toRealPath());
+                                .build(), null);
+                textFlowAppender.start();
+
+                loggerContext.getConfiguration().addAppender(textFlowAppender);
+                loggerContext.getRootLogger()
+                        .addAppender(loggerContext.getConfiguration().getAppender(textFlowAppender.getName()));
+                loggerContext.updateLoggers();
+            } catch (Exception e) {
+                logger.error("Failed to initialize internal console appender", e);
+            }
+            try {
+                if (userPrefs.persistLogsToFile.get()) {
+                    Path basePath = userPrefs.logFilesLocation.get()
+                            .resolve("binjr_" +
+                                    ProcessHandle.current().pid() +
+                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("_YYYY-MM-dd_HH-mm-ss")) +
+                                    ".log");
+                    var fileAppender = FileAppender.newBuilder()
+                            .setName("FileAppender")
+                            .setLayout(PatternLayout.newBuilder()
+                                    .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
+                                    .build())
+                            .withFileName(basePath.toString())
+                            .build();
+                    fileAppender.start();
+                    loggerContext.getRootLogger().addAppender(fileAppender);
+                    UserHistory.getInstance().logFilesHistory.push(basePath.toRealPath());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to initialize file appender", e);
             }
 
-            Configurator.setLevel("runtimeDebuggingFeatures", Level.DEBUG);
-            textFlowAppender = TextFlowAppender.createAppender(
-                    "InternalConsole",
-                    PatternLayout.newBuilder()
-                            .withPattern("[%d{YYYY-MM-dd HH:mm:ss.SSS}] [%-5level] [%t] [%logger{36}] %msg%n")
-                            .build(), null);
-            textFlowAppender.start();
-
-            loggerContext.getConfiguration().addAppender(textFlowAppender);
-            loggerContext.getRootLogger()
-                    .addAppender(loggerContext.getConfiguration().getAppender(textFlowAppender.getName()));
-            loggerContext.updateLoggers();
-
         } catch (Throwable t) {
-            logger.error("Failed to initialize debug console appender", t);
+            logger.error("Failed to initialize logging console appender", t);
         }
         DEBUG_CONSOLE_APPENDER = textFlowAppender;
     }

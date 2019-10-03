@@ -31,7 +31,7 @@ public class UserHistory extends MruFactory {
 
     public final MostRecentlyUsedList<Path> logFilesHistory =
             pathMostRecentlyUsedList("logFilesHistory",
-                    UserPreferences.getInstance().rollOverLogFileMax.get().intValue(),
+                    UserPreferences.getInstance().maxLogFilesToKeep.get().intValue(),
                     false);
 
     public final MostRecentlyUsedList<Path> mostRecentWorkspaces =

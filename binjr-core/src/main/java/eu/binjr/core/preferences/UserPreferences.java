@@ -208,22 +208,25 @@ public class UserPreferences extends PreferenceFactory {
     /**
      * The path where to save heap dumps.
      */
-    public final Preference<Path> heapDumpPath = pathPreference("heapDumpPath", Path.of(""));
+    public final Preference<Path> heapDumpPath =
+            pathPreference("heapDumpPath",Path.of(System.getProperty("java.io.tmpdir") + "/binjr/hprofs"));
 
     /**
      * The amount of time in ms the pointer must have hovered above a node before a tooltip is shown.
      */
     public final Preference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
 
-    public final Preference<Log4j2Level> rootLoggingLevel = enumPreference(Log4j2Level.class, "rootLoggingLevel", Log4j2Level.INFO);
+    public final Preference<Log4j2Level> rootLoggingLevel =
+            enumPreference(Log4j2Level.class, "rootLoggingLevel", Log4j2Level.INFO);
 
     public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
 
-    public final Preference<Path> logPath = pathPreference("logsDir", Path.of("./logs"));
+    public final Preference<Path> logFilesLocation =
+            pathPreference("logFilesLocation", Path.of( System.getProperty("java.io.tmpdir") + "/binjr/logs"));
 
-    public final Preference<Number> rollOverLogFileMax = integerPreference("rollOverLogFileMax", 10);
+    public final Preference<Number> maxLogFilesToKeep = integerPreference("maxLogFilesToKeep", 10);
 
-    public  Preference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", false);
+    public Preference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
 
     private UserPreferences() {
         super(Preferences.userRoot().node(BINJR_GLOBAL));
