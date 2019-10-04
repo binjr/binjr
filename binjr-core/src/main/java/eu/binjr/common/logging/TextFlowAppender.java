@@ -19,8 +19,6 @@ package eu.binjr.common.logging;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
-import javafx.scene.text.FontSmoothingType;
-import javafx.scene.text.Text;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
@@ -101,10 +99,6 @@ public final class TextFlowAppender extends AbstractAppender {
         return new TextFlowAppender(name, filter, layout, true);
     }
 
-    public Set<Log> getLogBuffer() {
-        return logBuffer.keySet();
-    }
-
     public void setRenderTextDelegate(Consumer<Collection<Log>> delegate) {
         this.renderTextDelegate = delegate;
     }
@@ -112,8 +106,13 @@ public final class TextFlowAppender extends AbstractAppender {
     /**
      * Clear the circular buffer used by the appender
      */
-    public synchronized void clearBuffer() {
-        logBuffer.clear();
+    public void clearBuffer() {
+        renderTextLock.lock();
+        try {
+            logBuffer.clear();
+        } finally {
+            renderTextLock.unlock();
+        }
     }
 
     /**
@@ -122,12 +121,17 @@ public final class TextFlowAppender extends AbstractAppender {
      * @param event Log event with log data
      */
     @Override
-    public synchronized void append(LogEvent event) {
-        new String(getLayout().toByteArray(event)).lines().forEach(
-                message -> {
-                    Log log = new Log(message, logColors.getOrDefault(event.getLevel(), defaultColor));
-                    logBuffer.put(log, null);
-                });
+    public void append(LogEvent event) {
+        renderTextLock.lock();
+        try {
+            new String(getLayout().toByteArray(event)).lines().forEach(
+                    message -> {
+                        Log log = new Log(message, logColors.getOrDefault(event.getLevel(), defaultColor));
+                        logBuffer.put(log, null);
+                    });
+        } finally {
+            renderTextLock.unlock();
+        }
     }
 
     private void refreshTextFlow() {

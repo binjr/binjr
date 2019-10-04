@@ -1,0 +1,1 @@
+* _[Fixed]_ Concurrent modifications to output console's log queue.
