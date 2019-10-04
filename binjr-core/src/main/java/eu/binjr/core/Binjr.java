@@ -124,13 +124,8 @@ public class Binjr extends Application {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        logger.info(() -> "***********************************");
-        logger.info(() -> "*  Starting " + AppEnvironment.APP_NAME);
-        logger.info(() -> "***********************************");
-        AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
-        String jaasCfgPath = System.getProperty("java.security.auth.login.config");
-        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
-            System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
+        if (AppEnvironment.getInstance().getJavaVersion().getMajor() >= 13) {
+            System.setProperty("sun.security.jgss.native", "true");
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
         bindPrefToVmOption(userPrefs.heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
@@ -155,6 +150,14 @@ public class Binjr extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        logger.info(() -> "***********************************");
+        logger.info(() -> "*  Starting " + AppEnvironment.APP_NAME);
+        logger.info(() -> "***********************************");
+        AppEnvironment.getInstance().getSysInfoProperties().forEach(logger::info);
+        String jaasCfgPath = System.getProperty("java.security.auth.login.config");
+        if (jaasCfgPath == null || jaasCfgPath.trim().length() == 0) {
+            System.setProperty("java.security.auth.login.config", Binjr.class.getResource("/jaas_login.conf").toExternalForm());
+        }
         var env = AppEnvironment.getInstance();
         env.processCommandLineOptions(getParameters());
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/MainView.fxml"));

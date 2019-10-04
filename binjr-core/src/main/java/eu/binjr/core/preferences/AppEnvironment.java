@@ -238,6 +238,26 @@ public class AppEnvironment {
         return sysInfo;
     }
 
+    public Version getJavaVersion(){
+        try {
+            return Version.parseVersion(System.getProperty("java.version"));
+        }catch (Exception e){
+            logger.error("Error parsing Java version: " + e.getMessage());
+            logger.debug("Call Stack", e);
+        }
+        return Version.emptyVersion;
+    }
+
+    public Version getJavaFxVersion(){
+        try {
+            return Version.parseVersion(System.getProperty("javafx.version"));
+        }catch (Exception e){
+            logger.error("Error parsing javafx version: " + e.getMessage());
+            logger.debug("Call Stack", e);
+        }
+        return Version.emptyVersion;
+    }
+
     /**
      * Returns the family of the currently running OS
      *
