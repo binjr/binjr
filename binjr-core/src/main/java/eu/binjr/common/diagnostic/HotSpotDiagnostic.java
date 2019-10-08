@@ -19,15 +19,9 @@ package eu.binjr.common.diagnostic;
 import com.sun.management.HotSpotDiagnosticMXBean;
 import com.sun.management.VMOption;
 
-import javax.management.JMX;
-import javax.management.MBeanServer;
-import javax.management.MalformedObjectNameException;
-import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
-import java.lang.management.PlatformManagedObject;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Supplier;
 
 public interface HotSpotDiagnostic {
     HotSpotDiagnosticMXBean HOTSPOT_DIAGNOSTIC = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);

@@ -26,6 +26,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryManagerMXBean;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -33,6 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.jar.Manifest;
+import java.util.stream.Collectors;
 
 /**
  * Provides access to the application's environmental properties
@@ -235,23 +238,24 @@ public class AppEnvironment {
         sysInfo.add(new SysInfoProperty("Operating System", System.getProperty("os.name") + " (" + System.getProperty("os.version") + ")"));
         sysInfo.add(new SysInfoProperty("System Architecture", System.getProperty("os.arch")));
         sysInfo.add(new SysInfoProperty("JVM Heap Stats", getHeapStats()));
+        sysInfo.add(new SysInfoProperty("Garbage Collectors", getGcNames()));
         return sysInfo;
     }
 
-    public Version getJavaVersion(){
+    public Version getJavaVersion() {
         try {
             return Version.parseVersion(System.getProperty("java.version"));
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error parsing Java version: " + e.getMessage());
             logger.debug("Call Stack", e);
         }
         return Version.emptyVersion;
     }
 
-    public Version getJavaFxVersion(){
+    public Version getJavaFxVersion() {
         try {
             return Version.parseVersion(System.getProperty("javafx.version"));
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error("Error parsing javafx version: " + e.getMessage());
             logger.debug("Call Stack", e);
         }
@@ -406,6 +410,13 @@ public class AppEnvironment {
                 committedMB,
                 usedMB
         );
+    }
+
+    private String getGcNames() {
+        return ManagementFactory.getGarbageCollectorMXBeans()
+                .stream()
+                .map(MemoryManagerMXBean::getName)
+                .collect(Collectors.joining(", "));
     }
 
     private static class EnvironmentHolder {

@@ -44,7 +44,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * A {@link eu.binjr.core.data.adapters.DataAdapter} implementation capable of consuming data from Round Robin Database files.
+ * A {@link eu.binjr.core.data.adapters.DataAdapter} implementation capable of consuming data
+ * from Round Robin Database files.
  *
  * @author Frederic Thevenet
  */
@@ -102,7 +103,9 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                         this));
                 RrdDb rrd = openRrdDb(rrdPath);
                 rrdDbMap.put(rrdPath, rrd);
-                for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs()).map(ArcDef::getConsolFun).collect(Collectors.toSet())) {
+                for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs())
+                        .map(ArcDef::getConsolFun)
+                        .collect(Collectors.toSet())) {
                     var consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding(
                             consolFun.toString(),
                             rrdPath.resolve(consolFun.toString()).toString(),
@@ -144,7 +147,10 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         Path dsPath = Path.of(path);
         try {
-            FetchRequest request = rrdDbMap.get(dsPath.getParent()).createFetchRequest(ConsolFun.valueOf(dsPath.getFileName().toString()), begin.getEpochSecond(), end.getEpochSecond());
+            FetchRequest request = rrdDbMap.get(dsPath.getParent()).createFetchRequest(
+                    ConsolFun.valueOf(dsPath.getFileName().toString()),
+                    begin.getEpochSecond(),
+                    end.getEpochSecond());
             request.setFilter(seriesInfo.stream().map(s -> s.getBinding().getLabel()).toArray(String[]::new));
             FetchData data = request.fetchData();
             Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
@@ -153,11 +159,15 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                 for (TimeSeriesInfo info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
                     XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
-                    TimeSeriesProcessor seriesProcessor = series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
+                    TimeSeriesProcessor seriesProcessor =
+                            series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
                     seriesProcessor.addSample(point);
                 }
             }
-            logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)", seriesInfo.size(), data.getRowCount(), seriesInfo.size() * data.getRowCount()));
+            logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)",
+                    seriesInfo.size(),
+                    data.getRowCount(),
+                    seriesInfo.size() * data.getRowCount()));
             return series;
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException("IO Error while retrieving data from rrd db", e);
@@ -176,7 +186,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
 
     @Override
     public String getSourceName() {
-        return "[RRD] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) + " more RRD file(s)" : "");
+        return "[RRD] " + rrdPaths.get(0).getFileName() + (rrdPaths.size() > 1 ? " + " + (rrdPaths.size() - 1) +
+                " more RRD file(s)" : "");
     }
 
     @Override
