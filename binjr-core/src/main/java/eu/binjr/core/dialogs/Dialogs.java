@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
@@ -33,9 +34,14 @@ import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
 
 import java.awt.*;
+import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Optional;
 
 /**
  * Defines helper methods to facilitate the display of common dialog boxes
@@ -332,5 +338,20 @@ public class Dialogs {
         } else {
             logger.debug("Failed to retrieve dialog's stage: cannot set dialog to be always on top");
         }
+    }
+
+    public static Optional<File> getInitialDir(MostRecentlyUsedList<Path> mru) {
+        try {
+            var initDir = mru.peek().orElse(Paths.get(System.getProperty("user.home")));
+            if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
+                initDir = initDir.getParent();
+            }
+            if (initDir.toRealPath().toFile().exists()) {
+                return Optional.of(initDir.toFile());
+            }
+        } catch (Exception e) {
+            logger.debug("Failed to retrieve initial dir for file chooser", e);
+        }
+        return Optional.empty();
     }
 }

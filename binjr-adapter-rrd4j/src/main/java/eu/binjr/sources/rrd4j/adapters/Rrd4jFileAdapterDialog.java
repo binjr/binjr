@@ -35,7 +35,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -124,11 +123,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD binary files", "*.rrd"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-            var initDir = mostRecentRrdFiles.peek().orElse(Paths.get(System.getProperty("user.home")));
-            if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
-                initDir = initDir.getParent();
-            }
-            fileChooser.setInitialDirectory(initDir.toFile());
+            Dialogs.getInitialDir(mostRecentRrdFiles).ifPresent(fileChooser::setInitialDirectory);
             List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
             if (rrdFiles != null) {
                 pathsField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));

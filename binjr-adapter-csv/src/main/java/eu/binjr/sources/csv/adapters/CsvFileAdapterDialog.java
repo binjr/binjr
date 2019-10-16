@@ -80,11 +80,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             fileChooser.setTitle("Open CSV file");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-            var initDir = getMostRecentList().peek().orElse(Paths.get(System.getProperty("user.home")));
-            if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
-                initDir = initDir.getParent();
-            }
-            fileChooser.setInitialDirectory(initDir.toFile());
+            Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
             return fileChooser.showOpenDialog(Dialogs.getStage(owner));
         } catch (Exception e) {
             Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);

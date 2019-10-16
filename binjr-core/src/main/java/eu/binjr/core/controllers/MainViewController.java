@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.text.StringUtils;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -31,7 +32,6 @@ import eu.binjr.core.data.workspace.Source;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.Workspace;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
@@ -80,9 +80,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -674,12 +672,7 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        var initDir = UserHistory.getInstance().mostRecentWorkspaces.peek()
-                .orElse(Paths.get(System.getProperty("user.home")));
-        if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
-            initDir = initDir.getParent();
-        }
-        fileChooser.setInitialDirectory(initDir.toFile());
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentWorkspaces).ifPresent(fileChooser::setInitialDirectory);
         File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             loadWorkspace(selectedFile);
@@ -754,12 +747,7 @@ public class MainViewController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
-        var initDir = UserHistory.getInstance().mostRecentWorkspaces.peek()
-                .orElse(Paths.get(System.getProperty("user.home")));
-        if (!Files.isDirectory(initDir) && initDir.getParent() != null) {
-            initDir = initDir.getParent();
-        }
-        fileChooser.setInitialDirectory(initDir.toFile());
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentWorkspaces).ifPresent(fileChooser::setInitialDirectory);
         fileChooser.setInitialFileName(BINJR_FILE_PATTERN[0]);
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {

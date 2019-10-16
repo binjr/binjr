@@ -76,7 +76,6 @@ import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -1397,9 +1396,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        var recentDirPath = UserHistory.getInstance().mostRecentSaveFolders.peek()
-                .orElse(Paths.get(System.getProperty("user.home"))).toFile();
-        fileChooser.setInitialDirectory(recentDirPath);
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
         fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {

@@ -42,7 +42,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.DateTimeException;
 import java.time.ZoneId;
 import java.util.stream.Collectors;
@@ -196,13 +195,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open");
-        try {
-            var recentDirPath = UserHistory.getInstance().mostRecentSaveFolders.peek()
-                    .orElse(Paths.get(System.getProperty("user.home"))).toFile();
-            fileChooser.setInitialDirectory(recentDirPath);
-        } catch (Exception e) {
-            logger.debug("Could not initialize working dir for FileChooser", e);
-        }
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
         return fileChooser.showOpenDialog(Dialogs.getStage(owner));
     }
 

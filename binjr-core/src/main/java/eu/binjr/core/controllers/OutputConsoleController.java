@@ -49,7 +49,6 @@ import org.controlsfx.control.PropertySheet;
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -151,8 +150,7 @@ public class OutputConsoleController implements Initializable {
             FileChooser fileChooser = new FileChooser();
             fileChooser.setTitle("Save console ouptut");
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
-            fileChooser.setInitialDirectory(UserHistory.getInstance().mostRecentSaveFolders.peek()
-                    .orElse(Paths.get(System.getProperty(System.getProperty("user.home")))).toFile());
+            Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
             fileChooser.setInitialFileName("binjr_console_output.txt");
             File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
