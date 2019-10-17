@@ -105,7 +105,7 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
      */
     public void importFromFile(Path savePath) throws IOException, InvalidPreferencesFormatException {
         try (var is = Files.newInputStream(savePath, StandardOpenOption.READ)) {
-            backingStore.importPreferences(is);
+            Preferences.importPreferences(is);
             storedItems.values().forEach(T::reload);
         }
     }

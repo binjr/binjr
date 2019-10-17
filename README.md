@@ -1,11 +1,8 @@
 # binjr 
-[![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22)
+[![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1) [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22) 
 
-Platform | Build Status
----|---
-Windows | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_windows)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_windows) 
-Linux | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_linux)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_linux) 
-macOS | [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr?branchName=master&jobName=app_bundle_mac)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1&branchName=master&jobName=app_bundle_mac)
+![Screenshot](https://binjr.eu/assets/images/binjr_demo4.gif)
+
 
 ## What is binjr?
 
@@ -29,8 +26,6 @@ it by changing the time range, the type of chart visualization and smaller aspec
 transparency for each individual series.  
 The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
-
-![Screenshot](https://binjr.eu/assets/images/screenshot06.png)
 
 ## Features
 
@@ -129,6 +124,21 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew run` to build and start the application straight away.
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
 > Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in the same environement.
+  
+## Trying it out
+
+If you'd like to experience binjr's visualization capabilities but do not have a compatible data source handy, you can use
+the [demonstration data adpater](https://github.com/binjr/binjr-adapter-demo). 
+
+It is a plugin for binjr which embeds a small data source that you can readily browse using binjr.
+
+1. Make sure [binjr](https://binjr.eu) is installed on your system and make a note of the folder it is installed in.
+2. Download the `binjr-adapter-demo-1.x.x.zip` archive from https://github.com/binjr/binjr-adapter-demo/releases/latest
+3. Copy the `binjr-adapter-demo-1.x.x.jar` file contained in the zip file into the `plugins` folder of your 
+   [binjr](https://binjr.eu) installation.
+4. Start [binjr](https://binjr.eu) (or restart it if it was runnning when you copied the plugin) and open the `demo.bjr`
+   workspace contained in the zip (from the command menu, select `Workspaces > Open...`, or press Ctrl+O) 
+
   
 ## Getting help
 
