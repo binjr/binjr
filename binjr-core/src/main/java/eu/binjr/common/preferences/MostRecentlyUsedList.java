@@ -84,6 +84,8 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
                 }
                 failSafeSave();
             });
+        } else {
+            logger.debug("Invalid value to push in " + key);
         }
     }
 

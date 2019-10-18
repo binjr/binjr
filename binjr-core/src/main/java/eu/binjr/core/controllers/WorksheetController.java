@@ -1402,7 +1402,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         if (selectedFile != null) {
             try {
                 if (selectedFile.getParent() != null) {
-                    UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.toPath());
+                    UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.getParentFile().toPath());
                 }
                 ImageIO.write(
                         SwingFXUtils.fromFXImage(snapImg, null),
