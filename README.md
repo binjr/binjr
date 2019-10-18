@@ -3,7 +3,7 @@
 
 A time series data browser.
 
-![Screenshot](https://binjr.eu/assets/images/binjr_demo4.gif)
+![Screenshot](https://binjr.eu/assets/images/binjr_demo.gif)
 
 ## Content
 * [What is binjr?](#what-is-binjr)
