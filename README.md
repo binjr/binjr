@@ -7,6 +7,7 @@ A time series data browser.
 
 ## Content
 * [What is binjr?](#what-is-binjr)
+* [What binjr is not](#what-binjr-is-not)
 * [Features](#features)
 * [Getting started](#getting-started)
 * [Trying it out](#trying-it-out)
@@ -28,14 +29,25 @@ source of time series data.
 and software components, but it was built as a forensic analysis tool, to investigate performance issues or applications
 crashes, rather than as a typical monitoring application.   
 
-Because of that, the user experience is more reminiscent of using a profiling application like [WPA](https://docs.microsoft.com/en-us/windows-hardware/test/wpt/windows-performance-analyzer) 
-than a dashboard-oriented platform like [Grafana](https://grafana.com/): it revolves around enabling the user to compose
-a custom view by using any of the time-series exposed by the source, simply by dragging and dropping them on the view.  
+Because of that, the user experience is more reminiscent of using a profiling application than a dashboard-oriented
+monitoring platform like.  
+It revolves around enabling the user to compose a custom view by using any of the time-series exposed by the source, 
+simply by dragging and dropping them on the view.  
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
 The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
+
+## What binjr is not
+* _binjr_ is not a system performance collector, nor a collector of anything else for that matter. What it provides is
+   efficient navigation and pretty presentation for time series collected elsewhere. 
+* _binjr_ is not a cloud solution. It's not even a server based solution; it's entirely a client application, 
+  albeit one that can get its data from remote servers. Think of it as a browser, only just for time series. 
+* _binjr_ is not a live system monitoring dashboard. While you can use it to connect to live sources, its feature set is
+  not geared toward that particular task, and there are better tools for that out there. Instead, it aims to be an 
+  investigation tool, for when you don't necessarily know what you're looking for beforehand and you'll want to build 
+  and change the view of the data as you navigate through it rather than be constrained by pre-determined dashboards. 
 
 ## Features
 
@@ -165,7 +177,7 @@ The great thing about it being an open source, community driven project, though,
  is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,
  there are always ways to make it happen.
  
-So, please, do not hesitate to suggest anew  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
+So, please, do not hesitate to suggest a new  feature or source support request by opening a [issue](https://github.com/binjr/binjr/issues). 
  
 Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
 with your changes. 
