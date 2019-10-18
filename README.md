@@ -1,8 +1,18 @@
 # binjr 
 [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1) [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22) 
 
+A time series data browser.
+
 ![Screenshot](https://binjr.eu/assets/images/binjr_demo4.gif)
 
+## Content
+* [What is binjr?](#what-is-binjr)
+* [Features](#features)
+* [Getting started](#getting-started)
+* [Trying it out](#trying-it-out)
+* [Getting help](#getting-help)
+* [Contributing](#contributing)
+* [How is it licensed?](#how-is-it-licensed)
 
 ## What is binjr?
 
