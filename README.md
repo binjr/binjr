@@ -30,9 +30,7 @@ and software components, but it was built as a forensic analysis tool, to invest
 crashes, rather than as a typical monitoring application.   
 
 Because of that, the user experience is more reminiscent of using a profiling application than a dashboard-oriented
-monitoring platform like.  
-It revolves around enabling the user to compose a custom view by using any of the time-series exposed by the source, 
-simply by dragging and dropping them on the view.  
+monitoring platform; it revolves around enabling the user to compose a custom view by using any of the time-series exposed by the source, simply by dragging and dropping them on the view.  
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
