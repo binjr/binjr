@@ -139,6 +139,19 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
+    public ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+        if (this.isClosed()) {
+            throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
+        }
+        Path dsPath = Path.of(path);
+        try {
+            return Instant.ofEpochSecond(rrdDbMap.get(dsPath.getParent()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
+        } catch (IOException e) {
+            throw new FetchingDataFromAdapterException("IO Error while retrieving last update from rrd db", e);
+        }
+    }
+
+    @Override
     public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant
             end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache)
             throws DataAdapterException {

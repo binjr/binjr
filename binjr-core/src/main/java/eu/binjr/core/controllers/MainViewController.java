@@ -28,6 +28,7 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.Source;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.Workspace;
@@ -81,7 +82,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -1156,26 +1156,29 @@ public class MainViewController implements Initializable {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                ZonedDateTime toDateTime;
-                ZonedDateTime fromDateTime;
-                ZoneId zoneId;
-                if (getSelectedWorksheetController() != null && getSelectedWorksheetController().getWorksheet() != null) {
-                    toDateTime = getSelectedWorksheetController().getWorksheet().getToDateTime();
-                    fromDateTime = getSelectedWorksheetController().getWorksheet().getFromDateTime();
-                    zoneId = getSelectedWorksheetController().getWorksheet().getTimeZone();
-                } else {
-                    toDateTime = ZonedDateTime.now();
-                    fromDateTime = toDateTime.minus(24, ChronoUnit.HOURS);
-                    zoneId = ZoneId.systemDefault();
+                var charts = WorksheetController.treeItemsAsChartList(rootItems, root);
+                if (charts.isPresent()) {
+                    ZonedDateTime toDateTime;
+                    boolean seen = false;
+                    ZonedDateTime best = null;
+                    Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
+                    for (Chart chart : charts.get()) {
+                        ZonedDateTime lastUpdate = chart.getLatestTimestamp();
+                        if (!seen || comparator.compare(lastUpdate, best) < 0) {
+                            seen = true;
+                            best = lastUpdate;
+                        }
+                    }
+                    toDateTime = seen ? best : ZonedDateTime.now();
+                    var worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
+                            charts.get(),
+                            toDateTime.getZone(),
+                            toDateTime.minus(24, ChronoUnit.HOURS),
+                            toDateTime);
+
+                    worksheet.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());
+                    editWorksheet(tabPane, worksheet);
                 }
-                WorksheetController.treeItemsAsChartList(rootItems, root).ifPresent(
-                        charts -> editWorksheet(tabPane,
-                                new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
-                                        charts,
-                                        zoneId,
-                                        fromDateTime,
-                                        toDateTime))
-                );
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }

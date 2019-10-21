@@ -142,6 +142,14 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
+    public ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+        if (this.isClosed()) {
+            throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
+        }
+        return getDataStore().get(getDataStore().lastKey()).getTimeStamp();
+    }
+
+    @Override
     public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");

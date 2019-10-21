@@ -170,6 +170,28 @@ public class Chart implements Dirtyable, AutoCloseable {
         this.status = new ChangeWatcher(this);
     }
 
+    public ZonedDateTime getLatestTimestamp() throws DataAdapterException {
+        ZonedDateTime latest = ZonedDateTime.now();
+        var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
+            var adapter = byAdapterEntry.getKey();
+            var sorter = new SortTransform();
+            sorter.setEnabled(adapter.isSortingRequired());
+            // Group all queries with the same adapter and path
+            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            var latch = new CountDownLatch(bindingsByPath.entrySet().size());
+            var errors = new ArrayList<Throwable>();
+            for (var byPathEntry : bindingsByPath.entrySet()) {
+                String path = byPathEntry.getKey();
+                var adapterLastUpdate = adapter.latestTimestamp(path, byPathEntry.getValue());
+                if (adapterLastUpdate.isBefore(latest)){
+                    latest = adapterLastUpdate;
+                }
+            }
+        }
+        return latest;
+    }
+
     /**
      * Fills up the backend for all {@link TimeSeriesInfo} in the chart by querying the relevant data adapters
      * for the specified time interval.

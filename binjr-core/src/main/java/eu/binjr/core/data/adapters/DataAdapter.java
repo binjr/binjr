@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.preferences.PreferenceFactory;
+import eu.binjr.common.javafx.controls.TimeRangePicker;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -25,10 +25,10 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.prefs.Preferences;
 
 /**
  * Provides the means to access a data source to retrieve time series data.
@@ -142,6 +142,11 @@ public interface DataAdapter extends AutoCloseable {
         return false;
     }
 
+    default ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+        return ZonedDateTime.now(getTimeZoneId());
+    }
+
     @Override
+
     void close();
 }

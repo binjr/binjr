@@ -17,7 +17,9 @@ A time series data browser.
 
 ## What is binjr?
 
-***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically editable charts and provides advanced features to navigate through the data in a natural and fluent fashion (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
+***binjr*** is a time series data browser; it renders time series data produced by other applications as dynamically 
+editable charts and provides advanced features to navigate through the data in a natural and fluent fashion 
+(drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
  
 It is a standalone client application, that runs independently from the applications that produce the data; there are
 no application server or server side components dedicated to ***binjr*** that needs to be installed on the source.   
@@ -30,7 +32,8 @@ and software components, but it was built as a forensic analysis tool, to invest
 crashes, rather than as a typical monitoring application.   
 
 Because of that, the user experience is more reminiscent of using a profiling application than a dashboard-oriented
-monitoring platform; it revolves around enabling the user to compose a custom view by using any of the time-series exposed by the source, simply by dragging and dropping them on the view.  
+monitoring platform; it revolves around enabling the user to compose a custom view by using any of the time-series 
+exposed by the source, simply by dragging and dropping them on the view.  
 That view then constantly evolves, as the user adds or removes series, from different sources, while navigating through 
 it by changing the time range, the type of chart visualization and smaller aspects such as the colour or 
 transparency for each individual series.  
@@ -103,7 +106,8 @@ Simply download the one for your system, unpack it and run `binjr` to start!
 
 ### Launch the latest version via Apache Maven
  
-Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start ***binjr*** simply by running the following command line:
+Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start ***binjr*** simply 
+by running the following command line:
 
 #### On Linux or macOS:
 
@@ -143,7 +147,8 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew build` to build the JAR for the all the modules.
 * `./gradlew run` to build and start the application straight away.
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
-> Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in the same environement.
+> Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in 
+> the same environement.
   
 ## Trying it out
 
