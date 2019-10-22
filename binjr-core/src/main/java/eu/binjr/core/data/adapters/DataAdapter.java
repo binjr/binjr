@@ -142,7 +142,16 @@ public interface DataAdapter extends AutoCloseable {
         return false;
     }
 
-    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+    /**
+     * Returns a {@link TimeRange} to initiate a new {@link eu.binjr.core.data.workspace.Worksheet} with so that it is
+     * set to a relevant period with regard to the chosen data sources.
+     *
+     * @param path       the path of the data in the source
+     * @param seriesInfo the series to get data from.
+     * @return the {@link TimeRange} to initiate a new {@link eu.binjr.core.data.workspace.Worksheet} with
+     * @throws DataAdapterException if an error occurs.
+     */
+    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
         var end = ZonedDateTime.now(getTimeZoneId());
         return TimeRange.of(end.minusHours(24), end);
     }

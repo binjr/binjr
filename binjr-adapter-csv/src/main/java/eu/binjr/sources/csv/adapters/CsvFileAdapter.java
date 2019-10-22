@@ -143,7 +143,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
