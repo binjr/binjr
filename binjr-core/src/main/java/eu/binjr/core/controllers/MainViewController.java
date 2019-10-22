@@ -914,11 +914,11 @@ public class MainViewController implements Initializable {
             }
             seriesControllers.put(newTab, current);
             current.getBindingManager().attachListener(current.selectedRangeProperty(),
-                    (ChangeListener<TimeRangePicker.TimeRange>) (observable, oldValue, newValue) -> {
+                    (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
                         if (getSelectedWorksheetController().equals(current) && current.getWorksheet().isTimeRangeLinked()) {
                             seriesControllers.values().forEach(i -> {
                                 if (!i.equals(current) && i.getWorksheet().isTimeRangeLinked()) {
-                                    i.selectedRangeProperty().setValue(TimeRangePicker.TimeRange.of(newValue));
+                                    i.selectedRangeProperty().setValue(TimeRange.of(newValue));
                                 }
                             });
                         }
@@ -1158,22 +1158,26 @@ public class MainViewController implements Initializable {
             try {
                 var charts = WorksheetController.treeItemsAsChartList(rootItems, root);
                 if (charts.isPresent()) {
-                    ZonedDateTime toDateTime;
-                    boolean seen = false;
-                    ZonedDateTime best = null;
+                   // ZonedDateTime toDateTime;
+
+                    ZonedDateTime toDateTime = null;
+                    ZonedDateTime fromDateTime = null;
                     Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
                     for (Chart chart : charts.get()) {
-                        ZonedDateTime lastUpdate = chart.getLatestTimestamp();
-                        if (!seen || comparator.compare(lastUpdate, best) < 0) {
-                            seen = true;
-                            best = lastUpdate;
+                        var range = chart.getInitialTimeRange();
+                        if (toDateTime == null || comparator.compare(range.getEnd(), toDateTime) > 0) {
+                            toDateTime = range.getEnd();
+                        }
+                        if (fromDateTime == null || comparator.compare(range.getBeginning(), fromDateTime) < 0) {
+                            fromDateTime = range.getBeginning();
                         }
                     }
-                    toDateTime = seen ? best : ZonedDateTime.now();
+                    toDateTime = toDateTime != null ? toDateTime : ZonedDateTime.now();
+                    fromDateTime = fromDateTime != null ? fromDateTime : toDateTime.minusHours(24);
                     var worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
                             charts.get(),
                             toDateTime.getZone(),
-                            toDateTime.minus(24, ChronoUnit.HOURS),
+                            fromDateTime,
                             toDateTime);
 
                     worksheet.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());

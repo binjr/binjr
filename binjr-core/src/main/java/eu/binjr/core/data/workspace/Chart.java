@@ -17,6 +17,7 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -170,26 +171,28 @@ public class Chart implements Dirtyable, AutoCloseable {
         this.status = new ChangeWatcher(this);
     }
 
-    public ZonedDateTime getLatestTimestamp() throws DataAdapterException {
-        ZonedDateTime latest = ZonedDateTime.now();
+    public TimeRange getInitialTimeRange() throws DataAdapterException {
+        ZonedDateTime end = null;
+        ZonedDateTime beginning = null;
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             var adapter = byAdapterEntry.getKey();
-            var sorter = new SortTransform();
-            sorter.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            var latch = new CountDownLatch(bindingsByPath.entrySet().size());
-            var errors = new ArrayList<Throwable>();
             for (var byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
-                var adapterLastUpdate = adapter.latestTimestamp(path, byPathEntry.getValue());
-                if (adapterLastUpdate.isBefore(latest)){
-                    latest = adapterLastUpdate;
+                var timeRange = adapter.getInitialTimeRange(path, byPathEntry.getValue());
+                if (end == null || timeRange.getEnd().isAfter(end)) {
+                    end = timeRange.getEnd();
+                }
+                if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
+                    beginning = timeRange.getBeginning();
                 }
             }
         }
-        return latest;
+        return TimeRange.of(
+                beginning == null ? ZonedDateTime.now().minusHours(24) : beginning,
+                end == null ? ZonedDateTime.now() : end);
     }
 
     /**

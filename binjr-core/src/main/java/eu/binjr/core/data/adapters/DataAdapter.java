@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.javafx.controls.TimeRangePicker;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -142,11 +142,11 @@ public interface DataAdapter extends AutoCloseable {
         return false;
     }
 
-    default ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
-        return ZonedDateTime.now(getTimeZoneId());
+    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+        var end = ZonedDateTime.now(getTimeZoneId());
+        return TimeRange.of(end.minusHours(24), end);
     }
 
     @Override
-
     void close();
 }

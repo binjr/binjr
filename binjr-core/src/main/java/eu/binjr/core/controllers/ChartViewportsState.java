@@ -17,9 +17,9 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.common.javafx.charts.XYChartSelection;
-import eu.binjr.common.javafx.controls.TimeRangePicker;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -46,7 +46,7 @@ public class ChartViewportsState implements AutoCloseable {
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;
     private final ChangeListener<ZonedDateTime> onRefreshAllRequired;
-    private final ReadOnlyObjectWrapper<TimeRangePicker.TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
+    private final ReadOnlyObjectWrapper<TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
 
     @Override
     public void close() {
@@ -56,11 +56,11 @@ public class ChartViewportsState implements AutoCloseable {
     }
 
     /**
-     * Returns the {@link eu.binjr.common.javafx.controls.TimeRangePicker.TimeRange} for the state.
+     * Returns the {@link TimeRange} for the state.
      *
-     * @return the {@link eu.binjr.common.javafx.controls.TimeRangePicker.TimeRange} for the state.
+     * @return the {@link TimeRange} for the state.
      */
-    public TimeRangePicker.TimeRange getTimeRange() {
+    public TimeRange getTimeRange() {
         return timeRange.get();
     }
 
@@ -69,7 +69,7 @@ public class ChartViewportsState implements AutoCloseable {
      *
      * @return the timeRange property.
      */
-    public ReadOnlyObjectProperty<TimeRangePicker.TimeRange> timeRangeProperty() {
+    public ReadOnlyObjectProperty<TimeRange> timeRangeProperty() {
         return timeRange.getReadOnlyProperty();
     }
 
@@ -304,7 +304,7 @@ public class ChartViewportsState implements AutoCloseable {
                 selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
                 parent.invalidateAll(toHistory, dontPlotChart, false);
             });
-            timeRange.set(TimeRangePicker.TimeRange.of(startX.getValue(), endX.getValue()));
+            timeRange.set(TimeRange.of(startX.getValue(), endX.getValue()));
         } finally {
             this.resumeAxisListeners();
         }

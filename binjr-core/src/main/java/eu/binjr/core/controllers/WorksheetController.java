@@ -613,7 +613,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         return titleBlock;
     }
 
-    Property<TimeRangePicker.TimeRange> selectedRangeProperty() {
+    Property<TimeRange> selectedRangeProperty() {
         return this.timeRangePicker.selectedRangeProperty();
     }
 
@@ -629,7 +629,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
-        timeRangePicker.initSelectedRange(TimeRangePicker.TimeRange.of(currentState.getStartX(), currentState.getEndX()));
+        timeRangePicker.initSelectedRange(TimeRange.of(currentState.getStartX(), currentState.getEndX()));
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
         });

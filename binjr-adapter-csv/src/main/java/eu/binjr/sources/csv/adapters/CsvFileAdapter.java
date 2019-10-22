@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -142,11 +143,12 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
-        return getDataStore().get(getDataStore().lastKey()).getTimeStamp();
+        return TimeRange.of(getDataStore().get(getDataStore().firstKey()).getTimeStamp(),
+                getDataStore().get(getDataStore().lastKey()).getTimeStamp());
     }
 
     @Override

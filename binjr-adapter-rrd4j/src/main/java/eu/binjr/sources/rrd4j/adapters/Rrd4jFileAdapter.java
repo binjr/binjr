@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -139,13 +140,14 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public ZonedDateTime latestTimestamp(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfos) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
         Path dsPath = Path.of(path);
         try {
-            return Instant.ofEpochSecond(rrdDbMap.get(dsPath.getParent()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
+            var end = Instant.ofEpochSecond(rrdDbMap.get(dsPath.getParent()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
+            return TimeRange.of(end.minusHours(24), end);
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException("IO Error while retrieving last update from rrd db", e);
         }

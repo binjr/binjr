@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.controllers.WorksheetNavigationHistory;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -146,6 +147,20 @@ public class Worksheet implements Dirtyable {
                 false,
                 true);
     }
+
+    public Worksheet(String name,
+                     List<Chart> charts,
+                     TimeRange range) {
+        this(name,
+                charts,
+                range.getZoneId(),
+                range.getBeginning(),
+                range.getEnd(),
+                ChartLayout.STACKED,
+                false,
+                true);
+    }
+
 
     private Worksheet(String name,
                       List<Chart> charts,

@@ -30,7 +30,6 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
@@ -42,7 +41,6 @@ import org.controlsfx.control.textfield.TextFields;
 import java.io.IOException;
 import java.net.URL;
 import java.time.*;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
@@ -91,7 +89,7 @@ public class TimeRangePicker extends ToggleButton {
             if (newValue != null) {
                 bindingManager.suspend();
                 try {
-                    zoneId.setValue(newValue.zoneId);
+                    zoneId.setValue(newValue.getZoneId());
                     timeRangePickerController.startDate.setDateTimeValue(newValue.getBeginning());
                     timeRangePickerController.endDate.setDateTimeValue(newValue.getEnd());
                 } finally {
@@ -378,7 +376,7 @@ public class TimeRangePicker extends ToggleButton {
                     if (Clipboard.getSystemClipboard().hasContent(TimeRange.TIME_RANGE_DATA_FORMAT)) {
                         String content = (String) Clipboard.getSystemClipboard().getContent(TimeRange.TIME_RANGE_DATA_FORMAT);
                         TimeRange range = TimeRange.deSerialize(content);
-                        zoneId.setValue(range.beginning.getZone());
+                        zoneId.setValue(range.getBeginning().getZone());
                         selectedRange.setValue(range);
                     }
                 } catch (Exception e) {
@@ -389,62 +387,6 @@ public class TimeRangePicker extends ToggleButton {
 
         Property<ZoneId> zoneIdProperty() {
             return formatter.valueProperty();
-        }
-    }
-
-    public static class TimeRange {
-        public static final DataFormat TIME_RANGE_DATA_FORMAT = new DataFormat(TimeRange.class.getCanonicalName());
-        private static final String DELIMITER = "\n";
-        private final ZonedDateTime beginning;
-        private final ZonedDateTime end;
-        private final Duration duration;
-        private final ZoneId zoneId;
-
-        public static TimeRange of(TimeRange range) {
-            return new TimeRange(range.getBeginning(), range.getEnd());
-        }
-
-        public static TimeRange of(ZonedDateTime beginning, ZonedDateTime end) {
-            return new TimeRange(beginning, end);
-        }
-
-        TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
-            this.zoneId = beginning.getZone();
-            this.beginning = beginning;
-            this.end = end.withZoneSameInstant(zoneId);
-            this.duration = Duration.between(beginning, end);
-        }
-
-        public ZonedDateTime getBeginning() {
-            return beginning;
-        }
-
-        public ZonedDateTime getEnd() {
-            return end;
-        }
-
-        public Duration getDuration() {
-            return duration;
-        }
-
-        public ZoneId getZoneId() {
-            return zoneId;
-        }
-
-        public boolean isNegative() {
-            return duration.isNegative();
-        }
-
-        public String serialize() {
-            return DateTimeFormatter.ISO_ZONED_DATE_TIME.format(beginning) + DELIMITER + DateTimeFormatter.ISO_ZONED_DATE_TIME.format(end);
-        }
-
-        public static TimeRange deSerialize(String xmlString) {
-            String[] s = xmlString.split(DELIMITER);
-            if (s.length != 2) {
-                throw new IllegalArgumentException("Could not parse provided string as a TimeRange");
-            }
-            return TimeRange.of(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[0], ZonedDateTime::from), DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[1], ZonedDateTime::from));
         }
     }
 
