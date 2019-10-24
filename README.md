@@ -7,7 +7,6 @@ A time series data browser.
 
 ## Content
 * [What is binjr?](#what-is-binjr)
-* [What binjr is not](#what-binjr-is-not)
 * [Features](#features)
 * [Getting started](#getting-started)
 * [Trying it out](#trying-it-out)
@@ -40,12 +39,12 @@ transparency for each individual series.
 The user can then save the current state of the session at any time to a file, in order to reopen it later or to share it 
 with someone else.
 
-## What binjr is not
-* _binjr_ is not a system performance collector, nor a collector of anything else for that matter. What it provides is
+### ...and what it isn't
+* _binjr_ is **not** a system performance collector, nor a collector of anything else for that matter. What it provides is
    efficient navigation and pretty presentation for time series collected elsewhere. 
-* _binjr_ is not a cloud solution. It's not even a server based solution; it's entirely a client application, 
+* _binjr_ is **not** a cloud solution. It's not even a server based solution; it's entirely a client application, 
   albeit one that can get its data from remote servers. Think of it as a browser, only just for time series. 
-* _binjr_ is not a live system monitoring dashboard. While you can use it to connect to live sources, its feature set is
+* _binjr_ is **not** a live system monitoring dashboard. While you can use it to connect to live sources, its feature set is
   not geared toward that particular task, and there are better tools for that out there. Instead, it aims to be an 
   investigation tool, for when you don't necessarily know what you're looking for beforehand and you'll want to build 
   and change the view of the data as you navigate through it rather than be constrained by pre-determined dashboards. 
@@ -65,7 +64,7 @@ with someone else.
   * Highly customizable views; choose chart types, change series colours, transparency, legends, etc...
   * Save you work session to a file at any time, to be reopened later or shared with someone else.  
    
-####  Fluent navigation 
+####  Smooth navigation 
   * Mouse driven zoom of both X and Y axis.
   * Drag and drop composition.
   * Browser-like, forward & backward navigation of zoom history.
@@ -94,7 +93,7 @@ with someone else.
 
 There are several ways to get up and running with ***binjr***:
 
-### Download an application bundle
+#### Download an application bundle
 
 The simplest way to start using ***binjr*** is to download an application bundle from the [release page](https://github.com/binjr/binjr/releases/latest).  
 
@@ -104,43 +103,7 @@ They are about 50 MB in size and there is one for each of the supported platform
 
 Simply download the one for your system, unpack it and run `binjr` to start!
 
-### Launch the latest version via Apache Maven
- 
-Alternatively, if your environment is properly set up to run Java 11 and Apache Maven, you can start ***binjr*** simply 
-by running the following command line:
-
-#### On Linux or macOS:
-
-* To start the latest version:
-  ```
-  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
-  ```
-* To start a specific version:
-  ```
-  mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom) -Dbinjr.version=2.3.0
-  ```
-  
-#### On Windows:
-
-* To start the latest version:
-  ```
-  curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
-  ```
-* To start a specific version:
-  ```
-  curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom -Dbinjr.version=2.3.0
-  ```
-  
-Runnning ***binjr*** that way means that you don't need to worry about keeping your copy up to date: it will always start 
-the latest version that was published over on [Maven Central](https://search.maven.org/search?q=g:%22eu.binjr%22) 
-(unless you explicitly set the desired version, see above).   
-Downloaded components are cached locally by Maven, so it doesn't need to download them again every time you 
-run the application.
-
-> **NB:** In order to run ***binjr*** that way, you not only need to have Apache Maven installed on your 
-> machine but also need your JAVA_HOME environment variable to point at a copy of a __Java runtime version 11 or later__.
-
-### Build from source
+#### Build from source
 
 You can also build or run the application from the source code using the included Gradle wrapper.  
 Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
@@ -149,19 +112,37 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
 > Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in 
 > the same environement.
+
+
+#### Download and run the latest version from the command line.
+  
+ Alternatively, if your environment is properly set up to run Java 11+ and Apache Maven, you can start ***binjr*** simply 
+ by running a single command line:
+ * Linux / macOS:
+   ```
+   mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
+   ```
+ * Windows:
+   ```
+   curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
+   ```
+ 
+ See [Launch the latest version via Apache Maven](https://github.com/binjr/binjr/wiki/getting-started#launch-the-latest-version-via-apache-maven) 
+ in the wiki form more details.
+
   
 ## Trying it out
 
 If you'd like to experience binjr's visualization capabilities but do not have a compatible data source handy, you can use
 the [demonstration data adpater](https://github.com/binjr/binjr-adapter-demo). 
 
-It is a plugin for binjr which embeds a small data source that you can readily browse using binjr.
+It is a plugin which embeds a small, stand-alone data source that you can readily browse using ***binjr***.
 
-1. Make sure [binjr](https://binjr.eu) is installed on your system and make a note of the folder it is installed in.
+1. Make sure ***binjr*** is installed on your system and make a note of the folder it is installed in.
 2. Download the `binjr-adapter-demo-1.x.x.zip` archive from https://github.com/binjr/binjr-adapter-demo/releases/latest
 3. Copy the `binjr-adapter-demo-1.x.x.jar` file contained in the zip file into the `plugins` folder of your 
-   [binjr](https://binjr.eu) installation.
-4. Start [binjr](https://binjr.eu) (or restart it if it was runnning when you copied the plugin) and open the `demo.bjr`
+   ***binjr*** installation.
+4. Start ***binjr*** (or restart it if it was runnning when you copied the plugin) and open the `demo.bjr`
    workspace contained in the zip (from the command menu, select `Workspaces > Open...`, or press Ctrl+O) 
 
   
