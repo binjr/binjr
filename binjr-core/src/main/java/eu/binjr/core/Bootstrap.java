@@ -46,7 +46,6 @@ public final class Bootstrap {
                 if (System.getProperty("jdk.gtk.version") == null) {
                     System.setProperty("jdk.gtk.version", "2");
                 }
-                args = appendToArray(args, "--resizable-dialogs=true");
             }
             Binjr.main(args);
         } catch (Exception e) {
