@@ -1079,7 +1079,7 @@
 }
 
 
-.borderless-color-picker .color-palette {
+.color-picker .color-palette {
     -fx-spacing: 0.833333em; /* 10px */
     -fx-background-color: -binjr-control-background-color;
     -fx-border-color: -binjr-color-gray;
@@ -1089,12 +1089,12 @@
 
 }
 
-.borderless-color-picker .color-palette > .color-picker-grid {
+.color-picker .color-palette > .color-picker-grid {
     -fx-padding: 0.5px;
     -fx-snap-to-pixel: true;
 }
 
-.borderless-color-picker .color-palette > .color-picker-grid > .color-square {
+.color-picker .color-palette > .color-picker-grid > .color-square {
     -fx-background-color: transparent;
     -fx-padding: 0.5px;
 }
