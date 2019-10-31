@@ -96,7 +96,7 @@ public class UserPreferences extends PreferenceFactory {
     public final Preference<Boolean> showAreaOutline = booleanPreference("verticalMarkerOn", true);
 
     /**
-     * The default opacity value to apply to series on aera charts.
+     * The default opacity value to apply to series on area charts.
      */
     public final Preference<Number> defaultGraphOpacity = doublePreference("defaultGraphOpacity", 0.45d);
 

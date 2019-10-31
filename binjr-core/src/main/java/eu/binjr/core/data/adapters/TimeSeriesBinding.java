@@ -24,7 +24,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
@@ -274,7 +274,7 @@ public class TimeSeriesBinding {
     }
 
     private Color computeDefaultColor() {
-        long targetNum = getHashValue(this.getTreeHierarchy()) % defaultChartColors.length;
+        long targetNum = getHashValue(this.getLabel()) % defaultChartColors.length;
         if (targetNum < 0) {
             targetNum = targetNum * -1;
         }
@@ -283,7 +283,7 @@ public class TimeSeriesBinding {
 
     private long getHashValue(final String value) {
         long hashVal;
-        messageDigest.get().update(value.getBytes(Charset.forName("UTF-8")));
+        messageDigest.get().update(value.getBytes(StandardCharsets.UTF_8));
         hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
         return hashVal;
     }
