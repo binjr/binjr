@@ -22,9 +22,13 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Region;
+import javafx.scene.transform.Transform;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.apache.logging.log4j.LogManager;
@@ -354,4 +358,5 @@ public class Dialogs {
         }
         return Optional.empty();
     }
+
 }

@@ -83,7 +83,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -1055,7 +1054,7 @@ public class MainViewController implements Initializable {
         label.getStyleClass().add("tooltip");
         // The label must be added to a scene so that CSS and layout are applied.
         StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.TRANSPARENT));
-        return label.snapshot(null, null);
+        return SnapshotUtils.outputScaleAwareSnapshot(label);
     }
 
     private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {

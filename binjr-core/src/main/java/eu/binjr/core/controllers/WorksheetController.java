@@ -54,7 +54,6 @@ import javafx.geometry.VPos;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -66,7 +65,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
-import javafx.scene.transform.Transform;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
@@ -1383,7 +1381,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
-            snapImg =pixelScaleAwareSnapshot(screenshotCanvas);
+            snapImg = SnapshotUtils.outputScaleAwareSnapshot(screenshotCanvas);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return;
@@ -1417,14 +1415,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
 
-    public static WritableImage pixelScaleAwareSnapshot(Pane pane) {
-        var stage = Dialogs.getStage(pane);
-        Objects.requireNonNull(stage, "Cannot identify a valid stage from node");
-        SnapshotParameters spa = new SnapshotParameters();
-        spa.setTransform(Transform.scale(stage.getOutputScaleX(),stage.getOutputScaleY()));
-        return pane.snapshot(spa, null);
-    }
-
     private void restoreSelectionFromHistory(WorksheetNavigationHistory history, WorksheetNavigationHistory toHistory) {
         if (!history.isEmpty()) {
             toHistory.push(currentState.asSelection());
@@ -1448,7 +1438,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                db.setDragView(row.snapshot(null, null));
+                db.setDragView(SnapshotUtils.outputScaleAwareSnapshot(row));
                 ClipboardContent cc = new ClipboardContent();
                 cc.put(SERIALIZED_MIME_TYPE, index);
                 db.setContent(cc);
