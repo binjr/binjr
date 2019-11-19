@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -69,6 +70,8 @@ public class PreferenceDialogController implements Initializable {
     public TableView<DataAdapterInfo> availableAdapterTable;
     public TableColumn<DataAdapterInfo, Boolean> enabledColumn;
     public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+    @FXML
+    public ChoiceBox<SnapshotOutputScale> snapshotScaleChoiceBox;
     @FXML
     public TitledPane updatePreferences;
     @FXML
@@ -158,34 +161,28 @@ public class PreferenceDialogController implements Initializable {
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter(Locale.getDefault(Locale.Category.FORMAT)));
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
-
-        uiThemeChoiceBox.getItems().setAll(UserInterfaceThemes.values());
-        uiThemeChoiceBox.getSelectionModel().select(userPrefs.userInterfaceTheme.get());
-        userPrefs.userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                uiThemeChoiceBox.getSelectionModel().select(newValue);
-            }
-        });
-        uiThemeChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                userPrefs.userInterfaceTheme.set(newValue);
-            }
-        });
-        notifcationDurationChoiceBox.getItems().setAll(NotificationDurationChoices.values());
-        notifcationDurationChoiceBox.getSelectionModel().select(userPrefs.notificationPopupDuration.get());
-        userPrefs.notificationPopupDuration.property().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                notifcationDurationChoiceBox.getSelectionModel().select(newValue);
-            }
-        });
-        notifcationDurationChoiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                userPrefs.notificationPopupDuration.set(newValue);
-            }
-        });
+        bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
+        bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutline.selectedProperty().bindBidirectional(userPrefs.showAreaOutline.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
+    }
+
+    @SafeVarargs
+    private <T> void bindEnumToChoiceBox(Preference<T> preference, ChoiceBox<T> choiceBox, T... initValues) {
+        choiceBox.getItems().setAll(initValues);
+        choiceBox.getSelectionModel().select(preference.get());
+        preference.property().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                choiceBox.getSelectionModel().select(newValue);
+            }
+        });
+        choiceBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                preference.set(newValue);
+            }
+        });
     }
 
     public void handleCheckForUpdate(ActionEvent actionEvent) {

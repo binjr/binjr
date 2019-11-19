@@ -1381,7 +1381,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
-            snapImg = SnapshotUtils.outputScaleAwareSnapshot(screenshotCanvas);
+            snapImg = SnapshotUtils.scaledSnapshot(screenshotCanvas,
+                    userPrefs.snapshotOutputScale.get().getScaleFactor(),
+                    userPrefs.snapshotOutputScale.get().getScaleFactor());
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return;

@@ -25,12 +25,14 @@ import javafx.stage.Screen;
 public final class SnapshotUtils {
 
     public static WritableImage outputScaleAwareSnapshot(Node node) {
-        return scaledSnapshot(node, Screen.getPrimary().getOutputScaleX(), Screen.getPrimary().getOutputScaleY());
+        return scaledSnapshot(node, 0.0,0.0);
     }
 
     public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
         SnapshotParameters spa = new SnapshotParameters();
-        spa.setTransform(Transform.scale(scaleX, scaleY));
+        spa.setTransform(Transform.scale(
+                scaleX == 0.0 ? Screen.getPrimary().getOutputScaleX() : scaleX,
+                scaleY == 0.0 ? Screen.getPrimary().getOutputScaleY() : scaleY));
         return node.snapshot(spa, null);
     }
 }

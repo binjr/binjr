@@ -209,7 +209,7 @@ public class UserPreferences extends PreferenceFactory {
      * The path where to save heap dumps.
      */
     public final Preference<Path> heapDumpPath =
-            pathPreference("heapDumpPath",Path.of(System.getProperty("java.io.tmpdir") + "/binjr"));
+            pathPreference("heapDumpPath", Path.of(System.getProperty("java.io.tmpdir") + "/binjr"));
 
     /**
      * The amount of time in ms the pointer must have hovered above a node before a tooltip is shown.
@@ -222,11 +222,14 @@ public class UserPreferences extends PreferenceFactory {
     public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
 
     public final Preference<Path> logFilesLocation =
-            pathPreference("logFilesLocation", Path.of( System.getProperty("java.io.tmpdir") + "/binjr"));
+            pathPreference("logFilesLocation", Path.of(System.getProperty("java.io.tmpdir") + "/binjr"));
 
     public final Preference<Number> maxLogFilesToKeep = integerPreference("maxLogFilesToKeep", 10);
 
     public Preference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
+
+    public Preference<SnapshotOutputScale> snapshotOutputScale =
+            enumPreference(SnapshotOutputScale.class, "snapshotOutputScale", SnapshotOutputScale.AUTO);
 
     private UserPreferences() {
         super(Preferences.userRoot().node(BINJR_GLOBAL));

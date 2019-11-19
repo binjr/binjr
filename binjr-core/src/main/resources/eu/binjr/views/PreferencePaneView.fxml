@@ -52,9 +52,9 @@
                     </padding>
                     <AnchorPane minHeight="0.0" minWidth="0.0">
                         <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
-                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" fillWidth="true">
                             <Label text="Theme"/>
-                            <ChoiceBox fx:id="uiThemeChoiceBox"/>
+                            <ChoiceBox fx:id="uiThemeChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Reload last workspace on start-up" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">
@@ -64,7 +64,14 @@
                                 </ToggleSwitch>
                             </VBox>
                             <Label text="Discard notifications after:"/>
-                            <ChoiceBox fx:id="notifcationDurationChoiceBox"/>
+                            <ChoiceBox fx:id="notifcationDurationChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <Label text="Snapshot Output Scale"/>
+                            <ChoiceBox fx:id="snapshotScaleChoiceBox"  maxWidth="1.7976931348623157E308" >
+                                <tooltip>
+                                    <Tooltip showDelay="500ms"
+                                             text="The output scale factor to apply to the snapshot"/>
+                                </tooltip>
+                            </ChoiceBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>
@@ -201,7 +208,8 @@
                                     <Region styleClass="icon-container, recycle-icon"/>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Restore all user settings to their default values"/>
+                                    <Tooltip showDelay="500ms"
+                                             text="Restore all user settings to their default values"/>
                                 </tooltip>
                             </Button>
                             <Button fx:id="exportPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
@@ -210,7 +218,7 @@
                                     <Region styleClass="icon-container, download-icon"/>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Export user settings to a file"/>
+                                    <Tooltip showDelay="500ms" text="Export user settings to a file"/>
                                 </tooltip>
                             </Button>
                             <Button fx:id="importPrefs" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
@@ -219,7 +227,7 @@
                                     <Region styleClass="icon-container, upload-icon"/>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Import user settings from a file"/>
+                                    <Tooltip showDelay="500ms" text="Import user settings from a file"/>
                                 </tooltip>
                             </Button>
                             <Button fx:id="clearHistory" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
