@@ -77,8 +77,9 @@ ext."signing.secretKeyRingFile" = "${projectDir}/distribution/publishing/keyring
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 System.out.println("Building version: ${BINJR_VERSION}")
-System.out.println("Is tag:${System.getenv('IS_TAG')}")
-System.out.println("Tag name:${System.getenv('REPO_TAG_NAME')}")
+System.out.println("Is tag: ${IS_TAG}")
+System.out.println("Is release: ${IS_RELEASE}")
+
 
 if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
@@ -198,8 +199,12 @@ configure(subprojects) {
     }
 
     signing {
-        required { gradle.taskGraph.hasTask("publishArtifacts") }
+        required { IS_RELEASE && gradle.taskGraph.hasTask("publishArtifacts") }
         sign publishing.publications.mavenJava
+    }
+
+    tasks.withType(Sign) {
+        onlyIf { IS_RELEASE }
     }
 
     nexusPublishing {
