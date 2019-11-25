@@ -1,3 +1,10 @@
+## [binjr v2.11.0](https://github.com/binjr/binjr/releases/tag/v2.11.0)
+Released on Thu, 25 Nov 2019
+
+* _[New]_ Updated the embedded Java runtime to OpenJDK 13.0.1
+* _[New]_ It is now possible to choose the output scale (i.e. the physical pixel density) for snapshots taken from binjr worksheets.
+* _[Fixed]_ On HiDPI screens the tooltip representing a tree node when dragging it to a worksheet is not at the right scale.  
+
 ## [binjr v2.10.0](https://github.com/binjr/binjr/releases/tag/v2.10.0)
 Released on Thu, 24 Oct 2019
 
