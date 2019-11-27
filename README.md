@@ -99,7 +99,7 @@ The simplest way to start using ***binjr*** is to download an application bundle
 
 These bundles contain all the dependencies required to run the app, including a copy of the Java runtime specially 
 crafted to only include the required components and save disk space.  
-They are about 50 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
+They are less than 60 MB in size and there is one for each of the supported platform: Windows, Linux and macOS.
 
 Simply download the one for your system, unpack it and run `binjr` to start!
 
