@@ -1,0 +1,1 @@
+* _[Fixed]_ The JRDS data adapter does not check the content type before attempting tp parse an http response payload as JSON. 

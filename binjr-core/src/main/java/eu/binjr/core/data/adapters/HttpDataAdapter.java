@@ -181,8 +181,7 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
             httpget.setHeader("User-Agent", AppEnvironment.APP_NAME + "/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
             R result = httpClient.execute(httpget, responseHandler);
             if (result == null) {
-                throw new FetchingDataFromAdapterException("Response entity to \"" + requestUri.toString() +
-                        "\" is null.");
+                throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri.toString() + "\"");
             }
             return result;
         } catch (HttpResponseException e) {

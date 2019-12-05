@@ -34,7 +34,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
 import org.apache.http.client.HttpResponseException;
-import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -144,7 +144,9 @@ public class JrdsDataAdapter extends HttpDataAdapter {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
             FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
-            for (JsonJrdsItem branch : Arrays.stream(t.items).filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type)).collect(Collectors.toList())) {
+            for (JsonJrdsItem branch : Arrays.stream(t.items)
+                    .filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type))
+                    .collect(Collectors.toList())) {
                 attachNode(tree, branch.id, m);
             }
             return tree;
@@ -282,7 +284,20 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
             params.add(new BasicNameValuePair(argName, argValue));
         }
-        String entityString = doHttpGet(craftRequestUri("jsontree", params), new BasicResponseHandler());
+        String entityString = doHttpGet(craftRequestUri("jsontree", params), response -> {
+            var entity = response.getEntity();
+            try {
+                if ("application/json".equalsIgnoreCase(ContentType.getOrDefault(entity).getMimeType())) {
+                    return EntityUtils.toString(entity);
+                }
+                logger.error("HTTP response content type is '" +
+                        ContentType.getOrDefault(entity).getMimeType() +
+                        " (expected 'application/json')");
+                return null;
+            } finally {
+                EntityUtils.consumeQuietly(entity);
+            }
+        });
         logger.trace(entityString);
         return entityString;
     }
