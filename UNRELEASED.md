@@ -1,1 +1,2 @@
-* _[Fixed]_ The JRDS data adapter does not check the content type before attempting tp parse an http response payload as JSON. 
+* _[Fixed]_ The JRDS data adapter does not check the content type before attempting tp parse an http response payload as JSON.
+* _[Fixed]_ The CSV Data Adapter cannot deal with columns having the same name in a single file.

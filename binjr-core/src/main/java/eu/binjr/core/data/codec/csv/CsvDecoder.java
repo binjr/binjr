@@ -139,12 +139,11 @@ public class CsvDecoder implements Decoder {
                         .withSkipHeaderRecord()
                         .withDelimiter(delimiter);
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
-
                 for (CSVRecord csvRecord : records) {
                     ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
                     DataSample tRecord = new DataSample(timeStamp);
-                    for (String h : headers) {
-                        tRecord.getCells().put(h, numberParser.apply(csvRecord.get(h)));
+                    for (int i = 1; i < csvRecord.size(); i++) {
+                        tRecord.getCells().put(Integer.toString(i), numberParser.apply(csvRecord.get(i)));
                     }
                     mapToResult.accept(tRecord);
                 }

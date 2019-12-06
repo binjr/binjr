@@ -46,10 +46,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.SortedMap;
+import java.util.*;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
@@ -123,10 +120,12 @@ public class CsvFileAdapter extends BaseDataAdapter {
                         "/" + getSourceName(), this));
         try (InputStream in = Files.newInputStream(csvPath)) {
             this.headers = csvDecoder.getDataColumnHeaders(in);
-            for (String header : headers) {
+            for (int i = 0; i < headers.size(); i++) {
+                String columnIndex = Integer.toString(i + 1);
+                String header = headers.get(i).isBlank() ? "Column #" + columnIndex : headers.get(i);
                 TimeSeriesBinding b = new TimeSeriesBinding(
-                        header,
-                        header,
+                        columnIndex,
+                        columnIndex,
                         null,
                         header,
                         UnitPrefixes.METRIC,
@@ -157,17 +156,18 @@ public class CsvFileAdapter extends BaseDataAdapter {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
         Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
-        Map<String, TimeSeriesInfo> rDict = new HashMap<>();
+        Map<String, List<TimeSeriesInfo>> rDict = new HashMap<>();
         for (TimeSeriesInfo info : seriesInfo) {
-            rDict.put(info.getBinding().getLabel(), info);
+            rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
         }
-
         for (DataSample sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
             for (String n : sample.getCells().keySet()) {
-                TimeSeriesInfo i = rDict.get(n);
-                if (i != null) {
-                    series.get(i).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
+                List<TimeSeriesInfo> timeSeriesInfoList = rDict.get(n);
+                if (timeSeriesInfoList != null) {
+                    for (var tsInfo: timeSeriesInfoList) {
+                        series.get(tsInfo).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
+                    }
                 }
             }
         }
@@ -213,7 +213,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         zoneId = validateParameter(params, "zoneId",
                 s -> {
                     if (s == null) {
-                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adpater " + getSourceName());
+                        throw new InvalidAdapterParameterException("Parameter zoneId is missing in adapter " + getSourceName());
                     }
                     return ZoneId.of(s);
                 });
@@ -257,7 +257,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
                         return Double.parseDouble(s);
                     } catch (NumberFormatException e) {
                         logger.debug(() -> "Cannot format value as a number", e);
-                        return 0.0;
+                        return Double.NaN;
                     }
                 },
                 s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(zoneId)));
