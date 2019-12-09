@@ -1,6 +1,7 @@
 import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
+import java.nio.file.Files
 import java.text.SimpleDateFormat
 import java.time.Duration
 
@@ -47,6 +48,10 @@ ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "13.0.1"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
+ext.JDK_JPACKAGE_DOWNLOAD_URL_ROOT = "https://download.java.net/java/early_access/jpackage/1/openjdk-14-jpackage+1-70_"
+ext.JDK_JPACKAGE_DOWNLOAD_URL = IS_MAC ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}osx-x64_bin.tar.gz" :
+        IS_WINDOWS ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}windows-x64_bin.zip" :
+                IS_LINUX ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}linux-x64_bin.tar.gz" : 'unsupported'
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
         "javafx.swing," +
@@ -70,7 +75,7 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.DISTRIBUTION_ROOT = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
 ext.DISTRIBUTION_PATH = IS_WINDOWS ? "${DISTRIBUTION_ROOT}" : "${DISTRIBUTION_ROOT}/${BINJR_VERSION}"
-ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : "tar.gz"
+ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : IS_MAC ? "dmg" : "tar.gz"
 ext.WIX_HOME = System.getenv("WIX")
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
 ext."signing.secretKeyRingFile" = "${projectDir}/distribution/publishing/keyring.gpg"
@@ -243,7 +248,7 @@ task copyAppLibs(type: Copy) {
 }
 
 task copyPluginLibs(type: Copy) {
-    into "$DISTRIBUTION_PATH/plugins"
+    into IS_MAC ? "$DISTRIBUTION_PATH/libs" : "$DISTRIBUTION_PATH/plugins"
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-rrd4j").jar
@@ -401,9 +406,48 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
+task downloadJpackage(type: Download) {
+    src JDK_JPACKAGE_DOWNLOAD_URL
+    dest new File("${buildDir}/tmp", 'jdk_jpackage')
+}
+
+task downloadAndUnpackJpackage(dependsOn: downloadJpackage, type: Copy) {
+    from IS_WINDOWS ? zipTree(downloadJpackage.dest) : tarTree(project.resources.gzip(downloadJpackage.dest))
+    into "${buildDir}/tmp"
+}
+
+task jpackageMacOS(type: Exec, dependsOn: [downloadAndUnpackJpackage]) {
+    workingDir buildDir
+    commandLine = [
+            "${buildDir}/tmp/jdk-14.jdk/Contents/Home/bin/jpackage",
+            "--name", project.name,
+            "--input", "${DISTRIBUTION_PATH}/libs",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Binjr",
+            "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
+            "--type", DISTRIBUTION_EXTENSION,
+            "--copyright", "Copyright (c) 2016-2019 Frederic Thevenet",
+            "--description", "A Time Series Browser",
+            "--app-version", BINJR_VERSION,
+            "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
+            "--file-associations", "${projectDir}/distribution/bundlers/mac/file-associations.properties",
+            "--java-options", "-Xmx2048M",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20"
+    ]
+    doLast {
+        def source = java.nio.file.Path.of("${buildDir}/${project.name}-${BINJR_VERSION}.${DISTRIBUTION_EXTENSION}")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"))
+    }
+}
+
 task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
+    } else if (IS_MAC) {
+        finalizedBy(jpackageMacOS)
     } else {
         finalizedBy(packageDistributionTar)
     }
