@@ -405,6 +405,16 @@ public class Worksheet implements Dirtyable {
     }
 
     /**
+     * Returns the total number of series on the worksheet.
+     *
+     * @return the total number of series on the worksheet.
+     */
+    @XmlTransient
+    public int getTotalNumberOfSeries() {
+        return getCharts().stream().map(v -> v.getSeries().size()).reduce(0, Integer::sum);
+    }
+
+    /**
      * Returns the way charts are laid out on the worksheet.
      *
      * @return the way charts are laid out on the worksheet.

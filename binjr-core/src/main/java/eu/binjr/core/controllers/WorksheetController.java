@@ -25,6 +25,7 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
+import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
@@ -1051,7 +1052,19 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void addToNewChart(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
         try {
-            treeItemsAsChartList(treeItems, root).ifPresent(charts -> worksheet.getCharts().addAll(charts));
+           treeItemsAsChartList(treeItems, root).ifPresent(charts ->{
+               // Set the time range of the whole worksheet to accommodate the new bindings
+               // if there are no other series present.
+               if (worksheet.getTotalNumberOfSeries() == 0) {
+                   try {
+                       this.timeRangePicker.selectedRangeProperty().setValue(charts.get(0).getInitialTimeRange());
+                   } catch (DataAdapterException e) {
+                       logger.error("Failed to reset time range", e);
+                   }
+               }
+                worksheet.getCharts().addAll(charts);
+            });
+
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e, null);
         }
@@ -1193,6 +1206,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
             targetChart.addSeries(newSeries);
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
+        }
+        // Set the time range of the whole worksheet to accommodate the new bindings
+        // if there are no other series present.
+        if (worksheet.getTotalNumberOfSeries() == bindings.size()) {
+            try {
+                this.timeRangePicker.selectedRangeProperty().setValue(targetChart.getInitialTimeRange());
+            } catch (DataAdapterException e) {
+                logger.error("Failed to reset time range", e);
+            }
         }
         invalidateAll(false, false, false);
     }
