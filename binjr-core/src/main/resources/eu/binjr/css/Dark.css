@@ -1,41 +1,73 @@
 {
-    -binjr-background-color: #204656;
-    -binjr-window-background-color: black;
-    -binjr-pane-background-color: #262626;
-    -binjr-control-background-color: transparent; /*#262626;*/
+    -binjr-background-color: #204656
+;
+    -binjr-window-background-color: black
+;
+    -binjr-pane-background-color: #262626
+;
+    -binjr-control-background-color: transparent
+; /*#262626;*/
 
-    -binjr-button-background-color: #404040;
-    -binjr-button-border-color: transparent;
-    -binjr-tool-button-background-color: transparent;
-    -binjr-icon-background-color: #505050;
+    -binjr-button-background-color: #404040
+;
+    -binjr-button-border-color: transparent
+;
+    -binjr-tool-button-background-color: transparent
+;
+    -binjr-icon-background-color: #505050
+;
 
-    -binjr-control-hover-color: -binjr-dark-blue-color;
-    -binjr-control-hilite-color: -binjr-blue-color;
-    -binjr-control-border-color: #808080;
+    -binjr-control-hover-color: -binjr-dark-blue-color
+;
+    -binjr-control-hilite-color: -binjr-blue-color
+;
+    -binjr-control-border-color: #808080
+;
 
-    -binjr-control-border-hilite-color: #bababa;
-    -binjr-color-dark-gray: white;
-    -binjr-color-darker-gray: white;
-    -binjr-color-red: #E81123;
-    -binjr-color-light-red: #F1707A;
-    -binjr-dark-blue-color: #336F87;
-    -binjr-blue-color: #4BACC6;
-    -binjr-command-bar-title-color: #285668;
-    -binjr-command-bar-border-color: #152E38;
-    -binjr-light-blue-color: #92CDDC;
-    -binjr-lighter-blue-color: #B7DEE8;
-    -binjr-foreground-color: #DAEEF3;
-    -binjr-gray-border-color: #C8C8C8;
-    -binjr-warning-color: TOMATO;
-    -fx-text-background-color: #ebebeb;
-    -icon-color: white;
+    -binjr-control-border-hilite-color: #bababa
+;
+    -binjr-color-dark-gray: white
+;
+    -binjr-color-darker-gray: white
+;
+    -binjr-color-red: #E81123
+;
+    -binjr-color-light-red: #F1707A
+;
+    -binjr-dark-blue-color: #336F87
+;
+    -binjr-blue-color: #4BACC6
+;
+    -binjr-command-bar-title-color: #285668
+;
+    -binjr-command-bar-border-color: #152E38
+;
+    -binjr-light-blue-color: #92CDDC
+;
+    -binjr-lighter-blue-color: #B7DEE8
+;
+    -binjr-foreground-color: #DAEEF3
+;
+    -binjr-gray-border-color: #C8C8C8
+;
+    -binjr-warning-color: TOMATO
+;
+    -fx-text-background-color: #ebebeb
+;
+    -icon-color: white
+;
 
-    SCROLL_BAR_THUMB: #494949;
-    SCROLL_BAR_TRACK: #1B1B1B;
+    SCROLL_BAR_THUMB: #494949
+;
+    SCROLL_BAR_TRACK: #1B1B1B
+;
 
-    -fx-base: black;
-    -fx-accent: -binjr-dark-blue-color;
-    -fx-accent-translucide: rgba(65, 142, 173, 0.2);
+    -fx-base: black
+;
+    -fx-accent: -binjr-dark-blue-color
+;
+    -fx-accent-translucide: rgba(65, 142, 173, 0.2)
+;
 /****/
 
 }
@@ -116,6 +148,7 @@
 .add-tab-button,
 .dialog-button,
 .toggle-button,
+.inner-button,
 .menu-button {
     -fx-background-color: -binjr-tool-button-background-color;
     -fx-background-radius: 0;
@@ -125,6 +158,18 @@
     -fx-border-radius: 0;
     -fx-alignment: center;
 }
+
+.inner-button:hover {
+    /*-fx-border-width: 1;*/
+    /*-fx-border-color:  -binjr-light-blue-color;*/
+    -fx-background-color:  -binjr-blue-color;
+}
+
+/*.inner-button:hover:pressed {*/
+/*    -fx-border-width: 1;*/
+/*    -fx-border-color:red;*/
+/*    -fx-background-color: red;*/
+/*}*/
 
 .combo-box-base > .arrow-button:hover,
 .dialog-button:hover,
@@ -693,10 +738,10 @@
 }
 
 .settings-button {
-    -fx-background-color:  -binjr-dark-blue-color;
+    -fx-background-color: -binjr-dark-blue-color;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-color:  -binjr-dark-blue-color;
+    -fx-border-color: -binjr-dark-blue-color;
     -fx-border-width: 0;
     -fx-border-radius: 0;
     -fx-alignment: center_left;
@@ -704,7 +749,7 @@
 
 .settings-button:hover {
     -fx-background-color: -binjr-dark-blue-color;
-    -fx-border-color:  -binjr-dark-blue-color;
+    -fx-border-color: -binjr-dark-blue-color;
 }
 
 .settings-button:hover:pressed {
@@ -864,7 +909,7 @@
 
 .command-bar .border-button {
     -fx-background-color: -binjr-dark-blue-color;
-    -fx-border-color:  -binjr-dark-blue-color;
+    -fx-border-color: -binjr-dark-blue-color;
     -fx-border-width: 2;
     -fx-font-size: 10pt;
 }

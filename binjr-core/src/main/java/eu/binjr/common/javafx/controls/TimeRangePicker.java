@@ -26,11 +26,13 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 import org.apache.logging.log4j.LogManager;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
 
 public class TimeRangePicker extends ToggleButton {
     private static final Logger logger = LogManager.getLogger(TimeRangePicker.class);
+    private final Label timeRangeText;
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
     private final Property<ZoneId> zoneId;
@@ -55,9 +58,48 @@ public class TimeRangePicker extends ToggleButton {
     private final ObjectProperty<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private final BindingManager bindingManager = new BindingManager();
 
-
     public TimeRangePicker() throws IOException {
         super();
+        var previousIntervalBtn = new ToolButtonBuilder<>()
+                .setStyleClass("inner-button")
+                .bind(Node::visibleProperty, selectedProperty().not())
+                .setHeight(25.0)
+                .setWidth(18.0)
+                .setIconStyleClass("left-arrow-icon")
+                .setAction(event -> {
+                    timeRangePickerController.stepBy(
+                            Duration.between(timeRangePickerController.endDate.getDateTimeValue(),
+                                    timeRangePickerController.startDate.getDateTimeValue()));
+                    event.consume();
+                })
+                .setTooltip("Step Back")
+                .build(Button::new);
+        var nextIntervalBtn = new ToolButtonBuilder<>()
+                .setHeight(25.0)
+                .setWidth(18.0)
+                .bind(Node::visibleProperty, selectedProperty().not())
+                .setStyleClass( "inner-button")
+                .setIconStyleClass("right-arrow-icon")
+                .setAction(event -> {
+                    timeRangePickerController.stepBy(
+                            Duration.between(timeRangePickerController.startDate.getDateTimeValue(),
+                                    timeRangePickerController.endDate.getDateTimeValue()));
+                    event.consume();
+                })
+                .setTooltip("Step Forward")
+                .build(Button::new);
+        timeRangeText = new Label("");
+        HBox graphic = new HBox();
+        graphic.setAlignment(Pos.CENTER);
+        graphic.getStyleClass().add("icon-container");
+        graphic.setSpacing(15.0);
+        graphic.getChildren().addAll(
+                previousIntervalBtn,
+                ToolButtonBuilder.makeIconNode(Pos.CENTER, "time-icon"),
+                timeRangeText,
+                ToolButtonBuilder.makeIconNode(Pos.CENTER, "combo-box-arrow-icon"),
+                nextIntervalBtn);
+        this.setGraphic(graphic);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/TimeRangePickerView.fxml"));
         this.timeRangePickerController = new TimeRangePickerController();
         loader.setController(timeRangePickerController);
@@ -98,29 +140,31 @@ public class TimeRangePicker extends ToggleButton {
                 }
             }
         });
-        bindingManager.attachListener(timeRangePickerController.startDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-            if (newValue != null && timeRangePickerController.endDate.getDateTimeValue() != null) {
-                TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
-                if (newRange.isNegative()) {
-                    TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
-                    this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.getDuration())));
-                } else {
-                    this.selectedRange.setValue(newRange);
-                }
-            }
-        });
+        bindingManager.attachListener(timeRangePickerController.startDate.dateTimeValueProperty(),
+                (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+                    if (newValue != null && timeRangePickerController.endDate.getDateTimeValue() != null) {
+                        TimeRange newRange = TimeRange.of(newValue, timeRangePickerController.endDate.getDateTimeValue());
+                        if (newRange.isNegative()) {
+                            TimeRange oldRange = TimeRange.of(oldValue, timeRangePickerController.endDate.getDateTimeValue());
+                            this.selectedRange.setValue(TimeRange.of(newValue, newValue.plus(oldRange.getDuration())));
+                        } else {
+                            this.selectedRange.setValue(newRange);
+                        }
+                    }
+                });
 
-        bindingManager.attachListener(timeRangePickerController.endDate.dateTimeValueProperty(), (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
-            if (newValue != null && timeRangePickerController.startDate.getDateTimeValue() != null) {
-                TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
-                if (newRange.isNegative()) {
-                    TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
-                    this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.getDuration()), newValue));
-                } else {
-                    this.selectedRange.setValue(newRange);
-                }
-            }
-        });
+        bindingManager.attachListener(timeRangePickerController.endDate.dateTimeValueProperty(),
+                (ChangeListener<ZonedDateTime>) (observable, oldValue, newValue) -> {
+                    if (newValue != null && timeRangePickerController.startDate.getDateTimeValue() != null) {
+                        TimeRange newRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), newValue);
+                        if (newRange.isNegative()) {
+                            TimeRange oldRange = TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), oldValue);
+                            this.selectedRange.setValue(TimeRange.of(newValue.minus(oldRange.getDuration()), newValue));
+                        } else {
+                            this.selectedRange.setValue(newRange);
+                        }
+                    }
+                });
     }
 
     public ZoneId getZoneId() {
@@ -137,7 +181,7 @@ public class TimeRangePicker extends ToggleButton {
 
     private void updateText() {
         this.timeRange.setValue(TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), timeRangePickerController.endDate.getDateTimeValue()));
-        setText(String.format("From %s to %s (%s)",
+        timeRangeText.setText(String.format("From %s to %s (%s)",
                 timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
                 timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
                 getZoneId().toString()));

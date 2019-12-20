@@ -22,7 +22,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.MaskerPane?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border"
             AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
@@ -35,7 +35,6 @@
                 </VBox.margin>
                 <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0"
                       AnchorPane.rightAnchor="0.0">
-
                     <HBox fx:id="navigationToolbar" HBox.hgrow="SOMETIMES">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                 maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
@@ -48,7 +47,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                               <Tooltip showDelay="500ms" text="Go back"/>
+                                <Tooltip showDelay="500ms" text="Go back"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
@@ -62,7 +61,7 @@
                                 </HBox>
                             </graphic>
                             <tooltip>
-                               <Tooltip showDelay="500ms" text="Go forward"/>
+                                <Tooltip showDelay="500ms" text="Go forward"/>
                             </tooltip>
                         </Button>
                         <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
@@ -79,31 +78,63 @@
                                 <Font size="10.0"/>
                             </font>
                             <tooltip>
-                               <Tooltip showDelay="500ms" text="Refresh"/>
+                                <Tooltip showDelay="500ms" text="Refresh"/>
                             </tooltip>
                         </Button>
+                        <Pane HBox.hgrow="ALWAYS"/>
+<!--                        <Button fx:id="previousIntervalBtn" contentDisplay="GRAPHIC_ONLY"-->
+<!--                                maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity"-->
+<!--                                minWidth="0" mnemonicParsing="false"  prefHeight="40.0" prefWidth="20.0"-->
+<!--                                styleClass="dialog-button">-->
+<!--                            <graphic>-->
+<!--                                <HBox alignment="CENTER" styleClass="icon-container">-->
+<!--                                    <Region styleClass="left-arrow-icon"/>-->
+<!--                                </HBox>-->
+<!--                            </graphic>-->
+<!--                            <tooltip>-->
+<!--                                <Tooltip showDelay="500ms" text="Step Back"/>-->
+<!--                            </tooltip>-->
+<!--                        </Button>-->
                         <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
+                                         contentDisplay="GRAPHIC_ONLY"
                                          maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
                                          minWidth="425"
                                          minHeight="40"
                                          styleClass="dialog-button"
                                          text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
-                            <graphic>
-                                <HBox alignment="CENTER_LEFT" styleClass="icon-container">
-                                    <Region styleClass="time-icon"/>
-                                </HBox>
-                            </graphic>
+<!--                            <graphic>-->
+<!--                                <HBox alignment="CENTER" styleClass="icon-container" spacing="15">-->
+<!--                                    <Region styleClass="time-icon"/>-->
+<!--                                    <Label fx:id="timeRangeText">From xxxx to xxxx (UTC)</Label>-->
+<!--                                    <Region styleClass="combo-box-arrow-icon"/>-->
+<!--                                </HBox>-->
+<!--                            </graphic>-->
                             <tooltip>
-                               <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
+                                <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
                             </tooltip>
                         </TimeRangePicker>
+<!--                        <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308"-->
+<!--                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"-->
+<!--                                prefHeight="40.0"-->
+<!--                                prefWidth="20.0" styleClass="dialog-button">-->
+<!--                            <graphic>-->
+<!--                                <HBox alignment="CENTER" styleClass="icon-container">-->
+<!--                                    <Region styleClass="right-arrow-icon"/>-->
+<!--                                </HBox>-->
+<!--                            </graphic>-->
+<!--                            <tooltip>-->
+<!--                                <Tooltip showDelay="500ms" text="Step Forward"/>-->
+<!--                            </tooltip>-->
+<!--                        </Button>-->
+                        <Pane HBox.hgrow="ALWAYS"/>
                         <ToolBar fx:id="chartsToolbar">
                             <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
                                     text="Snapshot">
                                 <tooltip>
-                                    <Tooltip showDelay="500ms" text="Save a screen capture of the current worksheet to disk"/>
+                                    <Tooltip showDelay="500ms"
+                                             text="Save a screen capture of the current worksheet to disk"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
@@ -117,7 +148,7 @@
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
                                     text="Toggle charts display mode">
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Switch to edit mode (Ctrl+M)"/>
+                                    <Tooltip showDelay="500ms" text="Switch to edit mode (Ctrl+M)"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
@@ -135,7 +166,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Toggle vertical crosshair marker"/>
+                                    <Tooltip showDelay="500ms" text="Toggle vertical crosshair marker"/>
                                 </tooltip>
                             </ToggleButton>
                             <ToggleButton fx:id="hCrosshair" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -149,7 +180,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Toggle horizontal crosshair marker"/>
+                                    <Tooltip showDelay="500ms" text="Toggle horizontal crosshair marker"/>
                                 </tooltip>
                             </ToggleButton>
                             <Button fx:id="addChartButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -164,7 +195,7 @@
                                     </HBox>
                                 </graphic>
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet."/>
+                                    <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet."/>
                                 </tooltip>
                             </Button>
                             <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
@@ -174,7 +205,7 @@
                                         styleClass="dialog-button"
                                         text="Chart layout">
                                 <tooltip>
-                                   <Tooltip showDelay="500ms" text="Select chart layout"/>
+                                    <Tooltip showDelay="500ms" text="Select chart layout"/>
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">

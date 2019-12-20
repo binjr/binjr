@@ -108,6 +108,7 @@
 .add-tab-button,
 .dialog-button,
 .toggle-button,
+.inner-button,
 .menu-button {
     -fx-background-color: -binjr-button-background-color;
     -fx-background-radius: 0;
@@ -117,6 +118,13 @@
     -fx-border-radius: 0;
     -fx-alignment: center;
 }
+
+.inner-button:hover {
+    /*-fx-border-width: 1;*/
+    /*-fx-border-color:  -binjr-blue-color;*/
+    -fx-background-color:  -binjr-blue-color;
+}
+
 
 .combo-box-base > .arrow-button:hover,
 .dialog-button:hover,
