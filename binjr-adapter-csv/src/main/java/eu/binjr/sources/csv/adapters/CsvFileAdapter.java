@@ -47,6 +47,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
@@ -63,7 +64,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
     private Character delimiter;
     private String encoding;
     private CsvDecoder csvDecoder;
-    private SortedMap<Long, DataSample> sortedDataStore;
+    private ConcurrentNavigableMap<Long, DataSample> sortedDataStore;
     private List<String> headers;
 
     /**
@@ -161,7 +162,9 @@ public class CsvFileAdapter extends BaseDataAdapter {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
         }
-        for (DataSample sample : getDataStore().subMap(begin.getEpochSecond(), end.getEpochSecond()).values()) {
+        Long fromKey = getDataStore().floorKey(begin.toEpochMilli());
+        Long toKey = getDataStore().ceilingKey(end.toEpochMilli());
+        for (DataSample sample : getDataStore().subMap(fromKey, true, toKey, true).values()) {
             for (String n : sample.getCells().keySet()) {
                 List<TimeSeriesInfo> timeSeriesInfoList = rDict.get(n);
                 if (timeSeriesInfoList != null) {
@@ -238,7 +241,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         super.close();
     }
 
-    protected SortedMap<Long, DataSample> getDataStore() throws DataAdapterException {
+    protected ConcurrentNavigableMap<Long, DataSample> getDataStore() throws DataAdapterException {
         if (sortedDataStore == null) {
             try (InputStream in = Files.newInputStream(csvPath)) {
                 this.sortedDataStore = buildSortedDataStore(in);
@@ -263,11 +266,11 @@ public class CsvFileAdapter extends BaseDataAdapter {
                 s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern(dateTimePattern).withZone(zoneId)));
     }
 
-    private SortedMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
-        SortedMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
+    private ConcurrentNavigableMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
+        ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
 
         try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::trace)) {
-            csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toEpochSecond(), sample));
+            csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toInstant().toEpochMilli(), sample));
         }
         return dataStore;
     }
