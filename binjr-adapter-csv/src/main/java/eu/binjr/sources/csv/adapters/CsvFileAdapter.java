@@ -162,13 +162,13 @@ public class CsvFileAdapter extends BaseDataAdapter {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
         }
-        Long fromKey = getDataStore().floorKey(begin.toEpochMilli());
-        Long toKey = getDataStore().ceilingKey(end.toEpochMilli());
+        Long fromKey = Objects.requireNonNullElse(getDataStore().floorKey(begin.toEpochMilli()), begin.toEpochMilli());
+        Long toKey = Objects.requireNonNullElse(getDataStore().ceilingKey(end.toEpochMilli()), end.toEpochMilli());
         for (DataSample sample : getDataStore().subMap(fromKey, true, toKey, true).values()) {
             for (String n : sample.getCells().keySet()) {
                 List<TimeSeriesInfo> timeSeriesInfoList = rDict.get(n);
                 if (timeSeriesInfoList != null) {
-                    for (var tsInfo: timeSeriesInfoList) {
+                    for (var tsInfo : timeSeriesInfoList) {
                         series.get(tsInfo).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
                     }
                 }
