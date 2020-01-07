@@ -119,7 +119,7 @@
                                 </tooltip>
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="settings-icon"/>
+                                        <Region styleClass="edit-icon"/>
                                     </HBox>
                                 </graphic>
                             </Button>

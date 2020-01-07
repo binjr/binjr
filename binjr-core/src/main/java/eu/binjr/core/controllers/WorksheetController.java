@@ -288,7 +288,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             bindingManager.suspend(getWorksheet().dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "settings-icon"));
+            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "edit-icon"));
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
         } else {
