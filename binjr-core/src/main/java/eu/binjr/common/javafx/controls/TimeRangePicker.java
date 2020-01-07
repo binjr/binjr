@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -78,7 +78,7 @@ public class TimeRangePicker extends ToggleButton {
                 .setHeight(25.0)
                 .setWidth(18.0)
                 .bind(Node::visibleProperty, selectedProperty().not())
-                .setStyleClass( "inner-button")
+                .setStyleClass("inner-button")
                 .setIconStyleClass("right-arrow-icon")
                 .setAction(event -> {
                     timeRangePickerController.stepBy(
@@ -165,7 +165,9 @@ public class TimeRangePicker extends ToggleButton {
                         }
                     }
                 });
+        bindingManager.bindBidirectional(this.textProperty(), timeRangeText.textProperty());
     }
+
 
     public ZoneId getZoneId() {
         return zoneId.getValue();

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2016-2019 Frederic Thevenet
+  ~    Copyright 2016-2020 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -82,50 +82,17 @@
                             </tooltip>
                         </Button>
                         <Pane HBox.hgrow="ALWAYS"/>
-<!--                        <Button fx:id="previousIntervalBtn" contentDisplay="GRAPHIC_ONLY"-->
-<!--                                maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity"-->
-<!--                                minWidth="0" mnemonicParsing="false"  prefHeight="40.0" prefWidth="20.0"-->
-<!--                                styleClass="dialog-button">-->
-<!--                            <graphic>-->
-<!--                                <HBox alignment="CENTER" styleClass="icon-container">-->
-<!--                                    <Region styleClass="left-arrow-icon"/>-->
-<!--                                </HBox>-->
-<!--                            </graphic>-->
-<!--                            <tooltip>-->
-<!--                                <Tooltip showDelay="500ms" text="Step Back"/>-->
-<!--                            </tooltip>-->
-<!--                        </Button>-->
                         <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
                                          contentDisplay="GRAPHIC_ONLY"
                                          maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
                                          minWidth="425"
                                          minHeight="40"
                                          styleClass="dialog-button"
-                                         text="From 22/10/2018 18:00:14 to 23/10/2018 21:00:14" HBox.hgrow="SOMETIMES">
-<!--                            <graphic>-->
-<!--                                <HBox alignment="CENTER" styleClass="icon-container" spacing="15">-->
-<!--                                    <Region styleClass="time-icon"/>-->
-<!--                                    <Label fx:id="timeRangeText">From xxxx to xxxx (UTC)</Label>-->
-<!--                                    <Region styleClass="combo-box-arrow-icon"/>-->
-<!--                                </HBox>-->
-<!--                            </graphic>-->
+                                         text="" HBox.hgrow="SOMETIMES">
                             <tooltip>
                                 <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
                             </tooltip>
                         </TimeRangePicker>
-<!--                        <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308"-->
-<!--                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"-->
-<!--                                prefHeight="40.0"-->
-<!--                                prefWidth="20.0" styleClass="dialog-button">-->
-<!--                            <graphic>-->
-<!--                                <HBox alignment="CENTER" styleClass="icon-container">-->
-<!--                                    <Region styleClass="right-arrow-icon"/>-->
-<!--                                </HBox>-->
-<!--                            </graphic>-->
-<!--                            <tooltip>-->
-<!--                                <Tooltip showDelay="500ms" text="Step Forward"/>-->
-<!--                            </tooltip>-->
-<!--                        </Button>-->
                         <Pane HBox.hgrow="ALWAYS"/>
                         <ToolBar fx:id="chartsToolbar">
                             <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
