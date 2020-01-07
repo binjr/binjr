@@ -1052,16 +1052,16 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     private void addToNewChart(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
         try {
-           treeItemsAsChartList(treeItems, root).ifPresent(charts ->{
-               // Set the time range of the whole worksheet to accommodate the new bindings
-               // if there are no other series present.
-               if (worksheet.getTotalNumberOfSeries() == 0) {
-                   try {
-                       this.timeRangePicker.selectedRangeProperty().setValue(charts.get(0).getInitialTimeRange());
-                   } catch (DataAdapterException e) {
-                       logger.error("Failed to reset time range", e);
-                   }
-               }
+            treeItemsAsChartList(treeItems, root).ifPresent(charts -> {
+                // Set the time range of the whole worksheet to accommodate the new bindings
+                // if there are no other series present.
+                if (worksheet.getTotalNumberOfSeries() == 0) {
+                    try {
+                        this.timeRangePicker.selectedRangeProperty().setValue(charts.get(0).getInitialTimeRange());
+                    } catch (DataAdapterException e) {
+                        logger.error("Failed to reset time range", e);
+                    }
+                }
                 worksheet.getCharts().addAll(charts);
             });
 
@@ -1398,6 +1398,9 @@ public class WorksheetController implements Initializable, AutoCloseable {
         WritableImage snapImg;
         boolean wasModeEdit = getWorksheet().isChartLegendsVisible();
         try {
+            // Invalidate chart nodes cache so that it is re-rendered when scaled up
+            // and not just stretched for snapshot
+            viewPorts.forEach(v -> v.getChart().setCache(false));
             getWorksheet().setChartLegendsVisible(false);
             worksheetTitleBlock.setManaged(true);
             worksheetTitleBlock.setVisible(true);
@@ -1410,6 +1413,7 @@ public class WorksheetController implements Initializable, AutoCloseable {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return;
         } finally {
+            viewPorts.forEach(v -> v.getChart().setCache(true));
             getWorksheet().setChartLegendsVisible(wasModeEdit);
             navigationToolbar.setManaged(true);
             navigationToolbar.setVisible(true);
