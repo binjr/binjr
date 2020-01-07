@@ -88,6 +88,7 @@ with someone else.
 * [JRDS](http://jrds.fr): A performance monitoring application written in Java.
 * Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
 * Comma Separated Values (CSV) files.
+* [A stand-alone demonstration data source.](#trying-it-out)
 
 ## Getting started
 
@@ -111,7 +112,7 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew run` to build and start the application straight away.
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
 > Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in 
-> the same environement.
+> the same environment.
 
 
 #### Download and run the latest version from the command line.
@@ -134,7 +135,7 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 ## Trying it out
 
 If you'd like to experience binjr's visualization capabilities but do not have a compatible data source handy, you can use
-the [demonstration data adpater](https://github.com/binjr/binjr-adapter-demo). 
+the [demonstration data adapter](https://github.com/binjr/binjr-adapter-demo). 
 
 It is a plugin which embeds a small, stand-alone data source that you can readily browse using ***binjr***.
 
