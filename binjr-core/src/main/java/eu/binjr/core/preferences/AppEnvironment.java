@@ -47,7 +47,7 @@ public class AppEnvironment {
     public static final String HTTP_GITHUB_REPO = "https://github.com/binjr/binjr";
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://github.com/binjr/binjr/wiki";
-    public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2019 Frederic Thevenet";
+    public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);

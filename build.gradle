@@ -306,7 +306,7 @@ markdownToHtml {
                         "    <br>\n" +
                         "    <hr>\n" +
                         "    <p style=\"text-align:left;\">\n" +
-                        "        (c) 2016-2019 <a href=\"https://www.fthevenet.eu\">Frederic Thevenet</a>\n" +
+                        "        (c) 2016-2020 <a href=\"https://www.fthevenet.eu\">Frederic Thevenet</a>\n" +
                         "        <span style=\"float:right;\"><a href=\"https://binjr.eu\">https://binjr.eu</a></span>\n" +
                         "    </p>\n" +
                         "</footer>"
@@ -426,7 +426,7 @@ task jpackageMacOS(type: Exec, dependsOn: [downloadAndUnpackJpackage]) {
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
             "--type", DISTRIBUTION_EXTENSION,
-            "--copyright", "Copyright (c) 2016-2019 Frederic Thevenet",
+            "--copyright", "Copyright (c) 2016-2020 Frederic Thevenet",
             "--description", "A Time Series Browser",
             "--app-version", BINJR_VERSION,
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
