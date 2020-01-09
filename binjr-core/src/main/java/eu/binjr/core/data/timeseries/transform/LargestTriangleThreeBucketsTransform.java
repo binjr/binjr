@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 /**
  * A time series transform that applies the <a href="https://github.com/sveinn-steinarsson/flot-downsample">Largest-Triangle-Three-Buckets algorithm</a>
- * to reduce the number of disreet data points in a series while keeping a good visual approximation of its appearance when plotted.
+ * to reduce the number of discreet data points in a series while keeping a good visual approximation of its appearance when plotted.
  *
  * @author Frederic Thevenet
  */
@@ -80,7 +80,7 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
             avgRangeEnd = Math.min(avgRangeEnd, dataLength);
             int avgRangeLength = avgRangeEnd - avgRangeStart;
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
-                avgX += data.get(avgRangeStart).getXValue().toEpochSecond();
+                avgX += data.get(avgRangeStart).getXValue().toInstant().toEpochMilli();
                 avgY += data.get(avgRangeStart).getYValue();
             }
             avgX /= avgRangeLength;
@@ -90,13 +90,13 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
             int rangeTo = (int) (Math.floor((i + 1) * every) + 1);
 
             // Point a
-            double pointAx = data.get(a).getXValue().toEpochSecond();
+            double pointAx = data.get(a).getXValue().toInstant().toEpochMilli();
             double pointAy = data.get(a).getYValue();
             double maxArea = -1;
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
                 double area = Math.abs((pointAx - avgX) * (data.get(rangeOffs).getYValue() - pointAy) -
-                        (pointAx - data.get(rangeOffs).getXValue().toEpochSecond()) * (avgY - pointAy)
+                        (pointAx - data.get(rangeOffs).getXValue().toInstant().toEpochMilli()) * (avgY - pointAy)
                 ) * 0.5;
                 if (area > maxArea) {
                     maxArea = area;

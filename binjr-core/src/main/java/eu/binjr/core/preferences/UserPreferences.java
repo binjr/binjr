@@ -231,6 +231,10 @@ public class UserPreferences extends PreferenceFactory {
     public Preference<SnapshotOutputScale> snapshotOutputScale =
             enumPreference(SnapshotOutputScale.class, "snapshotOutputScale", SnapshotOutputScale.AUTO);
 
+    public Preference<DownSamplingAlgorithm> downSamplingAlgorithm =
+            enumPreference(DownSamplingAlgorithm.class, "downSamplingAlgorithm", DownSamplingAlgorithm.AUTO);
+
+
     private UserPreferences() {
         super(Preferences.userRoot().node(BINJR_GLOBAL));
     }

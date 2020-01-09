@@ -266,8 +266,15 @@ public class WorksheetController implements Initializable, AutoCloseable {
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidateAll(false, false, false));
-            bindingManager.attachListener(UserPreferences.getInstance().downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(UserPreferences.getInstance().downSamplingThreshold.property(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.attachListener(userPrefs.downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
+            bindingManager.attachListener(userPrefs.downSamplingThreshold.property(), ((observable, oldValue, newValue) -> {
+                if (userPrefs.downSamplingEnabled.get())
+                    refresh();
+            }));
+            bindingManager.attachListener(userPrefs.downSamplingAlgorithm.property(), ((observable, oldValue, newValue) -> {
+                if (userPrefs.downSamplingEnabled.get())
+                    refresh();
+            }));
             bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 setEditChartMode(newValue);
             });
