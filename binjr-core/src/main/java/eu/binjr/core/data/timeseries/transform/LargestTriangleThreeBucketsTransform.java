@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
-    private final int threshold;
+    protected final int threshold;
 
     /**
      * Initializes a new instnace of the {@link LargestTriangleThreeBucketsTransform} class.
@@ -42,7 +42,11 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
      * @param threshold the maximum number of points to keep following the reduction.
      */
     public LargestTriangleThreeBucketsTransform(final int threshold) {
-        super("LargestTriangleThreeBucketsTransform");
+        this("LargestTriangleThreeBucketsTransform", threshold);
+    }
+
+    protected LargestTriangleThreeBucketsTransform(final String name, final int threshold) {
+        super(name);
         this.threshold = threshold;
     }
 
@@ -62,7 +66,7 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
      * @param threshold d the maximum number of samples to keep.
      * @return a reduced list of samples.
      */
-    private List<XYChart.Data<ZonedDateTime, Double>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, Double>> data, int threshold) {
+    protected List<XYChart.Data<ZonedDateTime, Double>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, Double>> data, int threshold) {
         int dataLength = data.size();
         List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>(threshold);
         // Bucket size. Leave room for start and end data points

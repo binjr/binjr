@@ -23,7 +23,9 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.timeseries.transform.*;
+import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
+import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
+import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -216,11 +218,11 @@ public class Chart implements Dirtyable, AutoCloseable {
         });
         // Define the transforms to apply
         var reducer = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
-                   userPref.downSamplingThreshold.get().intValue());
-        reducer.setEnabled(   userPref.downSamplingEnabled.get());
+                userPref.downSamplingThreshold.get().intValue());
+        reducer.setEnabled(userPref.downSamplingEnabled.get());
         var aligner = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
         var cleaner = new NanToZeroTransform();
-        cleaner.setEnabled(   userPref.forceNanToZero.get());
+        cleaner.setEnabled(userPref.forceNanToZero.get());
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -262,7 +264,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                         });
             }
             try {
-                if (!latch.await(   userPref.asyncTasksTimeOutMs.get().longValue(), TimeUnit.MILLISECONDS)) {
+                if (!latch.await(userPref.asyncTasksTimeOutMs.get().longValue(), TimeUnit.MILLISECONDS)) {
                     throw new DataAdapterException("Waiting for fetch sub-tasks to complete aborted");
                 }
                 if (!errors.isEmpty()) {

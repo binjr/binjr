@@ -18,6 +18,7 @@ package eu.binjr.core.preferences;
 
 import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.LargestTriangleThreeBucketsTransform;
+import eu.binjr.core.data.timeseries.transform.StackedLargestTriangleThreeBucketsTransform;
 import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
 import eu.binjr.core.data.workspace.ChartType;
 
@@ -30,9 +31,10 @@ import java.util.function.BiFunction;
  */
 public enum DownSamplingAlgorithm {
     AUTO("Automatic", (type, threshold) ->
-            type == ChartType.STACKED ? new DecimationTransform(threshold) : new LargestTriangleThreeBucketsTransform(threshold)),
+            type == ChartType.STACKED ? new StackedLargestTriangleThreeBucketsTransform(threshold) : new LargestTriangleThreeBucketsTransform(threshold)),
     DECIMATION("Decimation", (type, threshold) -> new DecimationTransform(threshold)),
-    LTTB("Largest Tiangle Three Buckets", (type, threshold) -> new LargestTriangleThreeBucketsTransform(threshold));
+    LTTB("Largest Triangle Three Buckets", (type, threshold) -> new LargestTriangleThreeBucketsTransform(threshold)),
+    LTTB_STACKED("Largest Triangle Three Buckets for correlated series", (type, threshold) -> new StackedLargestTriangleThreeBucketsTransform(threshold));
 
     private final String name;
     private final BiFunction<ChartType, Integer, TimeSeriesTransform> factory;
@@ -46,7 +48,7 @@ public enum DownSamplingAlgorithm {
         return name;
     }
 
-    public TimeSeriesTransform instantiateTransform(ChartType chartType, Integer threshold){
+    public TimeSeriesTransform instantiateTransform(ChartType chartType, Integer threshold) {
         return factory.apply(chartType, threshold);
     }
 }
