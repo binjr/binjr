@@ -60,7 +60,7 @@ public abstract class TimeSeriesTransform {
      */
     public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (isEnabled()) {
-            try (Profiler ignored = Profiler.start("Applying transform" + getName(), logger::trace)) {
+            try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::info)) {
                 return apply(data);
             }
         } else {

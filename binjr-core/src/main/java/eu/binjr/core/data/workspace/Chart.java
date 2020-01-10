@@ -24,6 +24,7 @@ import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
+import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.UserPreferences;

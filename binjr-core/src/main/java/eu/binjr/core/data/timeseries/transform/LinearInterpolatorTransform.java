@@ -18,36 +18,47 @@ package eu.binjr.core.data.timeseries.transform;
 
 import javafx.scene.chart.XYChart;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
+import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
+import java.time.Duration;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
-public class LinearInterpolatorTransform   extends TimeSeriesTransform{
-
+public final class LinearInterpolatorTransform extends TimeSeriesTransform {
+    private final int threshold;
 
     /**
      * Base constructor for {@link TimeSeriesTransform} instances.
-     *
-     * @param name the name of the transform function
      */
-    public LinearInterpolatorTransform(String name) {
-        super(name);
-    }
-
-    public double[] linearInterp(double[] x, double[] y, double[] xi) {
-        LinearInterpolator li = new LinearInterpolator(); // or other interpolator
-        PolynomialSplineFunction psf = li.interpolate(x, y);
-
-        double[] yi = new double[xi.length];
-        for (int i = 0; i < xi.length; i++) {
-            yi[i] = psf.value(xi[i]);
-        }
-        return yi;
+    public LinearInterpolatorTransform(int threshold) {
+        super("LinearInterpolatorTransform");
+        this.threshold = threshold;
     }
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
-        return null;
+        if (threshold > 0 && data.size() > threshold) {
+            List<XYChart.Data<ZonedDateTime, Double>> reduced = new ArrayList<>(threshold);
+            XYChart.Data<ZonedDateTime, Double> start = data.get(0);
+            double startMillis = start.getXValue().toInstant().toEpochMilli();
+            XYChart.Data<ZonedDateTime, Double> end = data.get(data.size() - 1);
+            var li = new LinearInterpolator();
+            PolynomialSplineFunction psf = li.interpolate(
+                    data.stream().mapToDouble(sample -> ((double) sample.getXValue().toInstant().toEpochMilli())).toArray(),
+                    data.stream().mapToDouble(XYChart.Data::getYValue).toArray());
+            double stepMillis = (Duration.between(start.getXValue(), end.getXValue()).toMillis()) / (threshold - 2.0);
+            reduced.add(start);
+            for (int i = 1; i < threshold - 2; i++) {
+                reduced.add(new XYChart.Data<>(start.getXValue().plusSeconds(i * (long) (Math.floor(stepMillis) / 1000.0)),
+                        psf.value(startMillis + (i * stepMillis))));
+            }
+            reduced.add(end);
+            return reduced;
+        }
+
+        return data;
     }
+
 }
