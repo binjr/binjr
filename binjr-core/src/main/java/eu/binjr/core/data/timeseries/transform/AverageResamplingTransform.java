@@ -25,7 +25,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO This is buggy: this introduce a eft to right offset.
+//FIXME: This introduce a right-shift to the series.
 public final class AverageResamplingTransform extends TimeSeriesTransform {
     private static final Logger logger = LogManager.getLogger(AverageResamplingTransform.class);
     private final int threshold;

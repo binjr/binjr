@@ -30,7 +30,6 @@ dependencies {
     api "org.openjfx:javafx-controls:$OPENJFX_VERSION"
     api "org.openjfx:javafx-fxml:$OPENJFX_VERSION"
     api "org.openjfx:javafx-swing:$OPENJFX_VERSION"
-    api 'org.apache.commons:commons-math3:3.6.1'
 }
 
 compileJava {
