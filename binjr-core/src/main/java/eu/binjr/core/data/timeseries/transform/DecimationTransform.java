@@ -16,25 +16,22 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
-import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
- * A simple {@link TimeSeriesTransform} that operates a linear decimation on the provided series.
+ * A simple {@link BaseTimeSeriesTransform} that operates a linear decimation on the provided series.
  *
  * @author Frederic Thevenet
  */
-public class DecimationTransform extends TimeSeriesTransform {
+public class DecimationTransform extends BaseTimeSeriesTransform {
     private final int threshold;
-
+    private static final Logger logger = LogManager.getLogger(DecimationTransform.class);
     /**
      * Initializes a new instance of the {@link DecimationTransform} class.
      *
@@ -63,6 +60,7 @@ public class DecimationTransform extends TimeSeriesTransform {
             sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));
         }
         sampled.add(data.get(dataLength - 1));
+        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 }

@@ -24,7 +24,6 @@ import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
-import eu.binjr.core.data.timeseries.transform.DecimationTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.preferences.UserPreferences;
@@ -217,19 +216,20 @@ public class Chart implements Dirtyable, AutoCloseable {
             }
             return false;
         });
-        // Define the transforms to apply
-        var reducer = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
-                userPref.downSamplingThreshold.get().intValue());
-        reducer.setEnabled(userPref.downSamplingEnabled.get());
-        var aligner = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
-        var cleaner = new NanToZeroTransform();
-        cleaner.setEnabled(userPref.forceNanToZero.get());
+
+        var align = new AlignBoundariesTransform(startTime, endTime, this.chartType.getValue() != ChartType.STACKED);
+        var clean = new NanToZeroTransform();
+        clean.setEnabled(userPref.forceNanToZero.get());
         // Group all bindings by common adapters
         var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
+            // Define the transforms to apply
+            var reduce = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
+                    userPref.downSamplingThreshold.get().intValue());
+            reduce.setEnabled(userPref.downSamplingEnabled.get());
             var adapter = byAdapterEntry.getKey();
-            var sorter = new SortTransform();
-            sorter.setEnabled(adapter.isSortingRequired());
+            var sort = new SortTransform();
+            sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var latch = new CountDownLatch(bindingsByPath.entrySet().size());
@@ -250,10 +250,14 @@ public class Chart implements Dirtyable, AutoCloseable {
                                 data.entrySet().parallelStream().forEach(entry -> {
                                     var info = entry.getKey();
                                     var proc = entry.getValue();
-                                    // Applying sample transforms
-                                    proc.applyTransforms(cleaner, sorter, reducer, aligner);
-                                    //Update timeSeries data
+                                    //bind proc to timeSeries info
                                     info.setProcessor(proc);
+                                    // Applying sample transforms
+                                    proc.applyTransforms(clean, sort, reduce);
+                                });
+                                // Run second pass transforms
+                                data.entrySet().parallelStream().forEach(entry -> {
+                                    entry.getValue().applyTransforms(reduce.getNextPassTransform(), align);
                                 });
                             } catch (Throwable t) {
                                 logger.error(t);

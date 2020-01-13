@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,25 +16,8 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
-import javafx.scene.chart.XYChart;
-
-import java.time.ZonedDateTime;
-import java.util.Comparator;
 import java.util.List;
 
-public class SortTransform extends BaseTimeSeriesTransform {
-
-    /**
-     * Base constructor for {@link BaseTimeSeriesTransform} instances.
-     */
-    public SortTransform() {
-        super("SortTransform");
-    }
-
-    @Override
-    protected List<XYChart.Data<ZonedDateTime, Double>> apply( List<XYChart.Data<ZonedDateTime, Double>> data) {
-        data.sort(Comparator.comparing(XYChart.Data::getXValue));
-        return data;
-    }
-
+public interface TimeSeriesAccumulator {
+    List<Double[]> getAccumulationBuffer();
 }

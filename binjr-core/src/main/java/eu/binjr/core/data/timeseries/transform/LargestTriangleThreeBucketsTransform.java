@@ -16,16 +16,13 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
-import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * A time series transform that applies the <a href="https://github.com/sveinn-steinarsson/flot-downsample">Largest-Triangle-Three-Buckets algorithm</a>
@@ -33,8 +30,9 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
+public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
+    private static final Logger logger = LogManager.getLogger(LargestTriangleThreeBucketsTransform.class);
 
     /**
      * Initializes a new instnace of the {@link LargestTriangleThreeBucketsTransform} class.
@@ -108,6 +106,7 @@ public class LargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
             a = nextA; // This a is the next a (chosen b)
         }
         sampled.add(data.get(dataLength - 1)); // Always add last
+        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 

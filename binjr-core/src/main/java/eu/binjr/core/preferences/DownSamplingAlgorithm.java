@@ -28,10 +28,11 @@ import java.util.function.BiFunction;
  */
 public enum DownSamplingAlgorithm {
     AUTO("Automatic", (type, threshold) ->
-            type == ChartType.STACKED ? new StackedLargestTriangleThreeBucketsTransform(threshold) : new LargestTriangleThreeBucketsTransform(threshold)),
+            type == ChartType.STACKED ? new FirstPassLttbTransform(threshold) : new LargestTriangleThreeBucketsTransform(threshold)),
     DECIMATION("Decimation", (type, threshold) -> new DecimationTransform(threshold)),
     LTTB("Largest Triangle Three Buckets", (type, threshold) -> new LargestTriangleThreeBucketsTransform(threshold)),
     LTTB_STACKED("Largest Triangle Three Buckets for correlated series", (type, threshold) -> new StackedLargestTriangleThreeBucketsTransform(threshold)),
+    MULTIPASS_LTTB("Multipass Largest Triangle Three Buckets", (type, threshold)-> new FirstPassLttbTransform(threshold)),
     AVERAGE("Average resampling", ((type, threshold) -> new AverageResamplingTransform(threshold)));
 
     private final String name;

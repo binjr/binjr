@@ -17,6 +17,8 @@
 package eu.binjr.core.data.timeseries.transform;
 
 import javafx.scene.chart.XYChart;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -28,38 +30,27 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class MultiDimLargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
+public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
+    private final List<Double[]> accumlationBuffer;
+    private static final Logger logger = LogManager.getLogger(SecondPassLttbTransform.class);
 
     /**
-     * Initializes a new instnace of the {@link MultiDimLargestTriangleThreeBucketsTransform} class.
+     * Initializes a new instnace of the {@link SecondPassLttbTransform} class.
      *
      * @param threshold the maximum number of points to keep following the reduction.
      */
-    public MultiDimLargestTriangleThreeBucketsTransform(final int threshold) {
-        super("LargestTriangleThreeBucketsTransform");
+    public SecondPassLttbTransform(final FirstPassLttbTransform firstPass, int threshold) {
+        super("SecondPassLttbTransform");
+        this.setEnabled(firstPass.isEnabled());
         this.threshold = threshold;
+        accumlationBuffer = firstPass.getAccumulationBuffer();
     }
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (threshold > 0 && data.size() > threshold) {
-
-
-            //    return applyLTTBReduction(data, threshold);
-            return null;
-        }
-        return data;
-    }
-
-
-    protected List<List<XYChart.Data<ZonedDateTime, Double>>> applyMulti(List<List<XYChart.Data<ZonedDateTime, Double>>> data) {
-
-        if (data != null && data.size() >0 &&threshold > 0 && data.get(0).size() > threshold) {
-
-
-            //    return applyLTTBReduction(data, threshold);
-            return null;
+                return applyLTTBReduction(data, threshold);
         }
         return data;
     }
@@ -69,22 +60,19 @@ public class MultiDimLargestTriangleThreeBucketsTransform extends TimeSeriesTran
      * <p>Method implementing the Largest-Triangle-Three-Buckets algorithm.</p>
      * <p>Adapted from <a href="https://gist.github.com/DanielWJudge/63300889f27c7f50eeb7">DanielWJudge/LargestTriangleThreeBuckets.cs</a></p>
      *
-     * @param data      the list of sample to apply the reduction to.
-     * @param threshold d the maximum number of samples to keep.
      * @return a reduced list of samples.
      */
-    private List<XYChart.Data<ZonedDateTime, Double[]>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, Double[]>> data, int threshold) {
+    private List<XYChart.Data<ZonedDateTime, Double>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, Double>> data, int threshold) {
         int dataLength = data.size();
-
-        List<XYChart.Data<ZonedDateTime, Double[]>> sampled = new ArrayList<>();
+        int nbDim = accumlationBuffer.size();
+        List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>();
         // Bucket size. Leave room for start and end data points
         double every = (double) (dataLength - 2) / (threshold - 2);
         int a = 0;
         int nextA = 0;
-        XYChart.Data<ZonedDateTime, Double[]> maxAreaPoint = data.get(a);
+        int maxAreaPointIdx = a;
         sampled.add(data.get(a)); // Always add the first point
         for (int i = 0; i < threshold - 2; i++) {
-            int nbDim = data.get(a).getYValue().length;
             // Calculate point average for next bucket (containing c)
             double avgX = 0;
             double[] avgY = new double[nbDim];
@@ -95,7 +83,7 @@ public class MultiDimLargestTriangleThreeBucketsTransform extends TimeSeriesTran
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
                 avgX += data.get(avgRangeStart).getXValue().toInstant().toEpochMilli();
                 for (int j = 0; j < nbDim; j++) {
-                    avgY[j] += data.get(avgRangeStart).getYValue()[j];
+                    avgY[j] += accumlationBuffer.get(j)[avgRangeStart];
                 }
             }
             avgX /= avgRangeLength;
@@ -108,28 +96,26 @@ public class MultiDimLargestTriangleThreeBucketsTransform extends TimeSeriesTran
 
             // Point a
             double pointAx = data.get(a).getXValue().toInstant().toEpochMilli();
-            Double[] pointAy = data.get(a).getYValue();
             double maxArea = -1;//
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
                 double[] area = new double[nbDim];
                 for (int j = 0; j < nbDim; j++) {
-                    area[j] = Math.abs((pointAx - avgX) * (data.get(rangeOffs).getYValue()[j] - pointAy[j]) -
-                            (pointAx - data.get(rangeOffs).getXValue().toInstant().toEpochMilli()) * (avgY[j] - pointAy[j])
+                    area[j] = Math.abs((pointAx - avgX) * (accumlationBuffer.get(j)[rangeOffs] - accumlationBuffer.get(j)[a]) -
+                            (pointAx - data.get(rangeOffs).getXValue().toInstant().toEpochMilli()) * (avgY[j] - accumlationBuffer.get(j)[a])
                     ) * 0.5;
                     if (area[j] > maxArea) {
                         maxArea = area[j];
-                        maxAreaPoint = data.get(rangeOffs);
+                        maxAreaPointIdx = rangeOffs;
                         nextA = rangeOffs; // Next a is this b
                     }
                 }
-
-
             }
-            sampled.add(maxAreaPoint); // Pick this point from the bucket
+            sampled.add(data.get(maxAreaPointIdx)); // Pick this point from the bucket
             a = nextA; // This a is the next a (chosen b)
         }
         sampled.add(data.get(dataLength - 1)); // Always add last
+        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 

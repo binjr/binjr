@@ -32,14 +32,14 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class AlignBoundariesTransform extends TimeSeriesTransform {
+public class AlignBoundariesTransform extends BaseTimeSeriesTransform {
 
     private double substituteValue = Double.NaN;
     private final ZonedDateTime startTime;
     private final ZonedDateTime endTime;
 
     /**
-     * Base constructor for {@link TimeSeriesTransform} instances.
+     * Base constructor for {@link BaseTimeSeriesTransform} instances.
      *
      * @param startTime        The timestamp specifying the beginning of the time range on which to align.
      * @param endTime          The timestamp specifying the end of the time range on which to align.

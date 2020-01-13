@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,22 +19,31 @@ package eu.binjr.core.data.timeseries.transform;
 import javafx.scene.chart.XYChart;
 
 import java.time.ZonedDateTime;
-import java.util.Comparator;
 import java.util.List;
 
-public class SortTransform extends BaseTimeSeriesTransform {
-
-    /**
-     * Base constructor for {@link BaseTimeSeriesTransform} instances.
-     */
-    public SortTransform() {
-        super("SortTransform");
+public class NoOpTransform implements TimeSeriesTransform {
+    @Override
+    public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
+        return data;
     }
 
     @Override
-    protected List<XYChart.Data<ZonedDateTime, Double>> apply( List<XYChart.Data<ZonedDateTime, Double>> data) {
-        data.sort(Comparator.comparing(XYChart.Data::getXValue));
-        return data;
+    public String getName() {
+        return "NoOpTransform";
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return false;
+    }
+
+    @Override
+    public void setEnabled(boolean enabled) {
+    }
+
+    @Override
+    public TimeSeriesTransform getNextPassTransform() {
+        return null;
     }
 
 }

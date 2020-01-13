@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class StackedLargestTriangleThreeBucketsTransform extends TimeSeriesTransform {
+public class StackedLargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransform {
     private final int threshold;
     private boolean[] keepList;
 
