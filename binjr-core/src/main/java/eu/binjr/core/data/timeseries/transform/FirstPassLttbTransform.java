@@ -30,9 +30,10 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class FirstPassLttbTransform extends BaseTimeSeriesTransform implements TimeSeriesAccumulator {
+public class FirstPassLttbTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
-    private final List<Double[]> accumulationBuffer;
+    private final List<Double[]> seriesValues;
+    private  ZonedDateTime[] timeStamps;
     private static final Logger logger = LogManager.getLogger(FirstPassLttbTransform.class);
     private volatile boolean isBufferCoherent = true;
 
@@ -44,36 +45,44 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform implements T
     public FirstPassLttbTransform(final int threshold) {
         super("FirstPassLttbTransform");
         this.threshold = threshold;
-        accumulationBuffer = new ArrayList<>();
-    }
+        seriesValues = new ArrayList<>();
 
-    @Override
-    public List<Double[]> getAccumulationBuffer() {
-        return accumulationBuffer;
+}
+
+
+    public List<Double[]> getSeriesValues() {
+        return seriesValues;
+    }
+    public ZonedDateTime[] getTimeStamps(){
+        return timeStamps;
     }
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         // collect values for second pass
         if (threshold > 0 && data.size() > threshold) {
-            accumulationBuffer.add(data.stream().map(XYChart.Data::getYValue).toArray(Double[]::new));
+            seriesValues.add(data.stream().map(XYChart.Data::getYValue).toArray(Double[]::new));
+            //this is potentially racy, but isn't an issue atm since all time stamps are supposed to be identical
+            if (timeStamps == null){
+                timeStamps = data.stream().map(XYChart.Data::getXValue).toArray(ZonedDateTime[]::new);
+            }
         }
         return data;
     }
 
     @Override
     public TimeSeriesTransform getNextPassTransform() {
-        if (accumulationBuffer.size() < 1) {
-            logger.debug(() -> "Accumulation buffer from first pass is empty: return noOp transform");
+        if (timeStamps == null) {
+            logger.debug(() -> "No data collected from first pass: return noOp transform");
             return new NoOpTransform();
         }
         boolean isBufferCoherent = true;
-        int firstLength = accumulationBuffer.get(0).length;
-        for (var b : accumulationBuffer) {
-            isBufferCoherent = isBufferCoherent & (b.length == firstLength);
+        int nbSamples = timeStamps.length;
+        for (var b : seriesValues) {
+            isBufferCoherent = isBufferCoherent & (b.length == nbSamples);
         }
         if (!isBufferCoherent) {
-            logger.debug(() -> "Accumulated series have different lengths: falling back to single pass lttb");
+            logger.debug(() -> "Collected series data are not coherent: falling back to single pass lttb");
             return new LargestTriangleThreeBucketsTransform(threshold);
         }
         return new SecondPassLttbTransform(this, threshold);

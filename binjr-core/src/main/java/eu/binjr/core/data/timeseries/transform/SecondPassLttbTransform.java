@@ -32,7 +32,7 @@ import java.util.List;
  */
 public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
-    private final List<Double[]> accumlationBuffer;
+    private final boolean[] whiteList;
     private static final Logger logger = LogManager.getLogger(SecondPassLttbTransform.class);
 
     /**
@@ -44,36 +44,41 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
         super("SecondPassLttbTransform");
         this.setEnabled(firstPass.isEnabled());
         this.threshold = threshold;
-        accumlationBuffer = firstPass.getAccumulationBuffer();
+        whiteList = computeWhileList(firstPass.getTimeStamps(), firstPass.getSeriesValues(), threshold);
     }
 
     @Override
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (threshold > 0 && data.size() > threshold) {
-                return applyLTTBReduction(data, threshold);
+            var filtered = new ArrayList<XYChart.Data<ZonedDateTime, Double>>();
+            for (int i = 0; i < data.size(); i++) {
+                if (whiteList[i]) {
+                    filtered.add(data.get(i));
+                }
+            }
+            logger.debug(() -> "Series reduced from " + data.size() + " to " + filtered.size() + " samples.");
+            return filtered;
         }
         return data;
     }
 
 
-    //TODO: cache white list of samples to keep the first time the second pass is run to reuse on subsequent series that
-    // share the data from the first pass.
     /**
      * <p>Method implementing the Largest-Triangle-Three-Buckets algorithm.</p>
      * <p>Adapted from <a href="https://gist.github.com/DanielWJudge/63300889f27c7f50eeb7">DanielWJudge/LargestTriangleThreeBuckets.cs</a></p>
      *
-     * @return a reduced list of samples.
+     * @return a white list of samples indexes to retain after a reduction
      */
-    private List<XYChart.Data<ZonedDateTime, Double>> applyLTTBReduction(List<XYChart.Data<ZonedDateTime, Double>> data, int threshold) {
-        int dataLength = data.size();
-        int nbDim = accumlationBuffer.size();
-        List<XYChart.Data<ZonedDateTime, Double>> sampled = new ArrayList<>();
+    private boolean[] computeWhileList(ZonedDateTime[] data, List<Double[]> seriesValues, int threshold) {
+        int dataLength = data.length;
+        int nbDim = seriesValues.size();
+        boolean[] whiteList = new boolean[dataLength];
         // Bucket size. Leave room for start and end data points
         double every = (double) (dataLength - 2) / (threshold - 2);
         int a = 0;
         int nextA = 0;
         int maxAreaPointIdx = a;
-        sampled.add(data.get(a)); // Always add the first point
+        whiteList[a] = true;// Always add the first point
         for (int i = 0; i < threshold - 2; i++) {
             // Calculate point average for next bucket (containing c)
             double avgX = 0;
@@ -83,9 +88,9 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
             avgRangeEnd = Math.min(avgRangeEnd, dataLength);
             int avgRangeLength = avgRangeEnd - avgRangeStart;
             for (; avgRangeStart < avgRangeEnd; avgRangeStart++) {
-                avgX += data.get(avgRangeStart).getXValue().toInstant().toEpochMilli();
+                avgX += data[avgRangeStart].toInstant().toEpochMilli();
                 for (int j = 0; j < nbDim; j++) {
-                    avgY[j] += accumlationBuffer.get(j)[avgRangeStart];
+                    avgY[j] += seriesValues.get(j)[avgRangeStart];
                 }
             }
             avgX /= avgRangeLength;
@@ -97,14 +102,14 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
             int rangeTo = (int) (Math.floor((i + 1) * every) + 1);
 
             // Point a
-            double pointAx = data.get(a).getXValue().toInstant().toEpochMilli();
+            double pointAx = data[a].toInstant().toEpochMilli();
             double maxArea = -1;//
             for (; rangeOffs < rangeTo; rangeOffs++) {
                 // Calculate triangle area over three buckets
                 double[] area = new double[nbDim];
                 for (int j = 0; j < nbDim; j++) {
-                    area[j] = Math.abs((pointAx - avgX) * (accumlationBuffer.get(j)[rangeOffs] - accumlationBuffer.get(j)[a]) -
-                            (pointAx - data.get(rangeOffs).getXValue().toInstant().toEpochMilli()) * (avgY[j] - accumlationBuffer.get(j)[a])
+                    area[j] = Math.abs((pointAx - avgX) * (seriesValues.get(j)[rangeOffs] - seriesValues.get(j)[a]) -
+                            (pointAx - data[rangeOffs].toInstant().toEpochMilli()) * (avgY[j] - seriesValues.get(j)[a])
                     ) * 0.5;
                     if (area[j] > maxArea) {
                         maxArea = area[j];
@@ -113,12 +118,13 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
                     }
                 }
             }
-            sampled.add(data.get(maxAreaPointIdx)); // Pick this point from the bucket
+            whiteList[maxAreaPointIdx] = true; // Pick this point from the bucket
             a = nextA; // This a is the next a (chosen b)
         }
-        sampled.add(data.get(dataLength - 1)); // Always add last
-        logger.debug(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
-        return sampled;
+        whiteList[dataLength - 1] = true; // Always add last
+
+        logger.debug(() -> "Lttb white list computed");
+        return whiteList;
     }
 
 
