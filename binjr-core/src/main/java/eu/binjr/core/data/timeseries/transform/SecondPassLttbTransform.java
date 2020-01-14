@@ -56,6 +56,8 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
     }
 
 
+    //TODO: cache white list of samples to keep the first time the second pass is run to reuse on subsequent series that
+    // share the data from the first pass.
     /**
      * <p>Method implementing the Largest-Triangle-Three-Buckets algorithm.</p>
      * <p>Adapted from <a href="https://gist.github.com/DanielWJudge/63300889f27c7f50eeb7">DanielWJudge/LargestTriangleThreeBuckets.cs</a></p>
@@ -115,7 +117,7 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
             a = nextA; // This a is the next a (chosen b)
         }
         sampled.add(data.get(dataLength - 1)); // Always add last
-        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
+        logger.debug(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 

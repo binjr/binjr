@@ -153,7 +153,7 @@ public abstract class TimeSeriesProcessor {
     public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
         if (!data.isEmpty()) {
             for (var t : seriesTransforms) {
-                setData(monitor.read().lock(() -> t.transform(data)));
+                setData(monitor.write().lock(() -> t.transform(data)));
             }
         } else {
             logger.trace("Don't apply transform on empty data store");

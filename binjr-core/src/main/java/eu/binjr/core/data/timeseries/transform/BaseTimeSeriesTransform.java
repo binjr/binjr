@@ -55,7 +55,7 @@ public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
     @Override
     public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (isEnabled()) {
-            try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::info)) {
+            try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::trace)) {
                 return apply(data);
             }
         } else {

@@ -34,6 +34,7 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform implements T
     protected final int threshold;
     private final List<Double[]> accumulationBuffer;
     private static final Logger logger = LogManager.getLogger(FirstPassLttbTransform.class);
+    private volatile boolean isBufferCoherent = true;
 
     /**
      * Initializes a new instnace of the {@link FirstPassLttbTransform} class.
@@ -62,6 +63,19 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform implements T
 
     @Override
     public TimeSeriesTransform getNextPassTransform() {
+        if (accumulationBuffer.size() < 1) {
+            logger.debug(() -> "Accumulation buffer from first pass is empty: return noOp transform");
+            return new NoOpTransform();
+        }
+        boolean isBufferCoherent = true;
+        int firstLength = accumulationBuffer.get(0).length;
+        for (var b : accumulationBuffer) {
+            isBufferCoherent = isBufferCoherent & (b.length == firstLength);
+        }
+        if (!isBufferCoherent) {
+            logger.debug(() -> "Accumulated series have different lengths: falling back to single pass lttb");
+            return new LargestTriangleThreeBucketsTransform(threshold);
+        }
         return new SecondPassLttbTransform(this, threshold);
     }
 }

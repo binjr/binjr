@@ -60,7 +60,7 @@ public class DecimationTransform extends BaseTimeSeriesTransform {
             sampled.add(data.get(Math.min(dataLength - 1, (int) Math.round(i * every))));
         }
         sampled.add(data.get(dataLength - 1));
-        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
+        logger.debug(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 }

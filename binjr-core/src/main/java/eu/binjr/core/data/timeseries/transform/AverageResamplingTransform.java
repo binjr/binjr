@@ -62,7 +62,7 @@ public final class AverageResamplingTransform extends BaseTimeSeriesTransform {
                 }
             }
             reduced.add(data.get(data.size() - 1));
-            logger.info(() -> "Series reduced from " + data.size() + " to " + reduced.size() + " samples.");
+            logger.debug(() -> "Series reduced from " + data.size() + " to " + reduced.size() + " samples.");
             return reduced;
         }
 

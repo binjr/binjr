@@ -106,7 +106,7 @@ public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransfor
             a = nextA; // This a is the next a (chosen b)
         }
         sampled.add(data.get(dataLength - 1)); // Always add last
-        logger.info(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
+        logger.debug(() -> "Series reduced from " + data.size() + " to " + sampled.size() + " samples.");
         return sampled;
     }
 
