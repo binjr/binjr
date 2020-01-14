@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2018 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
         super("SecondPassLttbTransform");
         this.setEnabled(firstPass.isEnabled());
         this.threshold = threshold;
-        whiteList = computeWhileList(firstPass.getTimeStamps(), firstPass.getSeriesValues(), threshold);
+        this.whiteList = computeWhiteList(firstPass.getTimeStamps(), firstPass.getSeriesValues(), threshold);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
      *
      * @return a white list of samples indexes to retain after a reduction
      */
-    private boolean[] computeWhileList(ZonedDateTime[] data, List<Double[]> seriesValues, int threshold) {
+    private boolean[] computeWhiteList(ZonedDateTime[] data, List<Double[]> seriesValues, int threshold) {
         int dataLength = data.length;
         int nbDim = seriesValues.size();
         boolean[] whiteList = new boolean[dataLength];
