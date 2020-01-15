@@ -431,7 +431,7 @@ task jpackageMacOS(type: Exec, dependsOn: [downloadAndUnpackJpackage]) {
             "--app-version", BINJR_VERSION,
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac/file-associations.properties",
-            "--java-options", "-Xmx2048M",
+            "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
