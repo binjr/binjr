@@ -20,7 +20,7 @@ jobs:
     parameters:
       name: app_bundle_linux
       platform: linux
-      jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-linux_x64.zip'
+      jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-linux_x64.tar.gz'
       jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
       pool:
         vmImage: 'ubuntu-16.04'
