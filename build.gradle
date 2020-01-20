@@ -22,8 +22,9 @@ import java.time.Duration
  */
 
 plugins {
-    id "de.undercouch.download" version "3.4.3"
+    id "de.undercouch.download" version "4.0.2"
     id "org.kordamp.markdown.convert" version "1.2.0"
+    id "com.github.ben-manes.versions" version "0.27.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
@@ -462,6 +463,19 @@ task packageDistribution(type: WrapTaskForSigning, dependsOn: [makeAppBundle]) {
 signing {
     sign packageDistribution
 }
+
+def isNonStable = { String version ->
+    // Ignore javafx early access and glassfish beta
+    def regex = /^[0-9,.v-]+((-ea\+)|(-b))[0-9.]+$/
+    return (version ==~ regex)
+}
+
+dependencyUpdates {
+    rejectVersionIf {
+        isNonStable(it.candidate.version)
+    }
+}
+
 
 
 /**
