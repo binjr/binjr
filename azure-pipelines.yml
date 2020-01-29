@@ -72,6 +72,7 @@ jobs:
           jdkVersionOption: '1.12'
           jdkArchitectureOption: 'x64'
           publishJUnitResults: false
+          options: '-Dorg.gradle.internal.publish.checksums.insecure=true'
           tasks: 'copyInfo publishArtifacts'
       - bash: |
           git clone https://github.com/binjr/binjr.github.io build/tmp/binjr.github.io
