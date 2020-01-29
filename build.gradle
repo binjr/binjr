@@ -49,7 +49,7 @@ ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "13.0.2"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
-ext.JDK_JPACKAGE_DOWNLOAD_URL_ROOT = "https://download.java.net/java/early_access/jdk14/28/GPL/openjdk-14-ea+28_"
+ext.JDK_JPACKAGE_DOWNLOAD_URL_ROOT = "https://download.java.net/java/early_access/jdk14/33/GPL/openjdk-14-ea+33_"
 ext.JDK_JPACKAGE_DOWNLOAD_URL = IS_MAC ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}osx-x64_bin.tar.gz" :
         IS_WINDOWS ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}windows-x64_bin.zip" :
                 IS_LINUX ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}linux-x64_bin.tar.gz" : 'unsupported'
