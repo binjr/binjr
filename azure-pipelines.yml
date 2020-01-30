@@ -14,78 +14,118 @@ variables:
   isTag: 'false'
   isSnapshot: 'false'
 
-jobs:
-  # Linux app bundle job
-  - template: build-job.yml
-    parameters:
-      name: app_bundle_linux
-      platform: linux
-      jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-linux_x64.tar.gz'
-      jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+stages:
+  - stage: build
+    jobs:
+      # Linux app bundle job
+      - template: build-job.yml
+        parameters:
+          name: app_bundle_linux
+          platform: linux
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-linux_x64.tar.gz'
+          jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+          pool:
+            vmImage: 'ubuntu-16.04'
+
+      # MacOS app bundle job
+      - template: build-job.yml
+        parameters:
+          name: app_bundle_mac
+          platform: mac
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-macosx_x64.tar.gz'
+          jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
+          pool:
+            vmImage: 'macOS-10.14'
+
+      # Windows app bundle job
+      - template: build-job.yml
+        parameters:
+          name: app_bundle_windows
+          platform: win
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-win_x64.zip'
+          jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
+          pool:
+            vmImage: 'windows-2019'
+
+      # Finalize release
+  - stage: release
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    jobs:
+    - job: finalize_release
       pool:
         vmImage: 'ubuntu-16.04'
+      steps:
+        - bash: |
+            echo '##vso[task.setvariable variable=isSnapshot;]true'
+          condition: and(succeeded(), endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
 
-  # MacOS app bundle job
-  - template: build-job.yml
-    parameters:
-      name: app_bundle_mac
-      platform: mac
-      jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-macosx_x64.tar.gz'
-      jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
+        - task: GithubRelease@0
+          inputs:
+            gitHubConnection: binjr-bot
+            repositoryName: binjr/binjr
+            action: edit
+            tag: $(Build.SourceBranchName)
+            assets: $(System.DefaultWorkingDirectory)/distribution/publishing/*.asc
+            assetUploadMode: 'replace'
+            releaseNotesSource: 'file'
+            addChangeLog: false
+            isPreRelease: $(isSnapshot)
+
+        - task: Gradle@2
+          condition: not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
+          env:
+            IS_TAG: $(isTag)
+            REPO_TAG_NAME: $(Build.SourceBranchName)
+            GPG_KEY_NAME: $(gpg.keyname)
+            GPG_PASSPHRASE: $(gpg.passphrase)
+            OSSRH_JIRA_PASSWORD: $(ossrh.password)
+            OSSRH_JIRA_USERNAME: $(ossrh.username)
+          inputs:
+            gradleWrapperFile: 'gradlew'
+            javaHomeOption: 'JDKVersion'
+            jdkVersionOption: '1.12'
+            jdkArchitectureOption: 'x64'
+            publishJUnitResults: false
+            tasks: 'copyInfo'
+
+        - bash: |
+            git clone https://github.com/binjr/binjr.github.io build/tmp/binjr.github.io
+            cd  build/tmp/binjr.github.io
+            cp ../info/CHANGELOG.md CHANGELOG.md
+            git config credential.helper store
+            echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
+            git config user.email "binjr.bot@free.fr"
+            git config user.name "binjr-bot"
+            wget https://api.github.com/repos/binjr/binjr/releases/latest -O repos/binjr/binjr/releases/latest
+            git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
+            git push
+          env:
+            GH_ACCESS_TOKEN: $(gh.access.token)
+          condition: not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
+
+  - stage: publish
+    jobs:
+    # Publish to Maven repo
+    - job: maven_publish
       pool:
-        vmImage: 'macOS-10.14'
-
-  # Windows app bundle job
-  - template: build-job.yml
-    parameters:
-      name: app_bundle_windows
-      platform: win
-      jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu13.29.9-ca-jdk13.0.2-win_x64.zip'
-      jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
-      pool:
-        vmImage: 'windows-2019'
-
-  # Publish to Maven repo
-  - job: maven_publish
-    dependsOn:
-    - app_bundle_linux
-    - app_bundle_windows
-    - app_bundle_mac
-    condition: succeeded()
-    pool:
-      vmImage: 'ubuntu-16.04'
-    steps:
-      - script: |
-          echo '##vso[task.setvariable variable=isTag;]true'
-        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-      - task: Gradle@2
-        env:
-          IS_TAG: $(isTag)
-          REPO_TAG_NAME: $(Build.SourceBranchName)
-          GPG_KEY_NAME: $(gpg.keyname)
-          GPG_PASSPHRASE: $(gpg.passphrase)
-          OSSRH_JIRA_PASSWORD: $(ossrh.password)
-          OSSRH_JIRA_USERNAME: $(ossrh.username)
-        inputs:
-          gradleWrapperFile: 'gradlew'
-          javaHomeOption: 'JDKVersion'
-          jdkVersionOption: '1.12'
-          jdkArchitectureOption: 'x64'
-          publishJUnitResults: false
-          options: '-Dorg.gradle.internal.publish.checksums.insecure=true'
-          tasks: 'copyInfo publishArtifacts'
-      - bash: |
-          git clone https://github.com/binjr/binjr.github.io build/tmp/binjr.github.io
-          cd  build/tmp/binjr.github.io
-          cp ../info/CHANGELOG.md CHANGELOG.md
-          git config credential.helper store
-          echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
-          git config user.email "binjr.bot@free.fr"
-          git config user.name "binjr-bot"
-          wget https://api.github.com/repos/binjr/binjr/releases/latest -O repos/binjr/binjr/releases/latest
-          git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
-          git push
-        env:
-          GH_ACCESS_TOKEN: $(gh.access.token)
-        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-
+        vmImage: 'ubuntu-16.04'
+      steps:
+        - script: |
+            echo '##vso[task.setvariable variable=isTag;]true'
+          condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+        - task: Gradle@2
+          env:
+            IS_TAG: $(isTag)
+            REPO_TAG_NAME: $(Build.SourceBranchName)
+            GPG_KEY_NAME: $(gpg.keyname)
+            GPG_PASSPHRASE: $(gpg.passphrase)
+            OSSRH_JIRA_PASSWORD: $(ossrh.password)
+            OSSRH_JIRA_USERNAME: $(ossrh.username)
+          inputs:
+            gradleWrapperFile: 'gradlew'
+            javaHomeOption: 'JDKVersion'
+            jdkVersionOption: '1.12'
+            jdkArchitectureOption: 'x64'
+            publishJUnitResults: false
+            options: '-Dorg.gradle.internal.publish.checksums.insecure=true'
+            tasks: 'publishArtifacts'

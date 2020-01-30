@@ -444,7 +444,7 @@ task jpackageMacOS(type: Exec, dependsOn: [downloadAndUnpackJpackage]) {
     }
 }
 
-task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPubKey, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
+task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
     if (IS_WINDOWS) {
         finalizedBy(wixRunLight)
     } else if (IS_MAC) {
