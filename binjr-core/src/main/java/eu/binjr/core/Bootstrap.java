@@ -40,13 +40,6 @@ public final class Bootstrap {
      */
     public static void main(String[] args) {
         try {
-            if (AppEnvironment.getInstance().getOsFamily() == OsFamily.LINUX) {
-                // Force openJfx to fall back to gtk 2 to workaround issue with Wayland
-                // unless its been explicitly set in the command line
-                if (System.getProperty("jdk.gtk.version") == null) {
-                    System.setProperty("jdk.gtk.version", "2");
-                }
-            }
             Binjr.main(args);
         } catch (Exception e) {
             logger.fatal("Failed to load " + AppEnvironment.APP_NAME, e);

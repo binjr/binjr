@@ -12,7 +12,6 @@ exec "$JAVACMD" \
   -XX:+UseShenandoahGC \
   -XX:ShenandoahGCHeuristics=compact \
   -XX:ShenandoahAllocationThreshold=20 \
-  -Djdk.gtk.version=2 \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
