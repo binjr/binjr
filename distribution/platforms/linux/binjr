@@ -4,7 +4,7 @@ BASEDIR="$(dirname "$(readlink -f "$0")")"
 
 JAVACMD="$BASEDIR/runtime/bin/java"
 
-exec $JAVACMD \
+exec "$JAVACMD" \
   -splash:"$BASEDIR/resources/images/splashscreen.png" \
   -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
   -Xmx4096M \
