@@ -49,10 +49,7 @@ ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "14"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
-ext.JDK_JPACKAGE_DOWNLOAD_URL_ROOT = "https://download.java.net/java/early_access/jdk14/33/GPL/openjdk-14-ea+33_"
-ext.JDK_JPACKAGE_DOWNLOAD_URL = IS_MAC ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}osx-x64_bin.tar.gz" :
-        IS_WINDOWS ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}windows-x64_bin.zip" :
-                IS_LINUX ? "${JDK_JPACKAGE_DOWNLOAD_URL_ROOT}linux-x64_bin.tar.gz" : 'unsupported'
+
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
         "javafx.swing," +
@@ -407,20 +404,10 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task downloadJpackage(type: Download) {
-    src JDK_JPACKAGE_DOWNLOAD_URL
-    dest new File("${buildDir}/tmp", 'jdk_jpackage')
-}
-
-task downloadAndUnpackJpackage(dependsOn: downloadJpackage, type: Copy) {
-    from IS_WINDOWS ? zipTree(downloadJpackage.dest) : tarTree(project.resources.gzip(downloadJpackage.dest))
-    into "${buildDir}/tmp"
-}
-
-task jpackageMacOS(type: Exec, dependsOn: [downloadAndUnpackJpackage]) {
+task jpackageMacOS(type: Exec) {
     workingDir buildDir
     commandLine = [
-            "${buildDir}/tmp/jdk-14.jdk/Contents/Home/bin/jpackage",
+            "jpackage",
             "--name", project.name,
             "--input", "${DISTRIBUTION_PATH}/libs",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
