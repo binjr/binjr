@@ -453,7 +453,7 @@ signing {
 
 def isNonStable = { String version ->
     // Ignore javafx early access and glassfish beta
-    def regex = /^[0-9,.v-]+((-ea\+)|(-b))[0-9.]+$/
+    def regex = /^[0-9,.v-]+((-ea\+)|(-b))[0-9.]+|^[0-9,.v-]+((-RC\+)$/
     return (version ==~ regex)
 }
 
