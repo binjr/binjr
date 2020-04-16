@@ -16,13 +16,13 @@
 
 package eu.binjr.core.data.codec.csv;
 
+import eu.binjr.common.function.CheckedFunction;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.exceptions.DecodingDataFromAdapterException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessorFactory;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.common.function.CheckedFunction;
-import eu.binjr.common.logging.Profiler;
 import javafx.scene.chart.XYChart;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
@@ -55,6 +55,21 @@ public class CsvDecoder implements Decoder {
     private static final Logger logger = LogManager.getLogger(CsvDecoder.class);
 
     /**
+     * Initializes a new instance of the {@link CsvDecoder} class using the default number parsing function.
+     *
+     * @param encoding          the encoding used in the CSV stream
+     * @param delimiter         the character to separate columns in the CSV stream
+     * @param timeSeriesFactory the factory used to fromUrl new {@link TimeSeriesProcessor} instances.
+     * @param dateParser        the function used to parse dates from the CSV stream
+     */
+    public CsvDecoder(String encoding,
+                      char delimiter,
+                      TimeSeriesProcessorFactory timeSeriesFactory,
+                      CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser) {
+        this(encoding, delimiter, timeSeriesFactory, null, dateParser);
+    }
+
+    /**
      * Initializes a new instance of the {@link CsvDecoder} class.
      *
      * @param encoding          the encoding used in the CSV stream
@@ -71,6 +86,14 @@ public class CsvDecoder implements Decoder {
         this.encoding = encoding;
         this.delimiter = delimiter;
         this.timeSeriesFactory = timeSeriesFactory;
+        if (numberParser == null) {
+            numberParser = s -> {
+                if (s == null || s.isBlank() || s.equalsIgnoreCase("null")) {
+                    return Double.NaN;
+                }
+                return Double.parseDouble(s);
+            };
+        }
         this.numberParser = numberParser;
         this.dateParser = dateParser;
     }

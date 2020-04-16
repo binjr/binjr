@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -61,6 +61,7 @@ import java.security.Principal;
 import java.security.Security;
 import java.time.Instant;
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * This class provides a base on which to implement {@link DataAdapter} instances that communicate with sources via the HTTP protocol.
@@ -70,6 +71,7 @@ import java.util.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
+    private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
     private final CloseableHttpClient httpClient;
     private URL baseAddress;
@@ -331,4 +333,21 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
             return false;
         }
     }
+
+    public static URL urlFromString(String address) throws CannotInitializeDataAdapterException {
+        try {
+            // Detect if URL protocol is present. If not, assume http.
+            if (!uriSchemePattern.matcher(address).find()) {
+                address = "http://" + address;
+            }
+            URL url = new URL(address.trim());
+            if (url.getHost().trim().isEmpty()) {
+                throw new CannotInitializeDataAdapterException("Malformed URL: no host");
+            }
+            return url;
+        } catch (MalformedURLException e) {
+            throw new CannotInitializeDataAdapterException("Malformed URL: " + e.getMessage(), e);
+        }
+    }
+
 }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2020 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,12 +14,25 @@
  *    limitations under the License.
  */
 
-rootProject.name = 'binjr'
-include 'binjr-adapter-csv'
-include 'binjr-adapter-jrds'
-include 'binjr-adapter-rrd4j'
-include 'binjr-adapter-netdata'
-include 'binjr-app'
-include 'binjr-core'
+package eu.binjr.sources.netdata.api;
 
+public enum GroupingMethod {
+    MIN("min"),
+    MAX("max"),
+    AVERAGE("average"),
+    SUM("sum"),
+    MEDIAN("median"),
+    STDDEV("stddev"),
+    INCREMENTAL_SUM("incremental-sum");
 
+    private final String parameterValue;
+
+    GroupingMethod(String parameterValue) {
+        this.parameterValue = parameterValue;
+    }
+
+    @Override
+    public String toString() {
+        return this.parameterValue;
+    }
+}

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2018 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -23,7 +23,10 @@ import eu.binjr.core.data.adapters.HttpDataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
-import eu.binjr.core.data.exceptions.*;
+import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
+import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
+import eu.binjr.core.data.exceptions.SourceCommunicationException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.sources.jrds.adapters.json.JsonJrdsItem;
@@ -47,7 +50,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -56,7 +58,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -73,7 +74,6 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
-    private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
     private CsvDecoder decoder;
     private String filter;
@@ -122,19 +122,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
      * @throws DataAdapterException if an error occurs while initializing the adapter.
      */
     public static JrdsDataAdapter fromUrl(String address, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
-        try {
-            // Detect if URL protocol is present. If not, assume http.
-            if (!uriSchemePattern.matcher(address).find()) {
-                address = "http://" + address;
-            }
-            URL url = new URL(address.trim());
-            if (url.getHost().trim().isEmpty()) {
-                throw new CannotInitializeDataAdapterException("Malformed URL: no host");
-            }
-            return new JrdsDataAdapter(url, zoneId, "utf-8", treeViewTab, filter);
-        } catch (MalformedURLException e) {
-            throw new CannotInitializeDataAdapterException("Malformed URL: " + e.getMessage(), e);
-        }
+        return new JrdsDataAdapter(urlFromString(address), zoneId, "utf-8", treeViewTab, filter);
     }
 
     //region [DataAdapter Members]
@@ -421,7 +409,6 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     private CsvDecoder decoderFactory(ZoneId zoneId) {
         return new CsvDecoder(getEncoding(), DELIMITER,
                 DoubleTimeSeriesProcessor::new,
-                Double::parseDouble,
                 s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
     }
 }

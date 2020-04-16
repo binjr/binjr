@@ -37,4 +37,12 @@ public enum ChartType {
     public String toString() {
         return label;
     }
+
+    public static ChartType valueOrDefault(String name, ChartType defaultValue) {
+        try {
+            return Enum.valueOf(ChartType.class, name);
+        } catch (IllegalArgumentException e) {
+            return defaultValue;
+        }
+    }
 }
