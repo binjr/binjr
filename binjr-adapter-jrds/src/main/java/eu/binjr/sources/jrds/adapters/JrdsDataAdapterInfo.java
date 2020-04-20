@@ -17,6 +17,7 @@
 package eu.binjr.sources.jrds.adapters;
 
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
+import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -30,12 +31,13 @@ public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
      * Initialises a new instance of the {@link JrdsDataAdapterInfo} class.
      */
     public JrdsDataAdapterInfo() {
-        super("JRDS Server",
+        super("JRDS",
                 "JRDS Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 JrdsDataAdapter.class,
-                JrdsAdapterDialog.class);
+                JrdsAdapterDialog.class,
+                SourceLocality.REMOTE);
     }
 }

@@ -119,5 +119,20 @@ public interface DataAdapterInfo {
      */
     public void setEnabled(boolean enabled);
 
+    /**
+     * Retuens the {@link eu.binjr.common.preferences.Preference} instance associated with the adapter
+     * @return
+     */
     public PreferenceFactory getPreferences();
+
+
+    /**
+     * Return true if the source for the adapter is a remote server , false otherwise.
+     *
+     * @return
+     */
+    default SourceLocality getSourceLocality() {
+        return SourceLocality.UNKNOWN;
+    }
+
 }

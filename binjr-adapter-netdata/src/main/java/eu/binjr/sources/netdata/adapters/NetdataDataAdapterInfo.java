@@ -17,6 +17,7 @@
 package eu.binjr.sources.netdata.adapters;
 
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
+import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -30,13 +31,14 @@ public class NetdataDataAdapterInfo extends BaseDataAdapterInfo {
      * Initialises a new instance of the {@link NetdataDataAdapterInfo} class.
      */
     public NetdataDataAdapterInfo() {
-        super("Netdata server",
+        super("Netdata",
                 "Netdata Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 NetdataAdapter.class,
                 NetDataAdapterDialog.class,
-                NetdataAdapterPreferences.getInstance());
+                NetdataAdapterPreferences.getInstance(),
+                SourceLocality.REMOTE);
     }
 }

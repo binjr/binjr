@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
+import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -30,12 +31,13 @@ public class CsvFileDataAdapterInfo extends BaseDataAdapterInfo {
      * Initialises a new instance of the {@link CsvFileDataAdapterInfo} class.
      */
     public CsvFileDataAdapterInfo() {
-        super("CSV File",
+        super("CSV",
                 "CSV File Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 CsvFileAdapter.class,
-                CsvFileAdapterDialog.class);
+                CsvFileAdapterDialog.class,
+                SourceLocality.LOCAL);
     }
 }

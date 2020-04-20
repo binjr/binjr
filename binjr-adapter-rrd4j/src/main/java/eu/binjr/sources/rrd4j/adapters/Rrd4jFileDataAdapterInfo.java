@@ -17,6 +17,7 @@
 package eu.binjr.sources.rrd4j.adapters;
 
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
+import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -30,12 +31,13 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
      * Initialises a new instance of the {@link Rrd4jFileDataAdapterInfo} class.
      */
     public Rrd4jFileDataAdapterInfo() {
-        super("RRD Files",
+        super("RRD",
                 "RRD Data Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 Rrd4jFileAdapter.class,
-                Rrd4jFileAdapterDialog.class);
+                Rrd4jFileAdapterDialog.class,
+                SourceLocality.LOCAL);
     }
 }
