@@ -43,6 +43,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
+ * A {@link eu.binjr.core.data.adapters.DataAdapter} implementation capable of consuming data from the
+ * Netdata (https://netdata.cloud) API.
+ *
  * @author Frederic Thevenet
  */
 public class NetdataAdapter extends HttpDataAdapter {
@@ -54,6 +57,11 @@ public class NetdataAdapter extends HttpDataAdapter {
     private UserPreferences userPrefs = UserPreferences.getInstance();
     private NetdataAdapterPreferences adapterPrefs = (NetdataAdapterPreferences) getAdapterInfo().getPreferences();
 
+    /**
+     * Initialises a new instance of the {@link NetdataAdapter} class.
+     *
+     * @throws CannotInitializeDataAdapterException if an error occurs while initializing the adapter.
+     */
     public NetdataAdapter() throws CannotInitializeDataAdapterException {
         this(null, ZoneId.systemDefault());
     }
@@ -65,6 +73,14 @@ public class NetdataAdapter extends HttpDataAdapter {
         jsonParser = new Gson();
     }
 
+    /**
+     * Returns a new instance of {@link NetdataAdapter} for the provided address and time zone.
+     *
+     * @param address the address of a Netdata server.
+     * @param zoneId  the desired time zone.
+     * @return a new instance of {@link NetdataAdapter} for the provided address and time zone.
+     * @throws CannotInitializeDataAdapterException if an error occurs while initializing the adapter.
+     */
     public static DataAdapter fromUrl(String address, ZoneId zoneId) throws CannotInitializeDataAdapterException {
         return new NetdataAdapter(urlFromString(address), zoneId);
     }

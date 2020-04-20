@@ -24,13 +24,18 @@ import javafx.scene.Node;
 import java.net.URI;
 import java.time.ZoneId;
 
-public class NetDataAdapterDialog extends DataAdapterDialog<URI> {
+/**
+ * A dialog box that returns a {@link NetdataAdapter} built according to user inputs.
+ *
+ * @author Frederic Thevenet
+ */
+public class NetdataAdapterDialog extends DataAdapterDialog<URI> {
     /**
      * Initializes a new instance of the {@link DataAdapterDialog} class.
      *
      * @param owner the owner window for the dialog
      */
-    public NetDataAdapterDialog(Node owner) {
+    public NetdataAdapterDialog(Node owner) {
         super(owner, Mode.URI, "mostRecentNetdataUrls");
     }
 

@@ -25,19 +25,19 @@ import eu.binjr.core.preferences.AppEnvironment;
  *
  * @author Frederic Thevenet
  */
-public class NetdataDataAdapterInfo extends BaseDataAdapterInfo {
+public class NetdataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
-     * Initialises a new instance of the {@link NetdataDataAdapterInfo} class.
+     * Initialises a new instance of the {@link NetdataAdapterInfo} class.
      */
-    public NetdataDataAdapterInfo() {
+    public NetdataAdapterInfo() {
         super("Netdata",
                 "Netdata Adapter",
                 AppEnvironment.COPYRIGHT_NOTICE,
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 NetdataAdapter.class,
-                NetDataAdapterDialog.class,
+                NetdataAdapterDialog.class,
                 NetdataAdapterPreferences.getInstance(),
                 SourceLocality.REMOTE);
     }

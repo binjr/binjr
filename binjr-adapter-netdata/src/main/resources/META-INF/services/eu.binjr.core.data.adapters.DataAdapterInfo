@@ -15,4 +15,4 @@
 #
 
 # Netdata Data adapter service implementation
-eu.binjr.sources.netdata.adapters.NetdataDataAdapterInfo
+eu.binjr.sources.netdata.adapters.NetdataAdapterInfo
