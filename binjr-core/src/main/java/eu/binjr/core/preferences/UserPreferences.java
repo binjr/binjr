@@ -20,6 +20,7 @@ import com.google.gson.Gson;
 import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.common.preferences.PreferenceFactory;
+import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
@@ -234,6 +235,8 @@ public class UserPreferences extends PreferenceFactory {
     public Preference<DownSamplingAlgorithm> downSamplingAlgorithm =
             enumPreference(DownSamplingAlgorithm.class, "downSamplingAlgorithm", DownSamplingAlgorithm.AUTO);
 
+    public Preference<BuiltInChartColorPalettes> chartColorPalette =
+            enumPreference(BuiltInChartColorPalettes.class, "chartColorPalette", BuiltInChartColorPalettes.VIBRANT);
 
     private UserPreferences() {
         super(Preferences.userRoot().node(BINJR_GLOBAL));

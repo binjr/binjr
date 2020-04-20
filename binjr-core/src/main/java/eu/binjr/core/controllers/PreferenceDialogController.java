@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.preferences.Preference;
+import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.adapters.DataAdapterInfo;
@@ -76,6 +77,8 @@ public class PreferenceDialogController implements Initializable {
     public TitledPane updatePreferences;
     @FXML
     public ToggleSwitch fullHeightCrosshair;
+    @FXML
+    public ChoiceBox<BuiltInChartColorPalettes> chartPaletteChoiceBox;
     @FXML
     private ToggleSwitch loadExternalToggle;
     @FXML
@@ -162,6 +165,8 @@ public class PreferenceDialogController implements Initializable {
         downSamplingThreshold.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
+        bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
+
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());

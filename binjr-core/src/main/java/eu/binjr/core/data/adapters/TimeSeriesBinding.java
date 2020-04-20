@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
@@ -46,30 +47,7 @@ public class TimeSeriesBinding {
             throw new IllegalStateException("Failed to create a new instance of Md5HashTargetResolver", e);
         }
     });
-    private final static Color[] defaultChartColors = new Color[]{
-            Color.LIGHTBLUE,
-            Color.LIGHTCORAL,
-            Color.LIGHTCYAN,
-            Color.LIGHTGRAY,
-            Color.LIGHTGREEN,
-            Color.LEMONCHIFFON,
-            Color.LAVENDER,
-            Color.LIGHTPINK,
-            Color.LIGHTSALMON,
-            Color.LIGHTSEAGREEN,
-            Color.LIGHTSKYBLUE,
-            Color.LIGHTSLATEGRAY,
-            Color.LIGHTSTEELBLUE,
-            Color.LIGHTYELLOW,
-            Color.MEDIUMBLUE,
-            Color.MEDIUMORCHID,
-            Color.MEDIUMPURPLE,
-            Color.MEDIUMSEAGREEN,
-            Color.MEDIUMSPRINGGREEN,
-            Color.MEDIUMTURQUOISE,
-            Color.MEDIUMVIOLETRED,
-            Color.MINTCREAM,
-    };
+
     @XmlAttribute(name = "sourceId")
     private final UUID adapterId;
     @XmlAttribute
@@ -165,12 +143,7 @@ public class TimeSeriesBinding {
             id = adapter.getId();
         }
         this.adapterId = id;
-        if (color == null) {
-            // pickup a default color at random, based on the hash of the binding path, so it stays stable
-            this.color = computeDefaultColor();
-        } else {
-            this.color = color;
-        }
+        this.color = color;
     }
 
     /**
@@ -211,7 +184,7 @@ public class TimeSeriesBinding {
      * @return the color of the bound series as defined in the source.
      */
     public Color getColor() {
-        return this.color;
+        return this.color == null ? computeDefaultColor() : this.color;
     }
 
     /**
@@ -274,11 +247,11 @@ public class TimeSeriesBinding {
     }
 
     private Color computeDefaultColor() {
-        long targetNum = getHashValue(this.getLabel()) % defaultChartColors.length;
+        long targetNum = getHashValue(this.getLabel()) % StageAppearanceManager.getInstance().getDefaultChartColors().length;
         if (targetNum < 0) {
             targetNum = targetNum * -1;
         }
-        return defaultChartColors[((int) targetNum)];
+        return StageAppearanceManager.getInstance().getDefaultChartColors()[((int) targetNum)];
     }
 
     private long getHashValue(final String value) {

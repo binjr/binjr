@@ -55,6 +55,8 @@
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" fillWidth="true">
                             <Label text="Theme"/>
                             <ChoiceBox fx:id="uiThemeChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <Label text="Charts Color Palette"/>
+                            <ChoiceBox fx:id="chartPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Reload last workspace on start-up" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">

@@ -29,6 +29,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.apache.logging.log4j.LogManager;
@@ -242,4 +243,9 @@ public class StageAppearanceManager {
     public void applyUiTheme(Scene scene) {
         setUiTheme(scene, UserPreferences.getInstance().userInterfaceTheme.get());
     }
+
+    public Color[] getDefaultChartColors() {
+        return UserPreferences.getInstance().chartColorPalette.get().getPalette();
+    }
+
 }
