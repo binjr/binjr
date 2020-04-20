@@ -25,7 +25,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.preferences.UserPreferences;
-import eu.binjr.sources.netdata.api.ChartDimensions;
+import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
 import org.apache.http.NameValuePair;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -39,8 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * @author Frederic Thevenet
@@ -71,20 +71,10 @@ public class NetdataAdapter extends HttpDataAdapter {
 
     @Override
     protected URI craftFetchUri(String path, Instant begin, Instant end) throws DataAdapterException {
-
-        return craftRequestUri(path,
-                makeParamList(
-                        UriParameter.of("after", begin.getEpochSecond()),
-                        UriParameter.of("before", end.getEpochSecond())
-                )
-        );
-    }
-
-    private List<NameValuePair> makeParamList(NameValuePair... parameters) {
         var params = new ArrayList<NameValuePair>();
         params.add(UriParameter.of("points",
                 (userPrefs.downSamplingEnabled.get() && !adapterPrefs.disableServerSideDownsampling.get()
-                        ? userPrefs.downSamplingThreshold.get() : 0)));
+                        ? userPrefs.downSamplingThreshold.get() : adapterPrefs.maxSamplesAllowed.get())));
         params.add(UriParameter.of("group", adapterPrefs.groupingMethod.get()));
         params.add(UriParameter.of("gtime", adapterPrefs.groupingTime.get()));
         if (adapterPrefs.disableTimeFrameAlignment.get()) {
@@ -92,8 +82,10 @@ public class NetdataAdapter extends HttpDataAdapter {
         }
         params.add(UriParameter.of("format", "csv"));
         params.add(UriParameter.of("options", "seconds"));
-        params.addAll(Arrays.asList(parameters));
-        return params;
+        params.add(UriParameter.of("after", begin.getEpochSecond()));
+        params.add(UriParameter.of("before", end.getEpochSecond()));
+
+        return craftRequestUri(path, params);
     }
 
     @Override
@@ -103,16 +95,23 @@ public class NetdataAdapter extends HttpDataAdapter {
 
     @Override
     public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        //TODO make async
         String entityString = doHttpGet(craftRequestUri(ChartSummary.ENDPOINT), new BasicResponseHandler());
         logger.trace(entityString);
         var chartSummary = jsonParser.fromJson(entityString, ChartSummary.class);
-        this.zoneId = ZoneId.of(chartSummary.getTimezone());
         FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(new TimeSeriesBindingBuilder(this)
                 .setLabel(getSourceName())
                 .setParent("")
                 .setPath("/").build());
+        Map<String, FilterableTreeItem<TimeSeriesBinding>> types = new TreeMap<>();
         chartSummary.getCharts().forEach((s, chart) -> {
+            var categoryName = getCategoryName(chart);
+            var categoryBranch = types.computeIfAbsent(categoryName, s1 -> new FilterableTreeItem<>(
+                    new TimeSeriesBindingBuilder(this)
+                            .setPath("")
+                            .setLabel(categoryName)
+                            .setParent(tree.getValue().getTreeHierarchy())
+                            .build()));
+
             var branch = new FilterableTreeItem<>(
                     new TimeSeriesBindingBuilder(this)
                             .setPath(chart.getDataUrl())
@@ -120,7 +119,7 @@ public class NetdataAdapter extends HttpDataAdapter {
                             .setGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
                             .setLegend(chart.getTitle())
                             .setUnitName(chart.getUnits())
-                            .setParent(tree.getValue().getTreeHierarchy())
+                            .setParent(categoryBranch.getValue().getTreeHierarchy())
                             .build());
             chart.getDimensions().forEach((s1, chartDimensions) -> {
                 branch.getInternalChildren().add(new FilterableTreeItem<>(
@@ -132,8 +131,9 @@ public class NetdataAdapter extends HttpDataAdapter {
                                 .setPath(chart.getDataUrl())
                                 .build()));
             });
-            tree.getInternalChildren().add(branch);
+            categoryBranch.getInternalChildren().add(branch);
         });
+        tree.getInternalChildren().addAll(types.values());
         return tree;
     }
 
@@ -165,4 +165,9 @@ public class NetdataAdapter extends HttpDataAdapter {
                 s -> Instant.ofEpochSecond(Long.parseLong(s)).atZone(zoneId));
     }
 
+    private String getCategoryName(Chart chart) {
+        var categoryName = chart.getType().split("_")[0];
+        return categoryName.isBlank() ?
+                "Unknown" : categoryName.substring(0, 1).toUpperCase() + categoryName.substring(1);
+    }
 }
