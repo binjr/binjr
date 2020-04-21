@@ -32,9 +32,9 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
     public Preference<Boolean> disableServerSideDownsampling = booleanPreference("disableServerSideDownsampling", false);
 
     /**
-     * SEt to true to disable Netdata alignment of all series on the same time-frame.
+     * Set to true to disable Netdata alignment of all series on the same time-frame.
      */
-    public Preference<Boolean> disableTimeFrameAlignment = booleanPreference("disableTimeFrameAlignment", false);
+    public Preference<Boolean> disableTimeFrameAlignment = booleanPreference("disableTimeFrameAlignment", true);
 
     /**
      * Netdata's grouping (i.e. down-sampling) method: If multiple collected values are to be grouped in order to
