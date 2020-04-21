@@ -173,6 +173,12 @@ public class Chart implements Dirtyable, AutoCloseable {
         userPref = UserPreferences.getInstance();
     }
 
+    /**
+     * Returns the preferred time range to initialize a new worksheet with.
+     *
+     * @return the preferred time range to initialize a new worksheet with.
+     * @throws DataAdapterException if an error occurs while fetching data from an adapter.
+     */
     public TimeRange getInitialTimeRange() throws DataAdapterException {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;

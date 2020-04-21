@@ -17,6 +17,7 @@
 package eu.binjr.sources.netdata.adapters;
 
 import com.google.gson.Gson;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
@@ -24,11 +25,12 @@ import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.workspace.ChartType;
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
 import org.apache.http.NameValuePair;
-import org.apache.http.impl.client.BasicResponseHandler;
+import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
@@ -38,7 +40,9 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -111,9 +115,10 @@ public class NetdataAdapter extends HttpDataAdapter {
 
     @Override
     public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        String entityString = doHttpGet(craftRequestUri(ChartSummary.ENDPOINT), new BasicResponseHandler());
-        logger.trace(entityString);
-        var chartSummary = jsonParser.fromJson(entityString, ChartSummary.class);
+        var chartSummary = doHttpGet(
+                craftRequestUri(ChartSummary.ENDPOINT),
+                response -> jsonParser.fromJson(EntityUtils.toString(response.getEntity()), ChartSummary.class)
+        );
         FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(new TimeSeriesBindingBuilder(this)
                 .setLabel(getSourceName())
                 .setParent("")
@@ -127,7 +132,6 @@ public class NetdataAdapter extends HttpDataAdapter {
                             .setLabel(categoryName)
                             .setParent(tree.getValue().getTreeHierarchy())
                             .build()));
-
             var branch = new FilterableTreeItem<>(
                     new TimeSeriesBindingBuilder(this)
                             .setPath(chart.getDataUrl())
@@ -163,6 +167,14 @@ public class NetdataAdapter extends HttpDataAdapter {
         return zoneId;
     }
 
+    @Override
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
+        Chart chart = doHttpGet(craftRequestUri(path.replace("/data?", "/chart?")), response ->
+                jsonParser.fromJson(EntityUtils.toString(response.getEntity()), Chart.class)
+        );
+        return TimeRange.of(ZonedDateTime.ofInstant(Instant.ofEpochSecond(chart.getFirstEntry().longValue()), zoneId),
+                ZonedDateTime.ofInstant(Instant.ofEpochSecond(chart.getLastEntry().longValue()), zoneId));
+    }
 
     @Override
     public String getSourceName() {
