@@ -102,10 +102,15 @@ public class NetdataAdapter extends HttpDataAdapter {
         }
         params.add(UriParameter.of("format", "csv"));
         params.add(UriParameter.of("options", "seconds"));
-        params.add(UriParameter.of("after", begin.getEpochSecond()));
-        params.add(UriParameter.of("before", end.getEpochSecond()));
+        params.add(UriParameter.of("after", begin.getEpochSecond()-60));
+        params.add(UriParameter.of("before", end.getEpochSecond()+60));
 
         return craftRequestUri(path, params);
+    }
+
+    @Override
+    public boolean isSortingRequired() {
+        return true;
     }
 
     @Override
