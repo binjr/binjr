@@ -23,6 +23,7 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
@@ -247,6 +248,15 @@ public class Chart implements Dirtyable, AutoCloseable {
                                         endTime.toInstant(),
                                         byPathEntry.getValue(),
                                         bypassCache);
+                                if (data.isEmpty()) {
+                                    // initialize processors with at least boundaries samples in it
+                                    for (var info : byPathEntry.getValue()) {
+                                        var proc = new DoubleTimeSeriesProcessor();
+                                        proc.addSample(startTime, Double.NaN);
+                                        proc.addSample(endTime, Double.NaN);
+                                        data.put(info, proc);
+                                    }
+                                }
                                 data.entrySet().parallelStream().forEach(entry -> {
                                     var info = entry.getKey();
                                     var proc = entry.getValue();
@@ -255,7 +265,7 @@ public class Chart implements Dirtyable, AutoCloseable {
                                     // Applying sample transforms
                                     proc.applyTransforms(clean, sort, reduce);
                                 });
-                                // Run second pass transforms
+                                // Run second pass transforms and time frame alignment
                                 data.entrySet().parallelStream().forEach(entry -> {
                                     entry.getValue().applyTransforms(reduce.getNextPassTransform(), align);
                                 });

@@ -150,6 +150,21 @@ public abstract class TimeSeriesProcessor {
         monitor.write().lock(() -> this.data.add(sample));
     }
 
+    /**
+     * Adds a new sample to the processor's data store
+     *
+     * @param timestamp the timestamp of the sample
+     * @param value     the value of the sample
+     */
+    public void addSample(ZonedDateTime timestamp, Double value) {
+        addSample(new XYChart.Data<>(timestamp, value));
+    }
+
+    /**
+     * Apply the transformation onto the data store.
+     *
+     * @param seriesTransforms A list of transformation to apply.
+     */
     public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
         if (!data.isEmpty()) {
             for (var t : seriesTransforms) {

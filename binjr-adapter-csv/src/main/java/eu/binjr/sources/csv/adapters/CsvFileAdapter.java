@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -169,7 +169,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
                 List<TimeSeriesInfo> timeSeriesInfoList = rDict.get(n);
                 if (timeSeriesInfoList != null) {
                     for (var tsInfo : timeSeriesInfoList) {
-                        series.get(tsInfo).addSample(new XYChart.Data<>(sample.getTimeStamp(), sample.getCells().get(n)));
+                        series.get(tsInfo).addSample(sample.getTimeStamp(), sample.getCells().get(n));
                     }
                 }
             }
