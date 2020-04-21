@@ -34,11 +34,11 @@ public class ColorXmlAdapter extends XmlAdapter<String, Color> {
 
     @Override
     public Color unmarshal(String stringValue) {
-        return Color.valueOf(stringValue);
+        return stringValue != null ? Color.valueOf(stringValue) : null;
     }
 
     @Override
     public String marshal(Color value) {
-        return value.toString();
+        return value != null ? value.toString() : null;
     }
 }
