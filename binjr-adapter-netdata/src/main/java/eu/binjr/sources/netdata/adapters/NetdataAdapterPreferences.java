@@ -49,6 +49,10 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
      */
     public Preference<Number> groupingTime = integerPreference("groupingTime", 0);
 
+    public final Preference<Number> fetchReadBehindSeconds = integerPreference("fetchReadBehindSeconds", 10);
+
+    public final Preference<Number> fetchReadAheadSeconds = integerPreference("fetchReadAheadSeconds", 10);
+
     /**
      * The maximum number of samples to recover from Netdata. 0 means every available samples will be returned.
      */

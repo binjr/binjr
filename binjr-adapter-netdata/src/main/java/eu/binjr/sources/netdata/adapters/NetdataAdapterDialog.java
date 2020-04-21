@@ -37,6 +37,7 @@ public class NetdataAdapterDialog extends DataAdapterDialog<URI> {
      */
     public NetdataAdapterDialog(Node owner) {
         super(owner, Mode.URI, "mostRecentNetdataUrls");
+        this.setDialogHeaderText("Connect to a Netdata source");
     }
 
     @Override

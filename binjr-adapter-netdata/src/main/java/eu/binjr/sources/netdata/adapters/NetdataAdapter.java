@@ -102,8 +102,8 @@ public class NetdataAdapter extends HttpDataAdapter {
         }
         params.add(UriParameter.of("format", "csv"));
         params.add(UriParameter.of("options", "seconds"));
-        params.add(UriParameter.of("after", begin.getEpochSecond()-60));
-        params.add(UriParameter.of("before", end.getEpochSecond()+60));
+        params.add(UriParameter.of("after", begin.getEpochSecond() - adapterPrefs.fetchReadBehindSeconds.get().intValue()));
+        params.add(UriParameter.of("before", end.getEpochSecond() + adapterPrefs.fetchReadAheadSeconds.get().intValue()));
 
         return craftRequestUri(path, params);
     }
