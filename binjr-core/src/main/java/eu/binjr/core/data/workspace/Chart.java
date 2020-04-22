@@ -92,8 +92,8 @@ public class Chart implements Dirtyable, AutoCloseable {
                 FXCollections.observableList(new LinkedList<>()),
                 "-",
                 UnitPrefixes.METRIC,
-                UserPreferences.getInstance().defaultGraphOpacity.get().doubleValue(),
-                UserPreferences.getInstance().showAreaOutline.get(),
+                UserPreferences.getInstance().defaultOpacityStackedAreaCharts.get().doubleValue(),
+                UserPreferences.getInstance().showOutlineOnStackedAreaCharts.get(),
                 1.0,
                 true,
                 0.0,
@@ -114,8 +114,12 @@ public class Chart implements Dirtyable, AutoCloseable {
                 FXCollections.observableList(new LinkedList<>()),
                 unitName,
                 prefix,
-                UserPreferences.getInstance().defaultGraphOpacity.get().doubleValue(),
-                UserPreferences.getInstance().showAreaOutline.get(),
+                chartType == ChartType.STACKED ?
+                        UserPreferences.getInstance().defaultOpacityStackedAreaCharts.get().doubleValue() :
+                        UserPreferences.getInstance().defaultOpacityAreaCharts.get().doubleValue(),
+                chartType == ChartType.STACKED ?
+                        UserPreferences.getInstance().showOutlineOnStackedAreaCharts.get() :
+                        UserPreferences.getInstance().showOutlineOnAreaCharts.get(),
                 1.0,
                 true,
                 0.0,

@@ -79,6 +79,9 @@ public class PreferenceDialogController implements Initializable {
     public ToggleSwitch fullHeightCrosshair;
     @FXML
     public ChoiceBox<BuiltInChartColorPalettes> chartPaletteChoiceBox;
+    public ToggleSwitch showOutlineStackedAreaCharts;
+    public Slider stackedAreaChartOpacitySlider;
+    public Label stackedAreaChartsOpacityText;
     @FXML
     private ToggleSwitch loadExternalToggle;
     @FXML
@@ -96,13 +99,13 @@ public class PreferenceDialogController implements Initializable {
     @FXML
     private ToggleSwitch updateCheckBox;
     @FXML
-    private ToggleSwitch showOutline;
+    private ToggleSwitch showOutlineAreaCharts;
     @FXML
     private AnchorPane root;
     @FXML
-    private Slider graphOpacitySlider = new Slider();
+    private Slider areaChartOpacitySlider = new Slider();
     @FXML
-    private Label opacityText = new Label();
+    private Label areaChartsOpacityText = new Label();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -114,11 +117,13 @@ public class PreferenceDialogController implements Initializable {
         assert uiThemeChoiceBox != null : "fx:id\"uiThemeChoiceBox\" was not injected!";
         assert updateFlow != null : "fx:id\"updateFlow\" was not injected!";
         assert updateCheckBox != null : "fx:id\"updateCheckBox\" was not injected!";
-        assert showOutline != null : "fx:id\"showOutline\" was not injected!";
-        assert graphOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
+        assert showOutlineAreaCharts != null : "fx:id\"showOutline\" was not injected!";
+        assert areaChartOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         UserPreferences userPrefs = UserPreferences.getInstance();
-        graphOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultGraphOpacity.property());
-        opacityText.textProperty().bind(Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
+        areaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
+        areaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", areaChartOpacitySlider.valueProperty().multiply(100)));
+        stackedAreaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());
+        stackedAreaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", stackedAreaChartOpacitySlider.valueProperty().multiply(100)));
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
@@ -166,11 +171,11 @@ public class PreferenceDialogController implements Initializable {
         formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
-
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
-        showOutline.selectedProperty().bindBidirectional(userPrefs.showAreaOutline.property());
+        showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
+        showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
     }
 

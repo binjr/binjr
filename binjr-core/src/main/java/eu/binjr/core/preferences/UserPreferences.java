@@ -94,12 +94,22 @@ public class UserPreferences extends PreferenceFactory {
     /**
      * True if series on area charts should display a brighter coloured outline, false otherwise.
      */
-    public final Preference<Boolean> showAreaOutline = booleanPreference("verticalMarkerOn", true);
+    public final Preference<Boolean> showOutlineOnAreaCharts = booleanPreference("showOutlineOnAreaCharts", true);
 
     /**
      * The default opacity value to apply to series on area charts.
      */
-    public final Preference<Number> defaultGraphOpacity = doublePreference("defaultGraphOpacity", 0.45d);
+    public final Preference<Number> defaultOpacityAreaCharts = doublePreference("defaultOpacityAreaCharts", 0.30d);
+
+    /**
+     * True if series on stacked area charts should display a brighter coloured outline, false otherwise.
+     */
+    public final Preference<Boolean> showOutlineOnStackedAreaCharts = booleanPreference("showOutlineOnStackedAreaCharts", false);
+
+    /**
+     * The default opacity value to apply to series on stacked area charts.
+     */
+    public final Preference<Number> defaultOpacityStackedAreaCharts = doublePreference("defaultOpacityStackedAreaCharts", 0.70d);
 
     /**
      * True is the shift key is pressed, false otherwise.

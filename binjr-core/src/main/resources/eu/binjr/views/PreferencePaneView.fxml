@@ -96,26 +96,29 @@
                             </VBox>
                             <Label text="Show outline on area charts" wrapText="true"/>
                             <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="showOutline" prefWidth="1.0">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </ToggleSwitch>
+                                <ToggleSwitch fx:id="showOutlineAreaCharts" prefWidth="1.0"/>
                             </VBox>
-                            <Label text="Default chart area opacity" wrapText="true"/>
+                            <Label text="Default area charts opacity" wrapText="true"/>
                             <VBox>
                                 <HBox alignment="CENTER_LEFT">
-                                    <Slider fx:id="graphOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
-                                    <Label fx:id="opacityText" text="100%"/>
+                                    <Slider fx:id="areaChartOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                                    <Label fx:id="areaChartsOpacityText" text="100%"/>
+                                </HBox>
+                            </VBox>
+                            <Label text="Show outline on stacked charts" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="showOutlineStackedAreaCharts"  prefWidth="1.0"/>
+                            </VBox>
+                            <Label text="Default stacked charts opacity" wrapText="true"/>
+                            <VBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Slider fx:id="stackedAreaChartOpacitySlider" blockIncrement="0.1" max="1.0" min="0"/>
+                                    <Label fx:id="stackedAreaChartsOpacityText" text="100%"/>
                                 </HBox>
                             </VBox>
                             <Label text="Enable sample reduction" wrapText="true"/>
                             <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0" selected="true">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </ToggleSwitch>
+                                <ToggleSwitch fx:id="enableDownSampling" prefWidth="1.0" selected="true"/>
                             </VBox>
                             <Label fx:id="maxSampleLabel" text="Maximum number of samples" wrapText="true"/>
                             <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="-1.0" text="1000"/>
