@@ -147,7 +147,7 @@ public class NetdataAdapter extends HttpDataAdapter {
                             .setParent(categoryBranch.getValue().getTreeHierarchy())
                             .build());
             chart.getDimensions().forEach((s1, chartDimensions) -> {
-                branch.getInternalChildren().add(new FilterableTreeItem<>(
+                branch.getInternalChildren().add(0, new FilterableTreeItem<>(
                         new TimeSeriesBindingBuilder(this)
                                 .setLabel(chartDimensions.getName())
                                 .setParent(branch.getValue().getTreeHierarchy())
