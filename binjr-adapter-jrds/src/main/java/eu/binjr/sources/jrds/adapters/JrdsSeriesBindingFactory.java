@@ -80,7 +80,7 @@ public class JrdsSeriesBindingFactory {
                 (isNullOrEmpty(graphdesc.graphName) ?
                         "???" : graphdesc.graphName) : graphdesc.name;
 
-        graphType = ChartType.STACKED;
+        graphType = getChartType(graphdesc);
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
         return new TimeSeriesBinding(label, path, null, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
@@ -122,24 +122,7 @@ public class JrdsSeriesBindingFactory {
                 (isNullOrEmpty(desc.name) ?
                         (isNullOrEmpty(desc.dsName) ?
                                 "???" : desc.dsName) : desc.name) : desc.legend;
-        switch (desc.graphType.toLowerCase()) {
-            case "area":
-                graphType = ChartType.AREA;
-                break;
-
-            case "stacked":
-                graphType = ChartType.STACKED;
-                break;
-
-            case "line":
-                graphType = ChartType.LINE;
-                break;
-
-            case "none":
-            default:
-                graphType = ChartType.STACKED;
-                break;
-        }
+        graphType = getChartType(desc);
         prefix = findPrefix(graphdesc);
         unitName = graphdesc.verticalLabel;
         return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, parentName + "/" + legend, adapter);
@@ -155,6 +138,27 @@ public class JrdsSeriesBindingFactory {
             }
         }
         return DEFAULT_PREFIX;
+    }
+
+    private ChartType getChartType(Graphdesc graphdesc) {
+        return graphdesc.seriesDescList.stream()
+                .filter(desc -> !desc.graphType.equalsIgnoreCase("none") && !desc.graphType.equalsIgnoreCase("comment"))
+                .reduce((last, n) -> n)
+                .map(this::getChartType)
+                .orElse(ChartType.AREA);
+    }
+
+    private ChartType getChartType(Graphdesc.SeriesDesc desc) {
+        switch (desc.graphType.toLowerCase()) {
+            case "area":
+                return ChartType.AREA;
+            case "line":
+                return ChartType.LINE;
+            case "none":
+            case "stacked":
+            default:
+                return ChartType.STACKED;
+        }
     }
 
     private boolean isNullOrEmpty(String s) {

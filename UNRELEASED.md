@@ -2,4 +2,5 @@
 * _[New]_ Users can now choose which default color palette to use for charts when the color isn't specified by the source. 
 * _[New]_ "Show outline" and "Default opacity" preferences are now settable separately for "area charts" and "stacked area" charts.
 * _[New]_ Updated the embedded runtime to OpenJDK 14.0.1 and OpenJFX 14.0.1
+* _[Fixed]_ JRDS adapter incorrectly reports all charts as stacked area charts.
 * _[Fixed]_ "Show outline on area charts " user preference is not persisted across sessions.
