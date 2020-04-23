@@ -5,8 +5,7 @@
 
 Copyright 2016-2020 Frederic Thevenet
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+Licensed under the Apache License, Version 2.0 (the "License");  
 You may obtain a copy of the License at
 
      http://www.apache.org/licenses/LICENSE-2.0
@@ -25,7 +24,7 @@ More info at:
 
 * [https://binjr.eu](https://binjr.eu)  
 
-## Third-party Content
+## Third-party
 
 This software uses material from several third party open source software projects, listed below:
 

@@ -1157,8 +1157,6 @@ public class MainViewController implements Initializable {
             try {
                 var charts = WorksheetController.treeItemsAsChartList(rootItems, root);
                 if (charts.isPresent()) {
-                   // ZonedDateTime toDateTime;
-
                     ZonedDateTime toDateTime = null;
                     ZonedDateTime fromDateTime = null;
                     Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
