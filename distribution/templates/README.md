@@ -75,7 +75,7 @@ with someone else.
 
 ***binjr*** can consume time series data provided by the following data sources:
 
-* [JRDS](http://jrds.fr): A performance monitoring application written in Java.
+* [JRDS](https://github.com/fbacchella/jrds): A performance monitoring application written in Java.
 * [Netdata](https://www.netdata.cloud):  distributed, real-time performance and health monitoring for systems and applications
 * Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
 * Comma Separated Values (CSV) files.
