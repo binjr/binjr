@@ -46,7 +46,8 @@ public class AppEnvironment {
     public static final String APP_NAME = "binjr";
     public static final String HTTP_GITHUB_REPO = "https://github.com/binjr/binjr";
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
-    public static final String HTTP_BINJR_WIKI = "https://github.com/binjr/binjr/wiki";
+    public static final String HTTP_BINJR_WIKI = "https://binjr.eu/documentation/reference/";
+    public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/412EC8A85400AC3F.asc";
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 

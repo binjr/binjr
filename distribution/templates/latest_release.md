@@ -7,4 +7,4 @@
 ### [Download binjr ${version} for Windows (64 bits)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi)   
 [GPG Signature](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1] 
 
-[^1]: [How to verify GPG signatures?](../../documentation/verify-signature/)
+[^1]: [How to verify the integrity of the downloaded file?](../../documentation/verify-signature/)

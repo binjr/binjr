@@ -79,7 +79,7 @@ public class UpdateManager {
 
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.github = GithubApiHelper.createCloseable(URI.create("https://binjr.eu"));
+        this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU));
         Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
         lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
@@ -335,12 +335,14 @@ public class UpdateManager {
     }
 
     private void verifyUpdatePackage(Path updatePath, Path sigPath) throws IOException, PGPException {
+        URL publicKeyUrl = new URL(AppEnvironment.BINJR_PUBLIC_KEY_URL);
         try (var packageStream = Files.newInputStream(updatePath, StandardOpenOption.READ)) {
             try (var sigStream = Files.newInputStream(sigPath, StandardOpenOption.READ)) {
-                try (var keyStream = this.getClass().getResourceAsStream("/eu/binjr/pubkey/5400AC3F.asc")) {
+                try (var keyStream = publicKeyUrl.openStream()) {
                     if (!verifyOpenPGP(packageStream, sigStream, keyStream)) {
                         throw new UnsupportedOperationException("Update package's signature could not be verified.");
                     }
+                    logger.debug("GPG signature verified successfully for " + updatePath);
                 }
             }
         }
