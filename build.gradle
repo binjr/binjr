@@ -267,11 +267,6 @@ task copyResources(type: Copy) {
     from "${projectDir}/distribution/resources"
 }
 
-task copyPubKey(type: Copy) {
-    into "${buildDir}"
-    from "${projectDir}/distribution/publishing/Public_key-412EC8A85400AC3F.asc"
-}
-
 task expandMdTemplates(type: Copy) {
     from "${projectDir}/distribution/templates"
     into "${buildDir}/tmp/expanded"

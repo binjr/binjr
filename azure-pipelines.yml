@@ -49,32 +49,15 @@ stages:
             vmImage: 'windows-2019'
 
       # Finalize release
-  - stage: release
+  - stage: deploy_site
     dependsOn: build
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')))
     jobs:
-    - job: finalize_release
+    - job: deploy_site
       pool:
         vmImage: 'ubuntu-18.04'
       steps:
-        - bash: |
-            echo '##vso[task.setvariable variable=isSnapshot;]true'
-          condition: and(succeeded(), endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
-
-        - task: GithubRelease@0
-          inputs:
-            gitHubConnection: binjr-bot
-            repositoryName: binjr/binjr
-            action: edit
-            tag: $(Build.SourceBranchName)
-            assets: $(System.DefaultWorkingDirectory)/distribution/publishing/*.asc
-            assetUploadMode: 'replace'
-            releaseNotesSource: 'file'
-            addChangeLog: false
-            isPreRelease: $(isSnapshot)
-
         - task: Gradle@2
-          condition: not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
           env:
             IS_TAG: $(isTag)
             REPO_TAG_NAME: $(Build.SourceBranchName)
@@ -96,9 +79,6 @@ stages:
             python3 -m pip install --upgrade pip setuptools
             python3 -m pip install mkdocs
             python3 -m pip install mkdocs-material
-        condition: not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
-
-        - bash: |
             git clone https://github.com/binjr/binjr-site build/tmp/binjr-site
             cd  build/tmp/binjr-site
             cp ../expanded/CHANGELOG.md src/docs/download/CHANGELOG.md
@@ -114,9 +94,8 @@ stages:
             python3 -m mkdocs gh-deploy
           env:
             GH_ACCESS_TOKEN: $(gh.access.token)
-          condition: not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT'))
 
-  - stage: publish
+  - stage: maven_publish
     dependsOn: build
     jobs:
     # Publish to Maven repo
