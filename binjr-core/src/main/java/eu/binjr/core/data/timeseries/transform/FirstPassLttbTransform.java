@@ -33,9 +33,8 @@ import java.util.List;
 public class FirstPassLttbTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
     private final List<Double[]> seriesValues;
-    private  ZonedDateTime[] timeStamps;
+    private ZonedDateTime[] timeStamps;
     private static final Logger logger = LogManager.getLogger(FirstPassLttbTransform.class);
-    private volatile boolean isBufferCoherent = true;
 
     /**
      * Initializes a new instnace of the {@link FirstPassLttbTransform} class.
@@ -46,14 +45,13 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform {
         super("FirstPassLttbTransform");
         this.threshold = threshold;
         seriesValues = new ArrayList<>();
-
-}
-
+    }
 
     public List<Double[]> getSeriesValues() {
         return seriesValues;
     }
-    public ZonedDateTime[] getTimeStamps(){
+
+    public ZonedDateTime[] getTimeStamps() {
         return timeStamps;
     }
 
@@ -61,10 +59,12 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform {
     protected List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data) {
         // collect values for second pass
         if (threshold > 0 && data.size() > threshold) {
-            seriesValues.add(data.stream().map(XYChart.Data::getYValue).toArray(Double[]::new));
-            //this is potentially racy, but isn't an issue atm since all time stamps are supposed to be identical
-            if (timeStamps == null){
-                timeStamps = data.stream().map(XYChart.Data::getXValue).toArray(ZonedDateTime[]::new);
+            var values = data.stream().map(XYChart.Data::getYValue).toArray(Double[]::new);
+            synchronized (seriesValues) {
+                seriesValues.add(values);
+                if (timeStamps == null) {
+                    timeStamps = data.stream().map(XYChart.Data::getXValue).toArray(ZonedDateTime[]::new);
+                }
             }
         }
         return data;
