@@ -47,7 +47,19 @@ public class AppEnvironment {
     public static final String HTTP_GITHUB_REPO = "https://github.com/binjr/binjr";
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://binjr.eu/documentation/reference/";
-    public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/412EC8A85400AC3F.asc";
+    public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/binjr_dev_pub_keys.asc";
+    public static final byte[] BINJR_PUBLIC_FINGER_PRINT = new byte[]{
+            Integer.decode("0xE3").byteValue(), Integer.decode("0xD2").byteValue(),
+            Integer.decode("0xF8").byteValue(), Integer.decode("0x00").byteValue(),
+            Integer.decode("0xBE").byteValue(), Integer.decode("0x2B").byteValue(),
+            Integer.decode("0x44").byteValue(), Integer.decode("0xE5").byteValue(),
+            Integer.decode("0x97").byteValue(), Integer.decode("0x44").byteValue(),
+            Integer.decode("0x7F").byteValue(), Integer.decode("0x29").byteValue(),
+            Integer.decode("0x41").byteValue(), Integer.decode("0x2E").byteValue(),
+            Integer.decode("0xC8").byteValue(), Integer.decode("0xA8").byteValue(),
+            Integer.decode("0x54").byteValue(), Integer.decode("0x00").byteValue(),
+            Integer.decode("0xAC").byteValue(), Integer.decode("0x3F").byteValue()
+    };
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
 
@@ -61,7 +73,6 @@ public class AppEnvironment {
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
     private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
-
 
     private AppEnvironment() {
         this.manifest = getManifest();

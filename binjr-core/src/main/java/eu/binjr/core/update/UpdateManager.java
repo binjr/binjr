@@ -22,8 +22,8 @@ import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.preferences.OsFamily;
+import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -41,14 +41,14 @@ import org.bouncycastle.openpgp.operator.jcajce.JcaPGPContentVerifierBuilderProv
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.security.Security;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -358,6 +358,10 @@ public class UpdateManager {
         PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
                 new JcaKeyFingerprintCalculator());
         PGPPublicKey key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
+        if (Arrays.compare(AppEnvironment.BINJR_PUBLIC_FINGER_PRINT, key.getFingerprint()) != 0) {
+            throw new IllegalArgumentException("Cannot verify signature: Unexpected fingerprint for the key downloaded at " +
+                    AppEnvironment.BINJR_PUBLIC_KEY_URL);
+        }
         sig.init(new JcaPGPContentVerifierBuilderProvider().setProvider("BC"), key);
         byte[] buff = new byte[1024];
         int read = 0;
