@@ -1,8 +1,8 @@
-# Latest Release
+# binjr
 
 The latest available release of binjr is ${tagName}, released on ${releaseDate}.  
-Complete release information can be found in the [change log](CHANGELOG.md). 
 
+Complete release information can be found in the [change log](CHANGELOG.md). 
 
 <style>
   .md-typeset button {
@@ -29,9 +29,23 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 |Version     | Operating System       |  Architecture        |  Download  | |
 |----------|----------|----------|------|----|
-| ${version} | **Linux** (glibc v2.5 or higher)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]  |
-| ${version} | **macOS** (10.10 or later)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1]  |
-| ${version} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1]  |
+| binjr ${tagName} | **Linux** (glibc v2.5 or higher)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]  |
+| binjr ${tagName} | **macOS** (10.10 or later)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1]  |
+| binjr ${tagName} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1]  |
+
+
+# Plugins
+
+You can use the plugins below to further extend binjr's out-of-the-box functionalities:
+
+1. Download and unpack the archive.
+2. Extract and copy the `jar` files into the `plugins` folder of your binjr installation.
+3. Restart binjr if it was running when you copied the plugin. 
+
+|Version | Operating System | Architecture | Download |   |
+|--------|------------------|--------------|----------|---|
+| [Demo data adapter](https://github.com/binjr/binjr-adapter-demo) v1.1.0 | **All** | - | [<button ><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr-adapter-demo/releases/download/v1.1.0/binjr-adapter-demo-1.1.0.zip) | [(GPG signature)](https://github.com/binjr/binjr-adapter-demo/releases/download/v1.1.0/binjr-adapter-demo-1.1.0.zip.asc)[^1]  |
+
 
 
 [^1]: [How to verify the integrity of the downloaded file?](../../documentation/verify-signature/)
