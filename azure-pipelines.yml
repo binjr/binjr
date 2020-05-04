@@ -83,6 +83,7 @@ stages:
             cd  build/tmp/binjr-site
             cp ../expanded/CHANGELOG.md src/docs/download/CHANGELOG.md
             cp ../expanded/latest_release.md src/docs/download/latest_release.md
+            cp ../expanded/getting-started.md src/docs/documentation/getting-started.md
             git config credential.helper store
             echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
             git config user.email "binjr.bot@free.fr"
