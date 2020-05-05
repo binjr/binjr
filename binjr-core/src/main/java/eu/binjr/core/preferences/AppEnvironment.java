@@ -46,7 +46,7 @@ public class AppEnvironment {
     public static final String APP_NAME = "binjr";
     public static final String HTTP_GITHUB_REPO = "https://github.com/binjr/binjr";
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
-    public static final String HTTP_BINJR_WIKI = "https://binjr.eu/documentation/reference/";
+    public static final String HTTP_BINJR_WIKI = "https://binjr.eu/documentation/user_guide/main/";
     public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/binjr_dev_pub_keys.asc";
     public static final byte[] BINJR_PUBLIC_FINGER_PRINT = new byte[]{
             Integer.decode("0xE3").byteValue(), Integer.decode("0xD2").byteValue(),
