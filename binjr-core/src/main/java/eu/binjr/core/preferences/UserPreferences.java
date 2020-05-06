@@ -74,7 +74,7 @@ public class UserPreferences extends PreferenceFactory {
     /**
      * True if the last open workspace should be reload next time the app if started, false otherwise.
      */
-    public final Preference<Boolean> loadLastWorkspaceOnStartup = booleanPreference("loadLastWorkspaceOnStartup", true);
+    public final Preference<Boolean> loadLastWorkspaceOnStartup = booleanPreference("loadLastWorkspaceOnStartup", false);
 
     /**
      * True to check if a new release is available each time the application starts, false otherwise.
