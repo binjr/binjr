@@ -45,37 +45,89 @@ They are less than 60 MB in size and there is one for each of the supported plat
 
 ## Build from source
 
-You can also build or run the application from the source code using the included Gradle wrapper.
-Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
+You can also build or run the application from the source code.
 
-* `./gradlew build` to build the JAR for the all the modules.
-* `./gradlew run` to build and start the application straight away.
-* `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
+**Prerequisites:**
 
-!!! warning "Packaging an application bundle"
-    Please note that it is mandatory to run the `clean` task in between two executions of `packageDistribution` in
-    the same environment.
+* [Git](https://git-scm.com/open)
+* [OpenJDK 11 or later](http://openjdk.java.net/)
+
+**(Optional):**
+
+* (macOS): Xcode command line tools and a version of OpenJDK including [jpackage](https://openjdk.java.net/jeps/343) 
+  (14 or later) are required to build the DMG image.
+* (Windows): [WiX 3.0 or later](https://wixtoolset.org/) is required to build the MSI installer.
+
+**Build**
+
+1. Clone the [repo from Github](https://github.com/binjr/binjr/): 
+    ``` sh
+    git clone https://github.com/binjr/binjr/
+    ```
+   
+2. Use the included gradle wrapper to:
+
+    - Build all the modules
+    
+        === "Linux / macOS"
+            ``` sh
+            sh gradlew build
+            ```
+          
+        === "Windows"
+            ``` bat
+            gradlew.bat build
+            ```
+   
+    - Build and start the application   
+      
+        === "Linux / macOS"
+            ``` sh
+            sh gradlew run
+            ```
+      
+        === "Windows"
+            ``` bat
+            gradlew.bat run
+            ```
+   
+    - Build an application bundle for the platform on which you run the build     
+
+        === "Linux / macOS"
+            ``` sh
+            sh gradlew clean packageDistribution  
+            ```
+          
+        === "Windows"
+            ``` bat
+            gradlew.bat clean packageDistribution  
+            ```
+                                  
+        !!! warning 
+            Please note that it is mandatory to run the `clean` task in between two executions of `packageDistribution` in
+            the same environment.
 
 
 ## Run from the command line
-
-!!! Note
-    In order to run binjr that way, you need to have Apache Maven installed on your machine and your JAVA_HOME
-    environment variable must point at a copy of a Java runtime version 11 or later.
 
 You can also start ***binjr*** simply by running a single command line. Running binjr that way means that you don't
 need to worry about keeping your copy up to date: it will always start the latest version that was published over
 on Maven Central.
 
+!!! Note
+    In order to run binjr that way, you need to have Apache Maven installed on your machine and your JAVA_HOME
+    environment variable must point at a copy of a Java runtime version 11 or later.
+
+
 === "Linux / macOS"
 
-    ```
+    ``` sh
     mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
     ```
 
 === "Windows"
 
-    ```
+    ``` bat
     curl https://binjr.eu/run-binjr.pom > %temp%\\run-binjr.pom & mvn exec:java -f %temp%\\run-binjr.pom
     ```
 
@@ -83,13 +135,13 @@ You can also use the `binjr.version`property to start a specific version of binr
 
 === "Linux / macOS"
 
-    ```
+    ``` sh
     mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom) -Dbinjr.version=2.14.0
     ```
 
 === "Windows"
 
-    ```
+    ``` bat
     curl https://binjr.eu/run-binjr.pom > %temp%\\run-binjr.pom & mvn exec:java -f %temp%\\run-binjr.pom  -Dbinjr.version=2.14.0
     ```
 
