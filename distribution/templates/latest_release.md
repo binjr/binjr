@@ -1,6 +1,10 @@
-# binjr
+# Application Bundles
 
-The latest available release of binjr is ${tagName}, released on ${releaseDate}.  
+These bundles contain all dependencies and runtime components needed to run binjr.   
+They also include support for the following data sources: 
+[JRDS](https://github.com/fbacchella/jrds), [Netdata](https://www.netdata.cloud), RDD Files and CSV files.
+
+The latest available version is ${version}, released on ${releaseDate}.  
 
 Complete release information can be found in the [change log](CHANGELOG.md). 
 
@@ -36,7 +40,7 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 # Plugins
 
-You can use the plugins below to further extend binjr's out-of-the-box functionalities:
+You can use the plugins below to further extend binjr's built-in functionalities:
 
 1. Download and unpack the archive.
 2. Extract and copy the `jar` files into the `plugins` folder of your binjr installation.
