@@ -55,8 +55,14 @@
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" fillWidth="true">
                             <Label text="Theme"/>
                             <ChoiceBox fx:id="uiThemeChoiceBox"  maxWidth="1.7976931348623157E308" />
-                            <Label text="Charts Color Palette"/>
-                            <ChoiceBox fx:id="chartPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
+                            <Label text="Span crosshair over all charts" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="fullHeightCrosshair" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
                             <Label text="Reload last workspace on start-up" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="loadAtStartupCheckbox" prefWidth="1.0">
@@ -86,14 +92,8 @@
                     <AnchorPane>
                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <Label text="Span crosshair over all charts" wrapText="true"/>
-                            <VBox fillWidth="false">
-                                <ToggleSwitch fx:id="fullHeightCrosshair" prefWidth="1.0">
-                                    <font>
-                                        <Font size="10.0"/>
-                                    </font>
-                                </ToggleSwitch>
-                            </VBox>
+                            <Label text="Default Color Palette"/>
+                            <ChoiceBox fx:id="chartPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Show outline on area charts" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="showOutlineAreaCharts" prefWidth="1.0"/>
