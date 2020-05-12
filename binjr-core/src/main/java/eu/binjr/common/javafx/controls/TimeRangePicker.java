@@ -317,6 +317,7 @@ public class TimeRangePicker extends ToggleButton {
         private BiConsumer<ZonedDateTime, ZonedDateTime> applyNewTimeRange = (start, end) -> {
             startDate.dateTimeValueProperty().setValue(start);
             endDate.dateTimeValueProperty().setValue(end);
+
         };
 
         private void stepBy(Duration intervalDuration) {
@@ -326,6 +327,8 @@ public class TimeRangePicker extends ToggleButton {
         private void last(Duration duration) {
             ZonedDateTime end = ZonedDateTime.now(zoneId.getValue());
             applyNewTimeRange.accept(end.minus(duration), end);
+            // hide popup
+            popup.hide();
         }
 
 
@@ -387,12 +390,16 @@ public class TimeRangePicker extends ToggleButton {
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()),
                         ZonedDateTime.of(today.plusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()));
+                // hide popup
+                popup.hide();
             });
             yesterday.setOnAction(event -> {
                 LocalDate today = LocalDate.now(zoneId.getValue());
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(today.minusDays(1), LocalTime.MIDNIGHT, zoneId.getValue()),
                         ZonedDateTime.of(today, LocalTime.MIDNIGHT, zoneId.getValue()));
+                // hide popup
+                popup.hide();
             });
             thisWeek.setOnAction(event -> {
                 LocalDate refDay = LocalDate.now(zoneId.getValue());
@@ -400,6 +407,8 @@ public class TimeRangePicker extends ToggleButton {
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(refDay.minusDays(n - 1), LocalTime.MIDNIGHT, zoneId.getValue()),
                         ZonedDateTime.of(refDay.plusDays(8 - n), LocalTime.MIDNIGHT, zoneId.getValue()));
+                // hide popup
+                popup.hide();
             });
             lastWeek.setOnAction(event -> {
                 LocalDate refDay = LocalDate.now(zoneId.getValue()).minusWeeks(1);
@@ -407,6 +416,8 @@ public class TimeRangePicker extends ToggleButton {
                 applyNewTimeRange.accept(
                         ZonedDateTime.of(refDay.minusDays(n - 1), LocalTime.MIDNIGHT, zoneId.getValue()),
                         ZonedDateTime.of(refDay.plusDays(8 - n), LocalTime.MIDNIGHT, zoneId.getValue()));
+                // hide popup
+                popup.hide();
             });
             copyTimeRangeButton.setOnAction(event -> {
                 try {

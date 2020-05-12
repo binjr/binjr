@@ -5,3 +5,4 @@
 * _[Fixed]_ JRDS adapter incorrectly reports all charts as stacked area charts.
 * _[Fixed]_ "Show outline on area charts " user preference is not persisted across sessions. 
 * _[Fixed]_ A concurrency issue causes an ArrayIndexOutOfBoundsException when applying sample reduction transform. 
+* _[Fixed]_ The time range picker is not dismissed automatically after the user selects a preset range.
