@@ -59,7 +59,7 @@ stages:
       steps:
         - task: Gradle@2
           env:
-            IS_TAG: $(isTag)
+            IS_TAG: 'true'
             REPO_TAG_NAME: $(Build.SourceBranchName)
             GPG_KEY_NAME: $(gpg.keyname)
             GPG_PASSPHRASE: $(gpg.passphrase)
