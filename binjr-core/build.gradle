@@ -16,15 +16,15 @@
 
 
 dependencies {
-    api 'org.apache.logging.log4j:log4j-core:2.13.1'
-    api 'org.apache.logging.log4j:log4j-jcl:2.13.1'
+    api 'org.apache.logging.log4j:log4j-core:2.13.2'
+    api 'org.apache.logging.log4j:log4j-jcl:2.13.2'
     api 'org.apache.httpcomponents:httpclient:4.5.12'
     api 'org.controlsfx:controlsfx:11.0.1'
     api 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.8.6'
     api 'org.apache.commons:commons-csv:1.8'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
-    api 'org.glassfish.jaxb:jaxb-runtime:2.3.2'
+    api 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
     api "org.bouncycastle:bcpg-jdk15on:1.65"
     // Only to prepare POM for Maven central upload
     api "org.openjfx:javafx-controls:$OPENJFX_VERSION"
