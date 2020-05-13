@@ -111,6 +111,7 @@ stages:
           env:
             IS_TAG: $(isTag)
             REPO_TAG_NAME: $(Build.SourceBranchName)
+            BINJR_BUILD_NUMBER: $(Build.BuildNumber)
             GPG_KEY_NAME: $(gpg.keyname)
             GPG_PASSPHRASE: $(gpg.passphrase)
             OSSRH_JIRA_PASSWORD: $(ossrh.password)
