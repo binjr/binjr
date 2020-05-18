@@ -17,11 +17,11 @@ Complete release information can be found in the [change log](CHANGELOG.md).
     opacity: 0.75;
   }
   .md-typeset button  {
-  border-style: solid;
-   border-width: 5px;   
+    border-style: solid;
+    border-width: 5px;   
     border-radius: 5px;
     padding: 0px 5px 0px 5px;
-    margin-bottom: 10px;
+
     border-color: var(--md-accent-fg-color); 
     display: block;
     color: var(--md-accent-bg-color);
@@ -33,23 +33,23 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 |Version     | Operating System       |  Architecture        |  Download  | |
 |----------|----------|----------|------|----|
-| binjr ${tagName} | **Linux** (glibc v2.5 or higher)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]  |
-| binjr ${tagName} | **macOS** (10.10 or later)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1]  |
-| binjr ${tagName} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [(GPG signature)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1]  |
+| <p>binjr ${tagName}</p> | <p>**Linux** (glibc v2.5 or higher)</p>| <p>x84 64-bit</p> | <p>[<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz)</p> | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]</p>  |
+| <p>binjr ${tagName}</p> | <p>**macOS** (10.10 or later)</p>| <p>x84 64-bit</p> |  <p>[<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg)</p> <p>[<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz)</p> | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz.asc)[^1]</p> |
+| <p>binjr ${tagName}</p> | <p>**Windows** (7 or later)</p>| <p>x84 64-bit</p> | <p>[<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi)</p> <p>[<button><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip)</p>  | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip.asc)[^1]</p> |
 
+[^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
 
-# Plugins
+!!! Warning "If you're having trouble launching binjr..."
+    === "...on macOS"
+        binjr might not be recognized by Apple, so you may get a warning when trying to run the first time.
+        To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
+        shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
 
-You can use the plugins below to further extend binjr's built-in functionalities:
-
-1. Download and unpack the archive.
-2. Extract and copy the `jar` files into the `plugins` folder of your binjr installation.
-3. Restart binjr if it was running when you copied the plugin. 
-
-|Version | Operating System | Architecture | Download |   |
-|--------|------------------|--------------|----------|---|
-| [Demo data adapter](https://github.com/binjr/binjr-adapter-demo) v1.1.0 | **All** | - | [<button ><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr-adapter-demo/releases/download/v1.1.0/binjr-adapter-demo-1.1.0.zip) | [(GPG signature)](https://github.com/binjr/binjr-adapter-demo/releases/download/v1.1.0/binjr-adapter-demo-1.1.0.zip.asc)[^1]  |
-
-
-
-[^1]: [How to verify the integrity of the downloaded file?](../../documentation/verify-signature/)
+    === "...on Windows"
+        binjr's installer might not be recognized by Microsoft Defender SmartScreen, so you might need to suppress a warning
+        to install it on your system. To do so, click "more info" then "run anyway"
+        ([see more](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-smartscreen/microsoft-defender-smartscreen-overview)).
+        
+    To ensure that your download has not been tempered with,
+    [you should verify its OpenGPG signature](/documentation/verify-signature).
+           

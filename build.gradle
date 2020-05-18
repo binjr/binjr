@@ -354,7 +354,10 @@ task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
     }
 }
 
-task listPackageContent(type: Exec) {
+task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
+}
+
+task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
     workingDir DISTRIBUTION_PATH
     commandLine = [
             "sh", "-c",
@@ -362,7 +365,7 @@ task listPackageContent(type: Exec) {
     ]
 }
 
-task packageDistributionZip(type: Zip) {
+task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
     from DISTRIBUTION_ROOT
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
@@ -376,7 +379,7 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
     ]
 }
 
-task wixRunHeat(type: Exec/*, dependsOn: [packageDistributionZip]*/) {
+task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/heat.exe",
@@ -414,7 +417,7 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task jpackageMacOS(type: Exec) {
+task jpackageMacOS(type: Exec, dependsOn: prepareAppBundle) {
     workingDir buildDir
     commandLine = [
             "jpackage",
@@ -441,25 +444,71 @@ task jpackageMacOS(type: Exec) {
     }
 }
 
-task makeAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
-    if (IS_WINDOWS) {
-        finalizedBy(wixRunLight)
-    } else if (IS_MAC) {
-        finalizedBy(jpackageMacOS)
-    } else {
-        finalizedBy(packageDistributionTar)
-    }
+task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.zip"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.zip"
 }
 
-task packageDistribution(type: WrapTaskForSigning, dependsOn: [makeAppBundle]) {
-    from "${buildDir}/${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.msi"
     destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"
+    archiveName "${DISTRIBUTION_NAME}.msi"
+}
+
+task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageMacOS]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.dmg"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.dmg"
+}
+
+task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.tar.gz"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.tar.gz"
+}
+
+task packageAsRpm(type: WrapTaskForSigning, dependsOn: [prepareAppBundle]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.rpm"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.rpm"
+}
+
+task packageAsDeb(type: WrapTaskForSigning, dependsOn: [prepareAppBundle]) {
+    from "${buildDir}${DISTRIBUTION_NAME}.deb"
+    destinationDir buildDir
+    archiveName "${DISTRIBUTION_NAME}.deb"
 }
 
 signing {
-    sign packageDistribution
+    sign packageAsZip
+    sign packageAsMsi
+    sign packageAsDmg
+    sign packageAsTarGz
+    sign packageAsRpm
+    sign packageAsDeb
 }
+
+task packageDistribution() {
+    if (IS_WINDOWS) {
+        finalizedBy(packageAsMsi, packageAsZip)
+    } else if (IS_MAC) {
+        finalizedBy(packageAsDmg, packageAsTarGz)
+    } else {
+        finalizedBy(packageAsTarGz)
+    }
+}
+
+task signPackageDistribution() {
+    if (IS_WINDOWS) {
+        finalizedBy(signPackageAsMsi, signPackageAsZip)
+    } else if (IS_MAC) {
+        finalizedBy(signPackageAsDmg, signPackageAsTarGz)
+    } else {
+        finalizedBy(signPackageAsTarGz)
+    }
+}
+
 
 def isNonStable = { String version ->
     // Ignore javafx early access and glassfish beta
