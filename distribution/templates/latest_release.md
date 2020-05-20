@@ -41,12 +41,13 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 !!! Warning "If you're having trouble launching binjr..."
     === "...on macOS"
-        binjr might not be recognized by Apple, so you may get a warning when trying to run the first time.
+        **binjr** might not be recognized by the Apple notary service, so you may get a warning when trying to run it the 
+        first time.
         To override it, locate binjr in the Finder on your Mac, control-click the app icon, then choose `Open` from the
         shortcut menu and click `Open` ([see more](https://support.apple.com/guide/mac-help/mh40616/mac)).
 
     === "...on Windows"
-        binjr's installer might not be recognized by Microsoft Defender SmartScreen, so you might need to suppress a warning
+        **binjr** might not be recognized by Microsoft Defender SmartScreen, so you might need to suppress a warning
         to install it on your system. To do so, click "more info" then "run anyway"
         ([see more](https://docs.microsoft.com/en-us/windows/security/threat-protection/microsoft-defender-smartscreen/microsoft-defender-smartscreen-overview)).
         
