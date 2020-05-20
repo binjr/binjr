@@ -257,6 +257,30 @@ task copyPluginLibs(type: Copy) {
     from project(":binjr-adapter-netdata").jar
 }
 
+task copyJpackageInputLibs(type: Copy) {
+    into "${buildDir}/tmp/input"
+    from(project(":binjr-core").configurations.runtimeClasspath) {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-jrds").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-csv").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-rrd4j").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-adapter-netdata").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
+    from project(":binjr-core").jar
+    from project(":binjr-adapter-jrds").jar
+    from project(":binjr-adapter-csv").jar
+    from project(":binjr-adapter-rrd4j").jar
+    from project(":binjr-adapter-netdata").jar
+}
+
 task copyPlatformSpecific(type: Copy) {
     into DISTRIBUTION_PATH
     from "${projectDir}/distribution/platforms/${OS_FAMILY}"
@@ -417,12 +441,12 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     ]
 }
 
-task jpackageMacOS(type: Exec, dependsOn: prepareAppBundle) {
+task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
     workingDir buildDir
     commandLine = [
             "jpackage",
             "--name", project.name,
-            "--input", "${DISTRIBUTION_PATH}/libs",
+            "--input", "${buildDir}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
@@ -441,6 +465,43 @@ task jpackageMacOS(type: Exec, dependsOn: prepareAppBundle) {
     doLast {
         def source = java.nio.file.Path.of("${buildDir}/${project.name}-${BINJR_VERSION}.${DISTRIBUTION_EXTENSION}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"))
+    }
+}
+
+
+task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+    workingDir buildDir
+    commandLine = [
+            "jpackage",
+            "--name", project.name,
+            "--input", "${buildDir}/tmp/input",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Binjr",
+            "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
+            "--type", "deb",
+            "--copyright", "2016-2020 Frederic Thevenet",
+            "--description", "A Time Series Browser",
+            "--app-version", BINJR_VERSION,
+            "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.png",
+            "--license-file", "${projectDir}/LICENSE.md",
+            "--file-associations", "${projectDir}/distribution/bundlers/deb/file-associations.properties",
+            "--resource-dir", "${projectDir}/distribution/bundlers/deb/",
+            "--java-options", "-Xmx4096M",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--linux-package-name", "binjr",
+            "--linux-deb-maintainer","binjr@free.fr",
+            "--linux-app-category", "Utility",
+            "--linux-menu-group", "Utility",
+            "--linux-rpm-license-type", "Apache-2.0",
+            "--linux-shortcut",
+            "--verbose"
+    ]
+    doLast {
+        def source = java.nio.file.Path.of("${buildDir}/${project.name}_${BINJR_VERSION}-1_${OS_ARCH}.deb")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
 }
 
@@ -474,7 +535,7 @@ task packageAsRpm(type: WrapTaskForSigning, dependsOn: [prepareAppBundle]) {
     archiveName "${DISTRIBUTION_NAME}.rpm"
 }
 
-task packageAsDeb(type: WrapTaskForSigning, dependsOn: [prepareAppBundle]) {
+task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
     from "${buildDir}${DISTRIBUTION_NAME}.deb"
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.deb"
