@@ -32,8 +32,8 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public class LinuxUpdater implements PlatformUpdater {
-    private static final Logger logger = LogManager.getLogger(LinuxUpdater.class);
+public class LinuxTarballUpdater implements PlatformUpdater {
+    private static final Logger logger = LogManager.getLogger(LinuxTarballUpdater.class);
 
     @Override
     public boolean isInAppUpdateSupported() {

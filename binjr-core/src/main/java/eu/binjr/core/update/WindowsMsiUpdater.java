@@ -32,8 +32,8 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class WindowsUpdater implements PlatformUpdater {
-    private static final Logger logger = LogManager.getLogger(WindowsUpdater.class);
+public class WindowsMsiUpdater implements PlatformUpdater {
+    private static final Logger logger = LogManager.getLogger(WindowsMsiUpdater.class);
 
     @Override
     public boolean isInAppUpdateSupported() {

@@ -70,6 +70,7 @@ public class AppEnvironment {
     private final Manifest manifest;
     private final BooleanProperty updateCheckDisabled = new SimpleBooleanProperty(false);
     private final Property<StageStyle> windowsStyle = new SimpleObjectProperty<>(StageStyle.DECORATED);
+    private final Property<AppPackaging> packaging = new SimpleObjectProperty<>(AppPackaging.UNKNOWN);
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
     private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
@@ -123,14 +124,22 @@ public class AppEnvironment {
                     } catch (IllegalArgumentException e) {
                         logger.error("Unknown windows style specified: " + val, e);
                     }
+                    break;
                 case "resizable-dialogs":
-                    this.setResizableDialogs(Boolean.valueOf(val));
+                    this.setResizableDialogs(Boolean.parseBoolean(val));
                     break;
                 case "disable-update-check":
-                    this.setUpdateCheckDisabled(Boolean.valueOf(val));
+                    this.setUpdateCheckDisabled(Boolean.parseBoolean(val));
+                    break;
+                case "packaging":
+                    try {
+                        this.setPackaging(AppPackaging.valueOf(val.toUpperCase()));
+                    } catch (IllegalArgumentException e) {
+                        logger.error("Unknown app packaging type specified: " + val, e);
+                    }
                     break;
                 case "disable-signature-verification":
-                    this.setSignatureVerificationDisabled(!Boolean.valueOf(val));
+                    this.setSignatureVerificationDisabled(!Boolean.parseBoolean(val));
                     break;
                 case "log-level":
                     UserPreferences.getInstance().rootLoggingLevel.set(Log4j2Level.valueOf(val, Log4j2Level.INFO));
@@ -353,7 +362,7 @@ public class AppEnvironment {
      *
      * @param updateCheckDisabled true to prevent binjr from checking for update
      */
-    public void setUpdateCheckDisabled(Boolean updateCheckDisabled) {
+    public void setUpdateCheckDisabled(boolean updateCheckDisabled) {
         this.updateCheckDisabled.setValue(updateCheckDisabled);
     }
 
@@ -371,7 +380,7 @@ public class AppEnvironment {
      *
      * @return true if binjr is prevented from checking for update, false otherwise.
      */
-    public Boolean isDisableUpdateCheck() {
+    public boolean isDisableUpdateCheck() {
         return updateCheckDisabled.getValue();
     }
 
@@ -430,6 +439,19 @@ public class AppEnvironment {
                 .map(MemoryManagerMXBean::getName)
                 .collect(Collectors.joining(", "));
     }
+
+    public AppPackaging getPackaging() {
+        return packaging.getValue();
+    }
+
+    public Property<AppPackaging> packagingProperty() {
+        return packaging;
+    }
+
+    public void setPackaging(AppPackaging value) {
+        packaging.setValue(value);
+    }
+
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();

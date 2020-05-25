@@ -27,8 +27,8 @@ import java.nio.file.Path;
  *
  * @author Frederic Thevenet
  */
-public class UnsupportedUpdater implements PlatformUpdater {
-    private static final Logger logger = LogManager.getLogger(UnsupportedUpdater.class);
+public class NotifyOnlyUpdater implements PlatformUpdater {
+    private static final Logger logger = LogManager.getLogger(NotifyOnlyUpdater.class);
 
     @Override
     public boolean isInAppUpdateSupported() {
@@ -37,7 +37,7 @@ public class UnsupportedUpdater implements PlatformUpdater {
 
     @Override
     public void launchUpdater(Path updatePackage, Version updateVersion, boolean restartRequested) throws Exception {
-        logger.debug(() -> "UnsupportedUpdater launchUpdater invoked with " +
+        logger.debug(() -> "NotifyOnlyUpdater launchUpdater invoked with " +
                 "updatePackage=" + updatePackage +
                 "updateVersion=" + updateVersion +
                 "restartRequested=" + restartRequested);

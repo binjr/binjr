@@ -17,4 +17,5 @@ exec "$JAVACMD" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
   "eu.binjr.core.Binjr" \
+  "--packaging=LINUX_TAR" \
   "$@"

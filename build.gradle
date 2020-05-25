@@ -403,7 +403,16 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
     ]
 }
 
+
+void setWindowsPackaging(String packaging){
+    File launcherIni = new File("${DISTRIBUTION_PATH}/binjr.ini")
+    launcherIni << "\n; -- Application Packaging --\narg.1 = --packaging=${packaging}\n"
+}
+
 task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
+    doFirst{
+        setWindowsPackaging("WIN_MSI")
+    }
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/heat.exe",
@@ -456,6 +465,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--app-version", BINJR_VERSION,
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac/file-associations.properties",
+            "--arguments", "--packaging=MAC_DMG",
             "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
@@ -491,6 +501,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--arguments", "--packaging=LINUX_DEB",
             "--linux-package-name", "binjr",
             "--linux-deb-maintainer","binjr@free.fr",
             "--linux-app-category", "Utility",

@@ -22,7 +22,6 @@ import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.OsFamily;
 import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
 import javafx.beans.property.Property;
@@ -92,17 +91,22 @@ public class UpdateManager {
         github.setUserCredentials(
                 UserPreferences.getInstance().githubUserName.get(),
                 UserPreferences.getInstance().githubAuthToken.get());
-        switch (AppEnvironment.getInstance().getOsFamily()) {
-            case LINUX:
-                platformUpdater = new LinuxUpdater();
+
+        switch (AppEnvironment.getInstance().getPackaging()) {
+            case LINUX_TAR:
+                platformUpdater = new LinuxTarballUpdater();
                 break;
-            case WINDOWS:
-                platformUpdater = new WindowsUpdater();
+            case WIN_MSI:
+                platformUpdater = new WindowsMsiUpdater();
                 break;
-            case OSX:
-            case UNSUPPORTED:
+            case MAC_DMG:
+            case MAC_TAR:
+            case WIN_ZIP:
+            case LINUX_DEB:
+            case LINUX_RPM:
+            case UNKNOWN:
             default:
-                platformUpdater = new UnsupportedUpdater();
+                platformUpdater = new NotifyOnlyUpdater();
                 break;
         }
     }
@@ -211,9 +215,13 @@ public class UpdateManager {
             @Override
             protected Path call() throws Exception {
                 var targetDir = Files.createTempDirectory("binjr-update_");
-                var packagePath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), false, targetDir);
+                String packageAssetName = String.format("binjr-%s_%s.%s",
+                        release.getVersion(),
+                        AppEnvironment.getInstance().getOsFamily().getPlatformClassifier(),
+                        AppEnvironment.getInstance().getPackaging().getBundleExtension());
+                var packagePath = downloadAsset(release, packageAssetName, targetDir);
                 if (!AppEnvironment.getInstance().isSignatureVerificationDisabled()) {
-                    var sigPath = downloadAsset(release, AppEnvironment.getInstance().getOsFamily(), true, targetDir);
+                    var sigPath = downloadAsset(release, packageAssetName + ".asc", targetDir);
                     verifyUpdatePackage(packagePath, sigPath);
                 }
                 return packagePath;
@@ -290,21 +298,14 @@ public class UpdateManager {
         n.showInformation();
     }
 
-    private Path downloadAsset(GithubRelease release, OsFamily os, boolean isSignature, Path targetDir) throws IOException, URISyntaxException {
+    private Path downloadAsset(GithubRelease release, String assetName, Path targetDir) throws IOException, URISyntaxException {
         var asset = release.getAssets()
                 .stream()
-                .filter(a -> a.getName().equalsIgnoreCase(
-                        String.format("binjr-%s_%s.%s%s",
-                                release.getVersion(),
-                                os.getPlatformClassifier(),
-                                os.getBundleExtension(),
-                                (isSignature ? ".asc" : ""))))
+                .filter(a -> a.getName().equalsIgnoreCase(assetName))
                 .findAny()
-                .orElseThrow(() -> new NoSuchElementException("Failed to find " +
-                        (isSignature ? "signature" : "package") + " for release " +
-                        release.getName() +
-                        " / platform " +
-                        AppEnvironment.getInstance().getOsFamily().getPlatformClassifier()));
+                .orElseThrow(() -> new NoSuchElementException("Unknown asset " + assetName +
+                        " for release " +
+                        release.getName()));
         logger.info("Downloading asset from " + asset.getBrowserDownloadUrl());
         return github.downloadAsset(asset, targetDir);
     }
