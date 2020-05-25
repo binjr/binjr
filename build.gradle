@@ -567,7 +567,7 @@ task packageDistribution() {
     } else if (IS_MAC) {
         finalizedBy(packageAsDmg, packageAsTarGz)
     } else {
-        finalizedBy(packageAsTarGz)
+        finalizedBy(packageAsTarGz, packageAsDeb)
     }
 }
 
@@ -577,7 +577,7 @@ task signPackageDistribution() {
     } else if (IS_MAC) {
         finalizedBy(signPackageAsDmg, signPackageAsTarGz)
     } else {
-        finalizedBy(signPackageAsTarGz)
+        finalizedBy(signPackageAsTarGz, signPackageAsDeb)
     }
 }
 
