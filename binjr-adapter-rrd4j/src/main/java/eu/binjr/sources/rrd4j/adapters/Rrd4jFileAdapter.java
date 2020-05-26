@@ -52,7 +52,7 @@ import java.util.stream.Collectors;
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
-    private final RrdDbPool rrdDbMap = new RrdDbPool(new RrdRandomAccessFileBackendFactory());
+    private final RrdDbPool rrdDbMap = new RrdDbPool(new RrdNioBackendFactory(0));
     private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();
 
