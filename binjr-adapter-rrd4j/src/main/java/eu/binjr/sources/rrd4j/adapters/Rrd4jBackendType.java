@@ -26,8 +26,4 @@ public enum Rrd4jBackendType {
     NIO,
     // Memory-oriented backends. RRD data is stored in memory, it gets lost as soon as JVM exits.
     MEMORY;
-//    //a memory-oriented backend that ensure persistent in a Berkeley Db storage.
-//    BERKELEY,
-//    //a memory-oriented backend that ensure persistent in a MongoDB storage.
-//    MONGODB;
 }
