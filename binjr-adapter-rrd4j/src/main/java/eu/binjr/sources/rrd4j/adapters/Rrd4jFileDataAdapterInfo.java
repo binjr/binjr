@@ -38,6 +38,7 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 Rrd4jFileAdapter.class,
                 Rrd4jFileAdapterDialog.class,
+                Rrd4jFileAdapterPreferences.getInstance(),
                 SourceLocality.LOCAL);
     }
 }

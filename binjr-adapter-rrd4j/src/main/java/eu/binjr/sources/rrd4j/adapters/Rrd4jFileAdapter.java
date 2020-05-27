@@ -16,6 +16,8 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.common.function.CheckedFunction;
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -35,6 +37,7 @@ import org.rrd4j.ConsolFun;
 import org.rrd4j.core.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -52,9 +55,10 @@ import java.util.stream.Collectors;
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
-    private final RrdDbPool rrdDbMap = new RrdDbPool(new RrdNioBackendFactory(0));
+    private final RrdDbPool rrdDbMap;
     private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();
+    private final Rrd4jFileAdapterPreferences prefs =Rrd4jFileAdapterPreferences.getInstance();
 
     /**
      * Initialises a new instance of the {@link Rrd4jFileAdapter} class.
@@ -70,6 +74,10 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
      */
     public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
+        Path a = Paths.get("");
+        var factory =   RrdBackendFactory.getFactory(prefs.rrd4jBackend.get().toString());
+        logger.debug(()-> "Rrd backend factory= " + factory.getName());
+        rrdDbMap  = new RrdDbPool(factory);
     }
 
     @Override
@@ -97,7 +105,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                         "-",
                         tree.getValue().getTreeHierarchy() + "/" + rrdFileName,
                         this));
-                RrdDb rrd = rrdDbMap.requestRrdDb(rrdPath.toString());
+                RrdDb rrd = rrdDbMap.requestRrdDb(rrdPath.toUri());
 
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs())
                         .map(ArcDef::getConsolFun)
@@ -141,7 +149,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         Path dsPath = Path.of(path);
         try {
-            var end = Instant.ofEpochSecond(rrdDbMap.requestRrdDb(dsPath.getParent().toString()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
+            var end = Instant.ofEpochSecond(rrdDbMap.requestRrdDb(dsPath.getParent().toUri()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
             return TimeRange.of(end.minusHours(24), end);
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException("IO Error while retrieving last update from rrd db", e);
@@ -157,7 +165,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         Path dsPath = Path.of(path);
         try {
-            FetchRequest request = rrdDbMap.requestRrdDb(dsPath.getParent().toString()).createFetchRequest(
+            FetchRequest request = rrdDbMap.requestRrdDb(dsPath.getParent().toUri()).createFetchRequest(
                     ConsolFun.valueOf(dsPath.getFileName().toString()),
                     begin.getEpochSecond(),
                     end.getEpochSecond());
@@ -256,12 +264,12 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     private void closeRrdDb() {
-        for (var rrdPath : rrdDbMap.getOpenFiles()) {
-            logger.debug(() -> "Closing RRD db " + rrdPath);
+        for (var rrdUri : rrdDbMap.getOpenUri()) {
+            logger.debug(() -> "Closing RRD db " + rrdUri);
             try {
-                rrdDbMap.requestRrdDb(rrdPath).close();
+                rrdDbMap.requestRrdDb(rrdUri).close();
             } catch (IOException e) {
-                logger.error("Error attempting to close RRD db " + rrdPath, e);
+                logger.error("Error attempting to close RRD db " + rrdUri, e);
             }
         }
     }
