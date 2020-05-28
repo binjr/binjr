@@ -26,7 +26,7 @@ stages:
           jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu14.28.21-ca-jdk14.0.1-linux_x64.tar.gz'
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           pool:
-            vmImage: 'ubuntu-16.04'
+            vmImage: 'ubuntu-18.04'
 
       # MacOS app bundle job
       - template: build-job.yml
@@ -36,7 +36,7 @@ stages:
           jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu14.28.21-ca-jdk14.0.1-macosx_x64.tar.gz'
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
           pool:
-            vmImage: 'macOS-10.14'
+            vmImage: 'macOS-10.15'
 
       # Windows app bundle job
       - template: build-job.yml

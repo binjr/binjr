@@ -36,7 +36,7 @@ jobs:
           IS_TAG: $(isTag)
           REPO_TAG_NAME: $(Build.SourceBranchName)
         inputs:
-          options: '--parallel'
+          options: '--stacktrace'
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
           jdkVersionOption: '1.14'
