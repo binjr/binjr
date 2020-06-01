@@ -79,19 +79,18 @@ stages:
             python3 -m pip install --upgrade pip setuptools
             python3 -m pip install mkdocs
             python3 -m pip install mkdocs-material
-            git clone https://github.com/binjr/binjr-site build/tmp/binjr-site
+            git clone -b sources https://github.com/binjr/binjr.github.io build/tmp/binjr-site
             cd  build/tmp/binjr-site
-            cp ../expanded/CHANGELOG.md src/docs/download/CHANGELOG.md
-            cp ../expanded/latest_release.md src/docs/download/latest_release.md
+            cp ../expanded/CHANGELOG.md docs/download/CHANGELOG.md
+            cp ../expanded/latest_release.md docs/download/latest_release.md
             git config credential.helper store
             echo "https://binjr-bot:$GH_ACCESS_TOKEN@github.com" >> "$HOME/.git-credentials"
             git config user.email "binjr.bot@free.fr"
             git config user.name "binjr-bot"
-            wget https://api.github.com/repos/binjr/binjr/releases/latest -O src/docs/repos/binjr/binjr/releases/latest
+            wget https://api.github.com/repos/binjr/binjr/releases/latest -O docs/repos/binjr/binjr/releases/latest
             git commit -am "Release  $BUILD_SOURCEBRANCHNAME"
             git push
-            cd src
-            python3 -m mkdocs gh-deploy
+            python3 -m mkdocs gh-deploy --remote-branch master
           env:
             GH_ACCESS_TOKEN: $(gh.access.token)
 
@@ -101,7 +100,7 @@ stages:
     # Publish to Maven repo
     - job: maven_publish
       pool:
-        vmImage: 'ubuntu-16.04'
+        vmImage: 'ubuntu-18.04'
       steps:
         - script: |
             echo '##vso[task.setvariable variable=isTag;]true'
