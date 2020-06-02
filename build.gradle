@@ -508,6 +508,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--linux-menu-group", "Utility",
             "--linux-rpm-license-type", "Apache-2.0",
             "--linux-shortcut",
+            "--temp", "${buildDir}/tmp/apt",
             "--verbose"
     ]
     doLast {

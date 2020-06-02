@@ -1,0 +1,37 @@
+#!/bin/sh
+# postinst script for binjr
+#
+# see: dh_installdeb(1)
+
+set -e
+
+# summary of how this script can be called:
+#        * <postinst> `configure' <most-recently-configured-version>
+#        * <old-postinst> `abort-upgrade' <new version>
+#        * <conflictor's-postinst> `abort-remove' `in-favour' <package>
+#          <new-version>
+#        * <postinst> `abort-remove'
+#        * <deconfigured's-postinst> `abort-deconfigure' `in-favour'
+#          <failed-install-package> <version> `removing'
+#          <conflicting-package> <version>
+# for details, see https://www.debian.org/doc/debian-policy/ or
+# the debian-policy package
+
+case "$1" in
+    configure)
+xdg-desktop-menu install /opt/binjr/lib/binjr-binjr.desktop || echo "Desktop menu entry could not be installed" >&2 
+xdg-mime install /opt/binjr/lib/binjr-binjr-MimeInfo.xml || echo "x-binjr Mime type could not be installed" >&2 
+xdg-icon-resource install --context mimetypes --size 128 /opt/binjr/lib/application-x-binjr.png application-x-binjr  || echo "Icon resource could not be installed" >&2 
+ln -sf /opt/binjr/bin/binjr /usr/bin/binjr
+    ;;
+
+    abort-upgrade|abort-remove|abort-deconfigure)
+    ;;
+
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+    ;;
+esac
+
+exit 0
