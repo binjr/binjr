@@ -65,3 +65,28 @@ jobs:
           releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
           addChangeLog: false
           isPreRelease: $(isSnapshot)
+
+      - bash: |
+          sudo apt install gnupg1 gpgv1 aptly
+          echo -e '#!/bin/bash\ngpg1 --batch --no-tty "$@"' | sudo tee /usr/bin/gpg > /dev/null
+          sudo chmod +x /usr/bin/gpg
+          gpg --import $(System.DefaultWorkingDirectory)/distribution/publishing/keyring.gpg
+          aptly --distribution="stable" --comment="binjr apt repository" repo create binjr
+          aptly repo add binjr  $(System.DefaultWorkingDirectory)/build/binjr-*_linux-amd64.deb
+          aptly -gpg-key="$(gpg.keyname)" -passphrase="$(gpg.passphrase)" publish repo binjr
+          git clone https://github.com/binjr/binjr-dist-repos build/tmp/binjr-dist-repos
+          cd  build/tmp/binjr-dist-repos
+          git config credential.helper store
+          echo "https://binjr-bot:$(gh.access.token)@github.com" >> "$HOME/.git-credentials"
+          git config user.email "binjr.bot@free.fr"
+          git config user.name "binjr-bot"
+          rm -rf apt/dists
+          rm -rf apt/pool
+          cp -r ~/.aptly/public/dists apt/dists
+          cp -r ~/.aptly/public/pool apt/pool
+          git add .
+          git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
+          git push -f
+        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq( variables['Agent.OS'], 'Linux' ))
+
+
