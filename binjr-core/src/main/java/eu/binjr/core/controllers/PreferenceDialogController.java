@@ -16,7 +16,7 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -180,7 +180,7 @@ public class PreferenceDialogController implements Initializable {
     }
 
     @SafeVarargs
-    private <T> void bindEnumToChoiceBox(Preference<T> preference, ChoiceBox<T> choiceBox, T... initValues) {
+    private <T> void bindEnumToChoiceBox(ObservablePreference<T> preference, ChoiceBox<T> choiceBox, T... initValues) {
         choiceBox.getItems().setAll(initValues);
         choiceBox.getSelectionModel().select(preference.get());
         preference.property().addListener((observable, oldValue, newValue) -> {

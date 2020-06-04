@@ -16,7 +16,7 @@
 
 package eu.binjr.sources.netdata.adapters;
 
-import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.sources.netdata.api.GroupingMethod;
 
@@ -29,34 +29,34 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
     /**
      * Set to true to disable server-side down-sampling (aka "grouping"). Client-side down-sampling will still be applied.
      */
-    public Preference<Boolean> disableServerSideDownsampling = booleanPreference("disableServerSideDownsampling", false);
+    public ObservablePreference<Boolean> disableServerSideDownsampling = booleanPreference("disableServerSideDownsampling", false);
 
     /**
      * Set to true to disable Netdata alignment of all series on the same time-frame.
      */
-    public Preference<Boolean> disableTimeFrameAlignment = booleanPreference("disableTimeFrameAlignment", true);
+    public ObservablePreference<Boolean> disableTimeFrameAlignment = booleanPreference("disableTimeFrameAlignment", true);
 
     /**
      * Netdata's grouping (i.e. down-sampling) method: If multiple collected values are to be grouped in order to
      * return fewer points, this parameters defines the method of grouping.
      */
-    public Preference<GroupingMethod> groupingMethod = enumPreference(GroupingMethod.class, "groupingMethod", GroupingMethod.AVERAGE);
+    public ObservablePreference<GroupingMethod> groupingMethod = enumPreference(GroupingMethod.class, "groupingMethod", GroupingMethod.AVERAGE);
 
     /**
      * The grouping number of seconds.
      * This is used in conjunction with group=average to change the units of metrics
      * (ie when the data is per-second, setting gtime=60 will turn them to per-minute).
      */
-    public Preference<Number> groupingTime = integerPreference("groupingTime", 0);
+    public ObservablePreference<Number> groupingTime = integerPreference("groupingTime", 0);
 
-    public final Preference<Number> fetchReadBehindSeconds = integerPreference("fetchReadBehindSeconds", 10);
+    public final ObservablePreference<Number> fetchReadBehindSeconds = integerPreference("fetchReadBehindSeconds", 10);
 
-    public final Preference<Number> fetchReadAheadSeconds = integerPreference("fetchReadAheadSeconds", 10);
+    public final ObservablePreference<Number> fetchReadAheadSeconds = integerPreference("fetchReadAheadSeconds", 10);
 
     /**
      * The maximum number of samples to recover from Netdata. 0 means every available samples will be returned.
      */
-    public Preference<Number> maxSamplesAllowed = integerPreference("maxSamplesAllowed", 10000);
+    public ObservablePreference<Number> maxSamplesAllowed = integerPreference("maxSamplesAllowed", 10000);
 
     private NetdataAdapterPreferences() {
         super(NetdataAdapter.class);

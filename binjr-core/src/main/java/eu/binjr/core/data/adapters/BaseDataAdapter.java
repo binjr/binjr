@@ -16,7 +16,6 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.common.function.CheckedFunction;
@@ -25,7 +24,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.UUID;
-import java.util.prefs.Preferences;
 
 /**
  * A base implementation of the {@link DataAdapter} interface that provides an implementation to the most common methods of the interface.

@@ -16,7 +16,7 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
-import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
 
@@ -27,7 +27,7 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
  */
 public class Rrd4jFileAdapterPreferences extends DataAdapterPreferences {
 
-    public final Preference<Rrd4jBackendType> rrd4jBackend =
+    public final ObservablePreference<Rrd4jBackendType> rrd4jBackend =
             enumPreference(Rrd4jBackendType.class, "rrd4jBackend", Rrd4jBackendType.NIO);
 
     private Rrd4jFileAdapterPreferences() {

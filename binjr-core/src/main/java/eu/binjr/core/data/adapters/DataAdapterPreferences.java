@@ -16,15 +16,15 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.preferences.Preference;
-import eu.binjr.common.preferences.PreferenceFactory;
+import eu.binjr.common.preferences.ObservablePreference;
+import eu.binjr.common.preferences.ObservablePreferenceFactory;
 import eu.binjr.core.preferences.UserPreferences;
 
 import java.util.prefs.Preferences;
 
-public class DataAdapterPreferences extends PreferenceFactory {
+public class DataAdapterPreferences extends ObservablePreferenceFactory {
 
-    public final Preference<Boolean> enabled = booleanPreference("adapterEnabled", true);
+    public final ObservablePreference<Boolean> enabled = booleanPreference("adapterEnabled", true);
 
     public DataAdapterPreferences(Class<? extends DataAdapter> dataAdapterClass) {
         super(Preferences.userRoot().node(UserPreferences.BINJR_GLOBAL + "/adapters/" + dataAdapterClass.getName()));

@@ -32,15 +32,15 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
-    private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
+public class ObservablePreferenceFactory extends ReloadableItemStore<ObservablePreference<?>> {
+    private static final Logger logger = LogManager.getLogger(ObservablePreferenceFactory.class);
 
-    public PreferenceFactory(Preferences backingStore) {
+    public ObservablePreferenceFactory(Preferences backingStore) {
         super(backingStore);
     }
 
-    public Preference<Boolean> booleanPreference(String key, Boolean defaultValue) {
-        var p = new Preference<>(Boolean.class, key, defaultValue, backingStore) {
+    public ObservablePreference<Boolean> booleanPreference(String key, Boolean defaultValue) {
+        var p = new ObservablePreference<>(Boolean.class, key, defaultValue, backingStore) {
             @Override
             protected Property<Boolean> makeProperty(Boolean value) {
                 return new SimpleBooleanProperty(value);
@@ -60,8 +60,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public Preference<String> stringPreference(String key, String defaultValue) {
-        var p = new Preference<String>(String.class, key, defaultValue, backingStore) {
+    public ObservablePreference<String> stringPreference(String key, String defaultValue) {
+        var p = new ObservablePreference<String>(String.class, key, defaultValue, backingStore) {
             @Override
             protected Property<String> makeProperty(String value) {
                 return new SimpleStringProperty(value);
@@ -81,8 +81,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public Preference<Number> integerPreference(String key, Integer defaultValue) {
-        var p = new Preference<>(Number.class, key, defaultValue, backingStore) {
+    public ObservablePreference<Number> integerPreference(String key, Integer defaultValue) {
+        var p = new ObservablePreference<>(Number.class, key, defaultValue, backingStore) {
             @Override
             protected Property<Number> makeProperty(Number value) {
                 return new SimpleIntegerProperty(value.intValue());
@@ -102,8 +102,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public Preference<Number> longPreference(String key, Long defaultValue) {
-        var p = new Preference<>(Number.class, key, defaultValue, backingStore) {
+    public ObservablePreference<Number> longPreference(String key, Long defaultValue) {
+        var p = new ObservablePreference<>(Number.class, key, defaultValue, backingStore) {
             @Override
             protected Property<Number> makeProperty(Number value) {
                 return new SimpleLongProperty(value.longValue());
@@ -123,8 +123,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public Preference<Number> doublePreference(String key, Double defaultValue) {
-        var p = new Preference<>(Number.class, key, defaultValue, backingStore) {
+    public ObservablePreference<Number> doublePreference(String key, Double defaultValue) {
+        var p = new ObservablePreference<>(Number.class, key, defaultValue, backingStore) {
             @Override
             protected Property<Number> makeProperty(Number value) {
                 return new SimpleDoubleProperty(value.doubleValue());
@@ -144,8 +144,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public Preference<Path> pathPreference(String key, Path defaultValue) {
-        var p = new Preference<>(Path.class, key, defaultValue, backingStore) {
+    public ObservablePreference<Path> pathPreference(String key, Path defaultValue) {
+        var p = new ObservablePreference<>(Path.class, key, defaultValue, backingStore) {
             @Override
             protected Property<Path> makeProperty(Path value) {
                 return new SimpleObjectProperty<>(value);
@@ -165,8 +165,8 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public <E extends Enum<E>> Preference<E> enumPreference(Class<E> type, String key, E defaultValue) {
-        var p = new Preference<E>(type, key, defaultValue, backingStore) {
+    public <E extends Enum<E>> ObservablePreference<E> enumPreference(Class<E> type, String key, E defaultValue) {
+        var p = new ObservablePreference<E>(type, key, defaultValue, backingStore) {
             @Override
             protected Property<E> makeProperty(E value) {
                 return new SimpleObjectProperty<E>(value);
@@ -186,12 +186,12 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public <T> Preference<T> objectPreference(Class<T> type,
-                                              String key,
-                                              T defaultValue,
-                                              Function<T, String> convertToString,
-                                              Function<String, T> parseFromString) {
-        var p = new Preference<T>(type, key, defaultValue, backingStore) {
+    public <T> ObservablePreference<T> objectPreference(Class<T> type,
+                                                        String key,
+                                                        T defaultValue,
+                                                        Function<T, String> convertToString,
+                                                        Function<String, T> parseFromString) {
+        var p = new ObservablePreference<T>(type, key, defaultValue, backingStore) {
             @Override
             protected Property<T> makeProperty(T value) {
                 return new SimpleObjectProperty<T>(value);
@@ -211,12 +211,12 @@ public class PreferenceFactory extends ReloadableItemStore<Preference<?>> {
         return p;
     }
 
-    public <U> Optional<Preference<U>> getByName(String name, Class<U> type) {
+    public <U> Optional<ObservablePreference<U>> getByName(String name, Class<U> type) {
         var p = storedItems.get(name);
         if (p == null || !type.isAssignableFrom(p.getInnerType())) {
             return Optional.empty();
         }
-        return Optional.of((Preference<U>) p);
+        return Optional.of((ObservablePreference<U>) p);
     }
 
     @Override

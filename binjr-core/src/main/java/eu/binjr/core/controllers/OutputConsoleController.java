@@ -23,7 +23,7 @@ import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.dialogs.Dialogs;
@@ -106,9 +106,9 @@ public class OutputConsoleController implements Initializable {
         preferenceEditor.getItems().addAll(UserPreferences.getInstance()
                 .getAll().values()
                 .stream()
-                .map(Preference::asPropertyItem)
+                .map(ObservablePreference::asPropertyItem)
                 .collect(Collectors.toList()));
-        UserPreferences.getInstance().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
+        UserPreferences.getInstance().getAll().addListener((MapChangeListener<String, ObservablePreference<?>>) c -> {
             if (c.wasAdded()) {
                 preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
             }
@@ -117,10 +117,10 @@ public class OutputConsoleController implements Initializable {
             preferenceEditor.getItems().addAll(di.getPreferences()
                     .getAll().values()
                     .stream()
-                    .map(Preference::asPropertyItem)
+                    .map(ObservablePreference::asPropertyItem)
                     .collect(Collectors.toList()));
 
-            di.getPreferences().getAll().addListener((MapChangeListener<String, Preference<?>>) c -> {
+            di.getPreferences().getAll().addListener((MapChangeListener<String, ObservablePreference<?>>) c -> {
                 if (c.wasAdded()) {
                     preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
                 }

@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.preferences.PreferenceFactory;
+import eu.binjr.common.preferences.ObservablePreferenceFactory;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.preferences.AppEnvironment;
 import javafx.beans.property.BooleanProperty;
@@ -229,7 +229,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     }
 
     @Override
-    public PreferenceFactory getPreferences() {
+    public ObservablePreferenceFactory getPreferences() {
         return adapterPreferences;
     }
 
