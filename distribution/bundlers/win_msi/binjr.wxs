@@ -118,8 +118,8 @@
         <Property Id="ApplicationFolderName" Value="binjr"/>
         <Property Id="WixAppFolder" Value="WixPerUserFolder"/>
         <WixVariable Id="WixUISupportPerMachine" Value="0"/>
-        <WixVariable Id="WixUIBannerBmp" Value="$(var.resourcesDir)\bundlers\windows\Install_Banner.jpg"/>
-        <WixVariable Id="WixUIDialogBmp" Value="$(var.resourcesDir)\bundlers\windows\Install_Splash.png"/>
+        <WixVariable Id="WixUIBannerBmp" Value="$(var.resourcesDir)\bundlers\win_msi\Install_Banner.jpg"/>
+        <WixVariable Id="WixUIDialogBmp" Value="$(var.resourcesDir)\bundlers\win_msi\Install_Splash.png"/>
         <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch binjr"/>
         <UI Id="WixUI_InstallDir">
             <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8"/>

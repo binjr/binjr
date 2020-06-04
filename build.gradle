@@ -19,6 +19,8 @@ import org.gradle.api.internal.file.copy.CopyAction
 import org.gradle.api.internal.file.copy.CopyActionProcessingStream
 
 import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.text.SimpleDateFormat
 import java.time.Duration
 
@@ -390,6 +392,11 @@ task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
 }
 
 task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
+    doFirst{
+        Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_zip/binjr.ini"),
+                Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
+                StandardCopyOption.REPLACE_EXISTING)
+    }
     from DISTRIBUTION_ROOT
     destinationDir buildDir
     archiveName "${DISTRIBUTION_NAME}.zip"
@@ -403,15 +410,11 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
     ]
 }
 
-
-void setWindowsPackaging(String packaging){
-    File launcherIni = new File("${DISTRIBUTION_PATH}/binjr.ini")
-    launcherIni << "\n; -- Application Packaging --\narg.1 = --packaging=${packaging}\n"
-}
-
 task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     doFirst{
-        setWindowsPackaging("WIN_MSI")
+        Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
+                Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
+                StandardCopyOption.REPLACE_EXISTING)
     }
     workingDir project.projectDir
     commandLine = [
@@ -431,7 +434,7 @@ task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
             "${WIX_HOME}/bin/candle.exe",
             "-arch", "x64",
             "-out", "${buildDir}/wix/obj/",
-            "${projectDir}/distribution/bundlers/windows/binjr.wxs",
+            "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
             "-dbinjrVersion=${BINJR_VERSION_STEM}",
             "-dbuildSourceDir=${DISTRIBUTION_PATH}",
@@ -464,7 +467,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--description", "A Time Series Browser",
             "--app-version", BINJR_VERSION,
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
-            "--file-associations", "${projectDir}/distribution/bundlers/mac/file-associations.properties",
+            "--file-associations", "${projectDir}/distribution/bundlers/mac_tar/file-associations.properties",
             "--arguments", "--packaging=MAC_DMG",
             "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
@@ -494,8 +497,8 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--app-version", BINJR_VERSION,
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
-            "--file-associations", "${projectDir}/distribution/bundlers/deb/file-associations.properties",
-            "--resource-dir", "${projectDir}/distribution/bundlers/deb/",
+            "--file-associations", "${projectDir}/distribution/bundlers/linux_deb/file-associations.properties",
+            "--resource-dir", "${projectDir}/distribution/bundlers/linux_deb/",
             "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
@@ -532,8 +535,8 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--app-version", BINJR_VERSION.replace("-", "."),
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
-            "--file-associations", "${projectDir}/distribution/bundlers/rpm/file-associations.properties",
-            "--resource-dir", "${projectDir}/distribution/bundlers/rpm/",
+            "--file-associations", "${projectDir}/distribution/bundlers/linux_rpm/file-associations.properties",
+            "--resource-dir", "${projectDir}/distribution/bundlers/linux_rpm/",
             "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",

@@ -30,5 +30,7 @@ exec $JAVACMD \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
+  -Djava.util.prefs.PreferencesFactory="eu.binjr.common.preferences.FilePreferencesFactory" \
   "eu.binjr.core.Binjr" \
+  "--packaging=MAC_TAR" \
   "$@"

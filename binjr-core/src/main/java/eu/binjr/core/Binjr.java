@@ -57,19 +57,17 @@ public class Binjr extends Application {
     public static final Logger runtimeDebuggingFeatures = LogManager.getLogger("runtimeDebuggingFeatures");
     private static final Logger logger = LogManager.getLogger(Binjr.class);
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
-    private static final UserPreferences userPrefs = UserPreferences.getInstance();
-
 
     static {
         // initialize the debug console appender early to start capturing logs ASAP.
         TextFlowAppender textFlowAppender = null;
         try {
-            Configurator.setRootLevel(userPrefs.rootLoggingLevel.get().getLevel());
-            userPrefs.rootLoggingLevel.property().addListener((observable, oldLevel, newLevel) -> {
+            Configurator.setRootLevel(UserPreferences.getInstance().rootLoggingLevel.get().getLevel());
+            UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldLevel, newLevel) -> {
                 Configurator.setRootLevel(newLevel.getLevel());
                 logger.info("Root logger level set to " + newLevel);
             });
-            if (userPrefs.redirectStdOutToLogs.get()) {
+            if (UserPreferences.getInstance().redirectStdOutToLogs.get()) {
                 System.setErr(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stderr"), Level.ERROR), true));
                 System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
             }
@@ -91,8 +89,8 @@ public class Binjr extends Application {
                 logger.error("Failed to initialize internal console appender", e);
             }
             try {
-                if (userPrefs.persistLogsToFile.get()) {
-                    Path basePath = userPrefs.logFilesLocation.get()
+                if (UserPreferences.getInstance().persistLogsToFile.get()) {
+                    Path basePath = UserPreferences.getInstance().logFilesLocation.get()
                             .resolve("binjr_" +
                                     ProcessHandle.current().pid() +
                                     LocalDateTime.now().format(DateTimeFormatter.ofPattern("_YYYY-MM-dd_HH-mm-ss")) +
@@ -128,8 +126,8 @@ public class Binjr extends Application {
             System.setProperty("sun.security.jgss.native", "true");
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        bindPrefToVmOption(userPrefs.heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
-        bindPrefToVmOption(userPrefs.heapDumpPath, HotSpotDiagnostic::setHeapDumpPath);
+        bindPrefToVmOption(UserPreferences.getInstance().heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
+        bindPrefToVmOption(UserPreferences.getInstance().heapDumpPath, HotSpotDiagnostic::setHeapDumpPath);
         launch(args);
     }
 
@@ -168,13 +166,13 @@ public class Binjr extends Application {
 
         try (Profiler p = Profiler.start("Set scene", logger::trace)) {
             if (Screen.getScreensForRectangle(
-                    userPrefs.windowLastPosition.get().getMinX(),
-                    userPrefs.windowLastPosition.get().getMinY(),
+                    UserPreferences.getInstance().windowLastPosition.get().getMinX(),
+                    UserPreferences.getInstance().windowLastPosition.get().getMinY(),
                     10, 10).size() > 0) {
-                primaryStage.setX(userPrefs.windowLastPosition.get().getMinX());
-                primaryStage.setY(userPrefs.windowLastPosition.get().getMinY());
-                primaryStage.setWidth(userPrefs.windowLastPosition.get().getWidth());
-                primaryStage.setHeight(userPrefs.windowLastPosition.get().getHeight());
+                primaryStage.setX(UserPreferences.getInstance().windowLastPosition.get().getMinX());
+                primaryStage.setY(UserPreferences.getInstance().windowLastPosition.get().getMinY());
+                primaryStage.setWidth(UserPreferences.getInstance().windowLastPosition.get().getWidth());
+                primaryStage.setHeight(UserPreferences.getInstance().windowLastPosition.get().getHeight());
             }
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);
