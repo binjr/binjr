@@ -16,6 +16,7 @@
 
 package eu.binjr.common.preferences;
 
+import eu.binjr.core.Binjr;
 import eu.binjr.core.preferences.AppEnvironment;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
@@ -26,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,17 +47,9 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
     private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
 
-
     ReloadableItemStore(String backingStoreKey) {
-        if (Boolean.parseBoolean(System.getProperty(AppEnvironment.PORTABLE_PROPERTY))) {
-            System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
-        }
-        this.backingStore = Preferences.userRoot().
-
-                node(backingStoreKey);
-        storedItems.addListener((MapChangeListener<String, T>) c ->
-
-        {
+        this.backingStore = getBackingPreference(backingStoreKey);
+        storedItems.addListener((MapChangeListener<String, T>) c -> {
             if (c.wasAdded()) {
                 logger.trace(() -> "Preference added to store: " + c.getValueAdded().toString());
             }
@@ -73,6 +67,28 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     public void reset() throws BackingStoreException {
         clearSubTree(backingStore);
         storedItems.values().forEach(T::reload);
+    }
+
+    private Preferences getBackingPreference(String name) {
+        if (Boolean.parseBoolean(System.getProperty(AppEnvironment.PORTABLE_PROPERTY))) {
+            try {
+                var jarLocation = Paths.get(Binjr.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+                var configDir = jarLocation.getParent().getParent().resolve("settings");
+                if (!Files.isDirectory(configDir)) {
+                    Files.createDirectory(configDir);
+                }
+                var preferencesFile = configDir.resolve("user").toFile();
+                if (!preferencesFile.exists()) {
+                    preferencesFile.createNewFile();
+                }
+                return new FilePreferences(preferencesFile, null, "").node(name);
+            } catch (Exception e) {
+                logger.error("Failed to create file to store preferences" + e.getMessage());
+                logger.debug(() -> "Stack Trace", e);
+                logger.warn("Non portable preference store will be used instead");
+            }
+        }
+        return Preferences.userRoot().node(name);
     }
 
     private void clearSubTree(Preferences node) throws BackingStoreException {

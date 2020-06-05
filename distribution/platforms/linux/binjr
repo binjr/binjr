@@ -16,7 +16,7 @@ exec "$JAVACMD" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
   -Dbasedir="$BASEDIR" \
-  -Djava.util.prefs.PreferencesFactory="eu.binjr.common.preferences.FilePreferencesFactory" \
+  -Dbinjr.portable=true \
   "eu.binjr.core.Binjr" \
   "--packaging=LINUX_TAR" \
   "$@"
