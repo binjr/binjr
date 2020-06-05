@@ -41,7 +41,7 @@ public class UserHistory extends MruFactory {
             pathMostRecentlyUsedList("mostRecentSaveFolders", 20, true);
 
     private UserHistory() {
-        super(Preferences.userRoot().node("binjr/history"));
+        super("binjr/history");
         logFilesHistory.setOnItemEvicted(path -> {
             try {
                 Files.deleteIfExists(path);

@@ -62,6 +62,7 @@ public class AppEnvironment {
     };
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
+    public static final String PORTABLE_PROPERTY = "binjr.portable";
 
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -451,7 +452,6 @@ public class AppEnvironment {
     public void setPackaging(AppPackaging value) {
         packaging.setValue(value);
     }
-
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();

@@ -29,6 +29,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.prefs.Preferences;
 
 /**
@@ -248,8 +252,11 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<BuiltInChartColorPalettes> chartColorPalette =
             enumPreference(BuiltInChartColorPalettes.class, "chartColorPalette", BuiltInChartColorPalettes.VIBRANT);
 
+    public ObservablePreference<LocalDateTime> lastCheckForUpdate =
+            localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
+
     private UserPreferences() {
-        super(Preferences.userRoot().node(BINJR_GLOBAL));
+        super(BINJR_GLOBAL);
     }
 
     public static UserPreferences getInstance() {

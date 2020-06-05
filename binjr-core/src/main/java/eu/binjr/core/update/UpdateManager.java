@@ -54,7 +54,6 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.prefs.Preferences;
 
 /**
  * Defines a series of methods to manage updates
@@ -63,9 +62,6 @@ import java.util.prefs.Preferences;
  */
 public class UpdateManager {
     private static final Logger logger = LogManager.getLogger(UpdateManager.class);
-    private static final String LAST_CHECK_FOR_UPDATE = "lastCheckForUpdate";
-    private static final String BINJR_UPDATE = "binjr/update";
-    private Property<LocalDateTime> lastCheckForUpdate;
     private Path updatePackage = null;
     private Version updateVersion = null;
     private boolean restartRequested = false;
@@ -79,9 +75,6 @@ public class UpdateManager {
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU));
-        Preferences prefs = Preferences.userRoot().node(BINJR_UPDATE);
-        lastCheckForUpdate = new SimpleObjectProperty<>(LocalDateTime.parse(prefs.get(LAST_CHECK_FOR_UPDATE, "1900-01-01T00:00:00"), DateTimeFormatter.ISO_LOCAL_DATE_TIME));
-        lastCheckForUpdate.addListener((observable, oldValue, newValue) -> prefs.put(LAST_CHECK_FOR_UPDATE, newValue.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)));
         UserPreferences.getInstance().githubUserName.property().addListener((observable, oldValue, newValue) -> {
             github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get());
         });
@@ -142,28 +135,6 @@ public class UpdateManager {
         asyncCheckForUpdate(newReleaseAvailable, upToDate, onFailure, true);
     }
 
-    /**
-     * Get the time stamp of the latest update check
-     *
-     * @return the time stamp of the latest update check
-     */
-    public LocalDateTime getLastCheckForUpdate() {
-        return lastCheckForUpdate.getValue();
-    }
-
-    /**
-     * Get the lastCheckForUpdateProperty property
-     *
-     * @return the lastCheckForUpdateProperty property
-     */
-    public Property<LocalDateTime> lastCheckForUpdateProperty() {
-        return lastCheckForUpdate;
-    }
-
-    private void setLastCheckForUpdate(LocalDateTime lastCheckForUpdate) {
-        this.lastCheckForUpdate.setValue(lastCheckForUpdate);
-    }
-
     private void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure, boolean forceCheck) {
         if (AppEnvironment.getInstance().isDisableUpdateCheck()) {
             logger.trace(() -> "Update check is explicitly disabled.");
@@ -172,14 +143,14 @@ public class UpdateManager {
             }
             return;
         }
-        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(getLastCheckForUpdate())) {
+        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore( UserPreferences.getInstance().lastCheckForUpdate.get())) {
             logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
             if (onFailure != null) {
                 onFailure.run();
             }
             return;
         }
-        setLastCheckForUpdate(LocalDateTime.now());
+        UserPreferences.getInstance().lastCheckForUpdate.set(LocalDateTime.now());
         Task<Optional<GithubRelease>> getLatestTask = new Task<>() {
             @Override
             protected Optional<GithubRelease> call() throws Exception {

@@ -22,6 +22,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.prefs.Preferences;
@@ -35,8 +38,8 @@ import java.util.stream.Collectors;
 public class ObservablePreferenceFactory extends ReloadableItemStore<ObservablePreference<?>> {
     private static final Logger logger = LogManager.getLogger(ObservablePreferenceFactory.class);
 
-    public ObservablePreferenceFactory(Preferences backingStore) {
-        super(backingStore);
+    public ObservablePreferenceFactory(String backingStoreKey) {
+        super(backingStoreKey);
     }
 
     public ObservablePreference<Boolean> booleanPreference(String key, Boolean defaultValue) {
@@ -96,6 +99,52 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
             @Override
             protected void saveToBackend(Number value) {
                 getBackingStore().putInt(getKey(), value.intValue());
+            }
+        };
+        storedItems.put(p.getKey(), p);
+        return p;
+    }
+
+    public ObservablePreference<ZonedDateTime> zoneDateTimePreference(String key, ZonedDateTime defaultValue) {
+        var p = new ObservablePreference<>(ZonedDateTime.class, key, defaultValue, backingStore) {
+            @Override
+            protected Property<ZonedDateTime> makeProperty(ZonedDateTime value) {
+                return new SimpleObjectProperty<>(value);
+            }
+
+            @Override
+            protected ZonedDateTime loadFromBackend() {
+                return ZonedDateTime.parse(getBackingStore().get(getKey(),
+                        getDefaultValue().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            }
+
+            @Override
+            protected void saveToBackend(ZonedDateTime value) {
+                getBackingStore().put(getKey(), value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+            }
+        };
+        storedItems.put(p.getKey(), p);
+        return p;
+    }
+
+    public ObservablePreference<LocalDateTime> localDateTimePreference(String key, LocalDateTime defaultValue) {
+        var p = new ObservablePreference<>(LocalDateTime.class, key, defaultValue, backingStore) {
+            @Override
+            protected Property<LocalDateTime> makeProperty(LocalDateTime value) {
+                return new SimpleObjectProperty<>(value);
+            }
+
+            @Override
+            protected LocalDateTime loadFromBackend() {
+                return LocalDateTime.parse(getBackingStore().get(getKey(),
+                        getDefaultValue().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
+                        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+            }
+
+            @Override
+            protected void saveToBackend(LocalDateTime value) {
+                getBackingStore().put(getKey(), value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
             }
         };
         storedItems.put(p.getKey(), p);

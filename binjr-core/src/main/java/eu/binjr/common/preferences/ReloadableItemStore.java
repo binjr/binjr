@@ -16,6 +16,7 @@
 
 package eu.binjr.common.preferences;
 
+import eu.binjr.core.preferences.AppEnvironment;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
@@ -42,16 +43,24 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     private static final Logger logger = LogManager.getLogger(ObservablePreferenceFactory.class);
     protected final Preferences backingStore;
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
-    private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);;
+    private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);
 
-    ReloadableItemStore(Preferences backingStore) {
-        this.backingStore = backingStore;
-        storedItems.addListener((MapChangeListener<String, T>)c->{
-            if (c.wasAdded()){
-                logger.trace(()-> "Preference added to store: " + c.getValueAdded().toString());
+
+    ReloadableItemStore(String backingStoreKey) {
+        if (Boolean.parseBoolean(System.getProperty(AppEnvironment.PORTABLE_PROPERTY))) {
+            System.setProperty("java.util.prefs.PreferencesFactory", FilePreferencesFactory.class.getName());
+        }
+        this.backingStore = Preferences.userRoot().
+
+                node(backingStoreKey);
+        storedItems.addListener((MapChangeListener<String, T>) c ->
+
+        {
+            if (c.wasAdded()) {
+                logger.trace(() -> "Preference added to store: " + c.getValueAdded().toString());
             }
-            if (c.wasRemoved()){
-                logger.trace(()-> "Preference removed from store: " + c.getValueAdded().toString());
+            if (c.wasRemoved()) {
+                logger.trace(() -> "Preference removed from store: " + c.getValueAdded().toString());
             }
         });
     }
@@ -136,7 +145,7 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     /**
      * Defines a items whose value can be stored into  a {@link ReloadableItemStore} instance.
      */
-    public static interface Reloadable {
+    public interface Reloadable {
         /**
          * Reloads the value of the item from the backing store.
          */

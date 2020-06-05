@@ -36,8 +36,8 @@ import java.util.prefs.Preferences;
 public class MruFactory extends ReloadableItemStore<MostRecentlyUsedList<?>> {
     private static final Logger logger = LogManager.getLogger(MruFactory.class);
 
-    public MruFactory(Preferences backingStore) {
-        super(backingStore);
+    public MruFactory(String backingStoreKey) {
+        super(backingStoreKey);
     }
 
     public MostRecentlyUsedList<String> stringMostRecentlyUsedList(String key, int capacity) {
