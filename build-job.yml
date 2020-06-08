@@ -52,13 +52,10 @@ jobs:
           action: edit
           tag: $(Build.SourceBranchName)
           assets: |
-            $(System.DefaultWorkingDirectory)/build/*.pkg
             $(System.DefaultWorkingDirectory)/build/*.dmg
             $(System.DefaultWorkingDirectory)/build/*.msi
             $(System.DefaultWorkingDirectory)/build/*.asc
             $(System.DefaultWorkingDirectory)/build/*.zip
-            $(System.DefaultWorkingDirectory)/build/*.rpm
-            $(System.DefaultWorkingDirectory)/build/*.deb
             $(System.DefaultWorkingDirectory)/build/*.tar.gz
           assetUploadMode: 'replace'
           releaseNotesSource: 'file'
