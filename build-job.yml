@@ -74,7 +74,7 @@ jobs:
           echo "**************************************"
           echo "* GPG setup"
           echo "**************************************"
-          sudo cp /usr/bin/gpg /usr/bin/gpg2
+          sudo cp /usr/bin/gpg /usr/bin/gpg_
           echo -e '#!/bin/bash\ngpg1 --batch --no-tty --passphrase "$(gpg.passphrase)" "$@"' | sudo tee /usr/bin/gpg > /dev/null
           sudo chmod +x /usr/bin/gpg
           gpg --import $(System.DefaultWorkingDirectory)/distribution/publishing/keyring.gpg
@@ -110,8 +110,8 @@ jobs:
           echo "**************************************"
           sudo createrepo -v rpm/stable
           sudo gpg --detach-sign --armor rpm/stable/repodata/repomd.xml
-          sudo shred /usr/bin/gpg
-          sudo cp /usr/bin/gpg2 /usr/bin/gpg
+          sudo shred -z /usr/bin/gpg
+          sudo cp /usr/bin/gpg_ /usr/bin/gpg
           cp $(System.DefaultWorkingDirectory)/distribution/bundlers/linux_rpm/binjr.repo rpm/binjr.repo
           echo "**************************************"
           echo "* Upload to binjr-dist-repos"
