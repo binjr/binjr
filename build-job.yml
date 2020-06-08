@@ -84,9 +84,17 @@ jobs:
           rm -rf apt/pool
           cp -r ~/.aptly/public/dists apt/dists
           cp -r ~/.aptly/public/pool apt/pool
+          sudo apt install createrepo
+          rm -rf rpm/stable
+          mkdir rpm/stable
+          cp $(System.DefaultWorkingDirectory)/build/binjr-*_linux-amd64.rpm rpm/stable
+          sudo createrepo rpm/stable
+          cp $(System.DefaultWorkingDirectory)/distribution/bundlers/linux_rpm/binjr.repo rpm/binjr.repo
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
         condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq( variables['Agent.OS'], 'Linux' ))
+
+
 
 
