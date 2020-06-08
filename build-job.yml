@@ -53,10 +53,13 @@ jobs:
           tag: $(Build.SourceBranchName)
           assets: |
             $(System.DefaultWorkingDirectory)/build/*.dmg
+            $(System.DefaultWorkingDirectory)/build/*.dmg.asc
             $(System.DefaultWorkingDirectory)/build/*.msi
-            $(System.DefaultWorkingDirectory)/build/*.asc
+            $(System.DefaultWorkingDirectory)/build/*.msi.asc
             $(System.DefaultWorkingDirectory)/build/*.zip
+            $(System.DefaultWorkingDirectory)/build/*.zip.asc
             $(System.DefaultWorkingDirectory)/build/*.tar.gz
+            $(System.DefaultWorkingDirectory)/build/*.tar.gz.asc
           assetUploadMode: 'replace'
           releaseNotesSource: 'file'
           releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
