@@ -3,4 +3,4 @@ name=binjr
 baseurl=https://repos.binjr.eu/rpm/stable
 gpgkey=https://binjr.eu/openpgpkey/binjr_dev_pub_keys.asc
 enabled=1
-gpgcheck=0
+gpgcheck=1
