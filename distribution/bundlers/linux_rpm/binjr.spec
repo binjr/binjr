@@ -56,7 +56,7 @@ cp -r %{_sourcedir}/opt/binjr/* %{buildroot}/opt/binjr
 %post
 xdg-desktop-menu install /opt/binjr/lib/binjr-binjr.desktop
 xdg-mime install /opt/binjr/lib/binjr-binjr-MimeInfo.xml
-xdg-icon-resource install --context mimetypes --size 128 /opt/binjr/lib/application-x-binjr.png application-x-binjr
+xdg-icon-resource install --context mimetypes --size 128 /opt/binjr/lib/binjr.png application-x-binjr
 # Symlink bin command to /usr/bin
 ln -sf /opt/%{name}/bin/%{name} %{_bindir}/%{name}
 
