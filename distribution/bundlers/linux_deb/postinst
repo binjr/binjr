@@ -21,7 +21,7 @@ case "$1" in
     configure)
 xdg-desktop-menu install /opt/binjr/lib/binjr-binjr.desktop || echo "Desktop menu entry could not be installed" >&2 
 xdg-mime install /opt/binjr/lib/binjr-binjr-MimeInfo.xml || echo "x-binjr Mime type could not be installed" >&2 
-xdg-icon-resource install --context mimetypes --size 128 /opt/binjr/lib/application-x-binjr.png application-x-binjr  || echo "Icon resource could not be installed" >&2 
+xdg-icon-resource install --context mimetypes --size 128 /opt/binjr/lib/binjr.png application-x-binjr  || echo "Icon resource could not be installed" >&2
 ln -sf /opt/binjr/bin/binjr /usr/bin/binjr
     ;;
 
