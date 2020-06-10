@@ -22,7 +22,7 @@ import eu.binjr.common.function.CheckedConsumer;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
-import eu.binjr.common.preferences.ObservablePreference;
+import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -131,7 +131,7 @@ public class Binjr extends Application {
         launch(args);
     }
 
-    private static <T> void bindPrefToVmOption(ObservablePreference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
+    private static <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
         try {
             optionSetter.accept(pref.get());
         } catch (DiagnosticException e) {

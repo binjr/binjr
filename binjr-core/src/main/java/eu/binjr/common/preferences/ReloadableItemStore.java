@@ -42,7 +42,7 @@ import java.util.prefs.Preferences;
  * @author Frederic Thevenet
  */
 public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadable> {
-    private static final Logger logger = LogManager.getLogger(ObservablePreferenceFactory.class);
+    private static final Logger logger = LogManager.getLogger(PreferenceFactory.class);
     protected final Preferences backingStore;
     protected final ObservableMap<String, T> storedItems = FXCollections.observableMap(new ConcurrentHashMap<>());
     private ObservableMap<String, T> readOnlyStoreItems = FXCollections.unmodifiableObservableMap(storedItems);

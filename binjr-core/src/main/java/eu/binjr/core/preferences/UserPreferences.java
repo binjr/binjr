@@ -18,8 +18,8 @@ package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
 import eu.binjr.common.logging.Log4j2Level;
-import eu.binjr.common.preferences.ObservablePreference;
-import eu.binjr.common.preferences.ObservablePreferenceFactory;
+import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
@@ -29,18 +29,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.prefs.Preferences;
 
 /**
  * Manage all user preferences
  *
  * @author Frederic Thevenet
  */
-public class UserPreferences extends ObservablePreferenceFactory {
+public class UserPreferences extends PreferenceFactory {
     private static final Logger logger = LogManager.getLogger(UserPreferences.class);
     private static final Gson gson = new Gson();
     public static final String BINJR_GLOBAL = "binjr/global";
@@ -48,27 +44,27 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * True if series down-sampling is enabled, false otherwise.
      */
-    public final ObservablePreference<Boolean> downSamplingEnabled = booleanPreference("downSamplingEnabled", true);
+    public final Preference<Boolean> downSamplingEnabled = booleanPreference("downSamplingEnabled", true);
 
     /**
      * The series down-sampling threshold value.
      */
-    public final ObservablePreference<Number> downSamplingThreshold = integerPreference("downSamplingThreshold", 1500);
+    public final Preference<Number> downSamplingThreshold = integerPreference("downSamplingThreshold", 1500);
 
     /**
      * The username used for authenticated access to the GitHub API.
      */
-    public final ObservablePreference<String> githubUserName = stringPreference("githubUserName", "");
+    public final Preference<String> githubUserName = stringPreference("githubUserName", "");
 
     /**
      * The authentication token  used for authenticated access to the GitHub API.
      */
-    public final ObservablePreference<String> githubAuthToken = stringPreference("githubAuthToken", "");
+    public final Preference<String> githubAuthToken = stringPreference("githubAuthToken", "");
 
     /**
      * The User Interface theme applied to the application.
      */
-    public final ObservablePreference<UserInterfaceThemes> userInterfaceTheme =
+    public final Preference<UserInterfaceThemes> userInterfaceTheme =
             objectPreference(UserInterfaceThemes.class,
                     "userInterfaceTheme_v2",
                     BuiltInUserInterfaceThemes.LIGHT,
@@ -78,110 +74,110 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * True if the last open workspace should be reload next time the app if started, false otherwise.
      */
-    public final ObservablePreference<Boolean> loadLastWorkspaceOnStartup = booleanPreference("loadLastWorkspaceOnStartup", false);
+    public final Preference<Boolean> loadLastWorkspaceOnStartup = booleanPreference("loadLastWorkspaceOnStartup", false);
 
     /**
      * True to check if a new release is available each time the application starts, false otherwise.
      */
-    public final ObservablePreference<Boolean> checkForUpdateOnStartUp = booleanPreference("checkForUpdateOnStartUp", true);
+    public final Preference<Boolean> checkForUpdateOnStartUp = booleanPreference("checkForUpdateOnStartUp", true);
 
     /**
      * True if the horizontal marker should be displayed on chart views, false otherwise.
      */
-    public final ObservablePreference<Boolean> horizontalMarkerOn = booleanPreference("horizontalMarkerOn", false);
+    public final Preference<Boolean> horizontalMarkerOn = booleanPreference("horizontalMarkerOn", false);
 
     /**
      * True if the vertical marker should be displayed on chart views, false otherwise.
      */
-    public final ObservablePreference<Boolean> verticalMarkerOn = booleanPreference("verticalMarkerOn", true);
+    public final Preference<Boolean> verticalMarkerOn = booleanPreference("verticalMarkerOn", true);
 
     /**
      * True if series on area charts should display a brighter coloured outline, false otherwise.
      */
-    public final ObservablePreference<Boolean> showOutlineOnAreaCharts = booleanPreference("showOutlineOnAreaCharts", true);
+    public final Preference<Boolean> showOutlineOnAreaCharts = booleanPreference("showOutlineOnAreaCharts", true);
 
     /**
      * The default opacity value to apply to series on area charts.
      */
-    public final ObservablePreference<Number> defaultOpacityAreaCharts = doublePreference("defaultOpacityAreaCharts", 0.30d);
+    public final Preference<Number> defaultOpacityAreaCharts = doublePreference("defaultOpacityAreaCharts", 0.30d);
 
     /**
      * True if series on stacked area charts should display a brighter coloured outline, false otherwise.
      */
-    public final ObservablePreference<Boolean> showOutlineOnStackedAreaCharts = booleanPreference("showOutlineOnStackedAreaCharts", false);
+    public final Preference<Boolean> showOutlineOnStackedAreaCharts = booleanPreference("showOutlineOnStackedAreaCharts", false);
 
     /**
      * The default opacity value to apply to series on stacked area charts.
      */
-    public final ObservablePreference<Number> defaultOpacityStackedAreaCharts = doublePreference("defaultOpacityStackedAreaCharts", 0.70d);
+    public final Preference<Number> defaultOpacityStackedAreaCharts = doublePreference("defaultOpacityStackedAreaCharts", 0.70d);
 
     /**
      * True is the shift key is pressed, false otherwise.
      */
-    public final ObservablePreference<Boolean> shiftPressed = booleanPreference("shiftPressed", false);
+    public final Preference<Boolean> shiftPressed = booleanPreference("shiftPressed", false);
 
     /**
      * True is the control key is pressed, false otherwise.
      */
-    public final ObservablePreference<Boolean> ctrlPressed = booleanPreference("ctrlPressed", false);
+    public final Preference<Boolean> ctrlPressed = booleanPreference("ctrlPressed", false);
 
     /**
      * The amount of time notification should over before being automatically dismissed.
      */
-    public final ObservablePreference<NotificationDurationChoices> notificationPopupDuration =
+    public final Preference<NotificationDurationChoices> notificationPopupDuration =
             enumPreference(NotificationDurationChoices.class,
                     "notificationPopupDuration",
                     NotificationDurationChoices.TEN_SECONDS);
     /**
      * The location to load plugins from in addition to those on the classpath.
      */
-    public final ObservablePreference<Path> pluginsLocation =
+    public final Preference<Path> pluginsLocation =
             pathPreference("pluginsLocation", Path.of(System.getProperty("user.home")));
 
     /**
      * True if plugins from the location defined by "pluginsLocation" should be loaded in addition to those
      * on the classpath.
      */
-    public final ObservablePreference<Boolean> loadPluginsFromExternalLocation =
+    public final Preference<Boolean> loadPluginsFromExternalLocation =
             booleanPreference("loadPluginsFromExternalLocation", false);
 
     /**
      * The line buffer depth for the debug console.
      */
-    public final ObservablePreference<Number> consoleMaxLineCapacity = integerPreference("consoleMaxLineCapacity", 2000);
+    public final Preference<Number> consoleMaxLineCapacity = integerPreference("consoleMaxLineCapacity", 2000);
 
     /**
      * True if the vertical maker should span over all stacked charts on a worksheet, false if it should only show
      * over the focused chart.
      */
-    public final ObservablePreference<Boolean> fullHeightCrosshairMarker = booleanPreference("fullHeightCrosshairMarker", true);
+    public final Preference<Boolean> fullHeightCrosshairMarker = booleanPreference("fullHeightCrosshairMarker", true);
 
     /**
      * The maximum number of thread to allocate to the asynchronous tasks thread pool.
      */
-    public final ObservablePreference<Number> maxAsyncTasksParallelism = integerPreference("maxAsyncTasksParallelism", 4);
+    public final Preference<Number> maxAsyncTasksParallelism = integerPreference("maxAsyncTasksParallelism", 4);
 
     /**
      * The maximum number of thread to allocate to the sub-tasks thread pool.
      */
-    public final ObservablePreference<Number> maxSubTasksParallelism = integerPreference("maxSubTasksParallelism", 4);
+    public final Preference<Number> maxSubTasksParallelism = integerPreference("maxSubTasksParallelism", 4);
 
     /**
      * The threading policy used by the async main thread pool.
      */
-    public final ObservablePreference<ThreadPoolPolicy> asyncThreadPoolPolicy =
+    public final Preference<ThreadPoolPolicy> asyncThreadPoolPolicy =
             enumPreference(ThreadPoolPolicy.class, "asyncThreadPoolPolicy", ThreadPoolPolicy.WORK_STEALING);
 
     /**
      * The threading policy used by the sub-tasks thread pool.
      */
-    public final ObservablePreference<ThreadPoolPolicy> subTasksThreadPoolPolicy =
+    public final Preference<ThreadPoolPolicy> subTasksThreadPoolPolicy =
             enumPreference(ThreadPoolPolicy.class, "subTasksThreadPoolPolicy", ThreadPoolPolicy.WORK_STEALING);
 
     /**
      * Records the last position of the application window before closing.
      */
-    public final ObservablePreference<Rectangle2D> windowLastPosition = objectPreference(Rectangle2D.class,
+    public final Preference<Rectangle2D> windowLastPosition = objectPreference(Rectangle2D.class,
             "windowLastPosition",
             new Rectangle2D(Double.MAX_VALUE, Double.MAX_VALUE, 0, 0),
             rectangle2D -> gson.toJson(rectangle2D),
@@ -191,68 +187,68 @@ public class UserPreferences extends ObservablePreferenceFactory {
      * Display a warning if the number of series a user attempts to drop onto a worksheet in a single operation
      * is greater than this value.
      */
-    public final ObservablePreference<Number> maxSeriesPerChartBeforeWarning =
+    public final Preference<Number> maxSeriesPerChartBeforeWarning =
             integerPreference("maxSeriesPerChartBeforeWarning", 50);
 
     /**
      * The timeout value in ms for asynchronous tasks (an exception will be thrown past this delay).
      */
-    public final ObservablePreference<Number> asyncTasksTimeOutMs = longPreference("asyncTasksTimeOutMs", 120000L);
+    public final Preference<Number> asyncTasksTimeOutMs = longPreference("asyncTasksTimeOutMs", 120000L);
 
     /**
      * Only trigger treeview filter after this amount of characters have been entered into the text field.
      */
-    public final ObservablePreference<Number> minCharsTreeFiltering = integerPreference("minCharsTreeFiltering", 3);
+    public final Preference<Number> minCharsTreeFiltering = integerPreference("minCharsTreeFiltering", 3);
 
     /**
      * True if request pooling on the http client should be enabled, false otherwise.
      */
-    public final ObservablePreference<Boolean> httpPoolingEnabled = booleanPreference("httpPoolingEnabled", true);
+    public final Preference<Boolean> httpPoolingEnabled = booleanPreference("httpPoolingEnabled", true);
 
     /**
      * True if NaN values in series should be replaced by zero before drawing the chart.
      */
-    public final ObservablePreference<Boolean> forceNanToZero = booleanPreference("forceNanToZero", true);
+    public final Preference<Boolean> forceNanToZero = booleanPreference("forceNanToZero", true);
 
     /**
      * True if a heap dump should be generate on out of memory errors, false otherwise.
      */
-    public final ObservablePreference<Boolean> heapDumpOnOutOfMemoryError =
+    public final Preference<Boolean> heapDumpOnOutOfMemoryError =
             booleanPreference("heapDumpOnOutOfMemoryError", false);
 
     /**
      * The path where to save heap dumps.
      */
-    public final ObservablePreference<Path> heapDumpPath =
+    public final Preference<Path> heapDumpPath =
             pathPreference("heapDumpPath", Path.of(System.getProperty("java.io.tmpdir") + "/binjr"));
 
     /**
      * The amount of time in ms the pointer must have hovered above a node before a tooltip is shown.
      */
-    public final ObservablePreference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
+    public final Preference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
 
-    public final ObservablePreference<Log4j2Level> rootLoggingLevel =
+    public final Preference<Log4j2Level> rootLoggingLevel =
             enumPreference(Log4j2Level.class, "rootLoggingLevel", Log4j2Level.INFO);
 
-    public final ObservablePreference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
+    public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
 
-    public final ObservablePreference<Path> logFilesLocation =
+    public final Preference<Path> logFilesLocation =
             pathPreference("logFilesLocation", Path.of(System.getProperty("java.io.tmpdir") + "/binjr"));
 
-    public final ObservablePreference<Number> maxLogFilesToKeep = integerPreference("maxLogFilesToKeep", 10);
+    public final Preference<Number> maxLogFilesToKeep = integerPreference("maxLogFilesToKeep", 10);
 
-    public ObservablePreference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
+    public Preference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
 
-    public ObservablePreference<SnapshotOutputScale> snapshotOutputScale =
+    public Preference<SnapshotOutputScale> snapshotOutputScale =
             enumPreference(SnapshotOutputScale.class, "snapshotOutputScale", SnapshotOutputScale.AUTO);
 
-    public ObservablePreference<DownSamplingAlgorithm> downSamplingAlgorithm =
+    public Preference<DownSamplingAlgorithm> downSamplingAlgorithm =
             enumPreference(DownSamplingAlgorithm.class, "downSamplingAlgorithm", DownSamplingAlgorithm.AUTO);
 
-    public ObservablePreference<BuiltInChartColorPalettes> chartColorPalette =
+    public Preference<BuiltInChartColorPalettes> chartColorPalette =
             enumPreference(BuiltInChartColorPalettes.class, "chartColorPalette", BuiltInChartColorPalettes.VIBRANT);
 
-    public ObservablePreference<LocalDateTime> lastCheckForUpdate =
+    public Preference<LocalDateTime> lastCheckForUpdate =
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 
     private UserPreferences() {
