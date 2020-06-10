@@ -29,13 +29,26 @@ Complete release information can be found in the [change log](CHANGELOG.md).
   }
 </style>
 
+## Installable Bundles
 
+Installable bundles integrates with the host OS to provide menu shortcuts, file associations and per user settings.
 
 |Version     | Operating System       |  Architecture        |  Download  | |
 |----------|----------|----------|------|----|
-| <p>binjr ${tagName}</p> | <p>**Linux** (glibc v2.5 or higher)</p>| <p>x84 64-bit</p> | <p>[<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz)</p> <p>[<button ><img alt="" src="../../assets/images/download.svg"> .deb</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.deb)</p> <p>[<button ><img alt="" src="../../assets/images/download.svg"> .rpm</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.rpm)</p> | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.deb.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.rpm.asc)[^1]</p>  |
-| <p>binjr ${tagName}</p> | <p>**macOS** (10.10 or later)</p>| <p>x84 64-bit</p>       | <p>[<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg)</p> <p>[<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz)</p>   | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz.asc)[^1]</p> |
-| <p>binjr ${tagName}</p> | <p>**Windows** (7 or later)</p>| <p>x84 64-bit</p>         | <p>[<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi)</p> <p>[<button><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip)</p>     | <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1]</p> <p>[Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip.asc)[^1]</p> |
+| binjr ${tagName} | **Debian** (9, 10), **Ubuntu** (18.04, 20.04)| x84 64-bit | [APT Repo](https://repos.binjr.eu/apt) |   |
+| binjr ${tagName} | **RHEL** (7, 8), **Fedora**| x84 64-bit | [RPM Repo](https://repos.binjr.eu/rpm) |   |
+| binjr ${tagName} | **macOS** (10.10 or later)| x84 64-bit |  [<button ><img alt="" src="../../assets/images/download.svg"> .dmg</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.dmg.asc)[^1] |
+| binjr ${tagName} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .msi</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.msi.asc)[^1] |
+
+## Portable bundles
+
+Portable bundles can be unpacked to and used from a detachable drive or a file share.
+
+|Version     | Operating System       |  Architecture        |  Download  | |
+|----------|----------|----------|------|----|
+| binjr ${tagName} | **Linux** (glibc v2.5 or higher)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz)| [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_linux-amd64.tar.gz.asc)[^1]  |
+| binjr ${tagName} | **macOS** (10.10 or later)| x84 64-bit | [<button ><img alt="" src="../../assets/images/download.svg"> .tar.gz</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz) | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_mac-x86_64.tar.gz.asc)[^1] |
+| binjr ${tagName} | **Windows** (7 or later)| x84 64-bit | [<button><img alt="" src="../../assets/images/download.svg"> .zip</button>](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip)  | [Signature (GPG)](https://github.com/binjr/binjr/releases/download/${tagName}/binjr-${version}_windows-amd64.zip.asc)[^1] |
 
 [^1]: [How to verify the integrity of the downloaded file?](/documentation/verify-signature/)
 
