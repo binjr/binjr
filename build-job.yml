@@ -45,7 +45,7 @@ jobs:
           tasks: 'signPackageDistribution'
 
       - task: GithubRelease@0
-        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+        condition: and(succeeded(), eq(variables['isTag'], 'true'))
         inputs:
           gitHubConnection: binjr-bot
           repositoryName: binjr/binjr
@@ -119,7 +119,7 @@ jobs:
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
-        condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), eq( variables['Agent.OS'], 'Linux' ))
+        condition: and(succeeded(), eq(variables['isTag'], 'true'), ne(variables['isSnapshot'], 'true'), eq(variables['Agent.OS'], 'Linux'))
 
 
 
