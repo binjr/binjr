@@ -109,7 +109,7 @@ jobs:
           echo "* Generate rpm repo"
           echo "**************************************"
           sudo createrepo -v rpm/stable
-          sudo gpg --detach-sign --armor rpm/stable/repodata/repomd.xml
+          sudo gpg -u $(gpg.package.keyname) --detach-sign --armor rpm/stable/repodata/repomd.xml
           sudo shred -z /usr/bin/gpg
           sudo cp /usr/bin/gpg_ /usr/bin/gpg
           cp $(System.DefaultWorkingDirectory)/distribution/bundlers/linux_rpm/binjr.repo rpm/binjr.repo
