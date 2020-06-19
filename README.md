@@ -97,7 +97,7 @@ There are several ways to get up and running with ***binjr***:
 
 #### Download an application bundle
 
-The simplest way to start using ***binjr*** is to download an application bundle from the [release page](https://github.com/binjr/binjr/releases/latest).  
+The simplest way to start using ***binjr*** is to download an application bundle from the [download page](https://binjr.eu/download/latest_release/).  
 
 These bundles contain all the dependencies required to run the app, including a copy of the Java runtime specially 
 crafted to only include the required components and save disk space.  
