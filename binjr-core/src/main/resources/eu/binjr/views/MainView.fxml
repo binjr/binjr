@@ -241,7 +241,7 @@
                <Tooltip showDelay="500ms" text="Sources"/>
             </tooltip>
             <items>
-                <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New source...">
+                <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New Source...">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addSource-icon"/>
@@ -317,7 +317,7 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr website">
+                <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr Website">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="binjr-icon"/>

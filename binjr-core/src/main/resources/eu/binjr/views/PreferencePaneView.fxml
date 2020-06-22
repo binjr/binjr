@@ -73,7 +73,7 @@
                             </VBox>
                             <Label text="Discard notifications after:"/>
                             <ChoiceBox fx:id="notifcationDurationChoiceBox"  maxWidth="1.7976931348623157E308" />
-                            <Label text="Snapshot Output Scale"/>
+                            <Label text="Snapshot output scale"/>
                             <ChoiceBox fx:id="snapshotScaleChoiceBox"  maxWidth="1.7976931348623157E308" >
                                 <tooltip>
                                     <Tooltip showDelay="500ms"
@@ -92,7 +92,7 @@
                     <AnchorPane>
                         <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                            <Label text="Default Color Palette"/>
+                            <Label text="Default color palette"/>
                             <ChoiceBox fx:id="chartPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
                             <Label text="Show outline on area charts" wrapText="true"/>
                             <VBox fillWidth="false">
@@ -135,7 +135,7 @@
                         <VBox layoutX="14.0" layoutY="14.0" maxHeight="1.7976931348623157E308" spacing="10.0"
                               AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                               AnchorPane.topAnchor="0.0">
-                            <Label text="Available Data Adapters"/>
+                            <Label text="Available data adapters"/>
                             <TableView fx:id="availableAdapterTable" editable="true" maxHeight="1.7976931348623157E308"
                                        VBox.vgrow="ALWAYS">
                                 <columns>
@@ -236,7 +236,7 @@
                                 </tooltip>
                             </Button>
                             <Button fx:id="clearHistory" maxWidth="1.7976931348623157E308" mnemonicParsing="false"
-                                    onAction="#handleClearHistory" styleClass="border-button" text="Clear History">
+                                    onAction="#handleClearHistory" styleClass="border-button" text="Clear history">
                                 <graphic>
                                     <Region styleClass="icon-container, trash-icon"/>
                                 </graphic>
@@ -265,7 +265,7 @@
                                 <ToggleSwitch fx:id="updateCheckBox" prefWidth="1.0"/>
                             </VBox>
                             <Button alignment="CENTER" mnemonicParsing="false" onAction="#handleCheckForUpdate"
-                                    styleClass="border-button" text="Check for Updates...">
+                                    styleClass="border-button" text="Check for updates...">
                                 <graphic>
                                     <Region styleClass="icon-container, sync-icon"/>
                                 </graphic>

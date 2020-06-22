@@ -73,7 +73,7 @@
                 </VBox>
                 <Separator prefWidth="200.0"/>
                 <!--<CheckBox fx:id="autoScaleYAxis" mnemonicParsing="false" text="Auto Scale Y Axis"/>-->
-                <Label text="Auto Scale Y Axis" wrapText="true"/>
+                <Label text="Auto scale Y axis" wrapText="true"/>
                 <VBox fillWidth="false">
                     <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
                 </VBox>
