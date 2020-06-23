@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2019 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,18 +63,18 @@ public class XYChartCrosshair<X, Y> {
     private final XYChartInfo chartInfo;
     private final BooleanProperty isSelecting = new SimpleBooleanProperty(false);
     private final Pane parent;
-    private Point2D selectionStart = new Point2D(-1, -1);
-    private Point2D mousePosition = new Point2D(-1, -1);
     private final Rectangle selection = new Rectangle(0, 0, 0, 0);
     private final BooleanProperty verticalMarkerVisible = new SimpleBooleanProperty();
     private final BooleanProperty horizontalMarkerVisible = new SimpleBooleanProperty();
-    private Consumer<Map<XYChart<X, Y>, XYChartSelection<X, Y>>> selectionDoneEvent;
     private final Map<XYChart<X, Y>, Property<Y>> currentYValues = new HashMap<>();
     private final Property<X> currentXValue = new SimpleObjectProperty<>();
     private final XYChart<X, Y> masterChart;
     private final BooleanProperty isMouseOverChart = new SimpleBooleanProperty(false);
     private final BindingManager bindingManager = new BindingManager();
     private final BooleanProperty displayFullHeightMarker = new SimpleBooleanProperty(false);
+    private Point2D selectionStart = new Point2D(-1, -1);
+    private Point2D mousePosition = new Point2D(-1, -1);
+    private Consumer<Map<XYChart<X, Y>, XYChartSelection<X, Y>>> selectionDoneEvent;
 
 
     /**
@@ -164,21 +164,21 @@ public class XYChartCrosshair<X, Y> {
     }
 
     /**
-     * Returns true if the horizontal marker is visible, false otherwise
-     *
-     * @return true if the horizontal marker is visible, false otherwise
-     */
-    public boolean isHorizontalMarkerVisible() {
-        return horizontalMarkerVisible.get();
-    }
-
-    /**
      * Sets the visibility of the  vertical marker
      *
      * @param verticalMarkerVisible the visibility of the  vertical marker
      */
     public void setVerticalMarkerVisible(boolean verticalMarkerVisible) {
         this.verticalMarkerVisible.set(verticalMarkerVisible);
+    }
+
+    /**
+     * Returns true if the horizontal marker is visible, false otherwise
+     *
+     * @return true if the horizontal marker is visible, false otherwise
+     */
+    public boolean isHorizontalMarkerVisible() {
+        return horizontalMarkerVisible.get();
     }
 
     /**
@@ -231,12 +231,12 @@ public class XYChartCrosshair<X, Y> {
         return displayFullHeightMarker.get();
     }
 
-    public BooleanProperty displayFullHeightMarkerProperty() {
-        return displayFullHeightMarker;
-    }
-
     public void setDisplayFullHeightMarker(boolean displayFullHeightMarker) {
         this.displayFullHeightMarker.set(displayFullHeightMarker);
+    }
+
+    public BooleanProperty displayFullHeightMarkerProperty() {
+        return displayFullHeightMarker;
     }
 
     public void dispose() {
@@ -299,8 +299,8 @@ public class XYChartCrosshair<X, Y> {
         verticalMarker.setStartX(mousePosition.getX() + 0.5);
         verticalMarker.setEndX(mousePosition.getX() + 0.5);
         if (displayFullHeightMarker.getValue()) {
-            verticalMarker.setStartY(0);
-            verticalMarker.setEndY(parent.getHeight());
+            verticalMarker.setStartY(2);
+            verticalMarker.setEndY(parent.getHeight() - 2);
         } else {
             verticalMarker.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
             verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);

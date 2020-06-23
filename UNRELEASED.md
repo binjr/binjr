@@ -1,0 +1,1 @@
+* _[Fixed]_ Jitter on the y-axis when hovering over charts with full height crosshair.
