@@ -149,4 +149,15 @@ public class DataAdapterFactory {
         }
         return info;
     }
+
+    /**
+     * Returns the {@link DataAdapterPreferences} for the specified key
+     *
+     * @param key the key that identifies the {@link DataAdapterPreferences} to return.
+     * @return the {@link DataAdapterPreferences} for the specified key
+     * @throws NoAdapterFoundException if no registered adapter could be found for the specified key.
+     */
+    public DataAdapterPreferences getAdapterPreferences(String key) throws NoAdapterFoundException {
+        return (DataAdapterPreferences) getDataAdapterInfo(key).getPreferences();
+    }
 }
