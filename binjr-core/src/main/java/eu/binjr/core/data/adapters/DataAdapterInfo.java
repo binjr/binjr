@@ -121,16 +121,17 @@ public interface DataAdapterInfo {
     public void setEnabled(boolean enabled);
 
     /**
-     * Retuens the {@link Preference} instance associated with the adapter
-     * @return
+     * Returns the {@link Preference} instance associated with the adapter
+     *
+     * @return the {@link Preference} instance associated with the adapter
      */
     public PreferenceFactory getPreferences();
 
 
     /**
-     * Return true if the source for the adapter is a remote server , false otherwise.
+     * Returns the source locality for the adapter.
      *
-     * @return
+     * @return the source locality for the adapter.
      */
     default SourceLocality getSourceLocality() {
         return SourceLocality.UNKNOWN;
