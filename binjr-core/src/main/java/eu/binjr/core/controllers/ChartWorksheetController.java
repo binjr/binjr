@@ -95,6 +95,7 @@ public class ChartWorksheetController implements WorksheetController {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(ChartWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
+    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/WorksheetView.fxml";
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final MainViewController parentController;
@@ -1094,6 +1095,11 @@ public class ChartWorksheetController implements WorksheetController {
             timeRangePicker.dispose();
             this.worksheet = null;
         }
+    }
+
+    @Override
+    public String getView() {
+        return WORKSHEET_VIEW_FXML;
     }
 
     @Override

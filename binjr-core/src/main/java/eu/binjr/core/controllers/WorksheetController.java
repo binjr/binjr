@@ -101,4 +101,6 @@ public interface WorksheetController extends Initializable, Closeable {
 
     @Override
     void close();
+
+    String getView();
 }

@@ -20,6 +20,8 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.navigation.NavigationHistory;
+import eu.binjr.core.controllers.ChartWorksheetController;
+import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
@@ -30,6 +32,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
+import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
@@ -72,6 +75,7 @@ public class Worksheet implements Dirtyable {
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient Property<Integer> selectedChart;
     private transient final ChangeWatcher status;
+    private Class<? extends WorksheetController> controllerClass = ChartWorksheetController.class;
 
     /**
      * Initializes a new instance of the {@link Worksheet} class
@@ -455,6 +459,21 @@ public class Worksheet implements Dirtyable {
         this.chartLegendsVisible.setValue(chartLegendsVisible);
     }
 
+
+    @Transient
+    public NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> getHistory() {
+        return history;
+    }
+
+    public void setControllerClass(Class<? extends WorksheetController> controllerClass) {
+        this.controllerClass = controllerClass;
+    }
+
+    @XmlAttribute()
+    public Class<? extends WorksheetController> getControllerClass() {
+        return controllerClass;
+    }
+
     // region Dirtyable
     @XmlTransient
     @Override
@@ -481,9 +500,7 @@ public class Worksheet implements Dirtyable {
         this.status.close();
     }
 
-    public NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> getHistory() {
-        return history;
-    }
+
     // endregion
 
 

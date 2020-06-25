@@ -899,12 +899,17 @@ public class MainViewController implements Initializable {
 
     private WorksheetController loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            WorksheetController current = new ChartWorksheetController(this, worksheet,
-                    sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
+            WorksheetController current = worksheet.getControllerClass()
+                    .getDeclaredConstructor(this.getClass(),
+                            worksheet.getClass(),
+                            Collection.class)
+                    .newInstance(this,
+                            worksheet,
+                            sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);
-                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/WorksheetView.fxml"));
+                FXMLLoader fXMLLoader = new FXMLLoader(current.getClass().getResource(current.getView()));
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
                 newTab.setContent(p);
@@ -1171,7 +1176,10 @@ public class MainViewController implements Initializable {
                     }
                     toDateTime = toDateTime != null ? toDateTime : ZonedDateTime.now();
                     fromDateTime = fromDateTime != null ? fromDateTime : toDateTime.minusHours(24);
-                    var worksheet = new Worksheet(StringUtils.ellipsize(rootItems.stream().map(t -> t.getValue().getLegend()).collect(Collectors.joining(", ")), 50),
+                    var worksheet = new Worksheet(
+                            StringUtils.ellipsize(rootItems.stream()
+                                    .map(t -> t.getValue().getLegend())
+                                    .collect(Collectors.joining(", ")), 50),
                             charts.get(),
                             toDateTime.getZone(),
                             fromDateTime,
