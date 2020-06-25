@@ -394,7 +394,7 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    public void handleExpandCommandBar(ActionEvent actionEvent) {
+    protected void handleExpandCommandBar(ActionEvent actionEvent) {
         commandBar.toggle();
     }
 
@@ -404,7 +404,7 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    private void handleAddSource(Event event) {
+    protected void handleAddSource(Event event) {
         Node sourceNode = (Node) event.getSource();
         ContextMenu sourceMenu = new ContextMenu();
         sourceMenu.getItems().addAll(populateSourceMenu());
@@ -457,7 +457,7 @@ public class MainViewController implements Initializable {
     }
 
     @FXML
-    public void handleHidePanel(ActionEvent actionEvent) {
+    protected void handleHidePanel(ActionEvent actionEvent) {
         this.searchField.clear();
         this.searchBarVisible.setValue(false);
     }

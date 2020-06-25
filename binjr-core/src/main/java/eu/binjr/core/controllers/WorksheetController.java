@@ -1524,13 +1524,6 @@ public class WorksheetController implements Initializable, AutoCloseable {
         }
     }
 
-    public void toggleChartLegendVisibility() {
-        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
-        if (currentViewport != null) {
-            currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
-        }
-    }
-
     BindingManager getBindingManager() {
         return bindingManager;
     }
