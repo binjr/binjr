@@ -84,7 +84,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     private final UserPreferences userPref;
 
     /**
-     * Initializes a new instance of the {@link Worksheet} class
+     * Initializes a new instance of the {@link Chart} class
      */
     public Chart() {
         this("New Chart (" + globalCounter.getAndIncrement() + ")",
@@ -101,10 +101,10 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Initializes a new instance of the {@link Worksheet} class with the provided name, chart type and zoneid
+     * Initializes a new instance of the {@link Chart} class with the provided name, chart type and zoneid
      *
-     * @param name      the name for the new {@link Worksheet} instance
-     * @param chartType the {@link ChartType} for the new {@link Worksheet} instance
+     * @param name      the name for the new {@link Chart} instance
+     * @param chartType the {@link ChartType} for the new {@link Chart} instance
      * @param unitName  the label for the unit of Y axis.
      * @param prefix    the unit prefix to use for the unit of Y axis.
      */
@@ -178,9 +178,9 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Returns the preferred time range to initialize a new worksheet with.
+     * Returns the preferred time range to initialize a new Chart with.
      *
-     * @return the preferred time range to initialize a new worksheet with.
+     * @return the preferred time range to initialize a new Chart with.
      * @throws DataAdapterException if an error occurs while fetching data from an adapter.
      */
     public TimeRange getInitialTimeRange() throws DataAdapterException {
@@ -309,7 +309,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Adds a {@link TimeSeriesInfo} to the worksheet
+     * Adds a {@link TimeSeriesInfo} to the Chart
      *
      * @param seriesInfo the {@link TimeSeriesInfo} to add
      */
@@ -318,7 +318,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Adds a collection of  {@link TimeSeriesInfo} to the worksheet
+     * Adds a collection of  {@link TimeSeriesInfo} to the chart
      *
      * @param seriesInfo the collection {@link TimeSeriesInfo} to add
      */
@@ -327,16 +327,16 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * Remove all the elements in the provided collection from the list of {@link Worksheet} instances
+     * Remove all the elements in the provided collection from the list of {@link Chart} instances
      *
-     * @param seriesInfo the list of {@link Worksheet} instances to remove
+     * @param seriesInfo the list of {@link Chart} instances to remove
      */
     public void removeSeries(Collection<TimeSeriesInfo> seriesInfo) {
         series.removeAll(seriesInfo);
     }
 
     /**
-     * Clear the {@link Worksheet} list
+     * Clear the series list
      */
     public void clearSeries() {
         series.clear();
@@ -344,9 +344,9 @@ public class Chart implements Dirtyable, AutoCloseable {
 
 
     /**
-     * The name of the {@link Worksheet}
+     * The name of the {@link Chart}
      *
-     * @return the name of the {@link Worksheet}
+     * @return the name of the {@link Chart}
      */
     @XmlAttribute
     public String getName() {
@@ -354,27 +354,27 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The name of the {@link Worksheet}
+     * The name of the {@link Chart}
      *
-     * @param name the name of the {@link Worksheet}
+     * @param name the name of the {@link Chart}
      */
     public void setName(String name) {
         this.name.setValue(name);
     }
 
     /**
-     * The name of the {@link Worksheet}
+     * The name of the {@link Chart}
      *
-     * @return An instance of {@link Property} for the name of the {@link Worksheet}
+     * @return An instance of {@link Property} for the name of the {@link Chart}
      */
     public Property<String> nameProperty() {
         return name;
     }
 
     /**
-     * The time series of the {@link Worksheet}
+     * The time series of the {@link Chart}
      *
-     * @return the time series of the {@link Worksheet}
+     * @return the time series of the {@link Chart}
      */
 
     //   @XmlTransient
@@ -385,9 +385,9 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The type of chart hosted by the  {@link Worksheet}
+     * The type of chart hosted by the  {@link Chart}
      *
-     * @return the type of chart hosted by the  {@link Worksheet}
+     * @return the type of chart hosted by the  {@link Chart}
      */
     @XmlAttribute
     public ChartType getChartType() {
@@ -395,27 +395,27 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The type of chart hosted by the  {@link Worksheet}
+     * The type of chart hosted by the  {@link Chart}
      *
-     * @param chartType the type of chart hosted by the {@link Worksheet}
+     * @param chartType the type of chart hosted by the {@link Chart}
      */
     public void setChartType(ChartType chartType) {
         this.chartType.setValue(chartType);
     }
 
     /**
-     * The type of chart hosted by the  {@link Worksheet}
+     * The type of chart hosted by the  {@link Chart}
      *
-     * @return An instance of {@link Property} for the type of chart hosted by the  {@link Worksheet}
+     * @return An instance of {@link Property} for the type of chart hosted by the  {@link Chart}
      */
     public Property<ChartType> chartTypeProperty() {
         return chartType;
     }
 
     /**
-     * The unit for the {@link Worksheet}'s times series Y axis
+     * The unit for the {@link Chart}'s times series Y axis
      *
-     * @return the unit for the {@link Worksheet}'s times series Y axis
+     * @return the unit for the {@link Chart}'s times series Y axis
      */
     @XmlAttribute
     public String getUnit() {
@@ -423,27 +423,27 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The unit for the {@link Worksheet}'s times series Y axis
+     * The unit for the {@link Chart}'s times series Y axis
      *
-     * @param unit the unit for the {@link Worksheet}'s times series Y axis
+     * @param unit the unit for the {@link Chart}'s times series Y axis
      */
     public void setUnit(String unit) {
         this.unit.setValue(unit);
     }
 
     /**
-     * The unit for the {@link Worksheet}'s times series Y axis
+     * The unit for the {@link Chart}'s times series Y axis
      *
-     * @return An instance of {@link Property} for the unit for the {@link Worksheet}'s times series Y axis
+     * @return An instance of {@link Property} for the unit for the {@link Chart}'s times series Y axis
      */
     public Property<String> unitProperty() {
         return unit;
     }
 
     /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
+     * The unit prefix for the {@link Chart}'s times series Y axis
      *
-     * @return the unit prefix for the {@link Worksheet}'s times series Y axis
+     * @return the unit prefix for the {@link Chart}'s times series Y axis
      */
     @XmlAttribute
     public UnitPrefixes getUnitPrefixes() {
@@ -451,18 +451,18 @@ public class Chart implements Dirtyable, AutoCloseable {
     }
 
     /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
+     * The unit prefix for the {@link Chart}'s times series Y axis
      *
-     * @param unitPrefixes the unit prefix for the {@link Worksheet}'s times series Y axis
+     * @param unitPrefixes the unit prefix for the {@link Chart}'s times series Y axis
      */
     public void setUnitPrefixes(UnitPrefixes unitPrefixes) {
         this.unitPrefixes.setValue(unitPrefixes);
     }
 
     /**
-     * The unit prefix for the {@link Worksheet}'s times series Y axis
+     * The unit prefix for the {@link Chart}'s times series Y axis
      *
-     * @return An instance of {@link Property} for the unit prefix for the {@link Worksheet}'s times series Y axis
+     * @return An instance of {@link Property} for the unit prefix for the {@link Chart}'s times series Y axis
      */
     public Property<UnitPrefixes> unitPrefixesProperty() {
         return unitPrefixes;
