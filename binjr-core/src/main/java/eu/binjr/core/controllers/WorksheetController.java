@@ -631,8 +631,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
         refreshButton.setOnAction(bindingManager.registerHandler(this::handleRefresh));
         snapshotButton.setOnAction(bindingManager.registerHandler(this::handleTakeSnapshot));
         toggleChartDisplayModeButton.setOnAction(bindingManager.registerHandler(this::handleToggleTableViewButton));
-        bindingManager.bind(backButton.disableProperty(), getWorksheet().getBackwardHistory().emptyProperty());
-        bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getForwardHistory().emptyProperty());
+        bindingManager.bind(backButton.disableProperty(), getWorksheet().getHistory().backward().emptyProperty());
+        bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getHistory().forward().emptyProperty());
         addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
         currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
@@ -1239,12 +1239,12 @@ public class WorksheetController implements Initializable, AutoCloseable {
 
     @FXML
     protected void handleHistoryBack(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(getWorksheet().getBackwardHistory(), getWorksheet().getForwardHistory());
+        getWorksheet().getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
     }
 
     @FXML
     protected void handleHistoryForward(ActionEvent actionEvent) {
-        restoreSelectionFromHistory(getWorksheet().getForwardHistory(), getWorksheet().getBackwardHistory());
+        getWorksheet().getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
     }
 
     @FXML
@@ -1263,12 +1263,8 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
     void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        if (saveToHistory) {
-            getWorksheet().getBackwardHistory().push(getWorksheet().getPreviousState());
-            getWorksheet().getForwardHistory().clear();
-        }
-        getWorksheet().setPreviousState(currentState.asSelection());
-        logger.debug(() -> getWorksheet().getBackwardHistory().dump());
+        getWorksheet().getHistory().setHead(currentState.asSelection(), saveToHistory);
+        logger.debug(() -> getWorksheet().getHistory().backward().dump());
         for (ChartViewPort viewPort : viewPorts) {
             invalidate(viewPort, dontPlotChart, forceRefresh);
         }
@@ -1450,14 +1446,14 @@ public class WorksheetController implements Initializable, AutoCloseable {
     }
 
 
-    private void restoreSelectionFromHistory(WorksheetNavigationHistory history, WorksheetNavigationHistory toHistory) {
-        if (!history.isEmpty()) {
-            toHistory.push(currentState.asSelection());
-            currentState.setSelection(history.pop(), false);
-        } else {
-            logger.debug(() -> "History is empty: nothing to go back to.");
-        }
-    }
+//    private void restoreSelectionFromHistory(WorksheetNavigationHistory history, WorksheetNavigationHistory toHistory) {
+//        if (!history.isEmpty()) {
+//            toHistory.push(currentState.asSelection());
+//            currentState.setSelection(history.pop(), false);
+//        } else {
+//            logger.debug(() -> "History is empty: nothing to go back to.");
+//        }
+//    }
 
     private ChartViewPort getSelectedViewPort() {
         var v = viewPorts.get(getWorksheet().getSelectedChart());

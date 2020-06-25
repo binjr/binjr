@@ -19,7 +19,7 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
-import eu.binjr.core.controllers.WorksheetNavigationHistory;
+import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
@@ -69,9 +69,7 @@ public class Worksheet implements Dirtyable {
 
     private transient BooleanProperty chartLegendsVisible;
 
-    private transient Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState;
-    private transient final WorksheetNavigationHistory backwardHistory = new WorksheetNavigationHistory();
-    private transient final WorksheetNavigationHistory forwardHistory = new WorksheetNavigationHistory();
+    private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient Property<Integer> selectedChart;
     private transient final ChangeWatcher status;
 
@@ -366,45 +364,6 @@ public class Worksheet implements Dirtyable {
     }
 
     /**
-     * Returns the previous state of the all the charts on the worksheet.
-     *
-     * @return the previous state of the all the charts on the worksheet.
-     */
-    @XmlTransient
-    public Map<Chart, XYChartSelection<ZonedDateTime, Double>> getPreviousState() {
-        return previousState;
-    }
-
-    /**
-     * Sets the previous state of the all the charts on the worksheet.
-     *
-     * @param previousState the previous state of the all the charts on the worksheet.
-     */
-    public void setPreviousState(Map<Chart, XYChartSelection<ZonedDateTime, Double>> previousState) {
-        this.previousState = previousState;
-    }
-
-    /**
-     * Returns the backward history for the worksheet.
-     *
-     * @return the backward history for the worksheet.
-     */
-    @XmlTransient
-    public WorksheetNavigationHistory getBackwardHistory() {
-        return backwardHistory;
-    }
-
-    /**
-     * Returns the forward history for the worksheet.
-     *
-     * @return the forward history for the worksheet.
-     */
-    @XmlTransient
-    public WorksheetNavigationHistory getForwardHistory() {
-        return forwardHistory;
-    }
-
-    /**
      * Returns the total number of series on the worksheet.
      *
      * @return the total number of series on the worksheet.
@@ -520,6 +479,10 @@ public class Worksheet implements Dirtyable {
         logger.debug(() -> "Closing Worksheet " + this.toString());
         IOUtils.closeCollectionElements(charts);
         this.status.close();
+    }
+
+    public NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> getHistory() {
+        return history;
     }
     // endregion
 
