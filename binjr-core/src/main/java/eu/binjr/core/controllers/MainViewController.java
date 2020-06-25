@@ -899,7 +899,7 @@ public class MainViewController implements Initializable {
 
     private WorksheetController loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            WorksheetController current = new WorksheetController(this, worksheet,
+            WorksheetController current = new ChartWorksheetController(this, worksheet,
                     sourcesAdapters.values().stream().map(Source::getAdapter).collect(Collectors.toList()));
             try {
                 // Register reload listener

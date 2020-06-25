@@ -207,7 +207,7 @@ public class ChartViewportsState implements AutoCloseable {
         this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
         this.startX.addListener(onRefreshAllRequired);
         this.endX.addListener(onRefreshAllRequired);
-        for (ChartViewPort viewPort : parent.viewPorts) {
+        for (ChartViewPort viewPort : parent.getViewPorts()) {
             this.put(viewPort.getDataStore(), new AxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
             this.get(viewPort.getDataStore()).ifPresent(y -> {
                 viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(y.startY);
