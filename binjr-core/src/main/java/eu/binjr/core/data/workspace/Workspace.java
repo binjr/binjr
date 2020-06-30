@@ -52,8 +52,8 @@ import java.util.Collection;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "2.2";
-    public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("2.0");
+    public static final String WORKSPACE_SCHEMA_VERSION = "3.0";
+    public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("3.0");
     public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
 
     @XmlTransient
@@ -69,7 +69,6 @@ public class Workspace implements Dirtyable {
     @IsDirtyable
     private final ObservableList<Worksheet> worksheets;
     @XmlAttribute
-  //  @IsDirtyable
     private final SimpleDoubleProperty dividerPosition;
     @XmlTransient
     private final ChangeWatcher status;
@@ -81,8 +80,6 @@ public class Workspace implements Dirtyable {
     @XmlTransient
     private final BooleanProperty presentationMode;
 
-    //    @IsDirtyable
-//    @XmlAttribute(name = "sourcePaneVisible")
     private transient final BooleanProperty sourcePaneVisible;
 
     /**
@@ -93,9 +90,9 @@ public class Workspace implements Dirtyable {
     }
 
     /**
-     * Initializes a new instance of the {@link Workspace} class with the provided list of {@link Worksheet} and {@link Source} instances
+     * Initializes a new instance of the {@link Workspace} class with the provided list of {@link XYChartsWorksheet} and {@link Source} instances
      *
-     * @param worksheets the list of  {@link Worksheet} instances to initialize the workspace with
+     * @param worksheets the list of  {@link XYChartsWorksheet} instances to initialize the workspace with
      * @param sources    the list of  {@link Source} instances to initialize the workspace with
      */
     private Workspace(ObservableList<Worksheet> worksheets, ObservableList<Source> sources) {
@@ -123,7 +120,7 @@ public class Workspace implements Dirtyable {
      */
     public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
         sanityCheck(file);
-        Workspace workspace = XmlUtils.deSerialize(Workspace.class, file);
+        Workspace workspace = XmlUtils.deSerialize(file, Workspace.class, XYChartsWorksheet.class, LogWorksheet.class);
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
         workspace.cleanUp();
@@ -172,27 +169,27 @@ public class Workspace implements Dirtyable {
     }
 
     /**
-     * Add all the elements in the provided collection to the list of {@link Worksheet} instances
+     * Add all the elements in the provided collection to the list of {@link XYChartsWorksheet} instances
      *
-     * @param worksheetsToAdd the list of {@link Worksheet} instances to add
+     * @param worksheetsToAdd the list of {@link XYChartsWorksheet} instances to add
      */
     public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
     /**
-     * Add all the elements in the provided collection to the list of {@link Worksheet} instances
+     * Add all the elements in the provided collection to the list of {@link XYChartsWorksheet} instances
      *
-     * @param worksheetsToAdd the {@link Worksheet} instances to add
+     * @param worksheetsToAdd the {@link XYChartsWorksheet} instances to add
      */
     public void addWorksheets(Worksheet... worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
     /**
-     * Remove all the elements in the provided collection from the list of {@link Worksheet} instances
+     * Remove all the elements in the provided collection from the list of {@link XYChartsWorksheet} instances
      *
-     * @param worksheetsToRemove the list of {@link Worksheet} instances to remove
+     * @param worksheetsToRemove the list of {@link XYChartsWorksheet} instances to remove
      */
     public void removeWorksheets(Worksheet... worksheetsToRemove) {
         for (var w : worksheetsToRemove) {
@@ -202,7 +199,7 @@ public class Workspace implements Dirtyable {
     }
 
     /**
-     * Clear the {@link Worksheet} list
+     * Clear the {@link XYChartsWorksheet} list
      */
     public void clearWorksheets() {
         worksheets.forEach(Worksheet::close);
@@ -255,9 +252,9 @@ public class Workspace implements Dirtyable {
     }
 
     /**
-     * Returns all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     * Returns all {@link XYChartsWorksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      *
-     * @return all {@link Worksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
+     * @return all {@link XYChartsWorksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      */
     public ObservableList<Worksheet> getWorksheets() {
         return worksheets;
@@ -372,7 +369,7 @@ public class Workspace implements Dirtyable {
         if (file == null) {
             throw new IllegalArgumentException("File cannot be null");
         }
-        XmlUtils.serialize(this, file);
+        XmlUtils.serialize(this, file, this.getClass(), XYChartsWorksheet.class, LogWorksheet.class);
         setPath(file.toPath());
         cleanUp();
         UserHistory.getInstance().mostRecentSaveFolders.push(file.toPath());

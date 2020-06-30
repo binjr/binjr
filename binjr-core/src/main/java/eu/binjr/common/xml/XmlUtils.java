@@ -16,14 +16,12 @@
 
 package eu.binjr.common.xml;
 
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import javax.xml.bind.JAXB;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
+import javax.xml.bind.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -73,40 +71,42 @@ public class XmlUtils {
         return null;
     }
 
-    public static <T> T deSerialize(Class<T> docClass, File file) throws JAXBException, IOException {
+    public static <T> T deSerialize(File file, Class<?>... classes) throws JAXBException, IOException {
         try (FileInputStream fin = new FileInputStream(file)) {
-            return deSerialize(docClass, fin);
+            return deSerialize(fin, classes);
         }
     }
 
     /**
      * Deserialize the XML content of a stream into a Java object of the specified type.
      *
-     * @param docClass    The class of the object to unmarshall the XML as
+     * @param classes    The classes of the object to unmarshall the XML as
      * @param inputStream An input stream containing the XML to deserialize
      * @param <T>         The type of object to unmarshall the XML as
      * @return The deserialized object
      * @throws JAXBException if an error occurs during deserialization
      */
-    public static <T> T deSerialize(Class<T> docClass, InputStream inputStream) throws JAXBException {
-        return deSerialize(docClass, new StreamSource(inputStream));
+    public static <T> T deSerialize( InputStream inputStream, Class<?>... classes) throws JAXBException {
+        return deSerialize(new StreamSource(inputStream), classes);
     }
 
     /**
      * Deserialize the XML content of a string into a Java object of the specified type.
      *
-     * @param docClass  The class of the object to unmarshall the XML as
+     * @param classes  The classes of the object to unmarshall the XML as
      * @param xmlString The XML to deserialize, as a string
      * @param <T>       The type of object to unmarshall the XML as
      * @return The deserialized object
      * @throws JAXBException if an error occurs during deserialization
      */
-    public static <T> T deSerialize(Class<T> docClass, String xmlString) throws JAXBException {
-        return deSerialize(docClass, new StreamSource(new StringReader(xmlString)));
+    public static <T> T deSerialize(String xmlString, Class<?>... classes) throws JAXBException {
+        return deSerialize(new StreamSource(new StringReader(xmlString)), classes);
     }
 
-    private static <T> T deSerialize(Class<T> docClass, StreamSource source) throws JAXBException {
-        return JAXB.unmarshal(source, docClass);
+    private static <T> T deSerialize(StreamSource source, Class<?>... classes) throws JAXBException {
+        JAXBContext jc = JAXBContext.newInstance(classes);
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+        return (T)unmarshaller.unmarshal(source);
     }
 
     /**
@@ -125,26 +125,29 @@ public class XmlUtils {
         return new SAXSource(xmlReader, inputSource);
     }
 
-    public static <T> void serialize(T object, Path path) throws JAXBException, IOException {
-        serialize(object, path.toFile());
+    public static <T> void serialize(T object, Path path, Class<?>... classes) throws JAXBException, IOException {
+        serialize(object, path.toFile(), classes);
     }
 
-    public static <T> void serialize(T object, File file) throws JAXBException, IOException {
+    public static <T> void serialize(T object, File file, Class<?>... classes) throws JAXBException, IOException {
         try (FileOutputStream fout = new FileOutputStream(file)) {
-            serialize(object, fout);
+            serialize(object, fout, classes);
         }
     }
 
-    public static <T> String serialize(T object) throws IOException, JAXBException {
+    public static <T> String serialize(T object, Class<?>... classes ) throws IOException, JAXBException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            serialize(object, out);
+            serialize(object, out, classes);
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
         }
 
     }
 
-    public static <T> void serialize(T object, OutputStream out) throws JAXBException {
-        JAXBContext jaxbContext = JAXBContext.newInstance(object.getClass());
+    public static <T> void serialize(T object, OutputStream out, Class<?>... classes) throws JAXBException {
+        if (classes ==null || classes.length == 0){
+            classes = new Class<?>[]{object.getClass()};
+        }
+        JAXBContext jaxbContext = JAXBContext.newInstance(classes);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(object, out);

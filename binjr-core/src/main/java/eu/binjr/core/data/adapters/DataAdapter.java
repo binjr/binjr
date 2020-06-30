@@ -21,6 +21,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.time.Instant;
@@ -143,12 +144,12 @@ public interface DataAdapter extends AutoCloseable {
     }
 
     /**
-     * Returns a {@link TimeRange} to initiate a new {@link eu.binjr.core.data.workspace.Worksheet} with so that it is
+     * Returns a {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with so that it is
      * set to a relevant period with regard to the chosen data sources.
      *
      * @param path       the path of the data in the source
      * @param seriesInfo the series to get data from.
-     * @return the {@link TimeRange} to initiate a new {@link eu.binjr.core.data.workspace.Worksheet} with
+     * @return the {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with
      * @throws DataAdapterException if an error occurs.
      */
     default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {

@@ -100,8 +100,8 @@ configure(subprojects) {
     apply plugin: "signing"
     group GROUP_ID
     version BINJR_VERSION
-    sourceCompatibility = 11
-    targetCompatibility = 11
+    sourceCompatibility = 14
+    targetCompatibility = 14
     description 'Flexible Time Series Visualization'
     compileJava.options.encoding = 'UTF-8'
 

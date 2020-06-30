@@ -30,8 +30,8 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.core.data.workspace.UnitPrefixes;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,7 +51,7 @@ import java.util.concurrent.ConcurrentNavigableMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 /**
- * A {@link DataAdapter} implementation used to feed {@link eu.binjr.core.data.workspace.Worksheet} instances
+ * A {@link DataAdapter} implementation used to feed {@link XYChartsWorksheet} instances
  * with  data from a local CSV formatted file.
  *
  * @author Frederic Thevenet

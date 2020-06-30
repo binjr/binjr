@@ -28,10 +28,7 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.workspace.Chart;
-import eu.binjr.core.data.workspace.Source;
-import eu.binjr.core.data.workspace.Worksheet;
-import eu.binjr.core.data.workspace.Workspace;
+import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
@@ -192,12 +189,12 @@ public class MainViewController implements Initializable {
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
             for (var w : workspace.getWorksheets()) {
-                w.setChartLegendsVisible(!newValue);
+                w.setEditModeEnabled(!newValue);
             }
             workspace.setSourcePaneVisible(!newValue);
         });
         for (var w : workspace.getWorksheets()) {
-            w.setChartLegendsVisible(!workspace.isPresentationMode());
+            w.setEditModeEnabled(!workspace.isPresentationMode());
         }
         workspace.setSourcePaneVisible(!workspace.isPresentationMode());
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
@@ -400,7 +397,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleAddNewWorksheet(Event event) {
-        editWorksheet(new Worksheet());
+        editWorksheet(new XYChartsWorksheet());
     }
 
     @FXML
@@ -710,7 +707,7 @@ public class MainViewController implements Initializable {
 
     private void loadWorksheets(Workspace wsFromfile) {
         try {
-            for (Worksheet worksheet : wsFromfile.getWorksheets()) {
+            for (var worksheet : wsFromfile.getWorksheets()) {
                 loadWorksheet(worksheet);
             }
             workspace.cleanUp();
@@ -884,7 +881,7 @@ public class MainViewController implements Initializable {
                 tab = entry.getKey();
             }
         }
-        Worksheet worksheet = worksheetCtrl.getWorksheet();
+        var worksheet = worksheetCtrl.getWorksheet();
         if (worksheet == null) {
             throw new IllegalStateException("WorksheetController is not associated to a valid Worksheet");
         }
@@ -917,29 +914,34 @@ public class MainViewController implements Initializable {
                 logger.error("Error loading time series", ex);
             }
             seriesControllers.put(newTab, current);
-            current.getBindingManager().attachListener(current.selectedRangeProperty(),
-                    (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
-                        if (getSelectedWorksheetController().equals(current) && current.getWorksheet().isTimeRangeLinked()) {
-                            seriesControllers.values().forEach(i -> {
-                                if (!i.equals(current) && i.getWorksheet().isTimeRangeLinked()) {
-                                    i.selectedRangeProperty().setValue(TimeRange.of(newValue));
-                                }
-                            });
+
+            if (current.getWorksheet() instanceof Syncable syncableWorksheet) {
+                current.getBindingManager().attachListener(current.selectedRangeProperty(),
+                        (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
+                            if (getSelectedWorksheetController().equals(current) && syncableWorksheet.isTimeRangeLinked()) {
+                                seriesControllers.values().stream()
+                                        .filter(c -> c.getWorksheet() instanceof Syncable)
+                                        .forEach(i -> {
+                                            if (!i.equals(current) && ((Syncable) i.getWorksheet()).isTimeRangeLinked()) {
+                                                i.selectedRangeProperty().setValue(TimeRange.of(newValue));
+                                            }
+                                        });
+                            }
                         }
-                    }
-            );
-            current.getBindingManager().attachListener(current.getWorksheet().timeRangeLinkedProperty(),
-                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                        if (newValue) {
-                            seriesControllers.values()
-                                    .stream()
-                                    .filter(c -> !c.equals(current) && c.getWorksheet().isTimeRangeLinked())
-                                    .map(c -> c.selectedRangeProperty().getValue())
-                                    .findFirst()
-                                    .ifPresent(timeRange -> current.selectedRangeProperty().setValue(timeRange));
+                );
+                current.getBindingManager().attachListener(syncableWorksheet.timeRangeLinkedProperty(),
+                        (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                            if (newValue) {
+                                seriesControllers.values()
+                                        .stream()
+                                        .filter(c -> !c.equals(current) && c.getWorksheet() instanceof Syncable && ((Syncable) c.getWorksheet()).isTimeRangeLinked())
+                                        .map(c -> c.selectedRangeProperty().getValue())
+                                        .findFirst()
+                                        .ifPresent(timeRange -> current.selectedRangeProperty().setValue(timeRange));
+                            }
                         }
-                    }
-            );
+                );
+            }
             current.getBindingManager().bindBidirectional(newTab.nameProperty(), worksheet.nameProperty());
             if (setToEditMode) {
                 logger.trace("Toggle edit mode for worksheet");
@@ -955,20 +957,24 @@ public class MainViewController implements Initializable {
 
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
         workspace.setPresentationMode(false);
+        var buttons = new ArrayList<ButtonBase>();
+        if (worksheet instanceof Syncable syncable) {
+            buttons.add(new ToolButtonBuilder<ToggleButton>()
+                    .setText("link")
+                    .setTooltip("Link Worksheet Timeline")
+                    .setStyleClass("link")
+                    .setIconStyleClass("link-icon", "small-icon")
+                    .bindBidirectionnal(ToggleButton::selectedProperty, syncable.timeRangeLinkedProperty())
+                    .build(ToggleButton::new));
+        }
         Button closeTabButton = new ToolButtonBuilder<Button>()
                 .setText("Close")
                 .setTooltip("Close Worksheet")
                 .setStyleClass("exit")
                 .setIconStyleClass("cross-icon", "small-icon")
                 .build(Button::new);
-        ToggleButton linkTabButton = new ToolButtonBuilder<ToggleButton>()
-                .setText("link")
-                .setTooltip("Link Worksheet Timeline")
-                .setStyleClass("link")
-                .setIconStyleClass("link-icon", "small-icon")
-                .bindBidirectionnal(ToggleButton::selectedProperty, worksheet.timeRangeLinkedProperty())
-                .build(ToggleButton::new);
-        EditableTab newTab = new EditableTab("New worksheet", linkTabButton, closeTabButton);
+        buttons.add(closeTabButton);
+        EditableTab newTab = new EditableTab("New worksheet", buttons.toArray(ButtonBase[]::new));
         loadWorksheet(worksheet, newTab, editMode);
         closeTabButton.setOnAction(event -> closeWorksheetTab(newTab));
         return newTab;
@@ -1017,30 +1023,33 @@ public class MainViewController implements Initializable {
         edit.setOnAction(manager.registerHandler(event -> tab.setEditable(true)));
         MenuItem duplicate = new MenuItem("Duplicate Worksheet");
         duplicate.setOnAction(manager.registerHandler(event -> {
-            editWorksheet(new Worksheet(worksheet));
+            editWorksheet(worksheet.duplicate());
         }));
         MenuItem detach = new MenuItem("Detach Worksheet");
         detach.setOnAction(manager.registerHandler(event -> {
             TearableTabPane pane = (TearableTabPane) tab.getTabPane();
             pane.detachTab(tab);
         }));
-        MenuItem link = new MenuItem();
-        manager.bind(link.textProperty(), Bindings.createStringBinding(() ->
-                        worksheet.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
-                worksheet.timeRangeLinkedProperty()));
-        link.setOnAction(manager.registerHandler(event -> {
-            worksheet.setTimeRangeLinked(!worksheet.isTimeRangeLinked());
-        }));
-        return FXCollections.observableArrayList(
+        var items = FXCollections.observableArrayList(
                 close,
                 closeOthers,
                 new SeparatorMenuItem(),
                 edit,
                 duplicate,
                 new SeparatorMenuItem(),
-                detach,
-                link
+                detach
         );
+        if (worksheet instanceof Syncable syncable) {
+            MenuItem link = new MenuItem();
+            manager.bind(link.textProperty(), Bindings.createStringBinding(() ->
+                            syncable.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
+                    syncable.timeRangeLinkedProperty()));
+            link.setOnAction(manager.registerHandler(event -> {
+                syncable.setTimeRangeLinked(!syncable.isTimeRangeLinked());
+            }));
+            items.add(link);
+        }
+        return items;
     }
 
     private boolean editWorksheet(Worksheet worksheet) {
@@ -1176,7 +1185,7 @@ public class MainViewController implements Initializable {
                     }
                     toDateTime = toDateTime != null ? toDateTime : ZonedDateTime.now();
                     fromDateTime = fromDateTime != null ? fromDateTime : toDateTime.minusHours(24);
-                    var worksheet = new Worksheet(
+                    var worksheet = new XYChartsWorksheet(
                             StringUtils.ellipsize(rootItems.stream()
                                     .map(t -> t.getValue().getLegend())
                                     .collect(Collectors.joining(", ")), 50),
@@ -1313,7 +1322,7 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
-        return Optional.of(loadWorksheetInTab(new Worksheet(), true));
+        return Optional.of(loadWorksheetInTab(new XYChartsWorksheet(), true));
     }
 
     @FXML

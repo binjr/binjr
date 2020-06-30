@@ -17,9 +17,10 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.workspace.Chart;
-import eu.binjr.common.javafx.charts.XYChartSelection;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleDoubleProperty;
@@ -168,7 +169,6 @@ public class ChartViewportsState implements AutoCloseable {
         }
 
 
-
         @Override
         public void close() {
             this.removeListeners();
@@ -200,7 +200,7 @@ public class ChartViewportsState implements AutoCloseable {
      * @param startX the beginning of the time range.
      * @param endX   the end of the time range.
      */
-    public ChartViewportsState(WorksheetController parent, ZonedDateTime startX, ZonedDateTime endX) {
+    public ChartViewportsState(XYChartsWorksheetController parent, ZonedDateTime startX, ZonedDateTime endX) {
         this.parent = parent;
         onRefreshAllRequired = (observable, oldValue, newValue) -> parent.invalidateAll(true, false, false);
         this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
@@ -216,8 +216,8 @@ public class ChartViewportsState implements AutoCloseable {
                 ((ValueAxis<Double>) viewPort.getChart().getYAxis()).upperBoundProperty().bindBidirectional(y.endY);
             });
         }
-        parent.getWorksheet().fromDateTimeProperty().bind(this.startX);
-        parent.getWorksheet().toDateTimeProperty().bind(this.endX);
+        ((XYChartsWorksheet) parent.getWorksheet()).fromDateTimeProperty().bind(this.startX);
+        ((XYChartsWorksheet) parent.getWorksheet()).toDateTimeProperty().bind(this.endX);
     }
 
     /**

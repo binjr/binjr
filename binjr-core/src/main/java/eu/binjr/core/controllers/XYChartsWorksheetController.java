@@ -91,23 +91,21 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  *
  * @author Frederic Thevenet
  */
-public class ChartWorksheetController implements WorksheetController {
+public class XYChartsWorksheetController extends WorksheetController {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
-    private static final Logger logger = LogManager.getLogger(ChartWorksheetController.class);
+    private static final Logger logger = LogManager.getLogger(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/WorksheetView.fxml";
+    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
-    private final MainViewController parentController;
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
-    private final BindingManager bindingManager = new BindingManager();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
     @FXML
     public AnchorPane root;
     private List<ChartViewPort> viewPorts = new ArrayList<>();
     @FXML
     Pane newChartDropTarget;
-    private Worksheet worksheet;
+    private XYChartsWorksheet worksheet;
     private volatile boolean preventReload = false;
     private AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
@@ -162,9 +160,9 @@ public class ChartWorksheetController implements WorksheetController {
     private VBox screenshotCanvas;
     private Profiler worksheetRefreshProfiler = null;
 
-    public ChartWorksheetController(MainViewController parentController, Worksheet worksheet, Collection<DataAdapter> sourcesAdapters)
+    public XYChartsWorksheetController(MainViewController parentController, XYChartsWorksheet worksheet, Collection<DataAdapter> sourcesAdapters)
             throws NoAdapterFoundException {
-        this.parentController = parentController;
+        super(parentController);
         this.worksheet = worksheet;
         // Attach bindings
         for (Chart chart : worksheet.getCharts()) {
@@ -186,7 +184,7 @@ public class ChartWorksheetController implements WorksheetController {
 
     private ChartPropertiesController buildChartPropertiesController(Chart chart) throws IOException {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ChartPropertiesView.fxml"));
-        ChartPropertiesController propertiesController = new ChartPropertiesController(getWorksheet(), chart);
+        ChartPropertiesController propertiesController = new ChartPropertiesController(worksheet, chart);
         loader.setController(propertiesController);
         Pane settingsPane = loader.load();
         chartProperties.getChildren().add(settingsPane);
@@ -221,7 +219,7 @@ public class ChartWorksheetController implements WorksheetController {
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                         if (!oldValue & newValue) {
                             worksheetRefreshProfiler = Profiler.start(
-                                    "Worksheet " + getWorksheet().getName() + " refresh total elapsed time",
+                                    "Worksheet " + worksheet.getName() + " refresh total elapsed time",
                                     logger::trace);
                         } else if (oldValue & !newValue) {
                             worksheetRefreshProfiler.close();
@@ -241,10 +239,10 @@ public class ChartWorksheetController implements WorksheetController {
                 if (userPrefs.downSamplingEnabled.get())
                     refresh();
             }));
-            bindingManager.attachListener(getWorksheet().chartLegendsVisibleProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            bindingManager.attachListener(worksheet.editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                 setEditChartMode(newValue);
             });
-            setEditChartMode(getWorksheet().isChartLegendsVisible());
+            setEditChartMode(worksheet.isEditModeEnabled());
             newChartDropTarget.setOnDragOver(bindingManager.registerHandler(this::handleDragOverNewChartTarget));
             newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
             newChartDropTarget.setOnDragEntered(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
@@ -258,7 +256,7 @@ public class ChartWorksheetController implements WorksheetController {
 
     private void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            bindingManager.suspend(getWorksheet().dividerPositionProperty());
+            bindingManager.suspend(worksheet.dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
             toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "edit-icon"));
@@ -269,15 +267,15 @@ public class ChartWorksheetController implements WorksheetController {
             chartsLegendsPane.setVisible(true);
             toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
             toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "screen-icon"));
-            splitPane.setDividerPositions(getWorksheet().getDividerPosition());
-            bindingManager.resume(getWorksheet().dividerPositionProperty());
+            splitPane.setDividerPositions(worksheet.getDividerPosition());
+            bindingManager.resume(worksheet.dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
     }
 
     private ZonedDateTimeAxis buildTimeAxis() {
-        ZonedDateTimeAxis axis = new ZonedDateTimeAxis(getWorksheet().getTimeZone());
-        bindingManager.bind(axis.zoneIdProperty(), getWorksheet().timeZoneProperty());
+        ZonedDateTimeAxis axis = new ZonedDateTimeAxis(worksheet.getTimeZone());
+        bindingManager.bind(axis.zoneIdProperty(), worksheet.timeZoneProperty());
         axis.setAnimated(false);
         axis.setSide(Side.BOTTOM);
         return axis;
@@ -285,7 +283,7 @@ public class ChartWorksheetController implements WorksheetController {
 
     private void initChartViewPorts() throws IOException {
         ZonedDateTimeAxis defaultXAxis = buildTimeAxis();
-        for (Chart currentChart : getWorksheet().getCharts()) {
+        for (Chart currentChart : worksheet.getCharts()) {
             ZonedDateTimeAxis xAxis;
             switch (worksheet.getChartLayout()) {
                 case OVERLAID:
@@ -333,7 +331,7 @@ public class ChartWorksheetController implements WorksheetController {
             viewPort.setCacheHint(CacheHint.SPEED);
             viewPort.setCacheShape(true);
             viewPort.setFocusTraversable(true);
-            viewPort.legendVisibleProperty().bind(worksheet.chartLegendsVisibleProperty()
+            viewPort.legendVisibleProperty().bind(worksheet.editModeEnabledProperty()
                     .not()
                     .and(Bindings.equal(ChartLayout.STACKED, (ObjectProperty) worksheet.chartLayoutProperty())));
             viewPort.setLegendSide(Side.BOTTOM);
@@ -343,16 +341,16 @@ public class ChartWorksheetController implements WorksheetController {
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
                 for (int i = 0; i < viewPorts.size(); i++) {
                     if (viewPorts.get(i).getChart() == viewPort) {
-                        getWorksheet().setSelectedChart(i);
+                        worksheet.setSelectedChart(i);
                     }
                 }
             }));
-            bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), getWorksheet().chartLegendsVisibleProperty());
+            bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
             viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
             viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
             viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
-                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
                 } else {
                     //FIXME WARNING: Caught 'java.lang.ClassCastException: class java.lang.String cannot be cast to class javafx.scene.paint.Paint
@@ -362,7 +360,7 @@ public class ChartWorksheetController implements WorksheetController {
                 }
             }));
             viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
-                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
                 } else {
                     viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
@@ -426,8 +424,8 @@ public class ChartWorksheetController implements WorksheetController {
                     seriesPane.setExpanded(true);
                 }
             };
-            bindingManager.attachListener(getWorksheet().selectedChartProperty(), changeListener);
-            changeListener.changed(getWorksheet().selectedChartProperty(), 0, getWorksheet().getSelectedChart());
+            bindingManager.attachListener(worksheet.selectedChartProperty(), changeListener);
+            changeListener.changed(worksheet.selectedChartProperty(), 0, worksheet.getSelectedChart());
         }
     }
 
@@ -436,7 +434,7 @@ public class ChartWorksheetController implements WorksheetController {
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
-            int nbAdditionalCharts = getWorksheet().getCharts().size() - 1;
+            int nbAdditionalCharts = worksheet.getCharts().size() - 1;
             DoubleBinding n = Bindings.createDoubleBinding(
                     () -> viewPorts.stream()
                             .filter(c -> !c.getChart().equals(chart))
@@ -508,8 +506,8 @@ public class ChartWorksheetController implements WorksheetController {
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
             chart.minHeightProperty().bind(Bindings.createDoubleBinding(
-                    () -> worksheet.isChartLegendsVisible() ? 150.0 : 250.0,
-                    worksheet.chartLegendsVisibleProperty()
+                    () -> worksheet.isEditModeEnabled() ? 150.0 : 250.0,
+                    worksheet.editModeEnabledProperty()
             ));
             VBox.setVgrow(chart, Priority.ALWAYS);
             chart.getYAxis().setSide(Side.LEFT);
@@ -577,7 +575,7 @@ public class ChartWorksheetController implements WorksheetController {
         titleBlock.setManaged(false);
         Label title = new Label();
         title.getStyleClass().add("title-text");
-        title.textProperty().bind(getWorksheet().nameProperty());
+        title.textProperty().bind(worksheet.nameProperty());
         title.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER_LEFT, "chart-icon"));
         Label range = new Label();
         range.getStyleClass().add("range-text");
@@ -598,12 +596,12 @@ public class ChartWorksheetController implements WorksheetController {
         refreshButton.setOnAction(bindingManager.registerHandler(this::handleRefresh));
         snapshotButton.setOnAction(bindingManager.registerHandler(this::handleTakeSnapshot));
         toggleChartDisplayModeButton.setOnAction(bindingManager.registerHandler(this::handleToggleTableViewButton));
-        bindingManager.bind(backButton.disableProperty(), getWorksheet().getHistory().backward().emptyProperty());
-        bindingManager.bind(forwardButton.disableProperty(), getWorksheet().getHistory().forward().emptyProperty());
+        bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
+        bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
-        currentState = new ChartViewportsState(this, getWorksheet().getFromDateTime(), getWorksheet().getToDateTime());
-        timeRangePicker.timeRangeLinkedProperty().bindBidirectional(getWorksheet().timeRangeLinkedProperty());
-        timeRangePicker.zoneIdProperty().bindBidirectional(getWorksheet().timeZoneProperty());
+        currentState = new ChartViewportsState(this, worksheet.getFromDateTime(), worksheet.getToDateTime());
+        timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
+        timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
         timeRangePicker.initSelectedRange(TimeRange.of(currentState.getStartX(), currentState.getEndX()));
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
@@ -858,7 +856,7 @@ public class ChartWorksheetController implements WorksheetController {
             newPane.setAnimated(false);
             seriesTableContainer.getPanes().add(newPane);
         }
-        Platform.runLater(() -> seriesTableContainer.getPanes().get(getWorksheet().getSelectedChart()).setExpanded(true));
+        Platform.runLater(() -> seriesTableContainer.getPanes().get(worksheet.getSelectedChart()).setExpanded(true));
         bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 chartProperties.expand();
@@ -880,20 +878,20 @@ public class ChartWorksheetController implements WorksheetController {
                         }
                     }
                     getAttachedViewport(newPane).ifPresent(nv -> {
-                        getWorksheet().setSelectedChart(viewPorts.indexOf(nv));
+                        worksheet.setSelectedChart(viewPorts.indexOf(nv));
                         if (editButtonsGroup.getSelectedToggle() != null) {
                             nv.getDataStore().setShowProperties(true);
                         }
                     });
                     if ((expandRequiered) && (oldPane != null)) {
-                        getWorksheet().setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
+                        worksheet.setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
                         Platform.runLater(() -> {
                             seriesTableContainer.setExpandedPane(oldPane);
                         });
                     }
                 });
-        splitPane.setDividerPositions(getWorksheet().getDividerPosition());
-        bindingManager.bind(getWorksheet().dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+        splitPane.setDividerPositions(worksheet.getDividerPosition());
+        bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
 
     @Override
@@ -1060,7 +1058,7 @@ public class ChartWorksheetController implements WorksheetController {
 
     @Override
     public ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding> treeView) {
-        ContextMenu contextMenu = new ContextMenu(getWorksheet().getCharts()
+        ContextMenu contextMenu = new ContextMenu(worksheet.getCharts()
                 .stream()
                 .map(c -> {
                     MenuItem m = new MenuItem(c.getName());
@@ -1215,12 +1213,12 @@ public class ChartWorksheetController implements WorksheetController {
 
     @FXML
     private void handleHistoryBack(ActionEvent actionEvent) {
-        getWorksheet().getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
+        worksheet.getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
     }
 
     @FXML
     private void handleHistoryForward(ActionEvent actionEvent) {
-        getWorksheet().getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
+        worksheet.getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
     }
 
     @FXML
@@ -1240,8 +1238,8 @@ public class ChartWorksheetController implements WorksheetController {
 
     @Override
     public void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        getWorksheet().getHistory().setHead(currentState.asSelection(), saveToHistory);
-        logger.debug(() -> getWorksheet().getHistory().backward().dump());
+        worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
+        logger.debug(() -> worksheet.getHistory().backward().dump());
         for (ChartViewPort viewPort : viewPorts) {
             invalidate(viewPort, dontPlotChart, forceRefresh);
         }
@@ -1249,7 +1247,7 @@ public class ChartWorksheetController implements WorksheetController {
 
     @Override
     public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Refreshing chart " + getWorksheet().getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
+        try (Profiler p = Profiler.start("Refreshing chart " + worksheet.getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {
                 XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
                 logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
@@ -1302,7 +1300,7 @@ public class ChartWorksheetController implements WorksheetController {
                                         }
                                     }
                                 }
-                                if (getWorksheet().getChartLayout() == ChartLayout.OVERLAID) {
+                                if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                                     // Force a redraw of the charts and their Y Axis considering their proper width.
                                     new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
                                 }
@@ -1378,12 +1376,12 @@ public class ChartWorksheetController implements WorksheetController {
     @Override
     public void saveSnapshot() {
         WritableImage snapImg;
-        boolean wasModeEdit = getWorksheet().isChartLegendsVisible();
+        boolean wasModeEdit = worksheet.isEditModeEnabled();
         try {
             // Invalidate chart nodes cache so that it is re-rendered when scaled up
             // and not just stretched for snapshot
             viewPorts.forEach(v -> v.getChart().setCache(false));
-            getWorksheet().setChartLegendsVisible(false);
+            worksheet.setEditModeEnabled(false);
             worksheetTitleBlock.setManaged(true);
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
@@ -1396,7 +1394,7 @@ public class ChartWorksheetController implements WorksheetController {
             return;
         } finally {
             viewPorts.forEach(v -> v.getChart().setCache(true));
-            getWorksheet().setChartLegendsVisible(wasModeEdit);
+            worksheet.setEditModeEnabled(wasModeEdit);
             navigationToolbar.setManaged(true);
             navigationToolbar.setVisible(true);
             worksheetTitleBlock.setManaged(false);
@@ -1407,7 +1405,7 @@ public class ChartWorksheetController implements WorksheetController {
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
+        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", worksheet.getName()));
         File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
         if (selectedFile != null) {
             try {
@@ -1435,7 +1433,7 @@ public class ChartWorksheetController implements WorksheetController {
 //    }
 
     private ChartViewPort getSelectedViewPort() {
-        var v = viewPorts.get(getWorksheet().getSelectedChart());
+        var v = viewPorts.get(worksheet.getSelectedChart());
         if (v != null) {
             return v;
         }

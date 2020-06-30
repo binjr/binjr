@@ -23,6 +23,7 @@ import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.Property;
@@ -37,8 +38,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public interface WorksheetController extends Initializable, Closeable {
-    static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
+public abstract class WorksheetController implements Initializable, Closeable {
+    protected final BindingManager bindingManager = new BindingManager();
+    protected final MainViewController parentController;
+
+    protected WorksheetController(MainViewController parentController){
+        this.parentController = parentController;
+    }
+
+    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
         var charts = new ArrayList<Chart>();
         var totalBindings = 0;
         for (var treeItem : treeItems) {
@@ -69,38 +77,41 @@ public interface WorksheetController extends Initializable, Closeable {
     }
 
     /**
-     * Returns the {@link Worksheet} instance associated with this controller
+     * Returns the {@link XYChartsWorksheet} instance associated with this controller
      *
-     * @return the {@link Worksheet} instance associated with this controller
+     * @return the {@link XYChartsWorksheet} instance associated with this controller
      */
-    Worksheet getWorksheet();
+    public abstract Worksheet getWorksheet();
 
-    Property<TimeRange> selectedRangeProperty();
+    public abstract Property<TimeRange> selectedRangeProperty();
 
-    Optional<ChartViewPort> getAttachedViewport(TitledPane pane);
+    public abstract Optional<ChartViewPort> getAttachedViewport(TitledPane pane);
 
-    ContextMenu getChartListContextMenu(TreeView<TimeSeriesBinding> treeView);
+    public abstract ContextMenu getChartListContextMenu(TreeView<TimeSeriesBinding> treeView);
 
-    void setReloadRequiredHandler(Consumer<WorksheetController> action);
+    public abstract void setReloadRequiredHandler(Consumer<WorksheetController> action);
 
-    void refresh();
+    public abstract void refresh();
 
-    void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh);
+    public abstract void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh);
 
-    void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh);
+    public abstract  void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh);
 
-    void saveSnapshot();
+    public abstract  void saveSnapshot();
 
-    void toggleShowPropertiesPane();
+    public abstract void toggleShowPropertiesPane();
 
-    void setShowPropertiesPane(boolean value);
+    public abstract void setShowPropertiesPane(boolean value);
 
-    List<ChartViewPort> getViewPorts();
+    public abstract List<ChartViewPort> getViewPorts();
 
-    BindingManager getBindingManager();
+
+    public BindingManager getBindingManager() {
+        return bindingManager;
+    }
 
     @Override
-    void close();
+    public abstract void close();
 
-    String getView();
+    public abstract String getView();
 }
