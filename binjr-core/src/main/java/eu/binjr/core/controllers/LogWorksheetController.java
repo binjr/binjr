@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
@@ -37,7 +38,7 @@ public class LogWorksheetController extends WorksheetController {
     private LogWorksheet worksheet;
     private Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
 
-    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<?> collection){
+    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet,  Collection<DataAdapter> adapters){
         super(parent);
         this.worksheet = worksheet;
     }

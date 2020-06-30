@@ -915,7 +915,8 @@ public class MainViewController implements Initializable {
             }
             seriesControllers.put(newTab, current);
 
-            if (current.getWorksheet() instanceof Syncable syncableWorksheet) {
+            if (current.getWorksheet() instanceof Syncable) {
+                 var syncableWorksheet = (Syncable)current.getWorksheet();
                 current.getBindingManager().attachListener(current.selectedRangeProperty(),
                         (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
                             if (getSelectedWorksheetController().equals(current) && syncableWorksheet.isTimeRangeLinked()) {
@@ -958,7 +959,8 @@ public class MainViewController implements Initializable {
     private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
         workspace.setPresentationMode(false);
         var buttons = new ArrayList<ButtonBase>();
-        if (worksheet instanceof Syncable syncable) {
+        if (worksheet instanceof Syncable) {
+            var syncable = (Syncable)worksheet;
             buttons.add(new ToolButtonBuilder<ToggleButton>()
                     .setText("link")
                     .setTooltip("Link Worksheet Timeline")
@@ -1039,7 +1041,8 @@ public class MainViewController implements Initializable {
                 new SeparatorMenuItem(),
                 detach
         );
-        if (worksheet instanceof Syncable syncable) {
+        if (worksheet instanceof Syncable) {
+            var syncable = (Syncable)worksheet;
             MenuItem link = new MenuItem();
             manager.bind(link.textProperty(), Bindings.createStringBinding(() ->
                             syncable.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
