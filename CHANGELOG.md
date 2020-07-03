@@ -1,5 +1,11 @@
+## [binjr v2.17.0](https://github.com/binjr/binjr/releases/tag/v2.17.0)
+Released on Thu, 02 Jul 2020
+
+* _[Fixed]_ Jitter on the y-axis when hovering over charts with full height crosshair.
+* _[Fixed]_ Incorrect capitalization on some menu entries and labels.
+
 ## [binjr v2.16.0](https://github.com/binjr/binjr/releases/tag/v2.16.0)
-Released on Wed, 10 June 2020
+Released on Wed, 10 Jun 2020
 
 * _[New]_ binjr can now be used as a "portable" application on all supported platforms. 
   Portable apps can be unpacked to and used from a detachable drive or a file share.  
