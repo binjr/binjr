@@ -21,7 +21,7 @@ import com.google.gson.JsonParseException;
 import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.adapters.HttpDataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
@@ -128,11 +128,11 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     //region [DataAdapter Members]
 
     @Override
-    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         try {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-            FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
             for (JsonJrdsItem branch : Arrays.stream(t.items)
                     .filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type))
                     .collect(Collectors.toList())) {
@@ -228,10 +228,10 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         }
     }
 
-    private void attachNode(FilterableTreeItem<TimeSeriesBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
+    private void attachNode(FilterableTreeItem<SourceBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
         JsonJrdsItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        FilterableTreeItem<TimeSeriesBinding> newBranch = new FilterableTreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
+        FilterableTreeItem<SourceBinding> newBranch = new FilterableTreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
 
         if (JRDS_FILTER.equals(n.type)) {
             // add a dummy node so that the branch can be expanded
@@ -345,10 +345,10 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     private class GraphDescListener implements ChangeListener<Boolean> {
         private final String currentPath;
-        private final FilterableTreeItem<TimeSeriesBinding> newBranch;
-        private final FilterableTreeItem<TimeSeriesBinding> tree;
+        private final FilterableTreeItem<SourceBinding> newBranch;
+        private final FilterableTreeItem<SourceBinding> tree;
 
-        public GraphDescListener(String currentPath, FilterableTreeItem<TimeSeriesBinding> newBranch, FilterableTreeItem<TimeSeriesBinding> tree) {
+        public GraphDescListener(String currentPath, FilterableTreeItem<SourceBinding> newBranch, FilterableTreeItem<SourceBinding> tree) {
             this.currentPath = currentPath;
             this.newBranch = newBranch;
             this.tree = tree;
@@ -379,9 +379,9 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     private class FilteredViewListener implements ChangeListener<Boolean> {
         private final JsonJrdsItem n;
-        private final FilterableTreeItem<TimeSeriesBinding> newBranch;
+        private final FilterableTreeItem<SourceBinding> newBranch;
 
-        public FilteredViewListener(JsonJrdsItem n, FilterableTreeItem<TimeSeriesBinding> newBranch) {
+        public FilteredViewListener(JsonJrdsItem n, FilterableTreeItem<SourceBinding> newBranch) {
             this.n = n;
             this.newBranch = newBranch;
         }

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.core.data.adapters.SourceBinding;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
@@ -37,6 +38,8 @@ enum ReflectionHelper {
         Reflections reflections = new Reflections("eu.binjr");
         // Add all Worksheet classes
         Set<Class<?>> classes = new HashSet<>(reflections.getSubTypesOf(Worksheet.class));
+        // Add SourceBinding classes
+        classes.addAll(reflections.getSubTypesOf(SourceBinding.class));
         // Add Workspace class
         classes.add(Workspace.class);
         classesToBeBound =  classes.toArray(Class<?>[]::new);

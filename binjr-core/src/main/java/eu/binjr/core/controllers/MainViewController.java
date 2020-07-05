@@ -20,10 +20,7 @@ import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.DataAdapterFactory;
-import eu.binjr.core.data.adapters.DataAdapterInfo;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -129,7 +126,7 @@ public class MainViewController implements Initializable {
     public ToggleButton searchCaseSensitiveToggle;
     @FXML
     public StackPane sourceArea;
-    List<TreeItem<TimeSeriesBinding>> searchResultSet;
+    List<TreeItem<SourceBinding>> searchResultSet;
     int currentSearchHit = -1;
     private Workspace workspace;
     @FXML
@@ -612,12 +609,12 @@ public class MainViewController implements Initializable {
         return menuItems.size() > 0 ? menuItems : Collections.singletonList(none);
     }
 
-    TreeView<TimeSeriesBinding> getSelectedTreeView() {
+    TreeView<SourceBinding> getSelectedTreeView() {
         if (sourcesPane == null || sourcesPane.getExpandedPane() == null) {
             return null;
         }
         var treeView = sourcesPane.getExpandedPane().getContent().lookup("#sourceTreeView");
-        return (TreeView<TimeSeriesBinding>) treeView;
+        return (TreeView<SourceBinding>) treeView;
     }
 
     private void slidePanel(int show, Duration delay) {
@@ -768,8 +765,8 @@ public class MainViewController implements Initializable {
         AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
                 event -> {
                     sourceMaskerPane.setVisible(false);
-                    Optional<TreeView<TimeSeriesBinding>> treeView =
-                            (Optional<TreeView<TimeSeriesBinding>>) event.getSource().getValue();
+                    Optional<TreeView<SourceBinding>> treeView =
+                            (Optional<TreeView<SourceBinding>>) event.getSource().getValue();
                     if (treeView.isPresent()) {
                         newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
                         sourcesAdapters.put(newSourcePane, newSource);
@@ -787,10 +784,10 @@ public class MainViewController implements Initializable {
 
     private void loadSource(Source source) throws DataAdapterException {
         TitledPane newSourcePane = newSourcePane(source);
-        Optional<TreeView<TimeSeriesBinding>> treeView;
+        Optional<TreeView<SourceBinding>> treeView;
         treeView = buildTreeViewForTarget(source.getAdapter());
         newSourcePane.setContent(buildSourcePaneContent((treeView.orElseGet(() -> {
-            FilterableTreeItem<TimeSeriesBinding> i = new FilterableTreeItem<>(new TimeSeriesBinding());
+            FilterableTreeItem<SourceBinding> i = new FilterableTreeItem<>(new TimeSeriesBinding());
             Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
             l.setTextFill(Color.RED);
             i.setGraphic(l);
@@ -803,7 +800,7 @@ public class MainViewController implements Initializable {
         });
     }
 
-    private Node buildSourcePaneContent(TreeView<TimeSeriesBinding> treeView, Source source) {
+    private Node buildSourcePaneContent(TreeView<SourceBinding> treeView, Source source) {
         TextField filterField = new TextField();
         filterField.setPromptText("Type in text to filter the tree view.");
         HBox.setHgrow(filterField, Priority.ALWAYS);
@@ -841,12 +838,12 @@ public class MainViewController implements Initializable {
         VBox.setVgrow(treeView, Priority.ALWAYS);
         treeView.setMaxHeight(Double.MAX_VALUE);
         treeView.setId("sourceTreeView");
-        ((FilterableTreeItem<TimeSeriesBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
+        ((FilterableTreeItem<SourceBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() ||
                             filterField.getText() == null ||
                             filterField.getText().length() < UserPreferences.getInstance().minCharsTreeFiltering.get().intValue())
                         return null;
-                    return (TreeItemPredicate<TimeSeriesBinding>) (parent, seriesBinding) -> {
+                    return (TreeItemPredicate<SourceBinding>) (parent, seriesBinding) -> {
                         var isMatch = seriesBinding != null && StringUtils.contains(
                                 seriesBinding.getTreeHierarchy(),
                                 filterField.getText(),
@@ -1074,13 +1071,13 @@ public class MainViewController implements Initializable {
         return SnapshotUtils.outputScaleAwareSnapshot(label);
     }
 
-    private Optional<TreeView<TimeSeriesBinding>> buildTreeViewForTarget(DataAdapter dp) {
+    private Optional<TreeView<SourceBinding>> buildTreeViewForTarget(DataAdapter dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
-        TreeView<TimeSeriesBinding> treeView = new TreeView<>();
+        TreeView<SourceBinding> treeView = new TreeView<>();
         treeView.setShowRoot(false);
         treeView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        Callback<TreeView<TimeSeriesBinding>, TreeCell<TimeSeriesBinding>> dragAndDropCellFactory = param -> {
-            final TreeCell<TimeSeriesBinding> bindingTreeCell = new TreeCell<>();
+        Callback<TreeView<SourceBinding>, TreeCell<SourceBinding>> dragAndDropCellFactory = param -> {
+            final TreeCell<SourceBinding> bindingTreeCell = new TreeCell<>();
             bindingTreeCell.itemProperty().addListener((observable, oldValue, newValue) -> bindingTreeCell.setText(newValue == null ? null : newValue.toString()));
             bindingTreeCell.setOnDragDetected(event -> {
                 try {
@@ -1113,7 +1110,7 @@ public class MainViewController implements Initializable {
         treeView.setCellFactory(ContextMenuTreeViewCell.forTreeView(getTreeViewContextMenu(treeView), dragAndDropCellFactory));
         try {
             dp.onStart();
-            FilterableTreeItem<TimeSeriesBinding> bindingTree = dp.getBindingTree();
+            FilterableTreeItem<SourceBinding> bindingTree = dp.getBindingTree();
             bindingTree.setExpanded(true);
             treeView.setRoot(bindingTree);
             return Optional.of(treeView);
@@ -1147,7 +1144,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private ContextMenu getTreeViewContextMenu(final TreeView<TimeSeriesBinding> treeView) {
+    private ContextMenu getTreeViewContextMenu(final TreeView<SourceBinding> treeView) {
         MenuItem expandBranch = new MenuItem("Expand Branch");
         expandBranch.setOnAction(event -> treeView.getSelectionModel().getSelectedItems().forEach(item -> TreeViewUtils.expandBranch(item, TreeViewUtils.ExpandDirection.DOWN)));
         MenuItem collapseBranch = new MenuItem("Collapse Branch");
@@ -1162,17 +1159,22 @@ public class MainViewController implements Initializable {
 
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(Bindings.size(tearableTabPane.getTabs()).lessThanOrEqualTo(0));
-        addToCurrent.setOnShowing(event -> addToCurrent.getItems().setAll(getSelectedWorksheetController().getChartListContextMenu(treeView).getItems()));
+        addToCurrent.setOnShowing(event ->
+                addToCurrent.getItems()
+                        .setAll(getSelectedWorksheetController()
+                                .getChartListContextMenu(treeView.getSelectionModel().getSelectedItems())
+                                .getItems()));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
-        addToNew.setOnAction(event -> addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
+        addToNew.setOnAction(event ->
+                addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
         return new ContextMenu(expandBranch, collapseBranch, new SeparatorMenuItem(), addToCurrent, addToNew);
     }
 
-    private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<TimeSeriesBinding>> rootItems) {
+    private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<SourceBinding>> rootItems) {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                var charts = WorksheetController.treeItemsAsChartList(rootItems, root);
+                var charts = XYChartsWorksheetController.treeItemsAsChartList(rootItems, root);
                 if (charts.isPresent()) {
                     ZonedDateTime toDateTime = null;
                     ZonedDateTime fromDateTime = null;
@@ -1210,7 +1212,7 @@ public class MainViewController implements Initializable {
         if (isNullOrEmpty(searchField.getText())) {
             return;
         }
-        TreeView<TimeSeriesBinding> selectedTreeView = getSelectedTreeView();
+        TreeView<SourceBinding> selectedTreeView = getSelectedTreeView();
         if (selectedTreeView == null) {
             return;
         }
@@ -1332,7 +1334,7 @@ public class MainViewController implements Initializable {
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding> treeView = getSelectedTreeView();
+            TreeView<SourceBinding> treeView = getSelectedTreeView();
             if (treeView != null) {
                 var items = treeView.getSelectionModel().getSelectedItems();
                 if (items != null && !items.isEmpty()) {

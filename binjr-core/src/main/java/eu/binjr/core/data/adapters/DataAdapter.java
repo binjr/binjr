@@ -43,7 +43,7 @@ public interface DataAdapter extends AutoCloseable {
      * @return a hierarchical view of all the individual bindings exposed by the underlying source.
      * @throws DataAdapterException if an error occurs while retrieving bindings.
      */
-    FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException;
+    FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException;
 
     /**
      * Gets decoded data from the source as a map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.

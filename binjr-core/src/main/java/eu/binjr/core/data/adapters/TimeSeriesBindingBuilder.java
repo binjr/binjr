@@ -81,7 +81,7 @@ public class TimeSeriesBindingBuilder {
         return this;
     }
 
-    public TimeSeriesBinding build() {
+    public SourceBinding build() {
         if (legend == null) {
             legend = label;
         }

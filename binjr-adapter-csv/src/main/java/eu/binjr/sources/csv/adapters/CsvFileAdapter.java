@@ -20,6 +20,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
 import eu.binjr.core.data.codec.csv.DataSample;
@@ -108,8 +109,8 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(
+    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding(
                         "",
                         "/",
@@ -124,7 +125,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
             for (int i = 0; i < headers.size(); i++) {
                 String columnIndex = Integer.toString(i + 1);
                 String header = headers.get(i).isBlank() ? "Column #" + columnIndex : headers.get(i);
-                TimeSeriesBinding b = new TimeSeriesBinding(
+                SourceBinding b = new TimeSeriesBinding(
                         columnIndex,
                         columnIndex,
                         null,

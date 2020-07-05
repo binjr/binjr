@@ -23,6 +23,7 @@ import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -92,19 +93,19 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  * @author Frederic Thevenet
  */
 public class XYChartsWorksheetController extends WorksheetController {
+    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = LogManager.getLogger(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
     @FXML
     public AnchorPane root;
-    private List<ChartViewPort> viewPorts = new ArrayList<>();
     @FXML
     Pane newChartDropTarget;
+    private List<ChartViewPort> viewPorts = new ArrayList<>();
     private XYChartsWorksheet worksheet;
     private volatile boolean preventReload = false;
     private AtomicBoolean closed = new AtomicBoolean(false);
@@ -180,6 +181,41 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private static String colorToRgbaString(Color c) {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
+    }
+
+    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<SourceBinding>> treeItems, Node dlgRoot) {
+        var charts = new ArrayList<Chart>();
+        var totalBindings = 0;
+        for (var treeItem : treeItems) {
+            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
+                if (t.getValue() instanceof TimeSeriesBinding) {
+                    TimeSeriesBinding binding = (TimeSeriesBinding) t.getValue();
+                    Chart chart = new Chart(
+                            binding.getLegend(),
+                            binding.getGraphType(),
+                            binding.getUnitName(),
+                            binding.getUnitPrefix()
+
+                    );
+                    for (var b : TreeViewUtils.flattenLeaves(t)) {
+                        if (b instanceof TimeSeriesBinding) {
+                            chart.addSeries(TimeSeriesInfo.fromBinding((TimeSeriesBinding) b));
+                            totalBindings++;
+                        }
+                    }
+                    charts.add(chart);
+                }
+            }
+        }
+        if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
+            if (Dialogs.confirmDialog(dlgRoot,
+                    "This action will add " + totalBindings + " series on a single worksheet.",
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(charts);
     }
 
     private ChartPropertiesController buildChartPropertiesController(Chart chart) throws IOException {
@@ -939,9 +975,9 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
+                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {
@@ -951,7 +987,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                         TitledPane droppedPane = (TitledPane) event.getSource();
                         droppedPane.setExpanded(true);
                         ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                        addBindings(TreeViewUtils.flattenLeaves(item, true), viewPort.getDataStore());
+                        addBindings(TreeViewUtils.flattenLeaves(item, true).stream().filter(b -> b instanceof TimeSeriesBinding)
+                                .map(b -> (TimeSeriesBinding) b).collect(Collectors.toList()), viewPort.getDataStore());
                     } catch (Exception e) {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                     }
@@ -969,9 +1006,9 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
-                TreeItem<TimeSeriesBinding> item = treeView.getSelectionModel().getSelectedItem();
+                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {
@@ -985,10 +1022,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                             }
                         }
                     }
+                    var items = treeView.getSelectionModel().getSelectedItems();
                     if (targetChart == null) {
-                        getChartListContextMenu(treeView).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                        getChartListContextMenu(items).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
                     } else {
-                        addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), targetChart);
+                        addToCurrentWorksheet(items, targetChart);
                     }
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
@@ -1003,9 +1041,9 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
-            TreeView<TimeSeriesBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
-                var items = treeView.getSelectionModel().getSelectedItems();
+                Collection<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
                 if (items != null && !items.isEmpty()) {
                     Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
                     if (targetStage != null) {
@@ -1023,9 +1061,9 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    private void addToNewChart(Collection<TreeItem<TimeSeriesBinding>> treeItems) {
+    private void addToNewChart(Collection<TreeItem<SourceBinding>> treeItems) {
         try {
-            WorksheetController.treeItemsAsChartList(treeItems, root).ifPresent(charts -> {
+            treeItemsAsChartList(treeItems, root).ifPresent(charts -> {
                 // Set the time range of the whole worksheet to accommodate the new bindings
                 // if there are no other series present.
                 if (worksheet.getTotalNumberOfSeries() == 0) {
@@ -1043,12 +1081,15 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    private void addToCurrentWorksheet(Collection<TreeItem<TimeSeriesBinding>> treeItems, Chart targetChart) {
+    private void addToCurrentWorksheet(Collection<TreeItem<SourceBinding>> treeItems, Chart targetChart) {
         try {
             // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
             Platform.runLater(() -> {
                 if (treeItems != null && !treeItems.isEmpty()) {
-                    addBindings(treeItems.stream().flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream()).collect(Collectors.toList()), targetChart);
+                    addBindings(treeItems.stream()
+                            .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
+                            .collect(Collectors.toList()
+                            ), targetChart);
                 }
             });
         } catch (Exception e) {
@@ -1057,17 +1098,19 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     @Override
-    public ContextMenu getChartListContextMenu(final TreeView<TimeSeriesBinding> treeView) {
+    public ContextMenu getChartListContextMenu(final Collection<TreeItem<SourceBinding>> items) {
         ContextMenu contextMenu = new ContextMenu(worksheet.getCharts()
                 .stream()
                 .map(c -> {
                     MenuItem m = new MenuItem(c.getName());
-                    m.setOnAction(bindingManager.registerHandler(e -> addToCurrentWorksheet(treeView.getSelectionModel().getSelectedItems(), c)));
+                    m.setOnAction(bindingManager.registerHandler(e -> addToCurrentWorksheet(items, c)));
                     return m;
                 })
                 .toArray(MenuItem[]::new));
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction((bindingManager.registerHandler(event -> addToNewChart(treeView.getSelectionModel().getSelectedItems()))));
+        newChart.setOnAction((bindingManager.registerHandler(event -> {
+            addToNewChart(new ArrayList<>(items));
+        })));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }
@@ -1151,10 +1194,16 @@ public class XYChartsWorksheetController extends WorksheetController {
         bindingManager.attachListener(worksheet.getCharts(), chartListListener);
     }
 
-    private void addBindings(Collection<TimeSeriesBinding> bindings, Chart targetChart) {
-        if (bindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
+    private void addBindings(Collection<SourceBinding> sourceBindings, Chart targetChart) {
+        Collection<TimeSeriesBinding> timeSeriesBindings = new ArrayList<>();
+        for (SourceBinding sb : sourceBindings) {
+            if (sb instanceof TimeSeriesBinding) {
+                timeSeriesBindings.add((TimeSeriesBinding) sb);
+            }
+        }
+        if (timeSeriesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(root,
-                    "This action will add " + bindings.size() + " series on a single chart.",
+                    "This action will add " + timeSeriesBindings.size() + " series on a single chart.",
                     "Are you sure you want to proceed?",
                     ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
                 return;
@@ -1173,7 +1222,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 showAllCheckBox.setSelected(andAll);
             });
         };
-        for (TimeSeriesBinding b : bindings) {
+        for (TimeSeriesBinding b : timeSeriesBindings) {
             TimeSeriesInfo newSeries = TimeSeriesInfo.fromBinding(b);
             bindingManager.attachListener(newSeries.selectedProperty(),
                     (observable, oldValue, newValue) ->
@@ -1189,7 +1238,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
         // Set the time range of the whole worksheet to accommodate the new bindings
         // if there are no other series present.
-        if (worksheet.getTotalNumberOfSeries() == bindings.size()) {
+        if (worksheet.getTotalNumberOfSeries() == timeSeriesBindings.size()) {
             try {
                 this.timeRangePicker.selectedRangeProperty().setValue(targetChart.getInitialTimeRange());
             } catch (DataAdapterException e) {

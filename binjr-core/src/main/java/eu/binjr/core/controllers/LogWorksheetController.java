@@ -18,15 +18,12 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TitledPane;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 
 import java.net.URL;
 import java.time.ZonedDateTime;
@@ -59,9 +56,10 @@ public class LogWorksheetController extends WorksheetController {
     }
 
     @Override
-    public ContextMenu getChartListContextMenu(TreeView<TimeSeriesBinding> treeView) {
-        return new ContextMenu(new MenuItem("Empty"));
+    public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
+        return null;
     }
+
 
     @Override
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {

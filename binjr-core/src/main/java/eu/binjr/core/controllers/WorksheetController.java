@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -46,36 +47,6 @@ public abstract class WorksheetController implements Initializable, Closeable {
         this.parentController = parentController;
     }
 
-    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<TimeSeriesBinding>> treeItems, Node dlgRoot) {
-        var charts = new ArrayList<Chart>();
-        var totalBindings = 0;
-        for (var treeItem : treeItems) {
-            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
-                TimeSeriesBinding binding = t.getValue();
-                Chart chart = new Chart(
-                        binding.getLegend(),
-                        binding.getGraphType(),
-                        binding.getUnitName(),
-                        binding.getUnitPrefix()
-                );
-                for (TimeSeriesBinding b : TreeViewUtils.flattenLeaves(t)) {
-                    chart.addSeries(TimeSeriesInfo.fromBinding(b));
-                    totalBindings++;
-                }
-                charts.add(chart);
-            }
-        }
-        if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
-            if (Dialogs.confirmDialog(dlgRoot,
-                    "This action will add " + totalBindings + " series on a single worksheet.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
-                return Optional.empty();
-            }
-        }
-        return Optional.of(charts);
-    }
-
     /**
      * Returns the {@link XYChartsWorksheet} instance associated with this controller
      *
@@ -87,7 +58,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract Optional<ChartViewPort> getAttachedViewport(TitledPane pane);
 
-    public abstract ContextMenu getChartListContextMenu(TreeView<TimeSeriesBinding> treeView);
+    public abstract ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView);
 
     public abstract void setReloadRequiredHandler(Consumer<WorksheetController> action);
 

@@ -16,10 +16,9 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
-import eu.binjr.common.function.CheckedFunction;
-import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
@@ -37,7 +36,6 @@ import org.rrd4j.ConsolFun;
 import org.rrd4j.core.*;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -81,8 +79,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
-        FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(
+    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
+        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding(
                         "",
                         "/",
@@ -95,7 +93,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         for (Path rrdPath : rrdPaths) {
             try {
                 String rrdFileName = rrdPath.getFileName().toString();
-                var rrdNode = new FilterableTreeItem<>(new TimeSeriesBinding(
+                FilterableTreeItem<SourceBinding> rrdNode = new FilterableTreeItem<>(new TimeSeriesBinding(
                         rrdFileName,
                         rrdFileName,
                         null,
@@ -110,7 +108,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs())
                         .map(ArcDef::getConsolFun)
                         .collect(Collectors.toSet())) {
-                    var consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding(
+                    FilterableTreeItem<SourceBinding> consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding(
                             consolFun.toString(),
                             rrdPath.resolve(consolFun.toString()).toString(),
                             null,

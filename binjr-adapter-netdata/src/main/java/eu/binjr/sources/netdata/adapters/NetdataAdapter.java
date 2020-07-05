@@ -119,16 +119,16 @@ public class NetdataAdapter extends HttpDataAdapter {
     }
 
     @Override
-    public FilterableTreeItem<TimeSeriesBinding> getBindingTree() throws DataAdapterException {
+    public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         var chartSummary = doHttpGet(
                 craftRequestUri(ChartSummary.ENDPOINT),
                 response -> jsonParser.fromJson(EntityUtils.toString(response.getEntity()), ChartSummary.class)
         );
-        FilterableTreeItem<TimeSeriesBinding> tree = new FilterableTreeItem<>(new TimeSeriesBindingBuilder(this)
+        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new TimeSeriesBindingBuilder(this)
                 .setLabel(getSourceName())
                 .setParent("")
                 .setPath("/").build());
-        Map<String, FilterableTreeItem<TimeSeriesBinding>> types = new TreeMap<>();
+        Map<String, FilterableTreeItem<SourceBinding>> types = new TreeMap<>();
         chartSummary.getCharts().forEach((s, chart) -> {
             var categoryName = getCategoryName(chart);
             var categoryBranch = types.computeIfAbsent(categoryName, s1 -> new FilterableTreeItem<>(

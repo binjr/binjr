@@ -23,7 +23,9 @@ import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -36,8 +38,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlRootElement(name = "Binding")
-public class TimeSeriesBinding {
+public class TimeSeriesBinding extends SourceBinding {
     private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -48,41 +49,25 @@ public class TimeSeriesBinding {
         }
     });
 
-    @XmlAttribute(name = "sourceId")
-    private final UUID adapterId;
-    @XmlAttribute
-    private final String label;
-    @XmlAttribute
-    private final String path;
     @XmlAttribute
     private final Color color;
-    @XmlAttribute
-    private final String legend;
     @XmlAttribute
     private final UnitPrefixes prefix;
     @XmlAttribute
     private final ChartType graphType;
     @XmlAttribute
     private final String unitName;
-    @XmlAttribute
-    private final String treeHierarchy;
-    @XmlTransient
-    private DataAdapter adapter;
 
     /**
      * Creates a new instance of the {@link TimeSeriesBinding} class.
      */
     public TimeSeriesBinding() {
-        this.label = "";
-        this.path = "";
+        super();
         this.color = null;
-        this.legend = "";
         this.prefix = UnitPrefixes.BINARY;
         this.graphType = ChartType.STACKED;
         this.unitName = "";
-        this.adapter = null;
-        this.treeHierarchy = "";
-        adapterId = null;
+
     }
 
     /**
@@ -130,52 +115,11 @@ public class TimeSeriesBinding {
     }
 
     private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter adapter, UUID adapterId) {
-        this.label = label;
-        this.path = path;
-        this.legend = legend;
+        super(label, legend, path, treeHierarchy, adapter, adapterId);
         this.prefix = prefix;
         this.graphType = graphType;
         this.unitName = unitName;
-        this.treeHierarchy = treeHierarchy;
-        this.adapter = adapter;
-        UUID id = adapterId;
-        if (id == null && adapter != null) {
-            id = adapter.getId();
-        }
-        this.adapterId = id;
         this.color = color;
-    }
-
-    /**
-     * Returns the label of the binding
-     *
-     * @return the label of the binding
-     */
-    public String getLabel() {
-        return this.label;
-    }
-
-    /**
-     * Returns the path of the binding
-     *
-     * @return the path of the binding
-     */
-    public String getPath() {
-        return this.path;
-    }
-
-    /**
-     * Returns the {@link SerializedDataAdapter} of the binding
-     *
-     * @return the {@link SerializedDataAdapter} of the binding
-     */
-    @XmlTransient
-    public DataAdapter getAdapter() {
-        return this.adapter;
-    }
-
-    public void setAdapter(DataAdapter adapter) {
-        this.adapter = adapter;
     }
 
     /**
@@ -185,15 +129,6 @@ public class TimeSeriesBinding {
      */
     public Color getColor() {
         return this.color == null ? computeDefaultColor() : this.color;
-    }
-
-    /**
-     * Returns the legend of the bound series as defined in the source.
-     *
-     * @return the legend of the bound series as defined in the source.
-     */
-    public String getLegend() {
-        return this.legend;
     }
 
     /**
@@ -221,24 +156,6 @@ public class TimeSeriesBinding {
      */
     public UnitPrefixes getUnitPrefix() {
         return prefix;
-    }
-
-    /**
-     * Gets the {@link SerializedDataAdapter}'s id
-     *
-     * @return the {@link SerializedDataAdapter}'s id
-     */
-    public UUID getAdapterId() {
-        return adapterId;
-    }
-
-    /**
-     * Returns the full hierarchy in the tree for the binding
-     *
-     * @return the full hierarchy in the tree for the binding
-     */
-    public String getTreeHierarchy() {
-        return treeHierarchy;
     }
 
     @Override

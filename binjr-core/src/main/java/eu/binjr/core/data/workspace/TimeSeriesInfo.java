@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -41,7 +42,7 @@ public class TimeSeriesInfo implements Dirtyable {
     @IsDirtyable
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
-    private final TimeSeriesBinding binding;
+    private final SourceBinding binding;
     private final ChangeWatcher status;
     private Property<TimeSeriesProcessor> processor = new SimpleObjectProperty<>();
 
@@ -82,7 +83,7 @@ public class TimeSeriesInfo implements Dirtyable {
     private TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           TimeSeriesBinding binding) {
+                           SourceBinding binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
@@ -196,7 +197,7 @@ public class TimeSeriesInfo implements Dirtyable {
      *
      * @return the {@link TimeSeriesBinding} to get the data from
      */
-    public TimeSeriesBinding getBinding() {
+    public SourceBinding getBinding() {
         return binding;
     }
 

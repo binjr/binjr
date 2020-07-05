@@ -17,6 +17,7 @@
 package eu.binjr.sources.jrds.adapters;
 
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
@@ -48,7 +49,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding of(String parentName, String label, String path, DataAdapter adapter) {
+    public SourceBinding of(String parentName, String label, String path, DataAdapter adapter) {
         return new TimeSeriesBinding(
                 label,
                 path,
@@ -71,7 +72,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter adapter) {
+    public SourceBinding of(String parentName, String legend, Graphdesc graphdesc, String path, DataAdapter adapter) {
         final String label;
         final UnitPrefixes prefix;
         final ChartType graphType;
@@ -96,7 +97,7 @@ public class JrdsSeriesBindingFactory {
      * @param adapter    the {@link JrdsDataAdapter} for the binding.
      * @return a JRDS series binding
      */
-    public TimeSeriesBinding of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter adapter) {
+    public SourceBinding of(String parentName, Graphdesc graphdesc, int idx, String path, DataAdapter adapter) {
         final String label;
         final Color color;
         final String legend;
