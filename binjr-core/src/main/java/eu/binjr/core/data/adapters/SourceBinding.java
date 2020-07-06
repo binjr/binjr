@@ -16,6 +16,8 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.core.data.workspace.Worksheet;
+
 import javax.xml.bind.annotation.*;
 import java.util.UUID;
 
@@ -43,6 +45,11 @@ public abstract class SourceBinding {
         adapterId = null;
         this.legend = "";
     }
+
+    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter adapter) {
+        this(label, legend , path, treeHierarchy, adapter, null);
+    }
+
 
     protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter adapter, UUID adapterId) {
         this.label = label;
@@ -115,4 +122,11 @@ public abstract class SourceBinding {
     public String getLegend() {
         return this.legend;
     }
+
+    @Override
+    public String toString() {
+        return getLegend();
+    }
+
+    public abstract Class<? extends Worksheet> getWorksheetClass();
 }

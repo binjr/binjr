@@ -19,6 +19,8 @@ package eu.binjr.core.data.adapters;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
+import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,6 +70,11 @@ public class TimeSeriesBinding extends SourceBinding {
         this.graphType = ChartType.STACKED;
         this.unitName = "";
 
+    }
+
+    @Override
+    public Class<? extends Worksheet> getWorksheetClass() {
+        return XYChartsWorksheet.class;
     }
 
     /**
@@ -156,11 +163,6 @@ public class TimeSeriesBinding extends SourceBinding {
      */
     public UnitPrefixes getUnitPrefix() {
         return prefix;
-    }
-
-    @Override
-    public String toString() {
-        return getLegend();
     }
 
     private Color computeDefaultColor() {

@@ -76,7 +76,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
-import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -157,6 +156,32 @@ public class MainViewController implements Initializable {
     public MainViewController() {
         super();
         this.workspace = new Workspace();
+    }
+
+    public static Optional<BindingsHierarchy[]> treeItemsAsChartList(Collection<TreeItem<SourceBinding>> treeItems, Node dlgRoot) {
+        var charts = new ArrayList<BindingsHierarchy>();
+        var totalBindings = 0;
+        for (var treeItem : treeItems) {
+            for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
+                var chart = new BindingsHierarchy();
+                var binding = t.getValue();
+                chart.setName(binding);
+                for (var b : TreeViewUtils.flattenLeaves(t)) {
+                    chart.getBindings().add(b);
+                    totalBindings++;
+                }
+                charts.add(chart);
+            }
+        }
+        if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
+            if (Dialogs.confirmDialog(dlgRoot,
+                    "This action will add " + totalBindings + " series on a single worksheet.",
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                return Optional.empty();
+            }
+        }
+        return Optional.of(charts.toArray(BindingsHierarchy[]::new));
     }
 
     @FXML
@@ -471,14 +496,14 @@ public class MainViewController implements Initializable {
         saveWorkspaceAs();
     }
 
+    //endregion
+
     @FXML
     protected void handleDisplayChartProperties(ActionEvent actionEvent) {
         if (getSelectedWorksheetController() != null) {
             getSelectedWorksheetController().toggleShowPropertiesPane();
         }
     }
-
-    //endregion
 
     @FXML
     protected void populateOpenRecentMenu(Event event) {
@@ -913,7 +938,7 @@ public class MainViewController implements Initializable {
             seriesControllers.put(newTab, current);
 
             if (current.getWorksheet() instanceof Syncable) {
-                 var syncableWorksheet = (Syncable)current.getWorksheet();
+                var syncableWorksheet = (Syncable) current.getWorksheet();
                 current.getBindingManager().attachListener(current.selectedRangeProperty(),
                         (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
                             if (getSelectedWorksheetController().equals(current) && syncableWorksheet.isTimeRangeLinked()) {
@@ -957,7 +982,7 @@ public class MainViewController implements Initializable {
         workspace.setPresentationMode(false);
         var buttons = new ArrayList<ButtonBase>();
         if (worksheet instanceof Syncable) {
-            var syncable = (Syncable)worksheet;
+            var syncable = (Syncable) worksheet;
             buttons.add(new ToolButtonBuilder<ToggleButton>()
                     .setText("link")
                     .setTooltip("Link Worksheet Timeline")
@@ -1039,7 +1064,7 @@ public class MainViewController implements Initializable {
                 detach
         );
         if (worksheet instanceof Syncable) {
-            var syncable = (Syncable)worksheet;
+            var syncable = (Syncable) worksheet;
             MenuItem link = new MenuItem();
             manager.bind(link.textProperty(), Bindings.createStringBinding(() ->
                             syncable.isTimeRangeLinked() ? "Unlink Worksheet Timeline" : "Link Worksheet Timeline",
@@ -1126,7 +1151,6 @@ public class MainViewController implements Initializable {
         return Optional.empty();
     }
 
-
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT:
@@ -1174,33 +1198,15 @@ public class MainViewController implements Initializable {
         // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
         Platform.runLater(() -> {
             try {
-                var charts = XYChartsWorksheetController.treeItemsAsChartList(rootItems, root);
+                var charts = treeItemsAsChartList(rootItems, root);
+                var title = StringUtils.ellipsize(rootItems.stream()
+                        .map(t -> t.getValue().getLegend())
+                        .collect(Collectors.joining(", ")), 50);
                 if (charts.isPresent()) {
-                    ZonedDateTime toDateTime = null;
-                    ZonedDateTime fromDateTime = null;
-                    Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
-                    for (Chart chart : charts.get()) {
-                        var range = chart.getInitialTimeRange();
-                        if (toDateTime == null || comparator.compare(range.getEnd(), toDateTime) > 0) {
-                            toDateTime = range.getEnd();
-                        }
-                        if (fromDateTime == null || comparator.compare(range.getBeginning(), fromDateTime) < 0) {
-                            fromDateTime = range.getBeginning();
-                        }
+                   for (var t : rootItems.stream().map(s-> s.getValue().getWorksheetClass()).distinct().collect(Collectors.toList())){
+                        var worksheet = WorksheetFactory.getInstance().createWorksheet(t, title, charts.get());
+                        editWorksheet(tabPane, worksheet);
                     }
-                    toDateTime = toDateTime != null ? toDateTime : ZonedDateTime.now();
-                    fromDateTime = fromDateTime != null ? fromDateTime : toDateTime.minusHours(24);
-                    var worksheet = new XYChartsWorksheet(
-                            StringUtils.ellipsize(rootItems.stream()
-                                    .map(t -> t.getValue().getLegend())
-                                    .collect(Collectors.joining(", ")), 50),
-                            charts.get(),
-                            toDateTime.getZone(),
-                            fromDateTime,
-                            toDateTime);
-
-                    worksheet.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());
-                    editWorksheet(tabPane, worksheet);
                 }
             } catch (Exception e) {
                 Dialogs.notifyException("Error adding bindings to new worksheet", e, root);

@@ -19,14 +19,11 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
+import eu.binjr.core.data.exceptions.DataAdapterException;
 import javafx.beans.property.BooleanProperty;
-import javafx.collections.FXCollections;
 
 import javax.xml.bind.annotation.XmlTransient;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.LinkedList;
+import java.util.Collection;
 
 public class LogWorksheet extends Worksheet {
 
@@ -58,6 +55,11 @@ public class LogWorksheet extends Worksheet {
 
     @Override
     public void close() {
+
+    }
+
+    @Override
+    public void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException {
 
     }
 

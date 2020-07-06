@@ -20,10 +20,13 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.navigation.NavigationHistory;
-import eu.binjr.core.controllers.XYChartsWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
+import eu.binjr.core.controllers.XYChartsWorksheetController;
+import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
+import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -35,10 +38,7 @@ import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -48,13 +48,12 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-@XmlRootElement(name = "TimeSeriesWorksheet")
 public class XYChartsWorksheet extends Worksheet implements Syncable {
     private static final Logger logger = LogManager.getLogger(XYChartsWorksheet.class);
-
+    private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
+    private transient final ChangeWatcher status;
     @IsDirtyable
     private ObservableList<Chart> charts;
-
     @IsDirtyable
     private Property<ZoneId> timeZone;
     @IsDirtyable
@@ -67,11 +66,8 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     private Property<Boolean> timeRangeLinked;
     @IsDirtyable
     private DoubleProperty dividerPosition;
-
-    private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient Property<Integer> selectedChart;
-    private transient final ChangeWatcher status;
-  //  private Class<? extends WorksheetController> controllerClass = XYChartsWorksheetController.class;
+    //  private Class<? extends WorksheetController> controllerClass = XYChartsWorksheetController.class;
 
     /**
      * Initializes a new instance of the {@link XYChartsWorksheet} class
@@ -205,19 +201,19 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     /**
      * The {@link ZoneId} used by the {@link XYChartsWorksheet} time series
      *
-     * @return An instance of {@link Property} for the {@link ZoneId} used by the {@link XYChartsWorksheet} time series
+     * @param timeZone the {@link ZoneId} used by the {@link XYChartsWorksheet} time series
      */
-    public Property<ZoneId> timeZoneProperty() {
-        return timeZone;
+    public void setTimeZone(ZoneId timeZone) {
+        this.timeZone.setValue(timeZone);
     }
 
     /**
      * The {@link ZoneId} used by the {@link XYChartsWorksheet} time series
      *
-     * @param timeZone the {@link ZoneId} used by the {@link XYChartsWorksheet} time series
+     * @return An instance of {@link Property} for the {@link ZoneId} used by the {@link XYChartsWorksheet} time series
      */
-    public void setTimeZone(ZoneId timeZone) {
-        this.timeZone.setValue(timeZone);
+    public Property<ZoneId> timeZoneProperty() {
+        return timeZone;
     }
 
     /**
@@ -233,19 +229,19 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     /**
      * The lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
      *
-     * @return An instance of {@link Property} for the lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
+     * @param fromDateTime the lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
      */
-    public Property<ZonedDateTime> fromDateTimeProperty() {
-        return fromDateTime;
+    public void setFromDateTime(ZonedDateTime fromDateTime) {
+        this.fromDateTime.setValue(fromDateTime);
     }
 
     /**
      * The lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
      *
-     * @param fromDateTime the lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
+     * @return An instance of {@link Property} for the lower bound of the time interval of the {@link XYChartsWorksheet}'s times series
      */
-    public void setFromDateTime(ZonedDateTime fromDateTime) {
-        this.fromDateTime.setValue(fromDateTime);
+    public Property<ZonedDateTime> fromDateTimeProperty() {
+        return fromDateTime;
     }
 
     /**
@@ -261,19 +257,19 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     /**
      * The upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
      *
-     * @return An instance of {@link Property} for the upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
+     * @param toDateTime the upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
      */
-    public Property<ZonedDateTime> toDateTimeProperty() {
-        return toDateTime;
+    public void setToDateTime(ZonedDateTime toDateTime) {
+        this.toDateTime.setValue(toDateTime);
     }
 
     /**
      * The upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
      *
-     * @param toDateTime the upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
+     * @return An instance of {@link Property} for the upper bound of the time interval of the {@link XYChartsWorksheet}'s times series
      */
-    public void setToDateTime(ZonedDateTime toDateTime) {
-        this.toDateTime.setValue(toDateTime);
+    public Property<ZonedDateTime> toDateTimeProperty() {
+        return toDateTime;
     }
 
     /**
@@ -287,15 +283,6 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     }
 
     /**
-     * The selectedChart property.
-     *
-     * @return the selectedChart property.
-     */
-    public Property<Integer> selectedChartProperty() {
-        return selectedChart;
-    }
-
-    /**
      * Sets  the worksheet's currently selected chart.
      *
      * @param selectedChart the worksheet's currently selected chart.
@@ -304,6 +291,14 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
         this.selectedChart.setValue(selectedChart);
     }
 
+    /**
+     * The selectedChart property.
+     *
+     * @return the selectedChart property.
+     */
+    public Property<Integer> selectedChartProperty() {
+        return selectedChart;
+    }
 
     /**
      * Returns all the {@link Chart} instance in the worksheet.
@@ -354,21 +349,21 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     }
 
     /**
-     * The chartLayout property.
-     *
-     * @return the chartLayout property.
-     */
-    public Property<ChartLayout> chartLayoutProperty() {
-        return chartLayout;
-    }
-
-    /**
      * Specify the way charts are laid out on the worksheet.
      *
      * @param chartLayout the way charts are laid out on the worksheet.
      */
     public void setChartLayout(ChartLayout chartLayout) {
         this.chartLayout.setValue(chartLayout);
+    }
+
+    /**
+     * The chartLayout property.
+     *
+     * @return the chartLayout property.
+     */
+    public Property<ChartLayout> chartLayoutProperty() {
+        return chartLayout;
     }
 
     @Override
@@ -392,16 +387,13 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
         return dividerPosition.getValue();
     }
 
-    public DoubleProperty dividerPositionProperty() {
-        return dividerPosition;
-    }
-
     public void setDividerPosition(Double dividerPosition) {
         this.dividerPosition.setValue(dividerPosition);
     }
 
-
-
+    public DoubleProperty dividerPositionProperty() {
+        return dividerPosition;
+    }
 
     @Transient
     public NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> getHistory() {
@@ -445,9 +437,50 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
         this.status.close();
     }
 
+    @Override
+    public void initWithBindings(String name, BindingsHierarchy... bindingsHierarchies) throws DataAdapterException {
+        this.charts.clear();
+        ZonedDateTime toDateTime = null;
+        ZonedDateTime fromDateTime = null;
+        Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
+        for (var bindingsHierarchy : bindingsHierarchies) {
+            if (bindingsHierarchy.getRoot() instanceof TimeSeriesBinding) {
+                TimeSeriesBinding binding = (TimeSeriesBinding) bindingsHierarchy.getRoot();
+                Chart chart = new Chart(
+                        binding.getLegend(),
+                        binding.getGraphType(),
+                        binding.getUnitName(),
+                        binding.getUnitPrefix());
 
-    // endregion
+                for (var b : bindingsHierarchy.getBindings()) {
+                    if (b instanceof TimeSeriesBinding) {
+                        TimeSeriesBinding tsb = (TimeSeriesBinding) b;
+                        chart.addSeries(TimeSeriesInfo.fromBinding(tsb));
+                    }
+                }
 
+                var range = chart.getInitialTimeRange();
+                if (toDateTime == null || comparator.compare(range.getEnd(), toDateTime) > 0) {
+                    toDateTime = range.getEnd();
+                }
+                if (fromDateTime == null || comparator.compare(range.getBeginning(), fromDateTime) < 0) {
+                    fromDateTime = range.getBeginning();
+                }
 
+                toDateTime = toDateTime != null ? toDateTime : ZonedDateTime.now();
+                fromDateTime = fromDateTime != null ? fromDateTime : toDateTime.minusHours(24);
+                this.setName(name);
+                this.charts.add(chart);
+                this.setTimeZone(toDateTime.getZone());
+                this.setFromDateTime(fromDateTime);
+                this.setToDateTime(toDateTime);
+            }
+        }
+        this.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());
+    }
 }
+
+
+
+
 

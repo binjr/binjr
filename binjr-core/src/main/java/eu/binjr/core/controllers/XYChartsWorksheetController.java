@@ -183,7 +183,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         return String.format("rgba(%d,%d,%d,%f)", Math.round(c.getRed() * 255), Math.round(c.getGreen() * 255), Math.round(c.getBlue() * 255), c.getOpacity());
     }
 
-    public static Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<SourceBinding>> treeItems, Node dlgRoot) {
+    private Optional<List<Chart>> treeItemsAsChartList(Collection<TreeItem<SourceBinding>> treeItems, Node dlgRoot) {
         var charts = new ArrayList<Chart>();
         var totalBindings = 0;
         for (var treeItem : treeItems) {

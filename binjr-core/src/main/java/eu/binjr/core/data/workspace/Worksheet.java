@@ -19,14 +19,16 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
+import eu.binjr.core.data.exceptions.DataAdapterException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.*;
+import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
+
 
 public abstract class Worksheet implements Dirtyable {
     protected static final AtomicInteger globalCounter = new AtomicInteger(0);
@@ -88,4 +90,6 @@ public abstract class Worksheet implements Dirtyable {
 
     @Override
     public abstract void close();
+
+    public abstract void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException;
 }
