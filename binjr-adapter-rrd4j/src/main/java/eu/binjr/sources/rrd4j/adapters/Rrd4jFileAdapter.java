@@ -54,9 +54,9 @@ import java.util.stream.Collectors;
 public class Rrd4jFileAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
     private final RrdDbPool rrdDbMap;
+    private final Rrd4jFileAdapterPreferences prefs = Rrd4jFileAdapterPreferences.getInstance();
     private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();
-    private final Rrd4jFileAdapterPreferences prefs =Rrd4jFileAdapterPreferences.getInstance();
 
     /**
      * Initialises a new instance of the {@link Rrd4jFileAdapter} class.
@@ -73,63 +73,47 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
         Path a = Paths.get("");
-        var factory =   RrdBackendFactory.getFactory(prefs.rrd4jBackend.get().toString());
-        logger.debug(()-> "Rrd backend factory= " + factory.getName());
-        rrdDbMap  = new RrdDbPool(factory);
+        var factory = RrdBackendFactory.getFactory(prefs.rrd4jBackend.get().toString());
+        logger.debug(() -> "Rrd backend factory= " + factory.getName());
+        rrdDbMap = new RrdDbPool(factory);
     }
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
-                new TimeSeriesBinding(
-                        "",
-                        "/",
-                        null,
-                        getSourceName(),
-                        UnitPrefixes.METRIC,
-                        ChartType.STACKED,
-                        "-",
-                        "/" + getSourceName(), this));
+                new TimeSeriesBinding.Builder()
+                        .withLabel(getSourceName())
+                        .withPath("/")
+                        .withAdapter(this)
+                        .build());
         for (Path rrdPath : rrdPaths) {
             try {
                 String rrdFileName = rrdPath.getFileName().toString();
-                FilterableTreeItem<SourceBinding> rrdNode = new FilterableTreeItem<>(new TimeSeriesBinding(
-                        rrdFileName,
-                        rrdFileName,
-                        null,
-                        rrdFileName,
-                        UnitPrefixes.METRIC,
-                        ChartType.STACKED,
-                        "-",
-                        tree.getValue().getTreeHierarchy() + "/" + rrdFileName,
-                        this));
+                FilterableTreeItem<SourceBinding> rrdNode = new FilterableTreeItem<>(
+                        new TimeSeriesBinding.Builder()
+                                .withLabel(rrdFileName)
+                                .withPath(rrdFileName)
+                                .withParent(tree.getValue())
+                                .withAdapter(this)
+                                .build());
                 RrdDb rrd = rrdDbMap.requestRrdDb(rrdPath.toUri());
-
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs())
                         .map(ArcDef::getConsolFun)
                         .collect(Collectors.toSet())) {
-                    FilterableTreeItem<SourceBinding> consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding(
-                            consolFun.toString(),
-                            rrdPath.resolve(consolFun.toString()).toString(),
-                            null,
-                            consolFun.toString(),
-                            UnitPrefixes.METRIC,
-                            ChartType.STACKED,
-                            "-",
-                            rrdNode.getValue().getTreeHierarchy() + "/" + consolFun.toString(),
-                            this));
+                    FilterableTreeItem<SourceBinding> consolFunNode = new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                            .withLabel(consolFun.toString())
+                            .withPath(rrdPath.resolve(consolFun.toString()).toString())
+                            .withParent(rrdNode.getValue())
+                            .withAdapter(this)
+                            .build());
                     rrdNode.getInternalChildren().add(consolFunNode);
                     for (String ds : rrd.getDsNames()) {
-                        consolFunNode.getInternalChildren().add(new TreeItem<>(new TimeSeriesBinding(
-                                ds,
-                                consolFunNode.getValue().getPath(),
-                                null,
-                                ds,
-                                UnitPrefixes.METRIC,
-                                ChartType.STACKED,
-                                "-",
-                                consolFunNode.getValue().getTreeHierarchy() + "/" + ds,
-                                this)));
+                        consolFunNode.getInternalChildren().add(new TreeItem<>(new TimeSeriesBinding.Builder()
+                                .withLabel(ds)
+                                .withPath(consolFunNode.getValue().getPath())
+                                .withParent(consolFunNode.getValue())
+                                .withAdapter(this)
+                                .build()));
                     }
                 }
                 tree.getInternalChildren().add(rrdNode);

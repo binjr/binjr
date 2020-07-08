@@ -74,13 +74,12 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
-    private final JrdsSeriesBindingFactory bindingFactory = new JrdsSeriesBindingFactory();
+    private final Gson gson;
     private CsvDecoder decoder;
     private String filter;
     private ZoneId zoneId;
     private String encoding;
     private JrdsTreeViewTab treeViewTab;
-    private final Gson gson;
 
     /**
      * Initialises a new instance of the {@link JrdsDataAdapter} class.
@@ -132,7 +131,12 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         try {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument(), filter), JsonJrdsTree.class);
             Map<String, JsonJrdsItem> m = Arrays.stream(t.items).collect(Collectors.toMap(o -> o.id, (o -> o)));
-            FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(bindingFactory.of("", getSourceName(), "/", this));
+            FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
+                    new JrdsBindingBuilder()
+                            .withLabel(getSourceName())
+                            .withPath("/")
+                            .withAdapter(this)
+                            .build());
             for (JsonJrdsItem branch : Arrays.stream(t.items)
                     .filter(jsonJrdsItem -> JRDS_TREE.equals(jsonJrdsItem.type) || JRDS_FILTER.equals(jsonJrdsItem.type))
                     .collect(Collectors.toList())) {
@@ -231,8 +235,13 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     private void attachNode(FilterableTreeItem<SourceBinding> tree, String id, Map<String, JsonJrdsItem> nodes) throws DataAdapterException {
         JsonJrdsItem n = nodes.get(id);
         String currentPath = normalizeId(n.id);
-        FilterableTreeItem<SourceBinding> newBranch = new FilterableTreeItem<>(bindingFactory.of(tree.getValue().getTreeHierarchy(), n.name, currentPath, this));
-
+        FilterableTreeItem<SourceBinding> newBranch = new FilterableTreeItem<>(
+                new JrdsBindingBuilder()
+                        .withParent(tree.getValue())
+                        .withLabel(n.name)
+                        .withPath(currentPath)
+                        .withAdapter(this)
+                        .build());
         if (JRDS_FILTER.equals(n.type)) {
             // add a dummy node so that the branch can be expanded
             newBranch.getInternalChildren().add(new FilterableTreeItem<>(null));
@@ -343,6 +352,12 @@ public class JrdsDataAdapter extends HttpDataAdapter {
         }
     }
 
+    private CsvDecoder decoderFactory(ZoneId zoneId) {
+        return new CsvDecoder(getEncoding(), DELIMITER,
+                DoubleTimeSeriesProcessor::new,
+                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
+    }
+
     private class GraphDescListener implements ChangeListener<Boolean> {
         private final String currentPath;
         private final FilterableTreeItem<SourceBinding> newBranch;
@@ -359,11 +374,22 @@ public class JrdsDataAdapter extends HttpDataAdapter {
             if (newValue) {
                 try {
                     Graphdesc graphdesc = getGraphDescriptor(currentPath);
-                    newBranch.setValue(bindingFactory.of(tree.getValue().getTreeHierarchy(), newBranch.getValue().getLegend(), graphdesc, currentPath, JrdsDataAdapter.this));
+                    newBranch.setValue(new JrdsBindingBuilder()
+                            .withGraphDesc(graphdesc)
+                            .withParent(tree.getValue())
+                            .withLegend(newBranch.getValue().getLegend())
+                            .withPath(currentPath)
+                            .withAdapter(JrdsDataAdapter.this)
+                            .build());
                     for (int i = 0; i < graphdesc.seriesDescList.size(); i++) {
                         String graphType = graphdesc.seriesDescList.get(i).graphType;
                         if (!"none".equalsIgnoreCase(graphType) && !"comment".equalsIgnoreCase(graphType)) {
-                            newBranch.getInternalChildren().add(new FilterableTreeItem<>(bindingFactory.of(newBranch.getValue().getTreeHierarchy(), graphdesc, i, currentPath, JrdsDataAdapter.this)));
+                            newBranch.getInternalChildren().add(new FilterableTreeItem<>((new JrdsBindingBuilder()
+                                    .withGraphDesc(graphdesc, i)
+                                    .withParent(newBranch.getValue())
+                                    .withPath(currentPath)
+                                    .withAdapter(JrdsDataAdapter.this)
+                                    .build())));
                         }
                     }
                     //remove dummy node
@@ -404,11 +430,5 @@ public class JrdsDataAdapter extends HttpDataAdapter {
                 }
             }
         }
-    }
-
-    private CsvDecoder decoderFactory(ZoneId zoneId) {
-        return new CsvDecoder(getEncoding(), DELIMITER,
-                DoubleTimeSeriesProcessor::new,
-                s -> ZonedDateTime.parse(s, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(zoneId)));
     }
 }

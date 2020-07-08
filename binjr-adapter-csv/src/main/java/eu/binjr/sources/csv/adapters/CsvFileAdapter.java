@@ -111,30 +111,23 @@ public class CsvFileAdapter extends BaseDataAdapter {
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
-                new TimeSeriesBinding(
-                        "",
-                        "/",
-                        null,
-                        getSourceName(),
-                        UnitPrefixes.METRIC,
-                        ChartType.STACKED,
-                        "-",
-                        "/" + getSourceName(), this));
+                new TimeSeriesBinding.Builder()
+                        .withLabel(getSourceName())
+                        .withPath("/")
+                        .withAdapter(this)
+                        .build());
         try (InputStream in = Files.newInputStream(csvPath)) {
             this.headers = csvDecoder.getDataColumnHeaders(in);
             for (int i = 0; i < headers.size(); i++) {
                 String columnIndex = Integer.toString(i + 1);
                 String header = headers.get(i).isBlank() ? "Column #" + columnIndex : headers.get(i);
-                SourceBinding b = new TimeSeriesBinding(
-                        columnIndex,
-                        columnIndex,
-                        null,
-                        header,
-                        UnitPrefixes.METRIC,
-                        ChartType.STACKED,
-                        "-",
-                        "/" + getSourceName() + "/" + header,
-                        this);
+                SourceBinding b = new TimeSeriesBinding.Builder()
+                        .withLabel(columnIndex)
+                        .withPath(columnIndex)
+                        .withLegend(header)
+                        .withParent(tree.getValue())
+                        .withAdapter(this)
+                        .build();
                 tree.getInternalChildren().add(new TreeItem<>(b));
             }
         } catch (IOException e) {

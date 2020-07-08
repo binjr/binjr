@@ -184,7 +184,7 @@ public class TimeSeriesBinding extends SourceBinding {
         private Color color = null;
         private UnitPrefixes prefix = UnitPrefixes.METRIC;
         private ChartType graphType = ChartType.STACKED;
-        private String unitName = "";
+        private String unitName = "-";
 
         public Builder withColor(Color color) {
             this.color = color;

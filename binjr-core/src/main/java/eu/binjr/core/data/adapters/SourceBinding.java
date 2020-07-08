@@ -134,14 +134,12 @@ public abstract class SourceBinding {
         private String label = "";
         private String path = "";
         private String legend = null;
-        private String treeHierarchy = "";
         private DataAdapter adapter;
-        private String parent = null;
+        private String parent = "";
 
         protected abstract B self();
 
         public B withAdapter(DataAdapter adapter) {
-
             this.adapter =adapter;
             return self();
         }
@@ -162,13 +160,8 @@ public abstract class SourceBinding {
         }
 
 
-        public B withHierarchy(String treeHierarchy) {
-            this.treeHierarchy = treeHierarchy;
-            return self();
-        }
-
-        public B withParent(String parent) {
-            this.parent = parent;
+        public B withParent(SourceBinding parent) {
+            this.parent = parent.getTreeHierarchy();
             return self();
         }
 
@@ -176,10 +169,7 @@ public abstract class SourceBinding {
             if (legend == null) {
                 legend = label;
             }
-            if (parent != null) {
-                treeHierarchy = parent + "/" + legend;
-            }
-            return construct(label, legend, path, treeHierarchy, adapter);
+            return construct(label, legend, path, parent + "/" + legend, adapter);
         }
 
         protected abstract T construct(String label, String legend, String path, String treeHierarchy, DataAdapter adapter);

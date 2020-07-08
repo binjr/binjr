@@ -29,7 +29,6 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
-import javafx.scene.control.TreeItem;
 import org.apache.http.NameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -56,8 +55,8 @@ import java.util.TreeMap;
 public class NetdataAdapter extends HttpDataAdapter {
     private static final Logger logger = LogManager.getLogger(NetdataAdapter.class);
     private static final char DELIMITER = ',';
-    private ZoneId zoneId;
     private final Gson jsonParser;
+    private ZoneId zoneId;
     private Decoder decoder;
     private UserPreferences userPrefs = UserPreferences.getInstance();
     private NetdataAdapterPreferences adapterPrefs = (NetdataAdapterPreferences) getAdapterInfo().getPreferences();
@@ -125,11 +124,12 @@ public class NetdataAdapter extends HttpDataAdapter {
                 craftRequestUri(ChartSummary.ENDPOINT),
                 response -> jsonParser.fromJson(EntityUtils.toString(response.getEntity()), ChartSummary.class)
         );
-        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
-                .withAdapter(this)
-                .withLabel(getSourceName())
-                .withParent("")
-                .withPath("/").build());
+        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
+                new TimeSeriesBinding.Builder()
+                        .withAdapter(this)
+                        .withLabel(getSourceName())
+                        .withPath("/")
+                        .build());
         Map<String, FilterableTreeItem<SourceBinding>> types = new TreeMap<>();
         chartSummary.getCharts().forEach((s, chart) -> {
             var categoryName = getCategoryName(chart);
@@ -138,9 +138,9 @@ public class NetdataAdapter extends HttpDataAdapter {
                             .withAdapter(this)
                             .withPath("")
                             .withLabel(categoryName)
-                            .withParent(tree.getValue().getTreeHierarchy())
+                            .withParent(tree.getValue())
                             .build()));
-           var branch = new FilterableTreeItem<SourceBinding>(
+            var branch = new FilterableTreeItem<SourceBinding>(
                     new TimeSeriesBinding.Builder()
                             .withAdapter(this)
                             .withPath(chart.getDataUrl())
@@ -148,14 +148,14 @@ public class NetdataAdapter extends HttpDataAdapter {
                             .withGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
                             .withLegend(chart.getTitle())
                             .withUnitName(chart.getUnits())
-                            .withParent(categoryBranch.getValue().getTreeHierarchy())
+                            .withParent(categoryBranch.getValue())
                             .build());
             chart.getDimensions().forEach((s1, chartDimensions) -> {
                 branch.getInternalChildren().add(0, new FilterableTreeItem<>(
                         new TimeSeriesBinding.Builder()
                                 .withLabel(chartDimensions.getName())
                                 .withAdapter(this)
-                                .withParent(branch.getValue().getTreeHierarchy())
+                                .withParent(branch.getValue())
                                 .withUnitName(chart.getUnits())
                                 .withGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
                                 .withPath(chart.getDataUrl())
