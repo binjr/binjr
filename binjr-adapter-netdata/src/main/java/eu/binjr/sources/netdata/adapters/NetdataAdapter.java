@@ -29,6 +29,7 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
+import javafx.scene.control.TreeItem;
 import org.apache.http.NameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.apache.logging.log4j.LogManager;
@@ -124,36 +125,40 @@ public class NetdataAdapter extends HttpDataAdapter {
                 craftRequestUri(ChartSummary.ENDPOINT),
                 response -> jsonParser.fromJson(EntityUtils.toString(response.getEntity()), ChartSummary.class)
         );
-        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new TimeSeriesBindingBuilder(this)
-                .setLabel(getSourceName())
-                .setParent("")
-                .setPath("/").build());
+        FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(new TimeSeriesBinding.Builder()
+                .withAdapter(this)
+                .withLabel(getSourceName())
+                .withParent("")
+                .withPath("/").build());
         Map<String, FilterableTreeItem<SourceBinding>> types = new TreeMap<>();
         chartSummary.getCharts().forEach((s, chart) -> {
             var categoryName = getCategoryName(chart);
             var categoryBranch = types.computeIfAbsent(categoryName, s1 -> new FilterableTreeItem<>(
-                    new TimeSeriesBindingBuilder(this)
-                            .setPath("")
-                            .setLabel(categoryName)
-                            .setParent(tree.getValue().getTreeHierarchy())
+                    new TimeSeriesBinding.Builder()
+                            .withAdapter(this)
+                            .withPath("")
+                            .withLabel(categoryName)
+                            .withParent(tree.getValue().getTreeHierarchy())
                             .build()));
-            var branch = new FilterableTreeItem<>(
-                    new TimeSeriesBindingBuilder(this)
-                            .setPath(chart.getDataUrl())
-                            .setLabel(chart.getName())
-                            .setGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
-                            .setLegend(chart.getTitle())
-                            .setUnitName(chart.getUnits())
-                            .setParent(categoryBranch.getValue().getTreeHierarchy())
+           var branch = new FilterableTreeItem<SourceBinding>(
+                    new TimeSeriesBinding.Builder()
+                            .withAdapter(this)
+                            .withPath(chart.getDataUrl())
+                            .withLabel(chart.getName())
+                            .withGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
+                            .withLegend(chart.getTitle())
+                            .withUnitName(chart.getUnits())
+                            .withParent(categoryBranch.getValue().getTreeHierarchy())
                             .build());
             chart.getDimensions().forEach((s1, chartDimensions) -> {
                 branch.getInternalChildren().add(0, new FilterableTreeItem<>(
-                        new TimeSeriesBindingBuilder(this)
-                                .setLabel(chartDimensions.getName())
-                                .setParent(branch.getValue().getTreeHierarchy())
-                                .setUnitName(chart.getUnits())
-                                .setGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
-                                .setPath(chart.getDataUrl())
+                        new TimeSeriesBinding.Builder()
+                                .withLabel(chartDimensions.getName())
+                                .withAdapter(this)
+                                .withParent(branch.getValue().getTreeHierarchy())
+                                .withUnitName(chart.getUnits())
+                                .withGraphType(ChartType.valueOrDefault(chart.getChartType().name(), ChartType.STACKED))
+                                .withPath(chart.getDataUrl())
                                 .build()));
             });
             categoryBranch.getInternalChildren().add(branch);

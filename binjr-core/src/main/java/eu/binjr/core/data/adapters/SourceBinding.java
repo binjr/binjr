@@ -129,4 +129,59 @@ public abstract class SourceBinding {
     }
 
     public abstract Class<? extends Worksheet> getWorksheetClass();
+
+    public abstract static class Builder<T extends SourceBinding, B extends Builder<T,B>> {
+        private String label = "";
+        private String path = "";
+        private String legend = null;
+        private String treeHierarchy = "";
+        private DataAdapter adapter;
+        private String parent = null;
+
+        protected abstract B self();
+
+        public B withAdapter(DataAdapter adapter) {
+
+            this.adapter =adapter;
+            return self();
+        }
+
+        public B withLabel(String label) {
+            this.label = label;
+            return self();
+        }
+
+        public B withPath(String path) {
+            this.path = path;
+            return self();
+        }
+
+        public B withLegend(String legend) {
+            this.legend = legend;
+            return self();
+        }
+
+
+        public B withHierarchy(String treeHierarchy) {
+            this.treeHierarchy = treeHierarchy;
+            return self();
+        }
+
+        public B withParent(String parent) {
+            this.parent = parent;
+            return self();
+        }
+
+        public T build()        {
+            if (legend == null) {
+                legend = label;
+            }
+            if (parent != null) {
+                treeHierarchy = parent + "/" + legend;
+            }
+            return construct(label, legend, path, treeHierarchy, adapter);
+        }
+
+        protected abstract T construct(String label, String legend, String path, String treeHierarchy, DataAdapter adapter);
+    }
 }

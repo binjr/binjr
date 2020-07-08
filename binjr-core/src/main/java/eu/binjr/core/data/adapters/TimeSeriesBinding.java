@@ -180,4 +180,40 @@ public class TimeSeriesBinding extends SourceBinding {
         return hashVal;
     }
 
+    public static class Builder extends SourceBinding.Builder<TimeSeriesBinding, TimeSeriesBinding.Builder> {
+        private Color color = null;
+        private UnitPrefixes prefix = UnitPrefixes.METRIC;
+        private ChartType graphType = ChartType.STACKED;
+        private String unitName = "";
+
+        public Builder withColor(Color color) {
+            this.color = color;
+            return self();
+        }
+
+        public Builder withPrefix(UnitPrefixes prefix) {
+            this.prefix = prefix;
+            return self();
+        }
+
+        public Builder withGraphType(ChartType graphType) {
+            this.graphType = graphType;
+            return self();
+        }
+
+        public Builder withUnitName(String unitName) {
+            this.unitName = unitName;
+            return self();
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+
+        @Override
+        protected TimeSeriesBinding construct(String label, String legend, String path, String treeHierarchy, DataAdapter adapter) {
+            return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, treeHierarchy, adapter);
+        }
+    }
 }
