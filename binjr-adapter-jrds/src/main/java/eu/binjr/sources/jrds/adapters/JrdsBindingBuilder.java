@@ -23,8 +23,6 @@ import javafx.scene.paint.Color;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.function.ObjIntConsumer;
-
 public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
     private static final Logger logger = LogManager.getLogger(JrdsBindingBuilder.class);
 
