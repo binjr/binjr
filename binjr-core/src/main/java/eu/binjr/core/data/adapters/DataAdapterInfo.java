@@ -127,6 +127,9 @@ public interface DataAdapterInfo {
      */
     public PreferenceFactory getPreferences();
 
+    default Version getApiLevel() {
+        return Version.emptyVersion;
+    }
 
     /**
      * Returns the source locality for the adapter.

@@ -26,6 +26,7 @@ import java.net.URLClassLoader;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.function.Predicate;
 
 /**
  * A collection of helper methods to work with {@link ServiceLoader}

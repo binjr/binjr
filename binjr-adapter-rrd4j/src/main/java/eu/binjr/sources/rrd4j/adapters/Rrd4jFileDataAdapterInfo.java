@@ -39,6 +39,7 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
                 Rrd4jFileAdapter.class,
                 Rrd4jFileAdapterDialog.class,
                 Rrd4jFileAdapterPreferences.getInstance(),
-                SourceLocality.LOCAL);
+                SourceLocality.LOCAL,
+                AppEnvironment.PLUGIN_API_LEVEL);
     }
 }

@@ -38,6 +38,7 @@ public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 JrdsDataAdapter.class,
                 JrdsAdapterDialog.class,
-                SourceLocality.REMOTE);
+                SourceLocality.REMOTE,
+                AppEnvironment.PLUGIN_API_LEVEL);
     }
 }

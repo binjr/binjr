@@ -38,6 +38,7 @@ public class CsvFileDataAdapterInfo extends BaseDataAdapterInfo {
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 CsvFileAdapter.class,
                 CsvFileAdapterDialog.class,
-                SourceLocality.LOCAL);
+                SourceLocality.LOCAL,
+                AppEnvironment.PLUGIN_API_LEVEL);
     }
 }

@@ -48,22 +48,14 @@ public class AppEnvironment {
     public static final String HTTP_WWW_BINJR_EU = "https://binjr.eu";
     public static final String HTTP_BINJR_WIKI = "https://binjr.eu/documentation/user_guide/main/";
     public static final String BINJR_PUBLIC_KEY_URL = "https://binjr.eu/openpgpkey/binjr_dev_pub_keys.asc";
-    public static final byte[] BINJR_PUBLIC_FINGER_PRINT = new byte[]{
-            Integer.decode("0xE3").byteValue(), Integer.decode("0xD2").byteValue(),
-            Integer.decode("0xF8").byteValue(), Integer.decode("0x00").byteValue(),
-            Integer.decode("0xBE").byteValue(), Integer.decode("0x2B").byteValue(),
-            Integer.decode("0x44").byteValue(), Integer.decode("0xE5").byteValue(),
-            Integer.decode("0x97").byteValue(), Integer.decode("0x44").byteValue(),
-            Integer.decode("0x7F").byteValue(), Integer.decode("0x29").byteValue(),
-            Integer.decode("0x41").byteValue(), Integer.decode("0x2E").byteValue(),
-            Integer.decode("0xC8").byteValue(), Integer.decode("0xA8").byteValue(),
-            Integer.decode("0x54").byteValue(), Integer.decode("0x00").byteValue(),
-            Integer.decode("0xAC").byteValue(), Integer.decode("0x3F").byteValue()
-    };
+    public static final byte[] BINJR_PUBLIC_FINGER_PRINT = decode(
+            "0xE3", "0xD2", "0xF8", "0x00", "0xBE", "0x2B", "0x44", "0xE5", "0x97", "0x44",
+            "0x7F", "0x29", "0x41", "0x2E", "0xC8", "0xA8", "0x54", "0x00", "0xAC", "0x3F");
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
     public static final String PORTABLE_PROPERTY = "binjr.portable";
-
+    public static final Version MINIMUM_PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
+    public static final Version PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
     private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);
@@ -96,6 +88,15 @@ public class AppEnvironment {
      */
     public static AppEnvironment getInstance() {
         return EnvironmentHolder.instance;
+    }
+
+    private static byte[] decode(String... strings) {
+        int len = strings.length;
+        byte[] bytes = new byte[len];
+        for (int i = 0; i < len; i++) {
+            bytes[i] = Integer.decode(strings[i]).byteValue();
+        }
+        return bytes;
     }
 
     /**
@@ -445,15 +446,17 @@ public class AppEnvironment {
         return packaging.getValue();
     }
 
-    public Property<AppPackaging> packagingProperty() {
-        return packaging;
-    }
-
     public void setPackaging(AppPackaging value) {
         packaging.setValue(value);
+    }
+
+    public Property<AppPackaging> packagingProperty() {
+        return packaging;
     }
 
     private static class EnvironmentHolder {
         private final static AppEnvironment instance = new AppEnvironment();
     }
+
+
 }

@@ -39,6 +39,7 @@ public class NetdataAdapterInfo extends BaseDataAdapterInfo {
                 NetdataAdapter.class,
                 NetdataAdapterDialog.class,
                 NetdataAdapterPreferences.getInstance(),
-                SourceLocality.REMOTE);
+                SourceLocality.REMOTE,
+                AppEnvironment.PLUGIN_API_LEVEL);
     }
 }

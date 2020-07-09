@@ -40,9 +40,10 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final String siteUrl;
     private final Class<? extends DataAdapter> adapterClass;
     private final Class<? extends Dialog<DataAdapter>> adapterDialog;
-    private BooleanProperty enabled = new SimpleBooleanProperty(true);
+    private final Version apiLevel;
     private final DataAdapterPreferences adapterPreferences;
     private final SourceLocality sourceLocality;
+    private BooleanProperty enabled = new SimpleBooleanProperty(true);
 
     protected BaseDataAdapterInfo(String name,
                                   String description,
@@ -50,7 +51,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String license,
                                   String siteUrl,
                                   Class<? extends DataAdapter> adapterClass) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, null, null, null);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, null, null, null, null);
     }
 
     protected BaseDataAdapterInfo(String name,
@@ -60,7 +61,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String siteUrl,
                                   Class<? extends DataAdapter> adapterClass,
                                   Class<? extends Dialog<DataAdapter>> dialogClass) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, null);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, null, null);
     }
 
     protected BaseDataAdapterInfo(String name,
@@ -71,7 +72,19 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   Class<? extends DataAdapter> adapterClass,
                                   Class<? extends Dialog<DataAdapter>> dialogClass,
                                   SourceLocality sourceLocality) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, sourceLocality);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, sourceLocality, null);
+    }
+
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  SourceLocality sourceLocality,
+                                  Version apiLevel) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, sourceLocality, apiLevel);
     }
 
     protected BaseDataAdapterInfo(String name,
@@ -80,7 +93,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String license, String siteUrl,
                                   Class<? extends DataAdapter> adapterClass,
                                   DataAdapterPreferences preferences) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, null, preferences, null);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, null, preferences, null, null);
     }
 
     protected BaseDataAdapterInfo(String name,
@@ -91,7 +104,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   Class<? extends DataAdapter> adapterClass,
                                   Class<? extends Dialog<DataAdapter>> dialogClass,
                                   DataAdapterPreferences preferences) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, null);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, null, null);
     }
 
     protected BaseDataAdapterInfo(String name,
@@ -103,7 +116,33 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   Class<? extends Dialog<DataAdapter>> dialogClass,
                                   DataAdapterPreferences preferences,
                                   SourceLocality sourceLocality) {
-        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality);
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
+    }
+
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  DataAdapterPreferences preferences,
+                                  SourceLocality sourceLocality,
+                                  Version apiLevel) {
+        this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, apiLevel);
+    }
+
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  Version version,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  DataAdapterPreferences preferences,
+                                  SourceLocality sourceLocality) {
+        this(name, description, version, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
     }
 
     /**
@@ -128,7 +167,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   Class<? extends DataAdapter> adapterClass,
                                   Class<? extends Dialog<DataAdapter>> dialogClass,
                                   DataAdapterPreferences preferences,
-                                  SourceLocality sourceLocality) {
+                                  SourceLocality sourceLocality,
+                                  Version apiLevel) {
         Objects.requireNonNull(name);
         Objects.requireNonNull(description);
         Objects.requireNonNull(copyright);
@@ -144,10 +184,15 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this.adapterClass = adapterClass;
         this.adapterDialog = dialogClass;
         if (sourceLocality == null) {
-            sourceLocality = SourceLocality.UNKNOWN;
+            this.sourceLocality = SourceLocality.UNKNOWN;
+        } else {
+            this.sourceLocality = sourceLocality;
         }
-        this.sourceLocality = sourceLocality;
-
+        if (apiLevel == null) {
+            this.apiLevel = Version.emptyVersion;
+        } else {
+            this.apiLevel = apiLevel;
+        }
         if (version == null) {
             this.version = AppEnvironment.getInstance().getVersion(adapterClass);
         } else {
@@ -256,5 +301,15 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     @Override
     public String getSiteUrl() {
         return siteUrl;
+    }
+
+    @Override
+    public Version getApiLevel() {
+        return this.apiLevel;
+    }
+
+    @Override
+    public SourceLocality getSourceLocality() {
+        return this.sourceLocality;
     }
 }

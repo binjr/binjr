@@ -21,6 +21,7 @@ import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.Node;
 import javafx.scene.control.Dialog;
@@ -40,10 +41,6 @@ public class DataAdapterFactory {
     private static final Logger logger = LogManager.getLogger(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters;
 
-    private static class DataAdapterFactoryHolder {
-        private static final DataAdapterFactory instance = new DataAdapterFactory();
-    }
-
     /**
      * Initializes a new instance if the {@link DataAdapterFactory} class.
      */
@@ -54,7 +51,23 @@ public class DataAdapterFactory {
             for (var dataAdapterInfo : ServiceLoaderHelper.load(DataAdapterInfo.class,
                     UserPreferences.getInstance().pluginsLocation.get(),
                     UserPreferences.getInstance().loadPluginsFromExternalLocation.get())) {
-                registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
+                if (dataAdapterInfo.getApiLevel().compareTo(AppEnvironment.MINIMUM_PLUGIN_API_LEVEL) < 0) {
+                    logger.warn("Cannot load plugin " +
+                            dataAdapterInfo.getName() +
+                            ": Its target API level (" +
+                            dataAdapterInfo.getApiLevel() +
+                            ") is less than the minimum required (" +
+                            AppEnvironment.MINIMUM_PLUGIN_API_LEVEL + ")");
+                } else if (dataAdapterInfo.getApiLevel().compareTo(AppEnvironment.PLUGIN_API_LEVEL) > 0) {
+                    logger.warn("Cannot load plugin " +
+                            dataAdapterInfo.getName() +
+                            ": Its target API level (" +
+                            dataAdapterInfo.getApiLevel() +
+                            ") is higher than this version's level (" +
+                            AppEnvironment.PLUGIN_API_LEVEL + ")");
+                } else {
+                    registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
+                }
             }
         } catch (Throwable e) {
             logger.error("Error loading adapters", e);
@@ -159,5 +172,9 @@ public class DataAdapterFactory {
      */
     public DataAdapterPreferences getAdapterPreferences(String key) throws NoAdapterFoundException {
         return (DataAdapterPreferences) getDataAdapterInfo(key).getPreferences();
+    }
+
+    private static class DataAdapterFactoryHolder {
+        private static final DataAdapterFactory instance = new DataAdapterFactory();
     }
 }
