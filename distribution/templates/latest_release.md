@@ -2,7 +2,7 @@
 
 These bundles contain all dependencies and runtime components needed to run binjr.   
 They also include support for the following data sources: 
-[JRDS](https://github.com/fbacchella/jrds), [Netdata](https://www.netdata.cloud), RDD Files and CSV files.
+[JRDS](https://github.com/fbacchella/jrds), [Netdata](https://www.netdata.cloud), RRD Files and CSV files.
 
 The latest available version is ${version}, released on ${releaseDate}.  
 
@@ -31,7 +31,7 @@ Complete release information can be found in the [change log](CHANGELOG.md).
 
 ## Installable bundles
 
-Installable bundles integrates with the host OS to provide menu shortcuts, file associations and per user settings.
+Installable bundles integrate with the host OS to provide menu shortcuts, file associations and per user settings.
 
 |Version     | Operating System       |  Architecture        |  Download  | |
 |----------|----------|----------|------|----|
