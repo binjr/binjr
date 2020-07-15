@@ -27,6 +27,8 @@ dependencies {
     api 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
     api "org.bouncycastle:bcpg-jdk15on:1.65"
     // Only to prepare POM for Maven central upload
+    api "org.openjfx:javafx-base:$OPENJFX_VERSION"
+    api "org.openjfx:javafx-graphics:$OPENJFX_VERSION"
     api "org.openjfx:javafx-controls:$OPENJFX_VERSION"
     api "org.openjfx:javafx-fxml:$OPENJFX_VERSION"
     api "org.openjfx:javafx-swing:$OPENJFX_VERSION"
