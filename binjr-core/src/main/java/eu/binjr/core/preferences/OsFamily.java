@@ -38,9 +38,5 @@ public enum OsFamily {
     public String getPlatformClassifier() {
         return platformClassifier;
     }
-
-//    public String getBundleExtension() {
-//        return bundleExtention;
-//    }
 }
 

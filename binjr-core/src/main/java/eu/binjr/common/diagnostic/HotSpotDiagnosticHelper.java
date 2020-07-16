@@ -22,9 +22,20 @@ import com.sun.management.VMOption;
 import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
 
-public interface HotSpotDiagnostic {
+public interface HotSpotDiagnosticHelper {
     HotSpotDiagnosticMXBean HOTSPOT_DIAGNOSTIC = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
+
+    static String dumpVmOptions() throws DiagnosticException{
+        return "Hotspot VM Options\n" + listOption()
+                .stream()
+                .map(vmOption -> String.format("%s=%s (%s)",
+                        vmOption.getName(),
+                        vmOption.getValue(),
+                        vmOption.getOrigin()))
+                .collect(Collectors.joining("\n"));
+    }
 
     static List<VMOption> listOption() throws DiagnosticException {
         try {

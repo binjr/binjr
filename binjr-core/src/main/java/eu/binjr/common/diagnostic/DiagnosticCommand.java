@@ -16,11 +16,14 @@
 
 package eu.binjr.common.diagnostic;
 
+import eu.binjr.core.preferences.AppEnvironment;
+
 import javax.management.JMX;
 import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
+import java.nio.file.Path;
 import java.util.function.Supplier;
 
 public interface DiagnosticCommand {
@@ -81,6 +84,79 @@ public interface DiagnosticCommand {
             throw new DiagnosticException("Failed to invoke diagnostic command help", t);
         }
     }
+
+    static void dumpHeap(Path path) throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                HotSpotDiagnosticHelper.dumpHeap(path);
+                break;
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+    }
+
+    static Path getHeapDumpPath() throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                return HotSpotDiagnosticHelper.getHeapDumpPath();
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+
+    }
+
+    static void setHeapDumpPath(Path path) throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                HotSpotDiagnosticHelper.setHeapDumpPath(path);
+                break;
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+    }
+
+    static boolean getHeapDumpOnOutOfMemoryError() throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                return HotSpotDiagnosticHelper.getHeapDumpOnOutOfMemoryError();
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+    }
+
+    static void setHeapDumpOnOutOfMemoryError(boolean value) throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                HotSpotDiagnosticHelper.setHeapDumpOnOutOfMemoryError(value);
+                break;
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+    }
+
+    static String dumpVmOptions() throws DiagnosticException {
+        switch (AppEnvironment.getInstance().getRunningJvm()) {
+            case HOTSPOT:
+                return HotSpotDiagnosticHelper.dumpVmOptions();
+            case OPENJ9:
+            case UNSUPPORTED:
+            default:
+                throw new UnavailableDiagnosticFeatureException();
+        }
+    }
+
+
+
 
     String threadPrint(String... args);
 

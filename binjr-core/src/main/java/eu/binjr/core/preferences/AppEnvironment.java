@@ -16,7 +16,11 @@
 
 package eu.binjr.core.preferences;
 
+import eu.binjr.common.diagnostic.DiagnosticException;
+import eu.binjr.common.diagnostic.HotSpotDiagnosticHelper;
+import eu.binjr.common.function.CheckedConsumer;
 import eu.binjr.common.logging.Log4j2Level;
+import eu.binjr.common.preferences.Preference;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
@@ -33,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
@@ -422,6 +427,21 @@ public class AppEnvironment {
         return signatureVerificationDisabled;
     }
 
+    public JvmImplementation getRunningJvm() {
+        String vmName = System.getProperty("java.vm.name");
+        if (vmName != null) {
+            if (vmName.toLowerCase(Locale.US).contains("OpenJDK".toLowerCase(Locale.US)) ||
+                    vmName.toLowerCase(Locale.US).contains("Hotspot".toLowerCase(Locale.US))) {
+                return JvmImplementation.HOTSPOT;
+            }
+            if (vmName.toLowerCase(Locale.US).contains("OpenJ9".toLowerCase(Locale.US))) {
+                return JvmImplementation.OPENJ9;
+            }
+        }
+        return JvmImplementation.UNSUPPORTED;
+
+    }
+
     private String getHeapStats() {
         Runtime rt = Runtime.getRuntime();
         double maxMB = rt.maxMemory() / 1024.0 / 1024.0;
@@ -458,5 +478,37 @@ public class AppEnvironment {
         private final static AppEnvironment instance = new AppEnvironment();
     }
 
+    public void bindHeapDumpPreferences() {
+        try {
+            switch (AppEnvironment.getInstance().getRunningJvm()) {
+                case HOTSPOT:
+                    bindPrefToVmOption(UserPreferences.getInstance().heapDumpOnOutOfMemoryError, HotSpotDiagnosticHelper::setHeapDumpOnOutOfMemoryError);
+                    bindPrefToVmOption(UserPreferences.getInstance().heapDumpPath, HotSpotDiagnosticHelper::setHeapDumpPath);
+                    break;
+                case OPENJ9:
+                case UNSUPPORTED:
+                default:
+                    logger.debug("This diagnostic feature is not supported");
+            }
+        } catch (Throwable e) {
+            logger.error("Failed to bind heap dump preferences" + e.getMessage());
+            logger.debug(e);
+        }
+    }
+
+    private <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
+        try {
+            optionSetter.accept(pref.get());
+        } catch (DiagnosticException e) {
+            logger.error(e.getMessage(), e);
+        }
+        pref.property().addListener((val, oldVal, newVal) -> {
+            try {
+                optionSetter.accept(newVal);
+            } catch (DiagnosticException e) {
+                logger.error(e.getMessage(), e);
+            }
+        });
+    }
 
 }

@@ -1,0 +1,1 @@
+* _[New]_ binjr can now be run under the Eclipse OpenJ9 JVM

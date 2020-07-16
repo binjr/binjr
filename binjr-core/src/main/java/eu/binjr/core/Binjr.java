@@ -17,7 +17,8 @@
 package eu.binjr.core;
 
 import eu.binjr.common.diagnostic.DiagnosticException;
-import eu.binjr.common.diagnostic.HotSpotDiagnostic;
+
+
 import eu.binjr.common.function.CheckedConsumer;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
@@ -126,24 +127,8 @@ public class Binjr extends Application {
             System.setProperty("sun.security.jgss.native", "true");
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-        bindPrefToVmOption(UserPreferences.getInstance().heapDumpOnOutOfMemoryError, HotSpotDiagnostic::setHeapDumpOnOutOfMemoryError);
-        bindPrefToVmOption(UserPreferences.getInstance().heapDumpPath, HotSpotDiagnostic::setHeapDumpPath);
+       AppEnvironment.getInstance().bindHeapDumpPreferences();
         launch(args);
-    }
-
-    private static <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
-        try {
-            optionSetter.accept(pref.get());
-        } catch (DiagnosticException e) {
-            logger.error(e.getMessage(), e);
-        }
-        pref.property().addListener((val, oldVal, newVal) -> {
-            try {
-                optionSetter.accept(newVal);
-            } catch (DiagnosticException e) {
-                logger.error(e.getMessage(), e);
-            }
-        });
     }
 
     @Override

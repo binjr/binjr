@@ -18,7 +18,6 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
-import eu.binjr.common.diagnostic.HotSpotDiagnostic;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.logging.Log4j2Level;
@@ -27,16 +26,21 @@ import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.JvmImplementation;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
@@ -65,6 +69,8 @@ public class OutputConsoleController implements Initializable {
     public VBox root;
     public PropertySheet preferenceEditor;
     @FXML
+    private MenuButton debugMenuButton;
+    @FXML
     private ListView<Text> textOutput;
     @FXML
     private ChoiceBox<Log4j2Level> logLevelChoice;
@@ -73,6 +79,7 @@ public class OutputConsoleController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        populateDebugCommandMenu();
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter());
         consoleMaxLinesText.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(UserPreferences.getInstance().consoleMaxLineCapacity.property());
@@ -284,17 +291,13 @@ public class OutputConsoleController implements Initializable {
 
     public void handleListHotspotVmOptions(ActionEvent actionEvent) {
         try {
-            Binjr.runtimeDebuggingFeatures.debug("Hotspot VM Options\n" + HotSpotDiagnostic.listOption()
-                    .stream()
-                    .map(vmOption -> String.format("%s=%s (%s)",
-                            vmOption.getName(),
-                            vmOption.getValue(),
-                            vmOption.getOrigin()))
-                    .collect(Collectors.joining("\n")));
-        } catch (DiagnosticException e) {
-            logger.error("Error attempting to list Hotspot VM options", e);
+           DiagnosticCommand.dumpVmOptions();
+        } catch (Exception e) {
+            Dialogs.notifyException("Error attempting to list Hotspot VM options: "+ e.getMessage(), e);
         }
     }
+
+
 
     public void handleDebugDumpHeap(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
@@ -305,11 +308,42 @@ public class OutputConsoleController implements Initializable {
         if (exportPath != null) {
             try {
                 Files.deleteIfExists(exportPath.toPath());
-                HotSpotDiagnostic.dumpHeap(exportPath.toPath());
+                DiagnosticCommand.dumpHeap(exportPath.toPath());
                 Binjr.runtimeDebuggingFeatures.debug("JVM's heap successfully dumped to " + exportPath.toString());
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while dumping JVM's heap: " + e.getMessage(), e, root);
             }
+        }
+    }
+
+    private void populateDebugCommandMenu(){
+        addMenuItem(debugMenuButton, "Dump Heap Stats", "debug-low-icon",this::handleDebugDumpHeapStats, false);
+        addMenuItem(debugMenuButton, "Dump VM Flags", "debug-low-icon",this::handleDebugDumpVmFlags, true);
+        addMenuItem(debugMenuButton, "Dump VM Command Line", "debug-low-icon",this::handleDebugDumpVmCommandLine, true);
+        addMenuItem(debugMenuButton, "Dump VM System Properties", "debug-low-icon",this::handleDebugDumpVmSystemProperties, true);
+
+        addMenuItem(debugMenuButton, "Run GC", "debug-med-icon",this::handleDebugForceGC, false);
+        addMenuItem(debugMenuButton, "Run Finalization", "debug-med-icon",this::handleDebugRunFinalization, false);
+        addMenuItem(debugMenuButton, "List Hotspot VM Options", "debug-med-icon",this::handleListHotspotVmOptions, true);
+        addMenuItem(debugMenuButton, "Export User History", "debug-med-icon",this::handleExportUserHistory, false);
+        addMenuItem(debugMenuButton, "Import User History", "debug-med-icon",this::handleImportUserHistory, false);
+
+        addMenuItem(debugMenuButton, "Dump Threads Stacks", "debug-high-icon",this::handleDebugDumpThreadsStacks, true);
+        addMenuItem(debugMenuButton, "Dump GC Class Histogram", "debug-high-icon",this::handleDebugDumpClassHistogram, true);
+        addMenuItem(debugMenuButton, "Dump Heap", "debug-high-icon",this::handleDebugDumpHeap, true);
+    }
+
+    private void addMenuItem(MenuButton menu, String text, String iconclass, EventHandler<ActionEvent> actionHandler, boolean hotspotOnly){
+        if (!hotspotOnly || AppEnvironment.getInstance().getRunningJvm() == JvmImplementation.HOTSPOT) {
+            var m = new MenuItem();
+            var r = new Region();
+            r.getStyleClass().add(iconclass);
+            var h = new HBox(r);
+            h.getStyleClass().add("icon-container");
+            m.setGraphic(h);
+            m.setText(text);
+            m.setOnAction(actionHandler);
+            menu.getItems().add(m);
         }
     }
 }
