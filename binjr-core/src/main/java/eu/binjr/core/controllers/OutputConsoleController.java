@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -291,7 +291,7 @@ public class OutputConsoleController implements Initializable {
 
     public void handleListHotspotVmOptions(ActionEvent actionEvent) {
         try {
-           DiagnosticCommand.dumpVmOptions();
+            Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmOptions());
         } catch (Exception e) {
             Dialogs.notifyException("Error attempting to list Hotspot VM options: "+ e.getMessage(), e);
         }

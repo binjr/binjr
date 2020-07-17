@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2019 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,14 +16,9 @@
 
 package eu.binjr.core;
 
-import eu.binjr.common.diagnostic.DiagnosticException;
-
-
-import eu.binjr.common.function.CheckedConsumer;
 import eu.binjr.common.logging.LoggingOutputStream;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.logging.TextFlowAppender;
-import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.MainViewController;
 import eu.binjr.core.preferences.AppEnvironment;
