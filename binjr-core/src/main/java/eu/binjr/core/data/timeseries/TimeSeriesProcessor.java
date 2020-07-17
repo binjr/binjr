@@ -17,11 +17,10 @@
 package eu.binjr.core.data.timeseries;
 
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.timeseries.transform.TimeSeriesTransform;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -36,7 +35,7 @@ import java.util.Optional;
  * @author Frederic Thevenet
  */
 public abstract class TimeSeriesProcessor {
-    private static final Logger logger = LogManager.getLogger(TimeSeriesProcessor.class);
+    private static final Logger logger = Logger.create(TimeSeriesProcessor.class);
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
     protected List<XYChart.Data<ZonedDateTime, Double>> data;
 

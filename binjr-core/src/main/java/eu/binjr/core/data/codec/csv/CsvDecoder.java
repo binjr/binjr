@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.data.codec.csv;
 
 import eu.binjr.common.function.CheckedFunction;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.exceptions.DecodingDataFromAdapterException;
@@ -26,8 +27,6 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import javafx.scene.chart.XYChart;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -52,7 +51,7 @@ public class CsvDecoder implements Decoder {
     private final CheckedFunction<String, Double, DecodingDataFromAdapterException> numberParser;
     private final CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser;
     private final TimeSeriesProcessorFactory timeSeriesFactory;
-    private static final Logger logger = LogManager.getLogger(CsvDecoder.class);
+    private static final Logger logger = Logger.create(CsvDecoder.class);
 
     /**
      * Initializes a new instance of the {@link CsvDecoder} class using the default number parsing function.
@@ -118,7 +117,7 @@ public class CsvDecoder implements Decoder {
 
     @Override
     public Map<TimeSeriesInfo, TimeSeriesProcessor> decode(InputStream in, List<TimeSeriesInfo> seriesInfo) throws IOException, DecodingDataFromAdapterException {
-        try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
+        try (Profiler ignored = Profiler.start("Building time series from csv data", logger::perf)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT
                         .withAllowMissingColumnNames(false)
@@ -154,7 +153,7 @@ public class CsvDecoder implements Decoder {
      * @throws DecodingDataFromAdapterException if an error occurred while decoding the CSV file.
      */
     public void decode(InputStream in, List<String> headers, Consumer<DataSample> mapToResult) throws IOException, DecodingDataFromAdapterException {
-        try (Profiler ignored = Profiler.start("Building time series from csv data", logger::trace)) {
+        try (Profiler ignored = Profiler.start("Building time series from csv data", logger::perf)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT
                         .withAllowMissingColumnNames(false)
@@ -211,7 +210,7 @@ public class CsvDecoder implements Decoder {
     }
 
     private List<String> parseColumnHeaders(CSVRecord record) throws IOException, DecodingDataFromAdapterException {
-        try (Profiler ignored = Profiler.start("Getting hearders from csv data", logger::trace)) {
+        try (Profiler ignored = Profiler.start("Getting hearders from csv data", logger::perf)) {
             if (record == null) {
                 throw new DecodingDataFromAdapterException("CSV stream does not contains column header");
             }

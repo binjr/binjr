@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,8 +17,7 @@
 package eu.binjr.common.preferences;
 
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.binjr.common.logging.Logger;
 
 import java.util.*;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -33,7 +32,7 @@ import java.util.prefs.Preferences;
  * @author Frederic Thevenet
  */
 public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Reloadable {
-    private static final Logger logger = LogManager.getLogger(MostRecentlyUsedList.class);
+    private static final Logger logger = Logger.create(MostRecentlyUsedList.class);
     private final int capacity;
     private final String key;
     private final Preferences backingStore;

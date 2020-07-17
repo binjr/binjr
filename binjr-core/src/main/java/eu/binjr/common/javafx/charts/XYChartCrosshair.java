@@ -17,6 +17,7 @@
 package eu.binjr.common.javafx.charts;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -32,8 +33,6 @@ import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.shape.Shape;
 import javafx.scene.shape.StrokeType;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.gillius.jfxutils.chart.XYChartInfo;
 
 import java.util.HashMap;
@@ -51,7 +50,7 @@ import static org.gillius.jfxutils.JFXUtil.getYShift;
  * @author Frederic Thevenet
  */
 public class XYChartCrosshair<X, Y> {
-    private static final Logger logger = LogManager.getLogger(XYChartCrosshair.class);
+    private static final Logger logger = Logger.create(XYChartCrosshair.class);
     private static final double SELECTION_OPACITY = 0.5;
 
     private final Line horizontalMarker = new Line();

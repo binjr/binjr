@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package eu.binjr.core.data.async;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -32,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Frederic Thevenet
  */
 public class AsyncTaskManager {
-    private static final Logger logger = LogManager.getLogger(AsyncTaskManager.class);
+    private static final Logger logger = Logger.create(AsyncTaskManager.class);
     private final ExecutorService mainthreadPool;
     private final ExecutorService subTaskThreadPool;
 

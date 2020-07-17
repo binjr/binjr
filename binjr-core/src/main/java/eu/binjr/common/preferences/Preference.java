@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,9 @@
 
 package eu.binjr.common.preferences;
 
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.Property;
 import javafx.beans.value.ObservableValue;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.PropertySheet;
 
 import java.util.Optional;
@@ -33,7 +32,7 @@ import java.util.prefs.Preferences;
  * @author Frederic Thevenet
  */
 public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
-    private static final Logger logger = LogManager.getLogger(Preference.class);
+    private static final Logger logger = Logger.create(Preference.class);
     private final String key;
     private final T defaultValue;
     private final Preferences backingStore;

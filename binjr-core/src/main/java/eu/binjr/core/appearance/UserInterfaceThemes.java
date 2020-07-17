@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,13 @@
 
 package eu.binjr.core.appearance;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.plugins.ServiceLoaderHelper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * Defines user interface themes
@@ -28,7 +30,7 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 public interface UserInterfaceThemes {
-    Logger logger = LogManager.getLogger(UserInterfaceThemes.class);
+    Logger logger = Logger.create(UserInterfaceThemes.class);
 
     class UiThemesHolder {
         private final static Set<UserInterfaceThemes> instance = loadUiThemes();

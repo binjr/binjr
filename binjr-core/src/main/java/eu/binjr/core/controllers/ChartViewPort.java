@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.charts.XYChartCrosshair;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.PrefixFormatter;
@@ -26,8 +27,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableView;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.Closeable;
 import java.time.ZonedDateTime;
@@ -44,7 +43,7 @@ public class ChartViewPort implements Closeable {
     private ChartPropertiesController propertiesController;
     private final PrefixFormatter prefixFormatter;
     private final TableView<TimeSeriesInfo> seriesTable;
-    private static final Logger logger = LogManager.getLogger(ChartViewPort.class);
+    private static final Logger logger = Logger.create(ChartViewPort.class);
     private final AtomicBoolean closing = new AtomicBoolean(false);
     private final BooleanProperty selected = new SimpleBooleanProperty(false);
     private XYChartCrosshair<ZonedDateTime, Double> crosshair;

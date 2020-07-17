@@ -16,9 +16,8 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
+import eu.binjr.common.logging.Logger;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -32,7 +31,7 @@ import java.util.List;
  */
 public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
-    private static final Logger logger = LogManager.getLogger(LargestTriangleThreeBucketsTransform.class);
+    private static final Logger logger = Logger.create(LargestTriangleThreeBucketsTransform.class);
 
     /**
      * Initializes a new instnace of the {@link LargestTriangleThreeBucketsTransform} class.

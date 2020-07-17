@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,21 +18,18 @@ package eu.binjr.core.update;
 
 import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import impl.org.controlsfx.skin.NotificationBar;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.stage.WindowEvent;
 import javafx.util.Duration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.bouncycastle.openpgp.*;
 import org.bouncycastle.openpgp.jcajce.JcaPGPObjectFactory;
 import org.bouncycastle.openpgp.operator.jcajce.JcaKeyFingerprintCalculator;
@@ -50,7 +47,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.Security;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.function.Consumer;
@@ -61,7 +57,7 @@ import java.util.function.Consumer;
  * @author Frederic Thevenet
  */
 public class UpdateManager {
-    private static final Logger logger = LogManager.getLogger(UpdateManager.class);
+    private static final Logger logger = Logger.create(UpdateManager.class);
     private Path updatePackage = null;
     private Version updateVersion = null;
     private boolean restartRequested = false;

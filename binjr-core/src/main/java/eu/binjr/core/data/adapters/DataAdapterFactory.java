@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.data.adapters;
 
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -25,8 +26,6 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.Node;
 import javafx.scene.control.Dialog;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -38,7 +37,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class DataAdapterFactory {
-    private static final Logger logger = LogManager.getLogger(DataAdapterFactory.class);
+    private static final Logger logger = Logger.create(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters;
 
     /**

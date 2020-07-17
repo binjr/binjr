@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,8 @@
 
 package eu.binjr.core;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.OsFamily;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 
@@ -31,7 +29,7 @@ import java.util.Arrays;
  * @author Frederic Thevenet
  */
 public final class Bootstrap {
-    private static final Logger logger = LogManager.getLogger(Bootstrap.class);
+    private static final Logger logger = Logger.create(Bootstrap.class);
 
     /**
      * The entry point fo the application.

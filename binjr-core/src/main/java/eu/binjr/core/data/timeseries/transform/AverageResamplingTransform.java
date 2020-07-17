@@ -16,9 +16,8 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
+import eu.binjr.common.logging.Logger;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.Duration;
 import java.time.ZonedDateTime;
@@ -27,7 +26,7 @@ import java.util.List;
 
 //FIXME: This introduce a right-shift to the series.
 public final class AverageResamplingTransform extends BaseTimeSeriesTransform {
-    private static final Logger logger = LogManager.getLogger(AverageResamplingTransform.class);
+    private static final Logger logger = Logger.create(AverageResamplingTransform.class);
     private final int threshold;
 
     /**

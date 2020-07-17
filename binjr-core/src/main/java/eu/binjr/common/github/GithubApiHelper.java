@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.common.github;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.binjr.common.logging.Logger;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpResponseException;
@@ -30,8 +31,6 @@ import org.apache.http.impl.client.AbstractResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.Closeable;
 import java.io.FileOutputStream;
@@ -51,7 +50,7 @@ import java.util.*;
  * @author Frederic Thevenet
  */
 public class GithubApiHelper {
-    private static final Logger logger = LogManager.getLogger(GithubApiHelper.class);
+    private static final Logger logger = Logger.create(GithubApiHelper.class);
     protected String userCredentials;
     protected final CloseableHttpClient httpClient;
     protected Gson gson;

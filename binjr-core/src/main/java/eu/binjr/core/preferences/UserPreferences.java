@@ -17,7 +17,7 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
-import eu.binjr.common.logging.Log4j2Level;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.common.preferences.PreferenceFactory;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
@@ -25,8 +25,7 @@ import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import javafx.geometry.Rectangle2D;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -37,7 +36,7 @@ import java.time.LocalDateTime;
  * @author Frederic Thevenet
  */
 public class UserPreferences extends PreferenceFactory {
-    private static final Logger logger = LogManager.getLogger(UserPreferences.class);
+    private static final Logger logger = Logger.create(UserPreferences.class);
     private static final Gson gson = new Gson();
     public static final String BINJR_GLOBAL = "binjr/global";
 
@@ -227,8 +226,8 @@ public class UserPreferences extends PreferenceFactory {
      */
     public final Preference<Number> tooltipShowDelayMs = longPreference("tooltipShowDelayMs", 500L);
 
-    public final Preference<Log4j2Level> rootLoggingLevel =
-            enumPreference(Log4j2Level.class, "rootLoggingLevel", Log4j2Level.INFO);
+    public final Preference<Level> rootLoggingLevel =
+            objectPreference(Level.class, "rootLoggingLevel", Level.INFO, Level::name, Level::valueOf);
 
     public final Preference<Boolean> redirectStdOutToLogs = booleanPreference("redirectStdOutToLogging", true);
 

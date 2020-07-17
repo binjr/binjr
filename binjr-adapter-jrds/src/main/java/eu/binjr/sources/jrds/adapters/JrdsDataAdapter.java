@@ -18,6 +18,7 @@ package eu.binjr.sources.jrds.adapters;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.adapters.HttpDataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
@@ -40,8 +41,6 @@ import org.apache.http.client.HttpResponseException;
 import org.apache.http.entity.ContentType;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import javax.xml.bind.JAXB;
@@ -72,7 +71,7 @@ public class JrdsDataAdapter extends HttpDataAdapter {
     protected static final String ENCODING_PARAM_NAME = "encoding";
     protected static final String ZONE_ID_PARAM_NAME = "zoneId";
     protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
-    private static final Logger logger = LogManager.getLogger(JrdsDataAdapter.class);
+    private static final Logger logger = Logger.create(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     private final Gson gson;
     private CsvDecoder decoder;

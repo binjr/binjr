@@ -16,9 +16,8 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
+import eu.binjr.common.logging.Logger;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -31,7 +30,7 @@ import java.util.List;
  */
 public class DecimationTransform extends BaseTimeSeriesTransform {
     private final int threshold;
-    private static final Logger logger = LogManager.getLogger(DecimationTransform.class);
+    private static final Logger logger = Logger.create(DecimationTransform.class);
     /**
      * Initializes a new instance of the {@link DecimationTransform} class.
      *

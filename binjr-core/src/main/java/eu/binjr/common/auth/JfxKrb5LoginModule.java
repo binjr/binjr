@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,12 +17,11 @@
 package eu.binjr.common.auth;
 
 import com.sun.security.auth.module.Krb5LoginModule;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.application.Platform;
 import javafx.stage.StageStyle;
 import javafx.util.Pair;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.dialog.LoginDialog;
 
 import javax.security.auth.Subject;
@@ -39,7 +38,7 @@ import java.util.concurrent.TimeoutException;
  * @author Frederic Thevenet
  */
 public class JfxKrb5LoginModule extends Krb5LoginModule {
-    private static final Logger logger = LogManager.getLogger(JfxKrb5LoginModule.class);
+    private static final Logger logger = Logger.create(JfxKrb5LoginModule.class);
     private CredentialsEntry credentials = CredentialsEntry.EMPTY;
 
     @Override

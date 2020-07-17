@@ -21,6 +21,7 @@ import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.logging.Log4j2Level;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.core.Binjr;
@@ -46,13 +47,13 @@ import javafx.scene.text.FontSmoothingType;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 import org.controlsfx.control.PropertySheet;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,7 @@ import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
  * @author Frederic Thevenet
  */
 public class OutputConsoleController implements Initializable {
-    private static final Logger logger = LogManager.getLogger(OutputConsoleController.class);
+    private static final Logger logger = Logger.create(OutputConsoleController.class);
     public TextField consoleMaxLinesText;
     public VBox root;
     public PropertySheet preferenceEditor;
@@ -73,7 +74,7 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private ListView<Text> textOutput;
     @FXML
-    private ChoiceBox<Log4j2Level> logLevelChoice;
+    private ChoiceBox<Level> logLevelChoice;
     @FXML
     private ToggleButton alwaysOnTopToggle;
 
@@ -100,7 +101,15 @@ public class OutputConsoleController implements Initializable {
             });
         }
         Platform.runLater(() -> {
-            logLevelChoice.getItems().setAll(Log4j2Level.values());
+            var l = Arrays.stream(Log4j2Level.values())
+                    .map(Log4j2Level::getLevel)
+                    .sorted( Level::compareTo)
+                    .collect(Collectors.toList());
+            l.add(Logger.PERF);
+            l.sort(Level::compareTo);
+            logLevelChoice.getItems().setAll(l);
+
+         //   logLevelChoice.getItems().add(Logger.PROFILE);
             logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
             UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldValue, newValue) -> {
                 logLevelChoice.getSelectionModel().select(newValue);

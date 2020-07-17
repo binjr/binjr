@@ -18,6 +18,7 @@ package eu.binjr.sources.netdata.adapters;
 
 import com.google.gson.Gson;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.codec.csv.CsvDecoder;
@@ -31,8 +32,6 @@ import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
 import org.apache.http.NameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.net.URI;
@@ -53,7 +52,7 @@ import java.util.TreeMap;
  * @author Frederic Thevenet
  */
 public class NetdataAdapter extends HttpDataAdapter {
-    private static final Logger logger = LogManager.getLogger(NetdataAdapter.class);
+    private static final Logger logger = Logger.create(NetdataAdapter.class);
     private static final char DELIMITER = ',';
     private final Gson jsonParser;
     private ZoneId zoneId;

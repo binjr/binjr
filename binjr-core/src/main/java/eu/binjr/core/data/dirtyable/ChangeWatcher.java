@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,14 +17,13 @@
 package eu.binjr.core.data.dirtyable;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -45,7 +44,7 @@ import java.util.List;
  */
 @XmlAccessorType(XmlAccessType.NONE)
 public class ChangeWatcher implements Dirtyable, Closeable {
-    private static final Logger logger = LogManager.getLogger(ChangeWatcher.class);
+    private static final Logger logger = Logger.create(ChangeWatcher.class);
     private final BooleanProperty dirty = new SimpleBooleanProperty(false);
     private final List<WeakReference<ObservableList<? extends Dirtyable>>> watchedLists;
     private final BindingManager bindingManager = new BindingManager();

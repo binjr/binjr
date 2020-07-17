@@ -16,15 +16,14 @@
 
 package eu.binjr.sources.jrds.adapters;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
-    private static final Logger logger = LogManager.getLogger(JrdsBindingBuilder.class);
+    private static final Logger logger = Logger.create(JrdsBindingBuilder.class);
 
     @Override
     protected JrdsBindingBuilder self() {

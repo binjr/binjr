@@ -32,7 +32,7 @@ import javafx.stage.Screen;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.binjr.common.logging.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
 import org.apache.logging.log4j.core.config.Configurator;
@@ -50,22 +50,22 @@ import java.time.format.DateTimeFormatter;
  * @author Frederic Thevenet
  */
 public class Binjr extends Application {
-    public static final Logger runtimeDebuggingFeatures = LogManager.getLogger("runtimeDebuggingFeatures");
-    private static final Logger logger = LogManager.getLogger(Binjr.class);
+    public static final Logger runtimeDebuggingFeatures = Logger.create("runtimeDebuggingFeatures");
+    private static final Logger logger = Logger.create(Binjr.class);
     public static final TextFlowAppender DEBUG_CONSOLE_APPENDER;
 
     static {
         // initialize the debug console appender early to start capturing logs ASAP.
         TextFlowAppender textFlowAppender = null;
         try {
-            Configurator.setRootLevel(UserPreferences.getInstance().rootLoggingLevel.get().getLevel());
+            Configurator.setRootLevel(UserPreferences.getInstance().rootLoggingLevel.get());
             UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldLevel, newLevel) -> {
-                Configurator.setRootLevel(newLevel.getLevel());
+                Configurator.setRootLevel(newLevel);
                 logger.info("Root logger level set to " + newLevel);
             });
             if (UserPreferences.getInstance().redirectStdOutToLogs.get()) {
-                System.setErr(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stderr"), Level.ERROR), true));
-                System.setOut(new PrintStream(new LoggingOutputStream(LogManager.getLogger("stdout"), Level.DEBUG), true));
+                System.setErr(new PrintStream(new LoggingOutputStream(Logger.create("stderr"), Level.ERROR), true));
+                System.setOut(new PrintStream(new LoggingOutputStream(Logger.create("stdout"), Level.DEBUG), true));
             }
             LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
             try {
@@ -144,7 +144,7 @@ public class Binjr extends Application {
         mainViewController.setAssociatedFile(env.getAssociatedWorkspace());
         primaryStage.setTitle(AppEnvironment.APP_NAME);
 
-        try (Profiler p = Profiler.start("Set scene", logger::trace)) {
+        try (Profiler p = Profiler.start("Set scene", logger::perf)) {
             if (Screen.getScreensForRectangle(
                     UserPreferences.getInstance().windowLastPosition.get().getMinX(),
                     UserPreferences.getInstance().windowLastPosition.get().getMinY(),
@@ -157,7 +157,7 @@ public class Binjr extends Application {
             primaryStage.setScene(new Scene(root));
             StageAppearanceManager.getInstance().register(primaryStage);
         }
-        try (Profiler p = Profiler.start("show", logger::trace)) {
+        try (Profiler p = Profiler.start("show", logger::perf)) {
             primaryStage.initStyle(AppEnvironment.getInstance().getWindowsStyle());
             primaryStage.show();
         }

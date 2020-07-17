@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -27,8 +28,6 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.scene.chart.ValueAxis;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.HashMap;
@@ -42,7 +41,7 @@ import java.util.Optional;
  */
 public class ChartViewportsState implements AutoCloseable {
     private final WorksheetController parent;
-    private static final Logger logger = LogManager.getLogger(ChartViewportsState.class);
+    private static final Logger logger = Logger.create(ChartViewportsState.class);
     private HashMap<Chart, AxisState> axisStates = new HashMap<>();
     private final SimpleObjectProperty<ZonedDateTime> startX;
     private final SimpleObjectProperty<ZonedDateTime> endX;

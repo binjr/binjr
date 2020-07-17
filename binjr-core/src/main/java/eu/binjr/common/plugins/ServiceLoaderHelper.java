@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package eu.binjr.common.plugins;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.preferences.UserPreferences;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,7 +25,6 @@ import java.net.URLClassLoader;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
-import java.util.function.Predicate;
 
 /**
  * A collection of helper methods to work with {@link ServiceLoader}
@@ -34,7 +32,7 @@ import java.util.function.Predicate;
  * @author Frederic Thevenet
  */
 public final class ServiceLoaderHelper {
-    private static final Logger logger = LogManager.getLogger(ServiceLoaderHelper.class);
+    private static final Logger logger = Logger.create(ServiceLoaderHelper.class);
 
     /**
      * A helper method to load and return service implementations from the classpath.

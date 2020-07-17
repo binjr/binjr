@@ -16,10 +16,9 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -30,7 +29,7 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
-    private static final Logger logger = LogManager.getLogger(BaseTimeSeriesTransform.class);
+    private static final Logger logger = Logger.create(BaseTimeSeriesTransform.class);
     private final String name;
     private volatile boolean enabled = true;
 
@@ -55,7 +54,7 @@ public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
     @Override
     public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
         if (isEnabled()) {
-            try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::trace)) {
+            try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::perf)) {
                 return apply(data);
             }
         } else {

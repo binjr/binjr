@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package eu.binjr.core.update;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.nio.file.Path;
 
@@ -28,7 +27,7 @@ import java.nio.file.Path;
  * @author Frederic Thevenet
  */
 public class NotifyOnlyUpdater implements PlatformUpdater {
-    private static final Logger logger = LogManager.getLogger(NotifyOnlyUpdater.class);
+    private static final Logger logger = Logger.create(NotifyOnlyUpdater.class);
 
     @Override
     public boolean isInAppUpdateSupported() {

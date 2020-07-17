@@ -16,9 +16,8 @@
 
 package eu.binjr.common.colors;
 
+import eu.binjr.common.logging.Logger;
 import javafx.scene.paint.Color;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Utility methods to convert color encodings
@@ -26,7 +25,7 @@ import org.apache.logging.log4j.Logger;
  * @author Frederic Thevenet
  */
 public class ColorUtils {
-    private static final Logger logger = LogManager.getLogger(ColorUtils.class);
+    private static final Logger logger = Logger.create(ColorUtils.class);
 
     public static String toRGBAString(Color color) {
         return toRGBAString(color, color.getOpacity());

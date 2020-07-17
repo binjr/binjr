@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
@@ -27,8 +28,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
@@ -49,7 +48,7 @@ import java.util.Optional;
  * @author Frederic Thevenet
  */
 public class Dialogs {
-    private static final Logger logger = LogManager.getLogger(Dialogs.class);
+    private static final Logger logger = Logger.create(Dialogs.class);
     private static final double TOOL_BUTTON_SIZE = 20;
 
     /**

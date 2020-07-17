@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2019 Frederic Thevenet
+ *    Copyright 2018-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.sources.rrd4j.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -24,13 +25,9 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import org.rrd4j.ConsolFun;
 import org.rrd4j.core.*;
@@ -52,7 +49,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter {
-    private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
+    private static final Logger logger = Logger.create(Rrd4jFileAdapter.class);
     private final RrdDbPool rrdDbMap;
     private final Rrd4jFileAdapterPreferences prefs = Rrd4jFileAdapterPreferences.getInstance();
     private List<Path> rrdPaths;

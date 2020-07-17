@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,9 +16,8 @@
 
 package eu.binjr.core.update;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +32,7 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 public class WindowsMsiUpdater implements PlatformUpdater {
-    private static final Logger logger = LogManager.getLogger(WindowsMsiUpdater.class);
+    private static final Logger logger = Logger.create(WindowsMsiUpdater.class);
 
     @Override
     public boolean isInAppUpdateSupported() {

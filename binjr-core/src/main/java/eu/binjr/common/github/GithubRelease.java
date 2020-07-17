@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,9 +18,8 @@ package eu.binjr.common.github;
 
 
 import com.google.gson.annotations.SerializedName;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.net.URL;
 import java.util.Date;
@@ -33,7 +32,7 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 public class GithubRelease {
-    private static final Logger logger = LogManager.getLogger(GithubRelease.class);
+    private static final Logger logger = Logger.create(GithubRelease.class);
     private URL url;
     @SerializedName("html_url")
     private URL htmlUrl;

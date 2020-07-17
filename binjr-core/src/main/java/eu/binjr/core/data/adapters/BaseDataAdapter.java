@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.function.CheckedFunction;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
-import eu.binjr.common.function.CheckedFunction;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Map;
 import java.util.UUID;
@@ -31,7 +30,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 public abstract class BaseDataAdapter implements DataAdapter {
-    private static final Logger logger = LogManager.getLogger(BaseDataAdapter.class);
+    private static final Logger logger = Logger.create(BaseDataAdapter.class);
     private UUID id = UUID.randomUUID();
     private volatile boolean closed = false;
 

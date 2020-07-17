@@ -17,6 +17,7 @@
 package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -29,13 +30,9 @@ import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
-import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.control.TreeItem;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
@@ -58,7 +55,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  * @author Frederic Thevenet
  */
 public class CsvFileAdapter extends BaseDataAdapter {
-    private static final Logger logger = LogManager.getLogger(CsvFileAdapter.class);
+    private static final Logger logger = Logger.create(CsvFileAdapter.class);
     private String dateTimePattern;
     private Path csvPath;
     private ZoneId zoneId;
@@ -263,7 +260,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
     private ConcurrentNavigableMap<Long, DataSample> buildSortedDataStore(InputStream in) throws IOException, DataAdapterException {
         ConcurrentNavigableMap<Long, DataSample> dataStore = new ConcurrentSkipListMap<>();
 
-        try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::trace)) {
+        try (Profiler ignored = Profiler.start("Building seekable datastore for csv file", logger::perf)) {
             csvDecoder.decode(in, headers, sample -> dataStore.put(sample.getTimeStamp().toInstant().toEpochMilli(), sample));
         }
         return dataStore;

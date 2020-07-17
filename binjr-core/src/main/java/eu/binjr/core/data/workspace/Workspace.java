@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
 import eu.binjr.common.xml.XmlUtils;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -29,8 +30,6 @@ import eu.binjr.core.preferences.UserHistory;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.*;
@@ -57,7 +56,7 @@ public class Workspace implements Dirtyable {
     public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
 
     @XmlTransient
-    private static final Logger logger = LogManager.getLogger(Workspace.class);
+    private static final Logger logger = Logger.create(Workspace.class);
     @XmlElementWrapper(name = "Sources")
     @XmlElements(@XmlElement(name = "Source"))
     @IsDirtyable

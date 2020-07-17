@@ -16,9 +16,8 @@
 
 package eu.binjr.core.data.timeseries.transform;
 
+import eu.binjr.common.logging.Logger;
 import javafx.scene.chart.XYChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
@@ -33,7 +32,7 @@ import java.util.List;
 public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
     protected final int threshold;
     private final boolean[] whiteList;
-    private static final Logger logger = LogManager.getLogger(SecondPassLttbTransform.class);
+    private static final Logger logger = Logger.create(SecondPassLttbTransform.class);
 
     /**
      * Initializes a new instnace of the {@link SecondPassLttbTransform} class.

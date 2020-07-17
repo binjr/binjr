@@ -17,6 +17,7 @@
 package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,8 +36,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
@@ -49,7 +48,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class TimeRangePicker extends ToggleButton {
-    private static final Logger logger = LogManager.getLogger(TimeRangePicker.class);
+    private static final Logger logger = Logger.create(TimeRangePicker.class);
     private final Label timeRangeText;
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;

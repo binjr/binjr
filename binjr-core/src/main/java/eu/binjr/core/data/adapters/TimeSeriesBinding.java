@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,14 +16,13 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.scene.paint.Color;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -41,7 +40,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TimeSeriesBinding extends SourceBinding {
-    private static final Logger logger = LogManager.getLogger(TimeSeriesBinding.class);
+    private static final Logger logger = Logger.create(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
             return MessageDigest.getInstance("MD5");

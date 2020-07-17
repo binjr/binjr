@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~    Copyright 2017-2018 Frederic Thevenet
+  ~    Copyright 2017-2020 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -16,6 +16,9 @@
   -->
 
 <Configuration status="WARN">
+    <CustomLevels>
+        <CustomLevel name="PROFILE" intLevel="450" />
+    </CustomLevels>
     <Properties>
         <Property name="filename">binjr.log</Property>
     </Properties>

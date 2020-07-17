@@ -21,6 +21,7 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
@@ -69,8 +70,6 @@ import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
 
 import javax.imageio.ImageIO;
@@ -95,7 +94,7 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class XYChartsWorksheetController extends WorksheetController {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
-    private static final Logger logger = LogManager.getLogger(XYChartsWorksheetController.class);
+    private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
     private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
@@ -256,7 +255,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                         if (!oldValue & newValue) {
                             worksheetRefreshProfiler = Profiler.start(
                                     "Worksheet " + worksheet.getName() + " refresh total elapsed time",
-                                    logger::trace);
+                                    logger::perf);
                         } else if (oldValue & !newValue) {
                             worksheetRefreshProfiler.close();
                         }
@@ -1296,7 +1295,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Refreshing chart " + worksheet.getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::trace)) {
+        try (Profiler p = Profiler.start("Refreshing chart " + worksheet.getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::perf)) {
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {
                 XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
                 logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
@@ -1308,7 +1307,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private void plotChart(ChartViewPort viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::trace)) {
+        try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::perf)) {
             nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
             AsyncTaskManager.getInstance().submit(() -> {
                         viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
@@ -1368,7 +1367,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo series) {
-        try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::trace)) {
+        try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.setName(series.getDisplayName());
             var r = new Region();

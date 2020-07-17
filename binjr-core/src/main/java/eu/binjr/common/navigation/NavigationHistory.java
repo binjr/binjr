@@ -16,11 +16,10 @@
 
 package eu.binjr.common.navigation;
 
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -31,7 +30,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Wraps a stack to record user navigation steps.
  */
 public class NavigationHistory<T> {
-    private static final Logger logger = LogManager.getLogger(NavigationHistory.class);
+    private static final Logger logger = Logger.create(NavigationHistory.class);
     private final HistoryQueue<T> forward = new HistoryQueue<>();
     private final HistoryQueue<T> backward = new HistoryQueue<>();
 

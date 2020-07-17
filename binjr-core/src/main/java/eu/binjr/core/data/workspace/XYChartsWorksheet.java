@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.controllers.XYChartsWorksheetController;
@@ -30,15 +31,16 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Comparator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -49,7 +51,7 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class XYChartsWorksheet extends Worksheet implements Syncable {
-    private static final Logger logger = LogManager.getLogger(XYChartsWorksheet.class);
+    private static final Logger logger = Logger.create(XYChartsWorksheet.class);
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
     @IsDirtyable

@@ -59,6 +59,7 @@ public final class TextFlowAppender extends AbstractAppender {
         super(name, filter, layout, ignoreExceptions);
         logColors.put(Level.TRACE, "log-trace");
         logColors.put(Level.DEBUG, "log-debug");
+        logColors.put(Logger.PERF, "log-perf");
         logColors.put(Level.INFO, "log-info");
         logColors.put(Level.WARN, "log-warn");
         logColors.put(Level.ERROR, "log-error");

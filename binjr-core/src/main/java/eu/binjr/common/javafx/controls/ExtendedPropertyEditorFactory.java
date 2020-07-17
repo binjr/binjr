@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -27,8 +28,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.DirectoryChooser;
 import javafx.util.Duration;
 import javafx.util.StringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.PropertySheet;
 import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.PropertyEditor;
@@ -40,7 +39,7 @@ import java.util.Optional;
 import java.util.function.BiFunction;
 
 public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory {
-    private static final Logger logger = LogManager.getLogger(ExtendedPropertyEditorFactory.class);
+    private static final Logger logger = Logger.create(ExtendedPropertyEditorFactory.class);
 
     @Override
     public PropertyEditor<?> call(PropertySheet.Item item) {

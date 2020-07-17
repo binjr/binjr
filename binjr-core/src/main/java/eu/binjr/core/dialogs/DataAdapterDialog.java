@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
@@ -33,8 +34,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.FileChooser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.textfield.AutoCompletionBinding;
 import org.controlsfx.control.textfield.TextFields;
 
@@ -52,7 +51,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
-    private static final Logger logger = LogManager.getLogger(DataAdapterDialog.class);
+    private static final Logger logger = Logger.create(DataAdapterDialog.class);
 
     private final HBox uriHBox;
     private DataAdapter result = null;

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2018 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.SysInfoProperty;
@@ -37,8 +38,6 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -55,7 +54,7 @@ import java.util.ResourceBundle;
  * @author Frederic Thevenet
  */
 public class AboutBoxController implements Initializable {
-    private static final Logger logger = LogManager.getLogger(AboutBoxController.class);
+    private static final Logger logger = Logger.create(AboutBoxController.class);
     public TextFlow licenseView;
     public TextFlow acknowledgementView;
     public Label copyrightText;

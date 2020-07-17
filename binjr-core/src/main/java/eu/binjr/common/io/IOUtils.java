@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,10 +16,12 @@
 
 package eu.binjr.common.io;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.binjr.common.logging.Logger;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
@@ -34,7 +36,7 @@ import java.util.Objects;
 public class IOUtils {
     private static final int DEFAULT_COPY_BUFFER_SIZE = 32 * 1024;
     private static final int EOF = -1;
-    private static final Logger logger = LogManager.getLogger(IOUtils.class);
+    private static final Logger logger = Logger.create(IOUtils.class);
 
     public static long copyChannels(ReadableByteChannel input, WritableByteChannel output) throws IOException {
         return copyChannels(input, output, DEFAULT_COPY_BUFFER_SIZE);

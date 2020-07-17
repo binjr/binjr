@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -46,8 +47,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
 import org.apache.http.util.EntityUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
@@ -72,7 +71,7 @@ import java.util.regex.Pattern;
 public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
-    private static final Logger logger = LogManager.getLogger(HttpDataAdapter.class);
+    private static final Logger logger = Logger.create(HttpDataAdapter.class);
     private final CloseableHttpClient httpClient;
     private URL baseAddress;
 
@@ -176,7 +175,7 @@ public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
     }
 
     protected <R> R doHttpGet(URI requestUri, ResponseHandler<R> responseHandler) throws DataAdapterException {
-        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::trace)) {
+        try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::perf)) {
             logger.debug(() -> "requestUri = " + requestUri);
             HttpGet httpget = new HttpGet(requestUri);
             // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.

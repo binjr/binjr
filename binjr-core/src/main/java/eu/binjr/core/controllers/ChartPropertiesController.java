@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.Worksheet;
@@ -28,8 +29,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.util.converter.NumberStringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.ToggleSwitch;
 
 import java.io.Closeable;
@@ -44,7 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author Frederic Thevenet
  */
 public class ChartPropertiesController implements Initializable, Closeable {
-    private static final Logger logger = LogManager.getLogger(ChartPropertiesController.class);
+    private static final Logger logger = Logger.create(ChartPropertiesController.class);
     private final Chart chart;
     private final Worksheet worksheet;
     private final AtomicBoolean closing = new AtomicBoolean(false);

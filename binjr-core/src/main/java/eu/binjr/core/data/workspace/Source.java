@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SerializedDataAdapter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -26,8 +27,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -43,7 +42,7 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Source")
 public class Source implements Dirtyable, Closeable {
-    private static final Logger logger = LogManager.getLogger(Source.class);
+    private static final Logger logger = Logger.create(Source.class);
     private final ChangeWatcher status;
     private final BindingManager bindingManager = new BindingManager();
     private UUID adapterId;

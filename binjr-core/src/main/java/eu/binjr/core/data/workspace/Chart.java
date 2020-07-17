@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -31,8 +32,6 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import javax.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
@@ -55,7 +54,7 @@ import static java.util.stream.Collectors.groupingBy;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Chart")
 public class Chart implements Dirtyable, AutoCloseable {
-    private static final Logger logger = LogManager.getLogger(Chart.class);
+    private static final Logger logger = Logger.create(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     private transient final ChangeWatcher status;
     @IsDirtyable

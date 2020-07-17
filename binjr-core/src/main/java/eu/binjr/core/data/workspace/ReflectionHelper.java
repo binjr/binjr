@@ -17,13 +17,10 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.data.adapters.SourceBinding;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
 
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 enum ReflectionHelper {
     INSTANCE;

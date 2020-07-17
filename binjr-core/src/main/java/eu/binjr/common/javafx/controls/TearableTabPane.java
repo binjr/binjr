@@ -18,12 +18,16 @@ package eu.binjr.common.javafx.controls;
 
 
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.common.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -42,8 +46,6 @@ import javafx.scene.shape.SVGPath;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.stage.WindowEvent;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.awt.*;
 import java.util.*;
@@ -59,7 +61,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class TearableTabPane extends TabPane implements AutoCloseable {
-    private static final Logger logger = LogManager.getLogger(TearableTabPane.class);
+    private static final Logger logger = Logger.create(TearableTabPane.class);
     private boolean tearable;
     private boolean reorderable;
     private Function<ActionEvent, Optional<Tab>> newTabFactory = (e) -> Optional.of(new Tab());

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,9 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.core.data.codec.Decoder;
-import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.common.cache.LRUMapCapacityBound;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.exceptions.DataAdapterException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -38,7 +36,7 @@ import java.util.Map;
  */
 public abstract class SimpleCachingDataAdapter extends SerializedDataAdapter {
     public static final int DEFAULT_CACHE_SIZE = 128;
-    private static final Logger logger = LogManager.getLogger(SimpleCachingDataAdapter.class);
+    private static final Logger logger = Logger.create(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<byte[]>> cache;
 
     /**

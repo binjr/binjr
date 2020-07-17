@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,11 +16,10 @@
 
 package eu.binjr.common.javafx.charts;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.StackedAreaChart;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * A {@link StackedAreaChart} that logs the execution time of the {@code layoutPlotChildren} method
@@ -28,7 +27,7 @@ import org.apache.logging.log4j.Logger;
  * @author Frederic Thevenet
  */
 public class ProfiledStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
-    private static final Logger logger = LogManager.getLogger(ProfiledStackedAreaChart.class);
+    private static final Logger logger = Logger.create(ProfiledStackedAreaChart.class);
 
     /**
      * Initializes a new instance of the {@link ProfiledStackedAreaChart} class
@@ -42,7 +41,7 @@ public class ProfiledStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
 
     @Override
     protected void layoutPlotChildren() {
-        try (Profiler p = Profiler.start("Plotting MyStackedAreaChart " + this.getTitle(), logger::trace)) {
+        try (Profiler p = Profiler.start("Plotting MyStackedAreaChart " + this.getTitle(), logger::perf)) {
             super.layoutPlotChildren();
         }
     }

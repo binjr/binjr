@@ -1478,6 +1478,10 @@
     -fx-fill: STEELBLUE;
 }
 
+.log-perf {
+    -fx-fill: #268f69;
+}
+
 .log-info {
     -fx-fill: black;
 }

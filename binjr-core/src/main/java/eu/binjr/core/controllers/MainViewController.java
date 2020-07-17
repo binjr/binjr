@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2019 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.adapters.*;
@@ -64,8 +65,6 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.controlsfx.control.MaskerPane;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import org.eclipse.fx.ui.controls.tree.TreeItemPredicate;
@@ -91,7 +90,7 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
     static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
-    private static final Logger logger = LogManager.getLogger(MainViewController.class);
+    private static final Logger logger = Logger.create(MainViewController.class);
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");

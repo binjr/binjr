@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2018 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import eu.binjr.common.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,8 +24,6 @@ import javafx.scene.control.DatePicker;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.util.StringConverter;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -39,7 +38,7 @@ import java.time.format.FormatStyle;
  * @author Frederic Thevenet
  */
 public class ZonedDateTimePicker extends DatePicker {
-    private static final Logger logger = LogManager.getLogger(ZonedDateTimePicker.class);
+    private static final Logger logger = Logger.create(ZonedDateTimePicker.class);
     private final Property<ZoneId> zoneId;
     private final ObjectProperty<ZonedDateTime> dateTimeValue;//
 

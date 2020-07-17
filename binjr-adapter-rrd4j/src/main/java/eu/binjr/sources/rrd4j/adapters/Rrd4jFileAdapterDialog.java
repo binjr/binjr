@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2019 Frederic Thevenet
+ *    Copyright 2018-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
@@ -31,8 +32,6 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -47,7 +46,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
-    private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapterDialog.class);
+    private static final Logger logger = Logger.create(Rrd4jFileAdapterDialog.class);
     private static final String BINJR_SOURCES = "binjr/sources";
     private DataAdapter result = null;
     private final TextField pathsField;

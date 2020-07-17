@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.bindings;
 
+import eu.binjr.common.logging.Logger;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -25,8 +26,6 @@ import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.WeakEventHandler;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -43,7 +42,7 @@ import java.util.function.BiConsumer;
  * @author Frederic Thevenet
  */
 public class BindingManager implements AutoCloseable {
-    private static final Logger logger = LogManager.getLogger(BindingManager.class);
+    private static final Logger logger = Logger.create(BindingManager.class);
     private final Map<ObservableValue, List<ChangeListener>> changeListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = Collections.synchronizedMap(new WeakHashMap<>());

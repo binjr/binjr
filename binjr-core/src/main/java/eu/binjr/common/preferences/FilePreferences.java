@@ -16,15 +16,13 @@
 
 package eu.binjr.common.preferences;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import eu.binjr.common.logging.Logger;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
-
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 
@@ -34,7 +32,7 @@ import java.util.prefs.BackingStoreException;
  * @author David Croft (<a href="http://www.davidc.net">www.davidc.net</a>)
  */
 public class FilePreferences extends AbstractPreferences {
-    private static final Logger logger = LogManager.getLogger(FilePreferences.class);
+    private static final Logger logger = Logger.create(FilePreferences.class);
     private final File backingFile;
     private Map<String, String> root;
     private Map<String, FilePreferences> children;

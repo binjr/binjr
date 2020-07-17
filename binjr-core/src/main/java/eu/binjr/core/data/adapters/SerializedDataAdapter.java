@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,12 +16,11 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.codec.Decoder;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +36,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 public abstract class SerializedDataAdapter extends BaseDataAdapter {
-    private static final Logger logger = LogManager.getLogger(SerializedDataAdapter.class);
+    private static final Logger logger = Logger.create(SerializedDataAdapter.class);
     private UUID id = UUID.randomUUID();
     protected volatile boolean closed = false;
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,18 +16,16 @@
 
 package eu.binjr.core.preferences;
 
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.MruFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.prefs.Preferences;
 
 public class UserHistory extends MruFactory {
-    private static final Logger logger = LogManager.getLogger(UserHistory.class);
+    private static final Logger logger = Logger.create(UserHistory.class);
 
     public final MostRecentlyUsedList<Path> logFilesHistory =
             pathMostRecentlyUsedList("logFilesHistory",

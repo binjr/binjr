@@ -19,15 +19,14 @@ package eu.binjr.core.preferences;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnosticHelper;
 import eu.binjr.common.function.CheckedConsumer;
-import eu.binjr.common.logging.Log4j2Level;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.Preference;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
 import javafx.beans.property.*;
 import javafx.stage.StageStyle;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
@@ -61,7 +60,7 @@ public class AppEnvironment {
     public static final String PORTABLE_PROPERTY = "binjr.portable";
     public static final Version MINIMUM_PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
     public static final Version PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
-    private static final Logger logger = LogManager.getLogger(AppEnvironment.class);
+    private static final Logger logger = Logger.create(AppEnvironment.class);
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);
     private final BooleanProperty debugMode = new SimpleBooleanProperty(false);
@@ -149,7 +148,7 @@ public class AppEnvironment {
                     this.setSignatureVerificationDisabled(!Boolean.parseBoolean(val));
                     break;
                 case "log-level":
-                    UserPreferences.getInstance().rootLoggingLevel.set(Log4j2Level.valueOf(val, Log4j2Level.INFO));
+                    UserPreferences.getInstance().rootLoggingLevel.set(Level.valueOf(val));
                     break;
                 case "log-file":
                     break;
