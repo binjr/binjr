@@ -15,6 +15,7 @@
     -fx-font-family: "?";
 }
 
+.styled-text-area .text,
 .log-trace,
 .log-debug,
 .log-perf,

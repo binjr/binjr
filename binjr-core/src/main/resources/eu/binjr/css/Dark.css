@@ -36,7 +36,7 @@
 ;
     -binjr-dark-blue-color: #336F87
 ;
-    -binjr-blue-color: #4BACC6
+    -binjr-blue-color: #4bacc6
 ;
     -binjr-command-bar-title-color: #285668
 ;
@@ -162,7 +162,7 @@
 .inner-button:hover {
     /*-fx-border-width: 1;*/
     /*-fx-border-color:  -binjr-light-blue-color;*/
-    -fx-background-color:  -binjr-blue-color;
+    -fx-background-color: -binjr-blue-color;
 }
 
 /*.inner-button:hover:pressed {*/
@@ -1769,3 +1769,77 @@
 .chart-legend-item {
     -fx-font-smoothing-type: lcd;
 }
+
+
+/******************************
+/* RichText
+/*****************************/
+
+.lineno{
+    -fx-background-color: -binjr-window-background-color;
+}
+
+.styled-text-area {
+    -fx-background-color: -binjr-pane-background-color;
+}
+
+/*!* the width of the border around a section of text *!*/
+/*-rtfx-border-stroke-width: <size>;*/
+
+/*!* the type of the border around a section of text *!*/
+/*-rtfx-border-stroke-type: [inside | outside | centered];*/
+
+/*!* the border's dash lengths: allows dot/dash style borders *!*/
+/*-rtfx-border-stroke-dash-array: <size>[ <size>]+;*/
+
+/*    !* the color of the underline *!*/
+/*-rtfx-underline-color: <paint>;*/
+
+/*!* the width of the underline *!*/
+/*-rtfx-underline-width: <size>;*/
+
+/*!* the underline's dash lengths: allows dot/dash style lines *!*/
+/*-rtfx-underline-dash-array: <size>[ <size>]+;*/
+
+/*    !* the StrokeLineCap to use: [ square | butt | round ] */
+/*       defaults to "square" *!*/
+/*-rtfx-underline-cap: <stroke-line-cap>;*/
+/*}*/
+
+.styled-text-area .lineno .text {
+    -fx-fill: gray;
+}
+
+.styled-text-area .main-selection {
+    -fx-fill: -binjr-dark-blue-color;
+}
+
+.styled-text-area .text {
+    -fx-fill: white;
+}
+
+.styled-text-area .tagmark {
+    -fx-fill: gray;
+}
+
+.styled-text-area .anytag {
+    -fx-fill: #569CD6;
+}
+
+.styled-text-area .paren {
+    -fx-fill: #569CD6;
+    -fx-font-weight: bold;
+}
+
+.styled-text-area .attribute {
+    -fx-fill: #9CDCFE;
+}
+
+.styled-text-area .avalue {
+    -fx-fill: #CE9178;
+}
+
+.styled-text-area .comment {
+    -fx-fill: teal;
+}
+

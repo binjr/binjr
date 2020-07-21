@@ -1533,3 +1533,83 @@
 .chart-legend-item {
     -fx-font-smoothing-type: lcd;
 }
+
+
+/******************************
+/* RichText
+/*****************************/
+
+.lineno{
+    -fx-background-color: -binjr-window-background-color;
+}
+
+.styled-text-area {
+    -fx-background-color: -binjr-pane-background-color;
+}
+
+
+.styled-text-area .main-selection {
+    -fx-fill: -binjr-lighter-blue-color;
+}
+
+
+/*!* the width of the border around a section of text *!*/
+/*-rtfx-border-stroke-width: <size>;*/
+
+/*!* the type of the border around a section of text *!*/
+/*-rtfx-border-stroke-type: [inside | outside | centered];*/
+
+/*!* the border's dash lengths: allows dot/dash style borders *!*/
+/*-rtfx-border-stroke-dash-array: <size>[ <size>]+;*/
+
+/*    !* the color of the underline *!*/
+/*-rtfx-underline-color: <paint>;*/
+
+/*!* the width of the underline *!*/
+/*-rtfx-underline-width: <size>;*/
+
+/*!* the underline's dash lengths: allows dot/dash style lines *!*/
+/*-rtfx-underline-dash-array: <size>[ <size>]+;*/
+
+/*    !* the StrokeLineCap to use: [ square | butt | round ] */
+/*       defaults to "square" *!*/
+/*-rtfx-underline-cap: <stroke-line-cap>;*/
+/*}*/
+
+.styled-text-area .lineno .text {
+    -fx-fill: #237893;
+}
+
+/* default text styling */
+.styled-text-area .text {
+    -fx-fill: white;
+}
+
+.styled-text-area .text {
+    -fx-fill: dimgrey;
+}
+
+.styled-text-area .tagmark {
+    -fx-fill:  #800000;
+}
+
+.styled-text-area .anytag {
+    -fx-fill: #800000;
+}
+
+.styled-text-area .paren {
+    -fx-fill: firebrick;
+    -fx-font-weight: bold;
+}
+
+.styled-text-area .attribute {
+    -fx-fill: red;
+}
+
+.styled-text-area .avalue {
+    -fx-fill: blue;
+}
+
+.styled-text-area .comment {
+    -fx-fill: #008000;
+}

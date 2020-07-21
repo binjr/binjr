@@ -138,4 +138,6 @@
     -fx-font-size: 12pt;
 }
 
-
+.styled-text-area {
+    -fx-font-size: 10pt;
+}

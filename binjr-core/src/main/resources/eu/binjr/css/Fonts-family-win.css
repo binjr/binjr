@@ -15,6 +15,7 @@
     -fx-font-family: "Segoe UI Light";
 }
 
+.styled-text-area .text,
 .log-trace,
 .log-debug,
 .log-perf,
