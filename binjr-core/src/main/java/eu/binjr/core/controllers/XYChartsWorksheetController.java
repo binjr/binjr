@@ -131,8 +131,6 @@ public class XYChartsWorksheetController extends WorksheetController {
     @FXML
     private Button snapshotButton;
     @FXML
-    private Button toggleChartDisplayModeButton;
-    @FXML
     private ToggleButton vCrosshair;
     @FXML
     private ToggleButton hCrosshair;
@@ -274,10 +272,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 if (userPrefs.downSamplingEnabled.get())
                     refresh();
             }));
-            bindingManager.attachListener(worksheet.editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                setEditChartMode(newValue);
-            });
-            setEditChartMode(worksheet.isEditModeEnabled());
+
             newChartDropTarget.setOnDragOver(bindingManager.registerHandler(this::handleDragOverNewChartTarget));
             newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
             newChartDropTarget.setOnDragEntered(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
@@ -287,25 +282,24 @@ public class XYChartsWorksheetController extends WorksheetController {
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
+        super.initialize(location, resources);
     }
 
-    private void setEditChartMode(Boolean newValue) {
+    @Override
+    protected void setEditChartMode(Boolean newValue) {
         if (!newValue) {
             bindingManager.suspend(worksheet.dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
-            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "edit-icon"));
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
         } else {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
-            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "screen-icon"));
             splitPane.setDividerPositions(worksheet.getDividerPosition());
             bindingManager.resume(worksheet.dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
+        super.setEditChartMode(newValue);
     }
 
     private ZonedDateTimeAxis buildTimeAxis() {
@@ -630,7 +624,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         forwardButton.setOnAction(bindingManager.registerHandler(this::handleHistoryForward));
         refreshButton.setOnAction(bindingManager.registerHandler(this::handleRefresh));
         snapshotButton.setOnAction(bindingManager.registerHandler(this::handleTakeSnapshot));
-        toggleChartDisplayModeButton.setOnAction(bindingManager.registerHandler(this::handleToggleTableViewButton));
         bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
@@ -1277,11 +1270,6 @@ public class XYChartsWorksheetController extends WorksheetController {
     @FXML
     private void handleTakeSnapshot(ActionEvent actionEvent) {
         saveSnapshot();
-    }
-
-    @FXML
-    private void handleToggleTableViewButton(ActionEvent actionEvent) {
-        parentController.handleTogglePresentationMode();
     }
 
     @Override
