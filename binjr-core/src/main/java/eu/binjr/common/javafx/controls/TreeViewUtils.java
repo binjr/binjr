@@ -16,15 +16,11 @@
 
 package eu.binjr.common.javafx.controls;
 
+import javafx.collections.FXCollections;
 import javafx.scene.control.TreeItem;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
-
-import static java.util.EnumSet.of;
 
 /**
  * Helper methods to walk JavaFX TreeViews
@@ -32,6 +28,7 @@ import static java.util.EnumSet.of;
  * @author Frederic Thevenet
  */
 public class TreeViewUtils {
+
     public enum ExpandDirection {
         UP,
         DOWN,
@@ -155,6 +152,24 @@ public class TreeViewUtils {
         }
     }
 
+    public static <T> void sortFromBranch(TreeItem<T> branch) {
+        if (!branch.isLeaf()){
+            branch.getChildren().forEach(TreeViewUtils::sortFromBranch);
+        }
+        FXCollections.sort(branch.getChildren(),
+                (o1, o2) -> {
+                    Objects.requireNonNull(o1);
+                    Objects.requireNonNull(o2);
+                    if (o1.isLeaf() && !o2.isLeaf()) {
+                        return 1;
+                    }
+                    if (!o1.isLeaf() && o2.isLeaf()) {
+                        return -1;
+                    }
+                    return o1.getValue().toString().compareToIgnoreCase(o1.toString());
+                });
+    }
+
     private static <T> void climbUpFromBranch(TreeItem<T> branch, boolean expanded) {
         if (branch == null) {
             return;
@@ -174,6 +189,4 @@ public class TreeViewUtils {
             }
         }
     }
-
-
 }
