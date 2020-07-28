@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.Node;
@@ -40,6 +41,7 @@ import java.util.function.BiFunction;
 
 public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory {
     private static final Logger logger = Logger.create(ExtendedPropertyEditorFactory.class);
+    private static final Gson gson = new Gson();
 
     @Override
     public PropertyEditor<?> call(PropertySheet.Item item) {
@@ -78,6 +80,20 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                 }
                 return Optional.empty();
             });
+        }
+
+        if (String[].class.isAssignableFrom(item.getType())) {
+            return new FormattedPropertyEditor<String[]>(item, new TextFormatter<String[]>(new StringConverter<String[]>() {
+                @Override
+                public String toString(String[] object) {
+                    return gson.toJson(object);
+                }
+
+                @Override
+                public String[] fromString(String string) {
+                    return gson.fromJson(string, String[].class);
+                }
+            }));
         }
 
         if (Duration.class.isAssignableFrom(item.getType())) {
