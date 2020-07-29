@@ -1,3 +1,9 @@
+## [binjr v2.17.0](https://github.com/binjr/binjr/releases/tag/v2.16.0)
+Released on Thu, 2 Jul 2020
+
+* _[Fixed]_ Jitter on the y-axis when hovering over charts with full height crosshair.
+* _[Fixed]_ Incorrect capitalization on some menu entries and labels.
+
 ## [binjr v2.16.0](https://github.com/binjr/binjr/releases/tag/v2.16.0)
 Released on Wed, 10 June 2020
 
