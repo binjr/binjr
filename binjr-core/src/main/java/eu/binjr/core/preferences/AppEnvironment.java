@@ -20,7 +20,7 @@ import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.diagnostic.HotSpotDiagnosticHelper;
 import eu.binjr.common.function.CheckedConsumer;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.preferences.Preference;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.dialogs.ConsoleStage;
 import javafx.application.Application;
@@ -495,7 +495,7 @@ public class AppEnvironment {
         }
     }
 
-    private <T> void bindPrefToVmOption(Preference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
+    private <T> void bindPrefToVmOption(ObservablePreference<T> pref, CheckedConsumer<T, DiagnosticException> optionSetter) {
         try {
             optionSetter.accept(pref.get());
         } catch (DiagnosticException e) {

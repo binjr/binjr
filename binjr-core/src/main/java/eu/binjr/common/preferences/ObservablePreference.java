@@ -31,15 +31,15 @@ import java.util.prefs.Preferences;
  * @param <T> The type of the inner value of the preference
  * @author Frederic Thevenet
  */
-public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
-    private static final Logger logger = Logger.create(Preference.class);
+public abstract class ObservablePreference<T> implements ReloadableItemStore.Reloadable {
+    private static final Logger logger = Logger.create(ObservablePreference.class);
     private final String key;
     private final T defaultValue;
     private final Preferences backingStore;
     private final Property<T> backingProperty;
     private final Class<T> innerType;
 
-    public Preference(Class<T> innerType, String key, T defaultValue, Preferences backingStore) {
+    public ObservablePreference(Class<T> innerType, String key, T defaultValue, Preferences backingStore) {
         this.backingStore = backingStore;
         this.key = key;
         this.defaultValue = defaultValue;
@@ -109,7 +109,7 @@ public abstract class Preference<T> implements ReloadableItemStore.Reloadable {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("Preference{");
+        final StringBuffer sb = new StringBuffer("ObservablePreference{");
         sb.append("key='").append(key).append('\'');
         sb.append(", defaultValue=").append(defaultValue);
         sb.append(", value=").append(backingProperty.getValue());
