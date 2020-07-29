@@ -44,10 +44,8 @@ public abstract class ObservablePreference<T> implements ReloadableItemStore.Rel
         this.key = key;
         this.defaultValue = defaultValue;
         this.innerType = innerType;
-
         backingProperty = makeProperty(failSafeLoad());
         backingProperty.addListener((observable, oldValue, newValue) -> failSafeSave(newValue));
-
     }
 
     @Override

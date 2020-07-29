@@ -86,12 +86,16 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
             return new FormattedPropertyEditor<String[]>(item, new TextFormatter<String[]>(new StringConverter<String[]>() {
                 @Override
                 public String toString(String[] object) {
+                    if (object == null) {
+                        object = new String[0];
+                    }
                     return gson.toJson(object);
                 }
 
                 @Override
                 public String[] fromString(String string) {
-                    return gson.fromJson(string, String[].class);
+                    var res = gson.fromJson(string, String[].class);
+                    return res != null ? res : new String[0];
                 }
             }));
         }
