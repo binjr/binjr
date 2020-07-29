@@ -1,0 +1,1 @@
+* _[Fixed]_ A regression that prevents *binjr* from opening RRD files generated with [RrdTools](https://github.com/oetiker/rrdtool-1.x).

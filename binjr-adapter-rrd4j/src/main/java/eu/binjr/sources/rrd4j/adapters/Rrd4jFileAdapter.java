@@ -55,7 +55,7 @@ import java.util.stream.Collectors;
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter {
     private static final Logger logger = LogManager.getLogger(Rrd4jFileAdapter.class);
-    private final RrdDbPool rrdDbMap;
+    private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
     private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();
     private final Rrd4jFileAdapterPreferences prefs =Rrd4jFileAdapterPreferences.getInstance();
@@ -74,10 +74,6 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
      */
     public Rrd4jFileAdapter(List<Path> rrdPath) {
         this.rrdPaths = rrdPath;
-        Path a = Paths.get("");
-        var factory =   RrdBackendFactory.getFactory(prefs.rrd4jBackend.get().toString());
-        logger.debug(()-> "Rrd backend factory= " + factory.getName());
-        rrdDbMap  = new RrdDbPool(factory);
     }
 
     @Override
@@ -105,8 +101,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                         "-",
                         tree.getValue().getTreeHierarchy() + "/" + rrdFileName,
                         this));
-                RrdDb rrd = rrdDbMap.requestRrdDb(rrdPath.toUri());
-
+                RrdDb rrd = openRrdDb(rrdPath);
+                rrdDbMap.put(rrdPath, rrd);
                 for (ConsolFun consolFun : Arrays.stream(rrd.getRrdDef().getArcDefs())
                         .map(ArcDef::getConsolFun)
                         .collect(Collectors.toSet())) {
@@ -149,7 +145,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         Path dsPath = Path.of(path);
         try {
-            var end = Instant.ofEpochSecond(rrdDbMap.requestRrdDb(dsPath.getParent().toUri()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
+            var end = Instant.ofEpochSecond(rrdDbMap.get(dsPath.getParent()).getLastArchiveUpdateTime()).atZone(getTimeZoneId());
             return TimeRange.of(end.minusHours(24), end);
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException("IO Error while retrieving last update from rrd db", e);
@@ -165,7 +161,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         Path dsPath = Path.of(path);
         try {
-            FetchRequest request = rrdDbMap.requestRrdDb(dsPath.getParent().toUri()).createFetchRequest(
+            FetchRequest request = rrdDbMap.get(dsPath.getParent()).createFetchRequest(
                     ConsolFun.valueOf(dsPath.getFileName().toString()),
                     begin.getEpochSecond(),
                     end.getEpochSecond());
@@ -234,11 +230,14 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     private RrdDb openRrdDb(Path rrdPath) throws IOException {
+        var factory  = RrdBackendFactory.getFactory(prefs.rrd4jBackend.get().toString());
+        logger.debug(()-> "Opening rrd file using backend factory= " + factory.getName());
         if ("text/xml".equalsIgnoreCase(Files.probeContentType(rrdPath))) {
             logger.debug(() -> "Attempting to import as an rrd XML dump");
             Path temp = Files.createTempFile("binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
             return RrdDb.getBuilder()
+                    .setBackendFactory(factory)
                     .setPath(temp.toUri())
                     .setReadOnly(true)
                     .setExternalPath(RrdDb.PREFIX_XML + rrdPath.toString())
@@ -246,6 +245,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
         }
         try {
             return RrdDb.getBuilder()
+                    .setBackendFactory(factory)
                     .setPath(rrdPath.toUri())
                     .setReadOnly(true)
                     .build();
@@ -256,6 +256,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
             Path temp = Files.createTempFile("binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
             return RrdDb.getBuilder()
+                    .setBackendFactory(factory)
                     .setPath(temp.toUri())
                     .setReadOnly(true)
                     .setExternalPath(RrdDb.PREFIX_RRDTool + rrdPath.toString())
@@ -264,14 +265,15 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     private void closeRrdDb() {
-        for (var rrdUri : rrdDbMap.getOpenUri()) {
-            logger.debug(() -> "Closing RRD db " + rrdUri);
+        rrdDbMap.forEach((s, rrdDb) -> {
+            logger.debug(() -> "Closing RRD db " + s);
             try {
-                rrdDbMap.requestRrdDb(rrdUri).close();
+                rrdDb.close();
             } catch (IOException e) {
-                logger.error("Error attempting to close RRD db " + rrdUri, e);
+                logger.error("Error attempting to close RRD db " + s, e);
             }
-        }
+        });
+        rrdDbMap.clear();
     }
 
     private void cleanTempFiles() {
