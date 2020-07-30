@@ -241,7 +241,7 @@
 }
 
 
-/* TextField */
+.search-field-outer,
 .text-input, .date-picker .text-input {
     -fx-background-radius: 0, 0;
     -fx-border-color: -binjr-control-border-color;
@@ -254,10 +254,12 @@
     -fx-highlight-text-fill: -fx-text-background-color;
 }
 
+.search-field-outer:hover,
 .text-input:hover, .date-picker .text-input:hover {
     -fx-background-color: #8f8f8f, -binjr-button-background-color;
 }
 
+.search-field-outer:focused,
 .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
     /*     -fx-background-color: #5c5c5c, -binjr-tool-button-background-color;*/
     /* -fx-border-color: -binjr-control-border-color;*/
@@ -1841,5 +1843,9 @@
 
 .styled-text-area .comment {
     -fx-fill: teal;
+}
+
+.styled-text-area .search-result-highlight {
+    -rtfx-background-color: #613214;
 }
 

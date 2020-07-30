@@ -141,3 +141,11 @@
 .styled-text-area {
     -fx-font-size: 10pt;
 }
+
+.search-field-inner {
+    -fx-background-radius: 0;
+    -fx-border-width: 0;
+    -fx-border-color: transparent;
+    -fx-background-color: transparent;
+    -fx-background-insets: 0;
+}

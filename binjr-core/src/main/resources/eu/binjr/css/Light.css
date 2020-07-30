@@ -199,6 +199,7 @@
 
 
 /* TextField */
+.search-field-outer,
 .text-input, .date-picker .text-input {
     -fx-background-radius: 0, 0;
     -fx-border-color: #bababa;
@@ -211,16 +212,19 @@
     -fx-highlight-text-fill: white;
 }
 
+.search-field-outer:hover,
 .text-input:hover, .date-picker .text-input:hover {
     -fx-background-color: #8f8f8f, white;
 }
 
-
+.search-field-outer:focused,
 .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
     /*     -fx-background-color: #5c5c5c, -binjr-button-background-color;*/
     -fx-border-color: -binjr-color-dark-gray;
     /*  -fx-text-fill: black;*/
 }
+
+
 
 /*******************************************************************************
  *                                                                             *
@@ -1612,4 +1616,8 @@
 
 .styled-text-area .comment {
     -fx-fill: #008000;
+}
+
+.styled-text-area .search-result-highlight {
+    -rtfx-background-color: #F8C9AB;
 }
