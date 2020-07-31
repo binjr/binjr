@@ -25,11 +25,11 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
  * @author Frederic Thevenet
  */
 @FunctionalInterface
-public interface TimeSeriesProcessorFactory {
+public interface TimeSeriesProcessorFactory<T> {
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class from the provided {@link TimeSeriesBinding}
      *
      * @return a new instance of the {@link TimeSeriesProcessor} class
      */
-    TimeSeriesProcessor create();
+    TimeSeriesProcessor<T> create();
 }

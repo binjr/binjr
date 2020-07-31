@@ -457,7 +457,7 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
                 for (var b : bindingsHierarchy.getBindings()) {
                     if (b instanceof TimeSeriesBinding) {
                         TimeSeriesBinding tsb = (TimeSeriesBinding) b;
-                        chart.addSeries(TimeSeriesInfo.fromBinding(tsb));
+                        chart.addSeries(TimeSeriesBinding.asTimeSeriesInfo(tsb));
                     }
                 }
 

@@ -45,12 +45,12 @@ import java.util.function.Consumer;
  *
  * @author Frederic Thevenet
  */
-public class CsvDecoder implements Decoder {
+public class CsvDecoder implements Decoder<Double> {
     private final String encoding;
     private final char delimiter;
     private final CheckedFunction<String, Double, DecodingDataFromAdapterException> numberParser;
     private final CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser;
-    private final TimeSeriesProcessorFactory timeSeriesFactory;
+    private final TimeSeriesProcessorFactory<Double> timeSeriesFactory;
     private static final Logger logger = Logger.create(CsvDecoder.class);
 
     /**
@@ -63,7 +63,7 @@ public class CsvDecoder implements Decoder {
      */
     public CsvDecoder(String encoding,
                       char delimiter,
-                      TimeSeriesProcessorFactory timeSeriesFactory,
+                      TimeSeriesProcessorFactory<Double> timeSeriesFactory,
                       CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser) {
         this(encoding, delimiter, timeSeriesFactory, null, dateParser);
     }
@@ -79,7 +79,7 @@ public class CsvDecoder implements Decoder {
      */
     public CsvDecoder(String encoding,
                       char delimiter,
-                      TimeSeriesProcessorFactory timeSeriesFactory,
+                      TimeSeriesProcessorFactory<Double> timeSeriesFactory,
                       CheckedFunction<String, Double, DecodingDataFromAdapterException> numberParser,
                       CheckedFunction<String, ZonedDateTime, DecodingDataFromAdapterException> dateParser) {
         this.encoding = encoding;
@@ -116,7 +116,7 @@ public class CsvDecoder implements Decoder {
     }
 
     @Override
-    public Map<TimeSeriesInfo, TimeSeriesProcessor> decode(InputStream in, List<TimeSeriesInfo> seriesInfo) throws IOException, DecodingDataFromAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> decode(InputStream in, List<TimeSeriesInfo<Double>> seriesInfo) throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::perf)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
                 CSVFormat csvFormat = CSVFormat.DEFAULT
@@ -125,15 +125,15 @@ public class CsvDecoder implements Decoder {
                         .withSkipHeaderRecord()
                         .withDelimiter(delimiter);
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
-                Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
+                Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
                 for (CSVRecord csvRecord : records) {
                     nbpoints.incrementAndGet();
                     ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
-                    for (TimeSeriesInfo info : seriesInfo) {
+                    for (TimeSeriesInfo<Double> info : seriesInfo) {
                         Double val = numberParser.apply(csvRecord.get(info.getBinding().getLabel()));
                         XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
-                        TimeSeriesProcessor l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
+                        TimeSeriesProcessor<Double> l = series.computeIfAbsent(info, k -> timeSeriesFactory.create());
                         l.addSample(point);
                     }
                 }
@@ -222,9 +222,9 @@ public class CsvDecoder implements Decoder {
         }
     }
 
-    private TimeSeriesInfo getBindingFromName(List<TimeSeriesInfo> seriesInfo, String seriesName) {
+    private TimeSeriesInfo<Double> getBindingFromName(List<TimeSeriesInfo<Double>> seriesInfo, String seriesName) {
         if (seriesInfo != null) {
-            for (TimeSeriesInfo b : seriesInfo) {
+            for (TimeSeriesInfo<Double> b : seriesInfo) {
                 if (b.getBinding().getLabel().equalsIgnoreCase(seriesName)) {
                     return b;
                 }

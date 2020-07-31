@@ -177,7 +177,7 @@ public class NetdataAdapter extends HttpDataAdapter {
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
         Chart chart = doHttpGet(craftRequestUri(path.replace("/data?", "/chart?")), response ->
                 jsonParser.fromJson(EntityUtils.toString(response.getEntity()), Chart.class)
         );

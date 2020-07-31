@@ -1845,7 +1845,7 @@
     -fx-fill: teal;
 }
 
-.styled-text-area .search-result-highlight {
-    -rtfx-background-color: #613214;
-}
+/*.styled-text-area .search-result-highlight {*/
+/*    -rtfx-background-color: #613214;*/
+/*}*/
 

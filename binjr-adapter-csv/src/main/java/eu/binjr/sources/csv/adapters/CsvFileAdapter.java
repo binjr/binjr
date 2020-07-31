@@ -54,7 +54,7 @@ import java.util.concurrent.ConcurrentSkipListMap;
  *
  * @author Frederic Thevenet
  */
-public class CsvFileAdapter extends BaseDataAdapter {
+public class CsvFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = Logger.create(CsvFileAdapter.class);
     private String dateTimePattern;
     private Path csvPath;
@@ -134,7 +134,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
@@ -143,13 +143,13 @@ public class CsvFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
-        Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
-        Map<String, List<TimeSeriesInfo>> rDict = new HashMap<>();
-        for (TimeSeriesInfo info : seriesInfo) {
+        Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
+        Map<String, List<TimeSeriesInfo<Double>>> rDict = new HashMap<>();
+        for (TimeSeriesInfo<Double> info : seriesInfo) {
             rDict.computeIfAbsent(info.getBinding().getLabel(), s -> new ArrayList<>()).add(info);
             series.put(info, new DoubleTimeSeriesProcessor());
         }
@@ -157,7 +157,7 @@ public class CsvFileAdapter extends BaseDataAdapter {
         Long toKey = Objects.requireNonNullElse(getDataStore().ceilingKey(end.toEpochMilli()), end.toEpochMilli());
         for (DataSample sample : getDataStore().subMap(fromKey, true, toKey, true).values()) {
             for (String n : sample.getCells().keySet()) {
-                List<TimeSeriesInfo> timeSeriesInfoList = rDict.get(n);
+                List<TimeSeriesInfo<Double>> timeSeriesInfoList = rDict.get(n);
                 if (timeSeriesInfoList != null) {
                     for (var tsInfo : timeSeriesInfoList) {
                         series.get(tsInfo).addSample(sample.getTimeStamp(), sample.getCells().get(n));

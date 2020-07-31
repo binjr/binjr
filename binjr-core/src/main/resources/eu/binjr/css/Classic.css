@@ -397,7 +397,7 @@
     -fx-fill: #008000;
 }
 
-.styled-text-area .search-result-highlight {
-    -rtfx-background-color: yellow;
-}
+/*.styled-text-area .search-result-highlight {*/
+/*    -rtfx-background-color: yellow;*/
+/*}*/
 

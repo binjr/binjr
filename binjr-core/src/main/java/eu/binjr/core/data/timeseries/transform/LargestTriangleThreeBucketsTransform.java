@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransform {
+public class LargestTriangleThreeBucketsTransform extends BaseTimeSeriesTransform<Double> {
     protected final int threshold;
     private static final Logger logger = Logger.create(LargestTriangleThreeBucketsTransform.class);
 

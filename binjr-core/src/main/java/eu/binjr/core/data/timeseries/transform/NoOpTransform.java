@@ -21,9 +21,9 @@ import javafx.scene.chart.XYChart;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public class NoOpTransform implements TimeSeriesTransform {
+public class NoOpTransform<T> implements TimeSeriesTransform<T> {
     @Override
-    public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
+    public List<XYChart.Data<ZonedDateTime, T>> transform(List<XYChart.Data<ZonedDateTime, T>> data) {
         return data;
     }
 
@@ -42,7 +42,7 @@ public class NoOpTransform implements TimeSeriesTransform {
     }
 
     @Override
-    public TimeSeriesTransform getNextPassTransform() {
+    public TimeSeriesTransform<T> getNextPassTransform() {
         return null;
     }
 

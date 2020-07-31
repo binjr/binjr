@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class DecimationTransform extends BaseTimeSeriesTransform {
+public class DecimationTransform extends BaseTimeSeriesTransform<Double> {
     private final int threshold;
     private static final Logger logger = Logger.create(DecimationTransform.class);
     /**

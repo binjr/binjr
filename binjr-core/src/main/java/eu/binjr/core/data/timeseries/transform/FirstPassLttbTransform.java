@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class FirstPassLttbTransform extends BaseTimeSeriesTransform {
+public class FirstPassLttbTransform extends BaseTimeSeriesTransform<Double> {
     protected final int threshold;
     private final List<Double[]> seriesValues;
     private ZonedDateTime[] timeStamps;

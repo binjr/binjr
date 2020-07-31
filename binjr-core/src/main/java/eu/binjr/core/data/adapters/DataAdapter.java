@@ -36,7 +36,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public interface DataAdapter extends AutoCloseable {
+public interface DataAdapter<T> extends AutoCloseable {
     /**
      * Return a hierarchical view of all the individual bindings exposed by the underlying source.
      *
@@ -56,7 +56,7 @@ public interface DataAdapter extends AutoCloseable {
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache) throws DataAdapterException;
+    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException;
 
     /**
      * Gets the encoding used to decode textual data sent by the source.
@@ -152,7 +152,7 @@ public interface DataAdapter extends AutoCloseable {
      * @return the {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with
      * @throws DataAdapterException if an error occurs.
      */
-    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
+    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<T>> seriesInfo) throws DataAdapterException {
         var end = ZonedDateTime.now(getTimeZoneId());
         return TimeRange.of(end.minusHours(24), end);
     }

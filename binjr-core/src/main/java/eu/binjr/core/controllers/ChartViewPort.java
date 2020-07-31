@@ -42,7 +42,7 @@ public class ChartViewPort implements Closeable {
     private final XYChart<ZonedDateTime, Double> chart;
     private ChartPropertiesController propertiesController;
     private final PrefixFormatter prefixFormatter;
-    private final TableView<TimeSeriesInfo> seriesTable;
+    private final TableView<TimeSeriesInfo<Double>> seriesTable;
     private static final Logger logger = Logger.create(ChartViewPort.class);
     private final AtomicBoolean closing = new AtomicBoolean(false);
     private final BooleanProperty selected = new SimpleBooleanProperty(false);
@@ -116,7 +116,7 @@ public class ChartViewPort implements Closeable {
      *
      * @return the table view control holding the series info.
      */
-    public TableView<TimeSeriesInfo> getSeriesTable() {
+    public TableView<TimeSeriesInfo<Double>> getSeriesTable() {
         return seriesTable;
     }
 

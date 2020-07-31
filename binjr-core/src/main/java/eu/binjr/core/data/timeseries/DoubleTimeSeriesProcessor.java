@@ -26,7 +26,7 @@ import java.util.OptionalDouble;
  *
  * @author Frederic Thevenet
  */
-public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor {
+public class DoubleTimeSeriesProcessor extends TimeSeriesProcessor<Double> {
 
     /**
      * Initializes a new instance of the {@link DoubleTimeSeriesProcessor} class with the provided binding.

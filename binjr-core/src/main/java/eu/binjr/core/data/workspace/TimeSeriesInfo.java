@@ -34,7 +34,7 @@ import javax.xml.bind.annotation.*;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Timeseries")
-public class TimeSeriesInfo implements Dirtyable {
+public class TimeSeriesInfo<T> implements Dirtyable {
     @IsDirtyable
     private final StringProperty displayName;
     @IsDirtyable
@@ -42,9 +42,9 @@ public class TimeSeriesInfo implements Dirtyable {
     @IsDirtyable
     private final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
-    private final SourceBinding binding;
+    private final SourceBinding<T> binding;
     private final ChangeWatcher status;
-    private Property<TimeSeriesProcessor> processor = new SimpleObjectProperty<>();
+    private final Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
     /**
      * Parameter-less constructor (needed for XMl serialization)
@@ -65,7 +65,7 @@ public class TimeSeriesInfo implements Dirtyable {
      *
      * @param seriesInfo the {@link TimeSeriesInfo} instance to clone.
      */
-    public TimeSeriesInfo(TimeSeriesInfo seriesInfo) {
+    public TimeSeriesInfo(TimeSeriesInfo<T> seriesInfo) {
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 seriesInfo.getDisplayColor(),
@@ -80,32 +80,16 @@ public class TimeSeriesInfo implements Dirtyable {
      * @param displayColor the color of the series
      * @param binding      the {@link TimeSeriesBinding}  for the series
      */
-    private TimeSeriesInfo(String displayName,
+    public TimeSeriesInfo(String displayName,
                            Boolean selected,
                            Color displayColor,
-                           SourceBinding binding) {
+                           SourceBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
         this.displayColor = new SimpleObjectProperty<>(displayColor);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
-    }
-
-    /**
-     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     *
-     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
-     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     */
-    public static TimeSeriesInfo fromBinding(TimeSeriesBinding binding) {
-        if (binding == null) {
-            throw new IllegalArgumentException("binding cannot be null");
-        }
-        return new TimeSeriesInfo(binding.getLegend(),
-                true,
-                binding.getColor(),
-                binding);
     }
 
     /**
@@ -197,7 +181,7 @@ public class TimeSeriesInfo implements Dirtyable {
      *
      * @return the {@link TimeSeriesBinding} to get the data from
      */
-    public SourceBinding getBinding() {
+    public SourceBinding<T> getBinding() {
         return binding;
     }
 
@@ -207,7 +191,7 @@ public class TimeSeriesInfo implements Dirtyable {
      * @return the data processor for the series
      */
     @XmlTransient
-    public TimeSeriesProcessor getProcessor() {
+    public TimeSeriesProcessor<T> getProcessor() {
         return processor.getValue();
     }
 
@@ -216,7 +200,7 @@ public class TimeSeriesInfo implements Dirtyable {
      *
      * @param processor the data processor for the series
      */
-    public void setProcessor(TimeSeriesProcessor processor) {
+    public void setProcessor(TimeSeriesProcessor<T> processor) {
         this.processor.setValue(processor);
     }
 
@@ -225,7 +209,7 @@ public class TimeSeriesInfo implements Dirtyable {
      *
      * @return The processor property.
      */
-    public Property<TimeSeriesProcessor> processorProperty() {
+    public Property<TimeSeriesProcessor<T>> processorProperty() {
         return this.processor;
     }
 

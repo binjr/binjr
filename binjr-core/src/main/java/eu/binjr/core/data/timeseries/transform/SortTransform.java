@@ -22,7 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-public class SortTransform extends BaseTimeSeriesTransform {
+public class SortTransform extends BaseTimeSeriesTransform<Double> {
 
     /**
      * Base constructor for {@link BaseTimeSeriesTransform} instances.

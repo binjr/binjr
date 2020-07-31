@@ -28,7 +28,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
+public abstract class BaseTimeSeriesTransform<T> implements TimeSeriesTransform<T> {
     private static final Logger logger = Logger.create(BaseTimeSeriesTransform.class);
     private final String name;
     private volatile boolean enabled = true;
@@ -49,10 +49,10 @@ public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
      * @return the actual transform implementation
      */
 
-    protected abstract List<XYChart.Data<ZonedDateTime, Double>> apply(List<XYChart.Data<ZonedDateTime, Double>> data);
+    protected abstract List<XYChart.Data<ZonedDateTime, T>> apply(List<XYChart.Data<ZonedDateTime, T>> data);
 
     @Override
-    public List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data) {
+    public List<XYChart.Data<ZonedDateTime, T>> transform(List<XYChart.Data<ZonedDateTime, T>> data) {
         if (isEnabled()) {
             try (Profiler ignored = Profiler.start("Applying transform " + getName(), logger::perf)) {
                 return apply(data);
@@ -79,7 +79,7 @@ public abstract class BaseTimeSeriesTransform implements TimeSeriesTransform {
     }
 
     @Override
-    public TimeSeriesTransform getNextPassTransform() {
-        return new NoOpTransform();
+    public TimeSeriesTransform<T> getNextPassTransform() {
+        return new NoOpTransform<T>();
     }
 }

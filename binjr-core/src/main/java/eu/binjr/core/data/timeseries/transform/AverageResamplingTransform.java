@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 //FIXME: This introduce a right-shift to the series.
-public final class AverageResamplingTransform extends BaseTimeSeriesTransform {
+public final class AverageResamplingTransform extends BaseTimeSeriesTransform<Double> {
     private static final Logger logger = Logger.create(AverageResamplingTransform.class);
     private final int threshold;
 

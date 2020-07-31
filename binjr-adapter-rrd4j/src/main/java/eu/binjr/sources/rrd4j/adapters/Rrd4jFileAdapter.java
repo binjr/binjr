@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class Rrd4jFileAdapter extends BaseDataAdapter {
+public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = Logger.create(Rrd4jFileAdapter.class);
     private final Rrd4jFileAdapterPreferences prefs = Rrd4jFileAdapterPreferences.getInstance();
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
@@ -119,7 +119,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
         }
@@ -133,8 +133,8 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
     }
 
     @Override
-    public Map<TimeSeriesInfo, TimeSeriesProcessor> fetchData(String path, Instant begin, Instant
-            end, List<TimeSeriesInfo> seriesInfo, boolean bypassCache)
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant
+            end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache)
             throws DataAdapterException {
         if (this.isClosed()) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
@@ -147,13 +147,13 @@ public class Rrd4jFileAdapter extends BaseDataAdapter {
                     end.getEpochSecond());
             request.setFilter(seriesInfo.stream().map(s -> s.getBinding().getLabel()).toArray(String[]::new));
             FetchData data = request.fetchData();
-            Map<TimeSeriesInfo, TimeSeriesProcessor> series = new HashMap<>();
+            Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
             for (int i = 0; i < data.getRowCount(); i++) {
                 ZonedDateTime timeStamp = Instant.ofEpochSecond(data.getTimestamps()[i]).atZone(getTimeZoneId());
-                for (TimeSeriesInfo info : seriesInfo) {
+                for (TimeSeriesInfo<Double> info : seriesInfo) {
                     Double val = data.getValues(info.getBinding().getLabel())[i];
                     XYChart.Data<ZonedDateTime, Double> point = new XYChart.Data<>(timeStamp, val);
-                    TimeSeriesProcessor seriesProcessor =
+                    TimeSeriesProcessor<Double> seriesProcessor =
                             series.computeIfAbsent(info, k -> new DoubleTimeSeriesProcessor());
                     seriesProcessor.addSample(point);
                 }

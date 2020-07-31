@@ -149,3 +149,8 @@
     -fx-background-color: transparent;
     -fx-background-insets: 0;
 }
+
+.styled-text-area .search-result-highlight {
+    -fx-fill: red;
+    -rtfx-background-color: yellow;
+}

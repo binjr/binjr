@@ -29,7 +29,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class SecondPassLttbTransform extends BaseTimeSeriesTransform {
+public class SecondPassLttbTransform extends BaseTimeSeriesTransform<Double> {
     protected final int threshold;
     private final boolean[] whiteList;
     private static final Logger logger = Logger.create(SecondPassLttbTransform.class);

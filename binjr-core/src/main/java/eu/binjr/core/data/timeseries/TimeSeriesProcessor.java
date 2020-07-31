@@ -34,10 +34,10 @@ import java.util.Optional;
  *
  * @author Frederic Thevenet
  */
-public abstract class TimeSeriesProcessor {
+public abstract class TimeSeriesProcessor<T> {
     private static final Logger logger = Logger.create(TimeSeriesProcessor.class);
     private final ReadWriteLockHelper monitor = new ReadWriteLockHelper();
-    protected List<XYChart.Data<ZonedDateTime, Double>> data;
+    protected List<XYChart.Data<ZonedDateTime, T>> data;
 
     /**
      * Initializes a new instance of the {@link TimeSeriesProcessor} class with the provided {@link TimeSeriesBinding}.
@@ -51,7 +51,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @return the minimum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final Double getMinValue() {
+    public final T getMinValue() {
         return monitor.read().lock(this::computeMinValue);
     }
 
@@ -60,7 +60,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @return the average for all Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final Double getAverageValue() {
+    public final T getAverageValue() {
         return monitor.read().lock(this::computeAverageValue);
     }
 
@@ -69,7 +69,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @return the maximum value for the Y coordinates of the {@link TimeSeriesProcessor}
      */
-    public final Double getMaxValue() {
+    public final T getMaxValue() {
         return monitor.read().lock(this::computeMaxValue);
     }
 
@@ -81,7 +81,7 @@ public abstract class TimeSeriesProcessor {
      * @param xValue the time stamp to get the value for.
      * @return An {@link Optional} instance that contains tthe value for the time position nearest to the one requested if process could complete and value is non-null.
      */
-    public Optional<Double> tryGetNearestValue(ZonedDateTime xValue) {
+    public Optional<T> tryGetNearestValue(ZonedDateTime xValue) {
         // If the lock is already acquired, just abandon the request and return Optional.empty
         return monitor.read().tryLock(this::unsyncedGetNearestValue, xValue);
     }
@@ -94,7 +94,7 @@ public abstract class TimeSeriesProcessor {
      * @param xValue the time stamp to get the value for.
      * @return the value for the time position nearest to the one requested.
      */
-    public Double getNearestValue(ZonedDateTime xValue) {
+    public T getNearestValue(ZonedDateTime xValue) {
         return monitor.read().lock(this::unsyncedGetNearestValue, xValue);
     }
 
@@ -108,7 +108,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @return the data of the {@link TimeSeriesProcessor}
      */
-    public Collection<XYChart.Data<ZonedDateTime, Double>> getData() {
+    public Collection<XYChart.Data<ZonedDateTime, T>> getData() {
         return monitor.read().lock(() -> new ArrayList<>(data));
     }
 
@@ -117,7 +117,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @param newData the list of {@link XYChart.Data} points to use as the {@link TimeSeriesProcessor}' data.
      */
-    public void setData(Collection<XYChart.Data<ZonedDateTime, Double>> newData) {
+    public void setData(Collection<XYChart.Data<ZonedDateTime, T>> newData) {
         monitor.write().lock(() -> this.data = new ArrayList<>(newData));
     }
 
@@ -127,7 +127,7 @@ public abstract class TimeSeriesProcessor {
      * @param index the index of the sample to retrieve.
      * @return the data sample at the given index.
      */
-    public XYChart.Data<ZonedDateTime, Double> getSample(int index) {
+    public XYChart.Data<ZonedDateTime, T> getSample(int index) {
         return monitor.read().lock(() -> this.data.get(index));
     }
 
@@ -145,7 +145,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @param sample a new sample to add to the processor's data store
      */
-    public void addSample(XYChart.Data<ZonedDateTime, Double> sample) {
+    public void addSample(XYChart.Data<ZonedDateTime, T> sample) {
         monitor.write().lock(() -> this.data.add(sample));
     }
 
@@ -155,7 +155,7 @@ public abstract class TimeSeriesProcessor {
      * @param timestamp the timestamp of the sample
      * @param value     the value of the sample
      */
-    public void addSample(ZonedDateTime timestamp, Double value) {
+    public void addSample(ZonedDateTime timestamp, T value) {
         addSample(new XYChart.Data<>(timestamp, value));
     }
 
@@ -164,7 +164,7 @@ public abstract class TimeSeriesProcessor {
      *
      * @param seriesTransforms A list of transformation to apply.
      */
-    public void applyTransforms(TimeSeriesTransform... seriesTransforms) {
+    public void applyTransforms(TimeSeriesTransform<T>... seriesTransforms) {
         if (!data.isEmpty()) {
             for (var t : seriesTransforms) {
                 setData(monitor.write().lock(() -> t.transform(data)));
@@ -174,16 +174,16 @@ public abstract class TimeSeriesProcessor {
         }
     }
 
-    protected abstract Double computeMinValue();
+    protected abstract T computeMinValue();
 
-    protected abstract Double computeAverageValue();
+    protected abstract T computeAverageValue();
 
-    protected abstract Double computeMaxValue();
+    protected abstract T computeMaxValue();
 
-    private Double unsyncedGetNearestValue(ZonedDateTime xValue) {
-        Double value = null;
+    private T unsyncedGetNearestValue(ZonedDateTime xValue) {
+        T value = null;
         if (xValue != null && data != null) {
-            var previous = new XYChart.Data<>(xValue, 0.0);
+            var previous = new XYChart.Data<ZonedDateTime,T>(xValue,null);
             for (var sample : data) {
                 value = sample.getYValue();
                 if (xValue.isBefore(sample.getXValue())) {

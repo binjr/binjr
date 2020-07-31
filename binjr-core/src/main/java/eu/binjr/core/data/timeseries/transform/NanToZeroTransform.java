@@ -22,7 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NanToZeroTransform extends BaseTimeSeriesTransform {
+public class NanToZeroTransform extends BaseTimeSeriesTransform<Double> {
 
     /**
      * Base constructor for {@link BaseTimeSeriesTransform} instances.

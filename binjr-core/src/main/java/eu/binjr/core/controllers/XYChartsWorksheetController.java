@@ -96,7 +96,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    private static PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
@@ -107,7 +107,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private List<ChartViewPort> viewPorts = new ArrayList<>();
     private XYChartsWorksheet worksheet;
     private volatile boolean preventReload = false;
-    private AtomicBoolean closed = new AtomicBoolean(false);
+    private final AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
     private Pane chartParent;
     @FXML
@@ -158,15 +158,15 @@ public class XYChartsWorksheetController extends WorksheetController {
     private VBox screenshotCanvas;
     private Profiler worksheetRefreshProfiler = null;
 
-    public XYChartsWorksheetController(MainViewController parentController, XYChartsWorksheet worksheet, Collection<DataAdapter> sourcesAdapters)
+    public XYChartsWorksheetController(MainViewController parentController, XYChartsWorksheet worksheet, Collection<DataAdapter<Double>> sourcesAdapters)
             throws NoAdapterFoundException {
         super(parentController);
         this.worksheet = worksheet;
         // Attach bindings
         for (Chart chart : worksheet.getCharts()) {
-            for (TimeSeriesInfo s : chart.getSeries()) {
+            for (TimeSeriesInfo<Double> s : chart.getSeries()) {
                 UUID id = s.getBinding().getAdapterId();
-                DataAdapter da = sourcesAdapters
+                DataAdapter<Double> da = sourcesAdapters
                         .stream()
                         .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                         .findAny()
@@ -196,7 +196,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     );
                     for (var b : TreeViewUtils.flattenLeaves(t)) {
                         if (b instanceof TimeSeriesBinding) {
-                            chart.addSeries(TimeSeriesInfo.fromBinding((TimeSeriesBinding) b));
+                            chart.addSeries(TimeSeriesBinding.asTimeSeriesInfo((TimeSeriesBinding) b));
                             totalBindings++;
                         }
                     }
@@ -661,7 +661,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         for (ChartViewPort currentViewPort : viewPorts) {
             currentViewPort.getSeriesTable().getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
             CheckBox showAllCheckBox = new CheckBox();
-            TableColumn<TimeSeriesInfo, Boolean> visibleColumn = new TableColumn<>();
+            TableColumn<TimeSeriesInfo<Double>, Boolean> visibleColumn = new TableColumn<>();
             visibleColumn.setGraphic(showAllCheckBox);
             visibleColumn.setSortable(false);
             visibleColumn.setResizable(false);
@@ -669,7 +669,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             InvalidationListener isVisibleListener = (observable) -> {
                 boolean andAll = true;
                 boolean orAll = false;
-                for (TimeSeriesInfo t : currentViewPort.getDataStore().getSeries()) {
+                for (TimeSeriesInfo<Double> t : currentViewPort.getDataStore().getSeries()) {
                     andAll &= t.isSelected();
                     orAll |= t.isSelected();
                 }
@@ -710,41 +710,41 @@ public class XYChartsWorksheetController extends WorksheetController {
                 currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
             }));
 
-            DecimalFormatTableCellFactory<TimeSeriesInfo, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+            DecimalFormatTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
             alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
 
-            TableColumn<TimeSeriesInfo, Color> colorColumn = new TableColumn<>();
+            TableColumn<TimeSeriesInfo<Double>, Color> colorColumn = new TableColumn<>();
             colorColumn.setSortable(false);
             colorColumn.setResizable(false);
             colorColumn.setPrefWidth(32);
 
-            TableColumn<TimeSeriesInfo, Boolean> nameColumn = new TableColumn<>("Name");
+            TableColumn<TimeSeriesInfo<Double>, Boolean> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
-            TableColumn<TimeSeriesInfo, String> minColumn = new TableColumn<>("Min.");
+            TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
             minColumn.setPrefWidth(75);
             minColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo, String> maxColumn = new TableColumn<>("Max.");
+            TableColumn<TimeSeriesInfo<Double>, String> maxColumn = new TableColumn<>("Max.");
             maxColumn.setSortable(false);
             maxColumn.setPrefWidth(75);
             maxColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo, String> avgColumn = new TableColumn<>("Avg.");
+            TableColumn<TimeSeriesInfo<Double>, String> avgColumn = new TableColumn<>("Avg.");
             avgColumn.setSortable(false);
             avgColumn.setPrefWidth(75);
             avgColumn.setCellFactory(alignRightCellFactory);
 
-            TableColumn<TimeSeriesInfo, String> currentColumn = new TableColumn<>("Current");
+            TableColumn<TimeSeriesInfo<Double>, String> currentColumn = new TableColumn<>("Current");
             currentColumn.setSortable(false);
             currentColumn.setPrefWidth(75);
             currentColumn.setCellFactory(alignRightCellFactory);
             currentColumn.getStyleClass().add("column-bold-text");
 
-            TableColumn<TimeSeriesInfo, String> pathColumn = new TableColumn<>("Path");
+            TableColumn<TimeSeriesInfo<Double>, String> pathColumn = new TableColumn<>("Path");
             pathColumn.setSortable(false);
             pathColumn.setPrefWidth(400);
 
@@ -1188,7 +1188,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void addBindings(Collection<SourceBinding> sourceBindings, Chart targetChart) {
         Collection<TimeSeriesBinding> timeSeriesBindings = new ArrayList<>();
-        for (SourceBinding sb : sourceBindings) {
+        for (var sb : sourceBindings) {
             if (sb instanceof TimeSeriesBinding) {
                 timeSeriesBindings.add((TimeSeriesBinding) sb);
             }
@@ -1205,7 +1205,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
                 boolean andAll = true;
                 boolean orAll = false;
-                for (TimeSeriesInfo t : targetChart.getSeries()) {
+                for (TimeSeriesInfo<Double> t : targetChart.getSeries()) {
                     andAll &= t.isSelected();
                     orAll |= t.isSelected();
                 }
@@ -1215,7 +1215,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             });
         };
         for (TimeSeriesBinding b : timeSeriesBindings) {
-            TimeSeriesInfo newSeries = TimeSeriesInfo.fromBinding(b);
+            TimeSeriesInfo<Double> newSeries = TimeSeriesBinding.asTimeSeriesInfo(b);
             bindingManager.attachListener(newSeries.selectedProperty(),
                     (observable, oldValue, newValue) ->
                             viewPorts.stream()
@@ -1240,8 +1240,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         invalidateAll(false, false, false);
     }
 
-    private void removeSelectedBinding(TableView<TimeSeriesInfo> seriesTable) {
-        List<TimeSeriesInfo> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
+    private void removeSelectedBinding(TableView<TimeSeriesInfo<Double>> seriesTable) {
+        List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
         seriesTable.getItems().removeAll(selected);
         seriesTable.getSelectionModel().clearSelection();
         invalidateAll(false, false, false);
@@ -1354,7 +1354,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo series) {
+    private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.setName(series.getDisplayName());
@@ -1476,8 +1476,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         throw new IllegalStateException("Could not retreive selected viewport on current worksheet");
     }
 
-    private TableRow<TimeSeriesInfo> seriesTableRowFactory(TableView<TimeSeriesInfo> tv) {
-        TableRow<TimeSeriesInfo> row = new TableRow<>();
+    private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
+        TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
         row.setOnDragDetected(bindingManager.registerHandler(event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
@@ -1502,7 +1502,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                TimeSeriesInfo draggedseries = tv.getItems().remove(draggedIndex);
+                TimeSeriesInfo<Double> draggedseries = tv.getItems().remove(draggedIndex);
                 int dropIndex;
                 if (row.isEmpty()) {
                     dropIndex = tv.getItems().size();

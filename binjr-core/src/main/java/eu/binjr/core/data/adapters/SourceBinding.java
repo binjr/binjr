@@ -23,7 +23,7 @@ import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
-public abstract class SourceBinding {
+public abstract class SourceBinding<T> {
     @XmlAttribute(name = "sourceId")
     protected final UUID adapterId;
     @XmlAttribute
@@ -35,7 +35,7 @@ public abstract class SourceBinding {
     @XmlAttribute
     protected final String legend;
     @XmlTransient
-    protected DataAdapter adapter;
+    protected DataAdapter<T> adapter;
 
     protected SourceBinding() {
         this.adapter = null;
@@ -46,12 +46,12 @@ public abstract class SourceBinding {
         this.legend = "";
     }
 
-    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter adapter) {
+    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter) {
         this(label, legend , path, treeHierarchy, adapter, null);
     }
 
 
-    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter adapter, UUID adapterId) {
+    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
         this.treeHierarchy = treeHierarchy;
@@ -88,11 +88,11 @@ public abstract class SourceBinding {
      * @return the {@link SerializedDataAdapter} of the binding
      */
     @XmlTransient
-    public DataAdapter getAdapter() {
+    public DataAdapter<T> getAdapter() {
         return this.adapter;
     }
 
-    public void setAdapter(DataAdapter adapter) {
+    public void setAdapter(DataAdapter<T> adapter) {
         this.adapter = adapter;
     }
 
@@ -130,16 +130,16 @@ public abstract class SourceBinding {
 
     public abstract Class<? extends Worksheet> getWorksheetClass();
 
-    public abstract static class Builder<T extends SourceBinding, B extends Builder<T,B>> {
+    public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T,S,B>> {
         private String label = "";
         private String path = "";
         private String legend = null;
-        private DataAdapter adapter;
+        private DataAdapter<T> adapter;
         private String parent = "";
 
         protected abstract B self();
 
-        public B withAdapter(DataAdapter adapter) {
+        public B withAdapter(DataAdapter<T> adapter) {
             this.adapter =adapter;
             return self();
         }
@@ -160,18 +160,18 @@ public abstract class SourceBinding {
         }
 
 
-        public B withParent(SourceBinding parent) {
+        public B withParent(SourceBinding<T> parent) {
             this.parent = parent.getTreeHierarchy();
             return self();
         }
 
-        public T build()        {
+        public S build()        {
             if (legend == null) {
                 legend = label;
             }
             return construct(label, legend, path, parent + "/" + legend, adapter);
         }
 
-        protected abstract T construct(String label, String legend, String path, String treeHierarchy, DataAdapter adapter);
+        protected abstract S construct(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter);
     }
 }

@@ -19,6 +19,7 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
@@ -58,7 +59,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
     private transient final ChangeWatcher status;
     @IsDirtyable
-    private ObservableList<TimeSeriesInfo> series;
+    private ObservableList<TimeSeriesInfo<Double>> series;
     @IsDirtyable
     private Property<String> name;
     @IsDirtyable
@@ -134,7 +135,7 @@ public class Chart implements Dirtyable, AutoCloseable {
         this(initChart.getName(),
                 initChart.getChartType(),
                 initChart.getSeries().stream()
-                        .map(TimeSeriesInfo::new)
+                        .map(TimeSeriesInfo<Double>::new)
                         .collect(Collectors.toCollection(() -> FXCollections.observableList(new LinkedList<>()))),
                 initChart.getUnit(),
                 initChart.getUnitPrefixes(),
@@ -149,7 +150,7 @@ public class Chart implements Dirtyable, AutoCloseable {
 
     private Chart(String name,
                   ChartType chartType,
-                  List<TimeSeriesInfo> bindings,
+                  List<TimeSeriesInfo<Double>> bindings,
                   String unitName,
                   UnitPrefixes base,
                   double graphOpacity,
@@ -237,7 +238,7 @@ public class Chart implements Dirtyable, AutoCloseable {
             var reduce = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
                     userPref.downSamplingThreshold.get().intValue());
             reduce.setEnabled(userPref.downSamplingEnabled.get());
-            var adapter = byAdapterEntry.getKey();
+            DataAdapter<Double> adapter = (DataAdapter<Double>) byAdapterEntry.getKey();
             var sort = new SortTransform();
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
@@ -312,7 +313,7 @@ public class Chart implements Dirtyable, AutoCloseable {
      *
      * @param seriesInfo the {@link TimeSeriesInfo} to add
      */
-    public void addSeries(TimeSeriesInfo seriesInfo) {
+    public void addSeries(TimeSeriesInfo<Double> seriesInfo) {
         series.add(seriesInfo);
     }
 
@@ -321,7 +322,7 @@ public class Chart implements Dirtyable, AutoCloseable {
      *
      * @param seriesInfo the collection {@link TimeSeriesInfo} to add
      */
-    public void addSeries(Collection<TimeSeriesInfo> seriesInfo) {
+    public void addSeries(Collection<TimeSeriesInfo<Double>> seriesInfo) {
         this.series.addAll(seriesInfo);
     }
 
@@ -330,7 +331,7 @@ public class Chart implements Dirtyable, AutoCloseable {
      *
      * @param seriesInfo the list of {@link Chart} instances to remove
      */
-    public void removeSeries(Collection<TimeSeriesInfo> seriesInfo) {
+    public void removeSeries(Collection<TimeSeriesInfo<Double>> seriesInfo) {
         series.removeAll(seriesInfo);
     }
 
@@ -379,7 +380,7 @@ public class Chart implements Dirtyable, AutoCloseable {
     //   @XmlTransient
     @XmlElementWrapper(name = "SeriesList")
     @XmlElements(@XmlElement(name = "Timeseries"))
-    public ObservableList<TimeSeriesInfo> getSeries() {
+    public ObservableList<TimeSeriesInfo<Double>> getSeries() {
         return series;
     }
 

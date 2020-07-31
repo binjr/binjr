@@ -32,7 +32,7 @@ import java.util.List;
  *
  * @author Frederic Thevenet
  */
-public class AlignBoundariesTransform extends BaseTimeSeriesTransform {
+public class AlignBoundariesTransform extends BaseTimeSeriesTransform<Double> {
 
     private double substituteValue = Double.NaN;
     private final ZonedDateTime startTime;

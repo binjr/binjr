@@ -21,14 +21,14 @@ import javafx.scene.chart.XYChart;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-public interface TimeSeriesTransform {
+public interface TimeSeriesTransform<T> {
     /**
      * Applies the transform function to the provided series
      *
      * @param data The data on which the transform should be applied.
      * @return A map of the transformed series.
      */
-    List<XYChart.Data<ZonedDateTime, Double>> transform(List<XYChart.Data<ZonedDateTime, Double>> data);
+    List<XYChart.Data<ZonedDateTime, T>> transform(List<XYChart.Data<ZonedDateTime, T>> data);
 
     /**
      * Gets the name of the transform function
@@ -41,5 +41,5 @@ public interface TimeSeriesTransform {
 
     void setEnabled(boolean enabled);
 
-    TimeSeriesTransform getNextPassTransform();
+    TimeSeriesTransform<T> getNextPassTransform();
 }

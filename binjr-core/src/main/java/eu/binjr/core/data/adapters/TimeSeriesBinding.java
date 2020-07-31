@@ -18,10 +18,7 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.data.workspace.ChartType;
-import eu.binjr.core.data.workspace.UnitPrefixes;
-import eu.binjr.core.data.workspace.Worksheet;
-import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.core.data.workspace.*;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -39,7 +36,7 @@ import java.util.UUID;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TimeSeriesBinding extends SourceBinding {
+public class TimeSeriesBinding extends SourceBinding<Double> {
     private static final Logger logger = Logger.create(TimeSeriesBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -69,6 +66,22 @@ public class TimeSeriesBinding extends SourceBinding {
         this.graphType = ChartType.STACKED;
         this.unitName = "";
 
+    }
+
+    /**
+     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     *
+     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
+     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     */
+    public static TimeSeriesInfo<Double> asTimeSeriesInfo(TimeSeriesBinding binding) {
+        if (binding == null) {
+            throw new IllegalArgumentException("binding cannot be null");
+        }
+        return new TimeSeriesInfo<>(binding.getLegend(),
+                true,
+                binding.getColor(),
+                binding);
     }
 
     @Override
@@ -107,7 +120,7 @@ public class TimeSeriesBinding extends SourceBinding {
      * @param treeHierarchy the hierarchy in the tree representation
      * @param adapter       the {@link SerializedDataAdapter} to the source
      */
-    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter adapter) {
+    public TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<Double> adapter) {
         this(label,
                 path,
                 color,
@@ -120,7 +133,7 @@ public class TimeSeriesBinding extends SourceBinding {
                 null);
     }
 
-    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter adapter, UUID adapterId) {
+    private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<Double> adapter, UUID adapterId) {
         super(label, legend, path, treeHierarchy, adapter, adapterId);
         this.prefix = prefix;
         this.graphType = graphType;
@@ -179,7 +192,7 @@ public class TimeSeriesBinding extends SourceBinding {
         return hashVal;
     }
 
-    public static class Builder extends SourceBinding.Builder<TimeSeriesBinding, TimeSeriesBinding.Builder> {
+    public static class Builder extends SourceBinding.Builder<Double, TimeSeriesBinding, TimeSeriesBinding.Builder> {
         private Color color = null;
         private UnitPrefixes prefix = UnitPrefixes.METRIC;
         private ChartType graphType = ChartType.STACKED;
@@ -211,7 +224,7 @@ public class TimeSeriesBinding extends SourceBinding {
         }
 
         @Override
-        protected TimeSeriesBinding construct(String label, String legend, String path, String treeHierarchy, DataAdapter adapter) {
+        protected TimeSeriesBinding construct(String label, String legend, String path, String treeHierarchy, DataAdapter<Double> adapter) {
             return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, treeHierarchy, adapter);
         }
     }
