@@ -38,17 +38,7 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TimeSeriesBinding extends SourceBinding<Double> {
     private static final Logger logger = Logger.create(TimeSeriesBinding.class);
-    private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
-        try {
-            return MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            logger.fatal("Failed to instantiate MD5 message digest");
-            throw new IllegalStateException("Failed to create a new instance of Md5HashTargetResolver", e);
-        }
-    });
 
-    @XmlAttribute
-    private final Color color;
     @XmlAttribute
     private final UnitPrefixes prefix;
     @XmlAttribute
@@ -61,27 +51,10 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
      */
     public TimeSeriesBinding() {
         super();
-        this.color = null;
         this.prefix = UnitPrefixes.BINARY;
         this.graphType = ChartType.STACKED;
         this.unitName = "";
 
-    }
-
-    /**
-     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     *
-     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
-     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
-     */
-    public static TimeSeriesInfo<Double> asTimeSeriesInfo(TimeSeriesBinding binding) {
-        if (binding == null) {
-            throw new IllegalArgumentException("binding cannot be null");
-        }
-        return new TimeSeriesInfo<>(binding.getLegend(),
-                true,
-                binding.getColor(),
-                binding);
     }
 
     @Override
@@ -134,20 +107,10 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     }
 
     private TimeSeriesBinding(String label, String path, Color color, String legend, UnitPrefixes prefix, ChartType graphType, String unitName, String treeHierarchy, DataAdapter<Double> adapter, UUID adapterId) {
-        super(label, legend, path, treeHierarchy, adapter, adapterId);
+        super(label, legend, color, path, treeHierarchy, adapter, adapterId);
         this.prefix = prefix;
         this.graphType = graphType;
         this.unitName = unitName;
-        this.color = color;
-    }
-
-    /**
-     * Returns the color of the bound series as defined in the source.
-     *
-     * @return the color of the bound series as defined in the source.
-     */
-    public Color getColor() {
-        return this.color == null ? computeDefaultColor() : this.color;
     }
 
     /**
@@ -177,31 +140,11 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
         return prefix;
     }
 
-    private Color computeDefaultColor() {
-        long targetNum = getHashValue(this.getLabel()) % StageAppearanceManager.getInstance().getDefaultChartColors().length;
-        if (targetNum < 0) {
-            targetNum = targetNum * -1;
-        }
-        return StageAppearanceManager.getInstance().getDefaultChartColors()[((int) targetNum)];
-    }
-
-    private long getHashValue(final String value) {
-        long hashVal;
-        messageDigest.get().update(value.getBytes(StandardCharsets.UTF_8));
-        hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
-        return hashVal;
-    }
 
     public static class Builder extends SourceBinding.Builder<Double, TimeSeriesBinding, TimeSeriesBinding.Builder> {
-        private Color color = null;
         private UnitPrefixes prefix = UnitPrefixes.METRIC;
         private ChartType graphType = ChartType.STACKED;
         private String unitName = "-";
-
-        public Builder withColor(Color color) {
-            this.color = color;
-            return self();
-        }
 
         public Builder withPrefix(UnitPrefixes prefix) {
             this.prefix = prefix;
@@ -224,7 +167,7 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
         }
 
         @Override
-        protected TimeSeriesBinding construct(String label, String legend, String path, String treeHierarchy, DataAdapter<Double> adapter) {
+        protected TimeSeriesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<Double> adapter) {
             return new TimeSeriesBinding(label, path, color, legend, prefix, graphType, unitName, treeHierarchy, adapter);
         }
     }

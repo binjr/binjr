@@ -18,30 +18,28 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.controllers.TextViewController;
 import eu.binjr.core.controllers.WorksheetController;
+import eu.binjr.core.data.adapters.TextFilesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.workspace.BindingsHierarchy;
-import eu.binjr.core.data.workspace.Worksheet;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class TextFilesWorksheet extends Worksheet {
-    private final ChangeWatcher status;
-    private final ObservableList<TextFilesBinding> bindings = FXCollections.observableList(new LinkedList<>());
+    private final transient ChangeWatcher status;
+    private final ObservableList<TimeSeriesInfo<String>> bindings = FXCollections.observableList(new LinkedList<>());
 
     @IsDirtyable
-    private URI fileUri;
+    private ObservableList<TimeSeriesInfo<String>> seriesInfos;
 
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
@@ -55,15 +53,18 @@ public class TextFilesWorksheet extends Worksheet {
         super(name, editModeEnabled);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
+        seriesInfos = FXCollections.observableList(new ArrayList<>());
     }
 
     private TextFilesWorksheet(TextFilesWorksheet worksheet) {
         this(worksheet.getName(), worksheet.isEditModeEnabled());
+        this.seriesInfos = worksheet.getSeriesInfo();
+
     }
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
-    public ObservableList<TextFilesBinding> getFilesBindings() {
+    public ObservableList<TimeSeriesInfo<String>> getSeriesInfo() {
         return bindings;
     }
 
@@ -89,7 +90,7 @@ public class TextFilesWorksheet extends Worksheet {
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
                 if (b instanceof TextFilesBinding) {
-                    this.bindings.add((TextFilesBinding) b);
+                    this.bindings.add(TimeSeriesInfo.fromBinding((TextFilesBinding)b));
                 }
             }
         }
@@ -112,10 +113,7 @@ public class TextFilesWorksheet extends Worksheet {
         status.cleanUp();
     }
 
-    @XmlAttribute
-    public URI getFileUri() {
-        return fileUri;
-    }
+
 
     @XmlAttribute
     public int getTextViewFontSize() {
@@ -130,7 +128,5 @@ public class TextFilesWorksheet extends Worksheet {
         this.textViewFontSize.set(textViewFontSize);
     }
 
-    public void setFileUri(URI fileUri) {
-        this.fileUri = fileUri;
-    }
+
 }

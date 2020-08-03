@@ -54,21 +54,22 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     private static final Logger logger = Logger.create(XYChartsWorksheet.class);
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
+    private final transient Property<Integer> selectedChart;
     @IsDirtyable
     private ObservableList<Chart> charts;
     @IsDirtyable
-    private Property<ZoneId> timeZone;
+    private final Property<ZoneId> timeZone;
     @IsDirtyable
-    private Property<ZonedDateTime> fromDateTime;
+    private final Property<ZonedDateTime> fromDateTime;
     @IsDirtyable
-    private Property<ZonedDateTime> toDateTime;
+    private final Property<ZonedDateTime> toDateTime;
     @IsDirtyable
-    private Property<ChartLayout> chartLayout;
+    private final Property<ChartLayout> chartLayout;
     @IsDirtyable
-    private Property<Boolean> timeRangeLinked;
+    private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
-    private DoubleProperty dividerPosition;
-    private transient Property<Integer> selectedChart;
+    private final DoubleProperty dividerPosition;
+
     //  private Class<? extends WorksheetController> controllerClass = XYChartsWorksheetController.class;
 
     /**
@@ -457,7 +458,7 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
                 for (var b : bindingsHierarchy.getBindings()) {
                     if (b instanceof TimeSeriesBinding) {
                         TimeSeriesBinding tsb = (TimeSeriesBinding) b;
-                        chart.addSeries(TimeSeriesBinding.asTimeSeriesInfo(tsb));
+                        chart.addSeries(TimeSeriesInfo.fromBinding(tsb));
                     }
                 }
 

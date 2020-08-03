@@ -16,14 +16,33 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.logging.Logger;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.workspace.Worksheet;
+import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.*;
+import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
 public abstract class SourceBinding<T> {
+    private static final Logger logger = Logger.create(SourceBinding.class);
+    private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
+        try {
+            return MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            logger.fatal("Failed to instantiate MD5 message digest");
+            throw new IllegalStateException("Failed to create a new instance of Md5HashTargetResolver", e);
+        }
+    });
+
+
+
     @XmlAttribute(name = "sourceId")
     protected final UUID adapterId;
     @XmlAttribute
@@ -36,24 +55,28 @@ public abstract class SourceBinding<T> {
     protected final String legend;
     @XmlTransient
     protected DataAdapter<T> adapter;
+    @XmlAttribute
+    protected final Color color;
 
     protected SourceBinding() {
         this.adapter = null;
         this.label = "";
         this.path = "";
+        this.color = null;
         this.treeHierarchy = "";
         adapterId = null;
         this.legend = "";
     }
 
-    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter) {
-        this(label, legend , path, treeHierarchy, adapter, null);
+    protected SourceBinding(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter) {
+        this(label, legend , color, path, treeHierarchy, adapter, null);
     }
 
 
-    protected SourceBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
+    protected SourceBinding(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter, UUID adapterId) {
         this.label = label;
         this.path = path;
+        this.color = color;
         this.treeHierarchy = treeHierarchy;
         this.adapter = adapter;
         UUID id = adapterId;
@@ -123,6 +146,15 @@ public abstract class SourceBinding<T> {
         return this.legend;
     }
 
+    /**
+     * Returns the color of the bound series as defined in the source.
+     *
+     * @return the color of the bound series as defined in the source.
+     */
+    public Color getColor() {
+        return this.color == null ? computeDefaultColor() : this.color;
+    }
+
     @Override
     public String toString() {
         return getLegend();
@@ -130,10 +162,27 @@ public abstract class SourceBinding<T> {
 
     public abstract Class<? extends Worksheet> getWorksheetClass();
 
+    private Color computeDefaultColor() {
+        long targetNum = getHashValue(this.getLabel()) % StageAppearanceManager.getInstance().getDefaultChartColors().length;
+        if (targetNum < 0) {
+            targetNum = targetNum * -1;
+        }
+        return StageAppearanceManager.getInstance().getDefaultChartColors()[((int) targetNum)];
+    }
+
+    private long getHashValue(final String value) {
+        long hashVal;
+        messageDigest.get().update(value.getBytes(StandardCharsets.UTF_8));
+        hashVal = new BigInteger(1, messageDigest.get().digest()).longValue();
+        return hashVal;
+    }
+
+
     public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T,S,B>> {
         private String label = "";
         private String path = "";
         private String legend = null;
+        private Color color = null;
         private DataAdapter<T> adapter;
         private String parent = "";
 
@@ -154,6 +203,11 @@ public abstract class SourceBinding<T> {
             return self();
         }
 
+        public B withColor(Color color) {
+            this.color = color;
+            return self();
+        }
+
         public B withLegend(String legend) {
             this.legend = legend;
             return self();
@@ -169,9 +223,10 @@ public abstract class SourceBinding<T> {
             if (legend == null) {
                 legend = label;
             }
-            return construct(label, legend, path, parent + "/" + legend, adapter);
+            return construct(label, legend,color, path, parent + "/" + legend, adapter);
         }
 
-        protected abstract S construct(String label, String legend, String path, String treeHierarchy, DataAdapter<T> adapter);
+        protected abstract S construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter);
+
     }
 }

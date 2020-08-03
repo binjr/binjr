@@ -33,8 +33,6 @@
 package eu.binjr.core.controllers;
 
 
-import eu.binjr.common.function.CheckedFunction;
-import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
@@ -43,7 +41,7 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.workspace.TextFilesBinding;
+import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
@@ -68,6 +66,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.groupingBy;
+
 public class TextViewController extends WorksheetController {
     private static final Logger logger = Logger.create(TextViewController.class);
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/TextView.fxml";
@@ -83,14 +83,14 @@ public class TextViewController extends WorksheetController {
         super(parent);
         this.worksheet = worksheet;
         try {
-            for (var d : worksheet.getFilesBindings()) {
-                UUID id = d.getAdapterId();
+            for (var d : worksheet.getSeriesInfo()) {
+                UUID id = d.getBinding().getAdapterId();
                 DataAdapter<String> da = adapters
                         .stream()
                         .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                         .findAny()
                         .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-                d.setAdapter(da);
+                d.getBinding().setAdapter(da);
             }
         } catch (NoAdapterFoundException e) {
             logger.error("Failed to retrieve preferences for data adapter", e);
@@ -250,18 +250,57 @@ public class TextViewController extends WorksheetController {
         }
     }
 
+    public void fetchDataFromSources() throws DataAdapterException {
+        // prune series from closed adapters
+        worksheet.getSeriesInfo().removeIf(seriesInfo -> {
+            if (seriesInfo.getBinding().getAdapter().isClosed()) {
+                logger.debug(() -> seriesInfo.getDisplayName() + " will be pruned because attached adapter " +
+                        seriesInfo.getBinding().getAdapter().getId() + " is closed.");
+                return true;
+            }
+            return false;
+        });
+
+        var bindingsByAdapters = worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
+            // Define the transforms to apply
+            var adapter = (DataAdapter<String>) byAdapterEntry.getKey();
+            var sort = new SortTransform();
+            sort.setEnabled(adapter.isSortingRequired());
+            // Group all queries with the same adapter and path
+            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            for (var byPathEntry : bindingsByPath.entrySet()) {
+                String path = byPathEntry.getKey();
+                logger.trace("Fetch sub-task '" + path + "' started");
+                // Get data from the adapter
+                var data = adapter.fetchData(
+                        path,
+                        Instant.MIN,
+                        Instant.MAX,
+                        byPathEntry.getValue(),
+                        true);
+                data.entrySet().parallelStream().forEach(entry -> {
+                    var info = entry.getKey();
+                    var proc = entry.getValue();
+                    //bind proc to timeSeries info
+                    info.setProcessor(proc);
+                });
+            }
+        }
+    }
+
     private void loadFile() {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        return worksheet.getFilesBindings().stream().map(
-                                CheckedLambdas.wrap((CheckedFunction<TextFilesBinding, String, DataAdapterException>)
-                                        b -> b.getAdapter()
-                                                .fetchData(b.getPath(), Instant.MIN, Instant.MAX, null, false)
-                                                .values().stream().map(stringTimeSeriesProcessor ->
-                                                        stringTimeSeriesProcessor.getData().stream()
-                                                                .map(XYChart.Data::getYValue).collect(Collectors.joining()))
-                                                .collect(Collectors.joining()))).collect(Collectors.joining());
+                        fetchDataFromSources();
+                        return worksheet.getSeriesInfo().stream()
+                                .map(info -> info.getProcessor()
+                                        .getData()
+                                        .stream()
+                                        .map(XYChart.Data::getYValue)
+                                        .collect(Collectors.joining()))
+                                .collect(Collectors.joining());
                     },
                     event -> {
                         busyIndicator.setVisible(false);

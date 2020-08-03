@@ -192,11 +192,10 @@ public class XYChartsWorksheetController extends WorksheetController {
                             binding.getGraphType(),
                             binding.getUnitName(),
                             binding.getUnitPrefix()
-
                     );
                     for (var b : TreeViewUtils.flattenLeaves(t)) {
                         if (b instanceof TimeSeriesBinding) {
-                            chart.addSeries(TimeSeriesBinding.asTimeSeriesInfo((TimeSeriesBinding) b));
+                            chart.addSeries(TimeSeriesInfo.fromBinding((TimeSeriesBinding) b));
                             totalBindings++;
                         }
                     }
@@ -1215,7 +1214,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             });
         };
         for (TimeSeriesBinding b : timeSeriesBindings) {
-            TimeSeriesInfo<Double> newSeries = TimeSeriesBinding.asTimeSeriesInfo(b);
+            TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             bindingManager.attachListener(newSeries.selectedProperty(),
                     (observable, oldValue, newValue) ->
                             viewPorts.stream()

@@ -93,6 +93,22 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     }
 
     /**
+     * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     *
+     * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
+     * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
+     */
+    public static <T> TimeSeriesInfo<T> fromBinding(SourceBinding<T> binding) {
+        if (binding == null) {
+            throw new IllegalArgumentException("binding cannot be null");
+        }
+        return new TimeSeriesInfo<T>(binding.getLegend(),
+                true,
+                binding.getColor(),
+                binding);
+    }
+
+    /**
      * Gets the display name fo the series
      *
      * @return the display name fo the series

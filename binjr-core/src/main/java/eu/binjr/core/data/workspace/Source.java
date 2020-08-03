@@ -31,6 +31,8 @@ import javafx.beans.property.SimpleStringProperty;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Closeable;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -53,6 +55,7 @@ public class Source implements Dirtyable, Closeable {
     private DataAdapter adapter;
     private Property<Boolean> editable = new SimpleBooleanProperty();
     private Property<Boolean> filterable = new SimpleBooleanProperty();
+    private final Collection<DataAdapter> subAdapters = new ArrayList<>();
 
     /**
      * Initializes a new instance of the {@link Source} class
@@ -254,6 +257,11 @@ public class Source implements Dirtyable, Closeable {
 
     private void setAdapterParams(Map<String, String> adapterParams) {
         this.adapterParams = adapterParams;
+    }
+
+    @XmlElement
+    public Collection<DataAdapter> getSubAdapters() {
+        return subAdapters;
     }
 
     //endregion
