@@ -55,7 +55,7 @@ public class Source implements Dirtyable, Closeable {
     private DataAdapter adapter;
     private Property<Boolean> editable = new SimpleBooleanProperty();
     private Property<Boolean> filterable = new SimpleBooleanProperty();
-    private final Collection<DataAdapter> subAdapters = new ArrayList<>();
+    private Boolean subSource = false;
 
     /**
      * Initializes a new instance of the {@link Source} class
@@ -84,6 +84,12 @@ public class Source implements Dirtyable, Closeable {
         newSource.setAdapterParams(adapter.getParams());
         newSource.setAdapterId(adapter.getId());
         return newSource;
+    }
+
+    public static Source subSourceOf(DataAdapter adapter){
+        var newSubSource = of(adapter);
+        newSubSource.subSource = true;
+        return newSubSource;
     }
 
     /**
@@ -259,10 +265,9 @@ public class Source implements Dirtyable, Closeable {
         this.adapterParams = adapterParams;
     }
 
-    @XmlElement
-    public Collection<DataAdapter> getSubAdapters() {
-        return subAdapters;
+    @XmlAttribute
+    public Boolean isSubSource() {
+        return subSource;
     }
-
     //endregion
 }

@@ -75,25 +75,20 @@ public class TextViewController extends WorksheetController {
     private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
 
-    public TextViewController() {
-        this(null, null, null);
-    }
 
-    public TextViewController(MainViewController parent, TextFilesWorksheet worksheet, Collection<DataAdapter<String>> adapters) {
+    public TextViewController(MainViewController parent, TextFilesWorksheet worksheet, Collection<DataAdapter<String>> adapters)
+            throws NoAdapterFoundException {
         super(parent);
         this.worksheet = worksheet;
-        try {
-            for (var d : worksheet.getSeriesInfo()) {
-                UUID id = d.getBinding().getAdapterId();
-                DataAdapter<String> da = adapters
-                        .stream()
-                        .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-                        .findAny()
-                        .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
-                d.getBinding().setAdapter(da);
-            }
-        } catch (NoAdapterFoundException e) {
-            logger.error("Failed to retrieve preferences for data adapter", e);
+        for (var d : worksheet.getSeriesInfo()) {
+            UUID id = d.getBinding().getAdapterId();
+            DataAdapter<String> da = adapters
+                    .stream()
+                    .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+                    .findAny()
+                    .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " +
+                            (id != null ? id.toString() : "null")));
+            d.getBinding().setAdapter(da);
         }
     }
 

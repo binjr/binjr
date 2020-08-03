@@ -36,10 +36,8 @@ import java.util.LinkedList;
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class TextFilesWorksheet extends Worksheet {
     private final transient ChangeWatcher status;
-    private final ObservableList<TimeSeriesInfo<String>> bindings = FXCollections.observableList(new LinkedList<>());
-
     @IsDirtyable
-    private ObservableList<TimeSeriesInfo<String>> seriesInfos;
+    private final ObservableList<TimeSeriesInfo<String>> seriesInfo = FXCollections.observableList(new LinkedList<>());
 
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
@@ -53,19 +51,18 @@ public class TextFilesWorksheet extends Worksheet {
         super(name, editModeEnabled);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
-        seriesInfos = FXCollections.observableList(new ArrayList<>());
+
     }
 
     private TextFilesWorksheet(TextFilesWorksheet worksheet) {
         this(worksheet.getName(), worksheet.isEditModeEnabled());
-        this.seriesInfos = worksheet.getSeriesInfo();
-
+        seriesInfo.addAll(worksheet.getSeriesInfo());
     }
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
     public ObservableList<TimeSeriesInfo<String>> getSeriesInfo() {
-        return bindings;
+        return seriesInfo;
     }
 
     @Override
@@ -90,7 +87,7 @@ public class TextFilesWorksheet extends Worksheet {
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
                 if (b instanceof TextFilesBinding) {
-                    this.bindings.add(TimeSeriesInfo.fromBinding((TextFilesBinding)b));
+                    this.seriesInfo.add(TimeSeriesInfo.fromBinding((TextFilesBinding)b));
                 }
             }
         }
