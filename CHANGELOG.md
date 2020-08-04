@@ -1,4 +1,9 @@
-## [binjr v2.17.0](https://github.com/binjr/binjr/releases/tag/v2.16.0)
+## [binjr v2.17.1](https://github.com/binjr/binjr/releases/tag/v2.17.1)
+Released on Wed, 29 Jul 2020
+
+* _[Fixed]_ A regression that prevents *binjr* from opening RRD files generated with [RrdTools](https://github.com/oetiker/rrdtool-1.x).
+
+## [binjr v2.17.0](https://github.com/binjr/binjr/releases/tag/v2.17.0)
 Released on Thu, 2 Jul 2020
 
 * _[Fixed]_ Jitter on the y-axis when hovering over charts with full height crosshair.
