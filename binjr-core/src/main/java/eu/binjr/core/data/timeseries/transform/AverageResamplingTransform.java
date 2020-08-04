@@ -31,6 +31,8 @@ public final class AverageResamplingTransform extends BaseTimeSeriesTransform<Do
 
     /**
      * Base constructor for {@link BaseTimeSeriesTransform} instances.
+     *
+     * @param threshold The number of sample to keep.
      */
     public AverageResamplingTransform(int threshold) {
         super("AverageResamplingTransform");

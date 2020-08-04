@@ -148,15 +148,17 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     /**
      * Initializes a new instance of the DataAdapterInfo class.
      *
-     * @param name         the name of the data adapter.
-     * @param description  the description associated to the data adapter.
-     * @param version      the version information related to the data adapter
-     * @param copyright    the copyright information related to the data adapter
-     * @param license      the license information related to the data adapter
-     * @param siteUrl      the version information related to the data adapter
-     * @param adapterClass the class that implements the data adapter.
-     * @param dialogClass  the class that implements the dialog box used to gather the adapter's parameters from the end user.
-     * @param preferences  An instance of {@link DataAdapterPreferences} for this adapter.
+     * @param name           the name of the data adapter.
+     * @param description    the description associated to the data adapter.
+     * @param version        the version information related to the data adapter
+     * @param copyright      the copyright information related to the data adapter
+     * @param license        the license information related to the data adapter
+     * @param siteUrl        the version information related to the data adapter
+     * @param adapterClass   the class that implements the data adapter.
+     * @param dialogClass    the class that implements the dialog box used to gather the adapter's parameters from the end user.
+     * @param sourceLocality Indicates wether the source is local or remote.
+     * @param preferences    An instance of {@link DataAdapterPreferences} for this adapter.
+     * @param apiLevel      The API level implemented by the {@link DataAdapter}
      */
     protected BaseDataAdapterInfo(String name,
                                   String description,

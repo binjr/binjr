@@ -81,9 +81,9 @@ public class TimeSeriesInfo<T> implements Dirtyable {
      * @param binding      the {@link TimeSeriesBinding}  for the series
      */
     public TimeSeriesInfo(String displayName,
-                           Boolean selected,
-                           Color displayColor,
-                           SourceBinding<T> binding) {
+                          Boolean selected,
+                          Color displayColor,
+                          SourceBinding<T> binding) {
         this.binding = binding;
         this.displayName = new SimpleStringProperty(displayName);
         this.selected = new SimpleBooleanProperty(selected);
@@ -95,6 +95,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     /**
      * Returns a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
      *
+     * @param <T>     The type of Y axis data for the time series binding.
      * @param binding the {@link TimeSeriesBinding} to build the {@link TimeSeriesInfo} from
      * @return a new instance of the {@link TimeSeriesInfo} class built from the specified {@link TimeSeriesBinding}
      */

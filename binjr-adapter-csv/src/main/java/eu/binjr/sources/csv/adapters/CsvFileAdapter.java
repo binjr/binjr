@@ -118,7 +118,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
             for (int i = 0; i < headers.size(); i++) {
                 String columnIndex = Integer.toString(i + 1);
                 String header = headers.get(i).isBlank() ? "Column #" + columnIndex : headers.get(i);
-                SourceBinding b = new TimeSeriesBinding.Builder()
+                var b = new TimeSeriesBinding.Builder()
                         .withLabel(columnIndex)
                         .withPath(columnIndex)
                         .withLegend(header)

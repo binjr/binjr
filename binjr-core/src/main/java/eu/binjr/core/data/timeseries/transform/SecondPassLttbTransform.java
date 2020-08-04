@@ -37,6 +37,7 @@ public class SecondPassLttbTransform extends BaseTimeSeriesTransform<Double> {
     /**
      * Initializes a new instnace of the {@link SecondPassLttbTransform} class.
      *
+     * @param firstPass A reference to the TimeSeriesTransform that was applied as the first pass of the algorithm.
      * @param threshold the maximum number of points to keep following the reduction.
      */
     public SecondPassLttbTransform(final FirstPassLttbTransform firstPass, int threshold) {
