@@ -35,7 +35,7 @@ import java.util.UUID;
  *
  * @author Frederic Thevenet
  */
-public abstract class SerializedDataAdapter extends BaseDataAdapter<Double> {
+public abstract class SerializedDataAdapter<T> extends BaseDataAdapter<T> {
     private static final Logger logger = Logger.create(SerializedDataAdapter.class);
     private UUID id = UUID.randomUUID();
     protected volatile boolean closed = false;
@@ -53,7 +53,7 @@ public abstract class SerializedDataAdapter extends BaseDataAdapter<Double> {
     public abstract InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException;
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<Double>> seriesInfo, boolean bypassCache)
+    public Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache)
             throws DataAdapterException {
         if (closed) {
             throw new IllegalStateException("An attempt was made to fetch data from a closed adapter");
@@ -71,6 +71,6 @@ public abstract class SerializedDataAdapter extends BaseDataAdapter<Double> {
      *
      * @return the {@link Decoder} used to produce {@link TimeSeriesProcessor} from the source.
      */
-    public abstract Decoder getDecoder();
+    public abstract Decoder<T> getDecoder();
 
 }

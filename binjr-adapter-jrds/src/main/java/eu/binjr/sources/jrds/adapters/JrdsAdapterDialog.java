@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ public class JrdsAdapterDialog extends DataAdapterDialog<URI> {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws DataAdapterException {
+    protected DataAdapter<?> getDataAdapter() throws DataAdapterException {
         return JrdsDataAdapter.fromUrl(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),

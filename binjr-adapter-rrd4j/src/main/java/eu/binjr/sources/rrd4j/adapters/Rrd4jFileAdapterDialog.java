@@ -45,10 +45,10 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
+public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter<?>> {
     private static final Logger logger = Logger.create(Rrd4jFileAdapterDialog.class);
     private static final String BINJR_SOURCES = "binjr/sources";
-    private DataAdapter result = null;
+    private DataAdapter<Double> result = null;
     private final TextField pathsField;
     private final MostRecentlyUsedList<Path> mostRecentRrdFiles =
             UserHistory.getInstance().pathMostRecentlyUsedList("mostRecentRrdFiles", 20, false);
@@ -139,8 +139,8 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter> {
      * @return an instance of {@link Rrd4jFileAdapter}
      * @throws DataAdapterException if the provided parameters are invalid
      */
-    private DataAdapter getDataAdapter() throws DataAdapterException {
-        List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(s -> Paths.get(s)).collect(Collectors.toList());
+    private DataAdapter<Double> getDataAdapter() throws DataAdapterException {
+        List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(Paths::get).collect(Collectors.toList());
         rrdFiles.forEach(mostRecentRrdFiles::push);
         return new Rrd4jFileAdapter(rrdFiles);
 

@@ -70,10 +70,10 @@ public class FirstPassLttbTransform extends BaseTimeSeriesTransform<Double> {
     }
 
     @Override
-    public TimeSeriesTransform getNextPassTransform() {
+    public TimeSeriesTransform<Double> getNextPassTransform() {
         if (timeStamps == null) {
             logger.debug(() -> "No data collected from first pass: return noOp transform");
-            return new NoOpTransform();
+            return new NoOpTransform<>();
         }
         boolean isBufferCoherent = true;
         int nbSamples = timeStamps.length;

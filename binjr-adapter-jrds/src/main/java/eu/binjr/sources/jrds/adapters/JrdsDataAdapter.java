@@ -46,7 +46,6 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import javax.xml.bind.JAXB;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -65,7 +64,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public class JrdsDataAdapter extends HttpDataAdapter {
+public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     public static final String JRDS_FILTER = "filter";
     public static final String JRDS_TREE = "tree";
     protected static final String ENCODING_PARAM_NAME = "encoding";
@@ -334,18 +333,16 @@ public class JrdsDataAdapter extends HttpDataAdapter {
 
     private Graphdesc getGraphDescriptorLegacy(String id) throws DataAdapterException {
         Instant now = ZonedDateTime.now().toInstant();
-        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            try (InputStream in = fetchRawData(id, now.minusSeconds(300), now, false)) {
-                List<String> headers = getDecoder().getDataColumnHeaders(in);
-                Graphdesc desc = new Graphdesc();
-                desc.seriesDescList = new ArrayList<>();
-                for (String header : headers) {
-                    Graphdesc.SeriesDesc d = new Graphdesc.SeriesDesc();
-                    d.name = header;
-                    desc.seriesDescList.add(d);
-                }
-                return desc;
+        try (InputStream in = fetchRawData(id, now.minusSeconds(300), now, false)) {
+            List<String> headers = getDecoder().getDataColumnHeaders(in);
+            Graphdesc desc = new Graphdesc();
+            desc.seriesDescList = new ArrayList<>();
+            for (String header : headers) {
+                Graphdesc.SeriesDesc d = new Graphdesc.SeriesDesc();
+                d.name = header;
+                desc.seriesDescList.add(d);
             }
+            return desc;
         } catch (IOException e) {
             throw new FetchingDataFromAdapterException(e);
         }

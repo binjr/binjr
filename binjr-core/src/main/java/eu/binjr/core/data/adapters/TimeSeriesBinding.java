@@ -17,17 +17,15 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.data.workspace.*;
+import eu.binjr.core.data.workspace.ChartType;
+import eu.binjr.core.data.workspace.UnitPrefixes;
+import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 /**
@@ -58,7 +56,7 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     }
 
     @Override
-    public Class<? extends Worksheet> getWorksheetClass() {
+    public Class<? extends Worksheet<Double>> getWorksheetClass() {
         return XYChartsWorksheet.class;
     }
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2019 Frederic Thevenet
+ *    Copyright 2016-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -46,17 +46,23 @@ public interface DataAdapter<T> extends AutoCloseable {
     FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException;
 
     /**
-     * Gets decoded data from the source as a map of {@link TimeSeriesProcessor}, for the time interval and {@link TimeSeriesInfo} specified.
+     * Gets decoded data from the source as a map of {@link TimeSeriesProcessor},
+     * for the time interval and {@link TimeSeriesInfo} specified.
      *
      * @param path        the path of the data in the source
      * @param begin       the start of the time interval.
      * @param end         the end of the time interval.
      * @param seriesInfo  the series to get data from.
-     * @param bypassCache true if adapter cache should be bypassed, false otherwise. This parameter is ignored if adapter does not support caching
+     * @param bypassCache true if adapter cache should be bypassed, false otherwise.
+     *                    This parameter is ignored if adapter does not support caching
      * @return the output stream in which to return data.
      * @throws DataAdapterException if an error occurs while retrieving data from the source.
      */
-    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<T>> seriesInfo, boolean bypassCache) throws DataAdapterException;
+    Map<TimeSeriesInfo<T>, TimeSeriesProcessor<T>> fetchData(String path,
+                                                             Instant begin,
+                                                             Instant end,
+                                                             List<TimeSeriesInfo<T>> seriesInfo,
+                                                             boolean bypassCache) throws DataAdapterException;
 
     /**
      * Gets the encoding used to decode textual data sent by the source.
@@ -95,7 +101,8 @@ public interface DataAdapter<T> extends AutoCloseable {
     void loadParams(Map<String, String> params) throws DataAdapterException;
 
     /**
-     * An api hook that is executed once, after parameters have been loaded and before any other call to the {@link DataAdapter} is made.
+     * An api hook that is executed once, after parameters have been loaded and before any other call
+     * to the {@link DataAdapter} is made.
      * <p>Used to initialize resources and  start-up external components.</p>
      * <p>The default implementation does nothing.</p>
      *

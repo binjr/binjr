@@ -57,31 +57,33 @@ import static java.util.stream.Collectors.groupingBy;
 public class Chart implements Dirtyable, AutoCloseable {
     private static final Logger logger = Logger.create(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
-    private transient final ChangeWatcher status;
+
     @IsDirtyable
-    private ObservableList<TimeSeriesInfo<Double>> series;
+    private final transient ObservableList<TimeSeriesInfo<Double>> series;
     @IsDirtyable
-    private Property<String> name;
+    private final Property<String> name;
     @IsDirtyable
-    private Property<String> unit;
+    private final Property<String> unit;
     @IsDirtyable
-    private Property<UnitPrefixes> unitPrefixes;
+    private final Property<UnitPrefixes> unitPrefixes;
     @IsDirtyable
-    private Property<ChartType> chartType;
+    private final Property<ChartType> chartType;
     @IsDirtyable
-    private DoubleProperty graphOpacity;
+    private final DoubleProperty graphOpacity;
     @IsDirtyable
-    private BooleanProperty showAreaOutline;
+    private final BooleanProperty showAreaOutline;
     @IsDirtyable
-    private DoubleProperty strokeWidth;
+    private final DoubleProperty strokeWidth;
     @IsDirtyable
-    private BooleanProperty autoScaleYAxis;
+    private final BooleanProperty autoScaleYAxis;
     @IsDirtyable
-    private DoubleProperty yAxisMinValue;
+    private final DoubleProperty yAxisMinValue;
     @IsDirtyable
-    private DoubleProperty yAxisMaxValue;
-    private transient BooleanProperty showProperties;
-    private final UserPreferences userPref;
+    private final DoubleProperty yAxisMaxValue;
+
+    private final transient ChangeWatcher status;
+    private final transient BooleanProperty showProperties;
+    private final transient UserPreferences userPref;
 
     /**
      * Initializes a new instance of the {@link Chart} class

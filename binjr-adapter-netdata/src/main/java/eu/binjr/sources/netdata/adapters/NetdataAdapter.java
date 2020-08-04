@@ -51,14 +51,14 @@ import java.util.TreeMap;
  *
  * @author Frederic Thevenet
  */
-public class NetdataAdapter extends HttpDataAdapter {
+public class NetdataAdapter extends HttpDataAdapter<Double> {
     private static final Logger logger = Logger.create(NetdataAdapter.class);
     private static final char DELIMITER = ',';
     private final Gson jsonParser;
-    private ZoneId zoneId;
-    private Decoder decoder;
-    private UserPreferences userPrefs = UserPreferences.getInstance();
-    private NetdataAdapterPreferences adapterPrefs = (NetdataAdapterPreferences) getAdapterInfo().getPreferences();
+    private final ZoneId zoneId;
+    private final Decoder<Double> decoder;
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
+    private final NetdataAdapterPreferences adapterPrefs = (NetdataAdapterPreferences) getAdapterInfo().getPreferences();
 
     /**
      * Initialises a new instance of the {@link NetdataAdapter} class.
@@ -84,7 +84,7 @@ public class NetdataAdapter extends HttpDataAdapter {
      * @return a new instance of {@link NetdataAdapter} for the provided address and time zone.
      * @throws CannotInitializeDataAdapterException if an error occurs while initializing the adapter.
      */
-    public static DataAdapter fromUrl(String address, ZoneId zoneId) throws CannotInitializeDataAdapterException {
+    public static DataAdapter<Double> fromUrl(String address, ZoneId zoneId) throws CannotInitializeDataAdapterException {
         return new NetdataAdapter(urlFromString(address), zoneId);
     }
 
@@ -113,7 +113,7 @@ public class NetdataAdapter extends HttpDataAdapter {
     }
 
     @Override
-    public Decoder getDecoder() {
+    public Decoder<Double> getDecoder() {
         return this.decoder;
     }
 
@@ -187,13 +187,13 @@ public class NetdataAdapter extends HttpDataAdapter {
 
     @Override
     public String getSourceName() {
-        return new StringBuilder("[Netdata] ")
-                .append(getBaseAddress() != null ? getBaseAddress().getHost() : "???")
-                .append((getBaseAddress() != null && getBaseAddress().getPort() > 0) ? ":" + getBaseAddress().getPort() : "")
-                .append(" - ")
-                .append(" (")
-                .append(zoneId != null ? zoneId : "???")
-                .append(")").toString();
+        return "[Netdata] " +
+                (getBaseAddress() != null ? getBaseAddress().getHost() : "???") +
+                ((getBaseAddress() != null && getBaseAddress().getPort() > 0) ? ":" + getBaseAddress().getPort() : "") +
+                " - " +
+                " (" +
+                (zoneId != null ? zoneId : "???") +
+                ")";
     }
 
     private CsvDecoder buildDecoder(ZoneId zoneId) {

@@ -47,7 +47,7 @@ public class TextFilesBinding extends SourceBinding<String> {
     }
 
     @Override
-    public Class<? extends Worksheet> getWorksheetClass() {
+    public Class<? extends Worksheet<String>> getWorksheetClass() {
         return TextFilesWorksheet.class;
     }
 

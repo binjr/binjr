@@ -50,18 +50,14 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
+public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter<?>> {
     private static final Logger logger = Logger.create(DataAdapterDialog.class);
 
-    private final HBox uriHBox;
-    private DataAdapter result = null;
+    private DataAdapter<?> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
-    private final Button browseButton;
-    private final Label uriLabel;
     private final ComboBox<String> uriField;
     private final TextField timezoneField;
     private final DialogPane parent;
-    private final Button okButton;
     private final GridPane paramsGridPane;
     private final MostRecentlyUsedList<T> mostRecentList;
 
@@ -106,8 +102,8 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
             throw new IllegalArgumentException("Failed to load /views/DataAdapterView.fxml", e);
         }
         this.setDialogPane(parent);
-        browseButton = (Button) parent.lookup("#browseButton");
-        uriLabel = (Label) parent.lookup("#uriLabel");
+        Button browseButton = (Button) parent.lookup("#browseButton");
+        Label uriLabel = (Label) parent.lookup("#uriLabel");
         uriField = (ComboBox<String>) parent.lookup("#uriField");
 
 
@@ -121,22 +117,22 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
         });
         timezoneField = (TextField) parent.lookup("#timezoneField");
         paramsGridPane = (GridPane) parent.lookup("#paramsGridPane");
-        uriHBox = (HBox) parent.lookup("#uriHBox");
+        HBox uriHBox = (HBox) parent.lookup("#uriHBox");
         if (mode == Mode.URI) {
-            this.browseButton.setPrefWidth(0);
-            this.uriHBox.setSpacing(0);
-            this.uriLabel.setText("Address:");
+            browseButton.setPrefWidth(0);
+            uriHBox.setSpacing(0);
+            uriLabel.setText("Address:");
         } else {
-            this.browseButton.setPrefWidth(-1);
-            this.uriLabel.setText("Path:");
+            browseButton.setPrefWidth(-1);
+            uriLabel.setText("Path:");
         }
-        this.browseButton.setOnAction(event -> {
+        browseButton.setOnAction(event -> {
             File selectedFile = displayFileChooser((Node) event.getSource());
             if (selectedFile != null) {
                 uriField.setValue(selectedFile.getPath());
             }
         });
-        okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
+        Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
         Platform.runLater(uriField::requestFocus);
         updateUriAutoCompletionBinding();
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
@@ -189,7 +185,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter> {
      * @return an instance of {@link SerializedDataAdapter}
      * @throws DataAdapterException if the provided {@link ZoneId} is invalid
      */
-    protected abstract DataAdapter getDataAdapter() throws DataAdapterException;
+    protected abstract DataAdapter<?> getDataAdapter() throws DataAdapterException;
 
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();

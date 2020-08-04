@@ -160,7 +160,7 @@ public abstract class SourceBinding<T> {
         return getLegend();
     }
 
-    public abstract Class<? extends Worksheet> getWorksheetClass();
+    public abstract Class<? extends Worksheet<T>> getWorksheetClass();
 
     private Color computeDefaultColor() {
         long targetNum = getHashValue(this.getLabel()) % StageAppearanceManager.getInstance().getDefaultChartColors().length;

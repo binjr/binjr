@@ -68,7 +68,7 @@ import java.util.regex.Pattern;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-public abstract class HttpDataAdapter extends SimpleCachingDataAdapter {
+public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = Logger.create(HttpDataAdapter.class);

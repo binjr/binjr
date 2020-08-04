@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -38,19 +38,19 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final String license;
     private final String jarLocation;
     private final String siteUrl;
-    private final Class<? extends DataAdapter> adapterClass;
-    private final Class<? extends Dialog<DataAdapter>> adapterDialog;
+    private final Class<? extends DataAdapter<?>> adapterClass;
+    private final Class<? extends Dialog<DataAdapter<?>>> adapterDialog;
     private final Version apiLevel;
     private final DataAdapterPreferences adapterPreferences;
     private final SourceLocality sourceLocality;
-    private BooleanProperty enabled = new SimpleBooleanProperty(true);
+    private final BooleanProperty enabled = new SimpleBooleanProperty(true);
 
     protected BaseDataAdapterInfo(String name,
                                   String description,
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass) {
+                                  Class<? extends DataAdapter<?>> adapterClass) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, null, null, null, null);
     }
 
@@ -59,8 +59,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass) {
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, null, null);
     }
 
@@ -69,8 +69,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   SourceLocality sourceLocality) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, sourceLocality, null);
     }
@@ -80,8 +80,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   SourceLocality sourceLocality,
                                   Version apiLevel) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, null, sourceLocality, apiLevel);
@@ -91,7 +91,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String description,
                                   String copyright,
                                   String license, String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
                                   DataAdapterPreferences preferences) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, null, preferences, null, null);
     }
@@ -101,8 +101,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   DataAdapterPreferences preferences) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, null, null);
     }
@@ -112,8 +112,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   DataAdapterPreferences preferences,
                                   SourceLocality sourceLocality) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
@@ -124,26 +124,26 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   DataAdapterPreferences preferences,
                                   SourceLocality sourceLocality,
                                   Version apiLevel) {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, apiLevel);
     }
 
-    protected BaseDataAdapterInfo(String name,
-                                  String description,
-                                  Version version,
-                                  String copyright,
-                                  String license,
-                                  String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
-                                  DataAdapterPreferences preferences,
-                                  SourceLocality sourceLocality) {
-        this(name, description, version, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
-    }
+//    protected BaseDataAdapterInfo(String name,
+//                                  String description,
+//                                  Version version,
+//                                  String copyright,
+//                                  String license,
+//                                  String siteUrl,
+//                                  Class<? extends DataAdapter<?>> adapterClass,
+//                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
+//                                  DataAdapterPreferences preferences,
+//                                  SourceLocality sourceLocality) {
+//        this(name, description, version, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
+//    }
 
     /**
      * Initializes a new instance of the DataAdapterInfo class.
@@ -164,8 +164,8 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
                                   String copyright,
                                   String license,
                                   String siteUrl,
-                                  Class<? extends DataAdapter> adapterClass,
-                                  Class<? extends Dialog<DataAdapter>> dialogClass,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<DataAdapter<?>>> dialogClass,
                                   DataAdapterPreferences preferences,
                                   SourceLocality sourceLocality,
                                   Version apiLevel) {
@@ -183,27 +183,11 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this.siteUrl = siteUrl;
         this.adapterClass = adapterClass;
         this.adapterDialog = dialogClass;
-        if (sourceLocality == null) {
-            this.sourceLocality = SourceLocality.UNKNOWN;
-        } else {
-            this.sourceLocality = sourceLocality;
-        }
-        if (apiLevel == null) {
-            this.apiLevel = Version.emptyVersion;
-        } else {
-            this.apiLevel = apiLevel;
-        }
-        if (version == null) {
-            this.version = AppEnvironment.getInstance().getVersion(adapterClass);
-        } else {
-            this.version = version;
-        }
+        this.sourceLocality = Objects.requireNonNullElse(sourceLocality, SourceLocality.UNKNOWN);
+        this.apiLevel = Objects.requireNonNullElse(apiLevel, Version.emptyVersion);
+        this.version = Objects.requireNonNullElseGet(version, () -> AppEnvironment.getInstance().getVersion(adapterClass));
         this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
-        if (preferences == null) {
-            adapterPreferences = new DataAdapterPreferences(adapterClass);
-        } else {
-            adapterPreferences = preferences;
-        }
+        adapterPreferences = Objects.requireNonNullElseGet(preferences, () -> new DataAdapterPreferences(adapterClass));
         enabled.bindBidirectional(adapterPreferences.enabled.property());
     }
 
@@ -234,7 +218,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @return the class that implements the data adapter.
      */
     @Override
-    public Class<? extends DataAdapter> getAdapterClass() {
+    public Class<? extends DataAdapter<?>> getAdapterClass() {
         return adapterClass;
     }
 
@@ -254,7 +238,7 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
     @Override
-    public Class<? extends Dialog<DataAdapter>> getAdapterDialog() {
+    public Class<? extends Dialog<DataAdapter<?>>> getAdapterDialog() {
         return adapterDialog;
     }
 

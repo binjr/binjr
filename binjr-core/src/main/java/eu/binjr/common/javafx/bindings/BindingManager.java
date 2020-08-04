@@ -41,6 +41,7 @@ import java.util.function.BiConsumer;
  *
  * @author Frederic Thevenet
  */
+@SuppressWarnings("rawtypes")
 public class BindingManager implements AutoCloseable {
     private static final Logger logger = Logger.create(BindingManager.class);
     private final Map<ObservableValue, List<ChangeListener>> changeListeners = Collections.synchronizedMap(new WeakHashMap<>());

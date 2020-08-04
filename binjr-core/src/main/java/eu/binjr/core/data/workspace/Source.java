@@ -31,8 +31,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Closeable;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
@@ -49,12 +47,12 @@ public class Source implements Dirtyable, Closeable {
     private final BindingManager bindingManager = new BindingManager();
     private UUID adapterId;
     @IsDirtyable
-    private Property<String> name = new SimpleStringProperty();
+    private final Property<String> name = new SimpleStringProperty();
     private String adapterClassName;
     private Map<String, String> adapterParams;
-    private DataAdapter adapter;
-    private Property<Boolean> editable = new SimpleBooleanProperty();
-    private Property<Boolean> filterable = new SimpleBooleanProperty();
+    private DataAdapter<?> adapter;
+    private final Property<Boolean> editable = new SimpleBooleanProperty();
+    private final Property<Boolean> filterable = new SimpleBooleanProperty();
     private Boolean subSource = false;
 
     /**
@@ -73,7 +71,7 @@ public class Source implements Dirtyable, Closeable {
      * @param adapter the {@link SerializedDataAdapter} to create the {@link Source}  instance from
      * @return an instance of the {@link Source} class from the provided  {@link SerializedDataAdapter}
      */
-    public static Source of(DataAdapter adapter) {
+    public static Source of(DataAdapter<?> adapter) {
         if (adapter == null) {
             throw new IllegalArgumentException("adapter cannot be null");
         }
@@ -86,7 +84,7 @@ public class Source implements Dirtyable, Closeable {
         return newSource;
     }
 
-    public static Source subSourceOf(DataAdapter adapter){
+    public static Source subSourceOf(DataAdapter<?> adapter){
         var newSubSource = of(adapter);
         newSubSource.subSource = true;
         return newSubSource;
@@ -202,7 +200,7 @@ public class Source implements Dirtyable, Closeable {
      * @return the {@link SerializedDataAdapter} attached to the {@link Source}.
      */
     @XmlTransient
-    public DataAdapter getAdapter() {
+    public DataAdapter<?> getAdapter() {
         return adapter;
     }
 
@@ -211,7 +209,7 @@ public class Source implements Dirtyable, Closeable {
      *
      * @param adapter the {@link SerializedDataAdapter} attached to the {@link Source}.
      */
-    public void setAdapter(DataAdapter adapter) {
+    public void setAdapter(DataAdapter<?> adapter) {
         this.adapter = adapter;
     }
 

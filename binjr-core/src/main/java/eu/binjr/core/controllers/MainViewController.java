@@ -702,7 +702,7 @@ public class MainViewController implements Initializable {
             AsyncTaskManager.getInstance().submit(() -> {
                         Workspace wsFromfile = Workspace.from(file);
                         for (Source source : wsFromfile.getSources()) {
-                            DataAdapter da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
+                            DataAdapter<?> da = DataAdapterFactory.getInstance().newAdapter(source.getAdapterClassName());
                             da.loadParams(source.getAdapterParams());
                             da.setId(source.getAdapterId());
                             source.setAdapter(da);
@@ -785,7 +785,7 @@ public class MainViewController implements Initializable {
         return false;
     }
 
-    private void addSource(DataAdapter da) {
+    private void addSource(DataAdapter<?> da) {
         Source newSource = Source.of(da);
         TitledPane newSourcePane = newSourcePane(newSource);
         sourceMaskerPane.setVisible(true);
@@ -889,7 +889,7 @@ public class MainViewController implements Initializable {
         return sourcePaneContent;
     }
 
-    private boolean loadWorksheet(Worksheet worksheet) {
+    private boolean loadWorksheet(Worksheet<?> worksheet) {
         EditableTab newTab = loadWorksheetInTab(worksheet, false);
         tearableTabPane.getTabs().add(newTab);
         tearableTabPane.getSelectionModel().select(newTab);
@@ -919,9 +919,9 @@ public class MainViewController implements Initializable {
         loadWorksheet(worksheet, tab, false);
     }
 
-    private <T> WorksheetController loadWorksheet(Worksheet<T> worksheet, EditableTab newTab, boolean setToEditMode) {
+    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            List<DataAdapter<T>> l = new ArrayList<>();
+            List<DataAdapter<?>> l = new ArrayList<>();
             for (var source : sourcesAdapters.values()) {
                 l.add(source.getAdapter());
                 if (source.getAdapter() instanceof MultiSourceAdapter) {
@@ -1023,7 +1023,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private MenuItem getWorksheetMenuItem(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+    private MenuItem getWorksheetMenuItem(EditableTab tab, Worksheet<?> worksheet, BindingManager manager) {
         var worksheetItem = new Menu();
         worksheetItem.setUserData(worksheet);
         manager.bind(worksheetItem.textProperty(), worksheet.nameProperty());
@@ -1031,13 +1031,13 @@ public class MainViewController implements Initializable {
         return worksheetItem;
     }
 
-    private ContextMenu getTabContextMenu(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+    private ContextMenu getTabContextMenu(EditableTab tab, Worksheet<?> worksheet, BindingManager manager) {
         var m = new ContextMenu();
         m.getItems().addAll(makeWorksheetMenuItem(tab, worksheet, manager));
         return m;
     }
 
-    private ObservableList<MenuItem> makeWorksheetMenuItem(EditableTab tab, Worksheet worksheet, BindingManager manager) {
+    private ObservableList<MenuItem> makeWorksheetMenuItem(EditableTab tab, Worksheet<?> worksheet, BindingManager manager) {
         MenuItem close = new MenuItem("Close Worksheet");
         close.setOnAction(manager.registerHandler(event -> closeWorksheetTab(tab)));
         MenuItem closeOthers = new MenuItem("Close Other Worksheets");
@@ -1085,11 +1085,11 @@ public class MainViewController implements Initializable {
         return items;
     }
 
-    private boolean editWorksheet(Worksheet worksheet) {
+    private boolean editWorksheet(Worksheet<?> worksheet) {
         return editWorksheet(tearableTabPane.getSelectedTabPane(), worksheet);
     }
 
-    private boolean editWorksheet(TabPane targetTabPane, Worksheet worksheet) {
+    private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) {
         var newTab = loadWorksheetInTab(worksheet, true);
         targetTabPane.getTabs().add(newTab);
         targetTabPane.getSelectionModel().select(newTab);
@@ -1104,7 +1104,7 @@ public class MainViewController implements Initializable {
         return SnapshotUtils.outputScaleAwareSnapshot(label);
     }
 
-    private Optional<TreeView<SourceBinding>> buildTreeViewForTarget(DataAdapter dp) {
+    private Optional<TreeView<SourceBinding>> buildTreeViewForTarget(DataAdapter<?> dp) {
         Objects.requireNonNull(dp, "DataAdapter instance provided to buildTreeViewForTarget cannot be null.");
         TreeView<SourceBinding> treeView = new TreeView<>();
         treeView.setShowRoot(false);
@@ -1211,7 +1211,11 @@ public class MainViewController implements Initializable {
                         .map(t -> t.getValue().getLegend())
                         .collect(Collectors.joining(", ")), 50);
                 if (charts.isPresent()) {
-                    for (var t : rootItems.stream().map(s -> s.getValue().getWorksheetClass()).distinct().collect(Collectors.toList())) {
+                    for (var t : rootItems
+                            .stream()
+                            .map(s -> s.getValue().getWorksheetClass())
+                            .distinct()
+                            .collect(Collectors.toList())) {
                         var worksheet = WorksheetFactory.getInstance().createWorksheet(t, title, charts.get());
                         editWorksheet(tabPane, worksheet);
                     }
@@ -1302,7 +1306,7 @@ public class MainViewController implements Initializable {
             }
         }
         logger.debug(() -> "Worksheets in current workspace: " +
-                StreamSupport.stream(workspace.getWorksheets().spliterator(), false)
+                workspace.getWorksheets().stream()
                         .map(Worksheet::getName)
                         .reduce((s, s2) -> s + " " + s2)
                         .orElse("null"));

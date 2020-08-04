@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2019 Frederic Thevenet
+ *    Copyright 2018-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
                 AppEnvironment.LICENSE,
                 AppEnvironment.HTTP_WWW_BINJR_EU,
                 Rrd4jFileAdapter.class,
-                Rrd4jFileAdapterDialog.class,
+               Rrd4jFileAdapterDialog.class,
                 Rrd4jFileAdapterPreferences.getInstance(),
                 SourceLocality.LOCAL,
                 AppEnvironment.PLUGIN_API_LEVEL);

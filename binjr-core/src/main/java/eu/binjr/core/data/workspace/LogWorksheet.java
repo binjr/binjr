@@ -50,7 +50,7 @@ public class LogWorksheet extends Worksheet<String> {
     }
 
     @Override
-    public Worksheet duplicate() {
+    public Worksheet<String> duplicate() {
         return new LogWorksheet(this);
     }
 

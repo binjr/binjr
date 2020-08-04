@@ -121,7 +121,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no adapter matching the provided key could be found
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public Dialog<DataAdapter> getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public Dialog<DataAdapter<?>> getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
             return getDataAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
 
@@ -138,7 +138,7 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no registered {@link DataAdapter} could be found for the provided key
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public DataAdapter newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public DataAdapter<?> newAdapter(String key) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
             return getDataAdapterInfo(key).getAdapterClass().getDeclaredConstructor().newInstance();
         } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {

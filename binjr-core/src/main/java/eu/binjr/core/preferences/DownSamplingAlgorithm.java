@@ -35,9 +35,9 @@ public enum DownSamplingAlgorithm {
     AVERAGE("Average resampling", ((type, threshold) -> new AverageResamplingTransform(threshold)));
 
     private final String name;
-    private final BiFunction<ChartType, Integer, TimeSeriesTransform> factory;
+    private final BiFunction<ChartType, Integer, TimeSeriesTransform<Double>> factory;
 
-    DownSamplingAlgorithm(String name, BiFunction<ChartType, Integer, TimeSeriesTransform> factory) {
+    DownSamplingAlgorithm(String name, BiFunction<ChartType, Integer, TimeSeriesTransform<Double>> factory) {
         this.name = name;
         this.factory = factory;
     }
@@ -46,7 +46,7 @@ public enum DownSamplingAlgorithm {
         return name;
     }
 
-    public TimeSeriesTransform instantiateTransform(ChartType chartType, Integer threshold) {
+    public TimeSeriesTransform<Double> instantiateTransform(ChartType chartType, Integer threshold) {
         return factory.apply(chartType, threshold);
     }
 }

@@ -34,7 +34,7 @@ import java.util.Map;
  *
  * @author Frederic Thevenet
  */
-public abstract class SimpleCachingDataAdapter extends SerializedDataAdapter {
+public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<T> {
     public static final int DEFAULT_CACHE_SIZE = 128;
     private static final Logger logger = Logger.create(SimpleCachingDataAdapter.class);
     private final Map<String, SoftReference<byte[]>> cache;

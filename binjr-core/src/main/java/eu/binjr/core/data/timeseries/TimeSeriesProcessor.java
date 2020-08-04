@@ -164,7 +164,8 @@ public abstract class TimeSeriesProcessor<T> {
      *
      * @param seriesTransforms A list of transformation to apply.
      */
-    public void applyTransforms(TimeSeriesTransform<T>... seriesTransforms) {
+    @SafeVarargs
+    public final void applyTransforms(TimeSeriesTransform<T>... seriesTransforms) {
         if (!data.isEmpty()) {
             for (var t : seriesTransforms) {
                 setData(monitor.write().lock(() -> t.transform(data)));

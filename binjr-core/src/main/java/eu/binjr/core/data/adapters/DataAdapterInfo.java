@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -97,7 +97,7 @@ public interface DataAdapterInfo {
      *
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    public Class<? extends Dialog<DataAdapter>> getAdapterDialog();
+    public Class<? extends Dialog<DataAdapter<?>>> getAdapterDialog();
 
     /**
      * The enabled property.

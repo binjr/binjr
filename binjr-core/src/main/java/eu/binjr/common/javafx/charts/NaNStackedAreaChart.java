@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-20 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,18 +16,10 @@
 
 package eu.binjr.common.javafx.charts;
 
-import javafx.beans.property.DoubleProperty;
 import javafx.collections.ObservableList;
-import javafx.scene.Group;
-import javafx.scene.Node;
 import javafx.scene.chart.Axis;
 import javafx.scene.chart.StackedAreaChart;
-import javafx.scene.chart.ValueAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.shape.ClosePath;
-import javafx.scene.shape.LineTo;
-import javafx.scene.shape.MoveTo;
-import javafx.scene.shape.Path;
 
 import java.util.*;
 
@@ -52,7 +44,7 @@ public class NaNStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
         final Axis<X> xa = getXAxis();
         final Axis<Y> ya = getYAxis();
         if (xa.isAutoRanging()) {
-            List xData = new ArrayList<Number>();
+            List<X> xData = new ArrayList<>();
             for (XYChart.Series<X, Y> series : getData()) {
                 for (XYChart.Data<X, Y> data : series.getData()) {
                     xData.add(data.getXValue());
