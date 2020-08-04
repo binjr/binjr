@@ -1,1 +1,1 @@
-* _[Fixed]_ A regression that prevents *binjr* from opening RRD files generated with [RrdTools](https://github.com/oetiker/rrdtool-1.x).
+* _[Fixed]_ A sharp performance drop when zooming extremely close up on the time axis (i.e. displaying less than a few seconds) 

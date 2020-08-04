@@ -578,7 +578,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         SECOND_15(ChronoUnit.SECONDS, 15),
         SECOND_5(ChronoUnit.SECONDS, 5),
         SECOND_1(ChronoUnit.SECONDS, 1),
-        MILLISECOND(ChronoUnit.MILLIS, 1);
+        MILLISECOND_100(ChronoUnit.MILLIS, 100);
 
         private final int amount;
 
