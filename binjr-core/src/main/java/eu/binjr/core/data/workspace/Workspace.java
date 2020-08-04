@@ -202,7 +202,7 @@ public class Workspace implements Dirtyable {
      * Clear the {@link XYChartsWorksheet} list
      */
     public void clearWorksheets() {
-        worksheets.forEach(Worksheet::close);
+        IOUtils.closeCollectionElements(worksheets);
         worksheets.clear();
     }
 
@@ -210,8 +210,8 @@ public class Workspace implements Dirtyable {
      * Clear the {@link Source} list
      */
     public void clearSources() {
-        sources.forEach(Source::close);
-        this.sources.clear();
+        IOUtils.closeCollectionElements(sources);
+        sources.clear();
     }
 
     /**
@@ -336,8 +336,8 @@ public class Workspace implements Dirtyable {
      * Clear all the properties of the {@link Workspace} instance
      */
     public void clear() {
-        IOUtils.closeCollectionElements(worksheets);
-        IOUtils.closeCollectionElements(sources);
+        clearWorksheets();
+        clearSources();
         cleanUp();
         this.setPath(Paths.get("Untitled"));
     }
