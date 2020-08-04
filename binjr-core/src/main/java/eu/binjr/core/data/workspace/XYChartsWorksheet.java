@@ -37,10 +37,7 @@ import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Comparator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -50,7 +47,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class XYChartsWorksheet extends Worksheet implements Syncable {
+public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     private static final Logger logger = Logger.create(XYChartsWorksheet.class);
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
@@ -410,7 +407,7 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
     }
 
     @Override
-    public Worksheet duplicate() {
+    public Worksheet<Double> duplicate() {
         return new XYChartsWorksheet(this);
     }
 
@@ -480,6 +477,15 @@ public class XYChartsWorksheet extends Worksheet implements Syncable {
             }
         }
         this.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());
+    }
+
+    @Override
+    protected List<TimeSeriesInfo<Double>> listAllSeriesInfo() {
+        List<TimeSeriesInfo<Double>> allInfo = new ArrayList<>();
+        for (Chart chart : getCharts()) {
+            allInfo.addAll( chart.getSeries());
+        }
+        return allInfo;
     }
 }
 

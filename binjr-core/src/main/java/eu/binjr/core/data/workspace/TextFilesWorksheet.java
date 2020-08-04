@@ -32,9 +32,10 @@ import javafx.collections.ObservableList;
 import javax.xml.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class TextFilesWorksheet extends Worksheet {
+public class TextFilesWorksheet extends Worksheet<String> {
     private final transient ChangeWatcher status;
     @IsDirtyable
     private final ObservableList<TimeSeriesInfo<String>> seriesInfo = FXCollections.observableList(new LinkedList<>());
@@ -71,7 +72,7 @@ public class TextFilesWorksheet extends Worksheet {
     }
 
     @Override
-    public Worksheet duplicate() {
+    public Worksheet<String> duplicate() {
         return new TextFilesWorksheet(this);
     }
 
@@ -91,6 +92,11 @@ public class TextFilesWorksheet extends Worksheet {
                 }
             }
         }
+    }
+
+    @Override
+    protected List<TimeSeriesInfo<String>> listAllSeriesInfo() {
+        return getSeriesInfo();
     }
 
     // region Dirtyable

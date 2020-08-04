@@ -23,9 +23,10 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import javafx.beans.property.BooleanProperty;
 
 import javax.xml.bind.annotation.XmlTransient;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
 
-public class LogWorksheet extends Worksheet {
+public class LogWorksheet extends Worksheet<String> {
 
     private final ChangeWatcher status;
 
@@ -61,6 +62,11 @@ public class LogWorksheet extends Worksheet {
     @Override
     public void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException {
 
+    }
+
+    @Override
+    protected List<TimeSeriesInfo<String>> listAllSeriesInfo() {
+        return new ArrayList<>();
     }
 
     // region Dirtyable

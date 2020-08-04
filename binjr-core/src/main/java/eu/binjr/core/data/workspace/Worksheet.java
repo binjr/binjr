@@ -17,26 +17,31 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.controllers.WorksheetController;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
 import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
-public abstract class Worksheet implements Dirtyable {
+public abstract class Worksheet<T> implements Dirtyable {
     protected static final AtomicInteger globalCounter = new AtomicInteger(0);
 
     @IsDirtyable
-    private Property<String> name;
+    private final Property<String> name;
 
-    private transient BooleanProperty editModeEnabled;
+    private final transient BooleanProperty editModeEnabled;
 
     protected Worksheet(String name, boolean editModeEnabled) {
         this.name = new SimpleStringProperty(name);
@@ -73,7 +78,7 @@ public abstract class Worksheet implements Dirtyable {
 
     public abstract Class<? extends WorksheetController> getControllerClass();
 
-    public abstract Worksheet duplicate();
+    public abstract Worksheet<T> duplicate();
 
     @XmlTransient
     public Boolean isEditModeEnabled() {
@@ -92,4 +97,19 @@ public abstract class Worksheet implements Dirtyable {
     public abstract void close();
 
     public abstract void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException;
+
+    protected abstract List<TimeSeriesInfo<T>> listAllSeriesInfo();
+
+    public void attachAdaptersToSeriesInfo(Collection<DataAdapter<T>> adapters) throws NoAdapterFoundException {
+        for (TimeSeriesInfo<T> s : listAllSeriesInfo()) {
+            UUID id = s.getBinding().getAdapterId();
+            DataAdapter<T> da = adapters
+                    .stream()
+                    .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+                    .findAny()
+                    .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " + (id != null ? id.toString() : "null")));
+            s.getBinding().setAdapter(da);
+        }
+    }
+
 }

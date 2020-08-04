@@ -732,6 +732,8 @@ public class MainViewController implements Initializable {
         try {
             for (var worksheet : wsFromfile.getWorksheets()) {
                 loadWorksheet(worksheet);
+                // Attach DataAdapter to the worksheet TimeSeriesInfo
+           //     worksheet.attachAdaptersToSeriesInfo(wsFromfile.getSources());
             }
             workspace.cleanUp();
             UserHistory.getInstance().mostRecentWorkspaces.push(workspace.getPath());
@@ -917,9 +919,9 @@ public class MainViewController implements Initializable {
         loadWorksheet(worksheet, tab, false);
     }
 
-    private WorksheetController loadWorksheet(Worksheet worksheet, EditableTab newTab, boolean setToEditMode) {
+    private <T> WorksheetController loadWorksheet(Worksheet<T> worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            List<DataAdapter> l = new ArrayList<>();
+            List<DataAdapter<T>> l = new ArrayList<>();
             for (var source : sourcesAdapters.values()) {
                 l.add(source.getAdapter());
                 if (source.getAdapter() instanceof MultiSourceAdapter) {
