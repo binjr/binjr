@@ -2,7 +2,7 @@
  * The MIT License (MIT)
  *
  * Copyright (c) 2013, Christian Schudt
- * Copyright (c) 2016-2019, Frederic Thevenet
+ * Copyright (c) 2016-2020, Frederic Thevenet
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -578,7 +578,10 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         SECOND_15(ChronoUnit.SECONDS, 15),
         SECOND_5(ChronoUnit.SECONDS, 5),
         SECOND_1(ChronoUnit.SECONDS, 1),
-        MILLISECOND(ChronoUnit.MILLIS, 1);
+        MILLISECOND_500(ChronoUnit.MILLIS, 500),
+        MILLISECOND_100(ChronoUnit.MILLIS, 100),
+        MILLISECOND_10(ChronoUnit.MILLIS, 10),
+        MILLISECOND_1(ChronoUnit.MILLIS, 1);
 
         private final int amount;
 

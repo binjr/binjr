@@ -1,1 +1,2 @@
 * _[New]_ binjr can now be run under the Eclipse OpenJ9 JVM
+* _[Fixed]_ A sharp performance drop when zooming extremely close up on the time axis (i.e. displaying less than a few seconds) 
