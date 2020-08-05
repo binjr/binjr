@@ -27,6 +27,8 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.stream.Stream;
 
 /**
  * Utility methods to read, write and copy data from and across streams
@@ -103,17 +105,32 @@ public class IOUtils {
         return new String(readToBuffer(in), charset);
     }
 
+    public static <T extends AutoCloseable> void closeAll(Collection<T> collection) {
+        closeAll(collection.stream());
+    }
 
-    public static  void closeCollectionElements(Collection<? extends AutoCloseable> collection) {
-        Objects.requireNonNull(collection, "Argument collection must not be null");
-        collection.forEach(closeable -> {
+    public static <T extends AutoCloseable> void closeAll(Collection<T> collection, BiConsumer<T, Exception> onError) {
+        closeAll(collection.stream(), onError);
+    }
+
+    public static <T extends AutoCloseable> void closeAll(Stream<T> stream) {
+        closeAll(stream, (c, e) -> {
+            logger.error("An error occurred while closing element" + c + ": " + e.getMessage());
+            logger.debug(e);
+        });
+    }
+
+    public static <T extends AutoCloseable> void closeAll(Stream<T> stream, BiConsumer<T, Exception> onError) {
+        Objects.requireNonNull(stream, "Argument collection must not be null");
+        stream.forEach(closeable -> {
             if (closeable != null) {
                 try {
                     closeable.close();
                 } catch (Exception e) {
-                    logger.warn("An error occurred while closing element" + closeable + " in collection " + collection);
+                    onError.accept(closeable, e);
                 }
             }
         });
     }
+
 }

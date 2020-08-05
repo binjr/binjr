@@ -202,7 +202,7 @@ public class Workspace implements Dirtyable {
      * Clear the {@link XYChartsWorksheet} list
      */
     public void clearWorksheets() {
-        IOUtils.closeCollectionElements(worksheets);
+        IOUtils.closeAll(worksheets);
         worksheets.clear();
     }
 
@@ -210,7 +210,7 @@ public class Workspace implements Dirtyable {
      * Clear the {@link Source} list
      */
     public void clearSources() {
-        IOUtils.closeCollectionElements(sources);
+        IOUtils.closeAll(sources);
         sources.clear();
     }
 

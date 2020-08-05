@@ -433,7 +433,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     @Override
     public void close() {
         logger.debug(() -> "Closing Worksheet " + this.toString());
-        IOUtils.closeCollectionElements(charts);
+        IOUtils.closeAll(charts);
         this.status.close();
     }
 

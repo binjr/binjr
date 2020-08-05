@@ -1122,7 +1122,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             this.seriesTableContainer.getPanes().clear();
             //Workaround JDK-8220012
             this.seriesTableContainer.getPanes().add(new TitledPane());
-            IOUtils.closeCollectionElements(viewPorts);
+            IOUtils.closeAll(viewPorts);
             viewPorts = null;
             timeRangePicker.dispose();
             this.worksheet = null;

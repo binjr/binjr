@@ -52,7 +52,7 @@ public class ChartViewportsState implements AutoCloseable {
     public void close() {
         this.startX.removeListener(onRefreshAllRequired);
         this.endX.removeListener(onRefreshAllRequired);
-        IOUtils.closeCollectionElements(axisStates.values());
+        IOUtils.closeAll(axisStates.values());
     }
 
     /**

@@ -581,7 +581,7 @@ public class Chart implements Dirtyable, AutoCloseable {
 
     @Override
     public void close() {
-        IOUtils.closeCollectionElements(series);
+        IOUtils.closeAll(series);
         this.status.close();
     }
 
