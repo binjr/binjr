@@ -23,6 +23,8 @@ import javafx.scene.Node;
 
 import java.net.URI;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * A dialog box that returns a {@link NetdataAdapter} built according to user inputs.
@@ -41,7 +43,7 @@ public class NetdataAdapterDialog extends DataAdapterDialog<URI> {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws DataAdapterException {
-        return NetdataAdapter.fromUrl(getSourceUri(), ZoneId.of(getSourceTimezone()));
+    protected Collection<DataAdapter> getDataAdapters() throws DataAdapterException {
+        return List.of(NetdataAdapter.fromUrl(getSourceUri(), ZoneId.of(getSourceTimezone())));
     }
 }

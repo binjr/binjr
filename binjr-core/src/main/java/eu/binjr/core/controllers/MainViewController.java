@@ -77,6 +77,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -616,7 +617,10 @@ public class MainViewController implements Initializable {
             menuItem.setOnAction(eventHandler -> {
                 try {
                     if (adapterInfo.getAdapterDialog() != null) {
-                        DataAdapterFactory.getInstance().getDialog(adapterInfo.getKey(), root).showAndWait().ifPresent(this::addSource);
+                        DataAdapterFactory.getInstance()
+                                .getDialog(adapterInfo.getKey(), root)
+                                .showAndWait()
+                                .ifPresent(dataAdapters -> dataAdapters.forEach(this::addSource));
                     } else {
                         addSource(DataAdapterFactory.getInstance().newAdapter(adapterInfo.getKey()));
                     }

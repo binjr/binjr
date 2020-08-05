@@ -43,6 +43,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.time.DateTimeException;
 import java.time.ZoneId;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 /**
@@ -50,10 +51,10 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter<?>> {
+public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter>> {
     private static final Logger logger = Logger.create(DataAdapterDialog.class);
 
-    private DataAdapter<?> result = null;
+    private Collection<DataAdapter> result = null;
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final ComboBox<String> uriField;
     private final TextField timezoneField;
@@ -138,7 +139,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter<?>> {
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
             try {
                 ZoneId zoneId = ZoneId.of(timezoneField.getText());
-                result = getDataAdapter();
+                result = getDataAdapters();
                 switch (mode) {
                     case PATH:
                         mostRecentList.push((T) Path.of(uriField.getValue()));
@@ -185,7 +186,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<DataAdapter<?>> {
      * @return an instance of {@link SerializedDataAdapter}
      * @throws DataAdapterException if the provided {@link ZoneId} is invalid
      */
-    protected abstract DataAdapter<?> getDataAdapter() throws DataAdapterException;
+    protected abstract Collection<DataAdapter> getDataAdapters() throws DataAdapterException;
 
     protected File displayFileChooser(Node owner) {
         FileChooser fileChooser = new FileChooser();

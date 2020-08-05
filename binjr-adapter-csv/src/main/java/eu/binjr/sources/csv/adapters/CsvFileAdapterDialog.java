@@ -39,6 +39,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -89,17 +91,17 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
     }
 
     @Override
-    protected DataAdapter getDataAdapter() throws DataAdapterException {
+    protected Collection<DataAdapter> getDataAdapters() throws DataAdapterException {
         Path csvPath = Paths.get(getSourceUri());
         if (!Files.exists(csvPath)) {
             throw new CannotInitializeDataAdapterException("Cannot find " + getSourceUri());
         }
         getMostRecentList().push(csvPath);
-        return new CsvFileAdapter(
+        return List.of(new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
                 encodingField.getText(),
                 dateFormatPattern.getText(),
-                separatorField.getText().charAt(0));
+                separatorField.getText().charAt(0)));
     }
 }

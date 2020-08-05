@@ -33,6 +33,8 @@ import javafx.scene.layout.Priority;
 
 import java.net.URI;
 import java.time.ZoneId;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -68,11 +70,11 @@ public class JrdsAdapterDialog extends DataAdapterDialog<URI> {
     }
 
     @Override
-    protected DataAdapter<?> getDataAdapter() throws DataAdapterException {
-        return JrdsDataAdapter.fromUrl(
+    protected Collection<DataAdapter> getDataAdapters() throws DataAdapterException {
+        return List.of(JrdsDataAdapter.fromUrl(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
                 this.tabsChoiceBox.getValue(),
-                this.extraArgumentTextField.getText());
+                this.extraArgumentTextField.getText()));
     }
 }

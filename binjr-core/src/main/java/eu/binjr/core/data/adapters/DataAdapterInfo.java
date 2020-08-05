@@ -22,6 +22,8 @@ import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.Dialog;
 
+import java.util.Collection;
+
 /**
  * An immutable representation of a {@link SerializedDataAdapter}'s metadata
  *
@@ -97,7 +99,7 @@ public interface DataAdapterInfo {
      *
      * @return the class that implements the dialog box used to gather the adapter's parameters from the end user.
      */
-    public Class<? extends Dialog<DataAdapter<?>>> getAdapterDialog();
+    public Class<? extends Dialog<Collection<DataAdapter>>> getAdapterDialog();
 
     /**
      * The enabled property.

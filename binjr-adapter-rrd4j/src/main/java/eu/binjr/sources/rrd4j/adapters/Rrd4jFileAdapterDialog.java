@@ -37,6 +37,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -45,10 +46,10 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter<?>> {
+public class Rrd4jFileAdapterDialog extends Dialog<Collection<DataAdapter>> {
     private static final Logger logger = Logger.create(Rrd4jFileAdapterDialog.class);
     private static final String BINJR_SOURCES = "binjr/sources";
-    private DataAdapter<Double> result = null;
+    private Collection<DataAdapter> result = null;
     private final TextField pathsField;
     private final MostRecentlyUsedList<Path> mostRecentRrdFiles =
             UserHistory.getInstance().pathMostRecentlyUsedList("mostRecentRrdFiles", 20, false);
@@ -91,7 +92,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<DataAdapter<?>> {
 
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
             try {
-                result = getDataAdapter();
+                result = List.of(getDataAdapter());
             } catch (CannotInitializeDataAdapterException e) {
                 Dialogs.notifyError("Error initializing adapter to source", e, Pos.CENTER, pathsField);
                 ae.consume();
