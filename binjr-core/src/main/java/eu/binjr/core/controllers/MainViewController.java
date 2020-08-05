@@ -77,7 +77,6 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -710,9 +709,7 @@ public class MainViewController implements Initializable {
                             da.loadParams(source.getAdapterParams());
                             da.setId(source.getAdapterId());
                             source.setAdapter(da);
-                            if (!source.isSubSource()) {
-                                loadSource(source);
-                            }
+                            loadSource(source);
                         }
                         return wsFromfile;
                     },
@@ -737,7 +734,7 @@ public class MainViewController implements Initializable {
             for (var worksheet : wsFromfile.getWorksheets()) {
                 loadWorksheet(worksheet);
                 // Attach DataAdapter to the worksheet TimeSeriesInfo
-           //     worksheet.attachAdaptersToSeriesInfo(wsFromfile.getSources());
+                //     worksheet.attachAdaptersToSeriesInfo(wsFromfile.getSources());
             }
             workspace.cleanUp();
             UserHistory.getInstance().mostRecentWorkspaces.push(workspace.getPath());
@@ -925,18 +922,15 @@ public class MainViewController implements Initializable {
 
     private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode) {
         try {
-            List<DataAdapter<?>> l = new ArrayList<>();
-            for (var source : sourcesAdapters.values()) {
-                l.add(source.getAdapter());
-                if (source.getAdapter() instanceof MultiSourceAdapter) {
-                    ((MultiSourceAdapter) source.getAdapter()).getSubSources().forEach(a -> l.add(a.getAdapter()));
-                }
-            }
             WorksheetController current = worksheet.getControllerClass()
                     .getDeclaredConstructor(this.getClass(),
                             worksheet.getClass(),
                             Collection.class)
-                    .newInstance(this, worksheet, l);
+                    .newInstance(this,
+                            worksheet,
+                            sourcesAdapters.values().stream()
+                                    .map(Source::getAdapter)
+                                    .collect(Collectors.toList()));
             try {
                 // Register reload listener
                 current.setReloadRequiredHandler(this::reloadController);

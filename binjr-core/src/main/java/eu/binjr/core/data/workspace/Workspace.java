@@ -231,10 +231,6 @@ public class Workspace implements Dirtyable {
      */
     public void addSource(Source sourceToAdd) {
         this.sources.add(sourceToAdd);
-        if (sourceToAdd.getAdapter() instanceof MultiSourceAdapter) {
-            var m = (MultiSourceAdapter) sourceToAdd.getAdapter();
-            sources.addAll(m.getSubSources());
-        }
     }
 
     /**
@@ -252,10 +248,6 @@ public class Workspace implements Dirtyable {
      * @param sourceToRemove the {@link Source} to remove.
      */
     public void removeSource(Source sourceToRemove) {
-        if (sourceToRemove instanceof MultiSourceAdapter) {
-            var m = (MultiSourceAdapter) sourceToRemove;
-            sources.removeAll(m.getSubSources());
-        }
         this.sources.remove(sourceToRemove);
     }
 

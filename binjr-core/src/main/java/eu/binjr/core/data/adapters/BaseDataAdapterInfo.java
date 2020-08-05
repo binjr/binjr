@@ -133,18 +133,18 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this(name, description, null, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, apiLevel);
     }
 
-//    protected BaseDataAdapterInfo(String name,
-//                                  String description,
-//                                  Version version,
-//                                  String copyright,
-//                                  String license,
-//                                  String siteUrl,
-//                                  Class<? extends DataAdapter<?>> adapterClass,
-//                                  Class<? extends Dialog<Collection<DataAdapter<?>>>> dialogClass,
-//                                  DataAdapterPreferences preferences,
-//                                  SourceLocality sourceLocality) {
-//        this(name, description, version, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
-//    }
+    protected BaseDataAdapterInfo(String name,
+                                  String description,
+                                  Version version,
+                                  String copyright,
+                                  String license,
+                                  String siteUrl,
+                                  Class<? extends DataAdapter<?>> adapterClass,
+                                  Class<? extends Dialog<Collection<DataAdapter>>> dialogClass,
+                                  DataAdapterPreferences preferences,
+                                  SourceLocality sourceLocality) {
+        this(name, description, version, copyright, license, siteUrl, adapterClass, dialogClass, preferences, sourceLocality, null);
+    }
 
     /**
      * Initializes a new instance of the DataAdapterInfo class.

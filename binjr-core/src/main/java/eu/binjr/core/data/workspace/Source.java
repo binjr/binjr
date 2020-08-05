@@ -254,7 +254,6 @@ public class Source implements Dirtyable, Closeable {
         this.filterable.setValue(filterable);
     }
 
-    //region Private members.
     private void setAdapterClassName(String adapterClassName) {
         this.adapterClassName = adapterClassName;
     }
@@ -263,9 +262,4 @@ public class Source implements Dirtyable, Closeable {
         this.adapterParams = adapterParams;
     }
 
-    @XmlAttribute
-    public Boolean isSubSource() {
-        return subSource;
-    }
-    //endregion
 }
