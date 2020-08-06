@@ -1618,6 +1618,10 @@
     -fx-fill: #008000;
 }
 
-/*.styled-text-area .search-result-highlight {*/
-/*    -rtfx-background-color: #F8C9AB;*/
-/*}*/
+.warning-label {
+    -fx-text-fill:  -binjr-color-gray;
+}
+
+.warning-label-icon {
+    -fx-background-color: -binjr-color-lighter-gray;
+}

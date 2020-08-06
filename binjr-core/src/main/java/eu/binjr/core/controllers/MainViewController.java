@@ -21,7 +21,10 @@ import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.data.adapters.*;
+import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
+import eu.binjr.core.data.adapters.DataAdapterInfo;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -60,6 +63,7 @@ import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -789,22 +793,23 @@ public class MainViewController implements Initializable {
     private void addSource(DataAdapter<?> da) {
         Source newSource = Source.of(da);
         TitledPane newSourcePane = newSourcePane(newSource);
-        sourceMaskerPane.setVisible(true);
+        newSourcePane.setContent(new MaskerPane());
+        sourcesAdapters.put(newSourcePane, newSource);
+        sourcesPane.getPanes().add(newSourcePane);
+        newSourcePane.setExpanded(true);
         workspace.setPresentationMode(false);
-        AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(da),
+        AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(newSource.getAdapter()),
                 event -> {
-                    sourceMaskerPane.setVisible(false);
                     Optional<TreeView<SourceBinding>> treeView =
                             (Optional<TreeView<SourceBinding>>) event.getSource().getValue();
                     if (treeView.isPresent()) {
                         newSourcePane.setContent(buildSourcePaneContent(treeView.get(), newSource));
-                        sourcesAdapters.put(newSourcePane, newSource);
-                        sourcesPane.getPanes().add(newSourcePane);
-                        newSourcePane.setExpanded(true);
+                    } else {
+                        newSourcePane.setContent(failedLoadingSource("Error connecting to " + newSource.getName()));
                     }
                 },
                 event -> {
-                    sourceMaskerPane.setVisible(false);
+                    newSourcePane.setContent(failedLoadingSource("Error connecting to " + newSource.getName()));
                     Dialogs.notifyException("Unexpected error getting data adapter:",
                             event.getSource().getException(),
                             root);
@@ -813,20 +818,27 @@ public class MainViewController implements Initializable {
 
     private void loadSource(Source source) throws DataAdapterException {
         TitledPane newSourcePane = newSourcePane(source);
-        Optional<TreeView<SourceBinding>> treeView;
-        treeView = buildTreeViewForTarget(source.getAdapter());
-        newSourcePane.setContent(buildSourcePaneContent((treeView.orElseGet(() -> {
-            FilterableTreeItem<SourceBinding> i = new FilterableTreeItem<>(new TimeSeriesBinding());
-            Label l = new Label("<Failed to connect to \"" + source.getName() + "\">");
-            l.setTextFill(Color.RED);
-            i.setGraphic(l);
-            return new TreeView<>(i);
-        })), source));
+        buildTreeViewForTarget(source.getAdapter()).ifPresentOrElse(
+                t -> newSourcePane.setContent(buildSourcePaneContent(t, source)),
+                () -> newSourcePane.setContent(failedLoadingSource("Error connecting to " + source.getName())));
         sourcesAdapters.put(newSourcePane, source);
         Platform.runLater(() -> {
             sourcesPane.getPanes().add(newSourcePane);
             newSourcePane.setExpanded(true);
         });
+    }
+
+    private Label failedLoadingSource(String message) {
+        Label errorLabel = new Label(message);
+        var icon = new Region();
+        icon.getStyleClass().addAll("warning-icon", "large-icon", "warning-label-icon");
+        errorLabel.setGraphicTextGap(30);
+        errorLabel.setContentDisplay(ContentDisplay.TOP);
+        errorLabel.setWrapText(true);
+        errorLabel.setTextAlignment(TextAlignment.CENTER);
+        errorLabel.setGraphic(icon);
+        errorLabel.getStyleClass().add("warning-label");
+        return errorLabel;
     }
 
     private Node buildSourcePaneContent(TreeView<SourceBinding> treeView, Source source) {
@@ -1098,7 +1110,7 @@ public class MainViewController implements Initializable {
         var label = new Label("    " + text + "    ");
         label.getStyleClass().add("tooltip");
         // The label must be added to a scene so that CSS and layout are applied.
-        StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.TRANSPARENT));
+        StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.RED));
         return SnapshotUtils.outputScaleAwareSnapshot(label);
     }
 

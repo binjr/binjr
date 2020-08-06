@@ -154,3 +154,7 @@
     -fx-fill: red;
     -rtfx-background-color: yellow;
 }
+
+.warning-label {
+    -fx-font-size: 10pt;
+}

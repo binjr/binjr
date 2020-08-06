@@ -199,7 +199,7 @@
                 </cursor>
                 <AnchorPane fx:id="chartView" cache="true" cacheHint="SPEED" depthTest="DISABLE"
                             VBox.vgrow="ALWAYS"
-                            styleClass="skinnable-pane-border,chart-viewport-parent"
+                            styleClass="skinnable-pane-border, chart-viewport-parent"
                             AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
                             AnchorPane.topAnchor="0.0">
                     <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
