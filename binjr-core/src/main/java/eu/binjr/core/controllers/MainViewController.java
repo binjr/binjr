@@ -35,6 +35,7 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.update.UpdateManager;
+import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
@@ -71,7 +72,6 @@ import javafx.util.Callback;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
-import org.eclipse.fx.ui.controls.tree.TreeItemPredicate;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -846,11 +846,12 @@ public class MainViewController implements Initializable {
         filterField.setPromptText("Type in text to filter the tree view.");
         HBox.setHgrow(filterField, Priority.ALWAYS);
         filterField.setMaxWidth(Double.MAX_VALUE);
+        filterField.getStyleClass().add("search-field-inner");
         var clearFilterbutton = new ToolButtonBuilder<Button>()
                 .setText("Clear")
                 .setTooltip("Clear filter")
                 .setStyleClass("dialog-button")
-                .setIconStyleClass("trash-icon", "small-icon")
+                .setIconStyleClass("cross-icon", "small-icon")
                 .setAction(event -> filterField.clear())
                 .build(Button::new);
         var filterCaseSensitiveToggle = new ToolButtonBuilder<ToggleButton>()
@@ -859,8 +860,10 @@ public class MainViewController implements Initializable {
                 .setIconStyleClass("match-case-icon")
                 .setTooltip("Match Case")
                 .build(ToggleButton::new);
-        var filterBar = new HBox(filterField, filterCaseSensitiveToggle, clearFilterbutton);
-        filterBar.setSpacing(5.0);
+        var filterBar = new HBox(filterField, clearFilterbutton, filterCaseSensitiveToggle);
+        filterBar.getStyleClass().add("search-field-outer");
+        filterBar.setPadding(new Insets(0, 3, 0, 3));
+        filterBar.setSpacing(2);
         filterBar.setAlignment(Pos.CENTER_LEFT);
         source.filterableProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
@@ -869,7 +872,7 @@ public class MainViewController implements Initializable {
         });
         filterBar.managedProperty().bind(source.filterableProperty());
         filterBar.visibleProperty().bind(filterBar.managedProperty());
-        VBox.setMargin(filterBar, new Insets(10, 5, 5, 15));
+        VBox.setMargin(filterBar, new Insets(10, 15, 5, 15));
         VBox sourcePaneContent = new VBox(filterBar);
         sourcePaneContent.getStyleClass().addAll("skinnable-pane-border", "chart-viewport-parent");
         AnchorPane.setBottomAnchor(sourcePaneContent, 0.0);
@@ -879,12 +882,21 @@ public class MainViewController implements Initializable {
         VBox.setVgrow(treeView, Priority.ALWAYS);
         treeView.setMaxHeight(Double.MAX_VALUE);
         treeView.setId("sourceTreeView");
+
+        // Delay the search until at least the following amount of time elapsed since the last character was entered
+        var textChangedTrigger = new SimpleBooleanProperty(false);
+        var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
+        filterField.textProperty().addListener(o -> {
+            delay.setOnFinished(event -> textChangedTrigger.setValue(!textChangedTrigger.get()));
+            delay.playFromStart();
+        });
+
         ((FilterableTreeItem<SourceBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() ||
                             filterField.getText() == null ||
                             filterField.getText().length() < UserPreferences.getInstance().minCharsTreeFiltering.get().intValue())
                         return null;
-                    return (TreeItemPredicate<SourceBinding>) (parent, seriesBinding) -> {
+                    return (parent, seriesBinding) -> {
                         var isMatch = seriesBinding != null && StringUtils.contains(
                                 seriesBinding.getTreeHierarchy(),
                                 filterField.getText(),
@@ -896,7 +908,7 @@ public class MainViewController implements Initializable {
                     };
                 },
                 source.filterableProperty(),
-                filterField.textProperty(),
+                textChangedTrigger,
                 filterCaseSensitiveToggle.selectedProperty()));
         sourcePaneContent.getChildren().addAll(treeView);
         return sourcePaneContent;

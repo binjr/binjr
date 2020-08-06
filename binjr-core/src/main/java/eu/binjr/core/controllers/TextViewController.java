@@ -36,6 +36,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -45,6 +46,8 @@ import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserPreferences;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -53,6 +56,7 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -74,6 +78,7 @@ public class TextViewController extends WorksheetController {
     private final TextFilesWorksheet worksheet;
     private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
+    private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
 
 
     public TextViewController(MainViewController parent, TextFilesWorksheet worksheet, Collection<DataAdapter<String>> adapters)
@@ -213,25 +218,33 @@ public class TextViewController extends WorksheetController {
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
 
         //Search bar initialization
+        prevOccurenceButton.setOnAction(getBindingManager().registerHandler(event -> {
+            if (searchHitIterator.hasPrevious()) {
+                focusOnSearchHit(searchHitIterator.previous());
+            }
+        }));
+        nextOccurenceButton.setOnAction(getBindingManager().registerHandler(event -> {
+            if (searchHitIterator.hasNext()) {
+                focusOnSearchHit(searchHitIterator.next());
+            }
+        }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
+        // Delay the search until at least the following amount of time elapsed since the last character was entered
+        var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
                 (ChangeListener<String>) (obs, oldText, newText) -> {
-                    var searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), newText);
-                    prevOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-                    nextOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-                    searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
-                    if (syntaxHilightStyleSpans != null) {
-                        textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
-                                (strings, strings2) -> Stream.concat(strings.stream(),
-                                        strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
-                    } else {
-                        textOutput.setStyleSpans(0, searchResults.getStyleSpans());
-                    }
-                    searchResults.getSearchHitRanges().stream().findFirst().ifPresentOrElse(
-                            this::focusOnSearchHit,
-                            () -> focusOnSearchHit(null));
-                });
+            delay.setOnFinished(event -> doSearchHighlight(newText,
+                    searchMatchCaseToggle.isSelected(),
+                    searchRegExToggle.isSelected()));
+            delay.playFromStart();
+        });
 
+        getBindingManager().attachListener(searchMatchCaseToggle.selectedProperty(),
+                (ChangeListener<Boolean>) (obs, oldVal, newVal) ->
+                        doSearchHighlight(searchTextField.getText(), newVal, searchRegExToggle.isSelected()));
+        getBindingManager().attachListener(searchRegExToggle.selectedProperty(),
+                (ChangeListener<Boolean>) (obs, oldVal, newVal) ->
+                        doSearchHighlight(searchTextField.getText(), searchMatchCaseToggle.isSelected(), newVal));
         Platform.runLater(this::refresh);
         super.initialize(location, resources);
     }
@@ -239,9 +252,33 @@ public class TextViewController extends WorksheetController {
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
         if (hit == null) {
             textOutput.selectRange(0, 0);
+            searchResultsLabel.setText("No results");
         } else {
             textOutput.selectRange(hit.getStart(), hit.getEnd());
             textOutput.requestFollowCaret();
+            searchResultsLabel.setText(String.format("%d/%d",
+                    searchHitIterator.peekCurrentIndex() + 1,
+                    searchHitIterator.peekLastIndex() + 1));
+        }
+    }
+
+    private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
+        var searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+        prevOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        nextOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
+        searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
+        if (syntaxHilightStyleSpans != null) {
+            textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
+                    (strings, strings2) -> Stream.concat(strings.stream(),
+                            strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
+        } else {
+            textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+        }
+        if (searchHitIterator.hasNext()) {
+            focusOnSearchHit(searchHitIterator.next());
+        } else {
+            focusOnSearchHit(null);
         }
     }
 

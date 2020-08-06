@@ -250,6 +250,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<LocalDateTime> lastCheckForUpdate =
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 
+    public ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 300);
+
     private UserPreferences() {
         super(BINJR_GLOBAL);
     }

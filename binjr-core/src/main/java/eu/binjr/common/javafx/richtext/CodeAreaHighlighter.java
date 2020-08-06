@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.richtext;
 
+import eu.binjr.common.logging.Logger;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -25,8 +26,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class CodeAreaHighlighter {
+    private static final Logger logger = Logger.create(CodeAreaHighlighter.class);
     private static final Pattern XML_TAG = Pattern.compile(
             "(?<ELEMENT>(</?\\??\\h*)([\\w:\\-_]+)([^<>]*)(\\h*/?\\??>))" +
                     "|(?<COMMENT><!--[^<>]+-->)");
@@ -42,11 +45,11 @@ public class CodeAreaHighlighter {
     private static final int GROUP_ATTRIBUTE_VALUE = 3;
     public static final String SEARCH_RESULT_HIGHLIGHT = "search-result-highlight";
 
-    public static class SearchHitRange{
+    public static class SearchHitRange {
         private final int start;
         private final int end;
 
-         private SearchHitRange(int start, int end) {
+        private SearchHitRange(int start, int end) {
             this.start = start;
             this.end = end;
         }
@@ -60,8 +63,8 @@ public class CodeAreaHighlighter {
         }
     }
 
-    public static class SearchHilightResults{
-        private final  List<SearchHitRange> searchHitRanges;
+    public static class SearchHilightResults {
+        private final List<SearchHitRange> searchHitRanges;
         private final StyleSpans<Collection<String>> styleSpans;
 
         private SearchHilightResults(List<SearchHitRange> searchHitRanges, StyleSpans<Collection<String>> styleSpans) {
@@ -70,7 +73,7 @@ public class CodeAreaHighlighter {
         }
 
 
-        public  List<SearchHitRange> getSearchHitRanges() {
+        public List<SearchHitRange> getSearchHitRanges() {
             return searchHitRanges;
         }
 
@@ -79,23 +82,46 @@ public class CodeAreaHighlighter {
         }
     }
 
-    public static SearchHilightResults computeSearchHitsHighlighting(String text, String searchExpression) {
-        var searchPattern = Pattern.compile(searchExpression);
+    public static SearchHilightResults computeSearchHitsHighlighting(String text, String searchText, boolean matchCase, boolean regEx) {
+        StringBuilder searchExpression = new StringBuilder();
+        if (!regEx) {
+            searchText.codePoints().forEachOrdered(value -> {
+                var c = Character.toString(value);
+                String regExSpecialChars = "\\^$.|?*+()[]{}";
+                if (regExSpecialChars.contains(c)) {
+                    searchExpression.append("\\");
+                }
+                searchExpression.append(c);
+            });
+        } else {
+            searchExpression.append(searchText);
+        }
+        if (!matchCase) {
+            searchExpression.insert(0, "(?i)");
+        }
+        logger.debug(() -> "Search expression= " + searchExpression.toString());
         List<SearchHitRange> hits = new ArrayList<>();
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-        if (searchExpression!=null && !searchExpression.isEmpty()) {
-            Matcher searchMatcher = searchPattern.matcher(text);
-            while (searchMatcher.find()) {
-                spansBuilder.add(Collections.emptyList(), searchMatcher.start() - lastKwEnd);
-                spansBuilder.add(Collections.singleton(SEARCH_RESULT_HIGHLIGHT), searchMatcher.end() - searchMatcher.start());
-                hits.add(new SearchHitRange(searchMatcher.start(), searchMatcher.end()));
-                lastKwEnd = searchMatcher.end();
+        try {
+            var searchPattern = Pattern.compile(searchExpression.toString());
+            if (searchText != null && !searchText.isEmpty()) {
+                Matcher searchMatcher = searchPattern.matcher(text);
+                while (searchMatcher.find()) {
+                    spansBuilder.add(Collections.emptyList(), searchMatcher.start() - lastKwEnd);
+                    spansBuilder.add(Collections.singleton(SEARCH_RESULT_HIGHLIGHT), searchMatcher.end() - searchMatcher.start());
+                    hits.add(new SearchHitRange(searchMatcher.start(), searchMatcher.end()));
+                    lastKwEnd = searchMatcher.end();
+                }
             }
+        } catch (PatternSyntaxException e) {
+            logger.error("Incorrect search expression pattern: " + e.getMessage());
+            logger.debug("", e);
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return new SearchHilightResults(hits, spansBuilder.create());
     }
+
 
     public static StyleSpans<Collection<String>> computeSyntaxHighlighting(String text) {
         Matcher matcher = XML_TAG.matcher(text);
