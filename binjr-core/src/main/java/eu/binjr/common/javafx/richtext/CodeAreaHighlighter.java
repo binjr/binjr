@@ -122,7 +122,6 @@ public class CodeAreaHighlighter {
         return new SearchHilightResults(hits, spansBuilder.create());
     }
 
-
     public static StyleSpans<Collection<String>> computeSyntaxHighlighting(String text) {
         Matcher matcher = XML_TAG.matcher(text);
         int lastKwEnd = 0;

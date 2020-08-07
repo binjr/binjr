@@ -19,172 +19,165 @@
 <?import eu.binjr.common.javafx.controls.ZonedDateTimePicker?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
 <AnchorPane fx:id="intervalSelector" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
             minWidth="-Infinity" prefHeight="180.0" prefWidth="670.0" styleClass="interval-picker-popup"
             xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-    <children>
-        <VBox layoutX="10.0" layoutY="6.0" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
-              AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-            <children>
-                <HBox alignment="CENTER_LEFT" spacing="5.0">
-                    <children>
-                        <Button fx:id="previousIntervalBtn" contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity" mnemonicParsing="false" prefWidth="18.0"
-                                styleClass="dialog-button">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="left-arrow-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Step Back"/>
-                            </tooltip>
-                        </Button>
-                        <Label minWidth="-Infinity" text="From:"/>
-                        <ZonedDateTimePicker fx:id="startDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
-                                             HBox.hgrow="SOMETIMES">
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Lower bound for the X axis"/>
-                            </tooltip>
-                        </ZonedDateTimePicker>
-                        <Label minWidth="-Infinity" text="To:"/>
-                        <ZonedDateTimePicker fx:id="endDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
-                                             prefHeight="25.0" HBox.hgrow="SOMETIMES">
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Upper bound for the X axis"/>
-                            </tooltip>
-                        </ZonedDateTimePicker>
-                        <ComboBox editable="true" fx:id="timezoneField" HBox.hgrow="SOMETIMES" prefHeight="25.0"/>
+    <VBox layoutX="10.0" layoutY="6.0" spacing="10.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0"
+          AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+        <HBox alignment="CENTER_LEFT" spacing="5.0">
+            <Button fx:id="previousIntervalBtn" contentDisplay="GRAPHIC_ONLY"
+                    maxHeight="1.7976931348623157E308" maxWidth="-Infinity" minHeight="-Infinity"
+                    minWidth="-Infinity" mnemonicParsing="false" prefWidth="18.0"
+                    styleClass="dialog-button">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="left-arrow-icon"/>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Step Back"/>
+                </tooltip>
+            </Button>
+            <Label minWidth="-Infinity" text="From:"/>
+            <ZonedDateTimePicker fx:id="startDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
+                                 HBox.hgrow="SOMETIMES">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Lower bound for the X axis"/>
+                </tooltip>
+            </ZonedDateTimePicker>
+            <Label minWidth="-Infinity" text="To:"/>
+            <ZonedDateTimePicker fx:id="endDate" maxWidth="1.7976931348623157E308" minWidth="165.0"
+                                 prefHeight="25.0" HBox.hgrow="SOMETIMES">
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Upper bound for the X axis"/>
+                </tooltip>
+            </ZonedDateTimePicker>
+            <ComboBox editable="true" fx:id="timezoneField" HBox.hgrow="SOMETIMES" prefHeight="25.0"/>
 
-                        <Button fx:id="copyTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0"
-                                minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button"
-                                text="Copy" HBox.hgrow="SOMETIMES">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <children>
-                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="copy-icon"/>
-                                    </children>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Copy Time Range"/>
-                            </tooltip>
-                        </Button>
-                        <Button fx:id="pasteTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
-                                maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0"
-                                minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button"
-                                text="Paste"
-                                HBox.hgrow="SOMETIMES">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <children>
-                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2"
-                                                styleClass="clipboard-icon"/>
-                                    </children>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Paste Time Range"/>
-                            </tooltip>
-                        </Button>
-                        <ToggleButton fx:id="linkTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
-                                      maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                      minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0"
-                                      styleClass="dialog-button" text="Link"
-                                      HBox.hgrow="SOMETIMES">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <children>
-                                        <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="link-icon"/>
-                                    </children>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Link Worksheet Time Line"/>
-                            </tooltip>
-                        </ToggleButton>
-                        <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308"
-                                maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                                prefWidth="18.0" styleClass="dialog-button">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="right-arrow-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                               <Tooltip showDelay="500ms" text="Step Forward"/>
-                            </tooltip>
-                        </Button>
-                    </children>
-                </HBox>
-                <GridPane alignment="CENTER" hgap="5.0" vgap="5.0" VBox.vgrow="SOMETIMES">
-                    <columnConstraints>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                        <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
-                    </rowConstraints>
-                    <children>
-                        <Button fx:id="last6Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 6 Hours"
-                                GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-                        <Button fx:id="last3Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 3 Hours"
-                                GridPane.columnIndex="1"/>
-                        <Button fx:id="last24Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 24 Hours"
-                                GridPane.columnIndex="1" GridPane.rowIndex="3"/>
-                        <Button fx:id="last7Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 7 Days"
-                                GridPane.columnIndex="2"/>
-                        <Button fx:id="last15Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 15 Days"
-                                GridPane.columnIndex="2" GridPane.rowIndex="1"/>
-                        <Button fx:id="last30Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 30 Days"
-                                GridPane.columnIndex="2" GridPane.rowIndex="2"/>
-                        <Button fx:id="last90Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 90 Days"
-                                GridPane.columnIndex="2" GridPane.rowIndex="3"/>
-                        <Button fx:id="last15Minutes" maxHeight="1.7976931348623157E308"
-                                maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
-                                styleClass="dialog-button" text="Last 15 Minutes"/>
-                        <Button fx:id="last30Minutes" maxHeight="1.7976931348623157E308"
-                                maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
-                                styleClass="dialog-button" text="Last 30 Minutes" GridPane.rowIndex="1"/>
-                        <Button fx:id="last60Minutes" maxHeight="1.7976931348623157E308"
-                                maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
-                                styleClass="dialog-button" text="Last 60 Minutes" GridPane.rowIndex="2"/>
-                        <Button fx:id="last12Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 12 Hours"
-                                GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-                        <Button fx:id="last90Minutes" maxHeight="1.7976931348623157E308"
-                                maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
-                                styleClass="dialog-button" text="Last 90 minutes" GridPane.rowIndex="3"/>
-                        <Button fx:id="today" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Today"
-                                GridPane.columnIndex="3"/>
-                        <Button fx:id="yesterday" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Yesterday"
-                                GridPane.columnIndex="3" GridPane.rowIndex="1"/>
-                        <Button fx:id="thisWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="This Week"
-                                GridPane.columnIndex="3" GridPane.rowIndex="2"/>
-                        <Button fx:id="lastWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
-                                minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last Week"
-                                GridPane.columnIndex="3" GridPane.rowIndex="3"/>
-                    </children>
-                </GridPane>
+            <Button fx:id="copyTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
+                    maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0"
+                    minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button"
+                    text="Copy" HBox.hgrow="SOMETIMES">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <children>
+                            <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="copy-icon"/>
+                        </children>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Copy Time Range"/>
+                </tooltip>
+            </Button>
+            <Button fx:id="pasteTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
+                    maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minHeight="10.0"
+                    minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0" styleClass="dialog-button"
+                    text="Paste"
+                    HBox.hgrow="SOMETIMES">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <children>
+                            <Region style=" -icon-scale-x: 2; -icon-scale-y: 2"
+                                    styleClass="clipboard-icon"/>
+                        </children>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Paste Time Range"/>
+                </tooltip>
+            </Button>
+            <ToggleButton fx:id="linkTimeRangeButton" contentDisplay="GRAPHIC_ONLY"
+                          maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                          minHeight="10.0" minWidth="-Infinity" mnemonicParsing="false" prefWidth="25.0"
+                          styleClass="dialog-button" text="Link"
+                          HBox.hgrow="SOMETIMES">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <children>
+                            <Region style=" -icon-scale-x: 2; -icon-scale-y: 2" styleClass="link-icon"/>
+                        </children>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Link Worksheet Time Line"/>
+                </tooltip>
+            </ToggleButton>
+            <Button fx:id="nextIntervalBtn" contentDisplay="GRAPHIC_ONLY" maxHeight="1.7976931348623157E308"
+                    maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                    prefWidth="18.0" styleClass="dialog-button">
+                <graphic>
+                    <HBox alignment="CENTER" styleClass="icon-container">
+                        <Region styleClass="right-arrow-icon"/>
+                    </HBox>
+                </graphic>
+                <tooltip>
+                    <Tooltip showDelay="500ms" text="Step Forward"/>
+                </tooltip>
+            </Button>
+        </HBox>
+        <GridPane alignment="CENTER" hgap="5.0" vgap="5.0" VBox.vgrow="SOMETIMES">
+            <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0"/>
+            </columnConstraints>
+            <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES"/>
+            </rowConstraints>
+            <children>
+                <Button fx:id="last6Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 6 Hours"
+                        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                <Button fx:id="last3Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 3 Hours"
+                        GridPane.columnIndex="1"/>
+                <Button fx:id="last24Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 24 Hours"
+                        GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+                <Button fx:id="last7Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 7 Days"
+                        GridPane.columnIndex="2"/>
+                <Button fx:id="last15Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 15 Days"
+                        GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                <Button fx:id="last30Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 30 Days"
+                        GridPane.columnIndex="2" GridPane.rowIndex="2"/>
+                <Button fx:id="last90Days" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 90 Days"
+                        GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                <Button fx:id="last15Minutes" maxHeight="1.7976931348623157E308"
+                        maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
+                        styleClass="dialog-button" text="Last 15 Minutes"/>
+                <Button fx:id="last30Minutes" maxHeight="1.7976931348623157E308"
+                        maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
+                        styleClass="dialog-button" text="Last 30 Minutes" GridPane.rowIndex="1"/>
+                <Button fx:id="last60Minutes" maxHeight="1.7976931348623157E308"
+                        maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
+                        styleClass="dialog-button" text="Last 60 Minutes" GridPane.rowIndex="2"/>
+                <Button fx:id="last12Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last 12 Hours"
+                        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+                <Button fx:id="last90Minutes" maxHeight="1.7976931348623157E308"
+                        maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
+                        styleClass="dialog-button" text="Last 90 minutes" GridPane.rowIndex="3"/>
+                <Button fx:id="today" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Today"
+                        GridPane.columnIndex="3"/>
+                <Button fx:id="yesterday" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Yesterday"
+                        GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <Button fx:id="thisWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="This Week"
+                        GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Button fx:id="lastWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last Week"
+                        GridPane.columnIndex="3" GridPane.rowIndex="3"/>
             </children>
-        </VBox>
-    </children>
+        </GridPane>
+    </VBox>
 </AnchorPane>

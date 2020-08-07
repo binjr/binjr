@@ -24,16 +24,20 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import org.controlsfx.control.MaskerPane?>
-<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0" styleClass="skinnable-pane-border"
-            AnchorPane.rightAnchor="0.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox prefHeight="537.0" prefWidth="687.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+<AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0"
+            styleClass="skinnable-pane-border"
+            xmlns="http://javafx.com/javafx/8.0.111"
+            xmlns:fx="http://javafx.com/fxml/1">
+    <VBox prefHeight="537.0" prefWidth="687.0"
+          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT">
             <AnchorPane>
                 <VBox.margin>
                     <Insets top="1.0"/>
                 </VBox.margin>
-                <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar" AnchorPane.leftAnchor="0.0"
+                <HBox alignment="CENTER_LEFT" styleClass="worksheet-tool-bar"
+                      AnchorPane.leftAnchor="0.0"
                       AnchorPane.rightAnchor="0.0">
                     <HBox fx:id="navigationToolbar" HBox.hgrow="SOMETIMES">
                         <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
@@ -95,34 +99,6 @@
                         </TimeRangePicker>
                         <Pane HBox.hgrow="ALWAYS"/>
                         <ToolBar fx:id="chartsToolbar">
-                            <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    text="Snapshot">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms"
-                                             text="Save a screen capture of the current worksheet to disk"/>
-                                </tooltip>
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="camera-icon"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
-                            <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
-                                    contentDisplay="GRAPHIC_ONLY"
-                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
-                                    text="Toggle charts display mode">
-                                <tooltip>
-                                    <Tooltip showDelay="500ms" text="Switch to edit mode (Ctrl+M)"/>
-                                </tooltip>
-                                <graphic>
-                                    <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="edit-icon"/>
-                                    </HBox>
-                                </graphic>
-                            </Button>
                             <ToggleButton fx:id="vCrosshair" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                           maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                           mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
@@ -180,6 +156,34 @@
                                     </HBox>
                                 </graphic>
                             </MenuButton>
+                            <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
+                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                    text="Snapshot">
+                                <tooltip>
+                                    <Tooltip showDelay="500ms"
+                                             text="Save a screen capture of the current worksheet to disk"/>
+                                </tooltip>
+                                <graphic>
+                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                        <Region styleClass="camera-icon"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
+                            <Button fx:id="toggleChartDisplayModeButton" styleClass="dialog-button"
+                                    contentDisplay="GRAPHIC_ONLY"
+                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"
+                                    text="Toggle charts display mode">
+                                <tooltip>
+                                    <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
+                                </tooltip>
+                                <graphic>
+                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                        <Region styleClass="expand-view-icon"/>
+                                    </HBox>
+                                </graphic>
+                            </Button>
                         </ToolBar>
                     </HBox>
                 </HBox>

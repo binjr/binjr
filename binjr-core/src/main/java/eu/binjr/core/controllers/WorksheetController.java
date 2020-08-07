@@ -101,11 +101,11 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     protected void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Edit' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "edit-icon"));
+            toggleChartDisplayModeButton.getTooltip().setText("Reduce series view (Ctrl+M)");
+            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "reduce-view-icon"));
         } else {
-            toggleChartDisplayModeButton.getTooltip().setText("Switch to 'Presentation' mode (Ctrl+M)");
-            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "screen-icon"));
+            toggleChartDisplayModeButton.getTooltip().setText("Expand series view (Ctrl+M)");
+            toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "expand-view-icon"));
         }
     }
 }

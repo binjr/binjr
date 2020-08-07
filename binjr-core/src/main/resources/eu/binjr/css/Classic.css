@@ -322,10 +322,6 @@
 /* RichText
 /*****************************/
 
-.lineno{
-    -fx-background-color: -binjr-window-background-color;
-}
-
 .styled-text-area {
     -fx-background-color: -binjr-pane-background-color;
 }
