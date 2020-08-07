@@ -452,10 +452,9 @@
     -fx-stroke: derive(-binjr-control-border-color, -50%);
 }
 
-
+.text-viewport-parent,
 .chart-viewport-parent {
     -fx-background-color: -binjr-pane-background-color;
-
 }
 
 .binjr-content-view {

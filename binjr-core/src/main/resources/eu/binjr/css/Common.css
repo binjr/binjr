@@ -55,6 +55,7 @@
 }
 
 .chart,
+.bar-chart,
 .chart-plot-background {
     -fx-background-color: transparent;
     -fx-border-width: 0;

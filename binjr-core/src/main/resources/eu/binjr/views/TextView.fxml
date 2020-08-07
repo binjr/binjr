@@ -131,7 +131,7 @@
                             <Insets/>
                         </HBox.margin>
                     </Label>
-                    <Button fx:id="prevOccurenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                    <Button fx:id="prevOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
                             disable="true"
                             graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                             minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
@@ -145,7 +145,7 @@
                             <Tooltip showDelay="500ms" text="Previous Occurrence"/>
                         </tooltip>
                     </Button>
-                    <Button fx:id="nextOccurenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                    <Button fx:id="nextOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
                             disable="true"
                             graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                             minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
@@ -193,9 +193,10 @@
             </AnchorPane>
         </VBox>
         <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
+                    styleClass="text-viewport-parent"
                     VBox.vgrow="ALWAYS">
             <VirtualizedScrollPane
-                    styleClass="chart-viewport-parent, skinnable-pane-border"
+                    styleClass=" skinnable-pane-border"
                     AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
                     AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <content>

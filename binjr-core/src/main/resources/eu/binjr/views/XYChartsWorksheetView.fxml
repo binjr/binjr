@@ -192,10 +192,6 @@
         <SplitPane fx:id="splitPane" dividerPositions="0.6949" orientation="VERTICAL" prefHeight="559.0"
                    prefWidth="718.0"
                    VBox.vgrow="ALWAYS">
-            <VBox.margin>
-                <Insets/>
-            </VBox.margin>
-
             <AnchorPane fx:id="chartViewport" minHeight="0.0" minWidth="0.0" VBox.vgrow="SOMETIMES"
                         styleClass="skinnable-pane-border">
                 <cursor>

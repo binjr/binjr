@@ -128,10 +128,10 @@ public class TextViewController extends WorksheetController {
     private Label searchResultsLabel;
 
     @FXML
-    private Button prevOccurenceButton;
+    private Button prevOccurrenceButton;
 
     @FXML
-    private Button nextOccurenceButton;
+    private Button nextOccurrenceButton;
 
     @Override
     public Worksheet getWorksheet() {
@@ -218,12 +218,12 @@ public class TextViewController extends WorksheetController {
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
 
         //Search bar initialization
-        prevOccurenceButton.setOnAction(getBindingManager().registerHandler(event -> {
+        prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
                 focusOnSearchHit(searchHitIterator.previous());
             }
         }));
-        nextOccurenceButton.setOnAction(getBindingManager().registerHandler(event -> {
+        nextOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasNext()) {
                 focusOnSearchHit(searchHitIterator.next());
             }
@@ -264,8 +264,8 @@ public class TextViewController extends WorksheetController {
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
         var searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
-        prevOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        nextOccurenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
         searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
         searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
         if (syntaxHilightStyleSpans != null) {
