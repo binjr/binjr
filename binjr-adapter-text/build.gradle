@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2020 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,13 +14,18 @@
  *    limitations under the License.
  */
 
-rootProject.name = 'binjr'
-include 'binjr-adapter-csv'
-include 'binjr-adapter-jrds'
-include 'binjr-adapter-rrd4j'
-include 'binjr-adapter-netdata'
-include 'binjr-adapter-text'
-include 'binjr-app'
-include 'binjr-core'
+dependencies {
+    compile project(':binjr-core')
+}
 
-
+jar {
+    manifest {
+        attributes(
+                'Specification-Title': project.name,
+                'Specification-Version': project.version,
+                'Implementation-Title': project.name,
+                'Implementation-Version': project.version,
+                'Build-Number': BINJR_BUILD_NUMBER
+        )
+    }
+}
