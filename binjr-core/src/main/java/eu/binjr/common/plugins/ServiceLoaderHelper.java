@@ -97,8 +97,9 @@ public final class ServiceLoaderHelper {
     }
 
     private static <T> void loadFromServiceLoader(ServiceLoader<T> sl, Set<T> registeredResources) {
-        for (T res : sl) {
+        for (Iterator<T> iterator = sl.iterator(); iterator.hasNext(); ) {
             try {
+                T res = iterator.next();
                 registeredResources.add(res);
                 logger.debug(() -> "Successfully registered resource " + res.toString() + " from external JAR.");
             } catch (ServiceConfigurationError sce) {
