@@ -16,8 +16,10 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -25,21 +27,24 @@ import eu.binjr.core.preferences.AppEnvironment;
  *
  * @author Frederic Thevenet
  */
+@AdapterMetadata(
+        name = "RRD",
+        description = "RRD Data Adapter",
+        copyright = AppEnvironment.COPYRIGHT_NOTICE,
+        license = AppEnvironment.LICENSE,
+        siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
+        adapterClass = Rrd4jFileAdapter.class,
+        dialogClass = Rrd4jFileAdapterDialog.class,
+        preferencesClass = Rrd4jFileAdapterPreferences.class,
+        sourceLocality = SourceLocality.LOCAL,
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+)
 public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link Rrd4jFileDataAdapterInfo} class.
      */
-    public Rrd4jFileDataAdapterInfo() {
-        super("RRD",
-                "RRD Data Adapter",
-                AppEnvironment.COPYRIGHT_NOTICE,
-                AppEnvironment.LICENSE,
-                AppEnvironment.HTTP_WWW_BINJR_EU,
-                Rrd4jFileAdapter.class,
-               Rrd4jFileAdapterDialog.class,
-                Rrd4jFileAdapterPreferences.getInstance(),
-                SourceLocality.LOCAL,
-                AppEnvironment.PLUGIN_API_LEVEL);
+    public Rrd4jFileDataAdapterInfo() throws CannotInitializeDataAdapterException {
+        super(Rrd4jFileDataAdapterInfo.class);
     }
 }

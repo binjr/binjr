@@ -16,8 +16,6 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.preferences.ObservablePreference;
-import eu.binjr.common.preferences.ObservablePreferenceFactory;
 import eu.binjr.common.version.Version;
 import javafx.beans.property.BooleanProperty;
 import javafx.scene.control.Dialog;
@@ -123,11 +121,11 @@ public interface DataAdapterInfo {
     public void setEnabled(boolean enabled);
 
     /**
-     * Returns the {@link ObservablePreference} instance associated with the adapter
+     * Returns the {@link DataAdapterPreferences} instance associated with the adapter
      *
-     * @return the {@link ObservablePreference} instance associated with the adapter
+     * @return the {@link DataAdapterPreferences} instance associated with the adapter
      */
-    public ObservablePreferenceFactory getPreferences();
+    public DataAdapterPreferences getPreferences();
 
     default Version getApiLevel() {
         return Version.emptyVersion;

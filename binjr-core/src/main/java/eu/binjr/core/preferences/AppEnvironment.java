@@ -58,8 +58,8 @@ public class AppEnvironment {
     public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
     public static final String PORTABLE_PROPERTY = "binjr.portable";
-    public static final Version MINIMUM_PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
-    public static final Version PLUGIN_API_LEVEL = Version.parseVersion("3.0.0");
+    public static final String MINIMUM_PLUGIN_API_LEVEL = "3.0.0";
+    public static final String PLUGIN_API_LEVEL = "3.0.0";
     private static final Logger logger = Logger.create(AppEnvironment.class);
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
     private final BooleanProperty resizableDialogs = new SimpleBooleanProperty(false);

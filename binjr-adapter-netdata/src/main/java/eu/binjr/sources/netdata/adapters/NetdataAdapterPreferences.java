@@ -17,6 +17,7 @@
 package eu.binjr.sources.netdata.adapters;
 
 import eu.binjr.common.preferences.ObservablePreference;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.sources.netdata.api.GroupingMethod;
 
@@ -58,15 +59,7 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<Number> maxSamplesAllowed = integerPreference("maxSamplesAllowed", 10000);
 
-    private NetdataAdapterPreferences() {
-        super(NetdataAdapter.class);
-    }
-
-    public static NetdataAdapterPreferences getInstance() {
-        return NetdataAdapterPreferencesHolder.instance;
-    }
-
-    private static class NetdataAdapterPreferencesHolder {
-        private final static NetdataAdapterPreferences instance = new NetdataAdapterPreferences();
+    public NetdataAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
+        super(dataAdapterClass);
     }
 }

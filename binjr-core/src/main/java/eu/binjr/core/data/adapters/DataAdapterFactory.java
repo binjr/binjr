@@ -16,9 +16,9 @@
 
 package eu.binjr.core.data.adapters;
 
-
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.plugins.ServiceLoaderHelper;
+import eu.binjr.common.version.Version;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
@@ -28,7 +28,11 @@ import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -38,32 +42,33 @@ import java.util.stream.Collectors;
  */
 public class DataAdapterFactory {
     private static final Logger logger = Logger.create(DataAdapterFactory.class);
-    private final Map<String, DataAdapterInfo> registeredAdapters;
+    private final Map<String, DataAdapterInfo> registeredAdapters = new ConcurrentHashMap<>();
+    private final static Version MINIMUM_API_LEVEL  = Version.parseVersion(AppEnvironment.MINIMUM_PLUGIN_API_LEVEL);
+    private final static Version CURRENT_API_LEVEL  = Version.parseVersion(AppEnvironment.PLUGIN_API_LEVEL);
 
     /**
      * Initializes a new instance if the {@link DataAdapterFactory} class.
      */
     private DataAdapterFactory() {
-        registeredAdapters = new HashMap<>();
         // An exception here could prevent the app from  starting
         try {
             for (var dataAdapterInfo : ServiceLoaderHelper.load(DataAdapterInfo.class,
                     UserPreferences.getInstance().pluginsLocation.get(),
                     UserPreferences.getInstance().loadPluginsFromExternalLocation.get())) {
-                if (dataAdapterInfo.getApiLevel().compareTo(AppEnvironment.MINIMUM_PLUGIN_API_LEVEL) < 0) {
+                if (dataAdapterInfo.getApiLevel().compareTo(MINIMUM_API_LEVEL) < 0) {
                     logger.warn("Cannot load plugin " +
                             dataAdapterInfo.getName() +
                             ": Its target API level (" +
                             dataAdapterInfo.getApiLevel() +
                             ") is less than the minimum required (" +
-                            AppEnvironment.MINIMUM_PLUGIN_API_LEVEL + ")");
-                } else if (dataAdapterInfo.getApiLevel().compareTo(AppEnvironment.PLUGIN_API_LEVEL) > 0) {
+                            MINIMUM_API_LEVEL + ")");
+                } else if (dataAdapterInfo.getApiLevel().compareTo(CURRENT_API_LEVEL) > 0) {
                     logger.warn("Cannot load plugin " +
                             dataAdapterInfo.getName() +
                             ": Its target API level (" +
                             dataAdapterInfo.getApiLevel() +
                             ") is higher than this version's level (" +
-                            AppEnvironment.PLUGIN_API_LEVEL + ")");
+                            CURRENT_API_LEVEL + ")");
                 } else {
                     registeredAdapters.put(dataAdapterInfo.getKey(), dataAdapterInfo);
                 }
@@ -88,7 +93,10 @@ public class DataAdapterFactory {
      * @return a collection of {@link DataAdapterInfo} for all active (enabled) {@link DataAdapter}
      */
     public Collection<DataAdapterInfo> getActiveAdapters() {
-        return registeredAdapters.values().stream().filter(DataAdapterInfo::isEnabled).sorted(Comparator.comparing(DataAdapterInfo::getName)).collect(Collectors.toList());
+        return registeredAdapters.values().stream()
+                .filter(DataAdapterInfo::isEnabled)
+                .sorted(Comparator.comparing(DataAdapterInfo::getName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -97,7 +105,9 @@ public class DataAdapterFactory {
      * @return a collection of {@link DataAdapterInfo} for all registered {@link DataAdapter}
      */
     public Collection<DataAdapterInfo> getAllAdapters() {
-        return registeredAdapters.values().stream().sorted(Comparator.comparing(DataAdapterInfo::getName)).collect(Collectors.toList());
+        return registeredAdapters.values().stream()
+                .sorted(Comparator.comparing(DataAdapterInfo::getName))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -121,7 +131,8 @@ public class DataAdapterFactory {
      * @throws NoAdapterFoundException              if no adapter matching the provided key could be found
      * @throws CannotInitializeDataAdapterException if an error occurred while trying to create a new instance.
      */
-    public Dialog<Collection<DataAdapter>> getDialog(String key, Node root) throws NoAdapterFoundException, CannotInitializeDataAdapterException {
+    public Dialog<Collection<DataAdapter>> getDialog(String key, Node root)
+            throws NoAdapterFoundException, CannotInitializeDataAdapterException {
         try {
             return getDataAdapterInfo(key).getAdapterDialog().getDeclaredConstructor(Node.class).newInstance(root);
 

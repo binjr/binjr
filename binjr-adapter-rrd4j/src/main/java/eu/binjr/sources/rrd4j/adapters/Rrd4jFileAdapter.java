@@ -50,7 +50,7 @@ import java.util.stream.Collectors;
  */
 public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
     private static final Logger logger = Logger.create(Rrd4jFileAdapter.class);
-    private final Rrd4jFileAdapterPreferences prefs = Rrd4jFileAdapterPreferences.getInstance();
+    private final Rrd4jFileAdapterPreferences prefs = (Rrd4jFileAdapterPreferences) this.getAdapterInfo().getPreferences();
     private final Map<Path, RrdDb> rrdDbMap = new HashMap<>();
     private List<Path> rrdPaths;
     private List<Path> tempPathToCollect = new ArrayList<>();

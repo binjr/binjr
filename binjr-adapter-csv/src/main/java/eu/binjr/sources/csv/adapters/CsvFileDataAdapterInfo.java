@@ -16,8 +16,10 @@
 
 package eu.binjr.sources.csv.adapters;
 
+import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -25,20 +27,23 @@ import eu.binjr.core.preferences.AppEnvironment;
  *
  * @author Frederic Thevenet
  */
+@AdapterMetadata(
+        name = "CSV",
+        description = "CSV File Data Adapter",
+        copyright = AppEnvironment.COPYRIGHT_NOTICE,
+        license = AppEnvironment.LICENSE,
+        siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
+        adapterClass = CsvFileAdapter.class,
+        dialogClass = CsvFileAdapterDialog.class,
+        sourceLocality = SourceLocality.LOCAL,
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+)
 public class CsvFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link CsvFileDataAdapterInfo} class.
      */
-    public CsvFileDataAdapterInfo() {
-        super("CSV",
-                "CSV File Data Adapter",
-                AppEnvironment.COPYRIGHT_NOTICE,
-                AppEnvironment.LICENSE,
-                AppEnvironment.HTTP_WWW_BINJR_EU,
-                CsvFileAdapter.class,
-                CsvFileAdapterDialog.class,
-                SourceLocality.LOCAL,
-                AppEnvironment.PLUGIN_API_LEVEL);
+    public CsvFileDataAdapterInfo() throws CannotInitializeDataAdapterException {
+        super(CsvFileDataAdapterInfo.class);
     }
 }

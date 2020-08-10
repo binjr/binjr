@@ -16,8 +16,10 @@
 
 package eu.binjr.sources.jrds.adapters;
 
+import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
+import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -25,20 +27,23 @@ import eu.binjr.core.preferences.AppEnvironment;
  *
  * @author Frederic Thevenet
  */
+@AdapterMetadata(
+        name = "JRDS",
+        description = "JRDS Data Adapter",
+        copyright = AppEnvironment.COPYRIGHT_NOTICE,
+        license = AppEnvironment.LICENSE,
+        siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
+        adapterClass = JrdsDataAdapter.class,
+        dialogClass = JrdsAdapterDialog.class,
+        sourceLocality = SourceLocality.REMOTE,
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+)
 public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link JrdsDataAdapterInfo} class.
      */
-    public JrdsDataAdapterInfo() {
-        super("JRDS",
-                "JRDS Data Adapter",
-                AppEnvironment.COPYRIGHT_NOTICE,
-                AppEnvironment.LICENSE,
-                AppEnvironment.HTTP_WWW_BINJR_EU,
-                JrdsDataAdapter.class,
-                JrdsAdapterDialog.class,
-                SourceLocality.REMOTE,
-                AppEnvironment.PLUGIN_API_LEVEL);
+    public JrdsDataAdapterInfo() throws CannotInitializeDataAdapterException {
+        super(JrdsDataAdapterInfo.class);
     }
 }
