@@ -197,7 +197,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * Only trigger treeview filter after this amount of characters have been entered into the text field.
      */
-    public final ObservablePreference<Number> minCharsTreeFiltering = integerPreference("minCharsTreeFiltering", 3);
+    public final ObservablePreference<Number> minCharsTreeFiltering = integerPreference("minCharsTreeFiltering", 1);
 
     /**
      * True if request pooling on the http client should be enabled, false otherwise.
@@ -250,7 +250,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<LocalDateTime> lastCheckForUpdate =
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 
-    public ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 300);
+    public ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 600);
 
     private UserPreferences() {
         super(BINJR_GLOBAL);
