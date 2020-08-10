@@ -19,7 +19,7 @@ package eu.binjr.common.version;
 import java.util.NoSuchElementException;
 import java.util.StringTokenizer;
 
-public class Version implements Comparable {
+public class Version implements Comparable<Version> {
     public static final String SNAPSHOT = "-SNAPSHOT";
     private final int major;
     private final int minor;
@@ -312,11 +312,10 @@ public class Version implements Comparable {
      * @throws ClassCastException If the specified object is not a
      *                            <code>Version</code>.
      */
-    public int compareTo(Object object) {
-        if (object == this) { // quicktest
+    public int compareTo(Version other) {
+        if (other == this) { // quicktest
             return 0;
         }
-        Version other = (Version) object;
         int result = major - other.major;
         if (result != 0) {
             return result;
@@ -335,4 +334,6 @@ public class Version implements Comparable {
         }
         return (this.isSnapshot ? 0 : 1) - (other.isSnapshot ? 0 : 1);
     }
+
+
 }
