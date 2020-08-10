@@ -857,7 +857,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setText("Up")
                     .setTooltip("Move the chart up the list.")
                     .setStyleClass("dialog-button")
-                    .setIconStyleClass("upArrow-icon", "small-icon")
+                    .setIconStyleClass("upArrow-icon")
                     .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
                     .bind(Node::disableProperty, Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), -1))
@@ -866,7 +866,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setText("Down")
                     .setTooltip("Move the chart down the list.")
                     .setStyleClass("dialog-button")
-                    .setIconStyleClass("downArrow-icon", "small-icon")
+                    .setIconStyleClass("downArrow-icon")
                     .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
                     .bind(Node::disableProperty, Bindings.createBooleanBinding(
                             () -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()))

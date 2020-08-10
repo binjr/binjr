@@ -138,7 +138,7 @@
                             styleClass="dialog-button" text="forward" textAlignment="CENTER">
                         <graphic>
                             <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="upArrow-icon, small-icon"/>
+                                <Region styleClass="upArrow-icon"/>
                             </HBox>
                         </graphic>
                         <tooltip>
@@ -152,7 +152,7 @@
                             styleClass="dialog-button" text="forward" textAlignment="CENTER">
                         <graphic>
                             <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="downArrow-icon, small-icon"/>
+                                <Region styleClass="downArrow-icon"/>
                             </HBox>
                         </graphic>
                         <tooltip>
