@@ -22,9 +22,14 @@ import eu.binjr.core.preferences.UserPreferences;
 
 public class DataAdapterPreferences extends ObservablePreferenceFactory {
 
-    public final ObservablePreference<Boolean> enabled = booleanPreference("adapterEnabled", true);
+    public final ObservablePreference<Boolean> enabled;
 
-    public DataAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass){
+    public DataAdapterPreferences(Class<? extends DataAdapter> dataAdapterClass){
+        this(dataAdapterClass, true);
+    }
+
+    public DataAdapterPreferences(Class<? extends DataAdapter> dataAdapterClass, boolean enabledByDefault) {
         super(UserPreferences.BINJR_GLOBAL + "/adapters/" + dataAdapterClass.getName());
+        enabled = booleanPreference("adapterEnabled", enabledByDefault);
     }
 }
