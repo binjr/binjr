@@ -60,7 +60,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
      * @param owner the owner window for the dialog
      */
     public CsvFileAdapterDialog(Node owner) {
-        super(owner, Mode.PATH,"mostRecentCsvFiles");
+        super(owner, Mode.PATH,"mostRecentCsvFiles", true);
         this.setDialogHeaderText("Add a csv file");
         addParamField(this.dateFormatPattern, "Date Format:");
         addParamField(this.encodingField, "Encoding:");

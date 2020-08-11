@@ -58,6 +58,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     private AutoCompletionBinding<String> autoCompletionBinding;
     private final ComboBox<String> uriField;
     private final TextField timezoneField;
+    private final Label timezoneLabel;
     private final DialogPane parent;
     private final GridPane paramsGridPane;
     private final MostRecentlyUsedList<T> mostRecentList;
@@ -79,7 +80,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
      * @param mode               the mode (Path or URL) to use for the dialog.
      * @param mostRecentListName the name of the {@link MostRecentlyUsedList} preference associated with this dialog.
      */
-    public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName) {
+    public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName, boolean showTimezone) {
         if (owner != null) {
             this.initOwner(Dialogs.getStage(owner));
         }
@@ -117,6 +118,11 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             }
         });
         timezoneField = (TextField) parent.lookup("#timezoneField");
+        timezoneLabel = (Label)parent.lookup("#timeZoneLabel");
+        timezoneField.setManaged(showTimezone);
+        timezoneField.setVisible(showTimezone);
+        timezoneLabel.setManaged(showTimezone);
+        timezoneLabel.setVisible(showTimezone);
         paramsGridPane = (GridPane) parent.lookup("#paramsGridPane");
         HBox uriHBox = (HBox) parent.lookup("#uriHBox");
         if (mode == Mode.URI) {

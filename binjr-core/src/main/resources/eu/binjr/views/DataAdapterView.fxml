@@ -33,7 +33,7 @@
             <children>
                 <TextField fx:id="timezoneField" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
                 <Label fx:id="uriLabel" text="Address:" GridPane.rowIndex="0"/>
-                <Label text="Timezone:" GridPane.rowIndex="1"/>
+                <Label fx:id="timeZoneLabel" text="Timezone:" GridPane.rowIndex="1"/>
                 <HBox fx:id="uriHBox" alignment="CENTER" spacing="5.0" GridPane.columnIndex="1">
                     <children>
                         <ComboBox fx:id="uriField" editable="true" prefHeight="25.0" prefWidth="500.0"/>
