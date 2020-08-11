@@ -126,7 +126,7 @@
                             </graphic>
                         </ToggleButton>
                     </HBox>
-                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="60.0" text="0 results">
+                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0" text="No results">
                         <HBox.margin>
                             <Insets/>
                         </HBox.margin>
