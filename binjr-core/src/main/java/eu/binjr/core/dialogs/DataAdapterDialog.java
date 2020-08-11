@@ -78,6 +78,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
      *
      * @param owner              the owner window for the dialog
      * @param mode               the mode (Path or URL) to use for the dialog.
+     * @param showTimezone       set to true to display the Timezone text field, false otherwise.
      * @param mostRecentListName the name of the {@link MostRecentlyUsedList} preference associated with this dialog.
      */
     public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName, boolean showTimezone) {
@@ -118,7 +119,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
             }
         });
         timezoneField = (TextField) parent.lookup("#timezoneField");
-        timezoneLabel = (Label)parent.lookup("#timeZoneLabel");
+        timezoneLabel = (Label) parent.lookup("#timeZoneLabel");
         timezoneField.setManaged(showTimezone);
         timezoneField.setVisible(showTimezone);
         timezoneLabel.setManaged(showTimezone);

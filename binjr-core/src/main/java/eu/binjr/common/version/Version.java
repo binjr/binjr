@@ -305,7 +305,7 @@ public class Version implements Comparable<Version> {
      * major, minor and micro components are equal and the qualifier component
      * is equal (using <code>String.compareTo</code>).
      *
-     * @param object The <code>Version</code> object to be compared.
+     * @param other The <code>Version</code> object to be compared.
      * @return A negative integer, zero, or a positive integer if this object is
      * less than, equal to, or greater than the specified
      * <code>Version</code> object.
