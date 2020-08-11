@@ -248,6 +248,9 @@ task copyAppLibs(type: Copy) {
     from project(":binjr-adapter-netdata").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
+    from project(":binjr-adapter-text").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-core").jar
 }
 
@@ -257,6 +260,7 @@ task copyPluginLibs(type: Copy) {
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
+    from project(":binjr-adapter-text").jar
 }
 
 task copyJpackageInputLibs(type: Copy) {
@@ -276,11 +280,15 @@ task copyJpackageInputLibs(type: Copy) {
     from project(":binjr-adapter-netdata").configurations.runtimeClasspath {
         exclude "javafx-*.jar"
     }
+    from project(":binjr-adapter-text").configurations.runtimeClasspath {
+        exclude "javafx-*.jar"
+    }
     from project(":binjr-core").jar
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-rrd4j").jar
     from project(":binjr-adapter-netdata").jar
+    from project(":binjr-adapter-text").jar
 }
 
 task copyPlatformSpecific(type: Copy) {

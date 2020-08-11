@@ -20,6 +20,7 @@ dependencies {
     compile project(':binjr-adapter-csv')
     compile project(':binjr-adapter-rrd4j')
     compile project(':binjr-adapter-netdata')
+    compile project(':binjr-adapter-text')
 
     runtimeOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
     runtimeOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"

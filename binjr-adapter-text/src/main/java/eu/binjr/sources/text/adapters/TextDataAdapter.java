@@ -1,6 +1,23 @@
+/*
+ *    Copyright 2020 Frederic Thevenet
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
 package eu.binjr.sources.text.adapters;
 
 
+import com.google.gson.Gson;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
@@ -35,11 +52,13 @@ import java.util.stream.Collectors;
  */
 public class TextDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(TextDataAdapter.class);
-    private final TextAdapterPreferences prefs = (TextAdapterPreferences) getAdapterInfo().getPreferences();
-    private Path rootPath;
-
+    protected final TextAdapterPreferences prefs = (TextAdapterPreferences) getAdapterInfo().getPreferences();
+    protected Path rootPath;
+    private static final Gson gson = new Gson();
 
     private FileSystemBrowser fileBrowser;
+    private String[] folderFilters;
+    private String[] fileExtensionsFilters;
 
     /**
      * Initializes a new instance of the {@link TextDataAdapter} class.
@@ -56,19 +75,19 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
      * @param rootPath the {@link Path} from which to load content.
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
-    public TextDataAdapter(Path rootPath) throws DataAdapterException {
+    public TextDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
         super();
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
-        params.put("rootPath", rootPath.toString());
-
-        loadParams(params);
+        initParams(rootPath, folderFilters, fileExtensionsFilters);
     }
 
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
         params.put("rootPath", rootPath.toString());
+        params.put("folderFilters", gson.toJson(folderFilters));
+        params.put("fileExtensionsFilters", gson.toJson(fileExtensionsFilters));
         return params;
     }
 
@@ -78,7 +97,15 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             logger.debug(() -> "TextDataAdapter params:");
             params.forEach((s, s2) -> logger.debug(() -> "key=" + s + ", value=" + s2));
         }
-        rootPath = Paths.get(validateParameterNullity(params, "rootPath"));
+        initParams(Paths.get(validateParameterNullity(params, "rootPath")),
+                gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
+                gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
+    }
+
+    private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
+        this.rootPath = rootPath;
+        this.folderFilters = folderFilters;
+        this.fileExtensionsFilters = fileExtensionsFilters;
         try {
             this.fileBrowser = FileSystemBrowser.of(rootPath);
         } catch (IOException e) {
@@ -102,10 +129,10 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
             nodeDict.put(fileBrowser.toPath("/"), configNode);
             for (Path conf : fileBrowser.listEntries(configPath ->
-                    Arrays.stream(prefs.foldersToVisit.get())
+                    Arrays.stream(folderFilters)
                             .map(folder -> configPath.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
-                            Arrays.stream(prefs.textFileExtensions.get())
+                            Arrays.stream(fileExtensionsFilters)
                                     .map(ext -> configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = conf.getFileName().toString();
@@ -212,7 +239,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
 
     @Override
     public String getSourceName() {
-        return "[Config Files] " + rootPath.getFileName();
+        return "[Text] " + rootPath.getFileName();
     }
 
     @Override
