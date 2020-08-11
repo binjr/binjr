@@ -41,6 +41,6 @@ public class TextAdapterPreferences extends DataAdapterPreferences {
 
 
     public TextAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
-        super(dataAdapterClass);
+        super(dataAdapterClass, false);
     }
 }
