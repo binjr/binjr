@@ -130,10 +130,10 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             nodeDict.put(fileBrowser.toPath("/"), configNode);
             for (Path conf : fileBrowser.listEntries(configPath ->
                     Arrays.stream(folderFilters)
-                            .map(folder -> configPath.startsWith(fileBrowser.toPath(folder)))
+                            .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
-                                    .map(ext -> configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
+                                    .map(ext -> ext.equalsIgnoreCase("*") || configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = conf.getFileName().toString();
                 var attachTo = configNode;

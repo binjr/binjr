@@ -29,16 +29,15 @@ public class TextAdapterPreferences extends DataAdapterPreferences {
 
     public ObservablePreference<String[]> folderFilters = objectPreference(String[].class,
             "folderFilters",
-            new String[]{"/"},
+            new String[]{"*"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
             "fileExtensionFilters",
-            new String[]{".xml", ".txt", ".env", ".properties", ".csv", ".log"},
+            new String[]{".xml", ".txt", ".env", ".properties", ".csv", ".log", "md", ".json", ".yml"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
-
 
     public TextAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass, false);
