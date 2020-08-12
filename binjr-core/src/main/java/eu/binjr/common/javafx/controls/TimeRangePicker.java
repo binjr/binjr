@@ -45,6 +45,7 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class TimeRangePicker extends ToggleButton {
@@ -304,6 +305,15 @@ public class TimeRangePicker extends ToggleButton {
         @FXML
         private Button lastWeek;
         @FXML
+        private Button minus1Hour;
+        @FXML
+        private Button plus1Hour;
+        @FXML
+        private Button minus24Hours;
+        @FXML
+        private Button plus24Hours;
+
+        @FXML
         private Button pasteTimeRangeButton;
         @FXML
         private Button copyTimeRangeButton;
@@ -330,6 +340,23 @@ public class TimeRangePicker extends ToggleButton {
             popup.hide();
         }
 
+
+        private void forward(Duration duration) {
+            shift(duration, ZonedDateTime::plus);
+        }
+
+        private void backward(Duration duration) {
+            shift(duration, ZonedDateTime::minus);
+        }
+
+        private void shift(Duration duration, BiFunction<ZonedDateTime, Duration, ZonedDateTime> move) {
+            var ref = TimeRange.of(selectedRange.get());
+            applyNewTimeRange.accept(
+                    move.apply(ref.getBeginning(), duration),
+                    move.apply(ref.getEnd(), duration));
+            // hide popup
+            popup.hide();
+        }
 
         private void updateAutoCompletionBinding() {
             if (autoCompletionBinding != null) {
@@ -418,6 +445,10 @@ public class TimeRangePicker extends ToggleButton {
                 // hide popup
                 popup.hide();
             });
+            minus1Hour.setOnAction(event -> backward(Duration.ofHours(1)));
+            plus1Hour.setOnAction(event -> forward(Duration.ofHours(1)));
+            minus24Hours.setOnAction(event -> backward(Duration.ofHours(24)));
+            plus24Hours.setOnAction(event -> forward(Duration.ofHours(24)));
             copyTimeRangeButton.setOnAction(event -> {
                 try {
                     final ClipboardContent content = new ClipboardContent();
@@ -445,6 +476,4 @@ public class TimeRangePicker extends ToggleButton {
             return formatter.valueProperty();
         }
     }
-
-
 }

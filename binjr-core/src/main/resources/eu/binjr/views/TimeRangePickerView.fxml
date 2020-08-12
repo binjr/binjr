@@ -165,18 +165,31 @@
                 <Button fx:id="last90Minutes" maxHeight="1.7976931348623157E308"
                         maxWidth="1.7976931348623157E308" minHeight="10.0" mnemonicParsing="false"
                         styleClass="dialog-button" text="Last 90 minutes" GridPane.rowIndex="3"/>
+                <Button fx:id="minus1Hour" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="1 Hour Before"
+                        GridPane.columnIndex="3"/>
+                <Button fx:id="plus1Hour" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="1 Hour After"
+                        GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                <Button fx:id="minus24Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="1 Day Before"
+                        GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                <Button fx:id="plus24Hours" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
+                        minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="1 Day After"
+                        GridPane.columnIndex="3" GridPane.rowIndex="3"/>
                 <Button fx:id="today" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Today"
-                        GridPane.columnIndex="3"/>
+                        GridPane.columnIndex="4"/>
                 <Button fx:id="yesterday" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Yesterday"
-                        GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+                        GridPane.columnIndex="4" GridPane.rowIndex="1"/>
                 <Button fx:id="thisWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="This Week"
-                        GridPane.columnIndex="3" GridPane.rowIndex="2"/>
+                        GridPane.columnIndex="4" GridPane.rowIndex="2"/>
                 <Button fx:id="lastWeek" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308"
                         minHeight="10.0" mnemonicParsing="false" styleClass="dialog-button" text="Last Week"
-                        GridPane.columnIndex="3" GridPane.rowIndex="3"/>
+                        GridPane.columnIndex="4" GridPane.rowIndex="3"/>
+
             </children>
         </GridPane>
     </VBox>
