@@ -115,46 +115,46 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
-        FilterableTreeItem<SourceBinding> configNode = new FilterableTreeItem<>(
+        FilterableTreeItem<SourceBinding> rootNode = new FilterableTreeItem<>(
                 new TextFilesBinding.Builder()
-                        .withLabel("Configuration Files")
+                        .withLabel("Text Files")
                         .withAdapter(this)
                         .build());
-        attachConfigFilesTree(configNode);
-        return configNode;
+        attachTextFilesTree(rootNode);
+        return rootNode;
     }
 
-    private void attachConfigFilesTree(FilterableTreeItem<SourceBinding> configNode) throws DataAdapterException {
-        try (var p = Profiler.start("Building Config binding tree", logger::perf)) {
+    private void attachTextFilesTree(FilterableTreeItem<SourceBinding> rootNode) throws DataAdapterException {
+        try (var p = Profiler.start("Building text binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
-            nodeDict.put(fileBrowser.toPath("/"), configNode);
-            for (Path conf : fileBrowser.listEntries(configPath ->
+            nodeDict.put(fileBrowser.toPath("/"), rootNode);
+            for (Path textFile : fileBrowser.listEntries(path ->
                     Arrays.stream(folderFilters)
-                            .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toPath(folder)))
+                            .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
-                                    .map(ext -> ext.equalsIgnoreCase("*") || configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
+                                    .map(ext -> ext.equalsIgnoreCase("*") || path.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
-                String fileName = conf.getFileName().toString();
-                var attachTo = configNode;
-                if (conf.getParent() != null) {
-                    attachTo = nodeDict.get(conf.getParent());
+                String fileName = textFile.getFileName().toString();
+                var attachTo = rootNode;
+                if (textFile.getParent() != null) {
+                    attachTo = nodeDict.get(textFile.getParent());
                     if (attachTo == null) {
-                        attachTo = makeBranchNode(nodeDict, conf.getParent(), configNode);
+                        attachTo = makeBranchNode(nodeDict, textFile.getParent(), rootNode);
                     }
                 }
                 FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
                         new TextFilesBinding.Builder()
                                 .withLabel(fileName)
-                                .withPath(conf.toString())
+                                .withPath(textFile.toString())
                                 .withParent(attachTo.getValue())
                                 .withAdapter(this)
                                 .build());
                 attachTo.getInternalChildren().add(filenode);
             }
-            TreeViewUtils.sortFromBranch(configNode);
+            TreeViewUtils.sortFromBranch(rootNode);
         } catch (Exception e) {
-            Dialogs.notifyException("Failed to list files from cvdiag: " + e.getMessage(), e);
+            Dialogs.notifyException("Error while enumerating files: " + e.getMessage(), e);
         }
     }
 
@@ -200,7 +200,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
         for (var info : seriesInfos) {
             try {
                 var proc = new TextProcessor();
-                proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFileFromCvdiag(info.getBinding().getPath()))));
+                proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFile(info.getBinding().getPath()))));
                 data.put(info, proc);
             } catch (IOException e) {
                 throw new DataAdapterException("Error fetching text from " + info.getBinding().getPath(), e);
@@ -262,7 +262,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
     }
 
 
-    public String readTextFileFromCvdiag(String path) throws IOException {
+    public String readTextFile(String path) throws IOException {
         try (Profiler ignored = Profiler.start("Extracting text from file " + path, logger::perf)) {
             try (var reader = new BufferedReader(new InputStreamReader(fileBrowser.getData(path), StandardCharsets.UTF_8))) {
                 return reader.lines().collect(Collectors.joining("\n"));

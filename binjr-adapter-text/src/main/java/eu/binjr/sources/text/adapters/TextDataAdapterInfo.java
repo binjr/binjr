@@ -31,7 +31,7 @@ import eu.binjr.core.preferences.AppEnvironment;
  */
 @AdapterMetadata(
         name = "Text",
-        description = "Text File Data Adapter",
+        description = "Text Files Data Adapter",
         copyright = AppEnvironment.COPYRIGHT_NOTICE,
         license = AppEnvironment.LICENSE,
         siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
