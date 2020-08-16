@@ -122,15 +122,24 @@ public class IOUtils {
 
     public static <T extends AutoCloseable> void closeAll(Stream<T> stream, BiConsumer<T, Exception> onError) {
         Objects.requireNonNull(stream, "Argument collection must not be null");
-        stream.forEach(closeable -> {
-            if (closeable != null) {
-                try {
-                    closeable.close();
-                } catch (Exception e) {
-                    onError.accept(closeable, e);
-                }
-            }
+        stream.forEach(closeable -> close(closeable, onError));
+    }
+
+    public static  <T extends AutoCloseable> void close(T closeable){
+        close(closeable, (t, e) -> {
+            logger.error("An error occurred while closing " + t + ": " + e.getMessage());
+            logger.debug(e);
         });
+    }
+
+    public static  <T extends AutoCloseable> void close(T closeable, BiConsumer<T, Exception> onError) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (Exception e) {
+                onError.accept(closeable, e);
+            }
+        }
     }
 
 }
