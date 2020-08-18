@@ -274,7 +274,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 
     @Override
     public String getSourceName() {
-        return "[Text] " + rootPath.getFileName();
+        return "[Logs] " + rootPath.getFileName();
     }
 
     @Override
