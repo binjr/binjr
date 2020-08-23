@@ -30,7 +30,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -42,6 +41,7 @@ public class TextFilesWorksheet extends Worksheet<String> {
 
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
+    private boolean syntaxHighlightEnabled = true;
 
 
     public TextFilesWorksheet() {
@@ -132,4 +132,11 @@ public class TextFilesWorksheet extends Worksheet<String> {
     }
 
 
+    public boolean isSyntaxHighlightEnabled() {
+        return syntaxHighlightEnabled;
+    }
+
+    public void setSyntaxHighlightEnabled(boolean syntaxHighlightEnabled) {
+        this.syntaxHighlightEnabled = syntaxHighlightEnabled;
+    }
 }

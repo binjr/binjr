@@ -339,8 +339,10 @@ public class TextViewController extends WorksheetController {
                         String data = (String) event.getSource().getValue();
                         textOutput.clear();
                         textOutput.replaceText(0, 0, data);
-                        this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
-                        textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                        if (worksheet.isSyntaxHighlightEnabled()) {
+                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
+                            textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                        }
                     }, event -> {
                         busyIndicator.setVisible(false);
                         Dialogs.notifyException("An error occurred while loading text file: " +

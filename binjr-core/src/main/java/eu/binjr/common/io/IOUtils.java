@@ -135,11 +135,11 @@ public class IOUtils {
     public static  <T extends AutoCloseable> void close(T closeable, BiConsumer<T, Exception> onError) {
         if (closeable != null) {
             try {
+                logger.trace(()-> "Closing: " + closeable);
                 closeable.close();
             } catch (Exception e) {
                 onError.accept(closeable, e);
             }
         }
     }
-
 }

@@ -18,6 +18,7 @@ package eu.binjr.sources.text.adapters;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.function.CheckedFunction;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
@@ -37,17 +38,18 @@ import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -55,6 +57,8 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 /**
@@ -65,13 +69,14 @@ import java.util.stream.Collectors;
 public class LogsDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
+    public static final String FIELD_CONTENT = "content";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
+    private final Map<String, LogFileIndex> indexes = new ConcurrentHashMap<>();
     protected Path rootPath;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
-    private Directory indexDirectory;
-    private IndexWriter indexWriter;
+
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -124,14 +129,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("Could not create file system browser instance", e);
         }
-        indexDirectory = new ByteBuffersDirectory();
-        IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
-        iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
-        try {
-            indexWriter = new IndexWriter(indexDirectory, iwc);
-        } catch (IOException e) {
-            throw new CannotInitializeDataAdapterException("Could not initialize index writer", e);
-        }
+
+
     }
 
     @Override
@@ -205,25 +204,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         return parent;
     }
 
-    private void indexLogFile(String path, boolean forceMerge) throws IOException {
-        try (Profiler ignored = Profiler.start("Indexing log file " + path, logger::perf)) {
-           var n = new int[]{0};
-            try (var reader = new BufferedReader(new InputStreamReader(fileBrowser.getData(path), StandardCharsets.UTF_8))) {
-                reader.lines().forEach(CheckedLambdas.wrap(line -> {
-                    Document doc = new Document();
-                    doc.add(new StringField("path", path, Field.Store.YES));
-                    doc.add(new TextField("contents", line, Field.Store.YES));
-                    indexWriter.addDocument(doc);
-                    n[0]++;
-                }));
-            }
-            logger.debug("Indexed " + n[0] + " lines for file " + path);
-            if (forceMerge) {
-                indexWriter.forceMerge(1);
-            }
-        }
-    }
-
 
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfos) throws DataAdapterException {
@@ -241,11 +221,21 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             try {
                 var proc = new TextProcessor();
                 LogFilesBinding binding = (LogFilesBinding) info.getBinding();
-                if (!binding.isIndexed()) {
-                    indexLogFile(binding.getPath(), true);
-                    binding.setIndexed(true);
+                var idx = indexes.computeIfAbsent(binding.getPath(),
+                        CheckedLambdas.wrap((CheckedFunction<String, LogFileIndex, IOException>)
+                                s -> new LogFileIndex(s, fileBrowser.getData(s))));
+                //  new QueryParser();
+                //  QueryParser parser = new QueryParser(field, analyzer);
+                //    proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFile(info.getBinding().getPath()))));
+                var builder = new QueryBuilder(new StandardAnalyzer());
+//              var tr = new Term("FIELD_CONTENT", "info");
+//                var q = new TermQuery(tr);
+                var t = idx.getSearcher().search(new MatchAllDocsQuery(), 100);
+                var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
+                for (var hit : t.scoreDocs) {
+                    l.add(new XYChart.Data<>(ZonedDateTime.now(), idx.getSearcher().doc(hit.doc).get(FIELD_CONTENT) + "\n"));
                 }
-                proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFile(info.getBinding().getPath()))));
+                proc.setData(l);
                 data.put(info, proc);
             } catch (IOException e) {
                 throw new DataAdapterException("Error fetching text from " + info.getBinding().getPath(), e);
@@ -284,8 +274,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 
     @Override
     public void close() {
-        IOUtils.close(indexDirectory);
-        IOUtils.close(indexWriter);
+        IOUtils.closeAll(indexes.values());
         IOUtils.close(fileBrowser);
         super.close();
     }
@@ -308,5 +297,53 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
+    public static class LogFileIndex implements Closeable {
+        public static final String FIELD_TIMESTAMP = "timestamp";
+        private final String path;
+        private final Directory indexDirectory;
+        private final DirectoryReader indexReader;
+        private final IndexSearcher searcher;
+
+        public LogFileIndex(String path, InputStream ias) throws IOException {
+            this.path = path;
+            indexDirectory = new ByteBuffersDirectory();
+         //   indexDirectory = FSDirectory.open(Files.createTempDirectory("binjr-idx").resolve(path));
+            IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
+            iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
+            var n = new AtomicInteger(0);
+
+            try (var indexWriter = new IndexWriter(indexDirectory, iwc)) {
+                try (Profiler ignored = Profiler.start(e -> logger.perf("Indexed " + n.get() + " lines for file " + path + e.toMilliString()))) {
+                    try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
+                        reader.lines().parallel().forEach(CheckedLambdas.wrap(line -> {
+                            Document doc = new Document();
+                         //   doc.add(new LongPoint(FIELD_TIMESTAMP, timeStamp));
+                         //   doc.add(new StringField("path", path, Field.Store.YES));
+                            doc.add(new TextField(FIELD_CONTENT, line, Field.Store.YES));
+                            indexWriter.addDocument(doc);
+                            n.incrementAndGet();
+                        }));
+                    }
+                }
+                try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                    indexWriter.commit();
+                }
+            }
+            indexReader = DirectoryReader.open(indexDirectory);
+            logger.info("Total indexed lines: " + indexReader.getDocCount(FIELD_CONTENT));
+            searcher = new IndexSearcher(indexReader);
+
+        }
+
+        @Override
+        public void close() throws IOException {
+            IOUtils.close(indexReader);
+            IOUtils.close(indexDirectory);
+        }
+
+        public IndexSearcher getSearcher() {
+            return searcher;
+        }
+    }
 
 }
