@@ -36,16 +36,16 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.document.Field;
-import org.apache.lucene.document.TextField;
+import org.apache.lucene.document.*;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.MatchAllDocsQuery;
+import org.apache.lucene.search.Query;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -56,9 +56,12 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -69,6 +72,7 @@ import java.util.stream.Collectors;
 public class LogsDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
+    public static final String FIELD_TIMESTAMP = "timestamp";
     public static final String FIELD_CONTENT = "content";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private final Map<String, LogFileIndex> indexes = new ConcurrentHashMap<>();
@@ -118,6 +122,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         initParams(Paths.get(validateParameterNullity(params, "rootPath")),
                 gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
                 gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
+
+
     }
 
     private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
@@ -132,6 +138,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 
 
     }
+
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
@@ -205,10 +212,10 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     }
 
 
-    @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfos) throws DataAdapterException {
-        return null;
-    }
+//    @Override
+//    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfos) throws DataAdapterException {
+//        return null;
+//    }
 
     @Override
     public Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> fetchData(String path,
@@ -230,7 +237,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 var builder = new QueryBuilder(new StandardAnalyzer());
 //              var tr = new Term("FIELD_CONTENT", "info");
 //                var q = new TermQuery(tr);
-                var t = idx.getSearcher().search(new MatchAllDocsQuery(), 100);
+                Query q  = LongPoint.newRangeQuery(FIELD_TIMESTAMP, start.toEpochMilli(), end.toEpochMilli());
+                var t = idx.getSearcher().search(q, prefs.hitsPerPage.get().intValue());
                 var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
                 for (var hit : t.scoreDocs) {
                     l.add(new XYChart.Data<>(ZonedDateTime.now(), idx.getSearcher().doc(hit.doc).get(FIELD_CONTENT) + "\n"));
@@ -297,17 +305,26 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
-    public static class LogFileIndex implements Closeable {
-        public static final String FIELD_TIMESTAMP = "timestamp";
+    public class LogFileIndex implements Closeable {
+
         private final String path;
         private final Directory indexDirectory;
         private final DirectoryReader indexReader;
         private final IndexSearcher searcher;
+        private Pattern pattern;
+        private DateTimeFormatter dateTimeFormatter;
 
         public LogFileIndex(String path, InputStream ias) throws IOException {
             this.path = path;
             indexDirectory = new ByteBuffersDirectory();
-         //   indexDirectory = FSDirectory.open(Files.createTempDirectory("binjr-idx").resolve(path));
+            this.pattern = Pattern.compile(String.format(prefs.linePattern.get(),
+                    prefs.timestampPattern.get(),
+                    prefs.severityPattern.get(),
+                    prefs.threadPattern.get(),
+                    prefs.loggerPattern.get(),
+                    prefs.msgPattern.get()));
+            this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy MM dd HH mm ss SSS").withZone(getTimeZoneId());
+            //   indexDirectory = FSDirectory.open(Files.createTempDirectory("binjr-idx").resolve(path));
             IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
             var n = new AtomicInteger(0);
@@ -316,11 +333,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 try (Profiler ignored = Profiler.start(e -> logger.perf("Indexed " + n.get() + " lines for file " + path + e.toMilliString()))) {
                     try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                         reader.lines().parallel().forEach(CheckedLambdas.wrap(line -> {
-                            Document doc = new Document();
-                         //   doc.add(new LongPoint(FIELD_TIMESTAMP, timeStamp));
-                         //   doc.add(new StringField("path", path, Field.Store.YES));
-                            doc.add(new TextField(FIELD_CONTENT, line, Field.Store.YES));
-                            indexWriter.addDocument(doc);
+                            indexWriter.addDocument(parseLine(line));
                             n.incrementAndGet();
                         }));
                     }
@@ -334,6 +347,26 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             searcher = new IndexSearcher(indexReader);
 
         }
+
+        private Document parseLine(String line) throws ParsingEventException {
+            Document doc = new Document();
+            Matcher m = pattern.matcher(line);
+            if (m.find()) {
+                try {
+                    var timeStamp = m.group("time") == null ? ZonedDateTime.now() :
+                            ZonedDateTime.parse(m.group("time").replaceAll("[/\\-:.,T]", " "), dateTimeFormatter);
+                    doc.add(new LongPoint(FIELD_TIMESTAMP, timeStamp.toInstant().toEpochMilli()));
+                    doc.add(new SortedSetDocValuesField("severity", new BytesRef(m.group("severity") == null ? "unknown" : m.group("severity"))));
+                    doc.add(new SortedSetDocValuesField("thread", new BytesRef(m.group("thread") == null ? "unknown" : m.group("thread"))));
+                    doc.add(new SortedSetDocValuesField("logger", new BytesRef(m.group("logger") == null ? "unknown" : m.group("logger"))));
+                } catch (Exception e) {
+                    throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
+                }
+            }
+            doc.add(new TextField(FIELD_CONTENT, line, Field.Store.YES));
+            return doc;
+        }
+
 
         @Override
         public void close() throws IOException {

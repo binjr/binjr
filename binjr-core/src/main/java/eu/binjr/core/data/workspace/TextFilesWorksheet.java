@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
-import eu.binjr.core.controllers.TextViewController;
+import eu.binjr.core.controllers.TextWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.TextFilesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -68,7 +68,7 @@ public class TextFilesWorksheet extends Worksheet<String> {
 
     @Override
     public Class<? extends WorksheetController> getControllerClass() {
-        return TextViewController.class;
+        return TextWorksheetController.class;
     }
 
     @Override

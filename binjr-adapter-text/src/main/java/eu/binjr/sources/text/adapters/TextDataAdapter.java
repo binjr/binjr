@@ -184,12 +184,6 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
         return parent;
     }
 
-
-    @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfos) throws DataAdapterException {
-        return null;
-    }
-
     @Override
     public Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> fetchData(String path,
                                                                               Instant start,

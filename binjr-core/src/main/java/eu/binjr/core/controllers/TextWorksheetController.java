@@ -63,7 +63,6 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 
 import java.net.URL;
-import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -72,16 +71,16 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
 
-public class TextViewController extends WorksheetController {
-    private static final Logger logger = Logger.create(TextViewController.class);
-    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/TextView.fxml";
+public class TextWorksheetController extends WorksheetController {
+    private static final Logger logger = Logger.create(TextWorksheetController.class);
+    public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/TextWorksheetView.fxml";
     private final TextFilesWorksheet worksheet;
     private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
 
 
-    public TextViewController(MainViewController parent, TextFilesWorksheet worksheet, Collection<DataAdapter<String>> adapters)
+    public TextWorksheetController(MainViewController parent, TextFilesWorksheet worksheet, Collection<DataAdapter<String>> adapters)
             throws NoAdapterFoundException {
         super(parent);
         this.worksheet = worksheet;
@@ -305,10 +304,11 @@ public class TextViewController extends WorksheetController {
                 String path = byPathEntry.getKey();
                 logger.trace("Fetch sub-task '" + path + "' started");
                 // Get data from the adapter
+                var range = adapter.getInitialTimeRange(path, byPathEntry.getValue());
                 var data = adapter.fetchData(
                         path,
-                        Instant.MIN,
-                        Instant.MAX,
+                        range.getBeginning().toInstant(),
+                        range.getEnd().toInstant(),
                         byPathEntry.getValue(),
                         true);
                 data.entrySet().parallelStream().forEach(entry -> {

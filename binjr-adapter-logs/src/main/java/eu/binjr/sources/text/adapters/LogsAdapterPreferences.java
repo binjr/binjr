@@ -39,6 +39,25 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 
+    public ObservablePreference<String> timestampPattern = stringPreference("timestampPattern",
+            "\\d{4}[\\/-]\\d{2}[\\/-]\\d{2}[\\-\\s]\\d{2}:\\d{2}:\\d{2}([\\.,]\\d+)?");
+
+    public ObservablePreference<String> severityPattern = stringPreference("severityPattern",
+            "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL");
+
+    public ObservablePreference<String> loggerPattern = stringPreference("severityPattern", "[\\w\\d\\.\\-_]*");
+
+    public ObservablePreference<String> threadPattern = stringPreference("threadPattern",
+            "([\\&quot;\\w\\d\\.\\,\\-_\\@\\s\\/\\:\\#\\\\\\=\\{\\}\\&amp;\\+\\%\\)\\(]*)((\\.\\.\\.\\[).*(ing\\]))?");
+
+    public ObservablePreference<String> msgPattern = stringPreference("msgPattern", ".*");
+
+    public ObservablePreference<String> linePattern = stringPreference("linePattern",
+            "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
+
+    public ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
+    //        "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
+
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }

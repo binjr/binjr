@@ -14,20 +14,16 @@
  *    limitations under the License.
  */
 
-dependencies {
-    compile project(':binjr-core')
-    implementation 'org.apache.lucene:lucene-core:8.6.1'
-    implementation 'com.axibase:date-processor:1.1.0'
-}
+package eu.binjr.sources.text.adapters;
 
-jar {
-    manifest {
-        attributes(
-                'Specification-Title': project.name,
-                'Specification-Version': project.version,
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Build-Number': BINJR_BUILD_NUMBER
-        )
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+
+public class ParsingEventException extends IOException {
+    public ParsingEventException(String s) {
+        super(s);
+    }
+    public ParsingEventException(String s, Throwable e) {
+        super(s, e);
     }
 }

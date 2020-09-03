@@ -32,6 +32,7 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.scene.paint.Color;
@@ -50,7 +51,7 @@ public class LogFilesBinding extends TextFilesBinding {
 
     @Override
     public Class<? extends Worksheet<String>> getWorksheetClass() {
-        return TextFilesWorksheet.class;
+        return LogWorksheet.class;
     }
 
     public boolean isIndexed() {
