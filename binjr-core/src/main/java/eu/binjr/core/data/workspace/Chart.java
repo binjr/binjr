@@ -234,17 +234,19 @@ public class Chart implements Dirtyable, AutoCloseable {
         var clean = new NanToZeroTransform();
         clean.setEnabled(userPref.forceNanToZero.get());
         // Group all bindings by common adapters
-        var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        var bindingsByAdapters = getSeries().stream()
+                .collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             // Define the transforms to apply
             var reduce = userPref.downSamplingAlgorithm.get().instantiateTransform(getChartType(),
                     userPref.downSamplingThreshold.get().intValue());
             reduce.setEnabled(userPref.downSamplingEnabled.get());
             DataAdapter<Double> adapter = (DataAdapter<Double>) byAdapterEntry.getKey();
-            var sort = new SortTransform();
+            SortTransform<Double> sort = new SortTransform<>();
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
-            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            var bindingsByPath = byAdapterEntry.getValue().stream()
+                    .collect(groupingBy(o -> o.getBinding().getPath()));
             var latch = new CountDownLatch(bindingsByPath.entrySet().size());
             var errors = new ArrayList<Throwable>();
             for (var byPathEntry : bindingsByPath.entrySet()) {

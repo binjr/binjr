@@ -43,6 +43,8 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.timeseries.TextProcessor;
+import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Syncable;
@@ -307,7 +309,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    public void fetchDataFromSources() throws DataAdapterException {
+    public TimeSeriesProcessor<String> fetchDataFromSources() throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -326,39 +328,44 @@ public class LogWorksheetController extends WorksheetController implements Synca
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            for (var byPathEntry : bindingsByPath.entrySet()) {
-                String path = byPathEntry.getKey();
-                logger.trace("Fetch sub-task '" + path + "' started");
-                // Get data from the adapter
-                var range = adapter.getInitialTimeRange(path, byPathEntry.getValue());
-                var data = adapter.fetchData(
-                        path,
-                        worksheet.getFromDateTime().toInstant(),
-                        worksheet.getToDateTime().toInstant(),
-                        byPathEntry.getValue(),
-                        true);
-                data.entrySet().parallelStream().forEach(entry -> {
-                    var info = entry.getKey();
-                    var proc = entry.getValue();
-                    //bind proc to timeSeries info
-                    info.setProcessor(proc);
-                });
-            }
+//            for (var byPathEntry : bindingsByPath.entrySet()) {
+//                String path = byPathEntry.getKey();
+            // Get data from the adapter
+            var data = adapter.fetchData(
+                    String.join("|", bindingsByPath.keySet()),
+                    worksheet.getFromDateTime().toInstant(),
+                    worksheet.getToDateTime().toInstant(),
+                    bindingsByPath.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),
+                    true);
+            return data.values().stream().findFirst().orElse(new TextProcessor());
+//                data.entrySet().parallelStream().forEach(entry -> {
+//                    var info = entry.getKey();
+//                    var proc = entry.getValue();
+//                    //bind proc to timeSeries info
+//                    info.setProcessor(proc);
+//                });
+            //   }
+
+
         }
+        return null;
     }
 
     private void loadFile() {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        fetchDataFromSources();
-                        return worksheet.getSeriesInfo().stream()
-                                .map(info -> info.getProcessor()
-                                        .getData()
-                                        .stream()
-                                        .map(XYChart.Data::getYValue)
-                                        .collect(Collectors.joining()))
+                        return fetchDataFromSources().getData().stream()
+                                .map(XYChart.Data::getYValue)
                                 .collect(Collectors.joining());
+//                                        .collect(Collectors.joining())
+//                        return worksheet.getSeriesInfo().stream()
+//                                .map(info -> info.getProcessor()
+//                                        .getData()
+//                                        .stream()
+//                                        .map(XYChart.Data::getYValue)
+//                                        .collect(Collectors.joining()))
+//                                .collect(Collectors.joining());
                     },
                     event -> {
                         busyIndicator.setVisible(false);

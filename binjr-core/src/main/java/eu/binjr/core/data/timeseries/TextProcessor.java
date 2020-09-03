@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2020 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,27 +14,22 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.timeseries.transform;
+package eu.binjr.core.data.timeseries;
 
-import javafx.scene.chart.XYChart;
+public class TextProcessor extends TimeSeriesProcessor<String> {
 
-import java.time.ZonedDateTime;
-import java.util.Comparator;
-import java.util.List;
-
-public class SortTransform<T> extends BaseTimeSeriesTransform<T> {
-
-    /**
-     * Base constructor for {@link BaseTimeSeriesTransform} instances.
-     */
-    public SortTransform() {
-        super("SortTransform");
+    @Override
+    protected String computeMinValue() {
+        return null;
     }
 
     @Override
-    protected List<XYChart.Data<ZonedDateTime, T>> apply( List<XYChart.Data<ZonedDateTime, T>> data) {
-        data.sort(Comparator.comparing(XYChart.Data::getXValue));
-        return data;
+    protected String computeAverageValue() {
+        return null;
     }
 
+    @Override
+    protected String computeMaxValue() {
+        return null;
+    }
 }

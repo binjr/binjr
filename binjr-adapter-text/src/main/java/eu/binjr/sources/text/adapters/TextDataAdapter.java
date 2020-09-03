@@ -19,7 +19,6 @@ package eu.binjr.sources.text.adapters;
 
 import com.google.gson.Gson;
 import eu.binjr.common.io.FileSystemBrowser;
-import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -27,6 +26,7 @@ import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TextFilesBinding;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.timeseries.TextProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
@@ -201,24 +201,6 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             }
         }
         return data;
-    }
-
-    public static class TextProcessor extends TimeSeriesProcessor<String> {
-
-        @Override
-        protected String computeMinValue() {
-            return null;
-        }
-
-        @Override
-        protected String computeAverageValue() {
-            return null;
-        }
-
-        @Override
-        protected String computeMaxValue() {
-            return null;
-        }
     }
 
     @Override
