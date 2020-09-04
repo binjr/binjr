@@ -48,7 +48,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String> loggerPattern = stringPreference("severityPattern", "[\\w\\d\\.\\-_]*");
 
     public ObservablePreference<String> threadPattern = stringPreference("threadPattern",
-            "([\\&quot;\\w\\d\\.\\,\\-_\\@\\s\\/\\:\\#\\\\\\=\\{\\}\\&amp;\\+\\%\\)\\(]*)((\\.\\.\\.\\[).*(ing\\]))?");
+            "([\\\"\\w\\d\\.\\,\\-_\\@\\s\\/\\:\\#\\\\\\=\\{\\}\\&\\+\\%\\)\\(]*)((\\.\\.\\.\\[).*(ing\\]))?");
 
     public ObservablePreference<String> msgPattern = stringPreference("msgPattern", ".*");
 

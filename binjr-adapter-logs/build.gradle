@@ -16,8 +16,8 @@
 
 dependencies {
     compile project(':binjr-core')
-    implementation 'org.apache.lucene:lucene-core:8.6.1'
-    implementation 'com.axibase:date-processor:1.1.0'
+    implementation 'org.apache.lucene:lucene-core:8.6.2'
+    implementation 'org.apache.lucene:lucene-facet:8.6.2'
 }
 
 jar {

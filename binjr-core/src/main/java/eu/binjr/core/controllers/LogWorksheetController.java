@@ -328,9 +328,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-//            for (var byPathEntry : bindingsByPath.entrySet()) {
-//                String path = byPathEntry.getKey();
-            // Get data from the adapter
             var data = adapter.fetchData(
                     String.join("|", bindingsByPath.keySet()),
                     worksheet.getFromDateTime().toInstant(),
@@ -338,17 +335,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     bindingsByPath.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),
                     true);
             return data.values().stream().findFirst().orElse(new TextProcessor());
-//                data.entrySet().parallelStream().forEach(entry -> {
-//                    var info = entry.getKey();
-//                    var proc = entry.getValue();
-//                    //bind proc to timeSeries info
-//                    info.setProcessor(proc);
-//                });
-            //   }
-
-
         }
-        return null;
+        return new TextProcessor();
     }
 
     private void loadFile() {
@@ -358,14 +346,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         return fetchDataFromSources().getData().stream()
                                 .map(XYChart.Data::getYValue)
                                 .collect(Collectors.joining());
-//                                        .collect(Collectors.joining())
-//                        return worksheet.getSeriesInfo().stream()
-//                                .map(info -> info.getProcessor()
-//                                        .getData()
-//                                        .stream()
-//                                        .map(XYChart.Data::getYValue)
-//                                        .collect(Collectors.joining()))
-//                                .collect(Collectors.joining());
                     },
                     event -> {
                         busyIndicator.setVisible(false);

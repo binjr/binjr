@@ -35,12 +35,18 @@ import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
+import org.apache.lucene.facet.DrillDownQuery;
+import org.apache.lucene.facet.DrillSideways;
+import org.apache.lucene.facet.FacetsConfig;
+import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
+import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
-import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -68,14 +74,16 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
     public static final String TIMESTAMP = "timestamp";
-    public static final String POINT_LINE_NUMBER = "lineNumber";
+    public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
-    private static final String STORE_TIMESTAMP = "timestampAttribute";
-    public static final String FACET_PATH = "path";
-    public static final String FACET_SEVERITY = "severity";
-    public static final String FACET_THREAD = "thread";
-    public static final String FACET_LOGGER = "logger";
+    private static final String TIMESTAMP_VALUES = "timestampValues";
+    public static final String PATH = "path";
+    public static final String SEVERITY = "severity";
+    public static final String THREAD = "thread";
+    public static final String LOGGER = "logger";
     public static final String SORT_TIMESTAMP = "sortedTimestamp";
+    public static final String FACET_SEVERITY = "facetSeverity";
+    public static final String FACET_PATH = "facetPath";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private LogFileIndex index;
     protected Path rootPath;
@@ -227,13 +235,17 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                                                                               boolean bypassCache) throws DataAdapterException {
         Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> data = new HashMap<>();
         try {
+            Map<String, Collection<String>> facets = new HashMap<>();
+            List<String> paths = new ArrayList<>();
             for (var info : seriesInfos) {
 
                 indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
                     index.add(p, fileBrowser.getData(p));
                     return p;
                 }));
+                paths.add(info.getBinding().getPath());
             }
+            facets.put(PATH, paths);
             var proc = new TextProcessor();
             // LogFilesBinding binding = (LogFilesBinding) info.getBinding();
 
@@ -241,11 +253,11 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             //  QueryParser parser = new QueryParser(field, analyzer);
             //    proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFile(info.getBinding().getPath()))));
             var builder = new QueryBuilder(new StandardAnalyzer());
-//              var tr = new Term("FIELD_CONTENT", "info");
-//                var q = new TermQuery(tr);
+            var tr = new Term(FIELD_CONTENT, "info");
+            //var q = new TermQuery(tr);
 
-            Query q = LongPoint.newRangeQuery(TIMESTAMP, start.toEpochMilli(), end.toEpochMilli());
-            proc.setData(index.filterSamples(q));
+
+            proc.setData(index.search(start.toEpochMilli(), end.toEpochMilli(), facets, null));
             data.put(null, proc);
         } catch (IOException e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
@@ -315,8 +327,10 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         //private final IndexSearcher searcher;
         private final SearcherManager searcherManager;
         private final IndexWriter indexWriter;
+        private final FacetsConfig facetsConfig;
         private Pattern pattern;
         private DateTimeFormatter dateTimeFormatter;
+        private SortedSetDocValuesReaderState state;
 
         public LogFileIndex() throws IOException {
 
@@ -337,6 +351,9 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 //            indexReader = DirectoryReader.open(indexDirectory, );
 //            logger.info("Total indexed lines: " + indexReader.getDocCount(FIELD_CONTENT));
             this.searcherManager = new SearcherManager(indexWriter, false, false, null);
+            facetsConfig = new FacetsConfig();
+            facetsConfig.setIndexFieldName(SEVERITY, FACET_SEVERITY);
+            facetsConfig.setIndexFieldName(PATH, FACET_PATH);
 
         }
 
@@ -349,16 +366,22 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                             .map(line -> new LogEvent(n.incrementAndGet(), line))
                             .parallel()
                             .forEach(CheckedLambdas.wrap(line -> {
-                                indexWriter.addDocument(parseLine(path, line));
+                                var doc = parseLine(path, line);
+                                indexWriter.addDocument(facetsConfig.build(doc));
                             }));
                 }
-                //   }
-                try (Profiler p = Profiler.start("Commit index", logger::perf)) {
-                    indexWriter.commit();
-                }
-                try (Profiler p = Profiler.start("Refresh searchManager", logger::perf)) {
-                    searcherManager.maybeRefreshBlocking();
-                }
+            }
+            try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                indexWriter.commit();
+            }
+            try (Profiler p = Profiler.start("Refresh searchManager", logger::perf)) {
+                searcherManager.maybeRefreshBlocking();
+            }
+            IndexSearcher searcher = searcherManager.acquire();
+            try (Profiler p = Profiler.start("Initialize  DocValues reader state", logger::perf)) {
+                this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
+            } finally {
+                searcherManager.release(searcher);
             }
         }
 
@@ -389,13 +412,13 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                             ZonedDateTime.parse(m.group("time").replaceAll("[/\\-:.,T]", " "), dateTimeFormatter);
                     var millis = timeStamp.toInstant().toEpochMilli();
                     doc.add(new LongPoint(TIMESTAMP, millis));
-                    doc.add(new NumericDocValuesField(TIMESTAMP, millis));
+                    doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
-                    doc.add(new LongPoint(POINT_LINE_NUMBER, event.getLineNumber()));
-                    doc.add(new SortedSetDocValuesField(FACET_PATH, new BytesRef(path)));
-                    doc.add(new SortedSetDocValuesField(FACET_SEVERITY, new BytesRef(m.group("severity") == null ? "unknown" : m.group("severity"))));
-                    doc.add(new SortedSetDocValuesField(FACET_THREAD, new BytesRef(m.group("thread") == null ? "unknown" : m.group("thread"))));
-                    doc.add(new SortedSetDocValuesField(FACET_LOGGER, new BytesRef(m.group("logger") == null ? "unknown" : m.group("logger"))));
+                    doc.add(new LongPoint(LINE_NUMBER, event.getLineNumber()));
+                    doc.add(new SortedSetDocValuesFacetField(PATH, path));
+                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, (m.group("severity") == null ? "unknown" : m.group("severity"))));
+                    doc.add(new SortedSetDocValuesFacetField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread"))));
+                    doc.add(new SortedSetDocValuesFacetField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger"))));
                 } catch (Exception e) {
                     throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
                 }
@@ -404,7 +427,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             return doc;
         }
 
-
         @Override
         public void close() throws IOException {
             IOUtils.close(indexWriter);
@@ -412,20 +434,31 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             IOUtils.close(indexDirectory);
         }
 
-        public List<XYChart.Data<ZonedDateTime, String>> filterSamples(Query q) throws IOException {
-            try (Profiler p = Profiler.start("Refresh searchManager", logger::perf)) {
-                searcherManager.maybeRefreshBlocking();
-            }
+        public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws IOException {
+            searcherManager.maybeRefreshBlocking();
             IndexSearcher searcher = searcherManager.acquire();
             try {
+                Query q = LongPoint.newRangeQuery(TIMESTAMP, start, end);
                 var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
-                var t = searcher.search(q, prefs.hitsPerPage.get().intValue(),
-                        new Sort(new SortField(TIMESTAMP, SortField.Type.SCORE, true)));
-                for (var hit : t.scoreDocs) {
-                    var doc = searcher.doc(hit.doc);
-                    l.add(new XYChart.Data<>(
-                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
-                            doc.get(FIELD_CONTENT) + "\n"));
+                var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
+                var drill = new DrillSideways(searcher, facetsConfig, this.state);
+                var dq = new DrillDownQuery(facetsConfig);
+                for (var facet : facets.entrySet()) {
+                    for (var label : facet.getValue()) {
+                        dq.add(facet.getKey(), label);
+                    }
+                }
+                DrillSideways.DrillSidewaysResult results;
+                try (Profiler p = Profiler.start("Executing query", logger::perf)) {
+                    results = drill.search(dq, q, null, prefs.hitsPerPage.get().intValue(), sort, false);
+                }
+                try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
+                    for (var hit : results.hits.scoreDocs) {
+                        var doc = searcher.doc(hit.doc);
+                        l.add(new XYChart.Data<>(
+                                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
+                                doc.get(FIELD_CONTENT) + "\n"));
+                    }
                 }
                 return l;
             } finally {
