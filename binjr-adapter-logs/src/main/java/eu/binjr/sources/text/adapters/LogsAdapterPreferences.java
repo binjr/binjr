@@ -56,7 +56,9 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
 
     public ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
-    //        "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
+
+    public ObservablePreference<IndexDirectoryLocation> indexDirectoryLocation =
+            enumPreference(IndexDirectoryLocation.class, "indexDirectoryLocation", IndexDirectoryLocation.MEMORY );
 
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);

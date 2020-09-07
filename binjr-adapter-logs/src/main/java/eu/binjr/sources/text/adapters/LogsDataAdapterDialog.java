@@ -63,7 +63,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
      * @param owner the owner window for the dialog
      */
     public LogsDataAdapterDialog(Node owner) throws NoAdapterFoundException {
-        super(owner, Mode.PATH, "mostRecentTextArchives", false);
+        super(owner, Mode.PATH, "mostRecentLogsArchives", false);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Zip Archive or Folder");
         extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));

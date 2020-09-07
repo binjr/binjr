@@ -18,6 +18,7 @@ package eu.binjr.sources.text.adapters;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
@@ -41,17 +42,21 @@ import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
+import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
+import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.store.MMapDirectory;
 import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
@@ -61,6 +66,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -84,6 +90,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     public static final String SORT_TIMESTAMP = "sortedTimestamp";
     public static final String FACET_SEVERITY = "facetSeverity";
     public static final String FACET_PATH = "facetPath";
+    public static final String MESSAGE = "message";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private LogFileIndex index;
     protected Path rootPath;
@@ -319,125 +326,189 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
+
+    private static class LogEvent {
+        private final String timestamp;
+        private final int lineNumber;
+        private String text;
+
+        private static class LogEventBuilder {
+            private final Pattern timestampPattern;
+            private LogEvent previous = null;
+            private int lineNumber;
+            private String timestamp;
+            private StringBuilder textBuilder = new StringBuilder();
+
+            public LogEventBuilder(Pattern timestampPattern) {
+                this.timestampPattern = timestampPattern;
+            }
+
+            public Optional<LogEvent> build(int lineNumber, String text) {
+                var m = timestampPattern.matcher(text);
+                if (m.find()) {
+                    var yield = previous;
+                    previous = new LogEvent(lineNumber, m.group(), text);
+                    if (yield != null) {
+                        return Optional.of(yield);
+                    } else {
+                        return Optional.empty();
+                    }
+                } else {
+                    if (previous != null) {
+                        previous.text = previous.text + "\n" + text;
+                    }
+                    return Optional.empty();
+                }
+            }
+
+            public Optional<LogEvent> getLast() {
+                return previous != null ? Optional.of(previous) : Optional.empty();
+            }
+        }
+
+        private LogEvent(int lineNumber, String timestamp, String text) {
+            this.lineNumber = lineNumber;
+            this.text = text;
+            this.timestamp = timestamp;
+        }
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+    }
+
     public class LogFileIndex implements Closeable {
-
-
         private final Directory indexDirectory;
-        //   private final DirectoryReader indexReader;
-        //private final IndexSearcher searcher;
-        private final SearcherManager searcherManager;
+        private DirectoryReader indexReader;
+        private IndexSearcher searcher;
         private final IndexWriter indexWriter;
         private final FacetsConfig facetsConfig;
-        private Pattern pattern;
-        private DateTimeFormatter dateTimeFormatter;
+        private final Pattern payloadPattern;
+        private final Pattern timestampPattern;
+        private final DateTimeFormatter dateTimeFormatter;
         private SortedSetDocValuesReaderState state;
+        private final Path indexDirectoryPath;
+        private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
 
         public LogFileIndex() throws IOException {
-
-            indexDirectory = new ByteBuffersDirectory();
-            this.pattern = Pattern.compile(String.format(prefs.linePattern.get(),
-                    prefs.timestampPattern.get(),
-                    prefs.severityPattern.get(),
-                    prefs.threadPattern.get(),
-                    prefs.loggerPattern.get(),
-                    prefs.msgPattern.get()));
+            this.payloadPattern = Pattern.compile(
+                    String.format("\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]",
+                            prefs.severityPattern.get(),
+                            prefs.threadPattern.get(),
+                            prefs.loggerPattern.get()
+                    ));
+            this.timestampPattern = Pattern.compile(prefs.timestampPattern.get());
+            logger.debug(() -> "Log parsing regexp: " + payloadPattern);
             this.dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy MM dd HH mm ss SSS").withZone(getTimeZoneId());
-            //   indexDirectory = FSDirectory.open(Files.createTempDirectory("binjr-idx").resolve(path));
-
+            switch (prefs.indexDirectoryLocation.get()) {
+                case MEMORY:
+                    indexDirectory = new ByteBuffersDirectory();
+                    logger.debug("Lucene lucene directory stored on the Java Heap");
+                    indexDirectoryPath = null;
+                    break;
+                default:
+                case FILES_SYSTEM:
+                    logger.info("Unmap supported: " + MMapDirectory.UNMAP_SUPPORTED);
+                    if (!MMapDirectory.UNMAP_SUPPORTED) {
+                        logger.info(MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
+                    }
+                    indexDirectoryPath = Files.createTempDirectory("binjr-logs-index");
+                    logger.debug("Lucene lucene directory stored at " + indexDirectoryPath);
+                    indexDirectory = FSDirectory.open(indexDirectoryPath);
+                    if (indexDirectory instanceof MMapDirectory) {
+                        logger.info("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
+                    }
+            }
             IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
             this.indexWriter = new IndexWriter(indexDirectory, iwc);
-
-//            indexReader = DirectoryReader.open(indexDirectory, );
-//            logger.info("Total indexed lines: " + indexReader.getDocCount(FIELD_CONTENT));
-            this.searcherManager = new SearcherManager(indexWriter, false, false, null);
+            indexReader = DirectoryReader.open(indexWriter);
+            searcher = new IndexSearcher(indexReader);
             facetsConfig = new FacetsConfig();
             facetsConfig.setIndexFieldName(SEVERITY, FACET_SEVERITY);
             facetsConfig.setIndexFieldName(PATH, FACET_PATH);
-
         }
 
         public void add(String path, InputStream ias) throws IOException {
             var n = new AtomicInteger(0);
-
+            var builder = new LogEvent.LogEventBuilder(timestampPattern);
             try (Profiler ignored = Profiler.start(e -> logger.perf("Indexed " + n.get() + " lines for file " + path + e.toMilliString()))) {
                 try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                     reader.lines()
-                            .map(line -> new LogEvent(n.incrementAndGet(), line))
+                            .map(line -> builder.build(n.incrementAndGet(), line))
                             .parallel()
                             .forEach(CheckedLambdas.wrap(line -> {
-                                var doc = parseLine(path, line);
-                                indexWriter.addDocument(facetsConfig.build(doc));
+                                if (line.isPresent()) {
+                                    addLogEvent(path, line.get());
+                                }
                             }));
                 }
+                // Don't forget the last log line buffered in the builder
+                builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
+                    addLogEvent(path, line);
+                }));
             }
-            try (Profiler p = Profiler.start("Commit index", logger::perf)) {
-                indexWriter.commit();
-            }
-            try (Profiler p = Profiler.start("Refresh searchManager", logger::perf)) {
-                searcherManager.maybeRefreshBlocking();
-            }
-            IndexSearcher searcher = searcherManager.acquire();
-            try (Profiler p = Profiler.start("Initialize  DocValues reader state", logger::perf)) {
-                this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
-            } finally {
-                searcherManager.release(searcher);
-            }
+            indexLock.write().lock(() -> {
+                try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                    indexWriter.commit();
+                }
+                try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
+                    this.indexReader = DirectoryReader.openIfChanged(indexReader);
+                    this.searcher = new IndexSearcher(indexReader);
+                    this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
+                }
+            });
         }
 
-        private class LogEvent {
-            private final int lineNumber;
-            private final String text;
-
-            private LogEvent(int lineNumber, String message) {
-                this.lineNumber = lineNumber;
-                this.text = message;
-            }
-
-            public int getLineNumber() {
-                return lineNumber;
-            }
-
-            public String getText() {
-                return text;
-            }
-        }
-
-        private Document parseLine(String path, LogEvent event) throws ParsingEventException {
+        private void addLogEvent(String path, LogsDataAdapter.LogEvent event) throws IOException {
             Document doc = new Document();
-            Matcher m = pattern.matcher(event.getText());
+            Matcher m = payloadPattern.matcher(event.getText());
+            doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
+            doc.add(new LongPoint(LINE_NUMBER, event.getLineNumber()));
             if (m.find()) {
                 try {
-                    var timeStamp = m.group("time") == null ? ZonedDateTime.now() :
-                            ZonedDateTime.parse(m.group("time").replaceAll("[/\\-:.,T]", " "), dateTimeFormatter);
+                    var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T]", " "), dateTimeFormatter);
                     var millis = timeStamp.toInstant().toEpochMilli();
                     doc.add(new LongPoint(TIMESTAMP, millis));
                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
-                    doc.add(new LongPoint(LINE_NUMBER, event.getLineNumber()));
                     doc.add(new SortedSetDocValuesFacetField(PATH, path));
                     doc.add(new SortedSetDocValuesFacetField(SEVERITY, (m.group("severity") == null ? "unknown" : m.group("severity"))));
-                    doc.add(new SortedSetDocValuesFacetField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread"))));
-                    doc.add(new SortedSetDocValuesFacetField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger"))));
+//                    doc.add(new TextField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread")), Field.Store.NO));
+//                    doc.add(new TextField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger")), Field.Store.NO));
                 } catch (Exception e) {
                     throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
                 }
             }
-            doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
-            return doc;
+            indexWriter.addDocument(facetsConfig.build(doc));
         }
 
         @Override
         public void close() throws IOException {
+            IOUtils.close(indexReader);
             IOUtils.close(indexWriter);
-            IOUtils.close(searcherManager);
             IOUtils.close(indexDirectory);
+
+            if (indexDirectoryPath != null) {
+                try {
+                    Files.deleteIfExists(indexDirectoryPath);
+                } catch (IOException e) {
+                    logger.warn("Failed to delete temp folder for log index " + indexDirectoryPath + ": " + e.getMessage());
+                    logger.debug("Exception stack", e);
+                }
+            }
         }
 
         public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws IOException {
-            searcherManager.maybeRefreshBlocking();
-            IndexSearcher searcher = searcherManager.acquire();
-            try {
+            return indexLock.read().lock(() -> {
                 Query q = LongPoint.newRangeQuery(TIMESTAMP, start, end);
                 var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
                 var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
@@ -461,10 +532,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     }
                 }
                 return l;
-            } finally {
-                searcherManager.release(searcher);
-            }
+            });
         }
     }
-
 }
