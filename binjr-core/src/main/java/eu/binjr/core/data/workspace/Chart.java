@@ -54,7 +54,7 @@ import static java.util.stream.Collectors.groupingBy;
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 @XmlRootElement(name = "Chart")
-public class Chart implements Dirtyable, AutoCloseable {
+public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
     private static final Logger logger = Logger.create(Chart.class);
     private static final AtomicInteger globalCounter = new AtomicInteger(0);
 
@@ -177,36 +177,6 @@ public class Chart implements Dirtyable, AutoCloseable {
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
         userPref = UserPreferences.getInstance();
-    }
-
-    /**
-     * Returns the preferred time range to initialize a new Chart with.
-     *
-     * @return the preferred time range to initialize a new Chart with.
-     * @throws DataAdapterException if an error occurs while fetching data from an adapter.
-     */
-    public TimeRange getInitialTimeRange() throws DataAdapterException {
-        ZonedDateTime end = null;
-        ZonedDateTime beginning = null;
-        var bindingsByAdapters = getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
-        for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            var adapter = byAdapterEntry.getKey();
-            // Group all queries with the same adapter and path
-            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            for (var byPathEntry : bindingsByPath.entrySet()) {
-                String path = byPathEntry.getKey();
-                var timeRange = adapter.getInitialTimeRange(path, byPathEntry.getValue());
-                if (end == null || timeRange.getEnd().isAfter(end)) {
-                    end = timeRange.getEnd();
-                }
-                if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
-                    beginning = timeRange.getBeginning();
-                }
-            }
-        }
-        return TimeRange.of(
-                beginning == null ? ZonedDateTime.now().minusHours(24) : beginning,
-                end == null ? ZonedDateTime.now() : end);
     }
 
     /**

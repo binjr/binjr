@@ -40,6 +40,11 @@ public class TimeRange {
         return new TimeRange(beginning, end);
     }
 
+    public static TimeRange last24Hours(){
+        var end = ZonedDateTime.now();
+        return new TimeRange(end.minusHours(24), end);
+    }
+
     TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
         Objects.requireNonNull(beginning, "Parameter 'beginning' must not be null");
         Objects.requireNonNull(end, "Parameter 'end' must not be null");

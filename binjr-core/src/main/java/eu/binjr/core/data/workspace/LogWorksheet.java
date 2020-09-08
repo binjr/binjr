@@ -20,7 +20,7 @@ import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
-import eu.binjr.core.data.adapters.TextFilesBinding;
+import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -29,15 +29,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class LogWorksheet extends Worksheet<String> implements Syncable {
+public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeable<String> {
 
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
 
@@ -63,8 +63,8 @@ public class LogWorksheet extends Worksheet<String> implements Syncable {
         this("New File (" + globalCounter.getAndIncrement() + ")",
                 true,
                 ZoneId.systemDefault(),
-                ZonedDateTime.now().minus(24, ChronoUnit.HOURS),
-                ZonedDateTime.now(),
+                ZonedDateTime.ofInstant(Instant.EPOCH,  ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(Instant.EPOCH,  ZoneId.systemDefault()),
                 false);
     }
 
@@ -116,12 +116,14 @@ public class LogWorksheet extends Worksheet<String> implements Syncable {
         for (var root : bindingsHierarchies) {
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
-                if (b instanceof TextFilesBinding) {
-                    this.seriesInfo.add(TimeSeriesInfo.fromBinding((TextFilesBinding) b));
+                if (b instanceof LogFilesBinding) {
+                    this.seriesInfo.add(TimeSeriesInfo.fromBinding((LogFilesBinding) b));
                 }
             }
         }
     }
+
+
 
     @Override
     protected List<TimeSeriesInfo<String>> listAllSeriesInfo() {
@@ -223,4 +225,8 @@ public class LogWorksheet extends Worksheet<String> implements Syncable {
         this.toDateTime.setValue(toDateTime);
     }
 
+    @Override
+    public List<TimeSeriesInfo<String>> getSeries() {
+        return seriesInfo;
+    }
 }

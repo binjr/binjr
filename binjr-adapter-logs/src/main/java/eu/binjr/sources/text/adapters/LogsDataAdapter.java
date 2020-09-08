@@ -22,6 +22,7 @@ import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -229,31 +230,37 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     }
 
 
-//    @Override
-//    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfos) throws DataAdapterException {
-//        return null;
-//    }
+    @Override
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfo) throws DataAdapterException {
+        try {
+            ensureIndexed(seriesInfo);
+            return index.getTimeRangeBounries(seriesInfo.stream().map(i-> i.getBinding().getPath()).collect(Collectors.toList()));
+        } catch (IOException e) {
+            throw new DataAdapterException("Error retrieving initial time range", e);
+        }
+    }
+
+    private void ensureIndexed(  List<TimeSeriesInfo<String>> seriesInfo) throws IOException {
+        for (var info : seriesInfo) {
+            indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
+                index.add(p, fileBrowser.getData(p));
+                return p;
+            }));
+        }
+    }
 
     @Override
     public Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> fetchData(String path,
                                                                               Instant start,
                                                                               Instant end,
-                                                                              List<TimeSeriesInfo<String>> seriesInfos,
+                                                                              List<TimeSeriesInfo<String>> seriesInfo,
                                                                               boolean bypassCache) throws DataAdapterException {
         Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> data = new HashMap<>();
         try {
+            ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
-            List<String> paths = new ArrayList<>();
-            for (var info : seriesInfos) {
-
-                indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
-                    index.add(p, fileBrowser.getData(p));
-                    return p;
-                }));
-                paths.add(info.getBinding().getPath());
-            }
-            facets.put(PATH, paths);
-            var proc = new TextProcessor();
+            facets.put(PATH, seriesInfo.stream().map(i-> i.getBinding().getPath()).collect(Collectors.toList()));
+            var proc = new StringProcessor();
             // LogFilesBinding binding = (LogFilesBinding) info.getBinding();
 
             //  new QueryParser();
@@ -262,7 +269,9 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             var builder = new QueryBuilder(new StandardAnalyzer());
             var tr = new Term(FIELD_CONTENT, "info");
             //var q = new TermQuery(tr);
-
+//            if (start.equals(end) && start.equals(Instant.EPOCH)) {
+//
+//            }
 
             proc.setData(index.search(start.toEpochMilli(), end.toEpochMilli(), facets, null));
             data.put(null, proc);
@@ -308,7 +317,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         super.close();
     }
 
-    public static class TextProcessor extends TimeSeriesProcessor<String> {
+    public static class StringProcessor extends TimeSeriesProcessor<String> {
 
         @Override
         protected String computeMinValue() {
@@ -505,6 +514,38 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     logger.debug("Exception stack", e);
                 }
             }
+        }
+
+        public TimeRange getTimeRangeBounries(List<String> files) throws IOException {
+            ZonedDateTime beginning = getTimeRangeBoundary(false, files);
+            ZonedDateTime end = getTimeRangeBoundary(true, files);
+            return (TimeRange.of(
+                    beginning != null ? beginning : ZonedDateTime.now().minusHours(24),
+                    end != null ? end : ZonedDateTime.now()));
+
+        }
+
+        private ZonedDateTime getTimeRangeBoundary(boolean getMin,List<String>  files) throws IOException {
+            return indexLock.read().lock(() -> {
+                var drill = new DrillSideways(searcher, facetsConfig, this.state);
+                var dq = new DrillDownQuery(facetsConfig);
+                for (var label : files) {
+                    dq.add(PATH, label);
+                }
+                var top = drill.search(dq,
+                        null,
+                        null,
+                        1,
+                        new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, getMin)),
+                        false);
+
+                if (top.hits.scoreDocs.length > 0) {
+                    return ZonedDateTime.ofInstant(
+                            Instant.ofEpochMilli(Long.parseLong(
+                                    searcher.doc(top.hits.scoreDocs[0].doc).get(TIMESTAMP))), getTimeZoneId());
+                }
+                return null;
+            });
         }
 
         public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws IOException {

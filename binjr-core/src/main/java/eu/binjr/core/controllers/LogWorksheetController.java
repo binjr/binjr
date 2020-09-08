@@ -67,6 +67,7 @@ import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 
 import java.net.URL;
+import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -182,9 +183,35 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
         if (forceRefresh) {
-            loadFile();
+            try {
+                AsyncTaskManager.getInstance().submit(() -> {
+                            busyIndicator.setVisible(true);
+                            return fetchDataFromSources().getData().stream()
+                                    .map(XYChart.Data::getYValue)
+                                    .collect(Collectors.joining());
+                        },
+                        event -> {
+                            busyIndicator.setVisible(false);
+                            String data = (String) event.getSource().getValue();
+                            textOutput.clear();
+                            textOutput.replaceText(0, 0, data);
+                            if (worksheet.isSyntaxHighlightEnabled()) {
+                                this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
+                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                            }
+                        }, event -> {
+                            busyIndicator.setVisible(false);
+                            Dialogs.notifyException("An error occurred while loading text file: " +
+                                            event.getSource().getException().getMessage(),
+                                    event.getSource().getException(),
+                                    root);
+                        });
+            } catch (Exception e) {
+                Dialogs.notifyException(e);
+            }
         }
     }
+
 
     @Override
     public void saveSnapshot() {
@@ -228,9 +255,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
         // TimeRange Picker initialization
+        timeRange.set(TimeRange.of(worksheet.getFromDateTime(), worksheet.getToDateTime()));
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
-        timeRangePicker.initSelectedRange(TimeRange.of(worksheet.getFromDateTime(), worksheet.getToDateTime()));
+        timeRangePicker.initSelectedRange(timeRange.get());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             timeRange.set(TimeRange.of(newValue.getBeginning(), newValue.getEnd()));
             invalidateAll(true, false, true);
@@ -320,14 +348,21 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return false;
         });
 
-        var bindingsByAdapters = worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        if (worksheet.getFromDateTime().toInstant().equals(Instant.EPOCH) &&
+                worksheet.getFromDateTime().equals(worksheet.getToDateTime())) {
+            timeRange.set(worksheet.getInitialTimeRange());
+        }
+
+        var bindingsByAdapters =
+                worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             // Define the transforms to apply
             var adapter = (DataAdapter<String>) byAdapterEntry.getKey();
             var sort = new SortTransform();
             sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
-            var bindingsByPath = byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+            var bindingsByPath =
+                    byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var data = adapter.fetchData(
                     String.join("|", bindingsByPath.keySet()),
                     worksheet.getFromDateTime().toInstant(),
@@ -337,35 +372,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return data.values().stream().findFirst().orElse(new TextProcessor());
         }
         return new TextProcessor();
-    }
-
-    private void loadFile() {
-        try {
-            AsyncTaskManager.getInstance().submit(() -> {
-                        busyIndicator.setVisible(true);
-                        return fetchDataFromSources().getData().stream()
-                                .map(XYChart.Data::getYValue)
-                                .collect(Collectors.joining());
-                    },
-                    event -> {
-                        busyIndicator.setVisible(false);
-                        String data = (String) event.getSource().getValue();
-                        textOutput.clear();
-                        textOutput.replaceText(0, 0, data);
-                        if (worksheet.isSyntaxHighlightEnabled()) {
-                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
-                            textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
-                        }
-                    }, event -> {
-                        busyIndicator.setVisible(false);
-                        Dialogs.notifyException("An error occurred while loading text file: " +
-                                        event.getSource().getException().getMessage(),
-                                event.getSource().getException(),
-                                root);
-                    });
-        } catch (Exception e) {
-            Dialogs.notifyException(e);
-        }
     }
 
     @Override

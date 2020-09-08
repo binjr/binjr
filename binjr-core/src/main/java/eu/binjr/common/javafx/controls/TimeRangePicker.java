@@ -18,6 +18,7 @@ package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.dialogs.Dialogs;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -165,7 +166,6 @@ public class TimeRangePicker extends ToggleButton {
                         }
                     }
                 });
-        bindingManager.bindBidirectional(this.textProperty(), timeRangeText.textProperty());
     }
 
 
@@ -182,11 +182,13 @@ public class TimeRangePicker extends ToggleButton {
     }
 
     private void updateText() {
-        this.timeRange.setValue(TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), timeRangePickerController.endDate.getDateTimeValue()));
-        timeRangeText.setText(String.format("From %s to %s (%s)",
-                timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
-                timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
-                getZoneId().toString()));
+        Dialogs.runOnFXThread(()->{
+            this.timeRange.setValue(TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), timeRangePickerController.endDate.getDateTimeValue()));
+            timeRangeText.setText(String.format("From %s to %s (%s)",
+                    timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
+                    timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
+                    getZoneId().toString()));
+        });
     }
 
     public TimeRange getSelectedRange() {
