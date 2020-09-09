@@ -22,6 +22,7 @@ import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TextFilesBinding;
@@ -59,6 +60,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
+    private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
 
     /**
      * Initializes a new instance of the {@link TextDataAdapter} class.
@@ -128,25 +130,25 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
         try (var p = Profiler.start("Building text binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
             nodeDict.put(fileBrowser.toPath("/"), rootNode);
-            for (Path textFile : fileBrowser.listEntries(path ->
+            for (var fsEntry : fileBrowser.listEntries(path ->
                     Arrays.stream(folderFilters)
                             .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
                                     .map(ext -> ext.equalsIgnoreCase("*") || path.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
-                String fileName = textFile.getFileName().toString();
+                String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = rootNode;
-                if (textFile.getParent() != null) {
-                    attachTo = nodeDict.get(textFile.getParent());
+                if (fsEntry.getPath().getParent() != null) {
+                    attachTo = nodeDict.get(fsEntry.getPath().getParent());
                     if (attachTo == null) {
-                        attachTo = makeBranchNode(nodeDict, textFile.getParent(), rootNode);
+                        attachTo = makeBranchNode(nodeDict, fsEntry.getPath().getParent(), rootNode);
                     }
                 }
                 FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
                         new TextFilesBinding.Builder()
-                                .withLabel(fileName)
-                                .withPath(textFile.toString())
+                                .withLabel(fileName + " (" + binaryPrefixFormatter.format(fsEntry.getSize()) + "B)")
+                                .withPath(fsEntry.getPath().toString())
                                 .withParent(attachTo.getValue())
                                 .withAdapter(this)
                                 .build());
@@ -233,10 +235,8 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
                 logger.debug(e);
             }
         }
-
         super.close();
     }
-
 
     public String readTextFile(String path) throws IOException {
         try (Profiler ignored = Profiler.start("Extracting text from file " + path, logger::perf)) {
@@ -245,6 +245,5 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
             }
         }
     }
-
 
 }

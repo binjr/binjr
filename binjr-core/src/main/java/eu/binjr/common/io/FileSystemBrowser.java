@@ -49,14 +49,13 @@ public abstract class FileSystemBrowser implements Closeable {
 
     public abstract Collection<InputStream> getData(Predicate<Path> filter) throws IOException;
 
-    public abstract Collection<Path> listEntries(Predicate<Path> filter) throws IOException;
+    public abstract Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException;
 
     public Path getPath() {
         return cvdiagPath;
     }
 
     public abstract Path toPath(String path);
-
 
     private static class FolderBrowser extends FileSystemBrowser {
         public FolderBrowser(Path cvdiagPath) throws IOException {
@@ -75,10 +74,13 @@ public abstract class FileSystemBrowser implements Closeable {
         }
 
         @Override
-        public Collection<Path> listEntries(Predicate<Path> filter) throws IOException {
+        public Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException {
             try (Stream<Path> paths = Files.walk(getPath())) {
                 return paths.map(p -> getPath().relativize(p))
                         .filter(filter)
+                        .map(CheckedLambdas.wrap(p -> {
+                            return new FileSystemEntry(Files.isDirectory(p), p, Files.size(getPath().resolve(p)));
+                        }))
                         .collect(Collectors.toList());
             }
         }
@@ -119,8 +121,8 @@ public abstract class FileSystemBrowser implements Closeable {
         }
 
         @Override
-        public Collection<Path> listEntries(Predicate<Path> filter) throws IOException {
-            List<Path> paths = new ArrayList<>();
+        public Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException {
+            List<FileSystemEntry> fsEntries = new ArrayList<>();
             try (Profiler ignored = Profiler.start("Listing path from zip " + getPath().getFileName(), logger::perf)) {
                 final Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
@@ -128,11 +130,11 @@ public abstract class FileSystemBrowser implements Closeable {
                     if (!zipEntry.isDirectory()) {
                         Path entryPath = zipRootPath.resolve(zipEntry.getName());
                         if (filter.test(entryPath)) {
-                            paths.add(entryPath);
+                            fsEntries.add(new FileSystemEntry(false, entryPath, zipEntry.getSize()));
                         }
                     }
                 }
-                return paths;
+                return fsEntries;
             }
         }
 
@@ -146,6 +148,30 @@ public abstract class FileSystemBrowser implements Closeable {
             if (this.zipFile != null) {
                 this.zipFile.close();
             }
+        }
+    }
+
+    public static class FileSystemEntry {
+        private final boolean directory;
+        private final Path path;
+        private final Long size;
+
+        public FileSystemEntry(boolean directory, Path path, Long size) {
+            this.directory = directory;
+            this.path = path;
+            this.size = size;
+        }
+
+        public boolean isDirectory() {
+            return directory;
+        }
+
+        public Path getPath() {
+            return path;
+        }
+
+        public Long getSize() {
+            return size;
         }
     }
 }

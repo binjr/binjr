@@ -26,6 +26,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.adapters.SourceBinding;
@@ -99,7 +100,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private final Map<String, Object> indexedFiles = new ConcurrentHashMap<String, Object>();
-
+    private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -173,25 +174,25 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         try (var p = Profiler.start("Building log files binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
             nodeDict.put(fileBrowser.toPath("/"), configNode);
-            for (Path conf : fileBrowser.listEntries(configPath ->
+            for (var fsEntry : fileBrowser.listEntries(configPath ->
                     Arrays.stream(folderFilters)
                             .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
                                     .map(ext -> ext.equalsIgnoreCase("*") || configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
-                String fileName = conf.getFileName().toString();
+                String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = configNode;
-                if (conf.getParent() != null) {
-                    attachTo = nodeDict.get(conf.getParent());
+                if (fsEntry.getPath().getParent() != null) {
+                    attachTo = nodeDict.get(fsEntry.getPath().getParent());
                     if (attachTo == null) {
-                        attachTo = makeBranchNode(nodeDict, conf.getParent(), configNode);
+                        attachTo = makeBranchNode(nodeDict, fsEntry.getPath().getParent(), configNode);
                     }
                 }
                 FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
                         new LogFilesBinding.Builder()
-                                .withLabel(fileName)
-                                .withPath(conf.toString())
+                                .withLabel(fileName + " (" + binaryPrefixFormatter.format(fsEntry.getSize()) + "B)")
+                                .withPath(fsEntry.getPath().toString())
                                 .withParent(attachTo.getValue())
                                 .withAdapter(this)
                                 .build());
@@ -234,13 +235,13 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfo) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo);
-            return index.getTimeRangeBounries(seriesInfo.stream().map(i-> i.getBinding().getPath()).collect(Collectors.toList()));
+            return index.getTimeRangeBounries(seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);
         }
     }
 
-    private void ensureIndexed(  List<TimeSeriesInfo<String>> seriesInfo) throws IOException {
+    private void ensureIndexed(List<TimeSeriesInfo<String>> seriesInfo) throws IOException {
         for (var info : seriesInfo) {
             indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
                 index.add(p, fileBrowser.getData(p));
@@ -259,7 +260,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         try {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
-            facets.put(PATH, seriesInfo.stream().map(i-> i.getBinding().getPath()).collect(Collectors.toList()));
+            facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
             var proc = new StringProcessor();
             // LogFilesBinding binding = (LogFilesBinding) info.getBinding();
 
