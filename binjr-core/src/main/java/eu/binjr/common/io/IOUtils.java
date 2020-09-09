@@ -25,6 +25,11 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -125,21 +130,55 @@ public class IOUtils {
         stream.forEach(closeable -> close(closeable, onError));
     }
 
-    public static  <T extends AutoCloseable> void close(T closeable){
+    public static <T extends AutoCloseable> void close(T closeable) {
         close(closeable, (t, e) -> {
             logger.error("An error occurred while closing " + t + ": " + e.getMessage());
             logger.debug(e);
         });
     }
 
-    public static  <T extends AutoCloseable> void close(T closeable, BiConsumer<T, Exception> onError) {
+    public static <T extends AutoCloseable> void close(T closeable, BiConsumer<T, Exception> onError) {
         if (closeable != null) {
             try {
-                logger.trace(()-> "Closing: " + closeable);
+                logger.trace(() -> "Closing: " + closeable);
                 closeable.close();
             } catch (Exception e) {
                 onError.accept(closeable, e);
             }
+        }
+    }
+
+    public static void attemptDeleteTempPath(Path path) {
+        try {
+            logger.debug("Attempting to delete " + path);
+            Files.walkFileTree(path, new SimpleFileVisitor<>() {
+                @Override
+                public FileVisitResult visitFile(Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                    try {
+                        Files.delete(path);
+                        logger.trace("Deleted file: " + path);
+                    } catch (IOException e) {
+                        logger.warn("Temporary file " + path + " could not be deleted: " + e.getMessage());
+                        logger.debug("Stack Trace:", e);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+
+                @Override
+                public FileVisitResult postVisitDirectory(Path directory, IOException ioException) throws IOException {
+                    try {
+                        Files.delete(directory);
+                        logger.trace("Deleted directory:" + path);
+                    } catch (IOException e) {
+                        logger.warn("Temporary folder " + directory + " could not be deleted: " + e.getMessage());
+                        logger.debug("Stack Trace:", e);
+                    }
+                    return FileVisitResult.CONTINUE;
+                }
+            });
+        } catch (IOException e) {
+            logger.warn("Temporary location " + path + " could not be deleted: " + e.getMessage());
+            logger.debug("Stack Trace:", e);
         }
     }
 }
