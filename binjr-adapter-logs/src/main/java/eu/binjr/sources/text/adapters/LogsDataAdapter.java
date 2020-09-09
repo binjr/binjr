@@ -425,11 +425,10 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     break;
                 default:
                 case FILES_SYSTEM:
-                    logger.info("Unmap supported: " + MMapDirectory.UNMAP_SUPPORTED);
                     if (!MMapDirectory.UNMAP_SUPPORTED) {
-                        logger.info(MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
+                        logger.debug(MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
                     }
-                    indexDirectoryPath = Files.createTempDirectory("binjr-logs-index");
+                    indexDirectoryPath = Files.createTempDirectory("binjr-logs-index_");
                     logger.debug("Lucene lucene directory stored at " + indexDirectoryPath);
                     indexDirectory = FSDirectory.open(indexDirectoryPath);
                     if (indexDirectory instanceof MMapDirectory) {
@@ -447,34 +446,40 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
 
         public void add(String path, InputStream ias) throws IOException {
-            var n = new AtomicInteger(0);
-            var builder = new LogEvent.LogEventBuilder(timestampPattern);
-            try (Profiler ignored = Profiler.start(e -> logger.perf("Indexed " + n.get() + " lines for file " + path + e.toMilliString()))) {
-                try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
-                    reader.lines()
-                            .map(line -> builder.build(n.incrementAndGet(), line))
-                            .parallel()
-                            .forEach(CheckedLambdas.wrap(line -> {
-                                if (line.isPresent()) {
-                                    addLogEvent(path, line.get());
-                                }
-                            }));
+            try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
+                var n = new AtomicInteger(0);
+                var builder = new LogEvent.LogEventBuilder(timestampPattern);
+                try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
+                    try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
+                        reader.lines()
+                                .map(line -> builder.build(n.incrementAndGet(), line))
+                                .parallel()
+                                .forEach(CheckedLambdas.wrap(line -> {
+                                    if (line.isPresent()) {
+                                        addLogEvent(path, line.get());
+                                    }
+                                }));
+                    }
+                    // Don't forget the last log line buffered in the builder
+                    builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
+                        addLogEvent(path, line);
+                    }));
                 }
-                // Don't forget the last log line buffered in the builder
-                builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
-                    addLogEvent(path, line);
-                }));
+                indexLock.write().lock(() -> {
+                    try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                        indexWriter.commit();
+                    }
+                    try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
+                        var updatedReader = DirectoryReader.openIfChanged(indexReader);
+                        if (updatedReader != null) {
+                            this.indexReader.close();
+                            this.indexReader = updatedReader;
+                            this.searcher = new IndexSearcher(indexReader);
+                        }
+                        this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
+                    }
+                });
             }
-            indexLock.write().lock(() -> {
-                try (Profiler p = Profiler.start("Commit index", logger::perf)) {
-                    indexWriter.commit();
-                }
-                try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
-                    this.indexReader = DirectoryReader.openIfChanged(indexReader);
-                    this.searcher = new IndexSearcher(indexReader);
-                    this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
-                }
-            });
         }
 
         private void addLogEvent(String path, LogsDataAdapter.LogEvent event) throws IOException {
@@ -507,12 +512,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             IOUtils.close(indexDirectory);
 
             if (indexDirectoryPath != null) {
-                try {
-                    Files.deleteIfExists(indexDirectoryPath);
-                } catch (IOException e) {
-                    logger.warn("Failed to delete temp folder for log index " + indexDirectoryPath + ": " + e.getMessage());
-                    logger.debug("Exception stack", e);
-                }
+                IOUtils.attemptDeleteTempPath(indexDirectoryPath);
             }
         }
 
@@ -525,7 +525,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 
         }
 
-        private ZonedDateTime getTimeRangeBoundary(boolean getMin,List<String>  files) throws IOException {
+        private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files) throws IOException {
             return indexLock.read().lock(() -> {
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
                 var dq = new DrillDownQuery(facetsConfig);
