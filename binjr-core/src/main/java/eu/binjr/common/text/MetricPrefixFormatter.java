@@ -16,6 +16,7 @@
 
 package eu.binjr.common.text;
 
+import java.util.NavigableMap;
 import java.util.TreeMap;
 
 /**
@@ -24,6 +25,21 @@ import java.util.TreeMap;
  * @author Frederic Thevenet
  */
 public class MetricPrefixFormatter extends PrefixFormatter {
+    private static final NavigableMap<Double, String> SUFFIX_MAP = new TreeMap<>() {{
+        put(Math.pow(BASE, -6.0), "a");
+        put(Math.pow(BASE, -5.0), "f");
+        put(Math.pow(BASE, -4.0), "p");
+        put(Math.pow(BASE, -3.0), "n");
+        put(Math.pow(BASE, -2.0), "µ");
+        put(Math.pow(BASE, -1.0), "m");
+        put(Math.pow(BASE, 0.0), "");
+        put(Math.pow(BASE, 1.0), "k");
+        put(Math.pow(BASE, 2.0), "M");
+        put(Math.pow(BASE, 3.0), "G");
+        put(Math.pow(BASE, 4.0), "T");
+        put(Math.pow(BASE, 5.0), "P");
+        put(Math.pow(BASE, 6.0), "E");
+    }};
 
     public static final int BASE = 1000;
 
@@ -31,20 +47,15 @@ public class MetricPrefixFormatter extends PrefixFormatter {
      * Initializes a new instance of the {@link MetricPrefixFormatter} class
      */
     public MetricPrefixFormatter() {
-        super(new TreeMap<>() {{
-            put(Math.pow(BASE, -6.0), "a");
-            put(Math.pow(BASE, -5.0), "f");
-            put(Math.pow(BASE, -4.0), "p");
-            put(Math.pow(BASE, -3.0), "n");
-            put(Math.pow(BASE, -2.0), "µ");
-            put(Math.pow(BASE, -1.0), "m");
-            put(Math.pow(BASE, 0.0), "");
-            put(Math.pow(BASE, 1.0), "k");
-            put(Math.pow(BASE, 2.0), "M");
-            put(Math.pow(BASE, 3.0), "G");
-            put(Math.pow(BASE, 4.0), "T");
-            put(Math.pow(BASE, 5.0), "P");
-            put(Math.pow(BASE, 6.0), "E");
-        }});
+        super(SUFFIX_MAP);
+    }
+
+    /**
+     * Initializes a new instance of the {@link MetricPrefixFormatter} class with the specified format pattern.
+     *
+     * @param pattern a non-localized pattern string
+     */
+    public MetricPrefixFormatter(String pattern) {
+        super(SUFFIX_MAP, pattern);
     }
 }

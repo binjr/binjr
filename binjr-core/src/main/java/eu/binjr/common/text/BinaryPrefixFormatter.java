@@ -26,23 +26,33 @@ import java.util.TreeMap;
 public class BinaryPrefixFormatter extends PrefixFormatter {
 
     public static final int BASE = 1024;
+    public static final TreeMap<Double, String> SUFFIX_MAP = new TreeMap<>() {{
+        put(Math.pow(BASE, -4.0), "*2⁻¹⁰⁰⁰⁰⁰⁰⁰⁰⁰");
+        put(Math.pow(BASE, -3.0), "*2⁻¹⁰⁰⁰⁰⁰⁰");
+        put(Math.pow(BASE, -2.0), "*2⁻¹⁰⁰⁰");
+        put(Math.pow(BASE, -1.0), "*2⁻¹⁰");
+        put(Math.pow(BASE, 0.0), "");
+        put(Math.pow(BASE, 1.0), "ki");
+        put(Math.pow(BASE, 2.0), "Mi");
+        put(Math.pow(BASE, 3.0), "Gi");
+        put(Math.pow(BASE, 4.0), "Ti");
+        put(Math.pow(BASE, 5.0), "Pi");
+        put(Math.pow(BASE, 6.0), "Ei");
+    }};
 
     /**
      * Initializes a new instance of the {@link BinaryPrefixFormatter} class
      */
     public BinaryPrefixFormatter() {
-        super(new TreeMap<>() {{
-            put(Math.pow(BASE,-4.0), "*2⁻¹⁰⁰⁰⁰⁰⁰⁰⁰⁰");
-            put(Math.pow(BASE,-3.0), "*2⁻¹⁰⁰⁰⁰⁰⁰");
-            put(Math.pow(BASE,-2.0), "*2⁻¹⁰⁰⁰");
-            put(Math.pow(BASE,-1.0), "*2⁻¹⁰");
-            put(Math.pow(BASE,0.0), "");
-            put(Math.pow(BASE,1.0), "ki");
-            put(Math.pow(BASE,2.0), "Mi");
-            put(Math.pow(BASE,3.0), "Gi");
-            put(Math.pow(BASE,4.0), "Ti");
-            put(Math.pow(BASE,5.0), "Pi");
-            put(Math.pow(BASE,6.0), "Ei");
-        }});
+        super(SUFFIX_MAP);
+    }
+
+    /**
+     * Initializes a new instance of the {@link BinaryPrefixFormatter} class with the specified format pattern.
+     *
+     * @param pattern a non-localized pattern string
+     */
+    public BinaryPrefixFormatter(String pattern) {
+        super(SUFFIX_MAP, pattern);
     }
 }

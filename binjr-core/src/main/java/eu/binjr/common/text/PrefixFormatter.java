@@ -26,8 +26,9 @@ import java.util.NavigableMap;
  * @author Frederic Thevenet
  */
 public abstract class PrefixFormatter {
-    private static final String PATTERN = "###,###.##";
+    private static final String DEFAULT_PATTERN = "###,###.##";
     private final NavigableMap<Double, String> suffixMap;
+    private final DecimalFormat formatter;
 
     /**
      * Initializes a new instance of {@link PrefixFormatter} with the arithmetical base and a
@@ -36,7 +37,19 @@ public abstract class PrefixFormatter {
      * @param suffixMap a map of the suffix labels and the associated divider as the key.
      */
     protected PrefixFormatter(NavigableMap<Double, String> suffixMap) {
+        this(suffixMap, DEFAULT_PATTERN);
+    }
+
+    /**
+     * Initializes a new instance of {@link PrefixFormatter} with the arithmetical base and a
+     * representation of the prefixes.
+     *
+     * @param suffixMap a map of the suffix labels and the associated divider as the key.
+     * @param pattern   a non-localized pattern string.
+     */
+    protected PrefixFormatter(NavigableMap<Double, String> suffixMap, String pattern) {
         this.suffixMap = suffixMap;
+        this.formatter = new DecimalFormat(pattern);
     }
 
     /**
@@ -46,7 +59,6 @@ public abstract class PrefixFormatter {
      * @return the formatted string
      */
     public String format(double value) {
-        DecimalFormat formatter = new DecimalFormat(PATTERN);
         if (Double.isNaN(value)) {
             return "NaN";
         }
