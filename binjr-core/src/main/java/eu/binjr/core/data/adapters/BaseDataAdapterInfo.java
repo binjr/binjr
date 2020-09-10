@@ -46,6 +46,11 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     private final SourceLocality sourceLocality;
     private final BooleanProperty enabled = new SimpleBooleanProperty(true);
 
+
+    /**
+     * Initializes a new instance of the DataAdapterInfo class.
+     *
+     */
     protected <T extends BaseDataAdapterInfo> BaseDataAdapterInfo(Class<T> infoClass) throws CannotInitializeDataAdapterException {
         if (!infoClass.isAnnotationPresent(AdapterMetadata.class)) {
             throw new CannotInitializeDataAdapterException("Could not find annotation on class " + infoClass.getName());
@@ -72,12 +77,6 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         enabled.bindBidirectional(adapterPreferences.enabled.property());
     }
 
-//
-//    /**
-//     * Initializes a new instance of the DataAdapterInfo class.
-//     *
-
-//     */
 
     /**
      * Returns the name of the data adapter.

@@ -33,6 +33,8 @@
 package eu.binjr.core.controllers;
 
 
+import com.google.gson.Gson;
+import eu.binjr.common.javafx.controls.LogFilterSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TimeRangePicker;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
@@ -78,6 +80,7 @@ import static java.util.stream.Collectors.groupingBy;
 public class LogWorksheetController extends WorksheetController implements Syncable {
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
+    private static final Gson gson = new Gson();
     private final LogWorksheet worksheet;
     //  private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
@@ -142,6 +145,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @FXML
     private Button nextOccurrenceButton;
+
+    @FXML
+    private LogFilterSelection filterSelection;
 
     @Override
     public Worksheet getWorksheet() {
@@ -250,7 +256,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public void initialize(URL location, ResourceBundle resources) {
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
-        textOutput.setParagraphGraphicFactory(LineNumberFactory.get(textOutput));
+        //textOutput.setParagraphGraphicFactory(LineNumberFactory.get(textOutput));
         textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
@@ -271,6 +277,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 timeRangePicker.updateSelectedRange(newValue);
             }
         });
+
+        // Filter selection
+        filterSelection.setSeverityLabels("trace", "debug", "perf", "info", "warn", "error", "fatal");
+        bindingManager.attachListener(filterSelection.filterProperty(),  (o)-> refresh());
 
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
@@ -353,6 +363,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             timeRange.set(worksheet.getInitialTimeRange());
         }
 
+        var queryString = gson.toJson(filterSelection.getFilter());
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -364,7 +375,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var data = adapter.fetchData(
-                    String.join("|", bindingsByPath.keySet()),
+                    queryString,
                     worksheet.getFromDateTime().toInstant(),
                     worksheet.getToDateTime().toInstant(),
                     bindingsByPath.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),

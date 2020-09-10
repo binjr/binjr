@@ -14,21 +14,29 @@
  *    limitations under the License.
  */
 
-dependencies {
-    compile project(':binjr-core')
-    implementation 'org.apache.lucene:lucene-core:8.6.2'
-    implementation 'org.apache.lucene:lucene-facet:8.6.2'
-    implementation 'org.apache.lucene:lucene-queryparser:8.6.2'
-}
+package eu.binjr.core.data.adapters;
 
-jar {
-    manifest {
-        attributes(
-                'Specification-Title': project.name,
-                'Specification-Version': project.version,
-                'Implementation-Title': project.name,
-                'Implementation-Version': project.version,
-                'Build-Number': BINJR_BUILD_NUMBER
-        )
+import java.util.ArrayList;
+import java.util.List;
+
+public class LogFilter {
+    public final String filterQuery;
+    public final List<String> severities;
+
+    public static LogFilter empty(){
+        return new LogFilter("", new ArrayList<>());
+    }
+
+    public LogFilter(String filterQuery, List<String> severities) {
+        this.filterQuery = filterQuery;
+        this.severities = severities;
+    }
+
+    public String getFilterQuery() {
+        return filterQuery;
+    }
+
+    public List<String> getSeverities() {
+        return severities;
     }
 }

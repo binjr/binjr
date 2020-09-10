@@ -56,7 +56,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
 
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
-    private boolean syntaxHighlightEnabled = true;
+    private boolean syntaxHighlightEnabled = false;
 
 
     public LogWorksheet() {

@@ -29,6 +29,7 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.LogFilesBinding;
+import eu.binjr.core.data.adapters.LogFilter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -47,7 +48,7 @@ import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
@@ -262,21 +263,11 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             Map<String, Collection<String>> facets = new HashMap<>();
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
             var proc = new StringProcessor();
-            // LogFilesBinding binding = (LogFilesBinding) info.getBinding();
-
-            //  new QueryParser();
-            //  QueryParser parser = new QueryParser(field, analyzer);
-            //    proc.setData(List.of(new XYChart.Data<>(ZonedDateTime.now(), readTextFile(info.getBinding().getPath()))));
-            var builder = new QueryBuilder(new StandardAnalyzer());
-            var tr = new Term(FIELD_CONTENT, "info");
-            //var q = new TermQuery(tr);
-//            if (start.equals(end) && start.equals(Instant.EPOCH)) {
-//
-//            }
-
-            proc.setData(index.search(start.toEpochMilli(), end.toEpochMilli(), facets, null));
+            var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
+            facets.put(SEVERITY, filter.severities);
+            proc.setData(index.search(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery()));
             data.put(null, proc);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
 
@@ -407,6 +398,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         private SortedSetDocValuesReaderState state;
         private final Path indexDirectoryPath;
         private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
+        private final QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
 
         public LogFileIndex() throws IOException {
             this.payloadPattern = Pattern.compile(
@@ -496,7 +488,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
                     doc.add(new SortedSetDocValuesFacetField(PATH, path));
-                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, (m.group("severity") == null ? "unknown" : m.group("severity"))));
+                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase()));
 //                    doc.add(new TextField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread")), Field.Store.NO));
 //                    doc.add(new TextField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger")), Field.Store.NO));
                 } catch (Exception e) {
@@ -549,21 +541,26 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             });
         }
 
-        public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws IOException {
+        public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws Exception {
             return indexLock.read().lock(() -> {
-                Query q = LongPoint.newRangeQuery(TIMESTAMP, start, end);
+                Query filterQuery = null;
+                if (query != null && !query.isBlank()) {
+                    filterQuery = parser.parse(query);
+                    logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
+                }
+                Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
                 var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
                 var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
-                var dq = new DrillDownQuery(facetsConfig);
+                var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
                 for (var facet : facets.entrySet()) {
                     for (var label : facet.getValue()) {
-                        dq.add(facet.getKey(), label);
+                        drillDownQuery.add(facet.getKey(), label);
                     }
                 }
                 DrillSideways.DrillSidewaysResult results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    results = drill.search(dq, q, null, prefs.hitsPerPage.get().intValue(), sort, false);
+                    results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
                     for (var hit : results.hits.scoreDocs) {

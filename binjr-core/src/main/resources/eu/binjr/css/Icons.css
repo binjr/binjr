@@ -25,6 +25,11 @@
     -icon-scale-y: 1.8;
 }
 
+.medium-icon {
+    -icon-scale-x: 2.5;
+    -icon-scale-y: 2.5;
+}
+
 .large-icon {
     -icon-scale-x: 12;
     -icon-scale-y: 12;

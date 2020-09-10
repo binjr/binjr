@@ -63,13 +63,13 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
      * @param owner the owner window for the dialog
      */
     public LogsDataAdapterDialog(Node owner) throws NoAdapterFoundException {
-        super(owner, Mode.PATH, "mostRecentLogsArchives", false);
+        super(owner, Mode.PATH, "mostRecentLogsArchives", true);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Zip Archive or Folder");
         extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
-        GridPane.setConstraints(label, 0, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
-        GridPane.setConstraints(extensionFiltersTextField, 1, 1, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
         getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField);
     }
