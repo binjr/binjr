@@ -65,7 +65,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 
 import java.net.URL;
@@ -149,6 +148,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private LogFilterSelection filterSelection;
 
+    @FXML
+    private Pagination pager;
+
     @Override
     public Worksheet getWorksheet() {
         return worksheet;
@@ -218,7 +220,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-
     @Override
     public void saveSnapshot() {
 
@@ -278,9 +279,18 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         });
 
+        bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
+            if (!oldVal.equals(newVal)) {
+                refresh();
+            }
+        });
+
         // Filter selection
         filterSelection.setSeverityLabels("trace", "debug", "perf", "info", "warn", "error", "fatal");
-        bindingManager.attachListener(filterSelection.filterProperty(),  (o)-> refresh());
+        bindingManager.bindBidirectional(filterSelection.filterProperty(), worksheet.filterProperty());
+
+        // Pagination setup
+        // pager.setPageFactory();
 
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
@@ -398,5 +408,44 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     public void setTimeRangeLinked(Boolean timeRangeLinked) {
 
+    }
+
+    public static class PaginationStatus {
+        private int nbPages;
+        private int currentPage;
+        private int maxHitsPerPage;
+        private long nbHits;
+
+        public int getNbPages() {
+            return nbPages;
+        }
+
+        public void setNbPages(int nbPages) {
+            this.nbPages = nbPages;
+        }
+
+        public int getCurrentPage() {
+            return currentPage;
+        }
+
+        public void setCurrentPage(int currentPage) {
+            this.currentPage = currentPage;
+        }
+
+        public int getMaxHitsPerPage() {
+            return maxHitsPerPage;
+        }
+
+        public void setMaxHitsPerPage(int maxHitsPerPage) {
+            this.maxHitsPerPage = maxHitsPerPage;
+        }
+
+        public long getNbHits() {
+            return nbHits;
+        }
+
+        public void setNbHits(long nbHits) {
+            this.nbHits = nbHits;
+        }
     }
 }

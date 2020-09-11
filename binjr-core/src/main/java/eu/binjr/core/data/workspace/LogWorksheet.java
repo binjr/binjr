@@ -21,6 +21,7 @@ import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.LogFilesBinding;
+import eu.binjr.core.data.adapters.LogFilter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -49,6 +50,8 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     private final Property<ZonedDateTime> toDateTime;
     @IsDirtyable
     private final Property<Boolean> timeRangeLinked;
+    @IsDirtyable
+    private final Property<LogFilter> filter;
 
     private final transient ChangeWatcher status;
     @IsDirtyable
@@ -74,6 +77,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
         this.fromDateTime = new SimpleObjectProperty<>(from);
         this.toDateTime = new SimpleObjectProperty<>(to);
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
+        this.filter = new SimpleObjectProperty<>(LogFilter.empty());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
 
@@ -228,5 +232,18 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     @Override
     public List<TimeSeriesInfo<String>> getSeries() {
         return seriesInfo;
+    }
+
+    @XmlElement
+    public LogFilter getFilter() {
+        return filter.getValue();
+    }
+
+    public Property<LogFilter> filterProperty() {
+        return filter;
+    }
+
+    public void setFilter(LogFilter filter){
+        this.filter.setValue(filter);
     }
 }
