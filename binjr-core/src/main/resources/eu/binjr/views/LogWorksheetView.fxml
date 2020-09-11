@@ -16,237 +16,198 @@
   ~    limitations under the License.
   -->
 
-<?import eu.binjr.common.javafx.controls.LogFilterSelection?>
-<?import eu.binjr.common.javafx.controls.TimeRangePicker?>
+<?import eu.binjr.common.javafx.controls.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.MaskerPane?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" styleClass="skinnable-pane-border"
-            xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
-    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<?import javafx.scene.text.*?>
+<?import org.controlsfx.control.*?>
+<?import org.fxmisc.flowless.*?>
+<?import org.fxmisc.richtext.*?>
+
+<AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" styleClass="skinnable-pane-border" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
+    <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
         <VBox alignment="CENTER_RIGHT" styleClass="worksheet-tool-bar">
             <HBox fx:id="navigationToolbar" alignment="CENTER_LEFT">
-                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back"
-                        textAlignment="CENTER">
+                <Button fx:id="backButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="back" textAlignment="CENTER">
                     <graphic>
                         <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="backArrow-icon"/>
+                            <Region styleClass="backArrow-icon" />
                         </HBox>
                     </graphic>
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Go back"/>
+                        <Tooltip showDelay="500ms" text="Go back" />
                     </tooltip>
                 </Button>
-                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward"
-                        textAlignment="CENTER">
+                <Button fx:id="forwardButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="forward" textAlignment="CENTER">
                     <graphic>
                         <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="forwardArrow-icon"/>
+                            <Region styleClass="forwardArrow-icon" />
                         </HBox>
                     </graphic>
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Go forward"/>
+                        <Tooltip showDelay="500ms" text="Go forward" />
                     </tooltip>
                 </Button>
-                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh"
-                        textAlignment="CENTER">
+                <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="refresh" textAlignment="CENTER">
                     <graphic>
                         <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="refresh-icon"/>
+                            <Region styleClass="refresh-icon" />
                         </HBox>
                     </graphic>
                     <font>
-                        <Font size="10.0"/>
+                        <Font size="10.0" />
                     </font>
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Refresh"/>
+                        <Tooltip showDelay="500ms" text="Refresh" />
                     </tooltip>
                 </Button>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
-                                 graphicTextGap="16.0"
-                                 maxHeight="1.7976931348623157E308"
-                                 maxWidth="4000.0"
-                                 minHeight="40" minWidth="425"
-                                 mnemonicParsing="false" styleClass="dialog-button"
-                                 text="" HBox.hgrow="SOMETIMES">
+                <Pane HBox.hgrow="ALWAYS" />
+                <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" graphicTextGap="16.0" maxHeight="1.7976931348623157E308" maxWidth="4000.0" minHeight="40" minWidth="425" mnemonicParsing="false" styleClass="dialog-button" text="" HBox.hgrow="SOMETIMES">
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
+                        <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet." />
                     </tooltip>
                 </TimeRangePicker>
-                <Pane HBox.hgrow="ALWAYS" maxWidth="25"/>
-                <LogFilterSelection fx:id="filterSelection"
-                                    HBox.hgrow="SOMETIMES"
-                                    maxHeight="1.7976931348623157E308"
-                                    maxWidth="4000.0"
-                                    minHeight="40"
-                                    styleClass="dialog-button">
+                <Pane maxWidth="25" HBox.hgrow="ALWAYS" />
+                <LogFilterSelection fx:id="filterSelection" maxHeight="1.7976931348623157E308" maxWidth="4000.0" minHeight="40" styleClass="dialog-button" HBox.hgrow="SOMETIMES">
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
+                        <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet." />
                     </tooltip>
                 </LogFilterSelection>
-                <Pane HBox.hgrow="ALWAYS"/>
+                <Pane HBox.hgrow="ALWAYS" />
                 <ToolBar fx:id="chartsToolbar">
-                    <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                  maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                  mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                                  text="Snapshot">
+                    <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Snapshot">
                         <tooltip>
-                            <Tooltip showDelay="500ms" text="Toggle Word Wrap"/>
+                            <Tooltip showDelay="500ms" text="Toggle Word Wrap" />
                         </tooltip>
                         <graphic>
                             <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="word-wrap-icon"/>
+                                <Region styleClass="word-wrap-icon" />
                             </HBox>
                         </graphic>
                     </ToggleButton>
-                    <Button fx:id="toggleChartDisplayModeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                            maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                            prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
-                            text="Toggle charts display mode">
+                    <Button fx:id="toggleChartDisplayModeButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button" text="Toggle charts display mode">
                         <tooltip>
-                            <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)"/>
+                            <Tooltip showDelay="500ms" text="Expand series view (Ctrl+M)" />
                         </tooltip>
                         <graphic>
                             <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="expand-view-icon"/>
+                                <Region styleClass="expand-view-icon" />
                             </HBox>
                         </graphic>
                     </Button>
                 </ToolBar>
             </HBox>
+             <HBox fx:id="highlightControls" alignment="CENTER_LEFT" styleClass="worksheet-tool-bar">
+                 <padding>
+                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                    </padding>
+                 <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="27.0" spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                     <HBox.margin>
+                         <Insets />
+                     </HBox.margin>
+                     <padding>
+                         <Insets left="3.0" right="3.0" />
+                     </padding>
+                     <Button fx:id="searchHistoryButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                         <graphic>
+                             <HBox alignment="CENTER" styleClass="icon-container">
+                                 <Region styleClass="find-icon, small-icon" />
+                             </HBox>
+                         </graphic>
+                         <tooltip>
+                             <Tooltip showDelay="500ms" text="Search History" />
+                         </tooltip>
+                     </Button>
+                     <TextField fx:id="searchTextField" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" styleClass="search-field-inner" HBox.hgrow="ALWAYS" />
+                     <Button fx:id="clearSearchButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                         <graphic>
+                             <HBox alignment="CENTER" styleClass="icon-container">
+                                 <Region styleClass="cross-icon, small-icon" />
+                             </HBox>
+                         </graphic>
+                         <tooltip>
+                             <Tooltip showDelay="500ms" text="Clear Search Bar" />
+                         </tooltip>
+                     </Button>
+                     <ToggleButton fx:id="searchMatchCaseToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
+                         <tooltip>
+                             <Tooltip showDelay="500ms" text="Match Case" />
+                         </tooltip>
+                         <graphic>
+                             <HBox alignment="CENTER" styleClass="icon-container">
+                                 <Region styleClass="match-case-icon" />
+                             </HBox>
+                         </graphic>
+                     </ToggleButton>
+                     <ToggleButton fx:id="searchRegExToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
+                         <tooltip>
+                             <Tooltip showDelay="500ms" text="Regex" />
+                         </tooltip>
+                         <graphic>
+                             <HBox alignment="CENTER" styleClass="icon-container">
+                                 <Region styleClass="regex-icon, small-icon" />
+                             </HBox>
+                         </graphic>
+                     </ToggleButton>
+                 </HBox>
+                 <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0" text="No results">
+                     <HBox.margin>
+                         <Insets />
+                     </HBox.margin>
+                 </Label>
+                 <Button fx:id="prevOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" disable="true" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                     <graphic>
+                         <HBox alignment="CENTER" styleClass="icon-container">
+                             <Region styleClass="upArrow-icon" />
+                         </HBox>
+                     </graphic>
+                     <tooltip>
+                         <Tooltip showDelay="500ms" text="Previous Occurrence" />
+                     </tooltip>
+                 </Button>
+                 <Button fx:id="nextOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" disable="true" graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                     <graphic>
+                         <HBox alignment="CENTER" styleClass="icon-container">
+                             <Region styleClass="downArrow-icon" />
+                         </HBox>
+                     </graphic>
+                     <tooltip>
+                         <Tooltip showDelay="500ms" text="Next Occurrence" />
+                     </tooltip>
+                 </Button>
+                 <Pane HBox.hgrow="ALWAYS" />
+             </HBox>
 
         </VBox>
-        <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
-                    styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
-            <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-                  AnchorPane.topAnchor="0.0">
+        <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
+            <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 <VirtualizedScrollPane styleClass=" skinnable-pane-border" VBox.vgrow="ALWAYS">
                     <!--                    <VBox.margin>-->
                     <!--                        <Insets left="5.0"/>-->
                     <!--                    </VBox.margin>-->
                     <content>
                         <CodeArea fx:id="textOutput">
-<!--                            <padding>-->
-<!--                                <Insets right="10.0"/>-->
-<!--                            </padding>-->
+                            <padding>
+                                <Insets left="4.0" />
+                            </padding>
                         </CodeArea>
                     </content>
                 </VirtualizedScrollPane>
-                <HBox fx:id="highlightControls" alignment="CENTER_LEFT" styleClass="worksheet-tool-bar">
-                    <padding>
-                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
-                    </padding>
-                    <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="27.0"
-                          spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
-                        <HBox.margin>
-                            <Insets/>
-                        </HBox.margin>
-                        <padding>
-                            <Insets left="3.0" right="3.0"/>
-                        </padding>
-                        <Button fx:id="searchHistoryButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
-                                text="forward" textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="find-icon, small-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Search History"/>
-                            </tooltip>
-                        </Button>
-                        <TextField fx:id="searchTextField" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                                   minWidth="-Infinity" styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
-                        <Button fx:id="clearSearchButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
-                                text="forward" textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="cross-icon, small-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Clear Search Bar"/>
-                            </tooltip>
-                        </Button>
-                        <ToggleButton fx:id="searchMatchCaseToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                      maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                      mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
-                                      styleClass="dialog-button" text="Snapshot">
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Match Case"/>
-                            </tooltip>
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="match-case-icon"/>
-                                </HBox>
-                            </graphic>
-                        </ToggleButton>
-                        <ToggleButton fx:id="searchRegExToggle" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
-                                      maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
-                                      mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
-                                      styleClass="dialog-button" text="Snapshot">
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Regex"/>
-                            </tooltip>
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="regex-icon, small-icon"/>
-                                </HBox>
-                            </graphic>
-                        </ToggleButton>
-                    </HBox>
-                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0" text="No results">
-                        <HBox.margin>
-                            <Insets/>
-                        </HBox.margin>
-                    </Label>
-                    <Button fx:id="prevOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" disable="true"
-                            graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
-                            styleClass="dialog-button" text="forward" textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="upArrow-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Previous Occurrence"/>
-                        </tooltip>
-                    </Button>
-                    <Button fx:id="nextOccurrenceButton" alignment="CENTER" contentDisplay="GRAPHIC_ONLY" disable="true"
-                            graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0"
-                            styleClass="dialog-button" text="forward" textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="downArrow-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Next Occurrence"/>
-                        </tooltip>
-                    </Button>
-                    <Pane HBox.hgrow="ALWAYS"/>
-                </HBox>
+            <HBox fx:id="paginationBar" styleClass="worksheet-tool-bar">
+               <children>
+                  <Pagination fx:id="pager" HBox.hgrow="ALWAYS">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </HBox.margin>
+                  </Pagination>
+               </children>
+               <VBox.margin>
+                  <Insets />
+               </VBox.margin>
+            </HBox>
             </VBox>
         </AnchorPane>
     </VBox>
-    <MaskerPane fx:id="busyIndicator" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+    <MaskerPane fx:id="busyIndicator" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
 </AnchorPane>
