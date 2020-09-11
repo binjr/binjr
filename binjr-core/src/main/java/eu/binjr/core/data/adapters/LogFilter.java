@@ -16,18 +16,25 @@
 
 package eu.binjr.core.data.adapters;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class LogFilter {
     public final String filterQuery;
-    public final List<String> severities;
+    public final Set<String> severities;
 
-    public static LogFilter empty(){
-        return new LogFilter("", new ArrayList<>());
+    public static LogFilter empty() {
+        return new LogFilter();
     }
 
-    public LogFilter(String filterQuery, List<String> severities) {
+    private LogFilter() {
+        this("", new HashSet<>());
+    }
+
+    public LogFilter(String filterQuery, Collection<String> severities) {
+        this(filterQuery, new HashSet<>(severities));
+    }
+
+    public LogFilter(String filterQuery, Set<String> severities) {
         this.filterQuery = filterQuery;
         this.severities = severities;
     }
@@ -36,7 +43,25 @@ public class LogFilter {
         return filterQuery;
     }
 
-    public List<String> getSeverities() {
+    public Set<String> getSeverities() {
         return severities;
+    }
+
+    @Override
+    public int hashCode() {
+        return filterQuery.hashCode() + severities.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        LogFilter filter = (LogFilter) obj;
+        return filterQuery.equals(filter.filterQuery) &&
+                severities.equals(filter.severities);
     }
 }
