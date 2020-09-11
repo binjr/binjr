@@ -398,7 +398,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         private SortedSetDocValuesReaderState state;
         private final Path indexDirectoryPath;
         private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
-        private final QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
 
         public LogFileIndex() throws IOException {
             this.payloadPattern = Pattern.compile(
@@ -545,6 +544,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             return indexLock.read().lock(() -> {
                 Query filterQuery = null;
                 if (query != null && !query.isBlank()) {
+                    logger.trace("Query text=" + query);
+                    QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
                     filterQuery = parser.parse(query);
                     logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
                 }
