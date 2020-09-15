@@ -28,6 +28,7 @@ import javafx.event.EventHandler;
 import javafx.event.WeakEventHandler;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 /**
@@ -47,9 +48,11 @@ public class BindingManager implements AutoCloseable {
     private final Map<ObservableValue, List<ChangeListener>> changeListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<ObservableList, List<InvalidationListener>> listInvalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<Property<?>, ObservableValue> boundProperties = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<Property<?>, Property> bidirectionallyBoundProperties = Collections.synchronizedMap(new WeakHashMap<>());
     private final List<EventHandler<?>> registeredHandlers = Collections.synchronizedList(new ArrayList<>());
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -131,6 +134,10 @@ public class BindingManager implements AutoCloseable {
         register(observable, listener, listChangeListeners, ObservableList::addListener);
     }
 
+    public void attachListener(ObservableList<?> observable, InvalidationListener listener) {
+        register(observable, listener, listInvalidationListeners, ObservableList::addListener);
+    }
+
     /**
      * Remove a specific {@link ChangeListener} from an {@link ObservableValue}.
      *
@@ -161,6 +168,10 @@ public class BindingManager implements AutoCloseable {
         unregister(observable, listener, listChangeListeners, ObservableList::removeListener);
     }
 
+    public void detachListener(ObservableList<?> observable, InvalidationListener listener) {
+        unregister(observable, listener, listInvalidationListeners, ObservableList::removeListener);
+    }
+
     /**
      * Remove <u>all</u> {@link InvalidationListener} from an {@link ObservableValue}.
      *
@@ -188,23 +199,31 @@ public class BindingManager implements AutoCloseable {
         unregister(observable, listChangeListeners, ObservableList::removeListener);
     }
 
+    public void detachAllInvalidationListeners(ObservableList<?> observable) {
+        unregister(observable, listInvalidationListeners, ObservableList::removeListener);
+    }
+
     @Override
     public synchronized void close() {
-        try {
-            unregisterAll(listChangeListeners, ObservableList::removeListener);
-            unregisterAll(invalidationListeners, ObservableValue::removeListener);
-            unregisterAll(changeListeners, ObservableValue::removeListener);
-            unbindAll();
-            // Release strong refs to registered event handlers, so that their
-            // weak counterpart may be collected.
-            registeredHandlers.clear();
-        } catch (Exception e) {
-            logger.warn("An error occuured while closing BindingManager instance", e);
+        if (closed.compareAndSet(false, true)) {
+            try {
+                unregisterAll(listChangeListeners, ObservableList::removeListener);
+                unregisterAll(listInvalidationListeners, ObservableList::removeListener);
+                unregisterAll(invalidationListeners, ObservableValue::removeListener);
+                unregisterAll(changeListeners, ObservableValue::removeListener);
+                unbindAll();
+                // Release strong refs to registered event handlers, so that their
+                // weak counterpart may be collected.
+                registeredHandlers.clear();
+            } catch (Exception e) {
+                logger.warn("An error occuured while closing BindingManager instance", e);
+            }
         }
     }
 
     public synchronized void suspend() {
         visitMap(listChangeListeners, ObservableList::removeListener);
+        visitMap(listInvalidationListeners, ObservableList::removeListener);
         visitMap(invalidationListeners, ObservableValue::removeListener);
         visitMap(changeListeners, ObservableValue::removeListener);
         boundProperties.keySet().forEach(Property::unbind);
@@ -212,23 +231,24 @@ public class BindingManager implements AutoCloseable {
 
     public synchronized void resume() {
         visitMap(listChangeListeners, ObservableList::addListener);
+        visitMap(listInvalidationListeners, ObservableList::addListener);
         visitMap(invalidationListeners, ObservableValue::addListener);
         visitMap(changeListeners, ObservableValue::addListener);
         boundProperties.forEach(Property::bind);
     }
 
-    public synchronized void suspend(Property<?>... properties){
-        for (var p : properties){
-           if (!boundProperties.containsKey(p) ){
-               throw new IllegalArgumentException("Property " + p.getName() + " is not managed by this instance of BindingManager");
-           }
-           p.unbind();
+    public synchronized void suspend(Property<?>... properties) {
+        for (var p : properties) {
+            if (!boundProperties.containsKey(p)) {
+                throw new IllegalArgumentException("Property " + p.getName() + " is not managed by this instance of BindingManager");
+            }
+            p.unbind();
         }
     }
 
-    public synchronized void resume(Property<?>... properties){
-        for (var p : properties){
-            if (!boundProperties.containsKey(p) ){
+    public synchronized void resume(Property<?>... properties) {
+        for (var p : properties) {
+            if (!boundProperties.containsKey(p)) {
                 throw new IllegalArgumentException("Property " + p.getName() + " is not managed by this instance of BindingManager");
             }
             p.bind(boundProperties.get(p));
