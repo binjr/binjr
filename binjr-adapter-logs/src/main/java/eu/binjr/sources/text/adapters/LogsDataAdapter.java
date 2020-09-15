@@ -33,6 +33,8 @@ import eu.binjr.core.data.adapters.LogFilter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.timeseries.FacetEntry;
+import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
@@ -54,7 +56,6 @@ import org.apache.lucene.store.ByteBuffersDirectory;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.MMapDirectory;
-import org.apache.lucene.util.QueryBuilder;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.*;
@@ -86,7 +87,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
     private static final String TIMESTAMP_VALUES = "timestampValues";
-    public static final String PATH = "path";
+    public static final String PATH = "filePath";
     public static final String SEVERITY = "severity";
     public static final String THREAD = "thread";
     public static final String LOGGER = "logger";
@@ -262,10 +263,12 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
-            var proc = new StringProcessor();
+            var proc = new LogEventsProcessor();
             var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
             facets.put(SEVERITY, filter.severities);
-            proc.setData(index.search(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery()));
+            var res = index.filter(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery());
+            proc.setData(res.getLogs());
+            proc.addFacetResults(SEVERITY, res.getFacetResults());
             data.put(null, proc);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
@@ -307,24 +310,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         IOUtils.close(index);
         IOUtils.close(fileBrowser);
         super.close();
-    }
-
-    public static class StringProcessor extends TimeSeriesProcessor<String> {
-
-        @Override
-        protected String computeMinValue() {
-            return null;
-        }
-
-        @Override
-        protected String computeAverageValue() {
-            return null;
-        }
-
-        @Override
-        protected String computeMaxValue() {
-            return null;
-        }
     }
 
 
@@ -540,7 +525,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             });
         }
 
-        public List<XYChart.Data<ZonedDateTime, String>> search(long start, long end, Map<String, Collection<String>> facets, String query) throws Exception {
+
+        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query) throws Exception {
             return indexLock.read().lock(() -> {
                 Query filterQuery = null;
                 if (query != null && !query.isBlank()) {
@@ -550,11 +536,11 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
                 }
                 Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
-                var l = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
+                var logs = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
                 var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
                 var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
-                for (var facet : facets.entrySet()) {
+                for (var facet : params.entrySet()) {
                     for (var label : facet.getValue()) {
                         drillDownQuery.add(facet.getKey(), label);
                     }
@@ -563,16 +549,41 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
                     results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
                 }
-                try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
+                var facets = new ArrayList<FacetEntry>();
+                try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                     for (var hit : results.hits.scoreDocs) {
                         var doc = searcher.doc(hit.doc);
-                        l.add(new XYChart.Data<>(
+                        logs.add(new XYChart.Data<>(
                                 ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
                                 doc.get(FIELD_CONTENT) + "\n"));
                     }
+                    var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
+                    if (severitySynthesis != null) {
+                        for (var f : severitySynthesis.labelValues) {
+                            facets.add(new FacetEntry(f.label, f.value.intValue()));
+                        }
+                    }
                 }
-                return l;
+                return new FilterResults(logs, facets);
             });
+        }
+    }
+
+    public static class FilterResults {
+        private final List<XYChart.Data<ZonedDateTime, String>> logs;
+        private final Collection<FacetEntry> facets;
+
+        public FilterResults(List<XYChart.Data<ZonedDateTime, String>> logs, Collection<FacetEntry> facets) {
+            this.logs = logs;
+            this.facets = facets;
+        }
+
+        public List<XYChart.Data<ZonedDateTime, String>> getLogs() {
+            return logs;
+        }
+
+        public Collection<FacetEntry> getFacetResults() {
+            return facets;
         }
     }
 }

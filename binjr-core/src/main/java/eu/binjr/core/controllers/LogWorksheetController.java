@@ -34,18 +34,19 @@ package eu.binjr.core.controllers;
 
 
 import com.google.gson.Gson;
-import eu.binjr.common.javafx.controls.LogFilterSelection;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TimeRangePicker;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.LogFilter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.timeseries.TextProcessor;
+import eu.binjr.core.data.timeseries.FacetEntry;
+import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.LogWorksheet;
@@ -55,6 +56,7 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
@@ -62,7 +64,9 @@ import javafx.fxml.FXML;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -70,6 +74,7 @@ import org.fxmisc.richtext.model.StyleSpans;
 import java.net.URL;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,6 +89,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     //  private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
+    private final AtomicBoolean closed = new AtomicBoolean(false);
 
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<String>> adapters)
@@ -146,7 +152,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button nextOccurrenceButton;
 
     @FXML
-    private LogFilterSelection filterSelection;
+    private ToggleButton filterToggleButton;
 
     @FXML
     private Pagination pager;
@@ -157,7 +163,23 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     @FXML
-    public MaskerPane busyIndicator;
+    private MaskerPane busyIndicator;
+
+    @FXML
+    private CheckListView<FacetEntry> severityListView;
+
+    @FXML
+    private TextField filterTextField;
+
+    @FXML
+    private Button clearFilterButton;
+
+    @FXML
+    private Button filterHistoryButton;
+
+    @FXML
+    private VBox filteringBar;
+
 
     @Override
     public Property<TimeRange> selectedRangeProperty() {
@@ -184,17 +206,26 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     @Override
-    public void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
-        invalidate(null, dontPlotChart, forceRefresh);
+    public void invalidateAll(boolean saveToHistory, boolean updateFacets, boolean forceRefresh) {
+        invalidate(null, updateFacets, forceRefresh);
     }
 
     @Override
-    public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
+    public void invalidate(ChartViewPort viewPort, boolean updateFacets, boolean forceRefresh) {
         if (forceRefresh) {
             try {
                 AsyncTaskManager.getInstance().submit(() -> {
                             busyIndicator.setVisible(true);
-                            return fetchDataFromSources().getData().stream()
+                            var res = (LogEventsProcessor) fetchDataFromSources();
+                            if(updateFacets) {
+                                severityListView.getItems().setAll(res.getFacetResults()
+                                        .get("severity"));
+//                                        .entrySet()
+//                                        .stream()
+//                                        .map(e-> String.format("%s (%d)", e.getKey(), e.getValue()))
+//                                        .toArray(String[]::new));
+                            }
+                            return res.getData().stream()
                                     .map(XYChart.Data::getYValue)
                                     .collect(Collectors.joining());
                         },
@@ -243,7 +274,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void close() {
+        if (closed.compareAndSet(false, true)) {
+            timeRangePicker.dispose();
 
+            bindingManager.close();
+        }
     }
 
     @Override
@@ -286,8 +321,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
 
         // Filter selection
-        filterSelection.setSeverityLabels("trace", "debug", "perf", "info", "warn", "error", "fatal");
-        bindingManager.bindBidirectional(filterSelection.filterProperty(), worksheet.filterProperty());
+        bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
+        bindingManager.bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
+//        filterSelection.setSeverityLabels("trace", "debug", "perf", "info", "warn", "error", "fatal");
+      //  bindingManager.bindBidirectional(filterSelection.filterProperty(), worksheet.filterProperty());
+
+        bindingManager.attachListener(
+                severityListView.getCheckModel().getCheckedItems(),
+                (InvalidationListener) l -> invalidateFilter());
+        filterTextField.setOnAction(
+                bindingManager.registerHandler(event ->  invalidateFilter()));
 
         // Pagination setup
         // pager.setPageFactory();
@@ -320,8 +363,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().attachListener(searchRegExToggle.selectedProperty(),
                 (ChangeListener<Boolean>) (obs, oldVal, newVal) ->
                         doSearchHighlight(searchTextField.getText(), searchMatchCaseToggle.isSelected(), newVal));
-        Platform.runLater(this::refresh);
+        Platform.runLater(() -> invalidateAll(true, true, true));
         super.initialize(location, resources);
+    }
+
+    private void invalidateFilter(){
+        worksheet.setFilter(
+                new LogFilter(filterTextField.getText(),
+                        severityListView.getCheckModel().getCheckedItems()
+                                .stream()
+                                .map(FacetEntry::getLabel).
+                                collect(Collectors.toList())));
     }
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
@@ -372,8 +424,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 worksheet.getFromDateTime().equals(worksheet.getToDateTime())) {
             timeRange.set(worksheet.getInitialTimeRange());
         }
-
-        var queryString = gson.toJson(filterSelection.getFilter());
+        var queryString = gson.toJson(worksheet.getFilter());
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -390,9 +441,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     worksheet.getToDateTime().toInstant(),
                     bindingsByPath.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),
                     true);
-            return data.values().stream().findFirst().orElse(new TextProcessor());
+            return data.values().stream().findFirst().orElse(new LogEventsProcessor());
         }
-        return new TextProcessor();
+        return new LogEventsProcessor();
     }
 
     @Override
