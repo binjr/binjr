@@ -1,6 +1,7 @@
 * _[Breaking Change]_ The plugin API for *binjr* v3.0.0 is no longer compatible with previous versions.
 * _[Breaking Change]_ The format for saved workspace in *binjr* v3.0.0 has changed and is not compatible with pevious versions
 * _[New]_ *binjr* is now able to handle and render time series with data types other than numerical values. 
+* _[New]_ *binjr* can now extract timeseries data from log files to navigate and filter through log events , in sync with other sources. 
 * _[New]_ *binjr* can now be run under the Eclipse OpenJ9 JVM
 * _[New]_ Relative presets in the time range selection panel.
 * _[New]_ Users no longer have to input a minimum of 3 characters in the source filtering bar to trigger filtering.
