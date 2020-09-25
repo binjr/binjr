@@ -247,12 +247,15 @@ public class XYChartCrosshair<X, Y> {
     private void fireSelectionDoneEvent() {
         if (selectionDoneEvent != null && (selection.getWidth() > 0 && selection.getHeight() > 0)) {
             var s = new HashMap<XYChart<X, Y>, XYChartSelection<X, Y>>();
-            charts.forEach((c, f) -> s.put(c, new XYChartSelection<>(
-                    getValueFromXcoord(selection.getX() - 0.5),
-                    getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
-                    getValueFromYcoord(c, Math.min(chartInfo.getPlotArea().getMaxY(), (selection.getY() + selection.getHeight()) - 0.5)),
-                    getValueFromYcoord(c, Math.max(chartInfo.getPlotArea().getMinY(), (selection.getY() - 0.5))),
-                    selection.getHeight() != chartInfo.getPlotArea().getHeight())));
+            var plotArea = chartInfo.getPlotArea();
+            charts.forEach((c, f) -> {
+                s.put(c, new XYChartSelection<>(
+                        getValueFromXcoord(selection.getX() - 0.5),
+                        getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
+                        getValueFromYcoord(c, Math.min(plotArea.getMaxY(), (selection.getY() + selection.getHeight()) - 0.5)),
+                        getValueFromYcoord(c, Math.max(plotArea.getMinY(), (selection.getY() - 0.5))),
+                        selection.getHeight() != plotArea.getHeight()));
+            });
             selectionDoneEvent.accept(s);
         }
     }
@@ -261,12 +264,13 @@ public class XYChartCrosshair<X, Y> {
         if (mousePosition.getY() < 0) {
             return;
         }
-        horizontalMarker.setStartX(chartInfo.getPlotArea().getMinX() + 0.5);
-        horizontalMarker.setEndX(chartInfo.getPlotArea().getMaxX() + 0.5);
+        var plotArea = chartInfo.getPlotArea();
+        horizontalMarker.setStartX(plotArea.getMinX() + 0.5);
+        horizontalMarker.setEndX(plotArea.getMaxX() + 0.5);
         horizontalMarker.setStartY(mousePosition.getY() + 0.5);
-        horizontalMarker.setEndY(mousePosition.getY() + 0.5);
-        yAxisLabel.setLayoutX(Math.min(parent.getWidth() - yAxisLabel.getWidth(), chartInfo.getPlotArea().getMaxX() + 5));
-        yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, chartInfo.getPlotArea().getMaxY() - yAxisLabel.getHeight()));
+        horizontalMarker.setEndY(horizontalMarker.getStartY());
+        yAxisLabel.setLayoutX(Math.min(parent.getWidth() - yAxisLabel.getWidth(), plotArea.getMaxX() + 5));
+        yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, plotArea.getMaxY() - yAxisLabel.getHeight()));
 
         StringBuilder yAxisText = new StringBuilder();
         charts.forEach((c, f) -> {
@@ -295,17 +299,18 @@ public class XYChartCrosshair<X, Y> {
         if (mousePosition.getX() < 0) {
             return;
         }
+        var plotArea = chartInfo.getPlotArea();
         verticalMarker.setStartX(mousePosition.getX() + 0.5);
-        verticalMarker.setEndX(mousePosition.getX() + 0.5);
+        verticalMarker.setEndX(verticalMarker.getStartX());
         if (displayFullHeightMarker.getValue()) {
             verticalMarker.setStartY(2);
             verticalMarker.setEndY(parent.getHeight() - 2);
         } else {
-            verticalMarker.setStartY(chartInfo.getPlotArea().getMinY() + 0.5);
-            verticalMarker.setEndY(chartInfo.getPlotArea().getMaxY() + 0.5);
+            verticalMarker.setStartY(plotArea.getMinY() + 0.5);
+            verticalMarker.setEndY(plotArea.getMaxY() + 0.5);
         }
-        xAxisLabel.setLayoutY(chartInfo.getPlotArea().getMaxY() + 4);
-        xAxisLabel.setLayoutX(Math.min(mousePosition.getX() + 4, chartInfo.getPlotArea().getMaxX() - xAxisLabel.getWidth()));
+        xAxisLabel.setLayoutY(plotArea.getMaxY() + 4);
+        xAxisLabel.setLayoutX(Math.min(mousePosition.getX() + 4, plotArea.getMaxX() - xAxisLabel.getWidth()));
         currentXValue.setValue(getValueFromXcoord(mousePosition.getX()));
         xAxisLabel.setText(xValuesFormatter.apply(currentXValue.getValue()));
     }
@@ -360,6 +365,7 @@ public class XYChartCrosshair<X, Y> {
     }
 
     private void applyStyle(Shape shape) {
+        shape.setManaged(false);
         shape.setMouseTransparent(true);
         shape.setSmooth(false);
         shape.setStrokeWidth(1.0);
