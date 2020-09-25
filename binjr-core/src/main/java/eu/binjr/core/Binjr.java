@@ -122,7 +122,7 @@ public class Binjr extends Application {
             System.setProperty("sun.security.jgss.native", "true");
         }
         System.setProperty("javax.security.auth.useSubjectCredsOnly", "false");
-       AppEnvironment.getInstance().bindHeapDumpPreferences();
+        AppEnvironment.getInstance().bindHeapDumpPreferences();
         launch(args);
     }
 

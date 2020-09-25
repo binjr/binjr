@@ -1123,7 +1123,7 @@ public class MainViewController implements Initializable {
         label.getStyleClass().add("tooltip");
         // The label must be added to a scene so that CSS and layout are applied.
         StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.RED));
-        return SnapshotUtils.outputScaleAwareSnapshot(label);
+        return SnapshotUtils.scaledSnapshot(label, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root));
     }
 
     private Optional<TreeView<SourceBinding>> buildTreeViewForTarget(DataAdapter<?> dp) {

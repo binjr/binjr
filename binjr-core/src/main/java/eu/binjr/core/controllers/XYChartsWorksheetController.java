@@ -32,6 +32,7 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.SnapshotOutputScale;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
@@ -1421,9 +1422,13 @@ public class XYChartsWorksheetController extends WorksheetController {
             worksheetTitleBlock.setVisible(true);
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
-            snapImg = SnapshotUtils.scaledSnapshot(screenshotCanvas,
-                    userPrefs.snapshotOutputScale.get().getScaleFactor(),
-                    userPrefs.snapshotOutputScale.get().getScaleFactor());
+            var scaleX = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
+                    Dialogs.getOutputScaleX(root) :
+                    userPrefs.snapshotOutputScale.get().getScaleFactor();
+            var scaleY = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
+                    Dialogs.getOutputScaleY(root) :
+                    userPrefs.snapshotOutputScale.get().getScaleFactor();
+            snapImg = SnapshotUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return;
@@ -1434,7 +1439,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             navigationToolbar.setVisible(true);
             worksheetTitleBlock.setManaged(false);
             worksheetTitleBlock.setVisible(false);
-
         }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
@@ -1457,16 +1461,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-
-//    private void restoreSelectionFromHistory(WorksheetNavigationHistory history, WorksheetNavigationHistory toHistory) {
-//        if (!history.isEmpty()) {
-//            toHistory.push(currentState.asSelection());
-//            currentState.setSelection(history.pop(), false);
-//        } else {
-//            logger.debug(() -> "History is empty: nothing to go back to.");
-//        }
-//    }
-
     private ChartViewPort getSelectedViewPort() {
         var v = viewPorts.get(worksheet.getSelectedChart());
         if (v != null) {
@@ -1481,7 +1475,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                db.setDragView(SnapshotUtils.outputScaleAwareSnapshot(row));
+                db.setDragView(SnapshotUtils.scaledSnapshot(row, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
                 ClipboardContent cc = new ClipboardContent();
                 cc.put(SERIALIZED_MIME_TYPE, index);
                 db.setContent(cc);

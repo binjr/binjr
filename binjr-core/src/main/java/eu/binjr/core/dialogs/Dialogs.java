@@ -21,11 +21,13 @@ import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
+import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import org.controlsfx.control.Notifications;
@@ -40,6 +42,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -196,6 +199,16 @@ public class Dialogs {
             return (Stage) node.getScene().getWindow();
         }
         return null;
+    }
+
+    public static double getOutputScaleX(Node node) {
+        var stage = Dialogs.getStage(node);
+        return stage == null ? Screen.getPrimary().getOutputScaleX() : stage.getOutputScaleX();
+    }
+
+    public static double getOutputScaleY(Node node) {
+        var stage = Dialogs.getStage(node);
+        return stage == null ? Screen.getPrimary().getOutputScaleY() : stage.getOutputScaleY();
     }
 
     /**

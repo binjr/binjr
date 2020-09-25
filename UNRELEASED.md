@@ -10,3 +10,4 @@
 * _[Fixed]_ If an error occurs while loading an adapter, all 
 * _[Fixed]_ A sharp performance drop when zooming extremely close up on the time axis (i.e. displaying less than a few seconds)
 * _[Fixed]_ Removed unused time zone selection field on Netdata adapter dialog. 
+* _[Fixed]_ Snapshots taken with the default output scaling use the main monitor scaling factor instead of the one on which the window is displayed. 

@@ -16,23 +16,16 @@
 
 package eu.binjr.common.javafx.controls;
 
+import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
 import javafx.scene.transform.Transform;
-import javafx.stage.Screen;
 
 public final class SnapshotUtils {
-
-    public static WritableImage outputScaleAwareSnapshot(Node node) {
-        return scaledSnapshot(node, 0.0,0.0);
-    }
-
     public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
         SnapshotParameters spa = new SnapshotParameters();
-        spa.setTransform(Transform.scale(
-                scaleX == 0.0 ? Screen.getPrimary().getOutputScaleX() : scaleX,
-                scaleY == 0.0 ? Screen.getPrimary().getOutputScaleY() : scaleY));
+        spa.setTransform(Transform.scale(scaleX, scaleY));
         return node.snapshot(spa, null);
     }
 }
