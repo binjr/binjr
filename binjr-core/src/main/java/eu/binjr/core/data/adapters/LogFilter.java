@@ -16,40 +16,66 @@
 
 package eu.binjr.core.data.adapters;
 
-import java.util.*;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlTransient;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
+@XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogFilter {
-    public final String filterQuery;
-    public final Set<String> severities;
+    private String filterQuery;
+    private Set<String> severities;
+    private int page;
+    private boolean retrieveHits;
 
-    public static LogFilter empty() {
-        return new LogFilter();
+    public static LogFilter all() {
+        return new LogFilter("", new HashSet<>(), 0, true);
+    }
+
+    public static LogFilter facetsOnly() {
+        return new LogFilter("", new HashSet<>(), 0, false);
     }
 
     private LogFilter() {
-        this("", new HashSet<>());
+        this("", new HashSet<>(), 0, true);
     }
 
-    public LogFilter(String filterQuery, Collection<String> severities) {
-        this(filterQuery, new HashSet<>(severities));
-    }
-
-    public LogFilter(String filterQuery, Set<String> severities) {
+    public LogFilter(String filterQuery, Set<String> severities, int page, boolean retrieveHits) {
         this.filterQuery = filterQuery;
         this.severities = severities;
+        this.page = page;
+        this.retrieveHits = retrieveHits;
     }
 
+    @XmlAttribute
     public String getFilterQuery() {
         return filterQuery;
     }
 
+    private void setFilterQuery(String value) {
+        this.filterQuery = value;
+    }
+
+    @XmlAttribute
     public Set<String> getSeverities() {
         return severities;
     }
 
+    @XmlAttribute
+    public int getPage() {
+        return page;
+    }
+
+    private void setPage(int value) {
+        this.page = value;
+    }
+
     @Override
     public int hashCode() {
-        return filterQuery.hashCode() + severities.hashCode();
+        return filterQuery.hashCode() + severities.hashCode() + Integer.hashCode(page);
     }
 
     @Override
@@ -62,6 +88,16 @@ public class LogFilter {
         }
         LogFilter filter = (LogFilter) obj;
         return filterQuery.equals(filter.filterQuery) &&
-                severities.equals(filter.severities);
+                severities.equals(filter.severities) &&
+                page == filter.page;
+    }
+
+    @XmlTransient
+    public boolean getRetrieveHits() {
+        return retrieveHits;
+    }
+
+    private void setRetrieveHits(boolean retrieveHits) {
+        this.retrieveHits = retrieveHits;
     }
 }

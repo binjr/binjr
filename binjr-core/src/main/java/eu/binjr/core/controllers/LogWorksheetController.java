@@ -48,18 +48,16 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.timeseries.transform.SortTransform;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Syncable;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
-import javafx.application.Platform;
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
@@ -90,7 +88,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private final AtomicBoolean closed = new AtomicBoolean(false);
-
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<String>> adapters)
             throws NoAdapterFoundException {
@@ -202,53 +199,48 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void refresh() {
-        invalidate(null, false, true);
+        invalidate(true, false);
     }
 
-    @Override
-    public void invalidateAll(boolean saveToHistory, boolean updateFacets, boolean forceRefresh) {
-        invalidate(null, updateFacets, forceRefresh);
+
+    public void invalidate(boolean saveToHistory, boolean retrieveFacets) {
+        //TODO handle history
+        queryLogIndex(worksheet.getFilter(), retrieveFacets);
     }
 
-    @Override
-    public void invalidate(ChartViewPort viewPort, boolean updateFacets, boolean forceRefresh) {
-        if (forceRefresh) {
-            try {
-                AsyncTaskManager.getInstance().submit(() -> {
-                            busyIndicator.setVisible(true);
-                            var res = (LogEventsProcessor) fetchDataFromSources();
-                            if(updateFacets) {
-                                severityListView.getItems().setAll(res.getFacetResults()
-                                        .get("severity"));
-//                                        .entrySet()
-//                                        .stream()
-//                                        .map(e-> String.format("%s (%d)", e.getKey(), e.getValue()))
-//                                        .toArray(String[]::new));
-                            }
-                            return res.getData().stream()
-                                    .map(XYChart.Data::getYValue)
-                                    .collect(Collectors.joining());
-                        },
-                        event -> {
-                            busyIndicator.setVisible(false);
-                            String data = (String) event.getSource().getValue();
-                            textOutput.clear();
-                            textOutput.replaceText(0, 0, data);
-                            if (worksheet.isSyntaxHighlightEnabled()) {
-                                this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
-                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
-                            }
-                        }, event -> {
-                            busyIndicator.setVisible(false);
-                            Dialogs.notifyException("An error occurred while loading text file: " +
-                                            event.getSource().getException().getMessage(),
-                                    event.getSource().getException(),
-                                    root);
-                        });
-            } catch (Exception e) {
-                Dialogs.notifyException(e);
-            }
+    public void queryLogIndex(LogFilter filter, boolean retrieveFacets) {
+        try {
+            AsyncTaskManager.getInstance().submit(() -> {
+                        busyIndicator.setVisible(true);
+                        var res = (LogEventsProcessor) fetchDataFromSources(filter);
+                        if (retrieveFacets) {
+                            severityListView.getItems().setAll(res.getFacetResults()
+                                    .get("severity"));
+                        }
+                        return  res.getData().stream()
+                                .map(XYChart.Data::getYValue)
+                                .collect(Collectors.joining()) ;
+                    },
+                    event -> {
+                        busyIndicator.setVisible(false);
+                        String data = (String) event.getSource().getValue();
+                        textOutput.clear();
+                        textOutput.replaceText(0, 0, data);
+                        if (worksheet.isSyntaxHighlightEnabled()) {
+                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
+                            textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                        }
+                    }, event -> {
+                        busyIndicator.setVisible(false);
+                        Dialogs.notifyException("An error occurred while loading text file: " +
+                                        event.getSource().getException().getMessage(),
+                                event.getSource().getException(),
+                                root);
+                    });
+        } catch (Exception e) {
+            Dialogs.notifyException(e);
         }
+
     }
 
     @Override
@@ -303,7 +295,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         timeRangePicker.initSelectedRange(timeRange.get());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             timeRange.set(TimeRange.of(newValue.getBeginning(), newValue.getEnd()));
-            invalidateAll(true, false, true);
+            refresh();
         });
 
         timeRange.getReadOnlyProperty().addListener((observable, oldValue, newValue) -> {
@@ -314,6 +306,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         });
 
+        // Compute facets to init control
+       queryLogIndex(LogFilter.facetsOnly(), true);
+
+        // init filter controls
+        pager.setCurrentPageIndex(worksheet.getFilter().getPage());
+        filterTextField.setText(worksheet.getFilter().getFilterQuery());
+        //    severityListView.getItems().addAll();
+
         bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
             if (!oldVal.equals(newVal)) {
                 refresh();
@@ -323,14 +323,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Filter selection
         bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
         bindingManager.bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
-//        filterSelection.setSeverityLabels("trace", "debug", "perf", "info", "warn", "error", "fatal");
-      //  bindingManager.bindBidirectional(filterSelection.filterProperty(), worksheet.filterProperty());
-
-        bindingManager.attachListener(
-                severityListView.getCheckModel().getCheckedItems(),
-                (InvalidationListener) l -> invalidateFilter());
-        filterTextField.setOnAction(
-                bindingManager.registerHandler(event ->  invalidateFilter()));
+        bindingManager.attachListener(severityListView.getCheckModel().getCheckedItems(),
+                (ListChangeListener<FacetEntry>) l -> invalidateFilter());
+        bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter());
+        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter()));
 
         // Pagination setup
         // pager.setPageFactory();
@@ -363,17 +359,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().attachListener(searchRegExToggle.selectedProperty(),
                 (ChangeListener<Boolean>) (obs, oldVal, newVal) ->
                         doSearchHighlight(searchTextField.getText(), searchMatchCaseToggle.isSelected(), newVal));
-        Platform.runLater(() -> invalidateAll(true, true, true));
+        refresh();
         super.initialize(location, resources);
     }
 
-    private void invalidateFilter(){
+    private void invalidateFilter() {
         worksheet.setFilter(
                 new LogFilter(filterTextField.getText(),
                         severityListView.getCheckModel().getCheckedItems()
                                 .stream()
                                 .map(FacetEntry::getLabel).
-                                collect(Collectors.toList())));
+                                collect(Collectors.toSet()), pager.getCurrentPageIndex(), true));
     }
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
@@ -409,7 +405,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    public TimeSeriesProcessor<String> fetchDataFromSources() throws DataAdapterException {
+    private TimeSeriesProcessor<String> fetchDataFromSources(LogFilter filter) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -424,14 +420,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 worksheet.getFromDateTime().equals(worksheet.getToDateTime())) {
             timeRange.set(worksheet.getInitialTimeRange());
         }
-        var queryString = gson.toJson(worksheet.getFilter());
+        var queryString = gson.toJson(filter);
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             // Define the transforms to apply
             var adapter = (DataAdapter<String>) byAdapterEntry.getKey();
-            var sort = new SortTransform();
-            sort.setEnabled(adapter.isSortingRequired());
             // Group all queries with the same adapter and path
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));

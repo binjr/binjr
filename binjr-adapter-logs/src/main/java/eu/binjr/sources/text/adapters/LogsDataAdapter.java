@@ -160,7 +160,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
-
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         FilterableTreeItem<SourceBinding> configNode = new FilterableTreeItem<>(
@@ -265,8 +264,11 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
             var proc = new LogEventsProcessor();
             var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
-            facets.put(SEVERITY, filter.severities);
-            var res = index.filter(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery());
+            facets.put(SEVERITY, filter.getSeverities());
+            var res = index.filter(start.toEpochMilli(),
+                    end.toEpochMilli(),
+                    facets, filter.getFilterQuery(),
+                    filter.getRetrieveHits());
             proc.setData(res.getLogs());
             proc.addFacetResults(SEVERITY, res.getFacetResults());
             data.put(null, proc);
@@ -311,7 +313,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         IOUtils.close(fileBrowser);
         super.close();
     }
-
 
     private static class LogEvent {
         private final String timestamp;
@@ -371,7 +372,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
-    public class LogFileIndex implements Closeable {
+    private class LogFileIndex implements Closeable {
         private final Directory indexDirectory;
         private DirectoryReader indexReader;
         private IndexSearcher searcher;
@@ -526,7 +527,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
 
 
-        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query) throws Exception {
+        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query, boolean retrieveHits) throws Exception {
             return indexLock.read().lock(() -> {
                 Query filterQuery = null;
                 if (query != null && !query.isBlank()) {
@@ -547,15 +548,22 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 }
                 DrillSideways.DrillSidewaysResult results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
+                    if (retrieveHits) {
+                        results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
+                    } else {
+                        TotalHitCountCollector collector = new TotalHitCountCollector();
+                        results = drill.search(drillDownQuery, collector);
+                    }
                 }
                 var facets = new ArrayList<FacetEntry>();
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
-                    for (var hit : results.hits.scoreDocs) {
-                        var doc = searcher.doc(hit.doc);
-                        logs.add(new XYChart.Data<>(
-                                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
-                                doc.get(FIELD_CONTENT) + "\n"));
+                    if (results.hits != null) {
+                        for (var hit : results.hits.scoreDocs) {
+                            var doc = searcher.doc(hit.doc);
+                            logs.add(new XYChart.Data<>(
+                                    ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
+                                    doc.get(FIELD_CONTENT) + "\n"));
+                        }
                     }
                     var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
                     if (severitySynthesis != null) {

@@ -52,13 +52,12 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
     private final Property<LogFilter> filter;
-
-    private final transient ChangeWatcher status;
     @IsDirtyable
     private final ObservableList<TimeSeriesInfo<String>> seriesInfo = FXCollections.observableList(new LinkedList<>());
-
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
+
+    private final transient ChangeWatcher status;
     private boolean syntaxHighlightEnabled = false;
 
 
@@ -66,8 +65,8 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
         this("New File (" + globalCounter.getAndIncrement() + ")",
                 true,
                 ZoneId.systemDefault(),
-                ZonedDateTime.ofInstant(Instant.EPOCH,  ZoneId.systemDefault()),
-                ZonedDateTime.ofInstant(Instant.EPOCH,  ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
                 false);
     }
 
@@ -77,7 +76,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
         this.fromDateTime = new SimpleObjectProperty<>(from);
         this.toDateTime = new SimpleObjectProperty<>(to);
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
-        this.filter = new SimpleObjectProperty<>(LogFilter.empty());
+        this.filter = new SimpleObjectProperty<>(LogFilter.all());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
 
@@ -126,7 +125,6 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
             }
         }
     }
-
 
 
     @Override
@@ -243,7 +241,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
         return filter;
     }
 
-    public void setFilter(LogFilter filter){
+    public void setFilter(LogFilter filter) {
         this.filter.setValue(filter);
     }
 }
