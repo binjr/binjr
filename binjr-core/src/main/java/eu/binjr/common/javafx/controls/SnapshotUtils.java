@@ -16,7 +16,6 @@
 
 package eu.binjr.common.javafx.controls;
 
-import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
