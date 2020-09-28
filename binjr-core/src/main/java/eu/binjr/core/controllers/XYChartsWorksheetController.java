@@ -1272,7 +1272,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         saveSnapshot();
     }
 
-    @Override
     public void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
         logger.debug(() -> worksheet.getHistory().backward().dump());
@@ -1281,7 +1280,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
     }
 
-    @Override
     public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
         try (Profiler p = Profiler.start("Refreshing chart " + worksheet.getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::perf)) {
             currentState.get(viewPort.getDataStore()).ifPresent(y -> {

@@ -164,12 +164,10 @@ public class TextWorksheetController extends WorksheetController {
         invalidate(null, false, true);
     }
 
-    @Override
     public void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         invalidate(null, dontPlotChart, forceRefresh);
     }
 
-    @Override
     public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
         if (forceRefresh) {
             loadFile();

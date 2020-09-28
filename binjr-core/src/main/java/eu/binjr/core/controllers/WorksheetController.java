@@ -69,10 +69,6 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract void refresh();
 
-    public abstract void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh);
-
-    public abstract  void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh);
-
     public abstract  void saveSnapshot();
 
     public abstract void toggleShowPropertiesPane();
