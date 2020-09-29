@@ -199,7 +199,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void refresh() {
-        invalidate(true, false);
+        invalidate(true, true);
     }
 
 
@@ -212,23 +212,32 @@ public class LogWorksheetController extends WorksheetController implements Synca
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        var res = (LogEventsProcessor) fetchDataFromSources(filter);
-                        if (retrieveFacets) {
-                            severityListView.getItems().setAll(res.getFacetResults()
-                                    .get("severity"));
-                        }
-                        return  res.getData().stream()
-                                .map(XYChart.Data::getYValue)
-                                .collect(Collectors.joining()) ;
+                        return (LogEventsProcessor) fetchDataFromSources(filter);
                     },
                     event -> {
-                        busyIndicator.setVisible(false);
-                        String data = (String) event.getSource().getValue();
-                        textOutput.clear();
-                        textOutput.replaceText(0, 0, data);
-                        if (worksheet.isSyntaxHighlightEnabled()) {
-                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
-                            textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                        try {
+                            var res = (LogEventsProcessor) event.getSource().getValue();
+                            if (retrieveFacets) {
+                                var selected = severityListView.getSelectionModel().getSelectedItems();
+                                severityListView.getItems().setAll(res.getFacetResults()
+                                        .get("severity"));
+                                severityListView.getItems()
+                                        .stream()
+                                        .filter(selected::contains)
+                                        .forEach(f -> severityListView.getSelectionModel().select(f));
+
+                            }
+                            String data = res.getData().stream()
+                                    .map(XYChart.Data::getYValue)
+                                    .collect(Collectors.joining());
+                            textOutput.clear();
+                            textOutput.replaceText(0, 0, data);
+                            if (worksheet.isSyntaxHighlightEnabled()) {
+                                this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
+                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                            }
+                        } finally {
+                            busyIndicator.setVisible(false);
                         }
                     }, event -> {
                         busyIndicator.setVisible(false);
@@ -307,7 +316,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
 
         // Compute facets to init control
-       queryLogIndex(LogFilter.facetsOnly(), true);
+        //  queryLogIndex(LogFilter.facetsOnly(), true);
 
         // init filter controls
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());
