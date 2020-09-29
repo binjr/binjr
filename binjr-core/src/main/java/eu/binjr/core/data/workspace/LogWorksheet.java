@@ -70,13 +70,18 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
                 false);
     }
 
-    protected LogWorksheet(String name, boolean editModeEnabled, ZoneId timezone, ZonedDateTime from, ZonedDateTime to, boolean isLinked) {
+    protected LogWorksheet(String name,
+                           boolean editModeEnabled,
+                           ZoneId timezone,
+                           ZonedDateTime from,
+                           ZonedDateTime to,
+                           boolean isLinked) {
         super(name, editModeEnabled);
         this.timeZone = new SimpleObjectProperty<>(timezone);
         this.fromDateTime = new SimpleObjectProperty<>(from);
         this.toDateTime = new SimpleObjectProperty<>(to);
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
-        this.filter = new SimpleObjectProperty<>(LogFilter.all());
+        this.filter = new SimpleObjectProperty<>(LogFilter.empty());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
 

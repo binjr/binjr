@@ -237,6 +237,7 @@ public class BindingManager implements AutoCloseable {
         boundProperties.forEach(Property::bind);
     }
 
+
     public synchronized void suspend(Property<?>... properties) {
         for (var p : properties) {
             if (!boundProperties.containsKey(p)) {

@@ -236,7 +236,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfo) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo);
-            return index.getTimeRangeBounries(seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
+            return index.getTimeRangeBoundaries(seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);
         }
@@ -267,8 +267,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             facets.put(SEVERITY, filter.getSeverities());
             var res = index.filter(start.toEpochMilli(),
                     end.toEpochMilli(),
-                    facets, filter.getFilterQuery(),
-                    filter.getRetrieveHits());
+                    facets, filter.getFilterQuery());
             proc.setData(res.getLogs());
             proc.addFacetResults(SEVERITY, res.getFacetResults());
             data.put(null, proc);
@@ -494,7 +493,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             }
         }
 
-        public TimeRange getTimeRangeBounries(List<String> files) throws IOException {
+        public TimeRange getTimeRangeBoundaries(List<String> files) throws IOException {
             ZonedDateTime beginning = getTimeRangeBoundary(false, files);
             ZonedDateTime end = getTimeRangeBoundary(true, files);
             return (TimeRange.of(
@@ -527,7 +526,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
 
 
-        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query, boolean retrieveHits) throws Exception {
+        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query) throws Exception {
             return indexLock.read().lock(() -> {
                 Query filterQuery = null;
                 if (query != null && !query.isBlank()) {
@@ -541,21 +540,18 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
                 var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
+
                 for (var facet : params.entrySet()) {
                     for (var label : facet.getValue()) {
                         drillDownQuery.add(facet.getKey(), label);
                     }
+
                 }
                 DrillSideways.DrillSidewaysResult results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    if (retrieveHits) {
-                        results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
-                    } else {
-                        TotalHitCountCollector collector = new TotalHitCountCollector();
-                        results = drill.search(drillDownQuery, collector);
-                    }
+                    results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
                 }
-                var facets = new ArrayList<FacetEntry>();
+                var severityFacet = new ArrayList<FacetEntry>();
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                     if (results.hits != null) {
                         for (var hit : results.hits.scoreDocs) {
@@ -566,13 +562,20 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                         }
                     }
                     var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
+                    var labels = new ArrayList<String>();
                     if (severitySynthesis != null) {
                         for (var f : severitySynthesis.labelValues) {
-                            facets.add(new FacetEntry(f.label, f.value.intValue()));
+                            severityFacet.add(new FacetEntry(f.label, f.value.intValue()));
+                            labels.add(f.label);
                         }
+                        // Add facets labels used in query if not present in the result
+                        severityFacet.addAll(params.getOrDefault(SEVERITY, List.of()).stream()
+                                .filter(l -> !labels.contains(l))
+                                .map(l -> new FacetEntry(l, 0))
+                                .collect(Collectors.toList()));
                     }
                 }
-                return new FilterResults(logs, facets);
+                return new FilterResults(logs, severityFacet);
             });
         }
     }

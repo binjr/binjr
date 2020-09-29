@@ -29,25 +29,21 @@ public class LogFilter {
     private String filterQuery;
     private Set<String> severities;
     private int page;
-    private boolean retrieveHits;
 
-    public static LogFilter all() {
-        return new LogFilter("", new HashSet<>(), 0, true);
-    }
 
-    public static LogFilter facetsOnly() {
-        return new LogFilter("", new HashSet<>(), 0, false);
+    public static LogFilter empty() {
+        return new LogFilter();
     }
 
     private LogFilter() {
-        this("", new HashSet<>(), 0, true);
+        this("", new HashSet<>(), 0);
     }
 
-    public LogFilter(String filterQuery, Set<String> severities, int page, boolean retrieveHits) {
+    public LogFilter(String filterQuery, Set<String> severities, int page) {
         this.filterQuery = filterQuery;
         this.severities = severities;
         this.page = page;
-        this.retrieveHits = retrieveHits;
+
     }
 
     @XmlAttribute
@@ -92,12 +88,4 @@ public class LogFilter {
                 page == filter.page;
     }
 
-    @XmlTransient
-    public boolean getRetrieveHits() {
-        return retrieveHits;
-    }
-
-    private void setRetrieveHits(boolean retrieveHits) {
-        this.retrieveHits = retrieveHits;
-    }
 }

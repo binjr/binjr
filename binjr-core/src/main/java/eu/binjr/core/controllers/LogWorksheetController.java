@@ -78,6 +78,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toList;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
     private static final Logger logger = Logger.create(LogWorksheetController.class);
@@ -172,7 +173,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button clearFilterButton;
 
     @FXML
-    private Button filterHistoryButton;
+    private Button applyFilterButton;
 
     @FXML
     private VBox filteringBar;
@@ -215,16 +216,22 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         return (LogEventsProcessor) fetchDataFromSources(filter);
                     },
                     event -> {
+                        bindingManager.suspend();
                         try {
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             if (retrieveFacets) {
-                                var selected = severityListView.getSelectionModel().getSelectedItems();
-                                severityListView.getItems().setAll(res.getFacetResults()
-                                        .get("severity"));
+
+                                var checkedFacetLabels = severityListView.getCheckModel()
+                                        .getCheckedItems().stream()
+                                        .filter(Objects::nonNull)
+                                        .map(FacetEntry::getLabel)
+                                        .collect(toList());
+                                severityListView.getCheckModel().clearChecks();
+                                severityListView.getItems().setAll(res.getFacetResults().get("severity"));
                                 severityListView.getItems()
                                         .stream()
-                                        .filter(selected::contains)
-                                        .forEach(f -> severityListView.getSelectionModel().select(f));
+                                        .filter(f -> checkedFacetLabels.contains(f.getLabel()))
+                                        .forEach(f -> severityListView.getCheckModel().check(f));
 
                             }
                             String data = res.getData().stream()
@@ -237,6 +244,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
                             }
                         } finally {
+                            bindingManager.resume();
                             busyIndicator.setVisible(false);
                         }
                     }, event -> {
@@ -315,8 +323,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         });
 
-        // Compute facets to init control
-        //  queryLogIndex(LogFilter.facetsOnly(), true);
+
 
         // init filter controls
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());
@@ -336,6 +343,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 (ListChangeListener<FacetEntry>) l -> invalidateFilter());
         bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter());
         filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter()));
+        clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+            filterTextField.clear();
+            invalidateFilter();
+        }));
+        applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter()));
 
         // Pagination setup
         // pager.setPageFactory();
@@ -377,8 +389,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 new LogFilter(filterTextField.getText(),
                         severityListView.getCheckModel().getCheckedItems()
                                 .stream()
-                                .map(FacetEntry::getLabel).
-                                collect(Collectors.toSet()), pager.getCurrentPageIndex(), true));
+                                .filter(Objects::nonNull)
+                                .map(FacetEntry::getLabel)
+                                .collect(Collectors.toSet()),
+                        pager.getCurrentPageIndex()));
     }
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
