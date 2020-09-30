@@ -288,7 +288,7 @@
                             </Button>
                             <Pane HBox.hgrow="ALWAYS"/>
                         </HBox>
-                        <Pagination fx:id="pager" HBox.hgrow="ALWAYS">
+                        <Pagination fx:id="pager" HBox.hgrow="ALWAYS" pageCount="1">
                             <HBox.margin>
                                 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                             </HBox.margin>

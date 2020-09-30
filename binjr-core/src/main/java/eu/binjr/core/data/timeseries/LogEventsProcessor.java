@@ -39,6 +39,8 @@ import java.util.Map;
 public class LogEventsProcessor extends TimeSeriesProcessor<String> {
 
     private final Map<String, Collection<FacetEntry>> facetResults = new HashMap<>();
+    private int totalHits = 0;
+    private int hitsPerPage = 0;
 
     @Override
     protected String computeMinValue() {
@@ -63,5 +65,19 @@ public class LogEventsProcessor extends TimeSeriesProcessor<String> {
         this.facetResults.put(name, synthesis);
     }
 
+    public int getTotalHits() {
+        return totalHits;
+    }
 
+    public void setTotalHits(int totalHits) {
+        this.totalHits = totalHits;
+    }
+
+    public void setHitsPerPage(int hitsPerPage) {
+        this.hitsPerPage = hitsPerPage;
+    }
+
+    public int getHitsPerPage() {
+        return hitsPerPage;
+    }
 }

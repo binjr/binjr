@@ -218,7 +218,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     event -> {
                         bindingManager.suspend();
                         try {
+
                             var res = (LogEventsProcessor) event.getSource().getValue();
+                            pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             if (retrieveFacets) {
 
                                 var checkedFacetLabels = severityListView.getCheckModel()
@@ -237,8 +239,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             String data = res.getData().stream()
                                     .map(XYChart.Data::getYValue)
                                     .collect(Collectors.joining());
-                            textOutput.clear();
-                            textOutput.replaceText(0, 0, data);
+                          //  textOutput.clear();
+                            textOutput.replaceText(0, textOutput.getLength(), data);
+
                             if (worksheet.isSyntaxHighlightEnabled()) {
                                 this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
                                 textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
@@ -322,7 +325,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 timeRangePicker.updateSelectedRange(newValue);
             }
         });
-
 
 
         // init filter controls

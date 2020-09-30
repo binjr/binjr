@@ -262,19 +262,14 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
-            var proc = new LogEventsProcessor();
             var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
             facets.put(SEVERITY, filter.getSeverities());
-            var res = index.filter(start.toEpochMilli(),
+            data.put(null, index.filter(start.toEpochMilli(),
                     end.toEpochMilli(),
-                    facets, filter.getFilterQuery());
-            proc.setData(res.getLogs());
-            proc.addFacetResults(SEVERITY, res.getFacetResults());
-            data.put(null, proc);
+                    facets, filter.getFilterQuery(), filter.getPage()));
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
-
         return data;
     }
 
@@ -526,40 +521,46 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
 
 
-        public FilterResults filter(long start, long end, Map<String, Collection<String>> params, String query) throws Exception {
+        public LogEventsProcessor filter(long start, long end, Map<String, Collection<String>> params, String query, int page) throws Exception {
             return indexLock.read().lock(() -> {
-                Query filterQuery = null;
+                Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
+                Query filterQuery = rangeQuery;
                 if (query != null && !query.isBlank()) {
                     logger.trace("Query text=" + query);
                     QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
-                    filterQuery = parser.parse(query);
-                    logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
+                    filterQuery = new BooleanQuery.Builder()
+                            .add(rangeQuery, BooleanClause.Occur.FILTER)
+                            .add(parser.parse(query), BooleanClause.Occur.FILTER)
+                            .build();
                 }
-                Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
+                logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
                 var logs = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
-                var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
                 var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
-
                 for (var facet : params.entrySet()) {
                     for (var label : facet.getValue()) {
                         drillDownQuery.add(facet.getKey(), label);
                     }
-
                 }
+                var pageSize = prefs.hitsPerPage.get().intValue();
+                var skip = page * pageSize;
                 DrillSideways.DrillSidewaysResult results;
+
+                var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
+                TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                    results = drill.search(drillDownQuery, rangeQuery, null, prefs.hitsPerPage.get().intValue(), sort, false);
+                    results = drill.search(drillDownQuery, collector);
                 }
+                var topDocs = collector.topDocs();
+                logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
                 var severityFacet = new ArrayList<FacetEntry>();
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
-                    if (results.hits != null) {
-                        for (var hit : results.hits.scoreDocs) {
-                            var doc = searcher.doc(hit.doc);
-                            logs.add(new XYChart.Data<>(
-                                    ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
-                                    doc.get(FIELD_CONTENT) + "\n"));
-                        }
+                    for (int i = skip; i < topDocs.scoreDocs.length; i++) {
+                        var hit = topDocs.scoreDocs[i];
+                        var doc = searcher.doc(hit.doc);
+                        logs.add(new XYChart.Data<>(
+                                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
+                                doc.get(FIELD_CONTENT) + "\n"));
                     }
                     var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
                     var labels = new ArrayList<String>();
@@ -575,26 +576,14 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                                 .collect(Collectors.toList()));
                     }
                 }
-                return new FilterResults(logs, severityFacet);
+                var proc = new LogEventsProcessor();
+                proc.setData(logs);
+                proc.addFacetResults(SEVERITY, severityFacet);
+                proc.setTotalHits(collector.getTotalHits());
+                proc.setHitsPerPage(pageSize);
+                return proc;
             });
         }
     }
 
-    public static class FilterResults {
-        private final List<XYChart.Data<ZonedDateTime, String>> logs;
-        private final Collection<FacetEntry> facets;
-
-        public FilterResults(List<XYChart.Data<ZonedDateTime, String>> logs, Collection<FacetEntry> facets) {
-            this.logs = logs;
-            this.facets = facets;
-        }
-
-        public List<XYChart.Data<ZonedDateTime, String>> getLogs() {
-            return logs;
-        }
-
-        public Collection<FacetEntry> getFacetResults() {
-            return facets;
-        }
-    }
 }
