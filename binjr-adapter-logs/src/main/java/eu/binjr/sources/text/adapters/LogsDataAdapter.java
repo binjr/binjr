@@ -68,8 +68,10 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -378,8 +380,20 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         private SortedSetDocValuesReaderState state;
         private final Path indexDirectoryPath;
         private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
+        private final ExecutorService parsingThreadPool;
+        private final int parsingThreadsNumber;
 
         public LogFileIndex() throws IOException {
+            this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
+                    (int) Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0) :
+                    Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
+            AtomicInteger threadNum = new AtomicInteger(0);
+            this.parsingThreadPool = Executors.newFixedThreadPool(parsingThreadsNumber, r -> {
+                Thread thread = new Thread(r);
+                thread.setName("parsing-thread-" + threadNum.incrementAndGet());
+                return thread;
+            });
+
             this.payloadPattern = Pattern.compile(
                     String.format("\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]",
                             prefs.severityPattern.get(),
@@ -415,6 +429,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             facetsConfig = new FacetsConfig();
             facetsConfig.setIndexFieldName(SEVERITY, FACET_SEVERITY);
             facetsConfig.setIndexFieldName(PATH, FACET_PATH);
+            logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
+                    " using " + parsingThreadsNumber + " parsing indexing threads");
         }
 
         public void add(String path, InputStream ias) throws IOException {
@@ -422,15 +438,72 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 var n = new AtomicInteger(0);
                 var builder = new LogEvent.LogEventBuilder(timestampPattern);
                 try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
-                    try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
-                        reader.lines()
-                                .map(line -> builder.build(n.incrementAndGet(), line))
-                                .parallel()
-                                .forEach(CheckedLambdas.wrap(line -> {
-                                    if (line.isPresent()) {
-                                        addLogEvent(path, line.get());
+                    final AtomicLong nbLogEvents = new AtomicLong(0);
+                    final AtomicBoolean taskDone = new AtomicBoolean(false);
+                    final AtomicBoolean taskAborted = new AtomicBoolean(false);
+                    final ArrayBlockingQueue<LogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                    final List<Future<Integer>> results = new ArrayList<>();
+                    for (int i = 0; i < parsingThreadsNumber; i++) {
+                        results.add(parsingThreadPool.submit(() -> {
+                            logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
+                            int nbEventProcessed = 0;
+                            do {
+                                List<LogEvent> todo = new ArrayList<>();
+                                var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
+                                if (drained == 0 && queue.size() == 0) {
+                                    // Park the thread for a while before polling again
+                                    // as is it likely that producer is done.
+                                    try {
+                                        Thread.sleep(100);
+                                    } catch (InterruptedException e) {
+                                        Thread.currentThread().interrupt();
                                     }
-                                }));
+                                }
+                                try {
+                                    for (var logEvent : todo) {
+                                        addLogEvent(path, logEvent);
+                                        nbEventProcessed++;
+                                    }
+                                } catch (Throwable t) {
+                                    // Signal that worker thread was aborted and rethrow
+                                    taskAborted.set(true);
+                                    throw t;
+                                }
+                            } while (!taskDone.get() && !taskAborted.get() && !Thread.currentThread().isInterrupted());
+                            return nbEventProcessed;
+                        }));
+                    }
+                    try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
+                        //  reader.lines().forEach(line -> builder.build(n.incrementAndGet(), line).ifPresent(queue::offer));
+                        String line;
+                        while ((line = reader.readLine()) != null && !taskAborted.get()) {
+                            var optLog = builder.build(n.incrementAndGet(), line);
+                            if (optLog.isPresent()) {
+                                queue.put(optLog.get());
+                            }
+                        }
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    while (!taskAborted.get() && queue.size() > 0) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    taskDone.set(true);
+                    for (Future<Integer> f : results) {
+                        //signal exceptions that may have happened on thread pool
+                        try {
+                            logger.trace("Thread added " + f.get() + " log event to index");
+                            nbLogEvents.addAndGet(f.get());
+                        } catch (InterruptedException e) {
+                            logger.error("Getting result from worker was interrupted", e);
+                        } catch (Exception e) {
+                            //rethrow execution exceptions
+                            throw new IOException("Error parsing logEvent", e);
+                        }
                     }
                     // Don't forget the last log line buffered in the builder
                     builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
@@ -458,7 +531,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             Document doc = new Document();
             Matcher m = payloadPattern.matcher(event.getText());
             doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
-            doc.add(new LongPoint(LINE_NUMBER, event.getLineNumber()));
+            doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getLineNumber()));
             if (m.find()) {
                 try {
                     var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T]", " "), dateTimeFormatter);
@@ -482,6 +555,14 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             IOUtils.close(indexReader);
             IOUtils.close(indexWriter);
             IOUtils.close(indexDirectory);
+            if (parsingThreadPool != null) {
+                try {
+                    parsingThreadPool.shutdown();
+                    parsingThreadPool.awaitTermination(30, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    logger.error("Termination interrupted", e);
+                }
+            }
 
             if (indexDirectoryPath != null) {
                 IOUtils.attemptDeleteTempPath(indexDirectoryPath);
@@ -520,7 +601,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             });
         }
 
-
         public LogEventsProcessor filter(long start, long end, Map<String, Collection<String>> params, String query, int page) throws Exception {
             return indexLock.read().lock(() -> {
                 Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
@@ -544,9 +624,12 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 }
                 var pageSize = prefs.hitsPerPage.get().intValue();
                 var skip = page * pageSize;
+
                 DrillSideways.DrillSidewaysResult results;
 
-                var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false));
+                var sort = new Sort(
+                        new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
+                        new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
                 TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
                     results = drill.search(drillDownQuery, collector);

@@ -60,6 +60,12 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<IndexDirectoryLocation> indexDirectoryLocation =
             enumPreference(IndexDirectoryLocation.class, "indexDirectoryLocation", IndexDirectoryLocation.MEMORY );
 
+    public ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
+
+    public ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
+
+    public ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
+
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }
