@@ -178,7 +178,7 @@
                   AnchorPane.topAnchor="0.0">
                 <VirtualizedScrollPane styleClass=" skinnable-pane-border" VBox.vgrow="ALWAYS">
                     <content>
-                        <CodeArea fx:id="textOutput">
+                        <CodeArea fx:id="textOutput" styleClass="log-view">
                             <padding>
                                 <Insets left="4.0"/>
                             </padding>

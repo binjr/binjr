@@ -32,12 +32,12 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.core.data.timeseries.LogEvent;
 import eu.binjr.core.data.workspace.LogWorksheet;
-import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.scene.paint.Color;
 
-public class LogFilesBinding extends TextFilesBinding {
+public class LogFilesBinding extends SourceBinding<LogEvent> {
 
     private transient boolean indexed = false;
 
@@ -45,12 +45,13 @@ public class LogFilesBinding extends TextFilesBinding {
         super();
     }
 
-    public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<String> adapter) {
-        super(label, legend, path, treeHierarchy, adapter);
+    public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
+        super(label, legend,null, path, treeHierarchy, adapter);
+        //super(label, legend, null, path, treeHierarchy, adapter);
     }
 
     @Override
-    public Class<? extends Worksheet<String>> getWorksheetClass() {
+    public Class<? extends Worksheet<LogEvent>> getWorksheetClass() {
         return LogWorksheet.class;
     }
 
@@ -62,7 +63,7 @@ public class LogFilesBinding extends TextFilesBinding {
         this.indexed = indexed;
     }
 
-    public static class Builder extends SourceBinding.Builder<String, LogFilesBinding, Builder> {
+    public static class Builder extends SourceBinding.Builder<LogEvent, LogFilesBinding, Builder> {
 
         @Override
         protected Builder self() {
@@ -70,7 +71,7 @@ public class LogFilesBinding extends TextFilesBinding {
         }
 
         @Override
-        protected LogFilesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<String> adapter) {
+        protected LogFilesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
             return new LogFilesBinding(label, legend, path, treeHierarchy, adapter);
         }
     }

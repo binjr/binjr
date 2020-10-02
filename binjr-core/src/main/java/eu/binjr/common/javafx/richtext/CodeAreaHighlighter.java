@@ -34,6 +34,8 @@ public class CodeAreaHighlighter {
             "(?<ELEMENT>(</?\\??\\h*)([\\w:\\-_]+)([^<>]*)(\\h*/?\\??>))" +
                     "|(?<COMMENT><!--[^<>]+-->)");
 
+    private static final Pattern LOGS_SEVERITY = Pattern.compile(
+            "(?i)\\[TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL\\s?\\]");
     private static final Pattern ATTRIBUTES = Pattern.compile("([\\w:]+\\h*)(=)(\\h*\"[^\"]*\")");
 
     private static final int GROUP_OPEN_BRACKET = 2;
@@ -122,7 +124,21 @@ public class CodeAreaHighlighter {
         return new SearchHilightResults(hits, spansBuilder.create());
     }
 
-    public static StyleSpans<Collection<String>> computeSyntaxHighlighting(String text) {
+    public static StyleSpans<Collection<String>> computeLogsSyntaxHighlighting(String text) {
+        Matcher matcher = LOGS_SEVERITY.matcher(text);
+        int lastKwEnd = 0;
+        StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+        while (matcher.find()) {
+            spansBuilder.add(Collections.emptyList(), matcher.start() - lastKwEnd);
+            spansBuilder.add(Collections.singleton("comment"), matcher.end() - matcher.start());
+            lastKwEnd = matcher.end();
+        }
+        spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
+        return spansBuilder.create();
+    }
+
+
+    public static StyleSpans<Collection<String>> computeXmlSyntaxHighlighting(String text) {
         Matcher matcher = XML_TAG.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();

@@ -25,6 +25,7 @@ import eu.binjr.core.data.adapters.LogFilter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.timeseries.LogEvent;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeable<String> {
+public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Rangeable<LogEvent> {
 
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
 
@@ -53,12 +54,12 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     @IsDirtyable
     private final Property<LogFilter> filter;
     @IsDirtyable
-    private final ObservableList<TimeSeriesInfo<String>> seriesInfo = FXCollections.observableList(new LinkedList<>());
+    private final ObservableList<TimeSeriesInfo<LogEvent>> seriesInfo = FXCollections.observableList(new LinkedList<>());
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
 
     private final transient ChangeWatcher status;
-    private boolean syntaxHighlightEnabled = false;
+    private boolean syntaxHighlightEnabled = true;
 
 
     public LogWorksheet() {
@@ -99,7 +100,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
-    public ObservableList<TimeSeriesInfo<String>> getSeriesInfo() {
+    public ObservableList<TimeSeriesInfo<LogEvent>> getSeriesInfo() {
         return seriesInfo;
     }
 
@@ -109,7 +110,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     }
 
     @Override
-    public Worksheet<String> duplicate() {
+    public Worksheet<LogEvent> duplicate() {
         return new LogWorksheet(this);
     }
 
@@ -133,7 +134,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
 
 
     @Override
-    protected List<TimeSeriesInfo<String>> listAllSeriesInfo() {
+    protected List<TimeSeriesInfo<LogEvent>> listAllSeriesInfo() {
         return getSeriesInfo();
     }
 
@@ -233,7 +234,7 @@ public class LogWorksheet extends Worksheet<String> implements Syncable, Rangeab
     }
 
     @Override
-    public List<TimeSeriesInfo<String>> getSeries() {
+    public List<TimeSeriesInfo<LogEvent>> getSeries() {
         return seriesInfo;
     }
 

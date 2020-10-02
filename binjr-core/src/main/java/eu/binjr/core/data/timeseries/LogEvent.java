@@ -16,32 +16,27 @@
 
 package eu.binjr.core.data.timeseries;
 
-public class FacetEntry {
-    private final String facetName;
-    private final String label;
-    private final int nbOccurrences;
+import java.util.HashMap;
+import java.util.Map;
 
+public class LogEvent {
+    private final String message;
+    private final Map<String, FacetEntry> facets = new HashMap<>();
 
-    public FacetEntry(String facetName, String label, int nbOccurrences) {
-        this.facetName = facetName;
-        this.label = label;
-        this.nbOccurrences = nbOccurrences;
+    public LogEvent(String message, FacetEntry... categories) {
+        this.message = message;
+        if (categories != null) {
+            for (var category : categories) {
+                this.facets.put(category.getFacetName(), category);
+            }
+        }
     }
 
-    public int getNbOccurrences() {
-        return nbOccurrences;
+    public String getMessage() {
+        return message;
     }
 
-    public String getLabel() {
-        return label;
-    }
-
-    @Override
-    public String toString() {
-        return String.format("%s (%d)", label, nbOccurrences);
-    }
-
-    public String getFacetName() {
-        return facetName;
+    public Map<String, FacetEntry> getFacets() {
+        return facets;
     }
 }

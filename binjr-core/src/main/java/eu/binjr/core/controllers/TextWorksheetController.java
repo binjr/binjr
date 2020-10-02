@@ -338,7 +338,7 @@ public class TextWorksheetController extends WorksheetController {
                         textOutput.clear();
                         textOutput.replaceText(0, 0, data);
                         if (worksheet.isSyntaxHighlightEnabled()) {
-                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
+                            this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeXmlSyntaxHighlighting(textOutput.getText());
                             textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
                         }
                     }, event -> {

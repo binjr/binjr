@@ -34,6 +34,7 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.FacetEntry;
+import eu.binjr.core.data.timeseries.LogEvent;
 import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -82,7 +83,7 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class LogsDataAdapter extends BaseDataAdapter<String> {
+public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
     public static final String TIMESTAMP = "timestamp";
@@ -146,8 +147,6 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         initParams(Paths.get(validateParameterNullity(params, "rootPath")),
                 gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
                 gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
-
-
     }
 
     private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
@@ -235,7 +234,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
 
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<String>> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<LogEvent>> seriesInfo) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo);
             return index.getTimeRangeBoundaries(seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
@@ -244,8 +243,8 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         }
     }
 
-    private void ensureIndexed(List<TimeSeriesInfo<String>> seriesInfo) throws IOException {
-        for (var info : seriesInfo) {
+    private void ensureIndexed(List<TimeSeriesInfo<LogEvent>> seriesInfo) throws IOException {
+        for (TimeSeriesInfo<LogEvent> info : seriesInfo) {
             indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
                 index.add(p, fileBrowser.getData(p));
                 return p;
@@ -254,12 +253,12 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> fetchData(String path,
-                                                                              Instant start,
-                                                                              Instant end,
-                                                                              List<TimeSeriesInfo<String>> seriesInfo,
-                                                                              boolean bypassCache) throws DataAdapterException {
-        Map<TimeSeriesInfo<String>, TimeSeriesProcessor<String>> data = new HashMap<>();
+    public Map<TimeSeriesInfo<LogEvent>, TimeSeriesProcessor<LogEvent>> fetchData(String path,
+                                                                                  Instant start,
+                                                                                  Instant end,
+                                                                                  List<TimeSeriesInfo<LogEvent>> seriesInfo,
+                                                                                  boolean bypassCache) throws DataAdapterException {
+        Map<TimeSeriesInfo<LogEvent>, TimeSeriesProcessor<LogEvent>> data = new HashMap<>();
         try {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
@@ -310,14 +309,14 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         super.close();
     }
 
-    private static class LogEvent {
+    private static class ParsedLogEvent {
         private final String timestamp;
         private final int lineNumber;
         private String text;
 
         private static class LogEventBuilder {
             private final Pattern timestampPattern;
-            private LogEvent previous = null;
+            private ParsedLogEvent previous = null;
             private int lineNumber;
             private String timestamp;
             private StringBuilder textBuilder = new StringBuilder();
@@ -326,11 +325,11 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 this.timestampPattern = timestampPattern;
             }
 
-            public Optional<LogEvent> build(int lineNumber, String text) {
+            public Optional<ParsedLogEvent> build(int lineNumber, String text) {
                 var m = timestampPattern.matcher(text);
                 if (m.find()) {
                     var yield = previous;
-                    previous = new LogEvent(lineNumber, m.group(), text);
+                    previous = new ParsedLogEvent(lineNumber, m.group(), text);
                     if (yield != null) {
                         return Optional.of(yield);
                     } else {
@@ -344,12 +343,12 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                 }
             }
 
-            public Optional<LogEvent> getLast() {
+            public Optional<ParsedLogEvent> getLast() {
                 return previous != null ? Optional.of(previous) : Optional.empty();
             }
         }
 
-        private LogEvent(int lineNumber, String timestamp, String text) {
+        private ParsedLogEvent(int lineNumber, String timestamp, String text) {
             this.lineNumber = lineNumber;
             this.text = text;
             this.timestamp = timestamp;
@@ -436,19 +435,19 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
         public void add(String path, InputStream ias) throws IOException {
             try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
                 var n = new AtomicInteger(0);
-                var builder = new LogEvent.LogEventBuilder(timestampPattern);
+                var builder = new ParsedLogEvent.LogEventBuilder(timestampPattern);
                 try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
                     final AtomicLong nbLogEvents = new AtomicLong(0);
                     final AtomicBoolean taskDone = new AtomicBoolean(false);
                     final AtomicBoolean taskAborted = new AtomicBoolean(false);
-                    final ArrayBlockingQueue<LogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                    final ArrayBlockingQueue<ParsedLogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                     final List<Future<Integer>> results = new ArrayList<>();
                     for (int i = 0; i < parsingThreadsNumber; i++) {
                         results.add(parsingThreadPool.submit(() -> {
                             logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
                             int nbEventProcessed = 0;
                             do {
-                                List<LogEvent> todo = new ArrayList<>();
+                                List<ParsedLogEvent> todo = new ArrayList<>();
                                 var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
                                 if (drained == 0 && queue.size() == 0) {
                                     // Park the thread for a while before polling again
@@ -527,7 +526,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
             }
         }
 
-        private void addLogEvent(String path, LogsDataAdapter.LogEvent event) throws IOException {
+        private void addLogEvent(String path, ParsedLogEvent event) throws IOException {
             Document doc = new Document();
             Matcher m = payloadPattern.matcher(event.getText());
             doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
@@ -540,7 +539,9 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
                     doc.add(new SortedSetDocValuesFacetField(PATH, path));
-                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase()));
+                    String severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
+                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, severity));
+                    doc.add(new StoredField(SEVERITY, severity));
 //                    doc.add(new TextField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread")), Field.Store.NO));
 //                    doc.add(new TextField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger")), Field.Store.NO));
                 } catch (Exception e) {
@@ -613,8 +614,7 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                             .add(parser.parse(query), BooleanClause.Occur.FILTER)
                             .build();
                 }
-                logger.debug("Parsed filter query: " + filterQuery.toString(FIELD_CONTENT));
-                var logs = new ArrayList<XYChart.Data<ZonedDateTime, String>>();
+                var logs = new ArrayList<XYChart.Data<ZonedDateTime, LogEvent>>();
                 var drill = new DrillSideways(searcher, facetsConfig, this.state);
                 var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
                 for (var facet : params.entrySet()) {
@@ -631,37 +631,39 @@ public class LogsDataAdapter extends BaseDataAdapter<String> {
                         new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                         new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
                 TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
+                logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
                     results = drill.search(drillDownQuery, collector);
                 }
                 var topDocs = collector.topDocs();
                 logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
-                var severityFacet = new ArrayList<FacetEntry>();
+                var severityFacet = new HashMap<String, FacetEntry>();
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
+                    var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
+                    var labels = new ArrayList<String>();
+                    if (severitySynthesis != null) {
+                        for (var f : severitySynthesis.labelValues) {
+                            severityFacet.put(f.label, new FacetEntry(SEVERITY, f.label, f.value.intValue()));
+                            labels.add(f.label);
+                        }
+                        // Add facets labels used in query if not present in the result
+                        params.getOrDefault(SEVERITY, List.of()).stream()
+                                .filter(l -> !labels.contains(l))
+                                .map(l -> new FacetEntry(SEVERITY,l, 0))
+                                .forEachOrdered(f -> severityFacet.put(f.getLabel(), f));
+                    }
                     for (int i = skip; i < topDocs.scoreDocs.length; i++) {
                         var hit = topDocs.scoreDocs[i];
                         var doc = searcher.doc(hit.doc);
                         logs.add(new XYChart.Data<>(
                                 ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
-                                doc.get(FIELD_CONTENT) + "\n"));
+                                new LogEvent(doc.get(FIELD_CONTENT) + "\n", severityFacet.get(doc.get(SEVERITY)))));
                     }
-                    var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
-                    var labels = new ArrayList<String>();
-                    if (severitySynthesis != null) {
-                        for (var f : severitySynthesis.labelValues) {
-                            severityFacet.add(new FacetEntry(f.label, f.value.intValue()));
-                            labels.add(f.label);
-                        }
-                        // Add facets labels used in query if not present in the result
-                        severityFacet.addAll(params.getOrDefault(SEVERITY, List.of()).stream()
-                                .filter(l -> !labels.contains(l))
-                                .map(l -> new FacetEntry(l, 0))
-                                .collect(Collectors.toList()));
-                    }
+
                 }
                 var proc = new LogEventsProcessor();
                 proc.setData(logs);
-                proc.addFacetResults(SEVERITY, severityFacet);
+                proc.addFacetResults(SEVERITY, severityFacet.values());
                 proc.setTotalHits(collector.getTotalHits());
                 proc.setHitsPerPage(pageSize);
                 return proc;

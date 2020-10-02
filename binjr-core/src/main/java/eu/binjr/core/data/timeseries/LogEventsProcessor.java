@@ -32,28 +32,26 @@
 
 package eu.binjr.core.data.timeseries;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public class LogEventsProcessor extends TimeSeriesProcessor<String> {
+public class LogEventsProcessor extends TimeSeriesProcessor<LogEvent> {
 
     private final Map<String, Collection<FacetEntry>> facetResults = new HashMap<>();
     private int totalHits = 0;
     private int hitsPerPage = 0;
 
     @Override
-    protected String computeMinValue() {
+    protected LogEvent computeMinValue() {
         return null;
     }
 
     @Override
-    protected String computeAverageValue() {
+    protected LogEvent computeAverageValue() {
         return null;
     }
 
     @Override
-    protected String computeMaxValue() {
+    protected LogEvent computeMaxValue() {
         return null;
     }
 
@@ -80,4 +78,5 @@ public class LogEventsProcessor extends TimeSeriesProcessor<String> {
     public int getHitsPerPage() {
         return hitsPerPage;
     }
+
 }

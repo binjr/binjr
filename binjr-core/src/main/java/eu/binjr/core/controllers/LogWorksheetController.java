@@ -38,6 +38,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TimeRangePicker;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.LogFilter;
@@ -46,10 +47,12 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.timeseries.FacetEntry;
+import eu.binjr.core.data.timeseries.LogEvent;
 import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Syncable;
+import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
@@ -59,7 +62,6 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -68,6 +70,7 @@ import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.net.URL;
 import java.time.Instant;
@@ -90,13 +93,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private final AtomicBoolean closed = new AtomicBoolean(false);
 
-    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<String>> adapters)
+    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
         super(parent);
         this.worksheet = worksheet;
-        for (var d : worksheet.getSeriesInfo()) {
+        for (TimeSeriesInfo<LogEvent> d : worksheet.getSeriesInfo()) {
             UUID id = d.getBinding().getAdapterId();
-            DataAdapter<String> da = adapters
+            DataAdapter<LogEvent> da = adapters
                     .stream()
                     .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                     .findAny()
@@ -218,7 +221,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     event -> {
                         bindingManager.suspend();
                         try {
-
+                            // Reset page number
+                            pager.setCurrentPageIndex(filter.getPage());
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             if (retrieveFacets) {
@@ -234,17 +238,18 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         .stream()
                                         .filter(f -> checkedFacetLabels.contains(f.getLabel()))
                                         .forEach(f -> severityListView.getCheckModel().check(f));
-
                             }
-                            String data = res.getData().stream()
-                                    .map(XYChart.Data::getYValue)
-                                    .collect(Collectors.joining());
-                          //  textOutput.clear();
-                            textOutput.replaceText(0, textOutput.getLength(), data);
-
-                            if (worksheet.isSyntaxHighlightEnabled()) {
-                                this.syntaxHilightStyleSpans = CodeAreaHighlighter.computeSyntaxHighlighting(textOutput.getText());
-                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
+                            StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+                            var sb = new StringBuilder();
+                            for (var data : res.getData()) {
+                                var hit = data.getYValue();
+                                spansBuilder.add(Collections.singleton(hit.getFacets().get("severity").getLabel()), hit.getMessage().length());
+                                sb.append(hit.getMessage());
+                            }
+                            textOutput.replaceText(0, textOutput.getLength(), sb.toString());
+                            spansBuilder.add(Collections.emptyList(), 0);
+                            try (var p = Profiler.start("Applied log events coloring", logger::perf)) {
+                                textOutput.setStyleSpans(0, spansBuilder.create());
                             }
                         } finally {
                             bindingManager.resume();
@@ -260,7 +265,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         } catch (Exception e) {
             Dialogs.notifyException(e);
         }
-
     }
 
     @Override
@@ -330,7 +334,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // init filter controls
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());
         filterTextField.setText(worksheet.getFilter().getFilterQuery());
-        //    severityListView.getItems().addAll();
+        pager.setCurrentPageIndex(worksheet.getFilter().getPage());
 
         bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
             if (!oldVal.equals(newVal)) {
@@ -342,17 +346,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
         bindingManager.bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
         bindingManager.attachListener(severityListView.getCheckModel().getCheckedItems(),
-                (ListChangeListener<FacetEntry>) l -> invalidateFilter());
-        bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter());
-        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter()));
+                (ListChangeListener<FacetEntry>) l -> invalidateFilter(true));
+        bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
+        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
         clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
             filterTextField.clear();
-            invalidateFilter();
+            invalidateFilter(true);
         }));
-        applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter()));
-
-        // Pagination setup
-        // pager.setPageFactory();
+        applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
 
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
@@ -386,7 +387,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         super.initialize(location, resources);
     }
 
-    private void invalidateFilter() {
+    private void invalidateFilter(boolean resetPage) {
         worksheet.setFilter(
                 new LogFilter(filterTextField.getText(),
                         severityListView.getCheckModel().getCheckedItems()
@@ -394,7 +395,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 .filter(Objects::nonNull)
                                 .map(FacetEntry::getLabel)
                                 .collect(Collectors.toSet()),
-                        pager.getCurrentPageIndex()));
+                        resetPage ? 0 : pager.getCurrentPageIndex()));
     }
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
@@ -411,7 +412,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
-        var searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+        var searchResults =
+                CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
         prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
         nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
         searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
@@ -430,7 +432,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private TimeSeriesProcessor<String> fetchDataFromSources(LogFilter filter) throws DataAdapterException {
+    private TimeSeriesProcessor<LogEvent> fetchDataFromSources(LogFilter filter) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -450,7 +452,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             // Define the transforms to apply
-            var adapter = (DataAdapter<String>) byAdapterEntry.getKey();
+            var adapter = (DataAdapter<LogEvent>) byAdapterEntry.getKey();
             // Group all queries with the same adapter and path
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
@@ -480,42 +482,4 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     }
 
-    public static class PaginationStatus {
-        private int nbPages;
-        private int currentPage;
-        private int maxHitsPerPage;
-        private long nbHits;
-
-        public int getNbPages() {
-            return nbPages;
-        }
-
-        public void setNbPages(int nbPages) {
-            this.nbPages = nbPages;
-        }
-
-        public int getCurrentPage() {
-            return currentPage;
-        }
-
-        public void setCurrentPage(int currentPage) {
-            this.currentPage = currentPage;
-        }
-
-        public int getMaxHitsPerPage() {
-            return maxHitsPerPage;
-        }
-
-        public void setMaxHitsPerPage(int maxHitsPerPage) {
-            this.maxHitsPerPage = maxHitsPerPage;
-        }
-
-        public long getNbHits() {
-            return nbHits;
-        }
-
-        public void setNbHits(long nbHits) {
-            this.nbHits = nbHits;
-        }
-    }
 }

@@ -259,34 +259,6 @@
     -fx-background-color: rgba(10,10,10,0.7);
 }
 
-.log-trace {
-    -fx-fill: GRAY;
-}
-
-.log-debug {
-    -fx-fill: STEELBLUE;
-}
-
-.log-perf {
-    -fx-fill: #268f69;
-}
-
-.log-info {
-    -fx-fill: black;
-}
-
-.log-warn {
-    -fx-fill: DARKORANGE;
-}
-
-.log-error {
-    -fx-fill: RED;
-}
-
-.log-fatal {
-    -fx-fill: DARKRED;
-}
-
 .interval-picker-popup {
      -fx-background-color:
         linear-gradient(to bottom,
@@ -393,6 +365,40 @@
     -fx-fill: #008000;
 }
 
+.styled-text-area .trace,
+.log-trace {
+    -fx-fill: GRAY;
+}
+
+.styled-text-area .debug,
+.log-debug {
+    -fx-fill: STEELBLUE;
+}
+
+.styled-text-area .perf,
+.log-perf {
+    -fx-fill: #268f69;
+}
+
+.styled-text-area .info,
+.log-info {
+    -fx-fill: black;
+}
+
+.styled-text-area .warn,
+.log-warn {
+    -fx-fill: DARKORANGE;
+}
+
+.styled-text-area .error,
+.log-error {
+    -fx-fill: RED;
+}
+
+.styled-text-area .fatal,
+.log-fatal {
+    -fx-fill: DARKRED;
+}
 /*.styled-text-area .search-result-highlight {*/
 /*    -rtfx-background-color: yellow;*/
 /*}*/

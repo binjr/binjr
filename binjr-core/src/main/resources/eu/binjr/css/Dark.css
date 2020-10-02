@@ -1656,39 +1656,6 @@
     -fx-background-color: -binjr-pane-background-color;
 }
 
-.log-trace {
-
-    -fx-fill: GRAY;
-}
-
-.log-debug {
-
-    -fx-fill: LIGHTBLUE;
-}
-
-.log-perf {
-    -fx-fill: #42eab3;
-}
-
-.log-info {
-
-    -fx-fill: -fx-text-background-color;
-}
-
-.log-warn {
-
-    -fx-fill: GOLD;
-}
-
-.log-error {
-
-    -fx-fill: TOMATO;
-}
-
-.log-fatal {
-    -fx-fill: RED;
-}
-
 .console-pane > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
     -fx-background-color: transparent;
 }
@@ -1851,4 +1818,38 @@
     -fx-fill: teal;
 }
 
+.styled-text-area .trace,
+.log-trace {
+    -fx-fill: GRAY;
+}
+
+.styled-text-area .debug,
+.log-debug {
+    -fx-fill: LIGHTBLUE;
+}
+
+.styled-text-area .perf,
+.log-perf {
+    -fx-fill: #42eab3;
+}
+
+.styled-text-area .info,
+.log-info {
+    -fx-fill: -fx-text-background-color;
+}
+
+.styled-text-area .warn,
+.log-warn {
+    -fx-fill: GOLD;
+}
+
+.styled-text-area .error,
+.log-error {
+    -fx-fill: TOMATO;
+}
+
+.styled-text-area .fatal,
+.log-fatal {
+    -fx-fill: RED;
+}
 
