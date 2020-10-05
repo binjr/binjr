@@ -25,3 +25,15 @@
 .log-fatal {
     -fx-font-family: "Noto Mono";
 }
+
+.styled-text-area .syntax-help-text {
+    -fx-font-family: "Lato Light";
+}
+
+.styled-text-area .syntax-help-title {
+    -fx-font-family: "Noto Sans";
+}
+
+.styled-text-area .syntax-help-code {
+    -fx-font-family: "Noto Mono";
+}

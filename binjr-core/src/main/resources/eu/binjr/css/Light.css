@@ -1587,6 +1587,8 @@
     -fx-font-weight: bold;
 }
 
+
+
 .styled-text-area .attribute {
     -fx-fill: red;
 }
@@ -1640,4 +1642,12 @@
 .styled-text-area .fatal,
 .log-fatal {
     -fx-fill: DARKRED;
+}
+
+.syntax-help-popup {
+    -fx-effect: null;
+    -fx-border-with: 1;
+    -fx-border-color: -binjr-color-dark-gray;
+    -fx-border-radius: 0;
+    -fx-background-color: -binjr-window-background-color;
 }

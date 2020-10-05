@@ -26,3 +26,16 @@
     -fx-font-family: "Consolas";
 }
 
+.styled-text-area .syntax-help-text {
+    -fx-font-family: "Segoe UI Light";
+}
+
+.styled-text-area .syntax-help-title {
+    -fx-font-family: "Segoe UI";
+}
+
+.styled-text-area .syntax-help-code {
+    -fx-font-family: "Consolas";
+}
+
+

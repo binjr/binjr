@@ -160,3 +160,25 @@
     -fx-font-size: 10pt;
 }
 
+.styled-text-area .syntax-help-text {
+    -fx-font-size: 10pt;
+}
+
+.styled-text-area .syntax-help-title {
+    -fx-font-size: 14pt;
+    /*-fx-font-weight: bold;*/
+}
+
+.styled-text-area .syntax-help-code {
+    -fx-font-size: 10pt;
+}
+.styled-text-area .syntax-help-code {
+    -fx-font-size: 10pt;
+    -fx-padding: 0,10,0,10;
+    -fx-fill: white;
+    -rtfx-background-color: #204656;
+}
+
+.syntax-help-popup .styled-text-area {
+    -fx-background-color: transparent;
+}

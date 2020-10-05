@@ -62,13 +62,18 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -162,6 +167,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public Worksheet getWorksheet() {
         return worksheet;
     }
+
+    @FXML
+    private Button querySyntaxButton;
 
     @FXML
     private MaskerPane busyIndicator;
@@ -334,6 +342,49 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         });
 
+        // Query syntax help
+        var syntaxPopupRoot = new StackPane();
+        syntaxPopupRoot.getStyleClass().addAll("syntax-help-popup");
+        syntaxPopupRoot.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
+        syntaxPopupRoot.setPrefSize(600, 700);
+        var syntaxCheatSheet = new StyleClassedTextArea();
+        syntaxCheatSheet.setEditable(false);
+        syntaxCheatSheet.append("Query Syntax\n\n", "syntax-help-title");
+        syntaxCheatSheet.append("Search for word \"foo\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" foo \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for word \"foo\" OR for word \"bar\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" foo bar ", "syntax-help-code");
+        syntaxCheatSheet.append(" or ", "syntax-help-text");
+        syntaxCheatSheet.append(" foo OR bar \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for phrase \"foo bar\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" \"foo bar\" \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for phrase \"foo bar\"  AND the phrase \"quick fox\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" \"foo bar\" AND \"quick fox\" ", "syntax-help-code");
+        syntaxCheatSheet.append(" or ", "syntax-help-text");
+        syntaxCheatSheet.append(" \"foo bar\" +\"quick fox\" \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for either the phrase \"foo bar\" AND the phrase \"quick fox\", or the phrase \"hello world\":  \n", "syntax-help-text");
+        syntaxCheatSheet.append(" (\"foo bar\" AND \"quick fox\") OR \"hello world\" \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for word \"foo\" and not \"bar\": (Note: The NOT operator cannot be used with just one term)\n", "syntax-help-text");
+        syntaxCheatSheet.append(" foo NOT bar ", "syntax-help-code");
+        syntaxCheatSheet.append(" or ", "syntax-help-text");
+        syntaxCheatSheet.append(" foo -bar \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for any word that starts with \"foo\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" foo* \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for any word that starts with \"foo\" and ends with bar:\n", "syntax-help-text");
+        syntaxCheatSheet.append(" foo*bar \n\n", "syntax-help-code");
+        syntaxCheatSheet.append(" Search for a term similar in spelling to \"foobar\" (e.g. \"fuzzy search\"): \n", "syntax-help-text");
+        syntaxCheatSheet.append(" foobar~ \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for \"foo bar\" within 4 words from each other:\n", "syntax-help-text");
+        syntaxCheatSheet.append(" \"foo bar\"~4 \n", "syntax-help-code");
+        syntaxPopupRoot.getChildren().add(syntaxCheatSheet);
+        var popup = new PopupControl();
+        popup.setAutoHide(true);
+        popup.getScene().setRoot(syntaxPopupRoot);
+        querySyntaxButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+            Node owner = (Node) actionEvent.getSource();
+            Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
+            popup.show(owner.getScene().getWindow(), bounds.getMaxX() - 600, bounds.getMaxY());
+        }));
 
         // init filter controls
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());

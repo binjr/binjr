@@ -25,3 +25,15 @@
 .log-fatal {
     -fx-font-family: "?";
 }
+
+.styled-text-area .syntax-help-text {
+    -fx-font-family: "?";
+}
+
+.styled-text-area .syntax-help-title {
+    -fx-font-family: "?";
+}
+
+.styled-text-area .syntax-help-code {
+    -fx-font-family: "?";
+}
