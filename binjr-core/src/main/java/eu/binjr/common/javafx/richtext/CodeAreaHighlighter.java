@@ -65,15 +65,14 @@ public class CodeAreaHighlighter {
         }
     }
 
-    public static class SearchHilightResults {
+    public static class SearchHighlightResults {
         private final List<SearchHitRange> searchHitRanges;
         private final StyleSpans<Collection<String>> styleSpans;
 
-        private SearchHilightResults(List<SearchHitRange> searchHitRanges, StyleSpans<Collection<String>> styleSpans) {
+        private SearchHighlightResults(List<SearchHitRange> searchHitRanges, StyleSpans<Collection<String>> styleSpans) {
             this.searchHitRanges = searchHitRanges;
             this.styleSpans = styleSpans;
         }
-
 
         public List<SearchHitRange> getSearchHitRanges() {
             return searchHitRanges;
@@ -84,7 +83,7 @@ public class CodeAreaHighlighter {
         }
     }
 
-    public static SearchHilightResults computeSearchHitsHighlighting(String text, String searchText, boolean matchCase, boolean regEx) {
+    public static SearchHighlightResults computeSearchHitsHighlighting(String text, String searchText, boolean matchCase, boolean regEx) {
         StringBuilder searchExpression = new StringBuilder();
         if (!regEx) {
             searchText.codePoints().forEachOrdered(value -> {
@@ -121,7 +120,7 @@ public class CodeAreaHighlighter {
             logger.debug("", e);
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
-        return new SearchHilightResults(hits, spansBuilder.create());
+        return new SearchHighlightResults(hits, spansBuilder.create());
     }
 
     public static StyleSpans<Collection<String>> computeLogsSyntaxHighlighting(String text) {
@@ -136,7 +135,6 @@ public class CodeAreaHighlighter {
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
     }
-
 
     public static StyleSpans<Collection<String>> computeXmlSyntaxHighlighting(String text) {
         Matcher matcher = XML_TAG.matcher(text);

@@ -226,7 +226,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             if (retrieveFacets) {
-
                                 var checkedFacetLabels = severityListView.getCheckModel()
                                         .getCheckedItems().stream()
                                         .filter(Objects::nonNull)
@@ -252,6 +251,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 syntaxHilightStyleSpans = spansBuilder.create();
                                 textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
                             }
+                            // Reset search highlight
+                            doSearchHighlight(searchTextField.getText(),
+                                    searchMatchCaseToggle.isSelected(),
+                                    searchRegExToggle.isSelected());
                         } finally {
                             bindingManager.resume();
                             busyIndicator.setVisible(false);
