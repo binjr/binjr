@@ -249,7 +249,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             textOutput.replaceText(0, textOutput.getLength(), sb.toString());
                             spansBuilder.add(Collections.emptyList(), 0);
                             try (var p = Profiler.start("Applied log events coloring", logger::perf)) {
-                                textOutput.setStyleSpans(0, spansBuilder.create());
+                                syntaxHilightStyleSpans = spansBuilder.create();
+                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
                             }
                         } finally {
                             bindingManager.resume();
