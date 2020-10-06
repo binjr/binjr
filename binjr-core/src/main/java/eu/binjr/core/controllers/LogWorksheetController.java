@@ -230,9 +230,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         bindingManager.suspend();
                         try {
                             // Reset page number
-                            pager.setCurrentPageIndex(filter.getPage());
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
+                            pager.setCurrentPageIndex(filter.getPage());
                             if (retrieveFacets) {
                                 var checkedFacetLabels = severityListView.getCheckModel()
                                         .getCheckedItems().stream()
@@ -387,7 +387,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         // init filter controls
-        pager.setCurrentPageIndex(worksheet.getFilter().getPage());
         filterTextField.setText(worksheet.getFilter().getFilterQuery());
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());
 
