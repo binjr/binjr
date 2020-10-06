@@ -217,10 +217,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     public void invalidate(boolean saveToHistory, boolean retrieveFacets) {
         //TODO handle history
-        queryLogIndex(worksheet.getFilter(), retrieveFacets);
+        queryLogIndex(worksheet.getFilter());
     }
 
-    public void queryLogIndex(LogFilter filter, boolean retrieveFacets) {
+    public void queryLogIndex(LogFilter filter) {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
@@ -233,19 +233,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             pager.setCurrentPageIndex(filter.getPage());
-                            if (retrieveFacets) {
-                                var checkedFacetLabels = severityListView.getCheckModel()
-                                        .getCheckedItems().stream()
-                                        .filter(Objects::nonNull)
-                                        .map(FacetEntry::getLabel)
-                                        .collect(toList());
-                                severityListView.getCheckModel().clearChecks();
-                                severityListView.getItems().setAll(res.getFacetResults().get("severity"));
-                                severityListView.getItems()
-                                        .stream()
-                                        .filter(f -> checkedFacetLabels.contains(f.getLabel()))
-                                        .forEach(f -> severityListView.getCheckModel().check(f));
-                            }
+                            // Update severity facet view
+                            severityListView.getCheckModel().clearChecks();
+                            severityListView.getItems().setAll(res.getFacetResults().get("severity"));
+                            severityListView.getItems()
+                                    .stream()
+                                    .filter(f -> filter.getSeverities().contains(f.getLabel()))
+                                    .forEach(f -> severityListView.getCheckModel().check(f));
+                            // Color and display message text
                             StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
                             var sb = new StringBuilder();
                             for (var data : res.getData()) {
