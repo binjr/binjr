@@ -649,8 +649,8 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                         // Add facets labels used in query if not present in the result
                         params.getOrDefault(SEVERITY, List.of()).stream()
                                 .filter(l -> !labels.contains(l))
-                                .map(l -> new FacetEntry(SEVERITY,l, 0))
-                                .forEachOrdered(f -> severityFacet.put(f.getLabel(), f));
+                                .map(l -> new FacetEntry(SEVERITY, l, 0))
+                                .forEach(f -> severityFacet.put(f.getLabel(), f));
                     }
                     for (int i = skip; i < topDocs.scoreDocs.length; i++) {
                         var hit = topDocs.scoreDocs[i];
@@ -663,7 +663,11 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 }
                 var proc = new LogEventsProcessor();
                 proc.setData(logs);
-                proc.addFacetResults(SEVERITY, severityFacet.values());
+                proc.addFacetResults(SEVERITY,
+                        severityFacet.values()
+                                .stream()
+                                .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
+                                .collect(Collectors.toList()));
                 proc.setTotalHits(collector.getTotalHits());
                 proc.setHitsPerPage(pageSize);
                 return proc;
