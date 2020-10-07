@@ -624,7 +624,7 @@ task signPackageDistribution() {
     if (IS_WINDOWS) {
         finalizedBy(signPackageAsMsi, signPackageAsZip)
     } else if (IS_MAC) {
-//        finalizedBy(signPackageAsDmg, signPackageAsTarGz)
+        finalizedBy(signPackageAsDmg, signPackageAsTarGz)
     } else {
         finalizedBy(signPackageAsTarGz, signPackageAsDeb, signPackageAsRpm)
     }
