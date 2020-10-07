@@ -467,7 +467,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "jpackage",
             "--name", project.name,
             "--input", "${buildDir}/tmp/input",
-            "--main-jar", "binjr-core-${BINJR_VERSION_STEM}.jar",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
             "--type", DISTRIBUTION_EXTENSION,
