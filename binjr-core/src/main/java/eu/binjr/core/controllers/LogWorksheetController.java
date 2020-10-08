@@ -385,6 +385,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         filterTextField.setText(worksheet.getFilter().getFilterQuery());
         pager.setCurrentPageIndex(worksheet.getFilter().getPage());
 
+        bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
+        bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
+
         bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
             if (!oldVal.equals(newVal)) {
                 refresh();
