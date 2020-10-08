@@ -34,8 +34,7 @@ package eu.binjr.core.controllers;
 
 
 import com.google.gson.Gson;
-import eu.binjr.common.javafx.controls.TimeRange;
-import eu.binjr.common.javafx.controls.TimeRangePicker;
+import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -57,8 +56,10 @@ import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -66,9 +67,14 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
 import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
@@ -86,7 +92,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
-import static java.util.stream.Collectors.toList;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
     private static final Logger logger = Logger.create(LogWorksheetController.class);
@@ -188,6 +193,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @FXML
     private VBox filteringBar;
+
+    @FXML
+    private HBox paginationBar;
+
+    @FXML
+    private TableView<TimeSeriesInfo<LogEvent>> fileTable;
 
 
     @Override
@@ -435,8 +446,63 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().attachListener(searchRegExToggle.selectedProperty(),
                 (ChangeListener<Boolean>) (obs, oldVal, newVal) ->
                         doSearchHighlight(searchTextField.getText(), searchMatchCaseToggle.isSelected(), newVal));
+
+        // Init log files table view
+        intiLogFileTable();
+
+
         refresh();
         super.initialize(location, resources);
+    }
+
+    private void intiLogFileTable() {
+        DecimalFormatTableCellFactory<TimeSeriesInfo<LogEvent>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+        alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
+        // alignRightCellFactory.setPattern("###");
+
+        TableColumn<TimeSeriesInfo<LogEvent>, Boolean> visibleColumn = new TableColumn<>();
+        visibleColumn.setSortable(false);
+        visibleColumn.setResizable(false);
+        visibleColumn.setPrefWidth(32);
+
+        visibleColumn.setCellValueFactory(p -> p.getValue().selectedProperty());
+        visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
+
+        TableColumn<TimeSeriesInfo<LogEvent>, Color> colorColumn = new TableColumn<>();
+        colorColumn.setSortable(false);
+        colorColumn.setResizable(false);
+        colorColumn.setPrefWidth(32);
+        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+        colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
+
+        TableColumn<TimeSeriesInfo<LogEvent>, String> eventNumColumn = new TableColumn<>("#");
+        eventNumColumn.setSortable(false);
+        eventNumColumn.setPrefWidth(75);
+        eventNumColumn.setCellFactory(alignRightCellFactory);
+        eventNumColumn.setCellValueFactory(p -> Bindings.createStringBinding(
+                () -> p.getValue().getProcessor() == null ? "NaN" :
+                        Integer.toString(((LogEventsProcessor) p.getValue().getProcessor()).getTotalHits()),
+                p.getValue().processorProperty()));
+
+
+        TableColumn<TimeSeriesInfo<LogEvent>, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setSortable(false);
+        nameColumn.setPrefWidth(260);
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+
+        TableColumn<TimeSeriesInfo<LogEvent>, String> pathColumn = new TableColumn<>("Path");
+        pathColumn.setSortable(false);
+        pathColumn.setPrefWidth(400);
+        pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
+
+        fileTable.setItems(worksheet.getSeriesInfo());
+        fileTable.getColumns().addAll(
+                visibleColumn,
+                colorColumn,
+                eventNumColumn,
+                nameColumn,
+                pathColumn);
+        TableViewUtils.autoFillTableWidthWithLastColumn(fileTable);
     }
 
     private void invalidateFilter(boolean resetPage) {

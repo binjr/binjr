@@ -44,6 +44,7 @@ import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.DrillDownQuery;
 import org.apache.lucene.facet.DrillSideways;
+import org.apache.lucene.facet.Facets;
 import org.apache.lucene.facet.FacetsConfig;
 import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
 import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
@@ -89,14 +90,13 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
-    private static final String TIMESTAMP_VALUES = "timestampValues";
     public static final String PATH = "filePath";
     public static final String SEVERITY = "severity";
     public static final String THREAD = "thread";
     public static final String LOGGER = "logger";
-    public static final String SORT_TIMESTAMP = "sortedTimestamp";
-    public static final String FACET_SEVERITY = "facetSeverity";
-    public static final String FACET_PATH = "facetPath";
+//    public static final String FACET_SEVERITY = "facetSeverity";
+//    public static final String FACET_PATH = "facetPath";
+    public static final String FACET_FIELD = "facets";
     public static final String MESSAGE = "message";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private LogFileIndex index;
@@ -426,8 +426,12 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             indexReader = DirectoryReader.open(indexWriter);
             searcher = new IndexSearcher(indexReader);
             facetsConfig = new FacetsConfig();
-            facetsConfig.setIndexFieldName(SEVERITY, FACET_SEVERITY);
-            facetsConfig.setIndexFieldName(PATH, FACET_PATH);
+            facetsConfig.setIndexFieldName(SEVERITY, FACET_FIELD);
+            facetsConfig.setRequireDimCount(SEVERITY, true);
+            facetsConfig.setRequireDimensionDrillDown(PATH, true);
+            facetsConfig.setIndexFieldName(PATH, FACET_FIELD);
+            facetsConfig.setRequireDimCount(PATH, true);
+            facetsConfig.setRequireDimensionDrillDown(PATH, true);
             logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                     " using " + parsingThreadsNumber + " parsing indexing threads");
         }
@@ -520,7 +524,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                             this.indexReader = updatedReader;
                             this.searcher = new IndexSearcher(indexReader);
                         }
-                        this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_SEVERITY);
+                        this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_FIELD);
                     }
                 });
             }
@@ -539,6 +543,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
                     doc.add(new SortedSetDocValuesFacetField(PATH, path));
+                    doc.add(new StoredField(PATH, path));
                     String severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
                     doc.add(new SortedSetDocValuesFacetField(SEVERITY, severity));
                     doc.add(new StoredField(SEVERITY, severity));
@@ -602,6 +607,24 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             });
         }
 
+        private HashMap<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params) throws IOException {
+            var facetEntryMap = new HashMap<String, FacetEntry>();
+            var synthesis = facets.getTopChildren(100, facetName);
+            var labels = new ArrayList<String>();
+            if (synthesis != null) {
+                for (var f : synthesis.labelValues) {
+                    facetEntryMap.put(f.label, new FacetEntry(facetName, f.label, f.value.intValue()));
+                    labels.add(f.label);
+                }
+                // Add facets labels used in query if not present in the result
+                params.getOrDefault(facetName, List.of()).stream()
+                        .filter(l -> !labels.contains(l))
+                        .map(l -> new FacetEntry(facetName, l, 0))
+                        .forEach(f -> facetEntryMap.put(f.getLabel(), f));
+            }
+            return facetEntryMap;
+        }
+
         public LogEventsProcessor filter(long start, long end, Map<String, Collection<String>> params, String query, int page) throws Exception {
             return indexLock.read().lock(() -> {
                 Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
@@ -638,31 +661,30 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 var topDocs = collector.topDocs();
                 logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
                 var severityFacet = new HashMap<String, FacetEntry>();
+                var pathFacet = new HashMap<String, FacetEntry>();
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
-                    var severitySynthesis = results.facets.getTopChildren(100, SEVERITY);
-                    var labels = new ArrayList<String>();
-                    if (severitySynthesis != null) {
-                        for (var f : severitySynthesis.labelValues) {
-                            severityFacet.put(f.label, new FacetEntry(SEVERITY, f.label, f.value.intValue()));
-                            labels.add(f.label);
-                        }
-                        // Add facets labels used in query if not present in the result
-                        params.getOrDefault(SEVERITY, List.of()).stream()
-                                .filter(l -> !labels.contains(l))
-                                .map(l -> new FacetEntry(SEVERITY, l, 0))
-                                .forEach(f -> severityFacet.put(f.getLabel(), f));
-                    }
+                    pathFacet = makeFacetResult(PATH, results.facets, params);
+                    severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+
+
                     for (int i = skip; i < topDocs.scoreDocs.length; i++) {
                         var hit = topDocs.scoreDocs[i];
                         var doc = searcher.doc(hit.doc);
                         logs.add(new XYChart.Data<>(
                                 ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
-                                new LogEvent(doc.get(FIELD_CONTENT) + "\n", severityFacet.get(doc.get(SEVERITY)))));
+                                new LogEvent(doc.get(FIELD_CONTENT) + "\n",
+                                        severityFacet.get(doc.get(SEVERITY)),
+                                        pathFacet.get(doc.get(PATH)))));
                     }
 
                 }
                 var proc = new LogEventsProcessor();
                 proc.setData(logs);
+                proc.addFacetResults(PATH,
+                        pathFacet.values()
+                                .stream()
+                                .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
+                                .collect(Collectors.toList()));
                 proc.addFacetResults(SEVERITY,
                         severityFacet.values()
                                 .stream()

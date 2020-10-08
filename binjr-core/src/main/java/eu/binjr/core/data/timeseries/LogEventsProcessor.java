@@ -32,7 +32,9 @@
 
 package eu.binjr.core.data.timeseries;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LogEventsProcessor extends TimeSeriesProcessor<LogEvent> {
 
@@ -42,7 +44,7 @@ public class LogEventsProcessor extends TimeSeriesProcessor<LogEvent> {
 
     @Override
     protected LogEvent computeMinValue() {
-        return null;
+        return (data != null && data.size() > 0) ? data.get(0).getYValue() : null;
     }
 
     @Override
@@ -52,7 +54,7 @@ public class LogEventsProcessor extends TimeSeriesProcessor<LogEvent> {
 
     @Override
     protected LogEvent computeMaxValue() {
-        return null;
+        return (data != null && data.size() > 0) ? data.get(data.size() - 1).getYValue() : null;
     }
 
     public Map<String, Collection<FacetEntry>> getFacetResults() {
