@@ -81,6 +81,7 @@ public abstract class FileSystemBrowser implements Closeable {
                         .map(CheckedLambdas.wrap(p -> {
                             return new FileSystemEntry(Files.isDirectory(p), p, Files.size(getPath().resolve(p)));
                         }))
+                        .sorted(FileSystemEntry::compareTo)
                         .collect(Collectors.toList());
             }
         }
@@ -127,13 +128,12 @@ public abstract class FileSystemBrowser implements Closeable {
                 final Enumeration<? extends ZipEntry> entries = zipFile.entries();
                 while (entries.hasMoreElements()) {
                     final ZipEntry zipEntry = entries.nextElement();
-                    if (!zipEntry.isDirectory()) {
-                        Path entryPath = zipRootPath.resolve(zipEntry.getName());
-                        if (filter.test(entryPath)) {
-                            fsEntries.add(new FileSystemEntry(false, entryPath, zipEntry.getSize()));
-                        }
+                    Path entryPath = zipRootPath.resolve(zipEntry.getName());
+                    if (filter.test(entryPath)) {
+                        fsEntries.add(new FileSystemEntry(zipEntry.isDirectory(), entryPath, zipEntry.getSize()));
                     }
                 }
+                fsEntries.sort(FileSystemEntry::compareTo);
                 return fsEntries;
             }
         }
@@ -151,7 +151,7 @@ public abstract class FileSystemBrowser implements Closeable {
         }
     }
 
-    public static class FileSystemEntry {
+    public static class FileSystemEntry implements Comparable<FileSystemEntry> {
         private final boolean directory;
         private final Path path;
         private final Long size;
@@ -172,6 +172,62 @@ public abstract class FileSystemBrowser implements Closeable {
 
         public Long getSize() {
             return size;
+        }
+
+        @Override
+        public int compareTo(FileSystemEntry o) {
+            var dirComp = Boolean.compare(this.directory, o.directory);
+            if (dirComp != 0) {
+                return dirComp;
+            }
+
+            var rootComp = Boolean.compare(isRoot(this.path), isRoot(o.path));
+            if (rootComp != 0) {
+                return rootComp;
+            }
+
+            var pathComp = this.path.toString().compareToIgnoreCase(o.path.toString());
+            if (pathComp != 0) {
+                return pathComp;
+            }
+            var depthComp = pathDepthFromRoot(o.path) - pathDepthFromRoot(this.path);
+            if (depthComp != 0) {
+                return depthComp;
+            }
+            return Long.compare(this.size, o.size);
+        }
+
+        private boolean isRoot(Path path) {
+            return path.getParent() == null || path.getParent().toString().equals("/");
+        }
+
+        private int pathDepthFromRoot(Path path) {
+            int depth = 0;
+            Path parent = path.getParent();
+            while (parent != null) {
+                depth++;
+                parent = parent.getParent();
+            }
+            return depth;
+        }
+
+        @Override
+        public int hashCode() {
+            return path.hashCode() + Long.hashCode(size) + Boolean.hashCode(directory);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            FileSystemEntry fse = (FileSystemEntry) obj;
+            return path.equals(fse.path) &&
+                    size == fse.size &&
+                    directory == fse.directory;
         }
     }
 }
