@@ -143,6 +143,10 @@
     -fx-font-size: 10pt;
 }
 
+/*.styled-text-area .paragraph-box {
+    -fx-padding: -5;
+}*/
+
 .search-field-inner {
     -fx-background-radius: 0;
     -fx-border-width: 0;
@@ -181,4 +185,27 @@
 
 .syntax-help-popup .styled-text-area {
     -fx-background-color: transparent;
+}
+
+.styled-text-area .file1 {
+    -rtfx-background-color: #0000FF30;
+  /*  -rtfx-underline-width:1;
+    -rtfx-underline-color: green;*/
+    -fx-padding: 10;
+}
+
+.text-flow {
+    /* the alignment of the text, where <alignment> can be
+        [ left | center | right | justify ] and defaults to "left" */
+    -fx-text-alignment: 0;
+
+    /* the amount of pixels to separate lines in a multi-line paragraph
+       (e.g. when `area.isWrapText() == true`) */
+    -fx-line-spacing:0;
+}
+
+.styled-text-area .file2 {
+    -rtfx-background-color: #00FF0030;
+ /*   -rtfx-border-stroke-width: 2;
+    -rtfx-border-stroke-color: red;*/
 }

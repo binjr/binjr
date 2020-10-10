@@ -34,6 +34,7 @@ package eu.binjr.core.controllers;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
@@ -69,10 +70,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
@@ -83,7 +81,10 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -94,31 +95,15 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.groupingBy;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
-    private static final Logger logger = Logger.create(LogWorksheetController.class);
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
+    private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final Gson gson = new Gson();
     private final LogWorksheet worksheet;
+    private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final ReadOnlyObjectWrapper<TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
     //  private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
-    private final AtomicBoolean closed = new AtomicBoolean(false);
-
-    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
-            throws NoAdapterFoundException {
-        super(parent);
-        this.worksheet = worksheet;
-        for (TimeSeriesInfo<LogEvent> d : worksheet.getSeriesInfo()) {
-            UUID id = d.getBinding().getAdapterId();
-            DataAdapter<LogEvent> da = adapters
-                    .stream()
-                    .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
-                    .findAny()
-                    .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " +
-                            (id != null ? id.toString() : "null")));
-            d.getBinding().setAdapter(da);
-        }
-    }
-
     @FXML
     private AnchorPane root;
 
@@ -167,39 +152,45 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @FXML
     private Pagination pager;
+    @FXML
+    private Button querySyntaxButton;
+    @FXML
+    private MaskerPane busyIndicator;
+    @FXML
+    private CheckListView<FacetEntry> severityListView;
+    @FXML
+    private TextField filterTextField;
+    @FXML
+    private Button clearFilterButton;
+    @FXML
+    private Button applyFilterButton;
+    @FXML
+    private VBox filteringBar;
+    @FXML
+    private HBox paginationBar;
+    @FXML
+    private TableView<TimeSeriesInfo<LogEvent>> fileTable;
+
+    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
+            throws NoAdapterFoundException {
+        super(parent);
+        this.worksheet = worksheet;
+        for (TimeSeriesInfo<LogEvent> d : worksheet.getSeriesInfo()) {
+            UUID id = d.getBinding().getAdapterId();
+            DataAdapter<LogEvent> da = adapters
+                    .stream()
+                    .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
+                    .findAny()
+                    .orElseThrow(() -> new NoAdapterFoundException("Failed to find a valid adapter with id " +
+                            (id != null ? id.toString() : "null")));
+            d.getBinding().setAdapter(da);
+        }
+    }
 
     @Override
     public Worksheet getWorksheet() {
         return worksheet;
     }
-
-    @FXML
-    private Button querySyntaxButton;
-
-    @FXML
-    private MaskerPane busyIndicator;
-
-    @FXML
-    private CheckListView<FacetEntry> severityListView;
-
-    @FXML
-    private TextField filterTextField;
-
-    @FXML
-    private Button clearFilterButton;
-
-    @FXML
-    private Button applyFilterButton;
-
-    @FXML
-    private VBox filteringBar;
-
-    @FXML
-    private HBox paginationBar;
-
-    @FXML
-    private TableView<TimeSeriesInfo<LogEvent>> fileTable;
-
 
     @Override
     public Property<TimeRange> selectedRangeProperty() {
@@ -224,7 +215,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public void refresh() {
         invalidate(true, true);
     }
-
 
     public void invalidate(boolean saveToHistory, boolean retrieveFacets) {
         //TODO handle history
@@ -254,9 +244,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             // Color and display message text
                             StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
                             var sb = new StringBuilder();
+                            Random r = new Random();
                             for (var data : res.getData()) {
                                 var hit = data.getYValue();
-                                spansBuilder.add(Collections.singleton(hit.getFacets().get("severity").getLabel()), hit.getMessage().length());
+                                spansBuilder.add(List.of(hit.getFacets().get("severity").getLabel(), "file" + (r.nextBoolean() ? "1" : "2")), hit.getMessage().length());
                                 sb.append(hit.getMessage());
                             }
                             textOutput.replaceText(0, textOutput.getLength(), sb.toString());
@@ -305,7 +296,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         return new ArrayList<>();
     }
 
-
     @Override
     public void close() {
         if (closed.compareAndSet(false, true)) {
@@ -319,8 +309,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public String getView() {
         return WORKSHEET_VIEW_FXML;
     }
-
-    private final ReadOnlyObjectWrapper<TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -583,6 +571,29 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return data.values().stream().findFirst().orElse(new LogEventsProcessor());
         }
         return new LogEventsProcessor();
+    }
+
+    private void setThemeColors(Pane previewPane, Color backgroundColor, Color textColor, Color controlColor) {
+        try {
+            Path cssPath = Files.createTempFile("fx-theme-", ".css");
+            Files.writeString(
+                    cssPath,
+                    ".themed{-fx-background-color:" + ColorUtils.toHex(backgroundColor) + ";}" +
+                            ".label{-fx-text-fill:" + ColorUtils.toHex(textColor) + ";}" +
+                            ".button{-fx-base:" + ColorUtils.toHex(controlColor) + ";}"
+            );
+            cssPath.toFile().deleteOnExit();
+
+            System.out.println("Wrote " + cssPath);
+            System.out.println("URL " + cssPath.toUri().toURL().toExternalForm());
+
+            previewPane.getStyleClass().setAll("themed");
+            previewPane.getStylesheets().setAll(
+                    cssPath.toUri().toURL().toExternalForm()
+            );
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
