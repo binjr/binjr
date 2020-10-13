@@ -143,10 +143,6 @@
     -fx-font-size: 10pt;
 }
 
-/*.styled-text-area .paragraph-box {
-    -fx-padding: -5;
-}*/
-
 .search-field-inner {
     -fx-background-radius: 0;
     -fx-border-width: 0;
@@ -208,4 +204,20 @@
     -rtfx-background-color: #00FF0030;
  /*   -rtfx-border-stroke-width: 2;
     -rtfx-border-stroke-color: red;*/
+}
+
+/*.styled-text-area .paragraph-box {*/
+/*    -fx-padding: 5;*/
+/*}*/
+
+.styled-text-area .paragraph-text {
+    -fx-padding: 1 4 2 2;
+}
+
+.para1 {
+    -fx-background-color: #00FF0030;
+}
+
+.para2 {
+    -fx-background-color: #0000FF30;
 }

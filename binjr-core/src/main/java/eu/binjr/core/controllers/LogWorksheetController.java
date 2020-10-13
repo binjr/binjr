@@ -78,8 +78,9 @@ import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
+import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.net.URL;
@@ -242,24 +243,24 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     .filter(f -> filter.getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
                             // Color and display message text
-                            StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-                            var sb = new StringBuilder();
-                            Random r = new Random();
-                            for (var data : res.getData()) {
-                                var hit = data.getYValue();
-                                spansBuilder.add(List.of(hit.getFacets().get("severity").getLabel(), "file" + (r.nextBoolean() ? "1" : "2")), hit.getMessage().length());
-                                sb.append(hit.getMessage());
+                            try (var p = Profiler.start("Set text", logger::perf)) {
+                                Random r = new Random();
+                                var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
+                                        SegmentOps.styledTextOps(),
+                                        Collections.emptyList());
+                                for (var data : res.getData()) {
+                                    var hit = data.getYValue();
+                                    docBuilder.addParagraph(
+                                            hit.getMessage().stripTrailing(),
+                                            List.of(hit.getFacets().get("severity").getLabel()),
+                                            List.of("para" + (r.nextBoolean() ? "1" : "2")));
+                                }
+                                textOutput.replace(docBuilder.build());
+                                // Reset search highlight
+                                doSearchHighlight(searchTextField.getText(),
+                                        searchMatchCaseToggle.isSelected(),
+                                        searchRegExToggle.isSelected());
                             }
-                            textOutput.replaceText(0, textOutput.getLength(), sb.toString());
-                            spansBuilder.add(Collections.emptyList(), 0);
-                            try (var p = Profiler.start("Applied log events coloring", logger::perf)) {
-                                syntaxHilightStyleSpans = spansBuilder.create();
-                                textOutput.setStyleSpans(0, syntaxHilightStyleSpans);
-                            }
-                            // Reset search highlight
-                            doSearchHighlight(searchTextField.getText(),
-                                    searchMatchCaseToggle.isSelected(),
-                                    searchRegExToggle.isSelected());
                         } finally {
                             bindingManager.resume();
                             busyIndicator.setVisible(false);

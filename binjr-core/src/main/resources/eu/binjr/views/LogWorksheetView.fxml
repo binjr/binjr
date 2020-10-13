@@ -238,11 +238,7 @@
                   <VBox>
                       <VirtualizedScrollPane styleClass=" skinnable-pane-border" VBox.vgrow="ALWAYS">
                           <content>
-                              <CodeArea fx:id="textOutput" styleClass="log-view">
-                                  <padding>
-                                      <Insets left="4.0" />
-                                  </padding>
-                              </CodeArea>
+                              <CodeArea fx:id="textOutput" styleClass="log-view"/>
                           </content>
                       </VirtualizedScrollPane>
                       <HBox fx:id="paginationBar" styleClass="worksheet-tool-bar">
