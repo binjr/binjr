@@ -70,7 +70,10 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.*;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
@@ -81,11 +84,13 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -102,7 +107,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final ReadOnlyObjectWrapper<TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
-    //  private final Property<TimeRange> timeRangeProperty = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     @FXML
@@ -171,6 +175,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private HBox paginationBar;
     @FXML
     private TableView<TimeSeriesInfo<LogEvent>> fileTable;
+    private Path tmpCssPath;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
@@ -219,6 +224,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     public void invalidate(boolean saveToHistory, boolean retrieveFacets) {
         //TODO handle history
+        makeFilesCss(worksheet.getSeriesInfo());
         queryLogIndex(worksheet.getFilter());
     }
 
@@ -243,23 +249,32 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     .filter(f -> filter.getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
                             // Color and display message text
-                            try (var p = Profiler.start("Set text", logger::perf)) {
-                                Random r = new Random();
+                            StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+                            spansBuilder.add(Collections.emptyList(), 0);
+                            try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
                                         SegmentOps.styledTextOps(),
                                         Collections.emptyList());
                                 for (var data : res.getData()) {
                                     var hit = data.getYValue();
+                                    var severity = hit.getFacets().get("severity").getLabel();
+                                    var path = hit.getFacets().get("filePath").getLabel();
+                                    var message = hit.getMessage().stripTrailing();
+                                    spansBuilder.add(List.of(severity), message.length());
                                     docBuilder.addParagraph(
-                                            hit.getMessage().stripTrailing(),
-                                            List.of(hit.getFacets().get("severity").getLabel()),
-                                            List.of("para" + (r.nextBoolean() ? "1" : "2")));
+                                            message,
+                                            List.of(severity),
+                                            List.of("file-" + path.hashCode()));
                                 }
-                                textOutput.replace(docBuilder.build());
+                                var doc = docBuilder.build();
+                                syntaxHilightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
+                                textOutput.replace(doc);
                                 // Reset search highlight
-                                doSearchHighlight(searchTextField.getText(),
-                                        searchMatchCaseToggle.isSelected(),
-                                        searchRegExToggle.isSelected());
+                                if (!searchTextField.getText().isEmpty()) {
+                                    doSearchHighlight(searchTextField.getText(),
+                                            searchMatchCaseToggle.isSelected(),
+                                            searchRegExToggle.isSelected());
+                                }
                             }
                         } finally {
                             bindingManager.resume();
@@ -439,6 +454,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init log files table view
         intiLogFileTable();
 
+        // Init temp css for paragraph colors
+
 
         refresh();
         super.initialize(location, resources);
@@ -519,23 +536,25 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
-        var searchResults =
-                CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
-        prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
-        searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
-        if (syntaxHilightStyleSpans != null) {
-            textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
-                    (strings, strings2) -> Stream.concat(strings.stream(),
-                            strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
-        } else {
-            textOutput.setStyleSpans(0, searchResults.getStyleSpans());
-        }
-        if (searchHitIterator.hasNext()) {
-            focusOnSearchHit(searchHitIterator.next());
-        } else {
-            focusOnSearchHit(null);
+        try (var p = Profiler.start("Applying search result highlights", logger::perf)) {
+            var searchResults =
+                    CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+            prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
+            searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
+            if (syntaxHilightStyleSpans != null) {
+                textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
+                        (strings, strings2) -> Stream.concat(strings.stream(),
+                                strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
+            } else {
+                textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+            }
+            if (searchHitIterator.hasNext()) {
+                focusOnSearchHit(searchHitIterator.next());
+            } else {
+                focusOnSearchHit(null);
+            }
         }
     }
 
@@ -574,27 +593,33 @@ public class LogWorksheetController extends WorksheetController implements Synca
         return new LogEventsProcessor();
     }
 
-    private void setThemeColors(Pane previewPane, Color backgroundColor, Color textColor, Color controlColor) {
+    private void makeFilesCss(Collection<TimeSeriesInfo<LogEvent>> info) {
         try {
-            Path cssPath = Files.createTempFile("fx-theme-", ".css");
-            Files.writeString(
-                    cssPath,
-                    ".themed{-fx-background-color:" + ColorUtils.toHex(backgroundColor) + ";}" +
-                            ".label{-fx-text-fill:" + ColorUtils.toHex(textColor) + ";}" +
-                            ".button{-fx-base:" + ColorUtils.toHex(controlColor) + ";}"
-            );
-            cssPath.toFile().deleteOnExit();
-
-            System.out.println("Wrote " + cssPath);
-            System.out.println("URL " + cssPath.toUri().toURL().toExternalForm());
-
-            previewPane.getStyleClass().setAll("themed");
-            previewPane.getStylesheets().setAll(
-                    cssPath.toUri().toURL().toExternalForm()
-            );
+            Path cssPath = getTmpCssPath();
+            String cssUrl = cssPath.toUri().toURL().toExternalForm();
+            if (root.getStylesheets().contains(cssUrl)) {
+                root.getStylesheets().remove(cssUrl);
+            }
+            String cssStr = info
+                    .stream()
+                    .map((i) -> ".file-" + i.getBinding().getPath().hashCode() +
+                            "{-fx-background-color:" + ColorUtils.toHex(i.getDisplayColor(), 0.2) + ";}")
+                    .collect(Collectors.joining("\n"));
+            Files.writeString(cssPath, cssStr, StandardOpenOption.TRUNCATE_EXISTING);
+            root.getStylesheets().add(cssUrl);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
+    }
+
+    private Path getTmpCssPath() throws IOException {
+
+        if (this.tmpCssPath == null) {
+            tmpCssPath = Files.createTempFile("tmp_", ".css");
+            tmpCssPath.toFile().deleteOnExit();
+        }
+        return tmpCssPath;
+
     }
 
     @Override

@@ -34,6 +34,8 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -90,9 +92,7 @@ public class StageAppearanceManager {
         registeredStages = new WeakHashMap<>();
         UserPreferences.getInstance().userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                for (Map.Entry<Stage, Set<AppearanceOptions>> e : registeredStages.entrySet()) {
-                    setAppearance(e.getKey(), newValue, e.getValue());
-                }
+                registeredStages.forEach((stage, options) ->  setAppearance(stage, newValue, options));
             }
         });
     }
@@ -215,7 +215,7 @@ public class StageAppearanceManager {
                 new Image(getClass().getResourceAsStream("/eu/binjr/icons/binjr_512.png")));
     }
 
-    private void setUiTheme(Scene scene, UserInterfaceThemes theme) {
+    private void setUiTheme(Scene scene, UserInterfaceThemes theme, String... extraCss ) {
         Dialogs.runOnFXThread(() -> {
             scene.getStylesheets().clear();
             Application.setUserAgentStylesheet(null);
@@ -224,6 +224,9 @@ public class StageAppearanceManager {
                     getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
                     theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
+            if (extraCss != null && extraCss.length > 0){
+                scene.getStylesheets().addAll(extraCss);
+            }
         });
     }
 
@@ -241,6 +244,14 @@ public class StageAppearanceManager {
 
     public void applyUiTheme(Scene scene) {
         setUiTheme(scene, UserPreferences.getInstance().userInterfaceTheme.get());
+    }
+
+    public void applyExtraCss(String... css){
+        registeredStages.keySet().forEach((stage)-> setUiTheme(
+                stage.getScene(),
+                UserPreferences.getInstance().userInterfaceTheme.get(),
+                css));
+
     }
 
     public Color[] getDefaultChartColors() {
