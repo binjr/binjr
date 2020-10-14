@@ -249,8 +249,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     .filter(f -> filter.getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
                             // Color and display message text
-                            StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
-                            spansBuilder.add(Collections.emptyList(), 0);
                             try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
                                         SegmentOps.styledTextOps(),
@@ -260,7 +258,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     var severity = hit.getFacets().get("severity").getLabel();
                                     var path = hit.getFacets().get("filePath").getLabel();
                                     var message = hit.getMessage().stripTrailing();
-                                    spansBuilder.add(List.of(severity), message.length());
                                     docBuilder.addParagraph(
                                             message,
                                             List.of(severity),
