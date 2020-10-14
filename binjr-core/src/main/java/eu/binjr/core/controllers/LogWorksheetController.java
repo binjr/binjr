@@ -57,6 +57,7 @@ import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -193,140 +194,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     @Override
-    public Worksheet getWorksheet() {
-        return worksheet;
-    }
-
-    @Override
-    public Property<TimeRange> selectedRangeProperty() {
-        return this.timeRangePicker.selectedRangeProperty();
-    }
-
-    @Override
-    public Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
-        return Optional.empty();
-    }
-
-    @Override
-    public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
-        return null;
-    }
-
-    @Override
-    public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
-    }
-
-    @Override
-    public void refresh() {
-        invalidate(true, true);
-    }
-
-    public void invalidate(boolean saveToHistory, boolean retrieveFacets) {
-        //TODO handle history
-        makeFilesCss(worksheet.getSeriesInfo());
-        queryLogIndex(worksheet.getFilter());
-    }
-
-    public void queryLogIndex(LogFilter filter) {
-        try {
-            AsyncTaskManager.getInstance().submit(() -> {
-                        busyIndicator.setVisible(true);
-                        return (LogEventsProcessor) fetchDataFromSources(filter);
-                    },
-                    event -> {
-                        bindingManager.suspend();
-                        try {
-                            // Reset page number
-                            var res = (LogEventsProcessor) event.getSource().getValue();
-                            pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
-                            pager.setCurrentPageIndex(filter.getPage());
-                            // Update severity facet view
-                            severityListView.getCheckModel().clearChecks();
-                            severityListView.getItems().setAll(res.getFacetResults().get("severity"));
-                            severityListView.getItems()
-                                    .stream()
-                                    .filter(f -> filter.getSeverities().contains(f.getLabel()))
-                                    .forEach(f -> severityListView.getCheckModel().check(f));
-                            // Color and display message text
-                            try (var p = Profiler.start("Display text", logger::perf)) {
-                                var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
-                                        SegmentOps.styledTextOps(),
-                                        Collections.emptyList());
-                                for (var data : res.getData()) {
-                                    var hit = data.getYValue();
-                                    var severity = hit.getFacets().get("severity").getLabel();
-                                    var path = hit.getFacets().get("filePath").getLabel();
-                                    var message = hit.getMessage().stripTrailing();
-                                    docBuilder.addParagraph(
-                                            message,
-                                            List.of(severity),
-                                            List.of("file-" + path.hashCode()));
-                                }
-                                // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
-                                if (res.getData().size() == 0) {
-                                    docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
-                                }
-                                var doc = docBuilder.build();
-                                syntaxHilightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
-                                textOutput.replace(doc);
-                                // Reset search highlight
-                                if (!searchTextField.getText().isEmpty()) {
-                                    doSearchHighlight(searchTextField.getText(),
-                                            searchMatchCaseToggle.isSelected(),
-                                            searchRegExToggle.isSelected());
-                                }
-                            }
-                        } finally {
-                            bindingManager.resume();
-                            busyIndicator.setVisible(false);
-                        }
-                    }, event -> {
-                        busyIndicator.setVisible(false);
-                        Dialogs.notifyException("An error occurred while loading text file: " +
-                                        event.getSource().getException().getMessage(),
-                                event.getSource().getException(),
-                                root);
-                    });
-        } catch (Exception e) {
-            Dialogs.notifyException(e);
-        }
-    }
-
-    @Override
-    public void saveSnapshot() {
-
-    }
-
-    @Override
-    public void toggleShowPropertiesPane() {
-
-    }
-
-    @Override
-    public void setShowPropertiesPane(boolean value) {
-
-    }
-
-    @Override
-    public List<ChartViewPort> getViewPorts() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public void close() {
-        if (closed.compareAndSet(false, true)) {
-            timeRangePicker.dispose();
-
-            bindingManager.close();
-        }
-    }
-
-    @Override
-    public String getView() {
-        return WORKSHEET_VIEW_FXML;
-    }
-
-    @Override
     public void initialize(URL location, ResourceBundle resources) {
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
@@ -341,7 +208,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         timeRangePicker.initSelectedRange(timeRange.get());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             timeRange.set(TimeRange.of(newValue.getBeginning(), newValue.getEnd()));
-            refresh();
+            invalidate(true, true);
         });
 
         timeRange.getReadOnlyProperty().addListener((observable, oldValue, newValue) -> {
@@ -461,18 +328,185 @@ public class LogWorksheetController extends WorksheetController implements Synca
         super.initialize(location, resources);
     }
 
+    @Override
+    public Worksheet getWorksheet() {
+        return worksheet;
+    }
+
+    @Override
+    public Property<TimeRange> selectedRangeProperty() {
+        return this.timeRangePicker.selectedRangeProperty();
+    }
+
+    @Override
+    public Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
+        return Optional.empty();
+    }
+
+    @Override
+    public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
+        return null;
+    }
+
+    @Override
+    public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
+    }
+
+    @Override
+    public void refresh() {
+        invalidate(true, false);
+    }
+
+    private void invalidate(boolean saveToHistory, boolean resetPage) {
+        //TODO handle history
+        makeFilesCss(worksheet.getSeriesInfo());
+        var filter = worksheet.getFilter();
+        queryLogIndex(resetPage ? new LogFilter(filter.getFilterQuery(), filter.getSeverities(), 0) : filter);
+    }
+
+    private void queryLogIndex(LogFilter filter) {
+        try {
+            AsyncTaskManager.getInstance().submit(() -> {
+                        busyIndicator.setVisible(true);
+                        return (LogEventsProcessor) fetchDataFromSources(filter);
+                    },
+                    event -> {
+                        bindingManager.suspend();
+                        try {
+                            // Align worksheet filter with actual value
+                            worksheet.setFilter(filter);
+                            // Reset page number
+                            var res = (LogEventsProcessor) event.getSource().getValue();
+                            pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
+                            pager.setCurrentPageIndex(filter.getPage());
+                            // Update severity facet view
+                            severityListView.getCheckModel().clearChecks();
+                            var facetEntries = res.getFacetResults().get("severity");
+                            severityListView.getItems().setAll((facetEntries != null) ? facetEntries : Collections.emptyList());
+                            severityListView.getItems()
+                                    .stream()
+                                    .filter(f -> filter.getSeverities().contains(f.getLabel()))
+                                    .forEach(f -> severityListView.getCheckModel().check(f));
+                            // Color and display message text
+                            try (var p = Profiler.start("Display text", logger::perf)) {
+                                var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
+                                        SegmentOps.styledTextOps(),
+                                        Collections.emptyList());
+                                for (var data : res.getData()) {
+                                    var hit = data.getYValue();
+                                    var severity = hit.getFacets().get("severity").getLabel();
+                                    var path = hit.getFacets().get("filePath").getLabel();
+                                    var message = hit.getMessage().stripTrailing();
+                                    docBuilder.addParagraph(
+                                            message,
+                                            List.of(severity),
+                                            List.of("file-" + path.hashCode()));
+                                }
+                                // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
+                                if (res.getData().size() == 0) {
+                                    docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
+                                }
+                                var doc = docBuilder.build();
+                                syntaxHilightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
+                                textOutput.replace(doc);
+                                // Reset search highlight
+                                if (!searchTextField.getText().isEmpty()) {
+                                    doSearchHighlight(searchTextField.getText(),
+                                            searchMatchCaseToggle.isSelected(),
+                                            searchRegExToggle.isSelected());
+                                }
+                            }
+                        } finally {
+                            bindingManager.resume();
+                            busyIndicator.setVisible(false);
+                        }
+                    }, event -> {
+                        busyIndicator.setVisible(false);
+                        Dialogs.notifyException("An error occurred while loading text file: " +
+                                        event.getSource().getException().getMessage(),
+                                event.getSource().getException(),
+                                root);
+                    });
+        } catch (Exception e) {
+            Dialogs.notifyException(e);
+        }
+    }
+
+    @Override
+    public void saveSnapshot() {
+
+    }
+
+    @Override
+    public void toggleShowPropertiesPane() {
+
+    }
+
+    @Override
+    public void setShowPropertiesPane(boolean value) {
+
+    }
+
+    @Override
+    public List<ChartViewPort> getViewPorts() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void close() {
+        if (closed.compareAndSet(false, true)) {
+            timeRangePicker.dispose();
+
+            bindingManager.close();
+        }
+    }
+
+    @Override
+    public String getView() {
+        return WORKSHEET_VIEW_FXML;
+    }
+
+
     private void intiLogFileTable() {
         DecimalFormatTableCellFactory<TimeSeriesInfo<LogEvent>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
         alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
         // alignRightCellFactory.setPattern("###");
-
+        CheckBox showAllCheckBox = new CheckBox();
         TableColumn<TimeSeriesInfo<LogEvent>, Boolean> visibleColumn = new TableColumn<>();
+        visibleColumn.setGraphic(showAllCheckBox);
         visibleColumn.setSortable(false);
         visibleColumn.setResizable(false);
         visibleColumn.setPrefWidth(32);
-
         visibleColumn.setCellValueFactory(p -> p.getValue().selectedProperty());
         visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
+
+        InvalidationListener isVisibleListener = (observable) -> {
+            boolean andAll = true;
+            boolean orAll = false;
+            for (var t : worksheet.getSeriesInfo()) {
+                andAll &= t.isSelected();
+                orAll |= t.isSelected();
+            }
+            showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
+            showAllCheckBox.setSelected(andAll);
+        };
+
+        for (var i : worksheet.getSeriesInfo()) {
+            bindingManager.attachListener(i.selectedProperty(), isVisibleListener);
+            bindingManager.attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
+            bindingManager.attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
+            // Explicitly call the listener to initialize the proper status of the checkbox
+            isVisibleListener.invalidated(null);
+        }
+
+        showAllCheckBox.setOnAction(bindingManager.registerHandler(event -> {
+            ChangeListener<Boolean> r = (o, oldVal, newVal) -> invalidate(false, true);
+            boolean b = ((CheckBox) event.getSource()).isSelected();
+            worksheet.getSeriesInfo().forEach(s -> bindingManager.detachAllChangeListeners(s.selectedProperty()));
+            worksheet.getSeriesInfo().forEach(t -> t.setSelected(b));
+            r.changed(null, null, null);
+            worksheet.getSeriesInfo().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
+        }));
 
         TableColumn<TimeSeriesInfo<LogEvent>, Color> colorColumn = new TableColumn<>();
         colorColumn.setSortable(false);
@@ -480,6 +514,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         colorColumn.setPrefWidth(32);
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
+
+        TableColumn<TimeSeriesInfo<LogEvent>, String> nameColumn = new TableColumn<>("Name");
+        nameColumn.setSortable(false);
+        nameColumn.setPrefWidth(400);
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
         TableColumn<TimeSeriesInfo<LogEvent>, String> eventNumColumn = new TableColumn<>("#");
         eventNumColumn.setSortable(false);
@@ -490,12 +529,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         Integer.toString(((LogEventsProcessor) p.getValue().getProcessor()).getTotalHits()),
                 p.getValue().processorProperty()));
 
-
-        TableColumn<TimeSeriesInfo<LogEvent>, String> nameColumn = new TableColumn<>("Name");
-        nameColumn.setSortable(false);
-        nameColumn.setPrefWidth(260);
-        nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
-
         TableColumn<TimeSeriesInfo<LogEvent>, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setSortable(false);
         pathColumn.setPrefWidth(400);
@@ -505,8 +538,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         fileTable.getColumns().addAll(
                 visibleColumn,
                 colorColumn,
-                eventNumColumn,
                 nameColumn,
+                eventNumColumn,
                 pathColumn);
         TableViewUtils.autoFillTableWidthWithLastColumn(fileTable);
     }
@@ -568,7 +601,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
             return false;
         });
-
         if (worksheet.getFromDateTime().toInstant().equals(Instant.EPOCH) &&
                 worksheet.getFromDateTime().equals(worksheet.getToDateTime())) {
             timeRange.set(worksheet.getInitialTimeRange());
@@ -586,7 +618,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     queryString,
                     worksheet.getFromDateTime().toInstant(),
                     worksheet.getToDateTime().toInstant(),
-                    bindingsByPath.values().stream().flatMap(Collection::stream).collect(Collectors.toList()),
+                    bindingsByPath.values().stream()
+                            .flatMap(Collection::stream)
+                            .filter(b -> b.isSelected())
+                            .collect(Collectors.toList()),
                     true);
             return data.values().stream().findFirst().orElse(new LogEventsProcessor());
         }

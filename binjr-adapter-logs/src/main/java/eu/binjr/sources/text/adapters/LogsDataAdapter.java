@@ -94,8 +94,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     public static final String SEVERITY = "severity";
     public static final String THREAD = "thread";
     public static final String LOGGER = "logger";
-//    public static final String FACET_SEVERITY = "facetSeverity";
-//    public static final String FACET_PATH = "facetPath";
     public static final String FACET_FIELD = "facets";
     public static final String MESSAGE = "message";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
@@ -265,9 +263,9 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
             var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
             facets.put(SEVERITY, filter.getSeverities());
-            data.put(null, index.filter(start.toEpochMilli(),
-                    end.toEpochMilli(),
-                    facets, filter.getFilterQuery(), filter.getPage()));
+            var proc = (seriesInfo.size() == 0) ? new LogEventsProcessor() :
+                    index.filter(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery(), filter.getPage());
+            data.put(null, proc);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
