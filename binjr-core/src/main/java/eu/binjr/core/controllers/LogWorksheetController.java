@@ -84,7 +84,6 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.IOException;
 import java.net.URL;
@@ -262,6 +261,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                             message,
                                             List.of(severity),
                                             List.of("file-" + path.hashCode()));
+                                }
+                                // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
+                                if (res.getData().size() == 0) {
+                                    docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
                                 }
                                 var doc = docBuilder.build();
                                 syntaxHilightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
