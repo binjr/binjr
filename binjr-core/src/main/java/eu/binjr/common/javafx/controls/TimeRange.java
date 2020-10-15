@@ -16,20 +16,28 @@
 
 package eu.binjr.common.javafx.controls;
 
+import com.google.gson.TypeAdapter;
+import com.google.gson.annotations.JsonAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 import javafx.scene.input.DataFormat;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
+@JsonAdapter(TimeRange.Adapter.class)
+@XmlAccessorType(XmlAccessType.PROPERTY)
 public class TimeRange {
     public static final DataFormat TIME_RANGE_DATA_FORMAT = new DataFormat(TimeRange.class.getCanonicalName());
-    private static final String DELIMITER = "\n";
+    private static final String DELIMITER = " ";
     private final ZonedDateTime beginning;
     private final ZonedDateTime end;
-    private final Duration duration;
     private final ZoneId zoneId;
 
     public static TimeRange of(TimeRange range) {
@@ -40,18 +48,17 @@ public class TimeRange {
         return new TimeRange(beginning, end);
     }
 
-    public static TimeRange last24Hours(){
+    public static TimeRange last24Hours() {
         var end = ZonedDateTime.now();
         return new TimeRange(end.minusHours(24), end);
     }
 
-    TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
+    private TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
         Objects.requireNonNull(beginning, "Parameter 'beginning' must not be null");
         Objects.requireNonNull(end, "Parameter 'end' must not be null");
         this.zoneId = beginning.getZone();
         this.beginning = beginning;
         this.end = end.withZoneSameInstant(zoneId);
-        this.duration = Duration.between(beginning, end);
     }
 
     public ZonedDateTime getBeginning() {
@@ -63,7 +70,7 @@ public class TimeRange {
     }
 
     public Duration getDuration() {
-        return duration;
+        return Duration.between(beginning, end);
     }
 
     public ZoneId getZoneId() {
@@ -71,18 +78,60 @@ public class TimeRange {
     }
 
     public boolean isNegative() {
-        return duration.isNegative();
+        return getDuration().isNegative();
     }
 
     public String serialize() {
         return DateTimeFormatter.ISO_ZONED_DATE_TIME.format(beginning) + DELIMITER + DateTimeFormatter.ISO_ZONED_DATE_TIME.format(end);
     }
 
-    public static TimeRange deSerialize(String xmlString) {
-        String[] s = xmlString.split(DELIMITER);
+    public static TimeRange deSerialize(String valueStr) {
+        String[] s = valueStr.split(DELIMITER);
         if (s.length != 2) {
             throw new IllegalArgumentException("Could not parse provided string as a TimeRange");
         }
         return TimeRange.of(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[0], ZonedDateTime::from), DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[1], ZonedDateTime::from));
+    }
+
+    @Override
+    public int hashCode() {
+        return beginning.hashCode() + end.hashCode() + zoneId.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        var other = (TimeRange) obj;
+        return beginning.equals(other.beginning) &&
+                end.equals(other.end) &&
+                zoneId.equals(other.zoneId);
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("TimeRange{");
+        sb.append("beginning=").append(beginning);
+        sb.append(", end=").append(end);
+        sb.append(", zoneId=").append(zoneId);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public static class Adapter extends TypeAdapter<TimeRange> {
+        @Override
+        public void write(final JsonWriter jsonWriter, final TimeRange value) throws IOException {
+            jsonWriter.value(value.serialize());
+        }
+
+        @Override
+        public TimeRange read(final JsonReader jsonReader) throws IOException {
+            String value = jsonReader.nextString();
+            return TimeRange.deSerialize(value);
+        }
     }
 }

@@ -24,15 +24,14 @@
         @XmlJavaTypeAdapter(type = Instant.class,
                 value = InstantXmlAdapter.class),
         @XmlJavaTypeAdapter(type = Color.class,
-                value = ColorXmlAdapter.class)
+                value = ColorXmlAdapter.class),
+        @XmlJavaTypeAdapter(type = TimeRange.class,
+                value = TimeRangeXmlAdapter.class)
 })
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.xml.adapters.InstantXmlAdapter;
-import eu.binjr.common.xml.adapters.LocalDateTimeXmlAdapter;
-import eu.binjr.common.xml.adapters.ZoneIdXmlAdapter;
-import eu.binjr.common.xml.adapters.ZonedDateTimeXmlAdapter;
-import eu.binjr.common.xml.adapters.ColorXmlAdapter;
+import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.xml.adapters.*;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;

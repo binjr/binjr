@@ -16,11 +16,14 @@
 
 package eu.binjr.core.data.adapters;
 
+import eu.binjr.common.javafx.controls.TimeRange;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlTransient;
-import java.util.Collection;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -29,6 +32,7 @@ public class LogFilter {
     private String filterQuery;
     private Set<String> severities;
     private int page;
+    private TimeRange timeRange;
 
 
     public static LogFilter empty() {
@@ -36,14 +40,16 @@ public class LogFilter {
     }
 
     private LogFilter() {
-        this("", new HashSet<>(), 0);
+        this(TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
+                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())),
+                "", new HashSet<>(), 0);
     }
 
-    public LogFilter(String filterQuery, Set<String> severities, int page) {
+    public LogFilter(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
         this.filterQuery = filterQuery;
         this.severities = severities;
         this.page = page;
-
+        this.timeRange = timeRange;
     }
 
     @XmlAttribute
@@ -69,6 +75,15 @@ public class LogFilter {
         this.page = value;
     }
 
+    @XmlAttribute
+    public TimeRange getTimeRange() {
+        return timeRange;
+    }
+
+    private void setTimeRange(TimeRange value) {
+        this.timeRange = value;
+    }
+
     @Override
     public int hashCode() {
         return filterQuery.hashCode() + severities.hashCode() + Integer.hashCode(page);
@@ -85,6 +100,7 @@ public class LogFilter {
         LogFilter filter = (LogFilter) obj;
         return filterQuery.equals(filter.filterQuery) &&
                 severities.equals(filter.severities) &&
+                timeRange.equals(filter.timeRange) &&
                 page == filter.page;
     }
 

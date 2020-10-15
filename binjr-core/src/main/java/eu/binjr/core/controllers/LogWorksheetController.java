@@ -60,7 +60,6 @@ import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
-import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
@@ -106,55 +105,41 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private static final Gson gson = new Gson();
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
-    private final ReadOnlyObjectWrapper<TimeRange> timeRange = new ReadOnlyObjectWrapper<>();
-    private StyleSpans<Collection<String>> syntaxHilightStyleSpans;
+    private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
+    private Path tmpCssPath;
     @FXML
     private AnchorPane root;
-
     @FXML
     private CodeArea textOutput;
-
     @FXML
     private ToggleButton wordWrapButton;
-
     @FXML
     private Button refreshButton;
     @FXML
     private Button backButton;
     @FXML
     private Button forwardButton;
-
     @FXML
     private TimeRangePicker timeRangePicker;
-
     @FXML
     private Button searchHistoryButton;
-
     @FXML
     private TextField searchTextField;
-
     @FXML
     private Button clearSearchButton;
-
     @FXML
     private ToggleButton searchMatchCaseToggle;
-
     @FXML
     private ToggleButton searchRegExToggle;
-
     @FXML
     private Label searchResultsLabel;
-
     @FXML
     private Button prevOccurrenceButton;
-
     @FXML
     private Button nextOccurrenceButton;
-
     @FXML
     private ToggleButton filterToggleButton;
-
     @FXML
     private Pagination pager;
     @FXML
@@ -175,7 +160,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private HBox paginationBar;
     @FXML
     private TableView<TimeSeriesInfo<LogEvent>> fileTable;
-    private Path tmpCssPath;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
@@ -197,28 +181,15 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public void initialize(URL location, ResourceBundle resources) {
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
-        //textOutput.setParagraphGraphicFactory(LineNumberFactory.get(textOutput));
         textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
         // TimeRange Picker initialization
-        timeRange.set(TimeRange.of(worksheet.getFromDateTime(), worksheet.getToDateTime()));
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
-        timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
-        timeRangePicker.initSelectedRange(timeRange.get());
+        timeRangePicker.initSelectedRange(worksheet.getFilter().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
-            timeRange.set(TimeRange.of(newValue.getBeginning(), newValue.getEnd()));
-            invalidate(true, true);
+            invalidateFilter(true);
         });
-
-        timeRange.getReadOnlyProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                worksheet.setFromDateTime(newValue.getBeginning());
-                worksheet.setToDateTime(newValue.getEnd());
-                timeRangePicker.updateSelectedRange(newValue);
-            }
-        });
-
         // Query syntax help
         var syntaxPopupRoot = new StackPane();
         syntaxPopupRoot.getStyleClass().addAll("syntax-help-popup");
@@ -321,9 +292,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init log files table view
         intiLogFileTable();
 
-        // Init temp css for paragraph colors
-
-
         refresh();
         super.initialize(location, resources);
     }
@@ -358,10 +326,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void invalidate(boolean saveToHistory, boolean resetPage) {
-        //TODO handle history
+        //  worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
         makeFilesCss(worksheet.getSeriesInfo());
         var filter = worksheet.getFilter();
-        queryLogIndex(resetPage ? new LogFilter(filter.getFilterQuery(), filter.getSeverities(), 0) : filter);
+        queryLogIndex(resetPage ? new LogFilter(filter.getTimeRange(), filter.getFilterQuery(), filter.getSeverities(), 0) : filter);
     }
 
     private void queryLogIndex(LogFilter filter) {
@@ -407,7 +375,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
                                 }
                                 var doc = docBuilder.build();
-                                syntaxHilightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
+                                syntaxHighlightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
                                 textOutput.replace(doc);
                                 // Reset search highlight
                                 if (!searchTextField.getText().isEmpty()) {
@@ -546,7 +514,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void invalidateFilter(boolean resetPage) {
         worksheet.setFilter(
-                new LogFilter(filterTextField.getText(),
+                new LogFilter(timeRangePicker.getSelectedRange(),
+                        filterTextField.getText(),
                         severityListView.getCheckModel().getCheckedItems()
                                 .stream()
                                 .filter(Objects::nonNull)
@@ -576,8 +545,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
             searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
             searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
-            if (syntaxHilightStyleSpans != null) {
-                textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
+            if (syntaxHighlightStyleSpans != null) {
+                textOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
                         (strings, strings2) -> Stream.concat(strings.stream(),
                                 strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
             } else {
@@ -601,11 +570,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
             return false;
         });
-        if (worksheet.getFromDateTime().toInstant().equals(Instant.EPOCH) &&
-                worksheet.getFromDateTime().equals(worksheet.getToDateTime())) {
-            timeRange.set(worksheet.getInitialTimeRange());
+        if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
+            filter.getTimeRange().getDuration()== java.time.Duration.ZERO) {
+            timeRangePicker.updateSelectedRange(worksheet.getInitialTimeRange());
+
         }
-        var queryString = gson.toJson(filter);
+        var queryArgs = gson.toJson(filter);
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -615,9 +585,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var data = adapter.fetchData(
-                    queryString,
-                    worksheet.getFromDateTime().toInstant(),
-                    worksheet.getToDateTime().toInstant(),
+                    queryArgs,
+                    timeRangePicker.getTimeRange().getBeginning().toInstant(),
+                    timeRangePicker.getTimeRange().getEnd().toInstant(),
                     bindingsByPath.values().stream()
                             .flatMap(Collection::stream)
                             .filter(b -> b.isSelected())

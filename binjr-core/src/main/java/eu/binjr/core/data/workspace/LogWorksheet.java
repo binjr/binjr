@@ -42,13 +42,8 @@ import java.util.Map;
 public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Rangeable<LogEvent> {
 
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
-
-    @IsDirtyable
-    private final Property<ZoneId> timeZone;
-    @IsDirtyable
-    private final Property<ZonedDateTime> fromDateTime;
-    @IsDirtyable
-    private final Property<ZonedDateTime> toDateTime;
+    private final transient ChangeWatcher status;
+    private boolean syntaxHighlightEnabled = true;
     @IsDirtyable
     private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
@@ -58,42 +53,29 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
 
-    private final transient ChangeWatcher status;
-    private boolean syntaxHighlightEnabled = true;
-
-
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
+                LogFilter.empty(),
                 true,
-                ZoneId.systemDefault(),
-                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
-                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
                 false);
     }
 
     protected LogWorksheet(String name,
+                           LogFilter filter,
                            boolean editModeEnabled,
-                           ZoneId timezone,
-                           ZonedDateTime from,
-                           ZonedDateTime to,
                            boolean isLinked) {
         super(name, editModeEnabled);
-        this.timeZone = new SimpleObjectProperty<>(timezone);
-        this.fromDateTime = new SimpleObjectProperty<>(from);
-        this.toDateTime = new SimpleObjectProperty<>(to);
+
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.filter = new SimpleObjectProperty<>(LogFilter.empty());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
-
     }
 
     private LogWorksheet(LogWorksheet worksheet) {
         this(worksheet.getName(),
+                worksheet.getFilter(),
                 worksheet.isEditModeEnabled(),
-                worksheet.getTimeZone(),
-                worksheet.getFromDateTime(),
-                worksheet.getToDateTime(),
                 worksheet.isTimeRangeLinked());
         seriesInfo.addAll(worksheet.getSeriesInfo());
     }
@@ -132,7 +114,6 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
         }
     }
 
-
     @Override
     protected List<TimeSeriesInfo<LogEvent>> listAllSeriesInfo() {
         return getSeriesInfo();
@@ -154,7 +135,6 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     public void cleanUp() {
         status.cleanUp();
     }
-
 
     @XmlAttribute
     public int getTextViewFontSize() {
@@ -194,44 +174,6 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
         this.timeRangeLinked.setValue(timeRangeLinked);
     }
 
-    @XmlAttribute
-    public ZoneId getTimeZone() {
-        return timeZone.getValue();
-    }
-
-    public Property<ZoneId> timeZoneProperty() {
-        return timeZone;
-    }
-
-    public void setTimeZone(ZoneId timeZone) {
-        this.timeZone.setValue(timeZone);
-    }
-
-    @XmlAttribute
-    public ZonedDateTime getFromDateTime() {
-        return fromDateTime.getValue();
-    }
-
-    public Property<ZonedDateTime> fromDateTimeProperty() {
-        return fromDateTime;
-    }
-
-    public void setFromDateTime(ZonedDateTime fromDateTime) {
-        this.fromDateTime.setValue(fromDateTime);
-    }
-
-    @XmlAttribute
-    public ZonedDateTime getToDateTime() {
-        return toDateTime.getValue();
-    }
-
-    public Property<ZonedDateTime> toDateTimeProperty() {
-        return toDateTime;
-    }
-
-    public void setToDateTime(ZonedDateTime toDateTime) {
-        this.toDateTime.setValue(toDateTime);
-    }
 
     @Override
     public List<TimeSeriesInfo<LogEvent>> getSeries() {
