@@ -415,7 +415,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     logger.debug("Lucene lucene directory stored at " + indexDirectoryPath);
                     indexDirectory = FSDirectory.open(indexDirectoryPath);
                     if (indexDirectory instanceof MMapDirectory) {
-                        logger.info("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
+                        logger.debug("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
                     }
             }
             IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
@@ -663,16 +663,16 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                     pathFacet = makeFacetResult(PATH, results.facets, params);
                     severityFacet = makeFacetResult(SEVERITY, results.facets, params);
-
-
                     for (int i = skip; i < topDocs.scoreDocs.length; i++) {
                         var hit = topDocs.scoreDocs[i];
                         var doc = searcher.doc(hit.doc);
+                        var severity = severityFacet.get(doc.get(SEVERITY));
+                        var path = pathFacet.get(doc.get(PATH));
                         logs.add(new XYChart.Data<>(
                                 ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), getTimeZoneId()),
                                 new LogEvent(doc.get(FIELD_CONTENT) + "\n",
-                                        severityFacet.get(doc.get(SEVERITY)),
-                                        pathFacet.get(doc.get(PATH)))));
+                                        severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
+                                        path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
                     }
 
                 }
