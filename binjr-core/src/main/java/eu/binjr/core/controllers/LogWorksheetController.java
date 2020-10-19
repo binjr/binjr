@@ -383,6 +383,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                             searchMatchCaseToggle.isSelected(),
                                             searchRegExToggle.isSelected());
                                 }
+                            } catch (Exception e) {
+                                Dialogs.notifyException(e);
                             }
                         } finally {
                             bindingManager.resume();
