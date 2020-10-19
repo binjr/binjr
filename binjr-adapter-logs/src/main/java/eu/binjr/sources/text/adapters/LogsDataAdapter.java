@@ -102,7 +102,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
-    private final Map<String, Object> indexedFiles = new ConcurrentHashMap<String, Object>();
+    private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
 
     /**
@@ -225,28 +225,32 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             }
             parent = filenode;
             rootPath = current;
-
         }
         return parent;
     }
-
 
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<LogEvent>> seriesInfo) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo);
-            return index.getTimeRangeBoundaries(seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
+            return index.getTimeRangeBoundaries(
+                    seriesInfo.stream()
+                            .map(i -> i.getBinding().getPath())
+                            .collect(Collectors.toList()));
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);
         }
     }
 
-    private void ensureIndexed(List<TimeSeriesInfo<LogEvent>> seriesInfo) throws IOException {
-        for (TimeSeriesInfo<LogEvent> info : seriesInfo) {
-            indexedFiles.computeIfAbsent(info.getBinding().getPath(), CheckedLambdas.wrap((p) -> {
-                index.add(p, fileBrowser.getData(p));
-                return p;
-            }));
+    private synchronized void ensureIndexed(List<TimeSeriesInfo<LogEvent>> seriesInfo) throws IOException {
+        var toDo = seriesInfo.stream()
+                .map(s -> s.getBinding().getPath())
+                .filter(p -> !indexedFiles.contains(p))
+                .collect(Collectors.toList());
+        for (int i = 0; i < toDo.size(); i++) {
+            String path = toDo.get(i);
+            index.add(path, fileBrowser.getData(path), (i == toDo.size() - 1));
+            indexedFiles.add(path);
         }
     }
 
@@ -432,9 +436,21 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             facetsConfig.setRequireDimensionDrillDown(PATH, true);
             logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                     " using " + parsingThreadsNumber + " parsing indexing threads");
+            logger.debug(() -> facetsConfig.getDimConfigs().entrySet().stream()
+                    .map(e -> "path= " + e.getKey() +
+                            " field= " + e.getValue().indexFieldName +
+                            " multivalued=" + e.getValue().multiValued +
+                            " hierarchical=" + e.getValue().hierarchical +
+                            " requireDimCount=" + e.getValue().requireDimCount +
+                            " requireDimensionDrillDown=" + e.getValue().requireDimensionDrillDown)
+                    .collect(Collectors.joining("\n")));
         }
 
         public void add(String path, InputStream ias) throws IOException {
+            add(path, ias, true);
+        }
+
+        public void add(String path, InputStream ias, boolean commit) throws IOException {
             try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
                 var n = new AtomicInteger(0);
                 var builder = new ParsedLogEvent.LogEventBuilder(timestampPattern);
@@ -475,7 +491,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                         }));
                     }
                     try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
-                        //  reader.lines().forEach(line -> builder.build(n.incrementAndGet(), line).ifPresent(queue::offer));
                         String line;
                         while ((line = reader.readLine()) != null && !taskAborted.get()) {
                             var optLog = builder.build(n.incrementAndGet(), line);
@@ -511,20 +526,23 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                         addLogEvent(path, line);
                     }));
                 }
-                indexLock.write().lock(() -> {
-                    try (Profiler p = Profiler.start("Commit index", logger::perf)) {
-                        indexWriter.commit();
-                    }
-                    try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
-                        var updatedReader = DirectoryReader.openIfChanged(indexReader);
-                        if (updatedReader != null) {
-                            this.indexReader.close();
-                            this.indexReader = updatedReader;
-                            this.searcher = new IndexSearcher(indexReader);
+                if (commit) {
+                    indexLock.write().lock(() -> {
+                        try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                            indexWriter.commit();
+                            //  indexWriter.forceMerge(1);
                         }
-                        this.state = new DefaultSortedSetDocValuesReaderState(searcher.getIndexReader(), FACET_FIELD);
-                    }
-                });
+                        try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
+                            var updatedReader = DirectoryReader.openIfChanged(indexReader);
+                            if (updatedReader != null) {
+                                this.indexReader.close();
+                                this.indexReader = updatedReader;
+                                this.searcher = new IndexSearcher(indexReader);
+                                this.state = new DefaultSortedSetDocValuesReaderState(indexReader, FACET_FIELD);
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -579,7 +597,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             return (TimeRange.of(
                     beginning != null ? beginning : ZonedDateTime.now().minusHours(24),
                     end != null ? end : ZonedDateTime.now()));
-
         }
 
         private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files) throws IOException {
@@ -595,7 +612,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                         1,
                         new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, getMin)),
                         false);
-
                 if (top.hits.scoreDocs.length > 0) {
                     return ZonedDateTime.ofInstant(
                             Instant.ofEpochMilli(Long.parseLong(
@@ -645,11 +661,8 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 }
                 var pageSize = prefs.hitsPerPage.get().intValue();
                 var skip = page * pageSize;
-
                 DrillSideways.DrillSidewaysResult results;
-
-                var sort = new Sort(
-                        new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
+                var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                         new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
                 TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
                 logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
@@ -674,7 +687,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                                         severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
                                         path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
                     }
-
                 }
                 var proc = new LogEventsProcessor();
                 proc.setData(logs);
