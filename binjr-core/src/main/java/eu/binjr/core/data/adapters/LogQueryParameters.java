@@ -28,24 +28,24 @@ import java.util.HashSet;
 import java.util.Set;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class LogFilter {
+public class LogQueryParameters {
     private String filterQuery;
     private Set<String> severities;
     private int page;
     private TimeRange timeRange;
 
 
-    public static LogFilter empty() {
-        return new LogFilter();
+    public static LogQueryParameters empty() {
+        return new LogQueryParameters();
     }
 
-    private LogFilter() {
+    private LogQueryParameters() {
         this(TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
                 ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())),
                 "", new HashSet<>(), 0);
     }
 
-    public LogFilter(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
+    public LogQueryParameters(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
         this.filterQuery = filterQuery;
         this.severities = severities;
         this.page = page;
@@ -97,7 +97,7 @@ public class LogFilter {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        LogFilter filter = (LogFilter) obj;
+        LogQueryParameters filter = (LogQueryParameters) obj;
         return filterQuery.equals(filter.filterQuery) &&
                 severities.equals(filter.severities) &&
                 timeRange.equals(filter.timeRange) &&

@@ -16,12 +16,11 @@
 
 package eu.binjr.core.data.workspace;
 
-import eu.binjr.common.javafx.charts.XYChartSelection;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.LogFilter;
+import eu.binjr.core.data.adapters.LogQueryParameters;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -31,23 +30,19 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Rangeable<LogEvent> {
 
-    private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
+    private transient final NavigationHistory<LogQueryParameters> history = new NavigationHistory<>();
     private final transient ChangeWatcher status;
     private boolean syntaxHighlightEnabled = true;
     @IsDirtyable
     private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
-    private final Property<LogFilter> filter;
+    private final Property<LogQueryParameters> queryParameters;
     @IsDirtyable
     private final ObservableList<TimeSeriesInfo<LogEvent>> seriesInfo = FXCollections.observableList(new LinkedList<>());
     @IsDirtyable
@@ -55,26 +50,26 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
 
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
-                LogFilter.empty(),
+                LogQueryParameters.empty(),
                 true,
                 false);
     }
 
     protected LogWorksheet(String name,
-                           LogFilter filter,
+                           LogQueryParameters queryParameters,
                            boolean editModeEnabled,
                            boolean isLinked) {
         super(name, editModeEnabled);
 
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
-        this.filter = new SimpleObjectProperty<>(LogFilter.empty());
+        this.queryParameters = new SimpleObjectProperty<>(queryParameters);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
 
     private LogWorksheet(LogWorksheet worksheet) {
         this(worksheet.getName(),
-                worksheet.getFilter(),
+                worksheet.getQueryParameters(),
                 worksheet.isEditModeEnabled(),
                 worksheet.isTimeRangeLinked());
         seriesInfo.addAll(worksheet.getSeriesInfo());
@@ -181,15 +176,19 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     }
 
     @XmlElement
-    public LogFilter getFilter() {
-        return filter.getValue();
+    public LogQueryParameters getQueryParameters() {
+        return queryParameters.getValue();
     }
 
-    public Property<LogFilter> filterProperty() {
-        return filter;
+    public Property<LogQueryParameters> queryParametersProperty() {
+        return queryParameters;
     }
 
-    public void setFilter(LogFilter filter) {
-        this.filter.setValue(filter);
+    public void setQueryParameters(LogQueryParameters queryParameters) {
+        this.queryParameters.setValue(queryParameters);
+    }
+
+    public NavigationHistory<LogQueryParameters> getHistory() {
+        return history;
     }
 }

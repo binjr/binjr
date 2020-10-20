@@ -41,7 +41,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogFilter;
+import eu.binjr.core.data.adapters.LogQueryParameters;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -63,6 +63,7 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -161,6 +162,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private TableView<TimeSeriesInfo<LogEvent>> fileTable;
 
+    @FXML
+    private void handleHistoryBack(ActionEvent actionEvent) {
+        worksheet.getHistory().getPrevious().ifPresent(h -> restoreQueryParameters(h, false));
+    }
+
+    @FXML
+    private void handleHistoryForward(ActionEvent actionEvent) {
+        worksheet.getHistory().getNext().ifPresent(h -> restoreQueryParameters(h, false));
+    }
+
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
         super(parent);
@@ -186,10 +197,15 @@ public class LogWorksheetController extends WorksheetController implements Synca
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
         // TimeRange Picker initialization
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
-        timeRangePicker.initSelectedRange(worksheet.getFilter().getTimeRange());
+        timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             invalidateFilter(true);
         });
+        // Init navigation
+        backButton.setOnAction(bindingManager.registerHandler(this::handleHistoryBack));
+        forwardButton.setOnAction(bindingManager.registerHandler(this::handleHistoryForward));
+        bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
+        bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         // Query syntax help
         var syntaxPopupRoot = new StackPane();
         syntaxPopupRoot.getStyleClass().addAll("syntax-help-popup");
@@ -235,17 +251,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         // init filter controls
-        filterTextField.setText(worksheet.getFilter().getFilterQuery());
-        pager.setCurrentPageIndex(worksheet.getFilter().getPage());
+        filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
+        pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
 
         bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
         bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
 
-        bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
-            if (!oldVal.equals(newVal)) {
-                refresh();
-            }
-        });
+//        bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
+//            if (!oldVal.equals(newVal)) {
+//                refresh();
+//            }
+//        });
 
         // Filter selection
         bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
@@ -322,17 +338,20 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void refresh() {
-        invalidate(true, false);
+        invalidate(false, false);
     }
 
     private void invalidate(boolean saveToHistory, boolean resetPage) {
-        //  worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
         makeFilesCss(worksheet.getSeriesInfo());
-        var filter = worksheet.getFilter();
-        queryLogIndex(resetPage ? new LogFilter(filter.getTimeRange(), filter.getFilterQuery(), filter.getSeverities(), 0) : filter);
+        var params = resetPage ?
+                new LogQueryParameters(worksheet.getQueryParameters().getTimeRange(),
+                        worksheet.getQueryParameters().getFilterQuery(), worksheet.getQueryParameters().getSeverities(), 0)
+                : worksheet.getQueryParameters();
+        worksheet.getHistory().setHead(params, saveToHistory);
+        queryLogIndex(params);
     }
 
-    private void queryLogIndex(LogFilter filter) {
+    private void queryLogIndex(LogQueryParameters filter) {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
@@ -342,7 +361,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         bindingManager.suspend();
                         try {
                             // Align worksheet filter with actual value
-                            worksheet.setFilter(filter);
+                            worksheet.setQueryParameters(filter);
                             // Reset page number
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
@@ -515,15 +534,33 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void invalidateFilter(boolean resetPage) {
-        worksheet.setFilter(
-                new LogFilter(timeRangePicker.getSelectedRange(),
-                        filterTextField.getText(),
-                        severityListView.getCheckModel().getCheckedItems()
-                                .stream()
-                                .filter(Objects::nonNull)
-                                .map(FacetEntry::getLabel)
-                                .collect(Collectors.toSet()),
-                        resetPage ? 0 : pager.getCurrentPageIndex()));
+        var newParams = new LogQueryParameters(timeRangePicker.getSelectedRange(),
+                filterTextField.getText(),
+                severityListView.getCheckModel().getCheckedItems()
+                        .stream()
+                        .filter(Objects::nonNull)
+                        .map(FacetEntry::getLabel)
+                        .collect(Collectors.toSet()),
+                resetPage ? 0 : pager.getCurrentPageIndex());
+        if (newParams != worksheet.getQueryParameters()) {
+            worksheet.setQueryParameters(newParams);
+            invalidate(true, resetPage);
+        }
+    }
+
+    private void restoreQueryParameters(LogQueryParameters newParams, boolean resetPage) {
+        if (newParams != worksheet.getQueryParameters()) {
+            bindingManager.suspend();
+            try {
+                worksheet.setQueryParameters(newParams);
+                timeRangePicker.updateSelectedRange(newParams.getTimeRange());
+                filterTextField.setText(newParams.getFilterQuery());
+                pager.setCurrentPageIndex(newParams.getPage());
+            } finally {
+                bindingManager.resume();
+            }
+            invalidate(false, resetPage);
+        }
     }
 
     private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
@@ -562,7 +599,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private TimeSeriesProcessor<LogEvent> fetchDataFromSources(LogFilter filter) throws DataAdapterException {
+    private TimeSeriesProcessor<LogEvent> fetchDataFromSources(LogQueryParameters filter) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -573,7 +610,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return false;
         });
         if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
-            filter.getTimeRange().getDuration()== java.time.Duration.ZERO) {
+                filter.getTimeRange().getDuration() == java.time.Duration.ZERO) {
             timeRangePicker.updateSelectedRange(worksheet.getInitialTimeRange());
 
         }

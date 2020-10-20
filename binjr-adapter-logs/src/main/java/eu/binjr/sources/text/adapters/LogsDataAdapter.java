@@ -29,7 +29,7 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.LogFilter;
+import eu.binjr.core.data.adapters.LogQueryParameters;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -263,7 +263,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
-            var filter = (LogFilter) gson.fromJson(path, LogFilter.class);
+            var filter = (LogQueryParameters) gson.fromJson(path, LogQueryParameters.class);
             facets.put(SEVERITY, filter.getSeverities());
             var proc = (seriesInfo.size() == 0) ? new LogEventsProcessor() :
                     index.filter(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery(), filter.getPage());
