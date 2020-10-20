@@ -42,13 +42,11 @@ import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
-import org.apache.lucene.facet.DrillDownQuery;
-import org.apache.lucene.facet.DrillSideways;
-import org.apache.lucene.facet.Facets;
-import org.apache.lucene.facet.FacetsConfig;
-import org.apache.lucene.facet.sortedset.DefaultSortedSetDocValuesReaderState;
-import org.apache.lucene.facet.sortedset.SortedSetDocValuesFacetField;
-import org.apache.lucene.facet.sortedset.SortedSetDocValuesReaderState;
+import org.apache.lucene.facet.*;
+import org.apache.lucene.facet.taxonomy.TaxonomyReader;
+import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
+import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -371,6 +369,9 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
 
     private class LogFileIndex implements Closeable {
         private final Directory indexDirectory;
+        private final Directory taxonomyDirectory;
+        private final TaxonomyWriter taxonomyWriter;
+        private TaxonomyReader taxonomyReader;
         private DirectoryReader indexReader;
         private IndexSearcher searcher;
         private final IndexWriter indexWriter;
@@ -378,7 +379,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
         private final Pattern payloadPattern;
         private final Pattern timestampPattern;
         private final DateTimeFormatter dateTimeFormatter;
-        private SortedSetDocValuesReaderState state;
         private final Path indexDirectoryPath;
         private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
         private final ExecutorService parsingThreadPool;
@@ -407,6 +407,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             switch (prefs.indexDirectoryLocation.get()) {
                 case MEMORY:
                     indexDirectory = new ByteBuffersDirectory();
+                    taxonomyDirectory = new ByteBuffersDirectory();
                     logger.debug("Lucene lucene directory stored on the Java Heap");
                     indexDirectoryPath = null;
                     break;
@@ -416,8 +417,9 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                         logger.debug(MMapDirectory.UNMAP_NOT_SUPPORTED_REASON);
                     }
                     indexDirectoryPath = Files.createTempDirectory("binjr-logs-index_");
+                    indexDirectory = FSDirectory.open(indexDirectoryPath.resolve("index"));
+                    taxonomyDirectory = FSDirectory.open(indexDirectoryPath.resolve("taxonomy"));
                     logger.debug("Lucene lucene directory stored at " + indexDirectoryPath);
-                    indexDirectory = FSDirectory.open(indexDirectoryPath);
                     if (indexDirectory instanceof MMapDirectory) {
                         logger.debug("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
                     }
@@ -425,13 +427,12 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());
             iwc.setOpenMode(IndexWriterConfig.OpenMode.CREATE);
             this.indexWriter = new IndexWriter(indexDirectory, iwc);
+            this.taxonomyWriter = new DirectoryTaxonomyWriter(taxonomyDirectory);
             indexReader = DirectoryReader.open(indexWriter);
             searcher = new IndexSearcher(indexReader);
             facetsConfig = new FacetsConfig();
-            facetsConfig.setIndexFieldName(SEVERITY, FACET_FIELD);
             facetsConfig.setRequireDimCount(SEVERITY, true);
             facetsConfig.setRequireDimensionDrillDown(PATH, true);
-            facetsConfig.setIndexFieldName(PATH, FACET_FIELD);
             facetsConfig.setRequireDimCount(PATH, true);
             facetsConfig.setRequireDimensionDrillDown(PATH, true);
             logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
@@ -529,8 +530,8 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 if (commit) {
                     indexLock.write().lock(() -> {
                         try (Profiler p = Profiler.start("Commit index", logger::perf)) {
+                            taxonomyWriter.commit();
                             indexWriter.commit();
-                            //  indexWriter.forceMerge(1);
                         }
                         try (Profiler p = Profiler.start("Refresh index reader and searcher", logger::perf)) {
                             var updatedReader = DirectoryReader.openIfChanged(indexReader);
@@ -538,7 +539,15 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                                 this.indexReader.close();
                                 this.indexReader = updatedReader;
                                 this.searcher = new IndexSearcher(indexReader);
-                                this.state = new DefaultSortedSetDocValuesReaderState(indexReader, FACET_FIELD);
+                            }
+                            if (taxonomyReader == null) {
+                                taxonomyReader = new DirectoryTaxonomyReader(taxonomyDirectory);
+                            } else {
+                                var updatedTaxoReader = DirectoryTaxonomyReader.openIfChanged(taxonomyReader);
+                                if (updatedTaxoReader != null) {
+                                    this.taxonomyReader.close();
+                                    this.taxonomyReader = updatedTaxoReader;
+                                }
                             }
                         }
                     });
@@ -558,10 +567,10 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     doc.add(new LongPoint(TIMESTAMP, millis));
                     doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
                     doc.add(new StoredField(TIMESTAMP, millis));
-                    doc.add(new SortedSetDocValuesFacetField(PATH, path));
+                    doc.add(new FacetField(PATH, path));
                     doc.add(new StoredField(PATH, path));
                     String severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
-                    doc.add(new SortedSetDocValuesFacetField(SEVERITY, severity));
+                    doc.add(new FacetField(SEVERITY, severity));
                     doc.add(new StoredField(SEVERITY, severity));
 //                    doc.add(new TextField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread")), Field.Store.NO));
 //                    doc.add(new TextField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger")), Field.Store.NO));
@@ -569,12 +578,14 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
                 }
             }
-            indexWriter.addDocument(facetsConfig.build(doc));
+            indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
         }
 
         @Override
         public void close() throws IOException {
+            IOUtils.close(taxonomyReader);
             IOUtils.close(indexReader);
+            IOUtils.close(taxonomyWriter);
             IOUtils.close(indexWriter);
             IOUtils.close(indexDirectory);
             if (parsingThreadPool != null) {
@@ -585,7 +596,6 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     logger.error("Termination interrupted", e);
                 }
             }
-
             if (indexDirectoryPath != null) {
                 IOUtils.attemptDeleteTempPath(indexDirectoryPath);
             }
@@ -601,7 +611,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
 
         private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files) throws IOException {
             return indexLock.read().lock(() -> {
-                var drill = new DrillSideways(searcher, facetsConfig, this.state);
+                var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
                 var dq = new DrillDownQuery(facetsConfig);
                 for (var label : files) {
                     dq.add(PATH, label);
@@ -652,7 +662,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                             .build();
                 }
                 var logs = new ArrayList<XYChart.Data<ZonedDateTime, LogEvent>>();
-                var drill = new DrillSideways(searcher, facetsConfig, this.state);
+                var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
                 var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
                 for (var facet : params.entrySet()) {
                     for (var label : facet.getValue()) {
