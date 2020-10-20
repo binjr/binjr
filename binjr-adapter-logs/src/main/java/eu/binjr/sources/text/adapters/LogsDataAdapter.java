@@ -263,10 +263,10 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             ensureIndexed(seriesInfo);
             Map<String, Collection<String>> facets = new HashMap<>();
             facets.put(PATH, seriesInfo.stream().map(i -> i.getBinding().getPath()).collect(Collectors.toList()));
-            var filter = (LogQueryParameters) gson.fromJson(path, LogQueryParameters.class);
-            facets.put(SEVERITY, filter.getSeverities());
+            var params = (LogQueryParameters) gson.fromJson(path, LogQueryParameters.class);
+            facets.put(SEVERITY, params.getSeverities());
             var proc = (seriesInfo.size() == 0) ? new LogEventsProcessor() :
-                    index.filter(start.toEpochMilli(), end.toEpochMilli(), facets, filter.getFilterQuery(), filter.getPage());
+                    index.search(start.toEpochMilli(), end.toEpochMilli(), facets, params.getFilterQuery(), params.getPage());
             data.put(null, proc);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
@@ -649,7 +649,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
             return facetEntryMap;
         }
 
-        public LogEventsProcessor filter(long start, long end, Map<String, Collection<String>> params, String query, int page) throws Exception {
+        public LogEventsProcessor search(long start, long end, Map<String, Collection<String>> params, String query, int page) throws Exception {
             return indexLock.read().lock(() -> {
                 Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
                 Query filterQuery = rangeQuery;

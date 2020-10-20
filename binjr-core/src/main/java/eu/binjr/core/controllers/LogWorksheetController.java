@@ -343,36 +343,35 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void invalidate(boolean saveToHistory, boolean resetPage) {
         makeFilesCss(worksheet.getSeriesInfo());
-        var params = resetPage ?
-                new LogQueryParameters(worksheet.getQueryParameters().getTimeRange(),
-                        worksheet.getQueryParameters().getFilterQuery(), worksheet.getQueryParameters().getSeverities(), 0)
-                : worksheet.getQueryParameters();
-        worksheet.getHistory().setHead(params, saveToHistory);
-        queryLogIndex(params);
+        if (resetPage) {
+            worksheet.setQueryParameters(new LogQueryParameters.Builder(worksheet.getQueryParameters())
+                    .setPage(0)
+                    .build());
+        }
+        worksheet.getHistory().setHead(worksheet.getQueryParameters(), saveToHistory);
+        queryLogIndex();
     }
 
-    private void queryLogIndex(LogQueryParameters filter) {
+    private void queryLogIndex() {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        return (LogEventsProcessor) fetchDataFromSources(filter);
+                        return (LogEventsProcessor) fetchDataFromSources(worksheet.getQueryParameters());
                     },
                     event -> {
                         bindingManager.suspend();
                         try {
-                            // Align worksheet filter with actual value
-                            worksheet.setQueryParameters(filter);
                             // Reset page number
                             var res = (LogEventsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
-                            pager.setCurrentPageIndex(filter.getPage());
+                            pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
                             severityListView.getCheckModel().clearChecks();
                             var facetEntries = res.getFacetResults().get("severity");
                             severityListView.getItems().setAll((facetEntries != null) ? facetEntries : Collections.emptyList());
                             severityListView.getItems()
                                     .stream()
-                                    .filter(f -> filter.getSeverities().contains(f.getLabel()))
+                                    .filter(f -> worksheet.getQueryParameters().getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {
@@ -534,14 +533,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void invalidateFilter(boolean resetPage) {
-        var newParams = new LogQueryParameters(timeRangePicker.getSelectedRange(),
-                filterTextField.getText(),
-                severityListView.getCheckModel().getCheckedItems()
+        var newParams = new LogQueryParameters.Builder()
+                .setTimeRange(timeRangePicker.getSelectedRange())
+                .setFilterQuery(filterTextField.getText())
+                .setSeverities(severityListView.getCheckModel().getCheckedItems()
                         .stream()
                         .filter(Objects::nonNull)
                         .map(FacetEntry::getLabel)
-                        .collect(Collectors.toSet()),
-                resetPage ? 0 : pager.getCurrentPageIndex());
+                        .collect(Collectors.toSet()))
+                .setPage(resetPage ? 0 : pager.getCurrentPageIndex())
+                .build();
         if (newParams != worksheet.getQueryParameters()) {
             worksheet.setQueryParameters(newParams);
             invalidate(true, resetPage);
@@ -611,8 +612,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
         if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
                 filter.getTimeRange().getDuration() == java.time.Duration.ZERO) {
-            timeRangePicker.updateSelectedRange(worksheet.getInitialTimeRange());
-
+            var initialRange = worksheet.getInitialTimeRange();
+            worksheet.setQueryParameters(new LogQueryParameters.Builder(filter).setTimeRange(initialRange).build());
+            timeRangePicker.updateSelectedRange(initialRange);
         }
         var queryArgs = gson.toJson(filter);
         var bindingsByAdapters =
@@ -625,8 +627,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             var data = adapter.fetchData(
                     queryArgs,
-                    timeRangePicker.getTimeRange().getBeginning().toInstant(),
-                    timeRangePicker.getTimeRange().getEnd().toInstant(),
+                    worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant(),
+                    worksheet.getQueryParameters().getTimeRange().getEnd().toInstant(),
                     bindingsByPath.values().stream()
                             .flatMap(Collection::stream)
                             .filter(b -> b.isSelected())

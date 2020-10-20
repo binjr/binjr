@@ -45,7 +45,7 @@ public class LogQueryParameters {
                 "", new HashSet<>(), 0);
     }
 
-    public LogQueryParameters(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
+    private LogQueryParameters(TimeRange timeRange, String filterQuery, Set<String> severities, int page) {
         this.filterQuery = filterQuery;
         this.severities = severities;
         this.page = page;
@@ -102,6 +102,49 @@ public class LogQueryParameters {
                 severities.equals(filter.severities) &&
                 timeRange.equals(filter.timeRange) &&
                 page == filter.page;
+    }
+
+    public static class Builder{
+        private String filterQuery;
+        private Set<String> severities;
+        private int page;
+        private TimeRange timeRange;
+
+        public Builder(){
+            this.timeRange = TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
+                    ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
+            this.filterQuery ="";
+            this.page = 0;
+            this.severities= new HashSet<>();
+        }
+
+        public Builder(LogQueryParameters params){
+            this.timeRange =params.getTimeRange();
+            this.filterQuery =params.getFilterQuery();
+            this.page = params.getPage();
+            this.severities= params.getSeverities();
+        }
+
+        public Builder setTimeRange(TimeRange value){
+            this.timeRange = value;
+            return this;
+        }
+        public Builder setFilterQuery(String value){
+            this.filterQuery = value;
+            return this;
+        }
+        public Builder setPage(int value){
+            this.page = value;
+            return this;
+        }
+        public Builder setSeverities(Set<String> value){
+            this.severities = value;
+            return this;
+        }
+
+        public LogQueryParameters build(){
+            return new LogQueryParameters(timeRange, filterQuery, severities, page);
+        }
     }
 
 }
