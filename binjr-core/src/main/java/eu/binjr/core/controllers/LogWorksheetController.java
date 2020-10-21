@@ -349,9 +349,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
             bindingManager.suspend(worksheet.dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             fileTablePane.setVisible(false);
+            fileTablePane.setManaged(false);
             fileTablePane.setMaxHeight(0.0);
         } else {
             fileTablePane.setMaxHeight(Double.MAX_VALUE);
+            fileTablePane.setManaged(true);
             fileTablePane.setVisible(true);
             splitPane.setDividerPositions(worksheet.getDividerPosition());
             bindingManager.resume(worksheet.dividerPositionProperty());

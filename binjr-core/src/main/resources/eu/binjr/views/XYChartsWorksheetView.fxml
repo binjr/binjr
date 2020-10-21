@@ -236,8 +236,6 @@
                             AnchorPane.topAnchor="0.0">
                 </DrawerPane>
             </AnchorPane>
-
-
             <AnchorPane fx:id="chartsLegendsPane" styleClass="skinnable-pane-border">
                 <ScrollPane id="chartLegendScoll" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
