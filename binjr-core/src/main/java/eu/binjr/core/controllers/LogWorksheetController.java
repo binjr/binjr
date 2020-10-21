@@ -60,9 +60,12 @@ import javafx.animation.PauseTransition;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -165,6 +168,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StackPane fileTablePane;
     @FXML
     private SplitPane splitPane;
+    private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
 
     @FXML
     private void handleHistoryBack(ActionEvent actionEvent) {
@@ -393,6 +397,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     .stream()
                                     .filter(f -> worksheet.getQueryParameters().getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
+                            // Update filePath facet view
+                            this.pathFacetEntries.setValue(res.getFacetResults().get("filePath").stream().collect(Collectors.toList()));
+
+
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
@@ -477,7 +485,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void intiLogFileTable() {
         DecimalFormatTableCellFactory<TimeSeriesInfo<LogEvent>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
-        alignRightCellFactory.setAlignment(TextAlignment.RIGHT);
+        alignRightCellFactory.setAlignment(TextAlignment.LEFT);
         // alignRightCellFactory.setPattern("###");
         CheckBox showAllCheckBox = new CheckBox();
         TableColumn<TimeSeriesInfo<LogEvent>, Boolean> visibleColumn = new TableColumn<>();
@@ -525,17 +533,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         TableColumn<TimeSeriesInfo<LogEvent>, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setSortable(false);
-        nameColumn.setPrefWidth(400);
+        nameColumn.setPrefWidth(350);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
-        TableColumn<TimeSeriesInfo<LogEvent>, String> eventNumColumn = new TableColumn<>("#");
+        TableColumn<TimeSeriesInfo<LogEvent>, String> eventNumColumn = new TableColumn<>("Nb events");
         eventNumColumn.setSortable(false);
         eventNumColumn.setPrefWidth(75);
         eventNumColumn.setCellFactory(alignRightCellFactory);
         eventNumColumn.setCellValueFactory(p -> Bindings.createStringBinding(
-                () -> p.getValue().getProcessor() == null ? "NaN" :
-                        Integer.toString(((LogEventsProcessor) p.getValue().getProcessor()).getTotalHits()),
-                p.getValue().processorProperty()));
+                () -> pathFacetEntries.getValue() == null ? "-" :
+                        pathFacetEntries.getValue().stream()
+                                .filter( e-> e.getLabel().equalsIgnoreCase(p.getValue().getBinding().getPath()))
+                                .map(e-> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
+                pathFacetEntries));
 
         TableColumn<TimeSeriesInfo<LogEvent>, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setSortable(false);
