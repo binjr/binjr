@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
@@ -30,8 +31,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.annotation.*;
+import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+
+import static java.util.stream.Collectors.groupingBy;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Rangeable<LogEvent> {
@@ -203,6 +207,30 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
 
     public void setQueryParameters(LogQueryParameters queryParameters) {
         this.queryParameters.setValue(queryParameters);
+    }
+
+    @Override
+    public TimeRange getInitialTimeRange() throws DataAdapterException {
+        ZonedDateTime end = null;
+        ZonedDateTime beginning = null;
+        var bindingsByAdapters =
+                getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
+        for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
+            var adapter = byAdapterEntry.getKey();
+            // Group all queries with the same adapter
+            var bindingsByPath =
+                    byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+                var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue());
+                if (end == null || timeRange.getEnd().isAfter(end)) {
+                    end = timeRange.getEnd();
+                }
+                if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
+                    beginning = timeRange.getBeginning();
+                }
+        }
+        return TimeRange.of(
+                beginning == null ? ZonedDateTime.now().minusHours(24) : beginning,
+                end == null ? ZonedDateTime.now() : end);
     }
 
     public NavigationHistory<LogQueryParameters> getHistory() {

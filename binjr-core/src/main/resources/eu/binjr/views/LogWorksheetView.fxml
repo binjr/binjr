@@ -314,7 +314,7 @@
                                 <Insets/>
                             </VBox.margin>
                         </HBox>
-                    </VBox>Spli
+                    </VBox>
                     <StackPane fx:id="fileTablePane" prefHeight="150.0" prefWidth="200.0">
                         <children>
                             <TableView fx:id="fileTable" prefHeight="128.0" prefWidth="1198.0"
