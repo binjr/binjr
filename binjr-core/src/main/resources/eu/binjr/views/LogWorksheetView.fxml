@@ -233,7 +233,11 @@
 
         </VBox>
         <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0" styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
-         <SplitPane dividerPositions="0.7454819277108434" orientation="VERTICAL" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <SplitPane fx:id="splitPane" dividerPositions="0.7454819277108434" orientation="VERTICAL"
+                    AnchorPane.bottomAnchor="0.0"
+                    AnchorPane.leftAnchor="0.0"
+                    AnchorPane.rightAnchor="0.0"
+                    AnchorPane.topAnchor="0.0">
             <items>
                   <VBox>
                       <VirtualizedScrollPane styleClass=" skinnable-pane-border" VBox.vgrow="ALWAYS">

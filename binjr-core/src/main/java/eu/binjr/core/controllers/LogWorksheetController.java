@@ -161,6 +161,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private HBox paginationBar;
     @FXML
     private TableView<TimeSeriesInfo<LogEvent>> fileTable;
+    @FXML
+    private StackPane fileTablePane;
+    @FXML
+    private SplitPane splitPane;
 
     @FXML
     private void handleHistoryBack(ActionEvent actionEvent) {
@@ -253,15 +257,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // init filter controls
         filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
         pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
-
         bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
         bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
-
-//        bindingManager.attachListener(worksheet.filterProperty(), (o, oldVal, newVal) -> {
-//            if (!oldVal.equals(newVal)) {
-//                refresh();
-//            }
-//        });
 
         // Filter selection
         bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
@@ -308,6 +305,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init log files table view
         intiLogFileTable();
 
+        splitPane.setDividerPositions(worksheet.getDividerPosition());
+        bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+
         refresh();
         super.initialize(location, resources);
     }
@@ -334,6 +334,23 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void setReloadRequiredHandler(Consumer<WorksheetController> action) {
+    }
+
+    @Override
+    protected void setEditChartMode(Boolean newValue) {
+        if (!newValue) {
+            bindingManager.suspend(worksheet.dividerPositionProperty());
+            splitPane.setDividerPositions(1.0);
+            fileTablePane.setVisible(false);
+            fileTablePane.setMaxHeight(0.0);
+        } else {
+            fileTablePane.setMaxHeight(Double.MAX_VALUE);
+            fileTablePane.setVisible(true);
+            splitPane.setDividerPositions(worksheet.getDividerPosition());
+            bindingManager.resume(worksheet.dividerPositionProperty());
+        }
+        setShowPropertiesPane(newValue);
+        super.setEditChartMode(newValue);
     }
 
     @Override

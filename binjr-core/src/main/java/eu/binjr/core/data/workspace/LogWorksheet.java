@@ -47,6 +47,8 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     private final ObservableList<TimeSeriesInfo<LogEvent>> seriesInfo = FXCollections.observableList(new LinkedList<>());
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
+    @IsDirtyable
+    private final DoubleProperty dividerPosition;
 
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
@@ -63,6 +65,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
 
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
+        this.dividerPosition = new SimpleDoubleProperty(0.7);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -74,6 +77,20 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
                 worksheet.isTimeRangeLinked());
         seriesInfo.addAll(worksheet.getSeriesInfo());
     }
+
+    @XmlAttribute
+    public Double getDividerPosition() {
+        return dividerPosition.getValue();
+    }
+
+    public void setDividerPosition(Double dividerPosition) {
+        this.dividerPosition.setValue(dividerPosition);
+    }
+
+    public DoubleProperty dividerPositionProperty() {
+        return dividerPosition;
+    }
+
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
