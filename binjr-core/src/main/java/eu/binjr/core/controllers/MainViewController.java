@@ -854,6 +854,9 @@ public class MainViewController implements Initializable {
                 .setIconStyleClass("cross-icon", "small-icon")
                 .setAction(event -> filterField.clear())
                 .build(Button::new);
+        clearFilterbutton.visibleProperty().bind(
+                Bindings.createBooleanBinding(() -> !filterField.getText().isBlank(),
+                        filterField.textProperty()));
         var filterCaseSensitiveToggle = new ToolButtonBuilder<ToggleButton>()
                 .setText("Aa")
                 .setStyleClass("dialog-button")

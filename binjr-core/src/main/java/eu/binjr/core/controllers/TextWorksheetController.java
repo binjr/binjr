@@ -49,6 +49,7 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -226,6 +227,8 @@ public class TextWorksheetController extends WorksheetController {
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
+        bindingManager.bind(clearSearchButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !searchTextField.getText().isBlank(), searchTextField.textProperty()));
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),

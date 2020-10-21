@@ -272,7 +272,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             invalidateFilter(true);
         }));
         applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
-
+        bindingManager.bind(clearFilterButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !filterTextField.getText().isBlank(), filterTextField.textProperty()));
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
@@ -285,6 +286,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
+        bindingManager.bind(clearSearchButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !searchTextField.getText().isBlank(), searchTextField.textProperty()));
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
