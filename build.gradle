@@ -315,6 +315,11 @@ task expandMdTemplates(type: Copy) {
     filteringCharset = 'UTF-8'
     def changeHistory = new File("./CHANGELOG.md").getText("UTF-8")
     def currentChanges = new File("./UNRELEASED.md").getText("UTF-8")
+    if (!IS_RELEASE) {
+        currentChanges = "## THIS IS A SNAPSHOT PREVIEW\n" +
+                "#### New features are not entirely stable and might change in incompatible ways in the next release\n" +
+                currentChanges
+    }
     expand(["version"       : "$BINJR_VERSION",
             "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
             "changeHistory" : "$changeHistory",
@@ -408,7 +413,7 @@ task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
 }
 
 task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
-    doFirst{
+    doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_zip/binjr.ini"),
                 Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
                 StandardCopyOption.REPLACE_EXISTING)
@@ -427,7 +432,7 @@ task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
 }
 
 task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
-    doFirst{
+    doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
                 Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
                 StandardCopyOption.REPLACE_EXISTING)
@@ -522,7 +527,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--arguments", "--packaging=LINUX_DEB",
             "--linux-package-name", "binjr",
-            "--linux-deb-maintainer","binjr@free.fr",
+            "--linux-deb-maintainer", "binjr@free.fr",
             "--linux-app-category", "Utility",
             "--linux-menu-group", "Utility",
             "--linux-rpm-license-type", "Apache-2.0",
