@@ -397,16 +397,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
                             severityListView.getCheckModel().clearChecks();
-                            var facetEntries = res.getFacetResults().get("severity");
-                            severityListView.getItems().setAll((facetEntries != null) ? facetEntries : Collections.emptyList());
+                            var severityFacetEntries = res.getFacetResults().get("severity");
+                            severityListView.getItems().setAll((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
                             severityListView.getItems()
                                     .stream()
                                     .filter(f -> worksheet.getQueryParameters().getSeverities().contains(f.getLabel()))
                                     .forEach(f -> severityListView.getCheckModel().check(f));
                             // Update filePath facet view
-                            this.pathFacetEntries.setValue(res.getFacetResults().get("filePath").stream().collect(Collectors.toList()));
-
-
+                            var fileFacetEntries = res.getFacetResults().get("filePath");
+                            if (fileFacetEntries != null) {
+                                this.pathFacetEntries.setValue(fileFacetEntries);
+                            }else {
+                                this.pathFacetEntries.setValue(Collections.emptyList());
+                            }
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
