@@ -26,6 +26,7 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.UUID;
 
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -40,7 +41,6 @@ public abstract class SourceBinding<T> {
             throw new IllegalStateException("Failed to create a new instance of Md5HashTargetResolver", e);
         }
     });
-
 
 
     @XmlAttribute(name = "sourceId")
@@ -69,7 +69,7 @@ public abstract class SourceBinding<T> {
     }
 
     protected SourceBinding(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter) {
-        this(label, legend , color, path, treeHierarchy, adapter, null);
+        this(label, legend, color, path, treeHierarchy, adapter, null);
     }
 
 
@@ -160,6 +160,32 @@ public abstract class SourceBinding<T> {
         return getLegend();
     }
 
+    @Override
+    public int hashCode() {
+        return (label != null ? label.hashCode() : 0) +
+                (path != null ? path.hashCode() : 0) +
+                (treeHierarchy != null ? treeHierarchy.hashCode() : 0) +
+                (legend != null ? legend.hashCode() : 0) +
+                (adapterId != null ? adapterId.hashCode() : 0);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        var filter = (SourceBinding<?>) obj;
+        return Objects.equals(label, filter.label) &&
+                Objects.equals(path, filter.path) &&
+                Objects.equals(treeHierarchy, filter.treeHierarchy) &&
+                Objects.equals(legend, filter.legend) &&
+                Objects.equals(adapterId, filter.adapterId);
+    }
+
+
     public abstract Class<? extends Worksheet<T>> getWorksheetClass();
 
     private Color computeDefaultColor() {
@@ -178,7 +204,7 @@ public abstract class SourceBinding<T> {
     }
 
 
-    public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T,S,B>> {
+    public abstract static class Builder<T, S extends SourceBinding<T>, B extends Builder<T, S, B>> {
         private String label = "";
         private String path = "";
         private String legend = null;
@@ -189,7 +215,7 @@ public abstract class SourceBinding<T> {
         protected abstract B self();
 
         public B withAdapter(DataAdapter<T> adapter) {
-            this.adapter =adapter;
+            this.adapter = adapter;
             return self();
         }
 
@@ -219,11 +245,11 @@ public abstract class SourceBinding<T> {
             return self();
         }
 
-        public S build()        {
+        public S build() {
             if (legend == null) {
                 legend = label;
             }
-            return construct(label, legend,color, path, parent + "/" + legend, adapter);
+            return construct(label, legend, color, path, parent + "/" + legend, adapter);
         }
 
         protected abstract S construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter);

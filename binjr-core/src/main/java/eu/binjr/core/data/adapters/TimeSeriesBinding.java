@@ -26,6 +26,7 @@ import javafx.scene.paint.Color;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -138,6 +139,21 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
         return prefix;
     }
 
+    @Override
+    public int hashCode() {
+        return super.hashCode() +
+                Objects.hashCode(prefix) +
+                Objects.hashCode(graphType)+
+                Objects.hashCode(unitName);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj) &&
+                Objects.equals(prefix, ((TimeSeriesBinding) obj).prefix) &&
+                Objects.equals(graphType, ((TimeSeriesBinding) obj).graphType) &&
+                Objects.equals(unitName, ((TimeSeriesBinding) obj).unitName);
+    }
 
     public static class Builder extends SourceBinding.Builder<Double, TimeSeriesBinding, TimeSeriesBinding.Builder> {
         private UnitPrefixes prefix = UnitPrefixes.METRIC;

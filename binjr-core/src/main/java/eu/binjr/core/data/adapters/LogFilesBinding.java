@@ -46,8 +46,17 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
     }
 
     public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
-        super(label, legend,null, path, treeHierarchy, adapter);
-        //super(label, legend, null, path, treeHierarchy, adapter);
+        super(label, legend, null, path, treeHierarchy, adapter);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 
     @Override

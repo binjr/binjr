@@ -153,7 +153,9 @@ public class TextWorksheetController extends WorksheetController {
 
     @Override
     public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
-        return null;
+        MenuItem item = new MenuItem(worksheet.getName());
+        item.setDisable(true);
+        return  new ContextMenu(item);
     }
 
     @Override

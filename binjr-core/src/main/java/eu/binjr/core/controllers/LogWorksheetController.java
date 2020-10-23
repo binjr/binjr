@@ -40,9 +40,7 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogQueryParameters;
-import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -57,15 +55,14 @@ import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -74,6 +71,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -102,6 +100,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.groupingBy;
+import static javafx.scene.control.SelectionMode.MULTIPLE;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
@@ -112,6 +111,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private Path tmpCssPath;
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
     @FXML
     private AnchorPane root;
     @FXML
@@ -340,7 +340,70 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
-        return null;
+        MenuItem item = new MenuItem(worksheet.getName());
+        item.setOnAction((bindingManager.registerHandler(event -> {
+            addToCurrentWorksheet(treeView);
+        })));
+        return new ContextMenu(item);
+    }
+
+    private void addToCurrentWorksheet(Collection<TreeItem<SourceBinding>> sourceBindings) {
+        try {
+            // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
+            Platform.runLater(() -> {
+                if (sourceBindings != null && !sourceBindings.isEmpty()) {
+                    var l = sourceBindings.stream()
+                            .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
+                            //      .map( binding-> (TimeSeriesInfo<LogEvent>)TimeSeriesInfo.fromBinding(binding))
+                            .collect(Collectors.toList());
+                    addBindings(l);
+
+                }
+            });
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
+        }
+    }
+
+    private void addBindings(Collection<SourceBinding> sourceBindings) {
+        Collection<LogFilesBinding> logFilesBindings = new ArrayList<>();
+        for (var sb : sourceBindings) {
+            if (sb instanceof LogFilesBinding) {
+                logFilesBindings.add((LogFilesBinding) sb);
+            }
+        }
+        if (logFilesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
+            if (Dialogs.confirmDialog(root,
+                    "This action will add " + logFilesBindings.size() + " series on a single view.",
+                    "Are you sure you want to proceed?",
+                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                return;
+            }
+        }
+        InvalidationListener isVisibleListener = (observable) -> {
+            boolean andAll = true;
+            boolean orAll = false;
+            for (var t : worksheet.getSeries()) {
+                andAll &= t.isSelected();
+                orAll |= t.isSelected();
+            }
+            CheckBox showAllCheckBox = (CheckBox) fileTable.getColumns().get(0).getGraphic();
+            showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
+            showAllCheckBox.setSelected(andAll);
+        };
+        for (var binding : logFilesBindings) {
+            if (binding instanceof LogFilesBinding) {
+                //    logFilesBindings.add((LogFilesBinding) sb);
+                if (worksheet.getSeriesInfo().stream().filter(s -> s.getBinding().equals(binding)).findAny().isEmpty()) {
+                    var i = TimeSeriesInfo.fromBinding(binding);
+                    bindingManager.attachListener(i.selectedProperty(), isVisibleListener);
+                    bindingManager.attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
+                    bindingManager.attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
+                    worksheet.getSeriesInfo().add(i);
+                }
+            }
+        }
+        this.refresh();
     }
 
     @Override
@@ -407,7 +470,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             var fileFacetEntries = res.getFacetResults().get("filePath");
                             if (fileFacetEntries != null) {
                                 this.pathFacetEntries.setValue(fileFacetEntries);
-                            }else {
+                            } else {
                                 this.pathFacetEntries.setValue(Collections.emptyList());
                             }
                             // Color and display message text
@@ -552,14 +615,28 @@ public class LogWorksheetController extends WorksheetController implements Synca
         eventNumColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> pathFacetEntries.getValue() == null ? "-" :
                         pathFacetEntries.getValue().stream()
-                                .filter( e-> e.getLabel().equalsIgnoreCase(p.getValue().getBinding().getPath()))
-                                .map(e-> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
+                                .filter(e -> e.getLabel().equalsIgnoreCase(p.getValue().getBinding().getPath()))
+                                .map(e -> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
                 pathFacetEntries));
 
         TableColumn<TimeSeriesInfo<LogEvent>, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setSortable(false);
         pathColumn.setPrefWidth(400);
         pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
+
+        fileTable.getSelectionModel().setSelectionMode(MULTIPLE);
+        fileTable.setOnKeyReleased(bindingManager.registerHandler(event -> {
+            if (event.getCode().equals(KeyCode.DELETE)) {
+                var selected = new ArrayList<>(fileTable.getSelectionModel().getSelectedItems());
+                selected.forEach(s -> {
+                    bindingManager.detachAllInvalidationListeners(s.selectedProperty());
+                   bindingManager.detachAllInvalidationListeners(s.displayColorProperty());
+                });
+                fileTable.getItems().removeAll(selected);
+                fileTable.getSelectionModel().clearSelection();
+                invalidate(false, false);
+            }
+        }));
 
         fileTable.setItems(worksheet.getSeriesInfo());
         fileTable.getColumns().addAll(
