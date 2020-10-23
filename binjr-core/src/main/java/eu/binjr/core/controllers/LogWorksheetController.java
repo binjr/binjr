@@ -240,6 +240,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         syntaxCheatSheet.append(" foo NOT bar ", "syntax-help-code");
         syntaxCheatSheet.append(" or ", "syntax-help-text");
         syntaxCheatSheet.append(" foo -bar \n\n", "syntax-help-code");
+        syntaxCheatSheet.append("Search for everything not containing \"foo bar\":\n", "syntax-help-text");
+        syntaxCheatSheet.append(" *:* NOT \"foo bar\"", "syntax-help-code");
+        syntaxCheatSheet.append(" or ", "syntax-help-text");
+        syntaxCheatSheet.append(" *:* -\"foo bar\" \n\n", "syntax-help-code");
         syntaxCheatSheet.append("Search for any word that starts with \"foo\":\n", "syntax-help-text");
         syntaxCheatSheet.append(" foo* \n\n", "syntax-help-code");
         syntaxCheatSheet.append("Search for any word that starts with \"foo\" and ends with bar:\n", "syntax-help-text");
