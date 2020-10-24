@@ -260,9 +260,9 @@
                     </graphic>
                 </MenuItem>
                 <MenuItem onAction="#handleShowSearchBar" text="Find...">
-                    <accelerator>
-                        <KeyCodeCombination alt="UP" code="F" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
-                    </accelerator>
+<!--                    <accelerator>-->
+<!--                        <KeyCodeCombination alt="UP" code="F" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>-->
+<!--                    </accelerator>-->
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="find-icon"/>

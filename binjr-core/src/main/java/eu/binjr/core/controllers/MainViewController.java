@@ -268,6 +268,11 @@ public class MainViewController implements Initializable {
             unregisterStageKeyEvents((Stage) event.getSource());
         });
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
+        sourcesPane.addEventFilter(KeyEvent.KEY_RELEASED, (e -> {
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                handleShowSearchBar(null);
+            }
+        }));
         saveMenuItem.disableProperty().bind(workspace.dirtyProperty().not());
         commandBar.setSibling(contentView);
         searchField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -797,6 +802,7 @@ public class MainViewController implements Initializable {
         sourcesAdapters.put(newSourcePane, newSource);
         sourcesPane.getPanes().add(newSourcePane);
         newSourcePane.setExpanded(true);
+
         workspace.setPresentationMode(false);
         AsyncTaskManager.getInstance().submit(() -> buildTreeViewForTarget(newSource.getAdapter()),
                 event -> {

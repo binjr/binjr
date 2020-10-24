@@ -40,7 +40,10 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
-import eu.binjr.core.data.adapters.*;
+import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.LogFilesBinding;
+import eu.binjr.core.data.adapters.LogQueryParameters;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -72,6 +75,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -108,10 +112,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private static final Gson gson = new Gson();
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
+    private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private Path tmpCssPath;
-    private final UserPreferences userPrefs = UserPreferences.getInstance();
     @FXML
     private AnchorPane root;
     @FXML
@@ -161,6 +166,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private VBox filteringBar;
     @FXML
+    private ToggleButton findToggleButton;
+    @FXML
+    private HBox highlightControls;
+    @FXML
     private HBox paginationBar;
     @FXML
     private TableView<TimeSeriesInfo<LogEvent>> fileTable;
@@ -168,17 +177,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StackPane fileTablePane;
     @FXML
     private SplitPane splitPane;
-    private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
-
-    @FXML
-    private void handleHistoryBack(ActionEvent actionEvent) {
-        worksheet.getHistory().getPrevious().ifPresent(h -> restoreQueryParameters(h, false));
-    }
-
-    @FXML
-    private void handleHistoryForward(ActionEvent actionEvent) {
-        worksheet.getHistory().getNext().ifPresent(h -> restoreQueryParameters(h, false));
-    }
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
@@ -194,6 +192,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             (id != null ? id.toString() : "null")));
             d.getBinding().setAdapter(da);
         }
+    }
+
+    @FXML
+    private void handleHistoryBack(ActionEvent actionEvent) {
+        worksheet.getHistory().getPrevious().ifPresent(h -> restoreQueryParameters(h, false));
+    }
+
+    @FXML
+    private void handleHistoryForward(ActionEvent actionEvent) {
+        worksheet.getHistory().getNext().ifPresent(h -> restoreQueryParameters(h, false));
     }
 
     @Override
@@ -283,6 +291,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.bind(clearFilterButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !filterTextField.getText().isBlank(), filterTextField.textProperty()));
         //Search bar initialization
+        bindingManager.bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
+        bindingManager.bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
+
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
                 focusOnSearchHit(searchHitIterator.previous());
@@ -318,6 +329,22 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         splitPane.setDividerPositions(worksheet.getDividerPosition());
         bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+
+        var eventTarget = root.getParent();
+        if (eventTarget== null){
+            eventTarget = root;
+        }
+        eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
+            if (e.getCode() == KeyCode.K && e.isControlDown()) {
+                filterToggleButton.setSelected(true);
+                filterTextField.requestFocus();
+            }
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                findToggleButton.setSelected(true);
+                searchTextField.requestFocus();
+            }
+        }));
+
 
         refresh();
         super.initialize(location, resources);
@@ -630,7 +657,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 var selected = new ArrayList<>(fileTable.getSelectionModel().getSelectedItems());
                 selected.forEach(s -> {
                     bindingManager.detachAllInvalidationListeners(s.selectedProperty());
-                   bindingManager.detachAllInvalidationListeners(s.displayColorProperty());
+                    bindingManager.detachAllInvalidationListeners(s.displayColorProperty());
                 });
                 fileTable.getItems().removeAll(selected);
                 fileTable.getSelectionModel().clearSelection();
