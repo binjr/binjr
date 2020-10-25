@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.text.adapters;
+package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;

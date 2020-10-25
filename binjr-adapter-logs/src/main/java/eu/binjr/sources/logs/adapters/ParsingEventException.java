@@ -14,10 +14,16 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.text.adapters;
+package eu.binjr.sources.logs.adapters;
 
-public enum IndexDirectoryLocation {
-    AUTO,
-    MEMORY,
-    FILES_SYSTEM
+import java.io.IOException;
+import java.nio.file.InvalidPathException;
+
+public class ParsingEventException extends IOException {
+    public ParsingEventException(String s) {
+        super(s);
+    }
+    public ParsingEventException(String s, Throwable e) {
+        super(s, e);
+    }
 }

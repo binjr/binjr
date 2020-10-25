@@ -15,4 +15,4 @@
 #
 
 # Text Data adapter service implementation
-eu.binjr.sources.text.adapters.LogsDataAdapterInfo
+eu.binjr.sources.logs.adapters.LogsDataAdapterInfo
