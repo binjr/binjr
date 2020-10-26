@@ -17,11 +17,11 @@
   -->
 
 <?import eu.binjr.common.javafx.controls.TimeRangePicker?>
+<?import eu.binjr.core.controllers.FacetPillsContainer?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.CheckListView?>
 <?import org.controlsfx.control.MaskerPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
@@ -135,10 +135,14 @@
                     </Button>
                 </ToolBar>
             </HBox>
-            <VBox fx:id="filteringBar" maxWidth="1.7976931348623157E308" spacing="5.0" HBox.hgrow="ALWAYS">
-                <children>
-                    <HBox spacing="10">
-                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" maxHeight="-Infinity" prefHeight="27.0"
+            <VBox fx:id="logsToolPane" spacing="10.0">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <HBox fx:id="filteringBar" maxWidth="1.7976931348623157E308" spacing="10.0" HBox.hgrow="ALWAYS">
+                    <children>
+                        <HBox fx:id="filterBar" alignment="CENTER_LEFT" maxHeight="-Infinity" maxWidth="600"
+                              prefHeight="27.0"
                               spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
                             <padding>
                                 <Insets left="3.0" right="3.0"/>
@@ -185,135 +189,122 @@
                                     <Tooltip showDelay="500ms" text="Display Query Syntax Help"/>
                                 </tooltip>
                             </Button>
-
                         </HBox>
-                        <Pane HBox.hgrow="ALWAYS"/>
-                    </HBox>
-                    <CheckListView fx:id="severityListView" styleClass="facet-view" orientation="HORIZONTAL" prefHeight="27.0"
-                                   HBox.hgrow="SOMETIMES" >
-                    </CheckListView>
-                </children>
-                <padding>
-                    <Insets bottom="5.0" left="10.0" right="10.0" top="5.0"/>
-                </padding>
-            </VBox>
-            <HBox fx:id="highlightControls" alignment="CENTER_LEFT">
-                <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity"
-                      prefHeight="27.0"
-                      spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                    <padding>
-                        <Insets left="3.0" right="3.0"/>
-                    </padding>
-                    <Button fx:id="searchHistoryButton" contentDisplay="GRAPHIC_ONLY"
-                            graphicTextGap="1.0"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
-                            prefWidth="20.0"
-                            styleClass="dialog-button" text="forward" textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="find-icon, small-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Find on Current Page"/>
-                        </tooltip>
-                    </Button>
-                    <TextField fx:id="searchTextField"
-                               maxWidth="1.7976931348623157E308"
-                               minHeight="-Infinity" minWidth="-Infinity" promptText="Find in page"
-                               styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
-                    <Button fx:id="clearSearchButton" contentDisplay="GRAPHIC_ONLY"
-                            graphicTextGap="1.0"
-                            maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                            minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
-                            prefWidth="20.0"
-                            styleClass="dialog-button" text="forward" textAlignment="CENTER">
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="cross-icon, small-icon"/>
-                            </HBox>
-                        </graphic>
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Clear Search Bar"/>
-                        </tooltip>
-                    </Button>
-                    <ToggleButton fx:id="searchMatchCaseToggle" contentDisplay="GRAPHIC_ONLY"
-                                  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                  minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
-                                  prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Match Case"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="match-case-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
-                    <ToggleButton fx:id="searchRegExToggle" contentDisplay="GRAPHIC_ONLY"
-                                  maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                  minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
-                                  prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
-                        <tooltip>
-                            <Tooltip showDelay="500ms" text="Regex"/>
-                        </tooltip>
-                        <graphic>
-                            <HBox alignment="CENTER" styleClass="icon-container">
-                                <Region styleClass="regex-icon, small-icon"/>
-                            </HBox>
-                        </graphic>
-                    </ToggleButton>
+                        <FacetPillsContainer fx:id="severityListView" alignment="CENTER_LEFT" spacing="7"
+                                             HBox.hgrow="SOMETIMES"/>
+                    </children>
+
                 </HBox>
-                <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0"
-                       text="No results">
-                    <HBox.margin>
-                        <Insets/>
-                    </HBox.margin>
-                </Label>
-                <Button fx:id="prevOccurrenceButton" alignment="CENTER"
-                        contentDisplay="GRAPHIC_ONLY"
-                        disable="true" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity"
-                        minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="25.0"
-                        prefWidth="25.0" styleClass="dialog-button" text="forward"
-                        textAlignment="CENTER">
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="upArrow-icon"/>
-                        </HBox>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Previous Occurrence"/>
-                    </tooltip>
-                </Button>
-                <Button fx:id="nextOccurrenceButton" alignment="CENTER"
-                        contentDisplay="GRAPHIC_ONLY"
-                        disable="true" graphicTextGap="1.0" maxHeight="-Infinity"
-                        maxWidth="-Infinity"
-                        minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
-                        prefHeight="25.0"
-                        prefWidth="25.0" styleClass="dialog-button" text="forward"
-                        textAlignment="CENTER">
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="downArrow-icon"/>
-                        </HBox>
-                    </graphic>
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Next Occurrence"/>
-                    </tooltip>
-                </Button>
-                <Pane HBox.hgrow="ALWAYS"/>
-                <padding>
-                    <Insets bottom="10.0" left="10.0" right="10.0" top="0.0"/>
-                </padding>
-            </HBox>
+                <HBox fx:id="highlightControls" alignment="CENTER_LEFT">
 
+                    <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                          prefHeight="27.0"
+                          maxWidth="600"
+                          spacing="2.0" styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                        <padding>
+                            <Insets left="3.0" right="3.0"/>
+                        </padding>
+                        <Button fx:id="searchHistoryButton" contentDisplay="GRAPHIC_ONLY"
+                                graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
+                                prefWidth="20.0"
+                                styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="find-icon, small-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Find on Current Page"/>
+                            </tooltip>
+                        </Button>
+                        <TextField fx:id="searchTextField"
+                                   maxWidth="1.7976931348623157E308"
+                                   minHeight="-Infinity" minWidth="-Infinity" promptText="Find in page"
+                                   styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                        <Button fx:id="clearSearchButton" contentDisplay="GRAPHIC_ONLY"
+                                graphicTextGap="1.0"
+                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
+                                prefWidth="20.0"
+                                styleClass="dialog-button" text="forward" textAlignment="CENTER">
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="cross-icon, small-icon"/>
+                                </HBox>
+                            </graphic>
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Clear Search Bar"/>
+                            </tooltip>
+                        </Button>
+                        <ToggleButton fx:id="searchMatchCaseToggle" contentDisplay="GRAPHIC_ONLY"
+                                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                      minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
+                                      prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Match Case"/>
+                            </tooltip>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="match-case-icon"/>
+                                </HBox>
+                            </graphic>
+                        </ToggleButton>
+                        <ToggleButton fx:id="searchRegExToggle" contentDisplay="GRAPHIC_ONLY"
+                                      maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                      minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
+                                      prefWidth="20.0" styleClass="dialog-button" text="Snapshot">
+                            <tooltip>
+                                <Tooltip showDelay="500ms" text="Regex"/>
+                            </tooltip>
+                            <graphic>
+                                <HBox alignment="CENTER" styleClass="icon-container">
+                                    <Region styleClass="regex-icon, small-icon"/>
+                                </HBox>
+                            </graphic>
+                        </ToggleButton>
+                    </HBox>
+                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0"
+                           text="No results">
+                    </Label>
+                    <Button fx:id="prevOccurrenceButton" alignment="CENTER"
+                            contentDisplay="GRAPHIC_ONLY"
+                            disable="true" graphicTextGap="1.0" maxHeight="-Infinity"
+                            maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            prefHeight="25.0"
+                            prefWidth="25.0" styleClass="dialog-button" text="forward"
+                            textAlignment="CENTER">
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="upArrow-icon"/>
+                            </HBox>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Previous Occurrence"/>
+                        </tooltip>
+                    </Button>
+                    <Button fx:id="nextOccurrenceButton" alignment="CENTER"
+                            contentDisplay="GRAPHIC_ONLY"
+                            disable="true" graphicTextGap="1.0" maxHeight="-Infinity"
+                            maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                            prefHeight="25.0"
+                            prefWidth="25.0" styleClass="dialog-button" text="forward"
+                            textAlignment="CENTER">
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="downArrow-icon"/>
+                            </HBox>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Next Occurrence"/>
+                        </tooltip>
+                    </Button>
+                    <Pane HBox.hgrow="ALWAYS"/>
+                </HBox>
+            </VBox>
         </VBox>
         <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
                     styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
@@ -338,7 +329,6 @@
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                     </HBox.margin>
                                 </Pagination>
-                                <Pane HBox.hgrow="NEVER" prefWidth="350"/>
                             </children>
                             <VBox.margin>
                                 <Insets/>

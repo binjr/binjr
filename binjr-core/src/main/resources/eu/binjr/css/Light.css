@@ -1651,3 +1651,55 @@
     -fx-border-radius: 0;
     -fx-background-color: -binjr-window-background-color;
 }
+
+.facet-pill {
+    -fx-padding: 5 10 5 10;
+    -fx-background-radius: 15;
+    -fx-background-color: -binjr-pane-background-color;
+    -fx-text-fill: white;
+}
+
+.facet-pill:selected .box .mark {
+    -fx-background-color: white;
+}
+
+
+.facet-pill .box {
+    -fx-background-color: transparent;
+}
+
+.facet-pill-trace {
+    -fx-background-color: GRAY;
+}
+
+.facet-pill-debug {
+    -fx-background-color: STEELBLUE;
+}
+
+.facet-pill-perf {
+    -fx-text-fill: white;
+    -fx-background-color: #268f69;
+}
+
+.facet-pill-info {
+    -fx-text-fill: white;
+    -fx-background-color: #0e0d0d;
+}
+
+.facet-pill-warn {
+    -fx-text-fill: black;
+    -fx-background-color: #ff8c00;
+}
+
+.facet-pill-warn:selected .box .mark {
+    -fx-background-color: black;
+}
+
+.facet-pill-error {
+    -fx-background-color: red;
+}
+
+.facet-pill-fatal {
+    -fx-text-fill: white;
+    -fx-background-color: DARKRED;
+}

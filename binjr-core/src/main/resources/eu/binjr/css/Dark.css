@@ -670,7 +670,7 @@
 }
 
 .warning-label {
-    -fx-text-fill:  -binjr-icon-background-color;
+    -fx-text-fill: -binjr-icon-background-color;
 }
 
 .warning-label-icon {
@@ -1750,7 +1750,7 @@
 /* RichText
 /*****************************/
 
-.lineno{
+.lineno {
     -fx-background-color: -binjr-window-background-color;
 }
 
@@ -1859,5 +1859,59 @@
     -fx-border-color: -binjr-control-border-color;
     -fx-border-radius: 0;
     -fx-background-color: -binjr-window-background-color;
+}
+
+.facet-pill {
+    -fx-padding: 5 10 5 10;
+    -fx-text-fill: white;
+    -fx-background-radius: 15;
+    -fx-background-color: -binjr-button-background-color;
+
+    /*-fx-border-with: 0;*/
+    /*-fx-border-color: -binjr-button-background-color;*/
+    /*-fx-border-radius: 15;*/
+}
+
+.facet-pill-trace {
+    -fx-background-color: GRAY;
+}
+
+.facet-pill-debug {
+    -fx-background-color: STEELBLUE;
+}
+
+.facet-pill-perf {
+    -fx-background-color: #268f69;
+}
+
+.facet-pill-info {
+    -fx-text-fill: black;
+    -fx-background-color: #d6d5d5;
+}
+
+.facet-pill-info:selected .box .mark {
+    -fx-background-color: black;
+}
+
+.facet-pill-warn {
+    -fx-text-fill: black;
+    -fx-background-color: #c8b23e;
+}
+
+.facet-pill-warn:selected .box .mark {
+    -fx-background-color: black;
+}
+
+.facet-pill-error {
+    -fx-text-fill: black;
+    -fx-background-color: #fd5454;
+}
+
+.facet-pill-error:selected .box .mark {
+    -fx-background-color: black;
+}
+
+.facet-pill-fatal {
+    -fx-background-color: DARKRED;
 }
 

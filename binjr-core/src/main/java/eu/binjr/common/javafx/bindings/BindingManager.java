@@ -23,6 +23,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
+import javafx.collections.ObservableSet;
+import javafx.collections.SetChangeListener;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.WeakEventHandler;
@@ -49,10 +51,15 @@ public class BindingManager implements AutoCloseable {
     private final Map<ObservableValue, List<InvalidationListener>> invalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableList, List<ListChangeListener>> listChangeListeners = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<ObservableList, List<InvalidationListener>> listInvalidationListeners = Collections.synchronizedMap(new WeakHashMap<>());
+
+    private final Map<ObservableSet, List<SetChangeListener>> setChangeListeners = Collections.synchronizedMap(new WeakHashMap<>());
+    private final Map<ObservableSet, List<InvalidationListener>> setInvalidationListeners= Collections.synchronizedMap(new WeakHashMap<>());
+
     private final Map<Property<?>, ObservableValue> boundProperties = Collections.synchronizedMap(new WeakHashMap<>());
     private final Map<Property<?>, Property> bidirectionallyBoundProperties = Collections.synchronizedMap(new WeakHashMap<>());
     private final List<EventHandler<?>> registeredHandlers = Collections.synchronizedList(new ArrayList<>());
     private final AtomicBoolean closed = new AtomicBoolean(false);
+
 
     /**
      * Binds the specified {@link ObservableValue} onto the specified {@link Property} and registers the resulting binding.
@@ -138,6 +145,23 @@ public class BindingManager implements AutoCloseable {
         register(observable, listener, listInvalidationListeners, ObservableList::addListener);
     }
 
+
+    public void attachListener(ObservableSet<?> observable, SetChangeListener listener){
+        register(observable, listener, setChangeListeners, ObservableSet::addListener);
+    }
+
+    public void attachListener(ObservableSet<?> observable,  InvalidationListener listener){
+        register(observable, listener, setInvalidationListeners, ObservableSet::addListener);
+    }
+
+    public void detachListener(ObservableSet<?> observable, SetChangeListener listener) {
+        unregister(observable, listener, setChangeListeners, ObservableSet::removeListener);
+    }
+
+    public void detachListener(ObservableSet<?> observable, InvalidationListener listener) {
+        unregister(observable, listener, setInvalidationListeners, ObservableSet::removeListener);
+    }
+
     /**
      * Remove a specific {@link ChangeListener} from an {@link ObservableValue}.
      *
@@ -211,6 +235,8 @@ public class BindingManager implements AutoCloseable {
                 unregisterAll(listInvalidationListeners, ObservableList::removeListener);
                 unregisterAll(invalidationListeners, ObservableValue::removeListener);
                 unregisterAll(changeListeners, ObservableValue::removeListener);
+                unregisterAll(setChangeListeners, ObservableSet::removeListener);
+                unregisterAll(setInvalidationListeners, ObservableSet::removeListener);
                 unbindAll();
                 // Release strong refs to registered event handlers, so that their
                 // weak counterpart may be collected.
@@ -226,6 +252,8 @@ public class BindingManager implements AutoCloseable {
         visitMap(listInvalidationListeners, ObservableList::removeListener);
         visitMap(invalidationListeners, ObservableValue::removeListener);
         visitMap(changeListeners, ObservableValue::removeListener);
+        visitMap(setChangeListeners, ObservableSet::removeListener);
+        visitMap(setInvalidationListeners, ObservableSet::removeListener);
         boundProperties.keySet().forEach(Property::unbind);
     }
 
@@ -234,6 +262,8 @@ public class BindingManager implements AutoCloseable {
         visitMap(listInvalidationListeners, ObservableList::addListener);
         visitMap(invalidationListeners, ObservableValue::addListener);
         visitMap(changeListeners, ObservableValue::addListener);
+        visitMap(setChangeListeners, ObservableSet::addListener);
+        visitMap(setInvalidationListeners, ObservableSet::addListener);
         boundProperties.forEach(Property::bind);
     }
 

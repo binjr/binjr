@@ -194,14 +194,3 @@
 .para2 {
     -fx-background-color: #0000FF30;
 }
-
-.facet-view  {
-    -fx-background-color: transparent;
-    -fx-border-size: 0;
-    -fx-border-color: transparent;
-}
-
-.facet-view * {
-    -fx-background-color: transparent;
-}
-

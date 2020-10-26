@@ -66,6 +66,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
+import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -83,7 +84,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.util.Duration;
-import org.controlsfx.control.CheckListView;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -156,7 +156,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private MaskerPane busyIndicator;
     @FXML
-    private CheckListView<FacetEntry> severityListView;
+    private FacetPillsContainer severityListView;
     @FXML
     private TextField filterTextField;
     @FXML
@@ -164,7 +164,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private Button applyFilterButton;
     @FXML
-    private VBox filteringBar;
+    private HBox filteringBar;
     @FXML
     private ToggleButton findToggleButton;
     @FXML
@@ -177,6 +177,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StackPane fileTablePane;
     @FXML
     private SplitPane splitPane;
+    @FXML
+    private VBox logsToolPane;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
             throws NoAdapterFoundException {
@@ -277,10 +279,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
 
         // Filter selection
+        bindingManager.bind(logsToolPane.managedProperty(), logsToolPane.visibleProperty());
+        bindingManager.bind(logsToolPane.visibleProperty(), filteringBar.visibleProperty().or(highlightControls.visibleProperty()));
+
         bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
         bindingManager.bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
-        bindingManager.attachListener(severityListView.getCheckModel().getCheckedItems(),
-                (ListChangeListener<FacetEntry>) l -> invalidateFilter(true));
+        bindingManager.attachListener(severityListView.getSelectedPills(),
+                (SetChangeListener<FacetPillsContainer.FacetPill>) l -> invalidateFilter(true));
         bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
         filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
         clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
@@ -331,7 +336,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
 
         var eventTarget = root.getParent();
-        if (eventTarget== null){
+        if (eventTarget == null) {
             eventTarget = root;
         }
         eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
@@ -486,13 +491,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
-                            severityListView.getCheckModel().clearChecks();
                             var severityFacetEntries = res.getFacetResults().get("severity");
-                            severityListView.getItems().setAll((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
-                            severityListView.getItems()
-                                    .stream()
-                                    .filter(f -> worksheet.getQueryParameters().getSeverities().contains(f.getLabel()))
-                                    .forEach(f -> severityListView.getCheckModel().check(f));
+                            severityListView.setAllEntries((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
+                            severityListView.getFacetPills()
+                                    .forEach(f -> {
+                                        f.getStyleClass().add("facet-pill-" + f.getFacet().getLabel());
+                                        f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().getLabel()));
+                                    });
                             // Update filePath facet view
                             var fileFacetEntries = res.getFacetResults().get("filePath");
                             if (fileFacetEntries != null) {
@@ -679,10 +684,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var newParams = new LogQueryParameters.Builder()
                 .setTimeRange(timeRangePicker.getSelectedRange())
                 .setFilterQuery(filterTextField.getText())
-                .setSeverities(severityListView.getCheckModel().getCheckedItems()
+                .setSeverities(severityListView.getFacetPills()
                         .stream()
-                        .filter(Objects::nonNull)
-                        .map(FacetEntry::getLabel)
+                        .filter(p-> p!= null && p.isSelected())
+                        .map(p-> p.getFacet().getLabel())
                         .collect(Collectors.toSet()))
                 .setPage(resetPage ? 0 : pager.getCurrentPageIndex())
                 .build();
