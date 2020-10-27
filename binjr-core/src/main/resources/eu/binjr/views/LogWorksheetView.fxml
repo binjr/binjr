@@ -323,7 +323,7 @@
                         </VirtualizedScrollPane>
                         <HBox fx:id="paginationBar" styleClass="worksheet-tool-bar">
                             <children>
-                                <Pagination fx:id="pager" maxPageIndicatorCount="20" pageCount="1" HBox.hgrow="ALWAYS">
+                                <Pagination fx:id="pager" maxPageIndicatorCount="50" pageCount="1" HBox.hgrow="ALWAYS">
                                     <HBox.margin>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                     </HBox.margin>
