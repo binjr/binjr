@@ -94,6 +94,7 @@ public class MainViewController implements Initializable {
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final DataFormat GENERIC_BINDING_FORMAT = new DataFormat(SourceBinding.MIME_TYPE);
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat(TimeSeriesBinding.MIME_TYPE);
     private static final DataFormat TEXT_FILES_BINDING_FORMAT = new DataFormat(TextFilesBinding.MIME_TYPE);
     private static final DataFormat LOG_FILES_BINDING_FORMAT = new DataFormat(LogFilesBinding.MIME_TYPE);
@@ -190,7 +191,8 @@ public class MainViewController implements Initializable {
     @FXML
     private void worksheetAreaOnDragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
+        if (db.hasContent(GENERIC_BINDING_FORMAT) ||
+                db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
                 db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
                 db.hasContent(LOG_FILES_BINDING_FORMAT)) {
             event.acceptTransferModes(TransferMode.COPY);
@@ -1386,7 +1388,8 @@ public class MainViewController implements Initializable {
     @FXML
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
+        if (db.hasContent(GENERIC_BINDING_FORMAT) ||
+                db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
                 db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
                 db.hasContent(LOG_FILES_BINDING_FORMAT)) {
             TreeView<SourceBinding> treeView = getSelectedTreeView();

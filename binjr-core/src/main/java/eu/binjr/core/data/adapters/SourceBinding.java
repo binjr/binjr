@@ -18,7 +18,6 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Worksheet;
-import javafx.scene.input.DataFormat;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.*;
@@ -32,6 +31,7 @@ import java.util.UUID;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Binding")
 public abstract class SourceBinding<T> {
+    public static final String MIME_TYPE = "x-binjr/SourceBinding";
     private static final Logger logger = Logger.create(SourceBinding.class);
     private static final ThreadLocal<MessageDigest> messageDigest = ThreadLocal.withInitial(() -> {
         try {
@@ -155,7 +155,9 @@ public abstract class SourceBinding<T> {
         return this.color == null ? computeDefaultColor() : this.color;
     }
 
-    public abstract String getMimeType();
+    public String getMimeType() {
+        return MIME_TYPE;
+    }
 
     @Override
     public String toString() {
