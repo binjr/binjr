@@ -34,6 +34,7 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.core.data.workspace.TextFilesWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
 public class TextFilesBinding extends SourceBinding<String> {
@@ -49,6 +50,11 @@ public class TextFilesBinding extends SourceBinding<String> {
     @Override
     public Class<? extends Worksheet<String>> getWorksheetClass() {
         return TextFilesWorksheet.class;
+    }
+
+    @Override
+    protected Color[] getDefaultColorPalette() {
+        return UserPreferences.getInstance().logFilesColorPalette.get().getPalette();
     }
 
     public static class Builder extends SourceBinding.Builder<String, TextFilesBinding, Builder> {

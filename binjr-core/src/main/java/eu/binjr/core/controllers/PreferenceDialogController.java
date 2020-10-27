@@ -81,6 +81,7 @@ public class PreferenceDialogController implements Initializable {
     public ToggleSwitch showOutlineStackedAreaCharts;
     public Slider stackedAreaChartOpacitySlider;
     public Label stackedAreaChartsOpacityText;
+    public ChoiceBox<BuiltInChartColorPalettes> logsPaletteChoiceBox;
     @FXML
     private ToggleSwitch loadExternalToggle;
     @FXML
@@ -170,6 +171,7 @@ public class PreferenceDialogController implements Initializable {
         formatter.valueProperty().bindBidirectional(userPrefs.downSamplingThreshold.property());
         bindEnumToChoiceBox(userPrefs.userInterfaceTheme, uiThemeChoiceBox, UserInterfaceThemes.values());
         bindEnumToChoiceBox(userPrefs.chartColorPalette, chartPaletteChoiceBox, BuiltInChartColorPalettes.values());
+        bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());

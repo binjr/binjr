@@ -90,9 +90,22 @@ public enum BuiltInChartColorPalettes {
             Color.valueOf("#002ff0"),
             Color.valueOf("#0022d4"),
             Color.valueOf("#04297c")
+
+    }),
+    GRAY_SCALE("Gray Scale", new Color[]{
+            Color.valueOf("#FFFFFF"),
+            Color.valueOf("#E0E0E0"),
+            Color.valueOf("#CCCCCC"),
+            Color.valueOf("#B8B8B8"),
+            Color.valueOf("#8F8F8F"),
+            Color.valueOf("#707070"),
+            Color.valueOf("#525252"),
+            Color.valueOf("#3D3D3D"),
+            Color.valueOf("#292929"),
+            Color.valueOf("#0A0A0A")
     });
 
-     private final Color[] palette;
+    private final Color[] palette;
     private final String name;
 
     BuiltInChartColorPalettes(String name, Color[] colors) {

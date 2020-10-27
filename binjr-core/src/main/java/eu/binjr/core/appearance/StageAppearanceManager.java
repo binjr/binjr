@@ -120,7 +120,6 @@ public class StageAppearanceManager {
         logger.trace(this::dumpRegisteredStages);
     }
 
-
     private Node installCurtain(Stage stage) {
         if (stage.getScene() != null && stage.getScene().getRoot() instanceof Pane) {
             ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/eu/binjr/images/avatar_512.png")));
@@ -251,11 +250,6 @@ public class StageAppearanceManager {
                 stage.getScene(),
                 UserPreferences.getInstance().userInterfaceTheme.get(),
                 css));
-
-    }
-
-    public Color[] getDefaultChartColors() {
-        return UserPreferences.getInstance().chartColorPalette.get().getPalette();
     }
 
 }

@@ -126,6 +126,21 @@
                     </AnchorPane>
                 </ScrollPane>
             </TitledPane>
+            <TitledPane fx:id="logsPrefsPane" animated="false" text="Logs">
+                <ScrollPane fitToHeight="true" fitToWidth="true">
+                    <padding>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </padding>
+                    <AnchorPane>
+                        <VBox layoutX="14.0" layoutY="14.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
+                              AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                            <Label text="Default color palette"/>
+                            <ChoiceBox fx:id="logsPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
+
+                        </VBox>
+                    </AnchorPane>
+                </ScrollPane>
+            </TitledPane>
             <TitledPane animated="false" text="Data Adapters">
                 <ScrollPane fitToHeight="true" fitToWidth="true">
                     <padding>

@@ -35,6 +35,7 @@ package eu.binjr.core.data.adapters;
 import eu.binjr.core.data.timeseries.LogEvent;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
 public class LogFilesBinding extends SourceBinding<LogEvent> {
@@ -62,6 +63,11 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
     @Override
     public Class<? extends Worksheet<LogEvent>> getWorksheetClass() {
         return LogWorksheet.class;
+    }
+
+    @Override
+    protected Color[] getDefaultColorPalette() {
+        return UserPreferences.getInstance().logFilesColorPalette.get().getPalette();
     }
 
     public boolean isIndexed() {

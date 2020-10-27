@@ -188,12 +188,14 @@ public abstract class SourceBinding<T> {
 
     public abstract Class<? extends Worksheet<T>> getWorksheetClass();
 
-    private Color computeDefaultColor() {
-        long targetNum = getHashValue(this.getLabel()) % StageAppearanceManager.getInstance().getDefaultChartColors().length;
+    protected abstract Color[] getDefaultColorPalette();
+
+    protected Color computeDefaultColor() {
+        long targetNum = getHashValue(this.getLabel()) % getDefaultColorPalette().length;
         if (targetNum < 0) {
             targetNum = targetNum * -1;
         }
-        return StageAppearanceManager.getInstance().getDefaultChartColors()[((int) targetNum)];
+        return getDefaultColorPalette()[((int) targetNum)];
     }
 
     private long getHashValue(final String value) {
@@ -255,4 +257,6 @@ public abstract class SourceBinding<T> {
         protected abstract S construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<T> adapter);
 
     }
+
+
 }

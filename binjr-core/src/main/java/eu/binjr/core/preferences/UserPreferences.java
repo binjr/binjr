@@ -247,6 +247,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<BuiltInChartColorPalettes> chartColorPalette =
             enumPreference(BuiltInChartColorPalettes.class, "chartColorPalette", BuiltInChartColorPalettes.VIBRANT);
 
+    public ObservablePreference<BuiltInChartColorPalettes> logFilesColorPalette =
+            enumPreference(BuiltInChartColorPalettes.class, "logFilesColorPalette", BuiltInChartColorPalettes.GRAY_SCALE);
+
     public ObservablePreference<LocalDateTime> lastCheckForUpdate =
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 

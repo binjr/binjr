@@ -96,7 +96,7 @@
                     </graphic>
                 </ToggleButton>
                 <ToggleButton fx:id="findToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                              prefWidth="40.0" selected="true" styleClass="dialog-button">
+                              prefWidth="40.0" selected="false" styleClass="dialog-button">
                     <tooltip>
                         <Tooltip showDelay="500ms" text="Find in current page (Ctrl+F)"/>
                     </tooltip>
@@ -196,7 +196,6 @@
 
                 </HBox>
                 <HBox fx:id="highlightControls" alignment="CENTER_LEFT">
-
                     <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity"
                           prefHeight="27.0"
                           maxWidth="600"

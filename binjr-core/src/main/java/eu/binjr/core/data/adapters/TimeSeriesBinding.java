@@ -21,6 +21,7 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -59,6 +60,11 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
     @Override
     public Class<? extends Worksheet<Double>> getWorksheetClass() {
         return XYChartsWorksheet.class;
+    }
+
+    @Override
+    protected Color[] getDefaultColorPalette() {
+        return UserPreferences.getInstance().chartColorPalette.get().getPalette();
     }
 
     /**
