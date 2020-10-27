@@ -53,7 +53,6 @@ import java.util.stream.Collectors;
  */
 public class TextDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(TextDataAdapter.class);
-    protected final TextAdapterPreferences prefs = (TextAdapterPreferences) getAdapterInfo().getPreferences();
     protected Path rootPath;
     private static final Gson gson = new Gson();
 
