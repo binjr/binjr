@@ -40,10 +40,7 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.LogQueryParameters;
-import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -65,7 +62,6 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.ListChangeListener;
 import javafx.collections.SetChangeListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -75,14 +71,14 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
@@ -107,6 +103,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static javafx.scene.control.SelectionMode.MULTIPLE;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
+   // private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("x-binjr/LogFilesBinding");
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final Gson gson = new Gson();
@@ -350,6 +347,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         }));
 
+        // Setup drag and drop
+        textOutput.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
+        textOutput.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
+
+        textOutput.setOnDragEntered(getBindingManager().registerHandler(event -> {
+            textOutput.setStyle("-fx-background-color:  -fx-accent-translucide;");
+
+        }));
+        textOutput.setOnDragExited(getBindingManager().registerHandler(event -> {
+            textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;");
+        }));
 
         refresh();
         super.initialize(location, resources);
@@ -377,6 +385,37 @@ public class LogWorksheetController extends WorksheetController implements Synca
             addToCurrentWorksheet(treeView);
         })));
         return new ContextMenu(item);
+    }
+
+    private void handleDragOverWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(DataFormat.lookupMimeType(LogFilesBinding.MIME_TYPE))) {
+            event.acceptTransferModes(TransferMode.MOVE);
+            event.consume();
+        }
+    }
+
+    private void handleDragDroppedOnWorksheetView(DragEvent event) {
+        Dragboard db = event.getDragboard();
+        if (db.hasContent(DataFormat.lookupMimeType(LogFilesBinding.MIME_TYPE))) {
+            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
+            if (treeView != null) {
+                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
+                if (item != null) {
+                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                    if (targetStage != null) {
+                        targetStage.requestFocus();
+                    }
+                    var items = treeView.getSelectionModel().getSelectedItems();
+                    addToCurrentWorksheet(items);
+                } else {
+                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                }
+            } else {
+                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+            }
+            event.consume();
+        }
     }
 
     private void addToCurrentWorksheet(Collection<TreeItem<SourceBinding>> sourceBindings) {
@@ -686,8 +725,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setFilterQuery(filterTextField.getText())
                 .setSeverities(severityListView.getFacetPills()
                         .stream()
-                        .filter(p-> p!= null && p.isSelected())
-                        .map(p-> p.getFacet().getLabel())
+                        .filter(p -> p != null && p.isSelected())
+                        .map(p -> p.getFacet().getLabel())
                         .collect(Collectors.toSet()))
                 .setPage(resetPage ? 0 : pager.getCurrentPageIndex())
                 .build();

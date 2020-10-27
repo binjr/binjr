@@ -37,6 +37,7 @@ import java.util.UUID;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class TimeSeriesBinding extends SourceBinding<Double> {
+    public static final String MIME_TYPE = "x-binjr/TimeSeriesBinding";
     private static final Logger logger = Logger.create(TimeSeriesBinding.class);
 
     @XmlAttribute
@@ -55,6 +56,11 @@ public class TimeSeriesBinding extends SourceBinding<Double> {
         this.graphType = ChartType.STACKED;
         this.unitName = "";
 
+    }
+
+    @Override
+    public String getMimeType() {
+        return MIME_TYPE;
     }
 
     @Override

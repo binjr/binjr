@@ -40,6 +40,7 @@ import javafx.scene.paint.Color;
 
 public class LogFilesBinding extends SourceBinding<LogEvent> {
 
+    public static final String MIME_TYPE = "x-binjr/LogFilesBinding";
     private transient boolean indexed = false;
 
     public LogFilesBinding() {
@@ -48,6 +49,11 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
 
     public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
         super(label, legend, null, path, treeHierarchy, adapter);
+    }
+
+    @Override
+    public String getMimeType() {
+        return MIME_TYPE;
     }
 
     @Override

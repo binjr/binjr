@@ -38,9 +38,15 @@ import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
 public class TextFilesBinding extends SourceBinding<String> {
+    public static final String MIME_TYPE = "x-binjr/TextFilesBinding";
 
     public TextFilesBinding() {
         super();
+    }
+
+    @Override
+    public String getMimeType() {
+        return MIME_TYPE;
     }
 
     public TextFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<String> adapter) {

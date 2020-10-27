@@ -950,7 +950,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void handleDragOverWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
             event.acceptTransferModes(TransferMode.MOVE);
             event.consume();
         }
@@ -958,7 +958,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void handleDragOverNewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
             event.acceptTransferModes(TransferMode.COPY);
             event.consume();
         }
@@ -966,7 +966,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
             TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
                 TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
@@ -997,7 +997,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
             TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
                 TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
@@ -1032,7 +1032,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(MainViewController.TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
             TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
             if (treeView != null) {
                 Collection<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();

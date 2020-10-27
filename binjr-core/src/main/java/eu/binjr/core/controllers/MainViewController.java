@@ -21,10 +21,7 @@ import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.DataAdapterFactory;
-import eu.binjr.core.data.adapters.DataAdapterInfo;
-import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -93,11 +90,14 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  */
 public class MainViewController implements Initializable {
     static final int SETTINGS_PANE_DISTANCE = 250;
-    static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("TimeSeriesBindingFormat");
     private static final Logger logger = Logger.create(MainViewController.class);
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat(TimeSeriesBinding.MIME_TYPE);
+    private static final DataFormat TEXT_FILES_BINDING_FORMAT = new DataFormat(TextFilesBinding.MIME_TYPE);
+    private static final DataFormat LOG_FILES_BINDING_FORMAT = new DataFormat(LogFilesBinding.MIME_TYPE);
+
     private final Map<EditableTab, WorksheetController> seriesControllers = new WeakHashMap<>();
     private final Map<TitledPane, Source> sourcesAdapters = new WeakHashMap<>();
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
@@ -190,7 +190,9 @@ public class MainViewController implements Initializable {
     @FXML
     private void worksheetAreaOnDragOver(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
+                db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
+                db.hasContent(LOG_FILES_BINDING_FORMAT)) {
             event.acceptTransferModes(TransferMode.COPY);
             event.consume();
         }
@@ -1157,7 +1159,9 @@ public class MainViewController implements Initializable {
                                 100);
                         db.setDragView(renderTextTooltip(toolTipText));
                         ClipboardContent content = new ClipboardContent();
-                        treeView.getSelectionModel().getSelectedItems().forEach(s -> content.put(TIME_SERIES_BINDING_FORMAT, s.getValue().getTreeHierarchy()));
+                        treeView.getSelectionModel().getSelectedItems().forEach(s -> content.put(
+                                DataFormat.lookupMimeType(s.getValue().getMimeType()),
+                                s.getValue().getTreeHierarchy()));
                         db.setContent(content);
                     } else {
                         logger.debug("No TreeItem selected: canceling drag and drop");
@@ -1382,7 +1386,9 @@ public class MainViewController implements Initializable {
     @FXML
     private void handleDragDroppedOnWorksheetArea(DragEvent event) {
         Dragboard db = event.getDragboard();
-        if (db.hasContent(TIME_SERIES_BINDING_FORMAT)) {
+        if (db.hasContent(TIME_SERIES_BINDING_FORMAT) ||
+                db.hasContent(TEXT_FILES_BINDING_FORMAT) ||
+                db.hasContent(LOG_FILES_BINDING_FORMAT)) {
             TreeView<SourceBinding> treeView = getSelectedTreeView();
             if (treeView != null) {
                 var items = treeView.getSelectionModel().getSelectedItems();

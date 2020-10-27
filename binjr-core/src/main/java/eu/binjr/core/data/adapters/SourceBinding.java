@@ -17,8 +17,8 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.workspace.Worksheet;
+import javafx.scene.input.DataFormat;
 import javafx.scene.paint.Color;
 
 import javax.xml.bind.annotation.*;
@@ -154,6 +154,8 @@ public abstract class SourceBinding<T> {
     public Color getColor() {
         return this.color == null ? computeDefaultColor() : this.color;
     }
+
+    public abstract String getMimeType();
 
     @Override
     public String toString() {
