@@ -49,7 +49,7 @@ ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "15"
+ext.OPENJFX_VERSION = "15.0.1"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
 
