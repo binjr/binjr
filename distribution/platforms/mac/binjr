@@ -32,6 +32,6 @@ exec $JAVACMD \
   -Dbasedir="$BASEDIR" \
   -Dbinjr.portable=true \
   "eu.binjr.core.Binjr" \
-  "--system-plugins-path=./plugins" \
-  "--packaging=MAC_TAR" \
+  --system-plugins-path="$BASEDIR/plugins" \
+  --packaging="MAC_TAR" \
   "$@"

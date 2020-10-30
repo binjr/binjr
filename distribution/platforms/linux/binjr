@@ -18,6 +18,6 @@ exec "$JAVACMD" \
   -Dbasedir="$BASEDIR" \
   -Dbinjr.portable=true \
   "eu.binjr.core.Binjr" \
-  "--system-plugins-path=./plugins" \
-  "--packaging=LINUX_TAR" \
+  --system-plugins-path="$BASEDIR/plugins" \
+  --packaging="LINUX_TAR" \
   "$@"
