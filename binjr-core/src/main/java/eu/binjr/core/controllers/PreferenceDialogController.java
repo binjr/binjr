@@ -143,15 +143,15 @@ public class PreferenceDialogController implements Initializable {
                 return Paths.get(string);
             }
         });
-        pathFormatter.valueProperty().bindBidirectional(userPrefs.pluginsLocation.property());
+        pathFormatter.valueProperty().bindBidirectional(userPrefs.userPluginsLocation.property());
         pluginLocTextfield.setTextFormatter(pathFormatter);
-        userPrefs.pluginsLocation.property().addListener((observable, oldValue, newValue) -> {
+        userPrefs.userPluginsLocation.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null && !Files.exists(newValue)) {
                 Dialogs.notifyError("Invalid Plugins Folder Location",
                         "The selected path for the plugins folder location does not exists",
                         Pos.BOTTOM_RIGHT,
                         root);
-                Platform.runLater(() -> userPrefs.pluginsLocation.set(oldValue));
+                Platform.runLater(() -> userPrefs.userPluginsLocation.set(oldValue));
             } else {
                 Dialogs.notifyInfo(
                         "Plugins Folder Location Changed",

@@ -17,7 +17,6 @@
 package eu.binjr.common.plugins;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.preferences.UserPreferences;
 
 import java.io.IOException;
 import java.net.URL;
@@ -35,33 +34,34 @@ public final class ServiceLoaderHelper {
     private static final Logger logger = Logger.create(ServiceLoaderHelper.class);
 
     /**
-     * A helper method to load and return service implementations from the classpath.
+     * A helper method to load and return service implementations from the classpath and external jars
      *
      * @param clazz the type of service to load and return
      * @param <T>   the type of service to load and return
      * @return A {@link Set} of loaded service implementations
      */
-    public static <T> Set<T> load(Class<T> clazz) {
-        return load(clazz, null, false);
+    public static <T> Set<T> loadFromClasspath(Class<T> clazz) {
+        Set<T> loadServices = new HashSet<>();
+        // Load plugins from classpath
+        loadFromServiceLoader(ServiceLoader.load(clazz), loadServices);
+        return loadServices;
     }
 
     /**
      * A helper method to load and return service implementations from the classpath and/or external jars
      *
-     * @param clazz            the type of service to load and return
-     * @param externalLocation a file system path specifying qhere to look for external jar to load services from
-     * @param loadFromExternal true if services should be loaded from an external location, false otherwise.
-     * @param <T>              the type of service to load and return
+     * @param clazz             the type of service to load and return
+     * @param externalLocations file system paths specifying where to look for external jar to load services from
+     * @param <T>               the type of service to load and return
      * @return A {@link Set} of loaded service implementations
      */
-    public static <T> Set<T> load(Class<T> clazz, Path externalLocation, boolean loadFromExternal) {
+    public static <T> Set<T> loadFromPaths(Class<T> clazz, Path... externalLocations) {
+        Objects.requireNonNull(externalLocations);
         Set<T> loadServices = new HashSet<>();
-        // Load plugins from classpath
-        loadFromServiceLoader(ServiceLoader.load(clazz), loadServices);
         //Load plugin from external folder
-        if (loadFromExternal) {
-            List<URL> urls = new ArrayList<>();
-            if (Files.exists(UserPreferences.getInstance().pluginsLocation.get())) {
+        List<URL> urls = new ArrayList<>();
+        for (var externalLocation : externalLocations) {
+            if (externalLocation != null && Files.exists(externalLocation)) {
                 logger.info(() -> "Looking for services of type " + clazz.getName() + " in " + externalLocation);
                 PathMatcher jarMatcher = FileSystems.getDefault().getPathMatcher("glob:**.jar");
                 try {

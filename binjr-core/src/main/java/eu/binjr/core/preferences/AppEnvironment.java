@@ -33,6 +33,8 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +73,7 @@ public class AppEnvironment {
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
     private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
+    private Path systemPluginPath;
 
     private AppEnvironment() {
         this.manifest = getManifest();
@@ -149,6 +152,9 @@ public class AppEnvironment {
                     break;
                 case "log-level":
                     UserPreferences.getInstance().rootLoggingLevel.set(Level.valueOf(val));
+                    break;
+                case "system-plugins-path":
+                    this.setSystemPluginPath(val);
                     break;
                 case "log-file":
                     break;
@@ -471,6 +477,19 @@ public class AppEnvironment {
 
     public Property<AppPackaging> packagingProperty() {
         return packaging;
+    }
+
+    private void setSystemPluginPath(String val) {
+        try {
+            this.systemPluginPath = Path.of(val);
+        }catch (InvalidPathException e){
+            logger.error("Cannot set system plugin path: " + e.getMessage());
+            logger.debug(()-> "Stack trace", e);
+        }
+    }
+
+    public Path getSystemPluginPath() {
+        return this.systemPluginPath;
     }
 
     private static class EnvironmentHolder {

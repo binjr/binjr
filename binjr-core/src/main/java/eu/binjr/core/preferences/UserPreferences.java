@@ -130,8 +130,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The location to load plugins from in addition to those on the classpath.
      */
-    public final ObservablePreference<Path> pluginsLocation =
+    public final ObservablePreference<Path> userPluginsLocation =
             pathPreference("pluginsLocation", Path.of(System.getProperty("user.home")));
+
 
     /**
      * True if plugins from the location defined by "pluginsLocation" should be loaded in addition to those

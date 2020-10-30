@@ -6,7 +6,7 @@ JAVACMD="$BASEDIR/runtime/bin/java"
 
 exec "$JAVACMD" \
   -splash:"$BASEDIR/resources/images/splashscreen.png" \
-  -cp "$BASEDIR/libs/*:$BASEDIR/plugins/*" \
+  -cp "$BASEDIR/libs/*" \
   -Xmx4096M \
   -XX:+UnlockExperimentalVMOptions \
   -XX:+UseShenandoahGC \
@@ -18,5 +18,6 @@ exec "$JAVACMD" \
   -Dbasedir="$BASEDIR" \
   -Dbinjr.portable=true \
   "eu.binjr.core.Binjr" \
+  "--system-plugins-path=./plugins" \
   "--packaging=LINUX_TAR" \
   "$@"

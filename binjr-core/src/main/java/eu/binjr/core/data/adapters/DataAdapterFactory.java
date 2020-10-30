@@ -43,8 +43,8 @@ import java.util.stream.Collectors;
 public class DataAdapterFactory {
     private static final Logger logger = Logger.create(DataAdapterFactory.class);
     private final Map<String, DataAdapterInfo> registeredAdapters = new ConcurrentHashMap<>();
-    private final static Version MINIMUM_API_LEVEL  = Version.parseVersion(AppEnvironment.MINIMUM_PLUGIN_API_LEVEL);
-    private final static Version CURRENT_API_LEVEL  = Version.parseVersion(AppEnvironment.PLUGIN_API_LEVEL);
+    private final static Version MINIMUM_API_LEVEL = Version.parseVersion(AppEnvironment.MINIMUM_PLUGIN_API_LEVEL);
+    private final static Version CURRENT_API_LEVEL = Version.parseVersion(AppEnvironment.PLUGIN_API_LEVEL);
 
     /**
      * Initializes a new instance if the {@link DataAdapterFactory} class.
@@ -52,9 +52,19 @@ public class DataAdapterFactory {
     private DataAdapterFactory() {
         // An exception here could prevent the app from  starting
         try {
-            for (var dataAdapterInfo : ServiceLoaderHelper.load(DataAdapterInfo.class,
-                    UserPreferences.getInstance().pluginsLocation.get(),
-                    UserPreferences.getInstance().loadPluginsFromExternalLocation.get())) {
+            // Load from classpath
+            var adapters = ServiceLoaderHelper.loadFromClasspath(DataAdapterInfo.class);
+            // Load from system plugin location
+            adapters.addAll(ServiceLoaderHelper.loadFromPaths(
+                    DataAdapterInfo.class,
+                    AppEnvironment.getInstance().getSystemPluginPath()));
+            // Load from user plugin location
+            if (UserPreferences.getInstance().loadPluginsFromExternalLocation.get()) {
+                adapters.addAll(ServiceLoaderHelper.loadFromPaths(
+                        DataAdapterInfo.class,
+                        UserPreferences.getInstance().userPluginsLocation.get()));
+            }
+            for (var dataAdapterInfo : adapters) {
                 if (dataAdapterInfo.getApiLevel().compareTo(MINIMUM_API_LEVEL) < 0) {
                     logger.warn("Cannot load plugin " +
                             dataAdapterInfo.getName() +
