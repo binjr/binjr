@@ -33,7 +33,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryManagerMXBean;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -482,10 +481,21 @@ public class AppEnvironment {
     private void setSystemPluginPath(String val) {
         try {
             this.systemPluginPath = Path.of(val);
-        }catch (InvalidPathException e){
+            if (!systemPluginPath.isAbsolute()) {
+                // resolve the path on top of entry point jar's location
+                var rootPath = Paths.get(getClass()
+                        .getProtectionDomain()
+                        .getCodeSource()
+                        .getLocation()
+                        .toURI()).getParent();
+                logger.debug(() -> "binjr-core path=" + rootPath);
+                this.systemPluginPath = rootPath.resolve(val);
+            }
+        } catch (Exception e) {
             logger.error("Cannot set system plugin path: " + e.getMessage());
-            logger.debug(()-> "Stack trace", e);
+            logger.debug(() -> "Stack trace", e);
         }
+        logger.debug(() -> "systemPluginPath=" + systemPluginPath);
     }
 
     public Path getSystemPluginPath() {
