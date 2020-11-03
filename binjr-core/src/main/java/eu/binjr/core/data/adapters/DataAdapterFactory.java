@@ -28,10 +28,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Dialog;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Objects;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -52,18 +50,16 @@ public class DataAdapterFactory {
     private DataAdapterFactory() {
         // An exception here could prevent the app from  starting
         try {
+            var pluginPaths = new ArrayList<Path>();
             // Load from classpath
             var adapters = ServiceLoaderHelper.loadFromClasspath(DataAdapterInfo.class);
-            // Load from system plugin location
-            adapters.addAll(ServiceLoaderHelper.loadFromPaths(
-                    DataAdapterInfo.class,
-                    AppEnvironment.getInstance().getSystemPluginPath()));
-            // Load from user plugin location
+            // Add system plugin location
+            pluginPaths.add(AppEnvironment.getInstance().getSystemPluginPath());
+            // Add user plugin location
             if (UserPreferences.getInstance().loadPluginsFromExternalLocation.get()) {
-                adapters.addAll(ServiceLoaderHelper.loadFromPaths(
-                        DataAdapterInfo.class,
-                        UserPreferences.getInstance().userPluginsLocation.get()));
+                pluginPaths.add(UserPreferences.getInstance().userPluginsLocation.get());
             }
+            adapters.addAll(ServiceLoaderHelper.loadFromPaths(DataAdapterInfo.class, pluginPaths));
             for (var dataAdapterInfo : adapters) {
                 if (dataAdapterInfo.getApiLevel().compareTo(MINIMUM_API_LEVEL) < 0) {
                     logger.warn("Cannot load plugin " +

@@ -55,6 +55,18 @@ public final class ServiceLoaderHelper {
      * @param <T>               the type of service to load and return
      * @return A {@link Set} of loaded service implementations
      */
+    public static <T> Set<T> loadFromPaths(Class<T> clazz, Collection<Path> externalLocations) {
+        return loadFromPaths(clazz, externalLocations.toArray(Path[]::new));
+    }
+
+    /**
+     * A helper method to load and return service implementations from the classpath and/or external jars
+     *
+     * @param clazz             the type of service to load and return
+     * @param externalLocations file system paths specifying where to look for external jar to load services from
+     * @param <T>               the type of service to load and return
+     * @return A {@link Set} of loaded service implementations
+     */
     public static <T> Set<T> loadFromPaths(Class<T> clazz, Path... externalLocations) {
         Objects.requireNonNull(externalLocations);
         Set<T> loadServices = new HashSet<>();
