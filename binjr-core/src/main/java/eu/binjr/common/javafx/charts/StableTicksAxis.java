@@ -51,8 +51,8 @@ import java.util.List;
  * @author Jason Winnebeck
  */
 public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
-    private T dataMaxValue;
-    private T dataMinValue;
+    private T dataMaxValue = (T) Double.valueOf(0);
+    private T dataMinValue = (T) Double.valueOf(0);
 
     public static class SelectableRegion extends Pane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
