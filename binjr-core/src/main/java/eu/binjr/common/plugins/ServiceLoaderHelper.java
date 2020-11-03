@@ -88,11 +88,8 @@ public final class ServiceLoaderHelper {
             } else {
                 logger.warn("External location " + externalLocation + " does not exist.");
             }
-            loadFromServiceLoader(ServiceLoader.load(clazz,
-                    new URLClassLoader(urls.toArray(URL[]::new), Thread.currentThread().getContextClassLoader())
-                    ), loadServices
-            );
         }
+        loadFromServiceLoader(ServiceLoader.load(clazz, new URLClassLoader(urls.toArray(URL[]::new))), loadServices);
         return loadServices;
     }
 
