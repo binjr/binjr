@@ -19,27 +19,38 @@ package eu.binjr.core.data.workspace;
 import eu.binjr.core.data.adapters.SourceBinding;
 import org.reflections.Reflections;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-enum ReflectionHelper {
+public enum ReflectionHelper {
     INSTANCE;
-    public Class<?>[] getClassesToBeBound() {
+
+
+    public static final String EU_BINJR = "eu.binjr";
+    private final Set<Class<?>> classesToBeBound = new HashSet<>();
+
+    ReflectionHelper() {
+        // Add Workspace class
+        classesToBeBound.add(Workspace.class);
+        // scan classpath
+        scan(new Reflections(EU_BINJR));
+    }
+
+    public Collection<Class<?>> getClassesToBeBound() {
         return classesToBeBound;
     }
 
+    public void scanClassLoader(ClassLoader cl) {
+        // scan
+        scan(new Reflections(EU_BINJR, cl));
+    }
 
-    private final Class<?>[] classesToBeBound;
-
-    ReflectionHelper(){
-        Reflections reflections = new Reflections("eu.binjr");
+    private void scan(Reflections reflections) {
         // Add all Worksheet classes
-        Set<Class<?>> classes = new HashSet<>(reflections.getSubTypesOf(Worksheet.class));
+        classesToBeBound.addAll(reflections.getSubTypesOf(Worksheet.class));
         // Add SourceBinding classes
-        classes.addAll(reflections.getSubTypesOf(SourceBinding.class));
-        // Add Workspace class
-        classes.add(Workspace.class);
-        classesToBeBound =  classes.toArray(Class<?>[]::new);
+        classesToBeBound.addAll(reflections.getSubTypesOf(SourceBinding.class));
     }
 
 }

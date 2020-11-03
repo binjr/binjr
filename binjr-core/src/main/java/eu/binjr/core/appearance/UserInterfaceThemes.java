@@ -38,7 +38,10 @@ public interface UserInterfaceThemes {
         private static Set<UserInterfaceThemes> loadUiThemes() {
             Set<UserInterfaceThemes> themes = new HashSet<>(Arrays.asList(BuiltInUserInterfaceThemes.values()));
             try {
-                themes.addAll(ServiceLoaderHelper.loadFromClasspath(UserInterfaceThemes.class));
+                Set<UserInterfaceThemes> loadedThemes = new HashSet<>();
+                ServiceLoaderHelper.loadFromClasspath(UserInterfaceThemes.class, loadedThemes);
+                themes.addAll(loadedThemes);
+                //TODO: load themes from dynamically loaded plugins
             } catch (Throwable t) {
                 logger.error("Failed to load UserInterfaceThemes from plugin: " + t.getMessage());
                 logger.debug(() -> "Complete stack", t);

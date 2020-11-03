@@ -40,11 +40,9 @@ public final class ServiceLoaderHelper {
      * @param <T>   the type of service to load and return
      * @return A {@link Set} of loaded service implementations
      */
-    public static <T> Set<T> loadFromClasspath(Class<T> clazz) {
-        Set<T> loadServices = new HashSet<>();
+    public static <T> void loadFromClasspath(Class<T> clazz,  Set<T> loadedServices) {
         // Load plugins from classpath
-        loadFromServiceLoader(ServiceLoader.load(clazz), loadServices);
-        return loadServices;
+        loadFromServiceLoader(ServiceLoader.load(clazz), loadedServices);
     }
 
     /**
@@ -53,10 +51,10 @@ public final class ServiceLoaderHelper {
      * @param clazz             the type of service to load and return
      * @param externalLocations file system paths specifying where to look for external jar to load services from
      * @param <T>               the type of service to load and return
-     * @return A {@link Set} of loaded service implementations
+     * @return the class loader used to load jars from the external paths
      */
-    public static <T> Set<T> loadFromPaths(Class<T> clazz, Collection<Path> externalLocations) {
-        return loadFromPaths(clazz, externalLocations.toArray(Path[]::new));
+    public static <T> ClassLoader loadFromPaths(Class<T> clazz, Set<T> loadedServices, Collection<Path> externalLocations) {
+        return loadFromPaths(clazz, loadedServices, externalLocations.toArray(Path[]::new));
     }
 
     /**
@@ -65,11 +63,10 @@ public final class ServiceLoaderHelper {
      * @param clazz             the type of service to load and return
      * @param externalLocations file system paths specifying where to look for external jar to load services from
      * @param <T>               the type of service to load and return
-     * @return A {@link Set} of loaded service implementations
+     * @return the class loader used to load jars from the external paths
      */
-    public static <T> Set<T> loadFromPaths(Class<T> clazz, Path... externalLocations) {
+    public static <T> ClassLoader loadFromPaths(Class<T> clazz, Set<T> loadedServices, Path... externalLocations) {
         Objects.requireNonNull(externalLocations);
-        Set<T> loadServices = new HashSet<>();
         //Load plugin from external folder
         List<URL> urls = new ArrayList<>();
         for (var externalLocation : externalLocations) {
@@ -101,15 +98,16 @@ public final class ServiceLoaderHelper {
                 logger.warn("External location " + externalLocation + " does not exist.");
             }
         }
-        loadFromServiceLoader(ServiceLoader.load(clazz, new URLClassLoader(urls.toArray(URL[]::new))), loadServices);
-        return loadServices;
+        var ucl = new URLClassLoader(urls.toArray(URL[]::new));
+        loadFromServiceLoader(ServiceLoader.load(clazz, ucl), loadedServices);
+        return ucl;
     }
 
-    private static <T> void loadFromServiceLoader(ServiceLoader<T> sl, Set<T> registeredResources) {
+    private static <T> void loadFromServiceLoader(ServiceLoader<T> sl, Set<T> loadedServices) {
         for (Iterator<T> iterator = sl.iterator(); iterator.hasNext(); ) {
             try {
                 T res = iterator.next();
-                registeredResources.add(res);
+                loadedServices.add(res);
                 logger.debug(() -> "Successfully registered resource " + res.toString() + " from external JAR.");
             } catch (ServiceConfigurationError sce) {
                 logger.error("Failed to load resource", sce);

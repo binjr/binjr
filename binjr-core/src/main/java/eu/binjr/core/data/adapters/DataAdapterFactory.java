@@ -21,6 +21,7 @@ import eu.binjr.common.plugins.ServiceLoaderHelper;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.workspace.ReflectionHelper;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
@@ -51,15 +52,19 @@ public class DataAdapterFactory {
         // An exception here could prevent the app from  starting
         try {
             var pluginPaths = new ArrayList<Path>();
+            var adapters = new HashSet<DataAdapterInfo>();
             // Load from classpath
-            var adapters = ServiceLoaderHelper.loadFromClasspath(DataAdapterInfo.class);
+            ServiceLoaderHelper.loadFromClasspath(DataAdapterInfo.class, adapters);
             // Add system plugin location
             pluginPaths.add(AppEnvironment.getInstance().getSystemPluginPath());
             // Add user plugin location
             if (UserPreferences.getInstance().loadPluginsFromExternalLocation.get()) {
                 pluginPaths.add(UserPreferences.getInstance().userPluginsLocation.get());
             }
-            adapters.addAll(ServiceLoaderHelper.loadFromPaths(DataAdapterInfo.class, pluginPaths));
+            var ucl = ServiceLoaderHelper.loadFromPaths(DataAdapterInfo.class,adapters,  pluginPaths);
+            // Scan loaded plugins for serialisable types
+            ReflectionHelper.INSTANCE.scanClassLoader(ucl);
+            // register adapters
             for (var dataAdapterInfo : adapters) {
                 if (dataAdapterInfo.getApiLevel().compareTo(MINIMUM_API_LEVEL) < 0) {
                     logger.warn("Cannot load plugin " +
@@ -193,4 +198,5 @@ public class DataAdapterFactory {
     private static class DataAdapterFactoryHolder {
         private static final DataAdapterFactory instance = new DataAdapterFactory();
     }
+
 }

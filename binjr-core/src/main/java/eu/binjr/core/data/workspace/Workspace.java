@@ -119,7 +119,7 @@ public class Workspace implements Dirtyable {
      */
     public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
         sanityCheck(file);
-        Workspace workspace = XmlUtils.deSerialize(file, ReflectionHelper.INSTANCE.getClassesToBeBound());
+        Workspace workspace = XmlUtils.deSerialize(file, ReflectionHelper.INSTANCE.getClassesToBeBound().toArray(Class<?>[]::new));
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
         workspace.cleanUp();
@@ -370,7 +370,7 @@ public class Workspace implements Dirtyable {
             throw new IllegalArgumentException("File cannot be null");
         }
 
-        XmlUtils.serialize(this, file, ReflectionHelper.INSTANCE.getClassesToBeBound());
+        XmlUtils.serialize(this, file, ReflectionHelper.INSTANCE.getClassesToBeBound().toArray(Class<?>[]::new));
         setPath(file.toPath());
         cleanUp();
         UserHistory.getInstance().mostRecentSaveFolders.push(file.toPath());
