@@ -323,11 +323,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                     xAxis = buildTimeAxis();
                     break;
             }
-            StableTicksAxis yAxis;
+            StableTicksAxis<Double> yAxis;
             if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
-                yAxis = new BinaryStableTicksAxis();
+                yAxis = new BinaryStableTicksAxis<>();
             } else {
-                yAxis = new MetricStableTicksAxis();
+                yAxis = new MetricStableTicksAxis<>();
             }
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);

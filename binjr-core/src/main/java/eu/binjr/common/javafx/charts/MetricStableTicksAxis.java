@@ -23,7 +23,7 @@ import eu.binjr.common.text.MetricPrefixFormatter;
  *
  * @author Frederic Thevenet
  */
-public class MetricStableTicksAxis extends StableTicksAxis {
+public class MetricStableTicksAxis<T extends Number> extends StableTicksAxis<T> {
 
     public MetricStableTicksAxis() {
         super(new MetricPrefixFormatter());

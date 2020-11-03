@@ -42,6 +42,7 @@ import org.gillius.jfxutils.chart.AxisTickFormatter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
@@ -49,9 +50,9 @@ import java.util.List;
  *
  * @author Jason Winnebeck
  */
-public abstract class StableTicksAxis extends ValueAxis<Double> {
-    private double dataMaxValue;
-    private double dataMinValue;
+public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
+    private T dataMaxValue;
+    private T dataMinValue;
 
     public static class SelectableRegion extends Pane {
         private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
@@ -110,7 +111,9 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     private AxisTickFormatter axisTickFormatter;
     private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
 
-    private List<Double> minorTicks;
+    private final StringProperty displayUnit = new SimpleStringProperty("");
+
+    private List<T> minorTicks;
 
     /**
      * Amount of padding to add on the each end of the axis when auto ranging.
@@ -145,8 +148,9 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
 
             @Override
             public String format(Number number) {
-                return prefixFormatter.format(number.doubleValue());
+                return prefixFormatter.format(number.doubleValue()) + displayUnit.getValue();
             }
+
         };
     }
 
@@ -246,10 +250,16 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     }
 
     @Override
-    public void invalidateRange(List<Double> data) {
+    public void invalidateRange(List<T> data) {
         // Calculate min and max value not taking NaN values into account
-        dataMaxValue = data.stream().filter(d -> d != null && !Double.isNaN(d)).max(Double::compareTo).orElse(getUpperBound());
-        dataMinValue = data.stream().filter(d -> d != null && !Double.isNaN(d)).min(Double::compareTo).orElse(getUpperBound());
+        dataMaxValue = data.stream()
+                .filter(d -> d != null && !Double.isNaN(d.doubleValue()))
+                .max(Comparator.comparingDouble(T::doubleValue))
+                .orElse((T) Double.valueOf(getUpperBound()));
+        dataMinValue = data.stream()
+                .filter(d -> d != null && !Double.isNaN(d.doubleValue()))
+                .min(Comparator.comparingDouble(T::doubleValue))
+                .orElse((T) Double.valueOf(getLowerBound()));
         // Invoke super with an empty list so that requestLayout is called while avoiding iterating the sample list again.
         super.invalidateRange(Collections.emptyList());
     }
@@ -257,8 +267,8 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     @Override
     protected Range autoRange(double minValue, double maxValue, double length, double labelSize) {
         // By fthevenet: Override the provided min and max values by those calculated by our override.
-        minValue = dataMinValue;
-        maxValue = dataMaxValue;
+        minValue = dataMinValue.doubleValue();
+        maxValue = dataMaxValue.doubleValue();
         //By dweil: if the range is very small, display it like a flat line, the scaling doesn't work very well at these
         //values. 1e-300 was chosen arbitrarily.
         if (Math.abs(minValue - maxValue) < 1e-300) {
@@ -318,7 +328,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
 
 
     @Override
-    protected List<Double> calculateMinorTickMarks() {
+    protected List<T> calculateMinorTickMarks() {
         return minorTicks;
     }
 
@@ -354,7 +364,7 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
     }
 
     @Override
-    protected List<Double> calculateTickValues(double length, Object range) {
+    protected List<T> calculateTickValues(double length, Object range) {
         Range rangeVal = (Range) range;
         //Use floor so we start generating ticks before the axis starts -- this is really only relevant
         //because of the minor ticks before the first visible major tick. We'll generate a first
@@ -363,21 +373,21 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
         //Generate one more tick than we expect, for "overlap" to get minor ticks on both sides of the
         //first and last major tick.
         int numTicks = (int) (rangeVal.getDelta() / rangeVal.tickSpacing) + 1;
-        List<Double> ret = new ArrayList<>(numTicks + 1);
+        List<T> ret = new ArrayList<>(numTicks + 1);
         minorTicks = new ArrayList<>((numTicks + 2) * NUM_MINOR_TICKS);
         double minorTickSpacing = rangeVal.tickSpacing / (NUM_MINOR_TICKS + 1);
         for (int i = 0; i <= numTicks; ++i) {
             double majorTick = firstTick + rangeVal.tickSpacing * i;
-            ret.add(majorTick);
+            ret.add((T) Double.valueOf(majorTick));
             for (int j = 1; j <= NUM_MINOR_TICKS; ++j) {
-                minorTicks.add(majorTick + minorTickSpacing * j);
+                minorTicks.add((T) Double.valueOf(majorTick + minorTickSpacing * j));
             }
         }
         return ret;
     }
 
     @Override
-    protected String getTickMarkLabel(Double number) {
+    protected String getTickMarkLabel(T number) {
         return axisTickFormatter.format(number);
     }
 
@@ -451,6 +461,18 @@ public abstract class StableTicksAxis extends ValueAxis<Double> {
 
     public SelectableRegion getSelectionMarker() {
         return selectionMarker;
+    }
+
+    public String getDisplayUnit() {
+        return displayUnit.get();
+    }
+
+    public StringProperty displayUnitProperty() {
+        return displayUnit;
+    }
+
+    public void setDisplayUnit(String displayUnit) {
+        this.displayUnit.set(displayUnit);
     }
 
 

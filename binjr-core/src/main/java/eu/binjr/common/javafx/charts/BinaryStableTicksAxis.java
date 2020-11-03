@@ -23,7 +23,7 @@ import eu.binjr.common.text.BinaryPrefixFormatter;
  *
  * @author Frederic Thevenet
  */
-public class BinaryStableTicksAxis extends StableTicksAxis {
+public class BinaryStableTicksAxis<T extends Number> extends StableTicksAxis<T> {
     public BinaryStableTicksAxis() {
         super(new BinaryPrefixFormatter());
     }
