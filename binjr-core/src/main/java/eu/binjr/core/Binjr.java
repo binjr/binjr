@@ -88,8 +88,8 @@ public class Binjr extends Application {
                 if (UserPreferences.getInstance().persistLogsToFile.get()) {
                     Path basePath = UserPreferences.getInstance().logFilesLocation.get()
                             .resolve("binjr_" +
+                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd_HH-mm-ss_")) +
                                     ProcessHandle.current().pid() +
-                                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("_YYYY-MM-dd_HH-mm-ss")) +
                                     ".log");
                     var fileAppender = FileAppender.newBuilder()
                             .setName("FileAppender")

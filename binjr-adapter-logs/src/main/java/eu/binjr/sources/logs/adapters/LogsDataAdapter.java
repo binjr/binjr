@@ -172,7 +172,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                 FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
                         new LogFilesBinding.Builder()
                                 .withLabel(fileName + " (" + binaryPrefixFormatter.format(fsEntry.getSize()) + "B)")
-                                .withPath(getId() + "/" +fsEntry.getPath().toString())
+                                .withPath(getId() + "/" + fsEntry.getPath().toString())
                                 .withParent(attachTo.getValue())
                                 .withAdapter(this)
                                 .build());
