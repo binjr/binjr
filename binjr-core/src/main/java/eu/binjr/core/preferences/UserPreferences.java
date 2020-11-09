@@ -24,6 +24,7 @@ import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
+import eu.binjr.core.data.index.IndexDirectoryLocation;
 import javafx.geometry.Rectangle2D;
 import org.apache.logging.log4j.Level;
 
@@ -255,6 +256,17 @@ public class UserPreferences extends ObservablePreferenceFactory {
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 
     public ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 600);
+
+    public ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
+
+    public ObservablePreference<IndexDirectoryLocation> indexLocation =
+            enumPreference(IndexDirectoryLocation.class, "indexLocation", IndexDirectoryLocation.FILES_SYSTEM);
+
+    public ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
+
+    public ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
+
+    public ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
 
     private UserPreferences() {
         super(BINJR_GLOBAL);

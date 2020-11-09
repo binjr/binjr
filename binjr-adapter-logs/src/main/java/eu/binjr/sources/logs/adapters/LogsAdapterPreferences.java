@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
+import eu.binjr.core.data.index.IndexDirectoryLocation;
 
 public class LogsAdapterPreferences extends DataAdapterPreferences {
     private static final Gson gson = new Gson();
@@ -55,16 +56,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String> linePattern = stringPreference("linePattern",
             "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
 
-    public ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
 
-    public ObservablePreference<IndexDirectoryLocation> indexDirectoryLocation =
-            enumPreference(IndexDirectoryLocation.class, "indexDirectoryLocation", IndexDirectoryLocation.MEMORY );
-
-    public ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
-
-    public ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
-
-    public ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
 
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);

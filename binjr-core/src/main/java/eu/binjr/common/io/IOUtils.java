@@ -121,7 +121,7 @@ public class IOUtils {
     public static <T extends AutoCloseable> void closeAll(Stream<T> stream) {
         closeAll(stream, (c, e) -> {
             logger.error("An error occurred while closing element" + c + ": " + e.getMessage());
-            logger.debug(e);
+            logger.debug("Stack Trace:", e);
         });
     }
 
@@ -133,7 +133,7 @@ public class IOUtils {
     public static <T extends AutoCloseable> void close(T closeable) {
         close(closeable, (t, e) -> {
             logger.error("An error occurred while closing " + t + ": " + e.getMessage());
-            logger.debug(e);
+            logger.debug("Stack Trace:", e);
         });
     }
 

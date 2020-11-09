@@ -16,9 +16,6 @@
 
 dependencies {
     compile project(':binjr-core')
-    implementation 'org.apache.lucene:lucene-core:8.6.3'
-    implementation 'org.apache.lucene:lucene-facet:8.6.3'
-    implementation 'org.apache.lucene:lucene-queryparser:8.6.3'
 }
 
 jar {

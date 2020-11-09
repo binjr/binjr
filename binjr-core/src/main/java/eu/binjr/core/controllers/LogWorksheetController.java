@@ -40,10 +40,15 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
-import eu.binjr.core.data.adapters.*;
+import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.LogFilesBinding;
+import eu.binjr.core.data.adapters.LogQueryParameters;
+import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.index.IndexManager;
+import eu.binjr.core.data.index.LogFileIndex;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.LogEvent;
 import eu.binjr.core.data.timeseries.LogEventsProcessor;
@@ -103,7 +108,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static javafx.scene.control.SelectionMode.MULTIPLE;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
-   // private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("x-binjr/LogFilesBinding");
+    // private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("x-binjr/LogFilesBinding");
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final Gson gson = new Gson();
@@ -804,6 +809,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             timeRangePicker.updateSelectedRange(initialRange);
         }
         var queryArgs = gson.toJson(filter);
+        var start = worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant();
+        var end = worksheet.getQueryParameters().getTimeRange().getEnd().toInstant();
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -812,18 +819,30 @@ public class LogWorksheetController extends WorksheetController implements Synca
             // Group all queries with the same adapter and path
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            var data = adapter.fetchData(
-                    queryArgs,
-                    worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant(),
-                    worksheet.getQueryParameters().getTimeRange().getEnd().toInstant(),
+            var data = adapter.fetchData(queryArgs, start, end,
                     bindingsByPath.values().stream()
                             .flatMap(Collection::stream)
-                            .filter(b -> b.isSelected())
-                            .collect(Collectors.toList()),
-                    true);
-            return data.values().stream().findFirst().orElse(new LogEventsProcessor());
+                            .filter(TimeSeriesInfo::isSelected)
+                            .collect(Collectors.toList()), true);
         }
-        return new LogEventsProcessor();
+        Map<String, Collection<String>> facets = new HashMap<>();
+        facets.put(LogFileIndex.PATH, worksheet.getSeriesInfo()
+                .stream()
+                .filter(TimeSeriesInfo::isSelected)
+                .map(i -> i.getBinding().getPath())
+                .collect(Collectors.toList()));
+        var params = worksheet.getQueryParameters();
+        facets.put(LogFileIndex.SEVERITY, params.getSeverities());
+        try {
+            return (facets.get(LogFileIndex.PATH).size() == 0) ? new LogEventsProcessor() :
+                    IndexManager.LOG_INDEX.get().search(start.toEpochMilli(), end.toEpochMilli(),
+                            facets,
+                            params.getFilterQuery(),
+                            params.getPage(),
+                            timeRangePicker.getZoneId());
+        } catch (Exception e) {
+            throw new DataAdapterException("Error fetching logs from index: " + e.getMessage(), e);
+        }
     }
 
     private void makeFilesCss(Collection<TimeSeriesInfo<LogEvent>> info) {
