@@ -73,7 +73,6 @@ import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.indexes.*;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
-
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -92,7 +91,10 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.store.MMapDirectory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -135,9 +137,9 @@ public class LogFileIndex implements Searchable {
     private static final Logger logger = Logger.create(LogFileIndex.class);
 
     public LogFileIndex() throws IOException {
- 
+
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
-                (int) Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0) :
+                Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
         AtomicInteger threadNum = new AtomicInteger(0);
         this.parsingThreadPool = Executors.newFixedThreadPool(parsingThreadsNumber, r -> {
@@ -205,6 +207,27 @@ public class LogFileIndex implements Searchable {
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
                 final ArrayBlockingQueue<ParsedLogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
+
+                // A thread that periodically check if consumers have been aborted.
+                // If so, it clears the blocking queue of all remaining tasks to
+                // ensure producer does not remain blocked trying to put new tasks
+                // on a filled-up queue.
+                ForkJoinPool.commonPool().submit(() -> {
+                    while (!taskDone.get()) {
+                        if (taskAborted.get()) {
+                            logger.warn("Log parsing task aborted: Remaining tasks in queue will be flushed.");
+                            queue.clear();
+                            break;
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
+                    logger.debug("Blocking queue monitor is done");
+                });
+
                 for (int i = 0; i < parsingThreadsNumber; i++) {
                     results.add(parsingThreadPool.submit(() -> {
                         logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
@@ -404,27 +427,26 @@ public class LogFileIndex implements Searchable {
 
     private void addLogEvent(String path, ParsedLogEvent event, ParserParameters parser) throws IOException {
         Document doc = new Document();
-        Matcher m = parser.getPayloadPattern().matcher(event.getText());
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
         doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getLineNumber()));
-        if (m.find()) {
-            try {
-                var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T]", " "), parser.getDateTimeFormatter());
-                var millis = timeStamp.toInstant().toEpochMilli();
-                doc.add(new LongPoint(TIMESTAMP, millis));
-                doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
-                doc.add(new StoredField(TIMESTAMP, millis));
-                doc.add(new FacetField(PATH, path));
-                doc.add(new StoredField(PATH, path));
-                String severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
-                doc.add(new FacetField(SEVERITY, severity));
-                doc.add(new StoredField(SEVERITY, severity));
-//                    doc.add(new TextField(THREAD, (m.group("thread") == null ? "unknown" : m.group("thread")), Field.Store.NO));
-//                    doc.add(new TextField(LOGGER, (m.group("logger") == null ? "unknown" : m.group("logger")), Field.Store.NO));
-            } catch (Exception e) {
-                throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
+        var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T]", " "), parser.getDateTimeFormatter());
+        var millis = timeStamp.toInstant().toEpochMilli();
+        doc.add(new LongPoint(TIMESTAMP, millis));
+        doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
+        doc.add(new StoredField(TIMESTAMP, millis));
+        doc.add(new FacetField(PATH, path));
+        doc.add(new StoredField(PATH, path));
+        String severity = "unknown";
+        try {
+            Matcher m = parser.getPayloadPattern().matcher(event.getText());
+            if (m.find()) {
+                severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
             }
+        } catch (Exception e) {
+            throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
         }
+        doc.add(new FacetField(SEVERITY, severity));
+        doc.add(new StoredField(SEVERITY, severity));
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
     }
 
