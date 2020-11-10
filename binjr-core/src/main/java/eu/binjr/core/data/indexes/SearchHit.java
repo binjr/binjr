@@ -14,17 +14,19 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.timeseries;
+package eu.binjr.core.data.indexes;
+
+import eu.binjr.core.data.timeseries.FacetEntry;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public class LogEvent {
-    private final String message;
+public class SearchHit {
+    private final String text;
     private final Map<String, FacetEntry> facets = new HashMap<>();
 
-    public LogEvent(String message, FacetEntry... categories) {
-        this.message = message;
+    public SearchHit(String text, FacetEntry... categories) {
+        this.text = text;
         if (categories != null) {
             for (var category : categories) {
                 this.facets.put(category.getFacetName(), category);
@@ -32,8 +34,8 @@ public class LogEvent {
         }
     }
 
-    public String getMessage() {
-        return message;
+    public String getText() {
+        return text;
     }
 
     public Map<String, FacetEntry> getFacets() {

@@ -30,7 +30,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.index;
+package eu.binjr.core.data.indexes;
 
 import java.io.IOException;
 

@@ -32,13 +32,13 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.core.data.timeseries.LogEvent;
+import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.paint.Color;
 
-public class LogFilesBinding extends SourceBinding<LogEvent> {
+public class LogFilesBinding extends SourceBinding<SearchHit> {
 
     public static final String MIME_TYPE = "x-binjr/LogFilesBinding";
     private transient boolean indexed = false;
@@ -47,7 +47,7 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
         super();
     }
 
-    public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
+    public LogFilesBinding(String label, String legend, String path, String treeHierarchy, DataAdapter<SearchHit> adapter) {
         super(label, legend, null, path, treeHierarchy, adapter);
     }
 
@@ -67,7 +67,7 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
     }
 
     @Override
-    public Class<? extends Worksheet<LogEvent>> getWorksheetClass() {
+    public Class<? extends Worksheet<SearchHit>> getWorksheetClass() {
         return LogWorksheet.class;
     }
 
@@ -84,7 +84,7 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
         this.indexed = indexed;
     }
 
-    public static class Builder extends SourceBinding.Builder<LogEvent, LogFilesBinding, Builder> {
+    public static class Builder extends SourceBinding.Builder<SearchHit, LogFilesBinding, Builder> {
 
         @Override
         protected Builder self() {
@@ -92,7 +92,7 @@ public class LogFilesBinding extends SourceBinding<LogEvent> {
         }
 
         @Override
-        protected LogFilesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<LogEvent> adapter) {
+        protected LogFilesBinding construct(String label, String legend, Color color, String path, String treeHierarchy, DataAdapter<SearchHit> adapter) {
             return new LogFilesBinding(label, legend, path, treeHierarchy, adapter);
         }
     }

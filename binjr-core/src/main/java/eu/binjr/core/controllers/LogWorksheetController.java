@@ -47,11 +47,11 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
-import eu.binjr.core.data.index.IndexManager;
-import eu.binjr.core.data.index.LogFileIndex;
+import eu.binjr.core.data.indexes.Indexes;
+import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.timeseries.FacetEntry;
-import eu.binjr.core.data.timeseries.LogEvent;
-import eu.binjr.core.data.timeseries.LogEventsProcessor;
+import eu.binjr.core.data.indexes.SearchHitsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Syncable;
@@ -174,7 +174,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private HBox paginationBar;
     @FXML
-    private TableView<TimeSeriesInfo<LogEvent>> fileTable;
+    private TableView<TimeSeriesInfo<SearchHit>> fileTable;
     @FXML
     private StackPane fileTablePane;
     @FXML
@@ -182,13 +182,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private VBox logsToolPane;
 
-    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<LogEvent>> adapters)
+    public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
         super(parent);
         this.worksheet = worksheet;
-        for (TimeSeriesInfo<LogEvent> d : worksheet.getSeriesInfo()) {
+        for (TimeSeriesInfo<SearchHit> d : worksheet.getSeriesInfo()) {
             UUID id = d.getBinding().getAdapterId();
-            DataAdapter<LogEvent> da = adapters
+            DataAdapter<SearchHit> da = adapters
                     .stream()
                     .filter(a -> (id != null && a != null && a.getId() != null) && id.equals(a.getId()))
                     .findAny()
@@ -430,7 +430,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 if (sourceBindings != null && !sourceBindings.isEmpty()) {
                     var l = sourceBindings.stream()
                             .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
-                            //      .map( binding-> (TimeSeriesInfo<LogEvent>)TimeSeriesInfo.fromBinding(binding))
+                            //      .map( binding-> (TimeSeriesInfo<SearchHit>)TimeSeriesInfo.fromBinding(binding))
                             .collect(Collectors.toList());
                     addBindings(l);
 
@@ -525,13 +525,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        return (LogEventsProcessor) fetchDataFromSources(worksheet.getQueryParameters());
+                        return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters());
                     },
                     event -> {
                         bindingManager.suspend();
                         try {
                             // Reset page number
-                            var res = (LogEventsProcessor) event.getSource().getValue();
+                            var res = (SearchHitsProcessor) event.getSource().getValue();
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
@@ -558,7 +558,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     var hit = data.getYValue();
                                     var severity = hit.getFacets().get("severity").getLabel();
                                     var path = hit.getFacets().get("filePath").getLabel();
-                                    var message = hit.getMessage().stripTrailing();
+                                    var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,
                                             List.of(severity),
@@ -632,11 +632,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void intiLogFileTable() {
-        DecimalFormatTableCellFactory<TimeSeriesInfo<LogEvent>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+        DecimalFormatTableCellFactory<TimeSeriesInfo<SearchHit>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
         alignRightCellFactory.setAlignment(TextAlignment.LEFT);
         // alignRightCellFactory.setPattern("###");
         CheckBox showAllCheckBox = new CheckBox();
-        TableColumn<TimeSeriesInfo<LogEvent>, Boolean> visibleColumn = new TableColumn<>();
+        TableColumn<TimeSeriesInfo<SearchHit>, Boolean> visibleColumn = new TableColumn<>();
         visibleColumn.setGraphic(showAllCheckBox);
         visibleColumn.setSortable(false);
         visibleColumn.setResizable(false);
@@ -672,19 +672,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
             worksheet.getSeriesInfo().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
         }));
 
-        TableColumn<TimeSeriesInfo<LogEvent>, Color> colorColumn = new TableColumn<>();
+        TableColumn<TimeSeriesInfo<SearchHit>, Color> colorColumn = new TableColumn<>();
         colorColumn.setSortable(false);
         colorColumn.setResizable(false);
         colorColumn.setPrefWidth(32);
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
 
-        TableColumn<TimeSeriesInfo<LogEvent>, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<TimeSeriesInfo<SearchHit>, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setSortable(false);
         nameColumn.setPrefWidth(350);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
 
-        TableColumn<TimeSeriesInfo<LogEvent>, String> eventNumColumn = new TableColumn<>("Nb events");
+        TableColumn<TimeSeriesInfo<SearchHit>, String> eventNumColumn = new TableColumn<>("Nb events");
         eventNumColumn.setSortable(false);
         eventNumColumn.setPrefWidth(75);
         eventNumColumn.setCellFactory(alignRightCellFactory);
@@ -695,7 +695,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 .map(e -> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
                 pathFacetEntries));
 
-        TableColumn<TimeSeriesInfo<LogEvent>, String> pathColumn = new TableColumn<>("Path");
+        TableColumn<TimeSeriesInfo<SearchHit>, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setSortable(false);
         pathColumn.setPrefWidth(400);
         pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -792,7 +792,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private TimeSeriesProcessor<LogEvent> fetchDataFromSources(LogQueryParameters filter) throws DataAdapterException {
+    private TimeSeriesProcessor<SearchHit> fetchDataFromSources(LogQueryParameters filter) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -815,7 +815,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             // Define the transforms to apply
-            var adapter = (DataAdapter<LogEvent>) byAdapterEntry.getKey();
+            var adapter = (DataAdapter<SearchHit>) byAdapterEntry.getKey();
             // Group all queries with the same adapter and path
             var bindingsByPath =
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
@@ -834,8 +834,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var params = worksheet.getQueryParameters();
         facets.put(LogFileIndex.SEVERITY, params.getSeverities());
         try {
-            return (facets.get(LogFileIndex.PATH).size() == 0) ? new LogEventsProcessor() :
-                    IndexManager.LOG_INDEX.get().search(start.toEpochMilli(), end.toEpochMilli(),
+            return (facets.get(LogFileIndex.PATH).size() == 0) ? new SearchHitsProcessor() :
+                    Indexes.LOG_FILES.get().search(start.toEpochMilli(), end.toEpochMilli(),
                             facets,
                             params.getFilterQuery(),
                             params.getPage(),
@@ -845,7 +845,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private void makeFilesCss(Collection<TimeSeriesInfo<LogEvent>> info) {
+    private void makeFilesCss(Collection<TimeSeriesInfo<SearchHit>> info) {
         try {
             Path cssPath = getTmpCssPath();
             String cssUrl = cssPath.toUri().toURL().toExternalForm();

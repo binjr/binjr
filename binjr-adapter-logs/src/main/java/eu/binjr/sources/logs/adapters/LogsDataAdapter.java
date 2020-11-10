@@ -31,10 +31,10 @@ import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.index.IndexManager;
-import eu.binjr.core.data.index.LogFileIndex;
-import eu.binjr.core.data.index.LogParserParameters;
-import eu.binjr.core.data.timeseries.LogEvent;
+import eu.binjr.core.data.indexes.Indexes;
+import eu.binjr.core.data.indexes.ParserParameters;
+import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.Searchable;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
@@ -56,20 +56,20 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
+public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
 
     public static final String LOG_FILE_INDEX = "logFileIndex";
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
-    private LogFileIndex index;
+    private Searchable index;
     protected Path rootPath;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
-    private LogParserParameters logParserParameters;
+    private ParserParameters parserParameters;
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -124,8 +124,8 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
         super.onStart();
         try {
             this.fileBrowser = FileSystemBrowser.of(rootPath);
-            this.index = IndexManager.LOG_INDEX.acquire();
-            this.logParserParameters = new LogParserParameters(prefs.timestampPattern.get(),
+            this.index = Indexes.LOG_FILES.acquire();
+            this.parserParameters = new ParserParameters(prefs.timestampPattern.get(),
                     String.format("\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]",
                             prefs.severityPattern.get(),
                             prefs.threadPattern.get(),
@@ -133,7 +133,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
                     ),
                     "yyyy MM dd HH mm ss SSS",
                     getTimeZoneId());
-            logger.debug(() -> "Log parsing params: " + this.logParserParameters.toString());
+            logger.debug(() -> "Log parsing params: " + this.parserParameters.toString());
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
         }
@@ -210,7 +210,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<LogEvent>> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo);
             return index.getTimeRangeBoundaries(
@@ -222,7 +222,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
         }
     }
 
-    private synchronized void ensureIndexed(List<TimeSeriesInfo<LogEvent>> seriesInfo) throws IOException {
+    private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo) throws IOException {
         var toDo = seriesInfo.stream()
                 .map(s -> s.getBinding().getPath())
                 .filter(p -> !indexedFiles.contains(p))
@@ -235,12 +235,12 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     }
 
     @Override
-    public Map<TimeSeriesInfo<LogEvent>, TimeSeriesProcessor<LogEvent>> fetchData(String path,
-                                                                                  Instant start,
-                                                                                  Instant end,
-                                                                                  List<TimeSeriesInfo<LogEvent>> seriesInfo,
-                                                                                  boolean bypassCache) throws DataAdapterException {
-        Map<TimeSeriesInfo<LogEvent>, TimeSeriesProcessor<LogEvent>> data = new HashMap<>();
+    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,
+                                                                                    Instant start,
+                                                                                    Instant end,
+                                                                                    List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                                                                                    boolean bypassCache) throws DataAdapterException {
+        Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
         try {
             ensureIndexed(seriesInfo);
         } catch (Exception e) {
@@ -275,7 +275,7 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
     @Override
     public void close() {
         try {
-            IndexManager.LOG_INDEX.release();
+            Indexes.LOG_FILES.release();
         } catch (Exception e) {
             logger.error("An error occurred while releasing index " + LOG_FILE_INDEX + ": " + e.getMessage());
             logger.debug("Stack Trace:", e);
@@ -284,8 +284,8 @@ public class LogsDataAdapter extends BaseDataAdapter<LogEvent> {
         super.close();
     }
 
-    public LogParserParameters getLogParser() {
-        return logParserParameters;
+    public ParserParameters getLogParser() {
+        return parserParameters;
     }
 
 

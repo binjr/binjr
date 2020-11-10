@@ -24,7 +24,7 @@ import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
-import eu.binjr.core.data.index.IndexDirectoryLocation;
+import eu.binjr.core.data.indexes.IndexDirectoryLocation;
 import javafx.geometry.Rectangle2D;
 import org.apache.logging.log4j.Level;
 

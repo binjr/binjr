@@ -25,7 +25,7 @@ import eu.binjr.core.data.adapters.LogQueryParameters;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.timeseries.LogEvent;
+import eu.binjr.core.data.indexes.SearchHit;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -38,7 +38,7 @@ import java.util.List;
 import static java.util.stream.Collectors.groupingBy;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Rangeable<LogEvent> {
+public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rangeable<SearchHit> {
 
     private transient final NavigationHistory<LogQueryParameters> history = new NavigationHistory<>();
     private final transient ChangeWatcher status;
@@ -48,7 +48,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     @IsDirtyable
     private final Property<LogQueryParameters> queryParameters;
     @IsDirtyable
-    private final ObservableList<TimeSeriesInfo<LogEvent>> seriesInfo = FXCollections.observableList(new LinkedList<>());
+    private final ObservableList<TimeSeriesInfo<SearchHit>> seriesInfo = FXCollections.observableList(new LinkedList<>());
     @IsDirtyable
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
     @IsDirtyable
@@ -98,7 +98,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
-    public ObservableList<TimeSeriesInfo<LogEvent>> getSeriesInfo() {
+    public ObservableList<TimeSeriesInfo<SearchHit>> getSeriesInfo() {
         return seriesInfo;
     }
 
@@ -108,7 +108,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     }
 
     @Override
-    public Worksheet<LogEvent> duplicate() {
+    public Worksheet<SearchHit> duplicate() {
         return new LogWorksheet(this);
     }
 
@@ -131,7 +131,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
     }
 
     @Override
-    protected List<TimeSeriesInfo<LogEvent>> listAllSeriesInfo() {
+    protected List<TimeSeriesInfo<SearchHit>> listAllSeriesInfo() {
         return getSeriesInfo();
     }
 
@@ -192,7 +192,7 @@ public class LogWorksheet extends Worksheet<LogEvent> implements Syncable, Range
 
 
     @Override
-    public List<TimeSeriesInfo<LogEvent>> getSeries() {
+    public List<TimeSeriesInfo<SearchHit>> getSeries() {
         return seriesInfo;
     }
 

@@ -46,7 +46,23 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.index;
+/*
+ *    Copyright 2020 Frederic Thevenet
+ *
+ *    Licensed under the Apache License, Version 2.0 (the "License");
+ *    you may not use this file except in compliance with the License.
+ *    You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *    Unless required by applicable law or agreed to in writing, software
+ *    distributed under the License is distributed on an "AS IS" BASIS,
+ *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *    See the License for the specific language governing permissions and
+ *    limitations under the License.
+ */
+
+package eu.binjr.core.data.indexes.logs;
 
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
@@ -54,9 +70,8 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.core.data.indexes.*;
 import eu.binjr.core.data.timeseries.FacetEntry;
-import eu.binjr.core.data.timeseries.LogEvent;
-import eu.binjr.core.data.timeseries.LogEventsProcessor;
 import eu.binjr.core.preferences.UserPreferences;
 
 import javafx.scene.chart.XYChart;
@@ -94,10 +109,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import static eu.binjr.core.data.index.IndexDirectoryLocation.FILES_SYSTEM;
-import static eu.binjr.core.data.index.IndexDirectoryLocation.MEMORY;
-
-public class LogFileIndex implements Closeable {
+public class LogFileIndex implements Searchable {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
@@ -138,7 +150,7 @@ public class LogFileIndex implements Closeable {
             case MEMORY:
                 indexDirectory = new ByteBuffersDirectory();
                 taxonomyDirectory = new ByteBuffersDirectory();
-                logger.debug("Lucene lucene directory stored on the Java Heap");
+                logger.debug("Lucene index directory stored on the Java Heap");
                 indexDirectoryPath = null;
                 break;
             default:
@@ -149,7 +161,7 @@ public class LogFileIndex implements Closeable {
                 indexDirectoryPath = Files.createTempDirectory("binjr-logs-index_");
                 indexDirectory = FSDirectory.open(indexDirectoryPath.resolve("index"));
                 taxonomyDirectory = FSDirectory.open(indexDirectoryPath.resolve("taxonomy"));
-                logger.debug("Lucene lucene directory stored at " + indexDirectoryPath);
+                logger.debug("Lucene index directory stored at " + indexDirectoryPath);
                 if (indexDirectory instanceof MMapDirectory) {
                     logger.debug("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
                 }
@@ -177,11 +189,13 @@ public class LogFileIndex implements Closeable {
                 .collect(Collectors.joining("\n")));
     }
 
-    public void add(String path, InputStream ias, LogParserParameters parser) throws IOException {
+    @Override
+    public void add(String path, InputStream ias, ParserParameters parser) throws IOException {
         add(path, ias, true, parser);
     }
 
-    public void add(String path, InputStream ias, boolean commit, LogParserParameters parser) throws IOException {
+    @Override
+    public void add(String path, InputStream ias, boolean commit, ParserParameters parser) throws IOException {
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             var n = new AtomicInteger(0);
             var builder = new ParsedLogEvent.LogEventBuilder(parser.getTimestampPattern());
@@ -285,6 +299,7 @@ public class LogFileIndex implements Closeable {
         }
     }
 
+    @Override
     public TimeRange getTimeRangeBoundaries(List<String> files, ZoneId zoneId) throws IOException {
         return indexLock.read().lock(() -> {
             ZonedDateTime beginning = getTimeRangeBoundary(false, files, zoneId);
@@ -295,11 +310,12 @@ public class LogFileIndex implements Closeable {
         });
     }
 
-    public LogEventsProcessor search(long start, long end,
-                                     Map<String, Collection<String>> params,
-                                     String query,
-                                     int page,
-                                     ZoneId zoneId) throws Exception {
+    @Override
+    public SearchHitsProcessor search(long start, long end,
+                                      Map<String, Collection<String>> params,
+                                      String query,
+                                      int page,
+                                      ZoneId zoneId) throws Exception {
         return indexLock.read().lock(() -> {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
             Query filterQuery = rangeQuery;
@@ -311,7 +327,7 @@ public class LogFileIndex implements Closeable {
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
-            var logs = new ArrayList<XYChart.Data<ZonedDateTime, LogEvent>>();
+            var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
             var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
             for (var facet : params.entrySet()) {
@@ -343,12 +359,12 @@ public class LogFileIndex implements Closeable {
                     var path = pathFacet.get(doc.get(PATH));
                     logs.add(new XYChart.Data<>(
                             ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId),
-                            new LogEvent(doc.get(FIELD_CONTENT) + "\n",
+                            new SearchHit(doc.get(FIELD_CONTENT) + "\n",
                                     severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
                                     path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
                 }
             }
-            var proc = new LogEventsProcessor();
+            var proc = new SearchHitsProcessor();
             proc.setData(logs);
             proc.addFacetResults(PATH,
                     pathFacet.values()
@@ -386,7 +402,7 @@ public class LogFileIndex implements Closeable {
         }
     }
 
-    private void addLogEvent(String path, ParsedLogEvent event, LogParserParameters parser) throws IOException {
+    private void addLogEvent(String path, ParsedLogEvent event, ParserParameters parser) throws IOException {
         Document doc = new Document();
         Matcher m = parser.getPayloadPattern().matcher(event.getText());
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));

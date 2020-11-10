@@ -21,7 +21,6 @@ import com.google.gson.Gson;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
-import eu.binjr.core.data.index.IndexDirectoryLocation;
 
 public class LogsAdapterPreferences extends DataAdapterPreferences {
     private static final Gson gson = new Gson();

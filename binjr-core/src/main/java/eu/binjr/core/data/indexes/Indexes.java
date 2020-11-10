@@ -30,55 +30,36 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.data.timeseries;
+package eu.binjr.core.data.indexes;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import eu.binjr.common.concurrent.CloseableResourceManager;
+import eu.binjr.common.function.CheckedLambdas;
+import eu.binjr.core.data.indexes.logs.LogFileIndex;
 
-public class LogEventsProcessor extends TimeSeriesProcessor<LogEvent> {
 
-    private final Map<String, Collection<FacetEntry>> facetResults = new HashMap<>();
-    private int totalHits = 0;
-    private int hitsPerPage = 0;
+import java.io.IOException;
 
-    @Override
-    protected LogEvent computeMinValue() {
-        return (data != null && data.size() > 0) ? data.get(0).getYValue() : null;
+public enum Indexes {
+    LOG_FILES("log_file_index");
+
+    private final CloseableResourceManager<Searchable> indexManager;
+    private final String key;
+
+    Indexes(String key) {
+        this.indexManager = new CloseableResourceManager<>();
+        this.key = key;
     }
 
-    @Override
-    protected LogEvent computeAverageValue() {
-        return null;
+    public Searchable acquire() throws IOException {
+        return indexManager.acquire(key, CheckedLambdas.wrap(LogFileIndex::new));
     }
 
-    @Override
-    protected LogEvent computeMaxValue() {
-        return (data != null && data.size() > 0) ? data.get(data.size() - 1).getYValue() : null;
+    public int release() throws Exception {
+        return indexManager.release(key);
     }
 
-    public Map<String, Collection<FacetEntry>> getFacetResults() {
-        return facetResults;
-    }
-
-    public void addFacetResults(String name, Collection<FacetEntry> synthesis) {
-        this.facetResults.put(name, synthesis);
-    }
-
-    public int getTotalHits() {
-        return totalHits;
-    }
-
-    public void setTotalHits(int totalHits) {
-        this.totalHits = totalHits;
-    }
-
-    public void setHitsPerPage(int hitsPerPage) {
-        this.hitsPerPage = hitsPerPage;
-    }
-
-    public int getHitsPerPage() {
-        return hitsPerPage;
+    public Searchable get(){
+        return indexManager.get(key);
     }
 
 }
