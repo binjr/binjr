@@ -18,6 +18,7 @@ package eu.binjr.sources.logs.adapters;
 
 import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
@@ -25,21 +26,23 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.sources.logs.controllers.ParsingRulesController;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TextField;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
+import javafx.stage.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -71,7 +74,37 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
 
-        getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField);
+        var parsingLabel = new Label("Parsing:");
+        var parsingHBox = new HBox();
+        parsingHBox.setSpacing(5);
+        var parsingChoiceBox = new ChoiceBox<String>();
+        parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
+        var editParsingButton = new Button("Edit");
+        editParsingButton.setOnAction(event -> {
+            try {
+//                FXMLLoader loader = new FXMLLoader(ParsingRulesController.class.getResource("/eu/binjr/views/ParsingRulesView.fxml"));
+//                Parent root = loader.load();
+//                ParsingRulesController controller = loader.getController();
+                Parent root  = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingRulesView.fxml"));
+                final Scene scene = new Scene(root);
+                var stage = new Stage();
+                stage.setScene(scene);
+                stage.setTitle("Edit Parsing Expressions");
+                StageAppearanceManager.getInstance().register(stage);
+                stage.initStyle(StageStyle.UTILITY);
+                stage.initOwner(this.getOwner());
+                stage.initModality(Modality.APPLICATION_MODAL);
+                stage.showAndWait();
+            } catch (Exception e) {
+                Dialogs.notifyException("Failed to show parsing rules windows", e,owner);
+            }
+        });
+        parsingHBox.getChildren().addAll(parsingChoiceBox, editParsingButton);
+        HBox.setHgrow(parsingChoiceBox, Priority.ALWAYS);
+        GridPane.setConstraints(parsingLabel, 0, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        GridPane.setConstraints(parsingHBox, 1, 3, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+
+        getParamsGridPane().getChildren().addAll(label, extensionFiltersTextField, parsingLabel, parsingHBox);
     }
 
     @Override

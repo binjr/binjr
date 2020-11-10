@@ -603,6 +603,10 @@
     -fx-background-color: -binjr-color-gray;
 }
 
+.tool-dialog-window {
+    -fx-background-color: -binjr-window-background-color;
+}
+
 .toolPane {
     -fx-background-color: white;
 

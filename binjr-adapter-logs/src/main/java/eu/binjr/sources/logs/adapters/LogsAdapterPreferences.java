@@ -40,7 +40,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             s -> gson.fromJson(s, String[].class));
 
     public ObservablePreference<String> timestampPattern = stringPreference("timestampPattern",
-            "\\d{4}[\\/-]\\d{2}[\\/-]\\d{2}[\\-\\s]\\d{2}:\\d{2}:\\d{2}([\\.,]\\d+)?");
+            "\\d{4}[\\/-]\\d{2}[\\/-]\\d{2}[\\-\\s]\\d{2}:\\d{2}:\\d{2}[\\.,]\\d{3}");
 
     public ObservablePreference<String> severityPattern = stringPreference("severityPattern",
             "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL");
@@ -53,7 +53,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public ObservablePreference<String> msgPattern = stringPreference("msgPattern", ".*");
 
     public ObservablePreference<String> linePattern = stringPreference("linePattern",
-            "\\[(?<time>%s)\\]\\s+\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]\\s(?<message>%s)");
+            "\\[(?<time>$TIMESTAMP)\\]\\s+\\[\\s?(?<severity>$SEVERITY)\\s?\\]\\s(?<message>$MESSAGE)");
 
 
 

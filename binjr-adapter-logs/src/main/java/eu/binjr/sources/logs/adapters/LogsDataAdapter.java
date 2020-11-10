@@ -125,14 +125,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         try {
             this.fileBrowser = FileSystemBrowser.of(rootPath);
             this.index = Indexes.LOG_FILES.acquire();
+            String lineRegex = prefs.linePattern.get()
+                    .replace("$TIMESTAMP", prefs.timestampPattern.get())
+                    .replace("$SEVERITY", prefs.severityPattern.get())
+                    .replace("$MESSAGE", prefs.msgPattern.get());
             this.parserParameters = new ParserParameters(prefs.timestampPattern.get(),
-                    String.format("\\[\\s?(?<severity>%s)\\s?\\]\\s+\\[(?<thread>%s)\\]\\s+\\[(?<logger>%s)\\]",
-                            prefs.severityPattern.get(),
-                            prefs.threadPattern.get(),
-                            prefs.loggerPattern.get()
-                    ),
-                    "yyyy MM dd HH mm ss SSS",
-                    getTimeZoneId());
+                    lineRegex, "yyyy MM dd HH mm ss SSS", getTimeZoneId());
             logger.debug(() -> "Log parsing params: " + this.parserParameters.toString());
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);

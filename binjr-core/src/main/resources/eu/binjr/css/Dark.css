@@ -702,6 +702,10 @@
     -fx-background-color: -binjr-control-border-color;
 }
 
+.tool-dialog-window {
+    -fx-background-color: -binjr-window-background-color;
+}
+
 .toolPane {
     -fx-background-color: -binjr-window-background-color;
 
