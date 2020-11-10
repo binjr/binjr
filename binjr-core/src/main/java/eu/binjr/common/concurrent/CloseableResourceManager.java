@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import java.io.Closeable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.function.Supplier;
@@ -190,16 +191,15 @@ public class CloseableResourceManager<T extends Closeable> {
      * Returns the resource identified by the supplied key.
      *
      * @param key the key to identify the resource to release.
-     * @return the resource identified by the supplied key. If there is no
-     * resource mapped to the specified key, returns null.
+     * @return An {@link Optional} wrapping the resource identified by the supplied key.
      */
-    public T get(String key) {
+    public Optional<T> get(String key) {
         return managerLock.read().lock(() -> {
             ResourceHolder<T> r = resources.get(key);
             if (r != null) {
-                return r.getInstance();
+                return Optional.of(r.getInstance());
             }
-            return null;
+            return Optional.empty();
         });
     }
 

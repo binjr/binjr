@@ -59,7 +59,7 @@ public enum Indexes {
     }
 
     public Searchable get(){
-        return indexManager.get(key);
+        return indexManager.get(key).orElseThrow();
     }
 
 }
