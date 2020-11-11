@@ -121,20 +121,20 @@ public class LogFileIndex implements Searchable {
     public static final String LOGGER = "logger";
     public static final String FACET_FIELD = "facets";
     public static final String MESSAGE = "message";
+    private static final Logger logger = Logger.create(LogFileIndex.class);
+    protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;
     private final Directory taxonomyDirectory;
     private final TaxonomyWriter taxonomyWriter;
-    private TaxonomyReader taxonomyReader;
-    private DirectoryReader indexReader;
-    private IndexSearcher searcher;
     private final IndexWriter indexWriter;
     private final FacetsConfig facetsConfig;
     private final Path indexDirectoryPath;
     private final ReadWriteLockHelper indexLock = new ReadWriteLockHelper(new ReentrantReadWriteLock());
     private final ExecutorService parsingThreadPool;
     private final int parsingThreadsNumber;
-    protected final UserPreferences prefs = UserPreferences.getInstance();
-    private static final Logger logger = Logger.create(LogFileIndex.class);
+    private TaxonomyReader taxonomyReader;
+    private DirectoryReader indexReader;
+    private IndexSearcher searcher;
 
     public LogFileIndex() throws IOException {
 
@@ -208,26 +208,6 @@ public class LogFileIndex implements Searchable {
                 final ArrayBlockingQueue<ParsedLogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
 
-                // A thread that periodically check if consumers have been aborted.
-                // If so, it clears the blocking queue of all remaining tasks to
-                // ensure producer does not remain blocked trying to put new tasks
-                // on a filled-up queue.
-                ForkJoinPool.commonPool().submit(() -> {
-                    while (!taskDone.get()) {
-                        if (taskAborted.get()) {
-                            logger.warn("Log parsing task aborted: Remaining tasks in queue will be flushed.");
-                            queue.clear();
-                            break;
-                        }
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                    logger.debug("Blocking queue monitor is done");
-                });
-
                 for (int i = 0; i < parsingThreadsNumber; i++) {
                     results.add(parsingThreadPool.submit(() -> {
                         logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
@@ -250,17 +230,19 @@ public class LogFileIndex implements Searchable {
                                     nbEventProcessed++;
                                 }
                             } catch (Throwable t) {
-                                // Signal that worker thread was aborted and rethrow
+                                // Signal that worker thread was aborted
                                 taskAborted.set(true);
+                                // Clears the blocking queue of all remaining tasks so that other workers finish ASAP
+                                queue.clear();
                                 throw t;
                             }
-                        } while (!taskDone.get() && !taskAborted.get() && !Thread.currentThread().isInterrupted());
+                        } while (!taskDone.get() && !Thread.currentThread().isInterrupted());
                         return nbEventProcessed;
                     }));
                 }
                 try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                     String line;
-                    while ((line = reader.readLine()) != null && !taskAborted.get()) {
+                    while (!taskAborted.get() && (line = reader.readLine()) != null) {
                         var optLog = builder.build(n.incrementAndGet(), line);
                         if (optLog.isPresent()) {
                             queue.put(optLog.get());
@@ -495,6 +477,24 @@ public class LogFileIndex implements Searchable {
         private final int lineNumber;
         private String text;
 
+        private ParsedLogEvent(int lineNumber, String timestamp, String text) {
+            this.lineNumber = lineNumber;
+            this.text = text;
+            this.timestamp = timestamp;
+        }
+
+        public int getLineNumber() {
+            return lineNumber;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+
         private static class LogEventBuilder {
             private final Pattern timestampPattern;
             private ParsedLogEvent previous = null;
@@ -527,24 +527,6 @@ public class LogFileIndex implements Searchable {
             public Optional<ParsedLogEvent> getLast() {
                 return previous != null ? Optional.of(previous) : Optional.empty();
             }
-        }
-
-        private ParsedLogEvent(int lineNumber, String timestamp, String text) {
-            this.lineNumber = lineNumber;
-            this.text = text;
-            this.timestamp = timestamp;
-        }
-
-        public int getLineNumber() {
-            return lineNumber;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getTimestamp() {
-            return timestamp;
         }
     }
 }
