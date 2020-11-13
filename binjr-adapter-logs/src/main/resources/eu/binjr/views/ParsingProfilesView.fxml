@@ -1,0 +1,597 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  ~    Copyright 2020 Frederic Thevenet
+  ~     
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import org.fxmisc.richtext.CodeArea?>
+<?import java.lang.*?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="root" prefHeight="777.0" prefWidth="788.0"
+            styleClass="skinnable-pane-border, tool-dialog-window" xmlns="http://javafx.com/javafx/11.0.1"
+            fx:controller="eu.binjr.sources.logs.controllers.ParsingProfilesController">
+    <children>
+        <VBox fx:id="expressions" layoutX="14.0" layoutY="64.0" spacing="10.0" AnchorPane.bottomAnchor="14.0"
+              AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="64.0">
+            <children>
+                <TitledPane collapsible="false" contentDisplay="RIGHT" graphicTextGap="5.0" text="Timestamp">
+                    <content>
+                        <VBox spacing="5.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="5.0">
+                                    <children>
+                                        <Label minWidth="150.0" prefWidth="150.0" text="Capture expression:"
+                                               HBox.hgrow="NEVER"/>
+                                        <HBox fx:id="timeCapture" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" prefHeight="27.0" spacing="2.0"
+                                              styleClass="search-field-outer" HBox.hgrow="ALWAYS">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="timeCaptureExpression" maxWidth="1.7976931348623157E308"
+                                                       minHeight="-Infinity" minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearTimeCapture" contentDisplay="GRAPHIC_ONLY"
+                                                    onAction="#handleOnClearField"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Filtering Query"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="timeCaptureHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    onAction="#handleOnDisplayHelp"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    userData="Help title\nSome more help\nEnd of help"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="5.0">
+                                    <children>
+                                        <CheckBox fx:id="normalizeSepCheckBox" minWidth="150.0" mnemonicParsing="false"
+                                                  prefWidth="150.0" text="Normalize separators :" HBox.hgrow="NEVER"/>
+                                        <HBox fx:id="separatorsToNormalize" alignment="CENTER_LEFT"
+                                              maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="27.0"
+                                              spacing="2.0" styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="separatorsToNormalizeExpression"
+                                                       maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                                       minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearSeparatorsToNormalize" contentDisplay="GRAPHIC_ONLY"
+                                                    onAction="#handleOnClearField"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Field"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="separatorsToNormalizeHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                        <Label minWidth="20.0" text="As :" HBox.hgrow="NEVER"/>
+                                        <HBox fx:id="separatorReplacement" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" prefHeight="27.0" spacing="2.0"
+                                              styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="separatorReplacementExpression"
+                                                       onAction="#handleOnClearField"
+                                                       maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                                       minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearSeparatorReplacement" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Field"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="separatorReplacementHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_LEFT" maxWidth="1.7976931348623157E308" spacing="5.0">
+                                    <children>
+                                        <Label minWidth="150.0" prefWidth="150.0" text="Parsing expression:"
+                                               HBox.hgrow="NEVER"/>
+                                        <HBox fx:id="timeParsing" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" prefHeight="27.0" spacing="2.0"
+                                              styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="timeParsingExpression" maxWidth="1.7976931348623157E308"
+                                                       minHeight="-Infinity" minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearTimeParsing" contentDisplay="GRAPHIC_ONLY"
+                                                    onAction="#handleOnClearField"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Field"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="timeParsingHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="testTimestamp" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                onAction="#handleOnTestTimestamp"
+                                                prefHeight="25.0" text="Test Extraction">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="test-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Test timestamp extraction rules"/>
+                                            </tooltip>
+                                        </Button>
+                                        <Button fx:id="resetTimestamp" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                prefHeight="25.0" text="Reset to Default">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="recycle-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Reset timestamp extraction rules"/>
+                                            </tooltip>
+                                            <HBox.margin>
+                                                <Insets/>
+                                            </HBox.margin>
+                                        </Button>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="5.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+                <TitledPane collapsible="false" graphicTextGap="5.0" text="Severity">
+                    <content>
+                        <VBox spacing="5.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                    <children>
+                                        <Label prefWidth="140.0" text="Capture expression:"/>
+                                        <HBox fx:id="severityCapture" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" prefHeight="27.0" spacing="2.0"
+                                              styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="severityCaptureExpression"
+                                                       maxWidth="1.7976931348623157E308" minHeight="-Infinity"
+                                                       minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearSeverityCapture" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    onAction="#handleOnClearField"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Field"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="severityCaptureHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="testSeverity" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                onAction="#handleOnTestSeverity"
+                                                prefHeight="25.0" text="Test Extraction">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="test-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Test severity extraction rules"/>
+                                            </tooltip>
+                                            <HBox.margin>
+                                                <Insets/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="resetSeverity" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                prefHeight="25.0" text="Reset to Default">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="recycle-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Reset severity extraction rules"/>
+                                            </tooltip>
+                                        </Button>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="5.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+                <TitledPane collapsible="false" graphicTextGap="5.0" text="Whole Line">
+                    <content>
+                        <VBox spacing="5.0">
+                            <children>
+                                <HBox alignment="CENTER_LEFT" spacing="5.0">
+                                    <children>
+                                        <Label prefWidth="140.0" text="Capture template:"/>
+                                        <HBox fx:id="lineTemplate" alignment="CENTER_LEFT" maxHeight="-Infinity"
+                                              maxWidth="1.7976931348623157E308" prefHeight="27.0" spacing="2.0"
+                                              styleClass="search-field-outer" HBox.hgrow="SOMETIMES">
+                                            <padding>
+                                                <Insets left="3.0" right="3.0"/>
+                                            </padding>
+
+                                            <TextField fx:id="lineTemplateExpression" maxWidth="1.7976931348623157E308"
+                                                       minHeight="-Infinity" minWidth="-Infinity" promptText=""
+                                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
+                                            <Button fx:id="clearLineTemplate" contentDisplay="GRAPHIC_ONLY"
+                                                    onAction="#handleOnClearField"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Clear" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="cross-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Clear Field"/>
+                                                </tooltip>
+                                            </Button>
+                                            <Button fx:id="lineTemplateHelp" contentDisplay="GRAPHIC_ONLY"
+                                                    graphicTextGap="1.0" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                    minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                    prefHeight="20.0" prefWidth="20.0" styleClass="dialog-button"
+                                                    text="Help" textAlignment="CENTER">
+                                                <graphic>
+                                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                                        <Region styleClass="help-icon, small-icon"/>
+                                                    </HBox>
+                                                </graphic>
+                                                <tooltip>
+                                                    <Tooltip showDelay="500ms" text="Display Help"/>
+                                                </tooltip>
+                                            </Button>
+                                        </HBox>
+                                    </children>
+                                </HBox>
+                                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                                    <children>
+                                        <Button fx:id="testLineTemplate" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                onAction="#handleOnTestLineTemplate"
+                                                prefHeight="25.0" text="Test Extraction">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="test-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Test whole line extraction rules"/>
+                                            </tooltip>
+                                            <HBox.margin>
+                                                <Insets/>
+                                            </HBox.margin>
+                                        </Button>
+                                        <Button fx:id="resetLineTemplate" maxHeight="-Infinity" maxWidth="-Infinity"
+                                                minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                                                prefHeight="25.0" text="Reset to Default">
+                                            <graphic>
+                                                <Region>
+                                                    <styleClass>
+                                                        <String fx:value="icon-container"/>
+                                                        <String fx:value="recycle-icon"/>
+                                                        <String fx:value="medium-icon"/>
+                                                    </styleClass>
+                                                    <padding>
+                                                        <Insets right="20.0"/>
+                                                    </padding>
+                                                </Region>
+                                            </graphic>
+                                            <tooltip>
+                                                <Tooltip showDelay="500ms" text="Reset whole line extraction rules"/>
+                                            </tooltip>
+                                        </Button>
+                                    </children>
+                                    <VBox.margin>
+                                        <Insets top="5.0"/>
+                                    </VBox.margin>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+                <TitledPane collapsible="false" maxHeight="1.7976931348623157E308" text="Test:" VBox.vgrow="ALWAYS">
+                    <content>
+                        <VBox spacing="10.0">
+                            <children>
+                                <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308" VBox.vgrow="SOMETIMES"/>
+                                <HBox fx:id="labels" spacing="5.0">
+                                    <children>
+                                        <Label style="-fx-background-color: #eab141; -fx-padding: 3;" text="Time"/>
+                                        <Label style="-fx-background-color: #35cf81; -fx-padding: 3;" text="Severity"/>
+                                        <Label style="-fx-background-color: #4fdee3; -fx-padding: 3;" text="Message"/>
+                                    </children>
+                                </HBox>
+                            </children>
+                        </VBox>
+                    </content>
+                </TitledPane>
+                <HBox alignment="CENTER_RIGHT" spacing="10.0">
+                    <children>
+                        <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOnOk" prefHeight="25.0"
+                                prefWidth="75.0" text="OK"/>
+                        <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleOnCancel"
+                                prefHeight="25.0" prefWidth="75.0" text="Cancel"/>
+                        <Button fx:id="applyButton" mnemonicParsing="false" onAction="#handleOnApply" prefHeight="25.0"
+                                prefWidth="75.0" text="Apply"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+        <HBox alignment="CENTER_LEFT" layoutX="14.0" layoutY="14.0" spacing="2.0" AnchorPane.leftAnchor="14.0"
+              AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="14.0">
+            <children>
+                <ComboBox fx:id="profileComboBox" editable="true" maxHeight="1.7976931348623157E308"
+                          maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                    <HBox.margin>
+                        <Insets right="5.0"/>
+                    </HBox.margin>
+                </ComboBox>
+                <Button fx:id="addProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                        onAction="#handleOnAddProfile"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0"
+                        styleClass="dialog-button" text="Add">
+                    <graphic>
+                        <Region>
+                            <styleClass>
+                                <String fx:value="icon-container"/>
+                                <String fx:value="plus-icon"/>
+                            </styleClass>
+                        </Region>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Create a new profile"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="deleteProfileButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                        onAction="#handleOnDelete"
+                        prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Delete" HBox.hgrow="NEVER">
+                    <graphic>
+                        <Region>
+                            <styleClass>
+                                <String fx:value="icon-container"/>
+                                <String fx:value="trash-icon"/>
+                            </styleClass>
+                        </Region>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Delete profile"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="cloneProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0"
+                        onAction="#handleOnCloneProfile"
+                        styleClass="dialog-button" text="Duplicate">
+                    <graphic>
+                        <Region>
+                            <styleClass>
+                                <String fx:value="icon-container"/>
+                                <String fx:value="copy-icon"/>
+                            </styleClass>
+                        </Region>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Duplicate profile"/>
+                    </tooltip>
+                </Button>
+
+                <Button fx:id="importProfileButton" cache="true" contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity"
+                        minWidth="-Infinity" mnemonicParsing="false" prefHeight="30.0" prefWidth="30.0"
+                        onAction="#handleOnImport"
+                        styleClass="dialog-button" text="Import" HBox.hgrow="NEVER">
+                    <graphic>
+                        <Region>
+                            <styleClass>
+                                <String fx:value="icon-container"/>
+                                <String fx:value="upload-icon"/>
+                            </styleClass>
+                        </Region>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Import profile"/>
+                    </tooltip>
+                </Button>
+                <Button fx:id="exportProfileButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
+                        maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+                        onAction="#handleOnExport"
+                        prefHeight="30.0" prefWidth="30.0" styleClass="dialog-button" text="Export" HBox.hgrow="NEVER">
+                    <graphic>
+                        <Region>
+                            <styleClass>
+                                <String fx:value="icon-container"/>
+                                <String fx:value="download-icon"/>
+                            </styleClass>
+                        </Region>
+                    </graphic>
+                    <tooltip>
+                        <Tooltip showDelay="500ms" text="Export profile"/>
+                    </tooltip>
+                </Button>
+            </children>
+        </HBox>
+    </children>
+</AnchorPane>

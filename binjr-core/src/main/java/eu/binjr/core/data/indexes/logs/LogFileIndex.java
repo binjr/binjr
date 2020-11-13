@@ -117,10 +117,6 @@ public class LogFileIndex implements Searchable {
     public static final String FIELD_CONTENT = "content";
     public static final String PATH = "filePath";
     public static final String SEVERITY = "severity";
-    public static final String THREAD = "thread";
-    public static final String LOGGER = "logger";
-    public static final String FACET_FIELD = "facets";
-    public static final String MESSAGE = "message";
     private static final Logger logger = Logger.create(LogFileIndex.class);
     protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;
@@ -200,7 +196,7 @@ public class LogFileIndex implements Searchable {
     public void add(String path, InputStream ias, boolean commit, ParserParameters parser) throws IOException {
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             var n = new AtomicInteger(0);
-            var builder = new ParsedLogEvent.LogEventBuilder(parser.getTimestampPattern());
+            var builder = new ParsedLogEvent.LogEventBuilder(parser.getTimestampSyntax());
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
                 final AtomicLong nbLogEvents = new AtomicLong(0);
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
@@ -411,8 +407,12 @@ public class LogFileIndex implements Searchable {
         Document doc = new Document();
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
         doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getLineNumber()));
-        var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T]", " "), parser.getDateTimeFormatter());
-        var millis = timeStamp.toInstant().toEpochMilli();
+        //     var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T_]", " "), parser.getDateTimeFormatter());
+        //     var millis = timeStamp.toInstant().toEpochMilli();
+        var rawTimeString = event.getTimestamp();//.replaceAll("[/\\-:.,T_]", " ");
+        var millis = parser.getDatetimeProcessor().parseMillis(rawTimeString);
+
+
         doc.add(new LongPoint(TIMESTAMP, millis));
         doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
         doc.add(new StoredField(TIMESTAMP, millis));

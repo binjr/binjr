@@ -24,6 +24,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.BaseDataAdapter;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -38,6 +39,7 @@ import eu.binjr.core.data.indexes.Searchable;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserHistory;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.BufferedReader;
@@ -70,6 +72,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private ParserParameters parserParameters;
+    private final MostRecentlyUsedList<String> defaultParsingProfiles =
+            UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
+    private final MostRecentlyUsedList<String> userParsingProfiles =
+            UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -90,6 +96,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         super();
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
+
         initParams(rootPath, folderFilters, fileExtensionsFilters);
     }
 
@@ -126,11 +133,18 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
             this.fileBrowser = FileSystemBrowser.of(rootPath);
             this.index = Indexes.LOG_FILES.acquire();
             String lineRegex = prefs.linePattern.get()
-                    .replace("$TIMESTAMP", prefs.timestampPattern.get())
+                    .replace("$TIMESTAMP", prefs.timestampSyntaxPattern.get())
                     .replace("$SEVERITY", prefs.severityPattern.get())
                     .replace("$MESSAGE", prefs.msgPattern.get());
-            this.parserParameters = new ParserParameters(prefs.timestampPattern.get(),
-                    lineRegex, "yyyy MM dd HH mm ss SSS", getTimeZoneId());
+            this.parserParameters = new ParserParameters.Builder()
+                    .setTimestampSyntax(prefs.timestampSyntaxPattern.get())
+//                    .setNormalizeSeparators()
+//                    .setSeparatorsPattern()
+//                    .setSeparatorsReplacement()
+                    .setTimeFormatPattern(prefs.timestampSemanticPattern.get())
+                    .setZoneId(getTimeZoneId())
+                    .setPayloadPattern(lineRegex)
+                    .build();
             logger.debug(() -> "Log parsing params: " + this.parserParameters.toString());
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);

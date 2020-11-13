@@ -26,11 +26,12 @@ dependencies {
     api 'jakarta.xml.bind:jakarta.xml.bind-api:2.3.3'
     api 'org.glassfish.jaxb:jaxb-runtime:2.3.3'
     api "org.bouncycastle:bcpg-jdk15on:1.66"
-    implementation 'org.reflections:reflections:0.9.12'
-    implementation 'org.fxmisc.richtext:richtextfx:0.10.5'
+    api 'org.reflections:reflections:0.9.12'
+    api 'org.fxmisc.richtext:richtextfx:0.10.5'
     implementation 'org.apache.lucene:lucene-core:8.6.3'
     implementation 'org.apache.lucene:lucene-facet:8.6.3'
     implementation 'org.apache.lucene:lucene-queryparser:8.6.3'
+    api 'com.axibase:date-processor:1.1.0'
     // Only to prepare POM for Maven central upload
     api "org.openjfx:javafx-base:$OPENJFX_VERSION"
     api "org.openjfx:javafx-graphics:$OPENJFX_VERSION"

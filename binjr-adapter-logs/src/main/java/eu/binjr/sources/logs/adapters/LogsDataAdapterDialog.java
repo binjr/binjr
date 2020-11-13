@@ -26,7 +26,6 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.sources.logs.controllers.ParsingRulesController;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -42,7 +41,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.*;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -82,21 +80,21 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-//                FXMLLoader loader = new FXMLLoader(ParsingRulesController.class.getResource("/eu/binjr/views/ParsingRulesView.fxml"));
+//                FXMLLoader loader = new FXMLLoader(ParsingProfilesController.class.getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
 //                Parent root = loader.load();
-//                ParsingRulesController controller = loader.getController();
-                Parent root  = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingRulesView.fxml"));
+//                ParsingProfilesController controller = loader.getController();
+                Parent root  = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
                 final Scene scene = new Scene(root);
                 var stage = new Stage();
                 stage.setScene(scene);
-                stage.setTitle("Edit Parsing Expressions");
+                stage.setTitle("Edit Parsing Profile");
                 StageAppearanceManager.getInstance().register(stage);
                 stage.initStyle(StageStyle.UTILITY);
                 stage.initOwner(this.getOwner());
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.showAndWait();
             } catch (Exception e) {
-                Dialogs.notifyException("Failed to show parsing rules windows", e,owner);
+                Dialogs.notifyException("Failed to show parsing profile windows", e,owner);
             }
         });
         parsingHBox.getChildren().addAll(parsingChoiceBox, editParsingButton);
