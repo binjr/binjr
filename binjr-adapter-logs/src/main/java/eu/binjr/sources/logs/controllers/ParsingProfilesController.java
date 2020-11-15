@@ -16,9 +16,9 @@
 package eu.binjr.sources.logs.controllers;
 
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.sources.logs.profiles.BuiltInOnlyLogParsingProfile;
-import eu.binjr.sources.logs.profiles.EditableLogParsingProfile;
-import eu.binjr.sources.logs.profiles.ReadOnlyLogParsingProfile;
+import eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile;
+import eu.binjr.sources.logs.parser.profile.CustomParsingProfile;
+import eu.binjr.sources.logs.parser.profile.ParsingProfile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
@@ -156,7 +156,7 @@ public class ParsingProfilesController {
     private Button cancelButton;
 
     @FXML
-    private ComboBox<ReadOnlyLogParsingProfile> profileComboBox;
+    private ComboBox<ParsingProfile> profileComboBox;
 
     @FXML
     private Button addProfileButton;
@@ -252,8 +252,8 @@ public class ParsingProfilesController {
     }
 
     private void applyChanges() {
-        if (this.profileComboBox.getValue() instanceof EditableLogParsingProfile) {
-            var editable = (EditableLogParsingProfile) this.profileComboBox.getValue();
+        if (this.profileComboBox.getValue() instanceof CustomParsingProfile) {
+            var editable = (CustomParsingProfile) this.profileComboBox.getValue();
             saveParserParameters(editable);
         }
     }
@@ -262,7 +262,7 @@ public class ParsingProfilesController {
     private void handleOnCloneProfile(ActionEvent actionEvent) {
         try {
             if (this.profileComboBox.getValue() != null) {
-                var p = EditableLogParsingProfile.of(this.profileComboBox.getValue());
+                var p = CustomParsingProfile.of(this.profileComboBox.getValue());
                 this.profileComboBox.getItems().add(p);
                 this.profileComboBox.getSelectionModel().select(p);
             }
@@ -276,7 +276,7 @@ public class ParsingProfilesController {
     @FXML
     private void handleOnAddProfile(ActionEvent actionEvent) {
         try {
-            var p = EditableLogParsingProfile.empty();
+            var p = CustomParsingProfile.empty();
             this.profileComboBox.getItems().add(p);
             this.profileComboBox.getSelectionModel().select(p);
         } catch (Throwable e) {
@@ -331,24 +331,24 @@ public class ParsingProfilesController {
         assert exportProfileButton != null : "fx:id=\"exportProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
 
 
-        this.profileComboBox.getItems().setAll(BuiltInOnlyLogParsingProfile.values());
+        this.profileComboBox.getItems().setAll(BuiltInParsingProfile.values());
         this.profileComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 loadParserParameters(newValue);
             }
         });
 
-        this.profileComboBox.setConverter(new StringConverter<ReadOnlyLogParsingProfile>() {
+        this.profileComboBox.setConverter(new StringConverter<ParsingProfile>() {
             @Override
-            public String toString(ReadOnlyLogParsingProfile object) {
+            public String toString(ParsingProfile object) {
                 return object.toString();
             }
 
             @Override
-            public ReadOnlyLogParsingProfile fromString(String string) {
+            public ParsingProfile fromString(String string) {
                 var val = profileComboBox.getValue();
-                if (val instanceof EditableLogParsingProfile) {
-                    ((EditableLogParsingProfile) val).setProfileName(string);
+                if (val instanceof CustomParsingProfile) {
+                    ((CustomParsingProfile) val).setProfileName(string);
 
                 }
                 return val;
@@ -356,45 +356,45 @@ public class ParsingProfilesController {
         });
 
 //        this.profileComboBox.editorProperty().addListener((observable) -> {
-//            if (profileComboBox.getSelectionModel().getSelectedItem() instanceof EditableLogParsingProfile) {
-//                var currentProfile = (EditableLogParsingProfile) profileComboBox.getSelectionModel().getSelectedItem();
+//            if (profileComboBox.getSelectionModel().getSelectedItem() instanceof CustomParsingProfile) {
+//                var currentProfile = (CustomParsingProfile) profileComboBox.getSelectionModel().getSelectedItem();
 //                currentProfile.setProfileName(((TextField) observable).getText());
 //            }
 //        });
 
 
 //        this.profileComboBox.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-//            if (profileComboBox.getSelectionModel().getSelectedItem() instanceof EditableLogParsingProfile) {
-//                var currentProfile = (EditableLogParsingProfile) profileComboBox.getSelectionModel().getSelectedItem();
+//            if (profileComboBox.getSelectionModel().getSelectedItem() instanceof CustomParsingProfile) {
+//                var currentProfile = (CustomParsingProfile) profileComboBox.getSelectionModel().getSelectedItem();
 //                currentProfile.setProfileName(newValue);
 //            } else {
 //                newValue = oldValue;
 //            }
 //        });
-        this.profileComboBox.getSelectionModel().select(BuiltInOnlyLogParsingProfile.BINJR_LOGS);
+        this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
 
     }
 
-    private void loadParserParameters(ReadOnlyLogParsingProfile profile) {
+    private void loadParserParameters(ParsingProfile profile) {
         try {
-            var notEditable = !(profile instanceof EditableLogParsingProfile);
-            this.timeCaptureExpression.setText(profile.getTimeCaptureExpression());
-            this.timeCapture.setDisable(notEditable);
-
-            this.normalizeSepCheckBox.setSelected(profile.isNormalizeSepCheckBox());
-            this.normalizeSepCheckBox.setDisable(notEditable);
-
-            this.separatorReplacementExpression.setText(profile.getSeparatorReplacementExpression());
-            this.separatorReplacement.setDisable(notEditable);
-
-            this.separatorsToNormalizeExpression.setText(profile.getSeparatorsToNormalizeExpression());
-            this.separatorsToNormalize.setDisable(notEditable);
-
-            this.timeParsingExpression.setText(profile.getTimeParsingExpression());
-            this.timeParsing.setDisable(notEditable);
-
-            this.severityCaptureExpression.setText(profile.getSeverityCaptureExpression());
-            this.severityCapture.setDisable(notEditable);
+            var notEditable = !(profile instanceof CustomParsingProfile);
+//            this.timeCaptureExpression.setText(profile.getTimeCaptureExpression());
+//            this.timeCapture.setDisable(notEditable);
+//
+//            this.normalizeSepCheckBox.setSelected(profile.isNormalizeSepCheckBox());
+//            this.normalizeSepCheckBox.setDisable(notEditable);
+//
+//            this.separatorReplacementExpression.setText(profile.getSeparatorReplacementExpression());
+//            this.separatorReplacement.setDisable(notEditable);
+//
+//            this.separatorsToNormalizeExpression.setText(profile.getSeparatorsToNormalizeExpression());
+//            this.separatorsToNormalize.setDisable(notEditable);
+//
+//            this.timeParsingExpression.setText(profile.getTimeParsingExpression());
+//            this.timeParsing.setDisable(notEditable);
+//
+//            this.severityCaptureExpression.setText(profile.getSeverityCaptureExpression());
+//            this.severityCapture.setDisable(notEditable);
 
             this.lineTemplateExpression.setText(profile.getLineTemplateExpression());
             this.lineTemplate.setDisable(notEditable);
@@ -410,14 +410,14 @@ public class ParsingProfilesController {
         }
     }
 
-    private void saveParserParameters(EditableLogParsingProfile profile) {
+    private void saveParserParameters(CustomParsingProfile profile) {
         try {
-            profile.setTimeCaptureExpression(this.timeCaptureExpression.getText());
-            profile.setNormalizeSepCheckBox(this.normalizeSepCheckBox.isSelected());
-            profile.setSeparatorReplacementExpression(this.separatorReplacementExpression.getText());
-            profile.setSeparatorsToNormalizeExpression(this.separatorsToNormalizeExpression.getText());
-            profile.setTimeParsingExpression(this.timeParsingExpression.getText());
-            profile.setSeverityCaptureExpression(this.severityCaptureExpression.getText());
+//            profile.setTimeCaptureExpression(this.timeCaptureExpression.getText());
+//            profile.setNormalizeSepCheckBox(this.normalizeSepCheckBox.isSelected());
+//            profile.setSeparatorReplacementExpression(this.separatorReplacementExpression.getText());
+//            profile.setSeparatorsToNormalizeExpression(this.separatorsToNormalizeExpression.getText());
+//            profile.setTimeParsingExpression(this.timeParsingExpression.getText());
+//            profile.setSeverityCaptureExpression(this.severityCaptureExpression.getText());
             profile.setLineTemplateExpression(this.lineTemplateExpression.getText());
         } catch (Exception e) {
             Dialogs.notifyException("Error saving profile", e, root);

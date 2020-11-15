@@ -25,15 +25,15 @@ import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
 import eu.binjr.core.preferences.UserPreferences;
-import eu.binjr.sources.logs.profiles.BuiltInOnlyLogParsingProfile;
-import eu.binjr.sources.logs.profiles.ReadOnlyLogParsingProfile;
+import eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile;
+import eu.binjr.sources.logs.parser.profile.ParsingProfile;
 
 import java.util.Optional;
 
 public class LogsAdapterPreferences extends DataAdapterPreferences {
     private static final Gson gson = new Gson();
-    private final MostRecentlyUsedList<ReadOnlyLogParsingProfile> defaultParsingProfiles;
-    private final MostRecentlyUsedList<ReadOnlyLogParsingProfile> userParsingProfiles;
+    private final MostRecentlyUsedList<ParsingProfile> defaultParsingProfiles;
+    private final MostRecentlyUsedList<ParsingProfile> userParsingProfiles;
     private final ParsingRulesMruFactory mruFactory;
 
 
@@ -78,11 +78,11 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
         this.userParsingProfiles = mruFactory.rulesMostRecentlyUsedList("userParsingProfiles", 100);
     }
 
-    public MostRecentlyUsedList<ReadOnlyLogParsingProfile> getDefaultParsingProfiles() {
+    public MostRecentlyUsedList<ParsingProfile> getDefaultParsingProfiles() {
         return defaultParsingProfiles;
     }
 
-    public MostRecentlyUsedList<ReadOnlyLogParsingProfile> getUserParsingProfiles() {
+    public MostRecentlyUsedList<ParsingProfile> getUserParsingProfiles() {
         return userParsingProfiles;
     }
 
@@ -91,23 +91,23 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             super(backingStoreKey);
         }
 
-        public MostRecentlyUsedList<ReadOnlyLogParsingProfile> rulesMostRecentlyUsedList(String key, int capacity) {
-            var mru = new MostRecentlyUsedList<ReadOnlyLogParsingProfile>(key, capacity, backingStore) {
+        public MostRecentlyUsedList<ParsingProfile> rulesMostRecentlyUsedList(String key, int capacity) {
+            var mru = new MostRecentlyUsedList<ParsingProfile>(key, capacity, backingStore) {
                 @Override
-                protected boolean validate(ReadOnlyLogParsingProfile value) {
+                protected boolean validate(ParsingProfile value) {
                     return (value != null);
                 }
 
                 @Override
-                protected void saveToBackend(int index, ReadOnlyLogParsingProfile value) {
+                protected void saveToBackend(int index, ParsingProfile value) {
                     getBackingStore().node(getKey()).put("value_" + index, gson.toJson(value));
                 }
 
                 @Override
-                protected Optional<ReadOnlyLogParsingProfile> loadFromBackend(int index) {
+                protected Optional<ParsingProfile> loadFromBackend(int index) {
                     var p = getBackingStore().node(getKey()).get("value_" + index, null);
                     if (p != null) {
-                        return Optional.of(gson.fromJson(p, BuiltInOnlyLogParsingProfile.class));
+                        return Optional.of(gson.fromJson(p, BuiltInParsingProfile.class));
                     }
                     return Optional.empty();
                 }
