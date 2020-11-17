@@ -44,7 +44,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     SECOND, "\\d{2}",
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
-            "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND[\\.,]$FRACTION\\]\\s+\\[\\s?$SEVERITY\\s?\\].*"
+            "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"
     ),
     GC("JVM GC logs",
             Map.of(EPOCH, "\\d+",

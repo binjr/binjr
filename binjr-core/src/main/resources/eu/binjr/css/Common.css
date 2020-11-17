@@ -1,3 +1,18 @@
+{
+    -palette-color-0:  #D66300;
+    -palette-color-1:  #70a91d;
+    -palette-color-2:  #5555dd;
+    -palette-color-3:  #DD5555;
+    -palette-color-4:  #FF3737;
+    -palette-color-5:  #bb44cc;
+    -palette-color-6:  #22AA99;
+    -palette-color-7:  #F54882;
+    -palette-color-8:  #06800d;
+    -palette-color-9:  #ee9911;
+    -palette-color-10:  #4381bf;
+    -palette-color-11:  #dddd00;
+}
+
 .command-bar .command-bar-pinned-item {
     -fx-content-display: graphic-only;
 }
@@ -194,3 +209,70 @@
 .para2 {
     -fx-background-color: #0000FF30;
 }
+table-cell .capture-group,
+.styled-text-area .capture-group {
+    -fx-font-weight: bold;
+    /*-rtfx-background-color: GRAY;*/
+}
+
+
+
+
+/*.capture-group-0 {*/
+/*    -fx-font-weight: bold;*/
+/*    -fx-text-fill:-palette-color-0;*/
+/*}*/
+
+
+.styled-text-area .capture-group-0 {
+    -fx-fill: -palette-color-0;
+}
+
+.styled-text-area .capture-group-1 {
+    -fx-fill: -palette-color-1;
+}
+
+.styled-text-area .capture-group-2 {
+
+    -fx-fill:-palette-color-2;
+}
+
+.styled-text-area .capture-group-3 {
+    -fx-fill: -palette-color-3;
+}
+
+.styled-text-area .capture-group-4 {
+    -fx-fill: -palette-color-4;
+}
+
+.styled-text-area .capture-group-5 {
+    -fx-fill: -palette-color-5;
+}
+
+.styled-text-area .capture-group-6 {
+    -fx-fill: -palette-color-6;
+}
+
+.styled-text-area .capture-group-7 {
+    -fx-fill: -palette-color-7;
+}
+
+.styled-text-area .capture-group-8 {
+    -fx-fill: -palette-color-8;
+}
+
+.styled-text-area .capture-group-9 {
+    -fx-fill: -palette-color-9;
+}
+
+.styled-text-area .capture-group-10{
+    -fx-fill: -palette-color-10;
+}
+
+.styled-text-area .capture-group-11 {
+    -fx-fill: -palette-color-11;
+}
+
+
+
+

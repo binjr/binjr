@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class CustomParsingProfile implements ParsingProfile {
-    private final Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
+    private  Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
     private String lineTemplateExpression;
     private String profileName;
 
@@ -31,7 +31,7 @@ public class CustomParsingProfile implements ParsingProfile {
                                 String lineTemplateExpression) {
         this.profileName = profileName;
 
-        captureGroups.putAll(captureGroups);
+        this.captureGroups.putAll(captureGroups);
         this.lineTemplateExpression = lineTemplateExpression;
     }
 
@@ -55,7 +55,9 @@ public class CustomParsingProfile implements ParsingProfile {
         return captureGroups;
     }
 
-
+    public void setCaptureGroups(Map<NamedCaptureGroup, String> captureGroups) {
+        this.captureGroups = captureGroups;
+    }
 
     public void setProfileName(String profileName) {
         this.profileName = profileName;
