@@ -197,8 +197,23 @@
     -fx-opacity: 100%;
 }
 
-
+.styled-text-field {
+    -fx-cursor: text;
+    -fx-text-fill: green;
+    -fx-background-color: red;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 0, 0;
+    -fx-padding: 4 7 4 7;
+}
+/*.styled-text-field:focused*/
+/*{*/
+/*    -fx-background-color: -fx-focus-color, -fx-control-inner-background, -fx-faint-focus-color,*/
+/*    linear-gradient(from 0px 0px to 0px 5px, derive(-fx-control-inner-background, -9%), -fx-control-inner-background);*/
+/*    -fx-background-insets: -0.2, 1, -1.4, 3;*/
+/*    -fx-background-radius: 3, 2, 4, 0;*/
+/*}*/
 /* TextField */
+
 .search-field-outer,
 .text-input, .date-picker .text-input {
     -fx-background-radius: 0, 0;
@@ -212,11 +227,13 @@
     -fx-highlight-text-fill: white;
 }
 
+
 .search-field-outer:hover,
 .text-input:hover, .date-picker .text-input:hover {
     -fx-background-color: #8f8f8f, white;
 }
 
+.styled-text-field:focused,
 .search-field-outer:focused,
 .text-input:focused, .date-picker:focused, .date-picker .text-input:focused {
     /*     -fx-background-color: #5c5c5c, -binjr-button-background-color;*/

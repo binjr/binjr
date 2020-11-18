@@ -17,6 +17,7 @@ package eu.binjr.sources.logs.controllers;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.sources.logs.parser.EventParser;
 import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
 import eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile;
 import eu.binjr.sources.logs.parser.profile.CustomParsingProfile;
@@ -31,9 +32,11 @@ import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.StyleClassedTextField;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
@@ -44,6 +47,7 @@ public class ParsingProfilesController {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
 
     public TableColumn<NameExpressionPair, NamedCaptureGroup> nameColumn;
+    public Label notificationLabel;
     //    public TableColumn expressionColumn;
     @FXML
     private TableView<NameExpressionPair> captureGroupTable;
@@ -81,7 +85,7 @@ public class ParsingProfilesController {
     private HBox lineTemplate;
 
     @FXML
-    private CodeArea lineTemplateExpression;
+    private StyleClassedTextField lineTemplateExpression;
 
 
     @FXML
@@ -163,7 +167,40 @@ public class ParsingProfilesController {
 
     @FXML
     void handleOnTestLineTemplate(ActionEvent event) {
+        try {
+            clearNotification();
+            applyChanges();
+            var p = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
+            p.parse(testArea.getText());
 
+        } catch (Exception e) {
+            notifyError(e.getMessage());
+        }
+    }
+
+    private void clearNotification() {
+        notificationLabel.setVisible(false);
+        notificationLabel.setManaged(false);
+        notificationLabel.setText("");
+    }
+
+    private void notifyInfo(String message) {
+        notify(message, "notification-info");
+    }
+
+    private void notifyWarn(String message) {
+        notify(message, "notification-warn");
+    }
+
+    private void notifyError(String message) {
+        notify(message, "notification-error");
+    }
+
+    private void notify(String message, String styleClass) {
+        notificationLabel.getStyleClass().setAll(styleClass);
+        notificationLabel.setText(message);
+        notificationLabel.setManaged(true);
+        notificationLabel.setVisible(true);
     }
 
     @FXML
@@ -261,7 +298,6 @@ public class ParsingProfilesController {
                 var val = profileComboBox.getValue();
                 if (val instanceof CustomParsingProfile) {
                     ((CustomParsingProfile) val).setProfileName(string);
-
                 }
                 return val;
             }
@@ -272,11 +308,11 @@ public class ParsingProfilesController {
         });
 
         this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
-
     }
 
     private void loadParserParameters(ParsingProfile profile) {
         try {
+            clearNotification();
             this.captureGroupTable.getItems().clear();
             profile.getCaptureGroups().forEach((k, v) -> {
                 this.captureGroupTable.getItems().add(new NameExpressionPair(k, v));
@@ -289,7 +325,7 @@ public class ParsingProfilesController {
                         protected void updateItem(NamedCaptureGroup item, boolean empty) {
                             super.updateItem(item, empty);
                             if (!isEmpty()) {
-                                var idx =getCaptureGroupPaletteIndex(item);
+                                var idx = getCaptureGroupPaletteIndex(item);
                                 this.setStyle("-fx-font-weight: bold; -fx-text-fill:-palette-color-" + idx + ";");
                                 setText(item.toString());
                             }
