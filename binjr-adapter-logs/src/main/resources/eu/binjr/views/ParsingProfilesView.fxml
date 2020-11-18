@@ -31,7 +31,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 <?import org.fxmisc.richtext.CodeArea?>
-<?import org.fxmisc.richtext.StyleClassedTextField?>
 
 <AnchorPane fx:id="root" prefHeight="777.0" prefWidth="853.0" styleClass="skinnable-pane-border, tool-dialog-window" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.sources.logs.controllers.ParsingProfilesController">
     <children>
@@ -106,11 +105,14 @@
                                                 <Insets left="3.0" right="3.0" />
                                             </padding>
 
-                                            <StyleClassedTextField fx:id="lineTemplateExpression" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS">
+                                            <CodeArea fx:id="lineTemplateExpression" maxHeight="-Infinity" maxWidth="1.7976931348623157E308" prefHeight="24.0" HBox.hgrow="ALWAYS">
                                                 <HBox.margin>
                                                     <Insets />
                                                 </HBox.margin>
-                                            </StyleClassedTextField>
+                                    <padding>
+                                       <Insets top="2.0" />
+                                    </padding>
+                                            </CodeArea>
                                             <Button fx:id="testLineTemplate" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleOnTestLineTemplate" prefHeight="24.0" prefWidth="24.0" styleClass="dialog-button" text="Test">
                                                 <graphic>
                                                     <Region>
@@ -146,11 +148,11 @@
                         </Label>
                     </children>
                 </VBox>
-            <Label text="Test:">
-               <font>
-                  <Font name="System Bold" size="12.0" />
-               </font>
-            </Label>
+                <Label text="Test:">
+                    <font>
+                        <Font name="System Bold" size="12.0" />
+                    </font>
+                </Label>
                 <HBox styleClass="search-field-outer" VBox.vgrow="SOMETIMES">
                     <children>
                         <CodeArea fx:id="testArea" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="301.0" HBox.hgrow="SOMETIMES" />

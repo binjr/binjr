@@ -26,13 +26,14 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.fxmisc.richtext.CodeArea;
-import org.fxmisc.richtext.StyleClassedTextField;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
@@ -85,7 +86,7 @@ public class ParsingProfilesController {
     private HBox lineTemplate;
 
     @FXML
-    private StyleClassedTextField lineTemplateExpression;
+    private CodeArea lineTemplateExpression;
 
 
     @FXML
@@ -303,6 +304,28 @@ public class ParsingProfilesController {
             }
         });
 
+        lineTemplateExpression.addEventFilter(KeyEvent.KEY_PRESSED, event -> {
+            Node source = (Node) event.getSource();
+            if (event.getCode() == KeyCode.ENTER) {
+                source.fireEvent(new ActionEvent(this, null));
+                event.consume();
+            } else if (event.getCode() == KeyCode.TAB) {
+                Node parent = source.getParent();
+                if (parent != null) {
+                    var siblings = source.getParent().getChildrenUnmodifiable();
+                    var pos = siblings.indexOf(source);
+                    if (event.isShiftDown() && pos > 0) {
+                        siblings.get(pos - 1).requestFocus();
+                    } else if (!event.isShiftDown() && pos < siblings.size()) {
+                        siblings.get(pos + 1).requestFocus();
+                    } else {
+                        parent.requestFocus();
+                    }
+                }
+                event.consume();
+            }
+        });
+
         lineTemplateExpression.textProperty().addListener((obs, oldText, newText) -> {
             lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(newText));
         });
@@ -335,12 +358,10 @@ public class ParsingProfilesController {
             });
             this.lineTemplateExpression.clear();
             this.lineTemplateExpression.appendText(profile.getLineTemplateExpression());
-
             var notEditable = !(profile instanceof CustomParsingProfile);
-            this.lineTemplate.setDisable(notEditable);
+            this.lineTemplateExpression.setDisable(notEditable);
             this.addGroupButton.setDisable(notEditable);
             this.deleteGroupButton.setDisable(notEditable);
-            this.captureGroupTable.setDisable(notEditable);
             this.applyButton.setDisable(notEditable);
             this.deleteProfileButton.setDisable(notEditable);
             this.profileComboBox.getEditor().setEditable(!notEditable);

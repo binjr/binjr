@@ -134,7 +134,7 @@
 }
 
 .property-sheet .tool-bar {
-    -fx-spacing:5;
+    -fx-spacing: 5;
     -fx-padding: 7;
 }
 
@@ -147,10 +147,10 @@
     /*-fx-text-fill:blue;*/
     /*-fx-border-top-width:0;*/
     /*-fx-border-bottom-width:1;*/
-    -fx-border-width:2;
+    -fx-border-width: 2;
     -fx-border-color: transparent;
     -fx-smooth: true;
-    -fx-font-family:"Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
+    -fx-font-family: "Segoe UI Light", "Segoe UI", Helvetica, Arial, sans-serif;
     -fx-font-size: 12pt;
 }
 
@@ -187,9 +187,10 @@
 .styled-text-area .syntax-help-code {
     -fx-font-size: 10pt;
 }
+
 .styled-text-area .syntax-help-code {
     -fx-font-size: 10pt;
-    -fx-padding: 0,10,0,10;
+    -fx-padding: 0, 10, 0, 10;
     -fx-fill: white;
     -rtfx-background-color: #204656;
 }
@@ -209,58 +210,58 @@
 .para2 {
     -fx-background-color: #0000FF30;
 }
-table-cell .capture-group,
-.styled-text-field .capture-group {
+
+.styled-text-area .capture-group {
     -fx-font-weight: bold;
     /*-rtfx-background-color: GRAY;*/
 }
 
-.styled-text-field .capture-group-0 {
+.styled-text-area .capture-group-0 {
     -fx-fill: -palette-color-0;
 }
 
-.styled-text-field .capture-group-1 {
+.styled-text-area .capture-group-1 {
     -fx-fill: -palette-color-1;
 }
 
-.styled-text-field .capture-group-2 {
+.styled-text-area .capture-group-2 {
 
-    -fx-fill:-palette-color-2;
+    -fx-fill: -palette-color-2;
 }
 
-.styled-text-field .capture-group-3 {
+.styled-text-area .capture-group-3 {
     -fx-fill: -palette-color-3;
 }
 
-.styled-text-field .capture-group-4 {
+.styled-text-area .capture-group-4 {
     -fx-fill: -palette-color-4;
 }
 
-.styled-text-field .capture-group-5 {
+.styled-text-area .capture-group-5 {
     -fx-fill: -palette-color-5;
 }
 
-.styled-text-field .capture-group-6 {
+.styled-text-area .capture-group-6 {
     -fx-fill: -palette-color-6;
 }
 
-.styled-text-field .capture-group-7 {
+.styled-text-area .capture-group-7 {
     -fx-fill: -palette-color-7;
 }
 
-.styled-text-field .capture-group-8 {
+.styled-text-area .capture-group-8 {
     -fx-fill: -palette-color-8;
 }
 
-.styled-text-field .capture-group-9 {
+.styled-text-area .capture-group-9 {
     -fx-fill: -palette-color-9;
 }
 
-.styled-text-field .capture-group-10{
+.styled-text-area .capture-group-10 {
     -fx-fill: -palette-color-10;
 }
 
-.styled-text-field .capture-group-11 {
+.styled-text-area .capture-group-11 {
     -fx-fill: -palette-color-11;
 }
 
