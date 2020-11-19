@@ -80,9 +80,6 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-//                FXMLLoader loader = new FXMLLoader(ParsingProfilesController.class.getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
-//                Parent root = loader.load();
-//                ParsingProfilesController controller = loader.getController();
                 Parent root  = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
                 final Scene scene = new Scene(root);
                 var stage = new Stage();

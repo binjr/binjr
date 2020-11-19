@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.parser.profile;
+package eu.binjr.core.data.indexes.parser.profile;
 
-import eu.binjr.sources.logs.parser.EventParser;
+import eu.binjr.core.data.indexes.parser.EventParser;
 import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
 
-import static eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile.*;
+import static eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

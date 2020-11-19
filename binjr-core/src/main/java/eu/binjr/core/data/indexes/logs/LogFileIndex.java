@@ -14,54 +14,6 @@
  *    limitations under the License.
  */
 
-/*
- *    Copyright 2020 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-/*
- *    Copyright 2020 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-/*
- *    Copyright 2020 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
 package eu.binjr.core.data.indexes.logs;
 
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
@@ -70,7 +22,11 @@ import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.core.data.indexes.*;
+import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.SearchHitsProcessor;
+import eu.binjr.core.data.indexes.Searchable;
+import eu.binjr.core.data.indexes.parser.EventParser;
+import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.chart.XYChart;
@@ -107,8 +63,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class LogFileIndex implements Searchable {
@@ -116,7 +70,7 @@ public class LogFileIndex implements Searchable {
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
     public static final String PATH = "filePath";
-    public static final String SEVERITY = "severity";
+    public static final String SEVERITY = "SEVERITY";
     private static final Logger logger = Logger.create(LogFileIndex.class);
     protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;
@@ -188,20 +142,20 @@ public class LogFileIndex implements Searchable {
     }
 
     @Override
-    public void add(String path, InputStream ias, ParserParameters parser) throws IOException {
+    public void add(String path, InputStream ias, EventParser parser) throws IOException {
         add(path, ias, true, parser);
     }
 
     @Override
-    public void add(String path, InputStream ias, boolean commit, ParserParameters parser) throws IOException {
+    public void add(String path, InputStream ias, boolean commit, EventParser parser) throws IOException {
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             var n = new AtomicInteger(0);
-            var builder = new ParsedLogEvent.LogEventBuilder(parser.getTimestampSyntax());
+            var builder = new ParsedEvent.LogEventBuilder(parser);
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
                 final AtomicLong nbLogEvents = new AtomicLong(0);
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
-                final ArrayBlockingQueue<ParsedLogEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                final ArrayBlockingQueue<ParsedEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
 
                 for (int i = 0; i < parsingThreadsNumber; i++) {
@@ -209,7 +163,7 @@ public class LogFileIndex implements Searchable {
                         logger.trace(() -> "Starting parsing worker on thread " + Thread.currentThread().getName());
                         int nbEventProcessed = 0;
                         do {
-                            List<ParsedLogEvent> todo = new ArrayList<>();
+                            List<ParsedEvent> todo = new ArrayList<>();
                             var drained = queue.drainTo(todo, prefs.parsingThreadDrainSize.get().intValue());
                             if (drained == 0 && queue.size() == 0) {
                                 // Park the thread for a while before polling again
@@ -222,7 +176,7 @@ public class LogFileIndex implements Searchable {
                             }
                             try {
                                 for (var logEvent : todo) {
-                                    addLogEvent(path, logEvent, parser);
+                                    addLogEvent(path, logEvent);
                                     nbEventProcessed++;
                                 }
                             } catch (Throwable t) {
@@ -269,7 +223,7 @@ public class LogFileIndex implements Searchable {
                 }
                 // Don't forget the last log line buffered in the builder
                 builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
-                    addLogEvent(path, line, parser);
+              //      addLogEvent(path, line);
                 }));
             }
             if (commit) {
@@ -403,30 +357,17 @@ public class LogFileIndex implements Searchable {
         }
     }
 
-    private void addLogEvent(String path, ParsedLogEvent event, ParserParameters parser) throws IOException {
+    private void addLogEvent(String path, ParsedEvent event) throws IOException {
         Document doc = new Document();
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
         doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getLineNumber()));
-        //     var timeStamp = ZonedDateTime.parse(event.getTimestamp().replaceAll("[/\\-:.,T_]", " "), parser.getDateTimeFormatter());
-        //     var millis = timeStamp.toInstant().toEpochMilli();
-        var rawTimeString = event.getTimestamp();//.replaceAll("[/\\-:.,T_]", " ");
-        var millis = parser.getDatetimeProcessor().parseMillis(rawTimeString);
-
-
+        var millis = event.getTimestamp().toInstant().toEpochMilli();
         doc.add(new LongPoint(TIMESTAMP, millis));
         doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
         doc.add(new StoredField(TIMESTAMP, millis));
         doc.add(new FacetField(PATH, path));
         doc.add(new StoredField(PATH, path));
-        String severity = "unknown";
-        try {
-            Matcher m = parser.getPayloadPattern().matcher(event.getText());
-            if (m.find()) {
-                severity = (m.group("severity") == null ? "unknown" : m.group("severity")).toLowerCase();
-            }
-        } catch (Exception e) {
-            throw new ParsingEventException("Error parsing line: " + e.getMessage(), e);
-        }
+        String severity = event.getSections().get(SEVERITY) == null ? "unknown" : event.getSections().get(SEVERITY).toLowerCase();
         doc.add(new FacetField(SEVERITY, severity));
         doc.add(new StoredField(SEVERITY, severity));
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
@@ -472,61 +413,4 @@ public class LogFileIndex implements Searchable {
         return facetEntryMap;
     }
 
-    private static class ParsedLogEvent {
-        private final String timestamp;
-        private final int lineNumber;
-        private String text;
-
-        private ParsedLogEvent(int lineNumber, String timestamp, String text) {
-            this.lineNumber = lineNumber;
-            this.text = text;
-            this.timestamp = timestamp;
-        }
-
-        public int getLineNumber() {
-            return lineNumber;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public String getTimestamp() {
-            return timestamp;
-        }
-
-        private static class LogEventBuilder {
-            private final Pattern timestampPattern;
-            private ParsedLogEvent previous = null;
-            private int lineNumber;
-            private String timestamp;
-            private StringBuilder textBuilder = new StringBuilder();
-
-            public LogEventBuilder(Pattern timestampPattern) {
-                this.timestampPattern = timestampPattern;
-            }
-
-            public Optional<ParsedLogEvent> build(int lineNumber, String text) {
-                var m = timestampPattern.matcher(text);
-                if (m.find()) {
-                    var yield = previous;
-                    previous = new ParsedLogEvent(lineNumber, m.group(), text);
-                    if (yield != null) {
-                        return Optional.of(yield);
-                    } else {
-                        return Optional.empty();
-                    }
-                } else {
-                    if (previous != null) {
-                        previous.text = previous.text + "\n" + text;
-                    }
-                    return Optional.empty();
-                }
-            }
-
-            public Optional<ParsedLogEvent> getLast() {
-                return previous != null ? Optional.of(previous) : Optional.empty();
-            }
-        }
-    }
 }

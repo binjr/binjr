@@ -535,15 +535,15 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
-                            var severityFacetEntries = res.getFacetResults().get("severity");
+                            var severityFacetEntries = res.getFacetResults().get(LogFileIndex.SEVERITY);
                             severityListView.setAllEntries((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
                             severityListView.getFacetPills()
                                     .forEach(f -> {
-                                        f.getStyleClass().add("facet-pill-" + f.getFacet().getLabel());
+                                        f.getStyleClass().add("facet-pill-" + f.getFacet().getLabel().toLowerCase());
                                         f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().getLabel()));
                                     });
                             // Update filePath facet view
-                            var fileFacetEntries = res.getFacetResults().get("filePath");
+                            var fileFacetEntries = res.getFacetResults().get(LogFileIndex.PATH);
                             if (fileFacetEntries != null) {
                                 this.pathFacetEntries.setValue(fileFacetEntries);
                             } else {
@@ -556,8 +556,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         Collections.emptyList());
                                 for (var data : res.getData()) {
                                     var hit = data.getYValue();
-                                    var severity = hit.getFacets().get("severity").getLabel();
-                                    var path = hit.getFacets().get("filePath").getLabel();
+                                    var severity = hit.getFacets().get(LogFileIndex.SEVERITY).getLabel();
+                                    var path = hit.getFacets().get(LogFileIndex.PATH).getLabel();
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,

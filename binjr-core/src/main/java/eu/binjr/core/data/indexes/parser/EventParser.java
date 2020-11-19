@@ -14,21 +14,18 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.parser;
+package eu.binjr.core.data.indexes.parser;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
-import eu.binjr.sources.logs.parser.capture.TemporalCaptureGroup;
-import eu.binjr.sources.logs.parser.profile.ParsingProfile;
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EventParser {
@@ -61,6 +58,10 @@ public class EventParser {
     }
 
     public Optional<ParsedEvent> parse(String text) {
+        return parse(0, text);
+    }
+
+    public Optional<ParsedEvent> parse(long number, String text) {
         var m = parsingRegex.matcher(text);
         var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, zoneId);
         final Map<String, String> sections = new HashMap<>();
@@ -76,45 +77,9 @@ public class EventParser {
                     }
                 }
             }
-            return Optional.of(new ParsedEvent(timestamp, sections, text));
+            return Optional.of(new ParsedEvent(number, timestamp, text, sections));
         }
         return Optional.empty();
-    }
-
-
-
-    public static class ParsedEvent {
-        private final ZonedDateTime timestamp;
-        private final Map<String, String> sections;
-        private final String text;
-
-        private ParsedEvent(ZonedDateTime timestamp, Map<String, String> sections, String text) {
-            this.sections = sections;
-            this.text = text;
-            this.timestamp = timestamp;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public ZonedDateTime getTimestamp() {
-            return timestamp;
-        }
-
-        public Map<String, String> getSections() {
-            return sections;
-        }
-
-        @Override
-        public String toString() {
-            final StringBuffer sb = new StringBuffer("ParsedEvent{");
-            sb.append("timestamp=").append(timestamp);
-            sb.append(", sections=").append(sections);
-            sb.append(", text='").append(text).append('\'');
-            sb.append('}');
-            return sb.toString();
-        }
     }
 
 }

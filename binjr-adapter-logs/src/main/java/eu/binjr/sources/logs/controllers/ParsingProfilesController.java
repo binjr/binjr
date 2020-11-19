@@ -16,12 +16,13 @@
 package eu.binjr.sources.logs.controllers;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.sources.logs.parser.EventParser;
-import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
-import eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile;
-import eu.binjr.sources.logs.parser.profile.CustomParsingProfile;
-import eu.binjr.sources.logs.parser.profile.ParsingProfile;
+import eu.binjr.core.data.indexes.parser.EventParser;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -168,7 +169,6 @@ public class ParsingProfilesController {
 
     }
 
-
     @FXML
     void handleOnTestLineTemplate(ActionEvent event) {
         try {
@@ -176,7 +176,7 @@ public class ParsingProfilesController {
             applyChanges();
             var parser = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
             parser.parse(testArea.getText());
-            var events = new ArrayList<EventParser.ParsedEvent>();
+            var events = new ArrayList<ParsedEvent>();
             Scanner scanner = new Scanner(testArea.getText());
             while (scanner.hasNextLine()) {
                 parser.parse(scanner.nextLine()).ifPresent(events::add);
@@ -383,7 +383,6 @@ public class ParsingProfilesController {
                 event.consume();
             }
         });
-
         testArea.textProperty().addListener((obs, oldText, newText) -> {
             resetTest();
         });
@@ -391,7 +390,6 @@ public class ParsingProfilesController {
             resetTest();
             lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(newText));
         });
-
         this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
     }
 
@@ -434,8 +432,6 @@ public class ParsingProfilesController {
             this.applyButton.setDisable(notEditable);
             this.deleteProfileButton.setDisable(notEditable);
             this.profileComboBox.getEditor().setEditable(!notEditable);
-
-
         } catch (
                 Exception e) {
             Dialogs.notifyException("Error loading profile", e, root);
@@ -454,7 +450,6 @@ public class ParsingProfilesController {
 
     private final AtomicInteger paletteEntriesSequence = new AtomicInteger(0);
     private final Map<NamedCaptureGroup, Integer> paletteLookupTable = new HashMap<>();
-
 
     private int getCaptureGroupPaletteIndex(NamedCaptureGroup cg) {
         return paletteLookupTable.computeIfAbsent(cg, key -> paletteEntriesSequence.getAndIncrement() % 12);

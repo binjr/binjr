@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.parser.capture;
+package eu.binjr.core.data.indexes.parser.capture;
 
 public interface NamedCaptureGroup {
 

@@ -14,9 +14,9 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.parser.profile;
+package eu.binjr.core.data.indexes.parser.profile;
 
-import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.Map;
 

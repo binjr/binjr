@@ -33,13 +33,16 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.Indexes;
-import eu.binjr.core.data.indexes.ParserParameters;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
+import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.BufferedReader;
@@ -71,11 +74,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
     private String[] fileExtensionsFilters;
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
-    private ParserParameters parserParameters;
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
     private final MostRecentlyUsedList<String> userParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
+    private ParsingProfile parsingProfile;
+    private EventParser parser;
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -97,7 +101,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
 
-        initParams(rootPath, folderFilters, fileExtensionsFilters);
+        initParams(rootPath, folderFilters, fileExtensionsFilters, CustomParsingProfile.of(BuiltInParsingProfile.BINJR));
     }
 
     @Override
@@ -106,6 +110,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         params.put("rootPath", rootPath.toString());
         params.put("folderFilters", gson.toJson(folderFilters));
         params.put("fileExtensionsFilters", gson.toJson(fileExtensionsFilters));
+        params.put("parsingProfile", gson.toJson(parsingProfile));
         return params;
     }
 
@@ -117,13 +122,16 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         }
         initParams(Paths.get(validateParameterNullity(params, "rootPath")),
                 gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
-                gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class));
+                gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class),
+                gson.fromJson(validateParameterNullity(params, "parsingProfile"), ParsingProfile.class));
     }
 
-    private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
+    private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile parsingProfile) throws DataAdapterException {
         this.rootPath = rootPath;
         this.folderFilters = folderFilters;
         this.fileExtensionsFilters = fileExtensionsFilters;
+        this.parsingProfile = parsingProfile;
+        this.parser = new EventParser(parsingProfile, getTimeZoneId());
     }
 
     @Override
@@ -132,20 +140,6 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         try {
             this.fileBrowser = FileSystemBrowser.of(rootPath);
             this.index = Indexes.LOG_FILES.acquire();
-            String lineRegex = prefs.linePattern.get()
-                    .replace("$TIMESTAMP", prefs.timestampSyntaxPattern.get())
-                    .replace("$SEVERITY", prefs.severityPattern.get())
-                    .replace("$MESSAGE", prefs.msgPattern.get());
-            this.parserParameters = new ParserParameters.Builder()
-                    .setTimestampSyntax(prefs.timestampSyntaxPattern.get())
-//                    .setNormalizeSeparators()
-//                    .setSeparatorsPattern()
-//                    .setSeparatorsReplacement()
-                    .setTimeFormatPattern(prefs.timestampSemanticPattern.get())
-                    .setZoneId(getTimeZoneId())
-                    .setPayloadPattern(lineRegex)
-                    .build();
-            logger.debug(() -> "Log parsing params: " + this.parserParameters.toString());
         } catch (IOException e) {
             throw new CannotInitializeDataAdapterException("An error occurred during the data adapter initialization", e);
         }
@@ -296,8 +290,8 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         super.close();
     }
 
-    public ParserParameters getLogParser() {
-        return parserParameters;
+    public EventParser getLogParser() {
+        return parser;
     }
 
 

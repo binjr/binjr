@@ -416,11 +416,11 @@
     -fx-padding: 5 10 5 10;
     -fx-background-radius: 15;
     -fx-background-color: -binjr-pane-background-color;
-    -fx-text-fill: white;
+    -fx-text-fill: black;
 }
 
 .facet-pill:selected .box .mark {
-    -fx-background-color: white;
+    -fx-background-color: black;
 }
 
 
@@ -451,8 +451,10 @@
     -fx-background-color: #ff8c00;
 }
 
-.facet-pill-warn:selected .box .mark {
-    -fx-background-color: black;
+.facet-pill-fatal:selected .box .mark,
+.facet-pill-perf:selected .box .mark,
+.facet-pill-info:selected .box .mark {
+    -fx-background-color: white;
 }
 
 .facet-pill-error {

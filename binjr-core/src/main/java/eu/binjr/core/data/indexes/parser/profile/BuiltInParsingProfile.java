@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package eu.binjr.sources.logs.parser.profile;
+package eu.binjr.core.data.indexes.parser.profile;
 
-import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
-import eu.binjr.sources.logs.parser.capture.CaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.Map;
 
-import static eu.binjr.sources.logs.parser.capture.TemporalCaptureGroup.*;
+import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
     BINJR("binjr logs",
@@ -33,8 +33,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     SECOND, "\\d{2}",
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
-            "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*"
-    ),
+            "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*"),
     BINJR_STRICT("binjr logs (Strict)",
             Map.of(YEAR, "\\d{4}",
                     MONTH, "\\d{2}",
@@ -44,15 +43,13 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     SECOND, "\\d{2}",
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
-            "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"
-    ),
+            "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"),
     GC("JVM GC logs",
             Map.of(EPOCH, "\\d+",
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL",
                     CaptureGroup.of("PHASE"), ".*"),
-            "\\[$EPOCH[\\.,]$FRACTIONs\\]\\[$SEVERITY\\]\\[$PHASE\\s*\\].*"
-    );
+            "\\[$EPOCH[\\.,]$FRACTIONs\\]\\[$SEVERITY\\]\\[$PHASE\\s*\\].*");
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -65,7 +62,6 @@ public enum BuiltInParsingProfile implements ParsingProfile {
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
     }
-
 
     @Override
     public String getLineTemplateExpression() {

@@ -25,8 +25,8 @@ import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 
 import eu.binjr.core.preferences.UserPreferences;
-import eu.binjr.sources.logs.parser.profile.BuiltInParsingProfile;
-import eu.binjr.sources.logs.parser.profile.ParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 import java.util.Optional;
 
@@ -35,7 +35,6 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     private final MostRecentlyUsedList<ParsingProfile> defaultParsingProfiles;
     private final MostRecentlyUsedList<ParsingProfile> userParsingProfiles;
     private final ParsingRulesMruFactory mruFactory;
-
 
     public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
 
@@ -50,26 +49,6 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             new String[]{".log", ".txt"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
-
-    public ObservablePreference<String> timestampSyntaxPattern = stringPreference("timestampSyntaxPattern",
-            "\\d{4}[\\/-]\\d{2}[\\/-]\\d{2}[\\-\\s]\\d{2}:\\d{2}:\\d{2}[\\.,]\\d{3}");
-
-    public ObservablePreference<String> severityPattern = stringPreference("severityPattern",
-            "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL");
-
-    public ObservablePreference<String> loggerPattern = stringPreference("severityPattern", "[\\w\\d\\.\\-_]*");
-
-    public ObservablePreference<String> threadPattern = stringPreference("threadPattern",
-            "([\\\"\\w\\d\\.\\,\\-_\\@\\s\\/\\:\\#\\\\\\=\\{\\}\\&\\+\\%\\)\\(]*)((\\.\\.\\.\\[).*(ing\\]))?");
-
-    public ObservablePreference<String> msgPattern = stringPreference("msgPattern", ".*");
-
-    public ObservablePreference<String> linePattern = stringPreference("linePattern",
-            "\\[(?<time>$TIMESTAMP)\\]\\s+\\[\\s?(?<severity>$SEVERITY)\\s?\\]\\s(?<message>$MESSAGE)");
-
-    public ObservablePreference<String> timestampSemanticPattern = stringPreference("timestampSemanticPattern",
-            "yyyy MM dd HH mm ss SSS");
-
 
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
