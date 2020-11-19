@@ -42,10 +42,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 public class ParsingProfilesController {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
+    public static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[A-Z]{2,}");
 
     public TableColumn<NameExpressionPair, NamedCaptureGroup> nameColumn;
     public Label notificationLabel;
@@ -169,14 +172,67 @@ public class ParsingProfilesController {
     @FXML
     void handleOnTestLineTemplate(ActionEvent event) {
         try {
-            clearNotification();
+            resetTest();
             applyChanges();
-            var p = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
-            p.parse(testArea.getText());
-
+            var parser = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
+            parser.parse(testArea.getText());
+            var events = new ArrayList<EventParser.ParsedEvent>();
+            Scanner scanner = new Scanner(testArea.getText());
+            while (scanner.hasNextLine()) {
+                parser.parse(scanner.nextLine()).ifPresent(events::add);
+            }
+            if (events.size() == 0) {
+                notifyWarn("No event found.");
+            } else {
+                notifyInfo(String.format("Found %d event(s).", events.size()));
+            }
+            testArea.setStyleSpans(0, highlightTextArea(parser.getParsingRegex(), testArea.getText()));
         } catch (Exception e) {
             notifyError(e.getMessage());
+            logger.error("Error testing parsing rules", e);
+            logger.debug(() -> "Stack Trace", e);
         }
+    }
+
+    private StyleSpans<Collection<String>> highlightTextArea(Pattern parsingRegex, String text) {
+        var matcher = parsingRegex.matcher(text);
+        int lastMatchEnd = 0;
+        StyleSpansBuilder<Collection<String>> groupSpansBuilder = new StyleSpansBuilder<>();
+        StyleSpansBuilder<Collection<String>> logsSpansBuilder = new StyleSpansBuilder<>();
+        logsSpansBuilder.add(Collections.emptyList(), 0);
+        while (matcher.find()) {
+            logsSpansBuilder.add(Collections.emptyList(), matcher.start() - lastMatchEnd);
+            logsSpansBuilder.add(List.of("complete-log"), matcher.end() - matcher.start());
+            groupSpansBuilder.add(Collections.emptyList(), matcher.start() - lastMatchEnd);
+            SortedMap<Integer, NamedCaptureGroup> ordered = new TreeMap<>();
+            for (Map.Entry<NamedCaptureGroup, String> entry : profileComboBox.getValue().getCaptureGroups().entrySet()) {
+                var captureGroup = entry.getKey();
+                var idx = getCaptureGroupPaletteIndex(captureGroup);
+                var parsed = matcher.group(captureGroup.name());
+                if (parsed != null && !parsed.isBlank()) {
+                    ordered.put(matcher.start(captureGroup.name()), captureGroup);
+                }
+            }
+            var cursor = matcher.start();
+            for (var entry : ordered.entrySet()) {
+                var groupPos = entry.getKey();
+                var groupName = entry.getValue();
+                var spanLen = groupPos - cursor;
+                if (spanLen > 0) {
+                    groupSpansBuilder.add(Collections.emptyList(), spanLen);
+                    cursor += spanLen;
+                }
+                var paletteIndex = getCaptureGroupPaletteIndex(groupName);
+                var len = matcher.end(groupName.name()) - matcher.start(groupName.name());
+                groupSpansBuilder.add(List.of("capture-group", "capture-group-" + paletteIndex), len);
+                cursor += len;
+            }
+            groupSpansBuilder.add(Collections.emptyList(), matcher.end() - cursor);
+            lastMatchEnd = matcher.end();
+        }
+        groupSpansBuilder.add(Collections.emptyList(), text.length() - lastMatchEnd);
+        return groupSpansBuilder.create().overlay(logsSpansBuilder.create(), (strings, strings2) -> Stream.concat(strings.stream(),
+                strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new)));
     }
 
     private void clearNotification() {
@@ -215,16 +271,18 @@ public class ParsingProfilesController {
     }
 
     public void handleOnClearTestArea(ActionEvent actionEvent) {
-
+        testArea.clear();
     }
 
 
     public void handleOnCopyTestArea(ActionEvent actionEvent) {
-
+        testArea.selectAll();
+        testArea.copy();
     }
 
     public void handleOnPasteToTestArea(ActionEvent actionEvent) {
-
+        testArea.selectAll();
+        testArea.paste();
     }
 
     @FXML
@@ -326,16 +384,27 @@ public class ParsingProfilesController {
             }
         });
 
+        testArea.textProperty().addListener((obs, oldText, newText) -> {
+            resetTest();
+        });
         lineTemplateExpression.textProperty().addListener((obs, oldText, newText) -> {
+            resetTest();
             lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(newText));
         });
 
         this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
     }
 
+    private void resetTest() {
+        clearNotification();
+        var spans = new StyleSpansBuilder<Collection<String>>();
+        spans.add(Collections.emptyList(), testArea.getText().length());
+        testArea.setStyleSpans(0, spans.create());
+    }
+
     private void loadParserParameters(ParsingProfile profile) {
         try {
-            clearNotification();
+            resetTest();
             this.captureGroupTable.getItems().clear();
             profile.getCaptureGroups().forEach((k, v) -> {
                 this.captureGroupTable.getItems().add(new NameExpressionPair(k, v));
@@ -392,7 +461,7 @@ public class ParsingProfilesController {
     }
 
     public StyleSpans<Collection<String>> computeParsingProfileSyntaxHighlighting(String text) {
-        Matcher matcher = Pattern.compile("\\$[A-Z]{2,}").matcher(text);
+        Matcher matcher = GROUP_TAG_PATTERN.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
         while (matcher.find()) {

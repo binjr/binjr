@@ -20,12 +20,15 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.sources.logs.parser.capture.NamedCaptureGroup;
 import eu.binjr.sources.logs.parser.capture.TemporalCaptureGroup;
 import eu.binjr.sources.logs.parser.profile.ParsingProfile;
+import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EventParser {
@@ -77,6 +80,8 @@ public class EventParser {
         }
         return Optional.empty();
     }
+
+
 
     public static class ParsedEvent {
         private final ZonedDateTime timestamp;

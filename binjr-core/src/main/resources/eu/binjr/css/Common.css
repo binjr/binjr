@@ -211,6 +211,10 @@
     -fx-background-color: #0000FF30;
 }
 
+.styled-text-area .complete-log {
+    -rtfx-background-color: #80808030;
+}
+
 .styled-text-area .capture-group {
     -fx-font-weight: bold;
     /*-rtfx-background-color: GRAY;*/
