@@ -52,6 +52,7 @@ ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "15.0.1"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replace(".", "-")}-jmods-${OS_FAMILY}"
+ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
 
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
@@ -374,17 +375,18 @@ markdownToHtml {
     }
 }
 
-task downloadopenJfxJmods(type: Download) {
+task downloadOpenJfxModules(type: Download) {
+    onlyIfModified true
     src OPENJFX_JMODS_DOWNLOAD_URL
-    dest new File("${buildDir}/tmp", 'openjfx-jmods.zip')
+    dest new File(DL_CACHE_PATH, 'openjfx-jmods.zip')
 }
 
-task downloadAndUnzipFile(dependsOn: downloadopenJfxJmods, type: Copy) {
-    from zipTree(downloadopenJfxJmods.dest)
+task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
+    from zipTree(downloadOpenJfxModules.dest)
     into buildDir
 }
 
-task createRuntimeImage(type: Exec, dependsOn: [downloadAndUnzipFile]) {
+task createRuntimeImage(type: Exec, dependsOn: [unzipOpenJfxModules]) {
     workingDir project.projectDir
     commandLine = [
             "${JDK_HOME}/bin/jlink",
