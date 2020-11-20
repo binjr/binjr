@@ -65,6 +65,20 @@ public interface DataAdapter<T> extends AutoCloseable {
                                                              boolean bypassCache) throws DataAdapterException;
 
     /**
+     * Returns a {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with so that it is
+     * set to a relevant period with regard to the chosen data sources.
+     *
+     * @param path       the path of the data in the source
+     * @param seriesInfo the series to get data from.
+     * @return the {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with
+     * @throws DataAdapterException if an error occurs.
+     */
+    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<T>> seriesInfo) throws DataAdapterException {
+        var end = ZonedDateTime.now(getTimeZoneId());
+        return TimeRange.of(end.minusHours(24), end);
+    }
+
+    /**
      * Gets the encoding used to decode textual data sent by the source.
      *
      * @return the encoding used to decode textual data sent by the source.
@@ -131,6 +145,7 @@ public interface DataAdapter<T> extends AutoCloseable {
      */
     boolean isClosed();
 
+
     default DataAdapterInfo getAdapterInfo() {
         try {
             return DataAdapterFactory.getInstance().getDataAdapterInfo(this.getClass().getName());
@@ -148,20 +163,6 @@ public interface DataAdapter<T> extends AutoCloseable {
      */
     default boolean isSortingRequired() {
         return false;
-    }
-
-    /**
-     * Returns a {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with so that it is
-     * set to a relevant period with regard to the chosen data sources.
-     *
-     * @param path       the path of the data in the source
-     * @param seriesInfo the series to get data from.
-     * @return the {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with
-     * @throws DataAdapterException if an error occurs.
-     */
-    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<T>> seriesInfo) throws DataAdapterException {
-        var end = ZonedDateTime.now(getTimeZoneId());
-        return TimeRange.of(end.minusHours(24), end);
     }
 
     @Override

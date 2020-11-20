@@ -18,6 +18,8 @@ package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializer;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -26,23 +28,26 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.text.BinaryPrefixFormatter;
-import eu.binjr.core.data.adapters.BaseDataAdapter;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
+import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.indexes.parser.EventParser;
+import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
+import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.value.ChangeListener;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.BufferedReader;
@@ -61,23 +66,36 @@ import java.util.stream.Collectors;
  *
  * @author Frederic Thevenet
  */
-public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
-    private static final Logger logger = Logger.create(LogsDataAdapter.class);
-    private static final Gson gson = new Gson();
-
+public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
     public static final String LOG_FILE_INDEX = "logFileIndex";
+    private static final Logger logger = Logger.create(LogsDataAdapter.class);
+    private static final Gson gson;
+
+    static {
+        GsonBuilder builder = new GsonBuilder();
+        builder.registerTypeAdapter(NamedCaptureGroup.class, (JsonDeserializer<Object>) (json, typeOfT, context) -> {
+            var groupName = json.getAsString();
+            return Arrays.stream(TemporalCaptureGroup.values())
+                    .filter(t -> t.name().equals(groupName))
+                    .map(t -> (NamedCaptureGroup) t)
+                    .findAny()
+                    .orElse(CaptureGroup.of(groupName));
+        });
+        gson = builder.create();
+    }
+
     protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
-    private Searchable index;
-    protected Path rootPath;
-    private FileSystemBrowser fileBrowser;
-    private String[] folderFilters;
-    private String[] fileExtensionsFilters;
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
     private final MostRecentlyUsedList<String> userParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
+    protected Path rootPath;
+    private Searchable index;
+    private FileSystemBrowser fileBrowser;
+    private String[] folderFilters;
+    private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
     private EventParser parser;
 
@@ -123,7 +141,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         initParams(Paths.get(validateParameterNullity(params, "rootPath")),
                 gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
                 gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class),
-                gson.fromJson(validateParameterNullity(params, "parsingProfile"), ParsingProfile.class));
+                gson.fromJson(validateParameterNullity(params, "parsingProfile"), CustomParsingProfile.class));
     }
 
     private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile parsingProfile) throws DataAdapterException {
@@ -215,10 +233,22 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         return parent;
     }
 
+    @Deprecated
+    @Override
+    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<SearchHit>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+        return fetchData(path, begin, end, seriesInfo, bypassCache, null);
+    }
+
+    @Deprecated
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
+        return getInitialTimeRange(path, seriesInfo, null);
+    }
+
+    @Override
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo, DoubleProperty progress) throws DataAdapterException {
         try {
-            ensureIndexed(seriesInfo);
+            ensureIndexed(seriesInfo, progress);
             return index.getTimeRangeBoundaries(
                     seriesInfo.stream()
                             .map(i -> i.getBinding().getPath())
@@ -228,15 +258,41 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
         }
     }
 
-    private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo) throws IOException {
-        var toDo = seriesInfo.stream()
+
+    private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo, DoubleProperty progress) throws IOException {
+        final var toDo = seriesInfo.stream()
                 .map(s -> s.getBinding().getPath())
                 .filter(p -> !indexedFiles.contains(p))
                 .collect(Collectors.toList());
-        for (int i = 0; i < toDo.size(); i++) {
-            String path = toDo.get(i);
-            index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), getLogParser());
-            indexedFiles.add(path);
+        if (toDo.size() > 0) {
+
+            final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.contains(getId() + "/" + path.toString()))
+                    .stream()
+                    .mapToLong(FileSystemBrowser.FileSystemEntry::getSize)
+                    .reduce(Long::sum).orElse(0));
+            final ChangeListener<Number> progressListener = (observable, oldValue, newValue) -> {
+                if (newValue != null && totalSizeInBytes > 0) {
+                    var oldProgress = (oldValue.longValue() * 100 / totalSizeInBytes) / 100.0;
+                    var newProgress = (newValue.longValue() * 100 / totalSizeInBytes) / 100.0;
+                    if (progress != null && oldProgress != newProgress) {
+                        Dialogs.runOnFXThread(() -> progress.setValue(newProgress));
+                    }
+                }
+            };
+            ((LogFileIndex) index).kilobytesReadProperty().addListener(progressListener);
+            try {
+                for (int i = 0; i < toDo.size(); i++) {
+                    String path = toDo.get(i);
+                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), getLogParser());
+                    indexedFiles.add(path);
+                }
+            } finally {
+                //remove listener
+                ((LogFileIndex) index).kilobytesReadProperty().removeListener(progressListener);
+                if (progress != null) {
+                    Dialogs.runOnFXThread(() -> progress.setValue(-1));
+                }
+            }
         }
     }
 
@@ -245,10 +301,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
                                                                                     Instant start,
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                    boolean bypassCache) throws DataAdapterException {
+                                                                                    boolean bypassCache,
+                                                                                    DoubleProperty progress) throws DataAdapterException {
         Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
         try {
-            ensureIndexed(seriesInfo);
+            ensureIndexed(seriesInfo, progress);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }
@@ -293,6 +350,5 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> {
     public EventParser getLogParser() {
         return parser;
     }
-
 
 }

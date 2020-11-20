@@ -40,18 +40,15 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
-import eu.binjr.core.data.adapters.DataAdapter;
-import eu.binjr.core.data.adapters.LogFilesBinding;
-import eu.binjr.core.data.adapters.LogQueryParameters;
-import eu.binjr.core.data.adapters.SourceBinding;
+import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.SearchHitsProcessor;
 import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.timeseries.FacetEntry;
-import eu.binjr.core.data.indexes.SearchHitsProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.LogWorksheet;
 import eu.binjr.core.data.workspace.Syncable;
@@ -85,7 +82,6 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
@@ -156,7 +152,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private Button querySyntaxButton;
     @FXML
-    private MaskerPane busyIndicator;
+    private VBox busyIndicator;
+    @FXML
+    private ProgressBar progressIndicator;
+    @FXML
+    private Label progressStatus;
     @FXML
     private FacetPillsContainer severityListView;
     @FXML
@@ -363,6 +363,18 @@ public class LogWorksheetController extends WorksheetController implements Synca
         textOutput.setOnDragExited(getBindingManager().registerHandler(event -> {
             textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;");
         }));
+
+        bindingManager.bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
+            if (progressIndicator.getProgress() < 0) {
+                return "";
+            } else {
+                return String.format("%.0f%%", progressIndicator.getProgress() * 100);
+            }
+
+        }, progressIndicator.progressProperty()));
+//        worksheet.getSeriesInfo().stream()
+//                .map(t -> t.getBinding().getAdapter()).findAny().ifPresent(a ->
+        bindingManager.bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
         refresh();
         super.initialize(location, resources);
@@ -620,7 +632,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public void close() {
         if (closed.compareAndSet(false, true)) {
             timeRangePicker.dispose();
-
             bindingManager.close();
         }
     }
@@ -814,16 +825,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            // Define the transforms to apply
-            var adapter = (DataAdapter<SearchHit>) byAdapterEntry.getKey();
-            // Group all queries with the same adapter and path
-            var bindingsByPath =
-                    byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-            var data = adapter.fetchData(queryArgs, start, end,
-                    bindingsByPath.values().stream()
-                            .flatMap(Collection::stream)
-                            .filter(TimeSeriesInfo::isSelected)
-                            .collect(Collectors.toList()), true);
+            if ( byAdapterEntry.getKey() instanceof ProgressAdapter) {
+                var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
+                // Group all queries with the same adapter and path
+                var bindingsByPath =
+                        byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+                var data = adapter.fetchData(queryArgs, start, end,
+                        bindingsByPath.values().stream()
+                                .flatMap(Collection::stream)
+                                .filter(TimeSeriesInfo::isSelected)
+                                .collect(Collectors.toList()), true, worksheet.progressProperty());
+            }
         }
         Map<String, Collection<String>> facets = new HashMap<>();
         facets.put(LogFileIndex.PATH, worksheet.getSeriesInfo()

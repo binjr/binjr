@@ -26,18 +26,18 @@ import java.util.zip.ZipFile;
 
 public abstract class FileSystemBrowser implements Closeable {
     private static Logger logger = Logger.create(FileSystemBrowser.class);
-    private final Path cvdiagPath;
+    private final Path filePath;
 
-    public static FileSystemBrowser of(Path cvdiagPath) throws IOException {
-        if (Files.isDirectory(cvdiagPath)) {
-            return new FolderBrowser(cvdiagPath);
+    public static FileSystemBrowser of(Path filePath) throws IOException {
+        if (Files.isDirectory(filePath)) {
+            return new FolderBrowser(filePath);
         } else {
-            return new ZipBrowser(cvdiagPath);
+            return new ZipBrowser(filePath);
         }
     }
 
-    protected FileSystemBrowser(Path cvdiagPath) throws IOException {
-        this.cvdiagPath = cvdiagPath;
+    protected FileSystemBrowser(Path filePath) throws IOException {
+        this.filePath = filePath;
     }
 
     public InputStream getData(String path) throws IOException {
@@ -52,14 +52,14 @@ public abstract class FileSystemBrowser implements Closeable {
     public abstract Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException;
 
     public Path getPath() {
-        return cvdiagPath;
+        return filePath;
     }
 
     public abstract Path toPath(String path);
 
     private static class FolderBrowser extends FileSystemBrowser {
-        public FolderBrowser(Path cvdiagPath) throws IOException {
-            super(cvdiagPath);
+        public FolderBrowser(Path filePath) throws IOException {
+            super(filePath);
         }
 
         @Override
@@ -102,10 +102,10 @@ public abstract class FileSystemBrowser implements Closeable {
         private final ZipFile zipFile;
         private final Path zipRootPath;
 
-        public ZipBrowser(Path cvdiagPath) throws IOException {
-            super(cvdiagPath);
-            this.zipFile = new ZipFile(cvdiagPath.toFile());
-            this.zipRootPath = FileSystems.newFileSystem(cvdiagPath, (ClassLoader) null).getRootDirectories().iterator().next();
+        public ZipBrowser(Path filePath) throws IOException {
+            super(filePath);
+            this.zipFile = new ZipFile(filePath.toFile());
+            this.zipRootPath = FileSystems.newFileSystem(filePath, (ClassLoader) null).getRootDirectories().iterator().next();
         }
 
         @Override

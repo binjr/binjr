@@ -22,7 +22,6 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.MaskerPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" styleClass="skinnable-pane-border"
@@ -346,6 +345,31 @@
             </SplitPane>
         </AnchorPane>
     </VBox>
-    <MaskerPane fx:id="busyIndicator" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+    <VBox fx:id="busyIndicator" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
+          maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
+          styleClass="busy-indicator"
+          fillWidth="false"
+          spacing="5.0"
+          AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <children>
+            <VBox alignment="CENTER" styleClass="title-frame">
+                <padding>
+                    <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                </padding>
+                <children>
+                    <Label text="Please Wait...">
+                        <padding>
+                            <Insets bottom="10.0" left="10.0" right="10.0" top="0.0"/>
+                        </padding>
+                        <font>
+                            <Font name="System Bold" size="12.0"/>
+                        </font>
+                    </Label>
+                    <ProgressBar fx:id="progressIndicator" prefWidth="200.0"/>
+                    <Label fx:id="progressStatus" text=""/>
+                </children>
+            </VBox>
+        </children>
+    </VBox>
 </AnchorPane>

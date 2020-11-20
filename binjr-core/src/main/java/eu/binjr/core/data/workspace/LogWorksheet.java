@@ -22,6 +22,7 @@ import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
 import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.adapters.LogQueryParameters;
+import eu.binjr.core.data.adapters.ProgressAdapter;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -53,6 +54,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
     @IsDirtyable
     private final DoubleProperty dividerPosition;
+
+    private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
 
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
@@ -216,17 +219,19 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         var bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            var adapter = byAdapterEntry.getKey();
-            // Group all queries with the same adapter
-            var bindingsByPath =
-                    byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
-                var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue());
+            if ( byAdapterEntry.getKey() instanceof ProgressAdapter) {
+                var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
+                // Group all queries with the same adapter
+                var bindingsByPath =
+                        byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+                var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();
                 }
                 if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
                     beginning = timeRange.getBeginning();
                 }
+            }
         }
         return TimeRange.of(
                 beginning == null ? ZonedDateTime.now().minusHours(24) : beginning,
@@ -235,5 +240,13 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     public NavigationHistory<LogQueryParameters> getHistory() {
         return history;
+    }
+
+    public double getProgress() {
+        return progress.get();
+    }
+
+    public DoubleProperty progressProperty() {
+        return progress;
     }
 }

@@ -29,6 +29,8 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.property.ReadOnlyLongProperty;
+import javafx.beans.property.ReadOnlyLongWrapper;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -85,6 +87,8 @@ public class LogFileIndex implements Searchable {
     private TaxonomyReader taxonomyReader;
     private DirectoryReader indexReader;
     private IndexSearcher searcher;
+
+    private final ReadOnlyLongWrapper kilobytesRead = new ReadOnlyLongWrapper(0);
 
     public LogFileIndex() throws IOException {
 
@@ -148,6 +152,7 @@ public class LogFileIndex implements Searchable {
 
     @Override
     public void add(String path, InputStream ias, boolean commit, EventParser parser) throws IOException {
+        kilobytesRead.set(0);
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             var n = new AtomicLong(0);
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
@@ -192,7 +197,13 @@ public class LogFileIndex implements Searchable {
                 var aggregator = parser.aggregator();
                 try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                     String line;
+                    int charRead = 0;
                     while (!taskAborted.get() && (line = reader.readLine()) != null) {
+                        charRead += line.length();
+                        if (charRead >= 10240) {
+                            kilobytesRead.set(kilobytesRead.get() + charRead );
+                            charRead = 0;
+                        }
                         aggregator.yield(n.incrementAndGet(), line).ifPresent(CheckedLambdas.wrap(queue::put));
                     }
                 } catch (InterruptedException e) {
@@ -369,6 +380,14 @@ public class LogFileIndex implements Searchable {
         doc.add(new FacetField(SEVERITY, severity));
         doc.add(new StoredField(SEVERITY, severity));
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
+    }
+
+    public long getKilobytesRead() {
+        return kilobytesRead.get();
+    }
+
+    public ReadOnlyLongProperty kilobytesReadProperty() {
+        return kilobytesRead.getReadOnlyProperty();
     }
 
     private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files, ZoneId zoneId) throws IOException {

@@ -1709,3 +1709,33 @@
     -fx-text-fill: white;
     -fx-background-color: DARKRED;
 }
+
+.busy-indicator {
+    -fx-background-color: rgba(255, 255, 255, .6);
+}
+
+.busy-indicator .title-frame {
+    -fx-background-radius: 8;
+    -fx-background-color:  rgba(255, 255, 255, .8);
+}
+
+.progress-bar {
+    -fx-indeterminate-bar-length: 60;
+    -fx-indeterminate-bar-escape: true;
+    -fx-indeterminate-bar-flip: false;
+    -fx-indeterminate-bar-animation-time: 2;
+}
+.progress-bar > .bar {
+    -fx-background-color: -binjr-dark-blue-color;
+    -fx-background-insets: 2 2 2 2;
+    -fx-background-radius: 0;
+    -fx-padding: 0.75em;
+}
+.progress-bar:indeterminate > .bar {
+    -fx-background-color: linear-gradient(to left, transparent, -binjr-dark-blue-color);
+}
+.progress-bar > .track {
+    -fx-background-color:  white, -binjr-color-gray, white, white;
+    -fx-background-insets: 0, 0 0 0 0, 1 1 1 1;
+    -fx-background-radius: 0, 0, 0;
+}

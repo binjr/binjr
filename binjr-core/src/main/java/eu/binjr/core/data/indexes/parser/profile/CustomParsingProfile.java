@@ -26,6 +26,10 @@ public class CustomParsingProfile implements ParsingProfile {
     private String lineTemplateExpression;
     private String profileName;
 
+    public CustomParsingProfile(){
+
+    }
+
     public CustomParsingProfile(String profileName,
                                 Map<NamedCaptureGroup, String> captureGroups,
                                 String lineTemplateExpression) {
