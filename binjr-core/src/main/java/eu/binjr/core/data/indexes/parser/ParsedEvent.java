@@ -24,16 +24,16 @@ public class ParsedEvent {
     private final ZonedDateTime timestamp;
     private final long lineNumber;
     private final Map<String, String> sections;
-    private String text;
+    private final String text;
 
-    public ParsedEvent(long lineNumber, ZonedDateTime timestamp, String text, Map<String, String> sections) {
-        this.lineNumber = lineNumber;
+    public ParsedEvent(long sequence, ZonedDateTime timestamp, String text, Map<String, String> sections) {
+        this.lineNumber = sequence;
         this.text = text;
         this.timestamp = timestamp;
         this.sections = sections;
     }
 
-    public long getLineNumber() {
+    public long getSequence() {
         return lineNumber;
     }
 
@@ -59,31 +59,5 @@ public class ParsedEvent {
         return sb.toString();
     }
 
-    public static class LogEventBuilder {
-        private final EventParser parser;
-        private ParsedEvent previous = null;
-        private long lineNumber;
-        private ZonedDateTime timestamp;
-        private StringBuilder textBuilder = new StringBuilder();
 
-        public LogEventBuilder(EventParser parser) {
-            this.parser = parser;
-        }
-
-        public Optional<ParsedEvent> build(long lineNumber, String text) {
-             var res = parser.parse(lineNumber, text);
-             if (res.isPresent()) {
-                 previous = res.get();
-             }else {
-                 if (previous != null) {
-                     previous.text += "\n" + text;
-                 }
-             }
-             return res;
-        }
-
-        public Optional<ParsedEvent> getLast() {
-            return previous != null ? Optional.of(previous) : Optional.empty();
-        }
-    }
 }

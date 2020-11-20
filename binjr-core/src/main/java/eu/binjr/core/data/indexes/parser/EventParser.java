@@ -21,7 +21,6 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
-
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -49,19 +48,7 @@ public class EventParser {
 
     }
 
-    public ParsingProfile getProfile() {
-        return profile;
-    }
-
-    public Pattern getParsingRegex() {
-        return parsingRegex;
-    }
-
-    public Optional<ParsedEvent> parse(String text) {
-        return parse(0, text);
-    }
-
-    public Optional<ParsedEvent> parse(long number, String text) {
+    private ParsedEvent doParse(long lineNumber, String text) {
         var m = parsingRegex.matcher(text);
         var timestamp = ZonedDateTime.ofInstant(Instant.EPOCH, zoneId);
         final Map<String, String> sections = new HashMap<>();
@@ -77,9 +64,59 @@ public class EventParser {
                     }
                 }
             }
-            return Optional.of(new ParsedEvent(number, timestamp, text, sections));
+            return new ParsedEvent(lineNumber, timestamp, text, sections);
         }
-        return Optional.empty();
+        return null;
     }
+
+    public ParsingProfile getProfile() {
+        return profile;
+    }
+
+    public Pattern getParsingRegex() {
+        return parsingRegex;
+    }
+
+    public EventAggregator aggregator() {
+        return new EventAggregator();
+    }
+    public Optional<ParsedEvent> parse(long sequence, String text) {
+        return Optional.ofNullable(doParse(sequence, text));
+    }
+
+    public Optional<ParsedEvent> parse(String text) {
+        return Optional.ofNullable(doParse(-1, text));
+    }
+
+    public class EventAggregator {
+        private ParsedEvent buffered;
+
+        private EventAggregator() {
+        }
+
+        public Optional<ParsedEvent> yield(long sequence, String text) {
+            var parsed = doParse(sequence, text);
+            if (parsed != null) {
+                var yield = buffered;
+                buffered = parsed;
+                return Optional.ofNullable(yield);
+            } else {
+                if (buffered != null) {
+                    buffered = new ParsedEvent(
+                            buffered.getSequence(),
+                            buffered.getTimestamp(),
+                            buffered.getText() + "\n" + text,
+                            buffered.getSections());
+                }
+                return Optional.empty();
+            }
+        }
+
+        public Optional<ParsedEvent> tail() {
+            return buffered != null ? Optional.of(buffered) : Optional.empty();
+        }
+    }
+
+
 
 }

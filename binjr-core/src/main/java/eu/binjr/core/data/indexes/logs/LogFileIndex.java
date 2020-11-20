@@ -149,8 +149,7 @@ public class LogFileIndex implements Searchable {
     @Override
     public void add(String path, InputStream ias, boolean commit, EventParser parser) throws IOException {
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
-            var n = new AtomicInteger(0);
-            var builder = new ParsedEvent.LogEventBuilder(parser);
+            var n = new AtomicLong(0);
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
                 final AtomicLong nbLogEvents = new AtomicLong(0);
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
@@ -190,15 +189,14 @@ public class LogFileIndex implements Searchable {
                         return nbEventProcessed;
                     }));
                 }
+                var aggregator = parser.aggregator();
                 try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                     String line;
                     while (!taskAborted.get() && (line = reader.readLine()) != null) {
-                        var optLog = builder.build(n.incrementAndGet(), line);
-                        if (optLog.isPresent()) {
-                            queue.put(optLog.get());
-                        }
+                        aggregator.yield(n.incrementAndGet(), line).ifPresent(CheckedLambdas.wrap(queue::put));
                     }
                 } catch (InterruptedException e) {
+                    logger.error("Put to queue interrupted", e);
                     Thread.currentThread().interrupt();
                 }
                 while (!taskAborted.get() && queue.size() > 0) {
@@ -221,9 +219,9 @@ public class LogFileIndex implements Searchable {
                         throw new IOException("Error parsing logEvent", e);
                     }
                 }
-                // Don't forget the last log line buffered in the builder
-                builder.getLast().ifPresent(CheckedLambdas.wrap(line -> {
-              //      addLogEvent(path, line);
+                // Don't forget the last log line buffered in the aggregator
+                aggregator.tail().ifPresent(CheckedLambdas.wrap(event -> {
+                    addLogEvent(path, event);
                 }));
             }
             if (commit) {
@@ -360,7 +358,7 @@ public class LogFileIndex implements Searchable {
     private void addLogEvent(String path, ParsedEvent event) throws IOException {
         Document doc = new Document();
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
-        doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getLineNumber()));
+        doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getSequence()));
         var millis = event.getTimestamp().toInstant().toEpochMilli();
         doc.add(new LongPoint(TIMESTAMP, millis));
         doc.add(new SortedNumericDocValuesField(TIMESTAMP, millis));
