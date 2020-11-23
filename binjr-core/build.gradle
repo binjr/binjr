@@ -31,7 +31,6 @@ dependencies {
     implementation 'org.apache.lucene:lucene-core:8.7.0'
     implementation 'org.apache.lucene:lucene-facet:8.7.0'
     implementation 'org.apache.lucene:lucene-queryparser:8.7.0'
-    api 'com.axibase:date-processor:1.1.0'
     // Only to prepare POM for Maven central upload
     api "org.openjfx:javafx-base:$OPENJFX_VERSION"
     api "org.openjfx:javafx-graphics:$OPENJFX_VERSION"
