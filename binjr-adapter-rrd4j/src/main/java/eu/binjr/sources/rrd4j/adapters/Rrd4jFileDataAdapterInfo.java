@@ -43,6 +43,8 @@ public class Rrd4jFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link Rrd4jFileDataAdapterInfo} class.
+     *
+     * @throws CannotInitializeDataAdapterException if an error occurs initializing the adapter.
      */
     public Rrd4jFileDataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(Rrd4jFileDataAdapterInfo.class);

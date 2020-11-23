@@ -45,6 +45,8 @@ public class TextDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link TextDataAdapterInfo} class.
+     *
+     * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
     public TextDataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(TextDataAdapterInfo.class);

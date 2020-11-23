@@ -42,6 +42,7 @@ public class CsvFileDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link CsvFileDataAdapterInfo} class.
+     * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
     public CsvFileDataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(CsvFileDataAdapterInfo.class);

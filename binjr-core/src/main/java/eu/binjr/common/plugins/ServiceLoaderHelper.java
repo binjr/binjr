@@ -36,11 +36,15 @@ public final class ServiceLoaderHelper {
     /**
      * A helper method to load and return service implementations from the classpath and external jars
      *
-     * @param clazz the type of service to load and return
-     * @param <T>   the type of service to load and return
-     * @return A {@link Set} of loaded service implementations
+     * @param clazz
+     * @param <T>
      */
-    public static <T> void loadFromClasspath(Class<T> clazz,  Set<T> loadedServices) {
+    /**
+     * @param clazz          the type of service to load and return
+     * @param loadedServices a set of services to witch the loaded services should be added.
+     * @param <T>            the type of service to load and return
+     */
+    public static <T> void loadFromClasspath(Class<T> clazz, Set<T> loadedServices) {
         // Load plugins from classpath
         loadFromServiceLoader(ServiceLoader.load(clazz), loadedServices);
     }
@@ -49,6 +53,7 @@ public final class ServiceLoaderHelper {
      * A helper method to load and return service implementations from the classpath and/or external jars
      *
      * @param clazz             the type of service to load and return
+     * @param loadedServices    a set of services to witch the loaded services should be added.
      * @param externalLocations file system paths specifying where to look for external jar to load services from
      * @param <T>               the type of service to load and return
      * @return the class loader used to load jars from the external paths
@@ -61,6 +66,7 @@ public final class ServiceLoaderHelper {
      * A helper method to load and return service implementations from the classpath and/or external jars
      *
      * @param clazz             the type of service to load and return
+     * @param loadedServices    a set of services to witch the loaded services should be added.
      * @param externalLocations file system paths specifying where to look for external jar to load services from
      * @param <T>               the type of service to load and return
      * @return the class loader used to load jars from the external paths

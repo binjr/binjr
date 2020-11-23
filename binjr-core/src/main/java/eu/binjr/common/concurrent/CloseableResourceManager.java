@@ -122,7 +122,6 @@ public class CloseableResourceManager<T extends Closeable> {
      * @param key      the key to identify the resource to register.
      * @param resource the resource to register
      * @return Reference count
-     * @throws IndexOutOfBoundsException
      */
     public int register(String key, T resource) {
         return managerLock.write().lock(() -> {

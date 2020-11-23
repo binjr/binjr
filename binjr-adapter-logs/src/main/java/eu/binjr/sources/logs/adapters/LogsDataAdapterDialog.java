@@ -61,6 +61,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     /**
      * Initializes a new instance of the {@link LogsDataAdapterDialog} class.
      *
+     * @throws NoAdapterFoundException if an error occurs initializing the dialog.
      * @param owner the owner window for the dialog
      */
     public LogsDataAdapterDialog(Node owner) throws NoAdapterFoundException {

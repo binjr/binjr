@@ -111,7 +111,9 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class from the provided {@link Path}
      *
-     * @param rootPath the {@link Path} from which to load content.
+     * @param rootPath              the {@link Path} from which to load content.
+     * @param folderFilters        a list of names of folders to inspect for content.
+     * @param fileExtensionsFilters a list of file extensions to inspect for content.
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
     public LogsDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {

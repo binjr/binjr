@@ -45,6 +45,8 @@ public class LogsDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link LogsDataAdapterInfo} class.
+     *
+     * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
     public LogsDataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(LogsDataAdapterInfo.class);

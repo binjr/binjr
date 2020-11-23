@@ -50,6 +50,9 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
     /**
      * Initializes a new instance of the DataAdapterInfo class.
      *
+     * @param infoClass the {@link Class} onto which annotations should be read.
+     * @param <T>       the type for the implementation of {@link DataAdapterInfo}
+     * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
     protected <T extends BaseDataAdapterInfo> BaseDataAdapterInfo(Class<T> infoClass) throws CannotInitializeDataAdapterException {
         if (!infoClass.isAnnotationPresent(AdapterMetadata.class)) {

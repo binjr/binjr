@@ -42,6 +42,8 @@ public class JrdsDataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link JrdsDataAdapterInfo} class.
+     *
+     * @throws CannotInitializeDataAdapterException if the adapter's initialization failed
      */
     public JrdsDataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(JrdsDataAdapterInfo.class);

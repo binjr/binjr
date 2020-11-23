@@ -61,6 +61,7 @@ public class TextDataAdapterDialog extends DataAdapterDialog<Path> {
      * Initializes a new instance of the {@link TextDataAdapterDialog} class.
      *
      * @param owner the owner window for the dialog
+     * @throws NoAdapterFoundException if no adapter could be found to get preferences for.
      */
     public TextDataAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentTextArchives", false);

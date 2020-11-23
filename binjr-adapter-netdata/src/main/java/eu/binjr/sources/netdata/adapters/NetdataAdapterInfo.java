@@ -20,6 +20,7 @@ import eu.binjr.core.data.adapters.AdapterMetadata;
 import eu.binjr.core.data.adapters.BaseDataAdapterInfo;
 import eu.binjr.core.data.adapters.SourceLocality;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
+import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.preferences.AppEnvironment;
 
 /**
@@ -28,21 +29,23 @@ import eu.binjr.core.preferences.AppEnvironment;
  * @author Frederic Thevenet
  */
 @AdapterMetadata(
-       name = "Netdata",
-       description = "Netdata Adapter",
-       copyright = AppEnvironment.COPYRIGHT_NOTICE,
-       license = AppEnvironment.LICENSE,
-       siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
-       adapterClass = NetdataAdapter.class,
-       dialogClass = NetdataAdapterDialog.class,
-       preferencesClass = NetdataAdapterPreferences.class,
-       sourceLocality = SourceLocality.REMOTE,
-       apiLevel = AppEnvironment.PLUGIN_API_LEVEL
+        name = "Netdata",
+        description = "Netdata Adapter",
+        copyright = AppEnvironment.COPYRIGHT_NOTICE,
+        license = AppEnvironment.LICENSE,
+        siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
+        adapterClass = NetdataAdapter.class,
+        dialogClass = NetdataAdapterDialog.class,
+        preferencesClass = NetdataAdapterPreferences.class,
+        sourceLocality = SourceLocality.REMOTE,
+        apiLevel = AppEnvironment.PLUGIN_API_LEVEL
 )
 public class NetdataAdapterInfo extends BaseDataAdapterInfo {
 
     /**
      * Initialises a new instance of the {@link NetdataAdapterInfo} class.
+     *
+     * @throws CannotInitializeDataAdapterException if an error occurs initializing the adapter.
      */
     public NetdataAdapterInfo() throws CannotInitializeDataAdapterException {
         super(NetdataAdapterInfo.class);
