@@ -39,7 +39,6 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -112,16 +111,18 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      * Initializes a new instance of the {@link LogsDataAdapter} class from the provided {@link Path}
      *
      * @param rootPath              the {@link Path} from which to load content.
-     * @param folderFilters        a list of names of folders to inspect for content.
+     * @param folderFilters         a list of names of folders to inspect for content.
      * @param fileExtensionsFilters a list of file extensions to inspect for content.
+     * @param profile               the parsing profile to use.
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
-    public LogsDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters) throws DataAdapterException {
+    public LogsDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile profile) throws DataAdapterException {
         super();
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
 
-        initParams(rootPath, folderFilters, fileExtensionsFilters, CustomParsingProfile.of(BuiltInParsingProfile.BINJR));
+        initParams(rootPath, folderFilters, fileExtensionsFilters, profile);
+        //CustomParsingProfile.of(BuiltInParsingProfile.BINJR));
     }
 
     @Override

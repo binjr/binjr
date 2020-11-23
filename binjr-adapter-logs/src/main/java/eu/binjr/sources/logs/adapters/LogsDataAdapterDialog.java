@@ -24,6 +24,8 @@ import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.fxml.FXMLLoader;
@@ -44,6 +46,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -57,12 +60,13 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     private final TextField extensionFiltersTextField;
     private final LogsAdapterPreferences prefs;
     private static final Gson gson = new Gson();
+    private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapterDialog} class.
      *
-     * @throws NoAdapterFoundException if an error occurs initializing the dialog.
      * @param owner the owner window for the dialog
+     * @throws NoAdapterFoundException if an error occurs initializing the dialog.
      */
     public LogsDataAdapterDialog(Node owner) throws NoAdapterFoundException {
         super(owner, Mode.PATH, "mostRecentLogsArchives", true);
@@ -76,12 +80,18 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var parsingLabel = new Label("Parsing:");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
-        var parsingChoiceBox = new ChoiceBox<String>();
+
+        parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
+
+        parsingChoiceBox.setValue(Arrays.stream(BuiltInParsingProfile.values())
+                .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
+                .findAny().orElse(BuiltInParsingProfile.BINJR));
+
         parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-                Parent root  = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
+                Parent root = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
                 final Scene scene = new Scene(root);
                 var stage = new Stage();
                 stage.setScene(scene);
@@ -92,7 +102,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.showAndWait();
             } catch (Exception e) {
-                Dialogs.notifyException("Failed to show parsing profile windows", e,owner);
+                Dialogs.notifyException("Failed to show parsing profile windows", e, owner);
             }
         });
         parsingHBox.getChildren().addAll(parsingChoiceBox, editParsingButton);
@@ -149,6 +159,12 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         }
         getMostRecentList().push(path);
         prefs.fileExtensionFilters.set(gson.fromJson(extensionFiltersTextField.getText(), String[].class));
-        return List.of(new LogsDataAdapter(path, prefs.folderFilters.get(), prefs.fileExtensionFilters.get()));
+
+        prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
+
+        return List.of(new LogsDataAdapter(path,
+                prefs.folderFilters.get(),
+                prefs.fileExtensionFilters.get(),
+                parsingChoiceBox.getValue()));
     }
 }

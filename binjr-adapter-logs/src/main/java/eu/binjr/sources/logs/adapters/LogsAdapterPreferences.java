@@ -27,6 +27,7 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import javafx.collections.ObservableList;
 
 import java.util.Optional;
 
@@ -50,6 +51,10 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 
+
+    public ObservablePreference<String> mostRecentlyUsedParsingProfile =
+            stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.BINJR.name());
+
     public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
         this.mruFactory = new ParsingRulesMruFactory(UserPreferences.BINJR_GLOBAL + "/adapters/" + LogsAdapterPreferences.class.getName());
@@ -64,6 +69,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
     public MostRecentlyUsedList<ParsingProfile> getUserParsingProfiles() {
         return userParsingProfiles;
     }
+
 
     private static class ParsingRulesMruFactory extends MruFactory {
         public ParsingRulesMruFactory(String backingStoreKey) {
