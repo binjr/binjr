@@ -62,6 +62,16 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Gson gson = new Gson();
     private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
 
+
+    private void updateProfileList(ParsingProfile[] newValue) {
+        parsingChoiceBox.getItems().clear();
+        parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
+        parsingChoiceBox.getItems().addAll(newValue);
+        parsingChoiceBox.setValue(Arrays.stream(BuiltInParsingProfile.values())
+                .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
+                .findAny().orElse(BuiltInParsingProfile.BINJR));
+    }
+
     /**
      * Initializes a new instance of the {@link LogsDataAdapterDialog} class.
      *
@@ -80,13 +90,8 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var parsingLabel = new Label("Parsing:");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
-
-        parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
-
-        parsingChoiceBox.setValue(Arrays.stream(BuiltInParsingProfile.values())
-                .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
-                .findAny().orElse(BuiltInParsingProfile.BINJR));
-
+        updateProfileList(prefs.userParsingProfiles.get());
+        prefs.userParsingProfiles.property().addListener((observable, oldValue, newValue) -> updateProfileList(newValue));
         parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
@@ -159,7 +164,6 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         }
         getMostRecentList().push(path);
         prefs.fileExtensionFilters.set(gson.fromJson(extensionFiltersTextField.getText(), String[].class));
-
         prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
 
         return List.of(new LogsDataAdapter(path,

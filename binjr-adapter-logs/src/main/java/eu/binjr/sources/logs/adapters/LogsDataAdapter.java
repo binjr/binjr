@@ -68,22 +68,9 @@ import java.util.stream.Collectors;
 public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
     public static final String LOG_FILE_INDEX = "logFileIndex";
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
-    private static final Gson gson;
+    private static final Gson gson = new Gson();
 
-    static {
-        GsonBuilder builder = new GsonBuilder();
-        builder.registerTypeAdapter(NamedCaptureGroup.class, (JsonDeserializer<Object>) (json, typeOfT, context) -> {
-            var groupName = json.getAsString();
-            return Arrays.stream(TemporalCaptureGroup.values())
-                    .filter(t -> t.name().equals(groupName))
-                    .map(t -> (NamedCaptureGroup) t)
-                    .findAny()
-                    .orElse(CaptureGroup.of(groupName));
-        });
-        gson = builder.create();
-    }
-
-    protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
+    //protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
@@ -120,9 +107,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         super();
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
-
         initParams(rootPath, folderFilters, fileExtensionsFilters, profile);
-        //CustomParsingProfile.of(BuiltInParsingProfile.BINJR));
     }
 
     @Override

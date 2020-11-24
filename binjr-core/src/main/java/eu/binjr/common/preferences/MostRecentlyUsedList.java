@@ -25,7 +25,7 @@ import java.util.function.Consumer;
 import java.util.prefs.Preferences;
 
 /**
- * Manages access to a persistable, Last In First Out, auto de-duplicating collection, whose main purpose is to
+ * Manages access to a persistent, Last In First Out, auto de-duplicating collection, whose main purpose is to
  * handle "most recently used" item lists in UI applications.
  *
  * @param <T> The type of item to collect

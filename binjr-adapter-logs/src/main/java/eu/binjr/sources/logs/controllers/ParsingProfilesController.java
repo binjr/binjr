@@ -16,13 +16,17 @@
 package eu.binjr.sources.logs.controllers;
 
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.data.indexes.parser.ParsedEvent;
-import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.EventParser;
+import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.sources.logs.adapters.LogsAdapterPreferences;
+import eu.binjr.sources.logs.adapters.LogsDataAdapter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -138,9 +142,7 @@ public class ParsingProfilesController {
         } catch (Throwable e) {
             Dialogs.notifyException("Error cloning profile", e, root);
         }
-
     }
-
 
     @FXML
     private void handleOnAddProfile(ActionEvent actionEvent) {
@@ -151,7 +153,6 @@ public class ParsingProfilesController {
         } catch (Throwable e) {
             Dialogs.notifyException("Error creating profile", e, root);
         }
-
     }
 
     @FXML
@@ -173,7 +174,7 @@ public class ParsingProfilesController {
     void handleOnTestLineTemplate(ActionEvent event) {
         try {
             resetTest();
-            applyChanges();
+            //  applyChanges();
             var parser = new EventParser(this.profileComboBox.getValue(), ZoneId.systemDefault());
             parser.parse(testArea.getText());
             var events = new ArrayList<ParsedEvent>();
@@ -301,6 +302,7 @@ public class ParsingProfilesController {
     @FXML
     private void handleOnOk(ActionEvent actionEvent) {
         applyChanges();
+        prefs.mostRecentlyUsedParsingProfile.set(profileComboBox.getValue().getProfileName());
         Dialogs.getStage(root).close();
     }
 
@@ -319,8 +321,24 @@ public class ParsingProfilesController {
             var editable = (CustomParsingProfile) this.profileComboBox.getValue();
             saveParserParameters(editable);
         }
+        prefs.userParsingProfiles.set(profileComboBox.getItems().stream()
+                .filter(p -> p instanceof CustomParsingProfile)
+                .collect(Collectors.toList())
+                .toArray(ParsingProfile[]::new));
     }
 
+    private final LogsAdapterPreferences prefs;
+
+    public ParsingProfilesController() {
+        LogsAdapterPreferences p;
+        try {
+            p = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
+        } catch (NoAdapterFoundException e) {
+            p = new LogsAdapterPreferences(LogsDataAdapter.class);
+            e.printStackTrace();
+        }
+        this.prefs = p;
+    }
 
     @FXML
     void initialize() {
@@ -340,6 +358,7 @@ public class ParsingProfilesController {
         assert exportProfileButton != null : "fx:id=\"exportProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
 
         this.profileComboBox.getItems().setAll(BuiltInParsingProfile.values());
+        this.profileComboBox.getItems().addAll(prefs.userParsingProfiles.get());
         this.profileComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 loadParserParameters(newValue);
