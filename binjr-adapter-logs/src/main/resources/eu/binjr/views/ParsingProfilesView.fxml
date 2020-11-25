@@ -209,7 +209,6 @@
                     <children>
                         <Button fx:id="okButton" mnemonicParsing="false" onAction="#handleOnOk" prefHeight="25.0" prefWidth="75.0" text="OK" />
                         <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#handleOnCancel" prefHeight="25.0" prefWidth="75.0" text="Cancel" />
-                        <Button fx:id="applyButton" mnemonicParsing="false" onAction="#handleOnApply" prefHeight="25.0" prefWidth="75.0" text="Apply" />
                     </children>
                 </HBox>
             </children>

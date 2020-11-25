@@ -253,7 +253,6 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 .filter(p -> !indexedFiles.contains(p))
                 .collect(Collectors.toList());
         if (toDo.size() > 0) {
-
             final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.contains(getId() + "/" + path.toString()))
                     .stream()
                     .mapToLong(FileSystemBrowser.FileSystemEntry::getSize)

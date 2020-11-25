@@ -22,12 +22,15 @@ import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 public class LogsAdapterPreferences extends DataAdapterPreferences {
     private static final Gson gson = new Gson();
-    //  private final MostRecentlyUsedList<ParsingProfile> userParsingProfiles;
-    //  private final ParsingRulesMruFactory mruFactory;
+
+    public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
+        super(dataAdapterClass);
+    }
 
     public ObservablePreference<Number> defaultTextViewFontSize = integerPreference("defaultTextViewFontSize", 10);
 
@@ -43,56 +46,14 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 
-
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
             stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.BINJR.name());
-
-    public LogsAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
-        super(dataAdapterClass);
-        //  this.mruFactory = new ParsingRulesMruFactory(UserPreferences.BINJR_GLOBAL + "/adapters/" + LogsAdapterPreferences.class.getName());
-        //  this.userParsingProfiles = mruFactory.rulesMostRecentlyUsedList("userParsingProfiles", 100);
-    }
 
     public ObservablePreference<ParsingProfile[]> userParsingProfiles =
             objectPreference(ParsingProfile[].class,
                     "userParsingProfiles",
                     new ParsingProfile[0],
                     s -> gson.toJson(s),
-                    s -> gson.fromJson(s, ParsingProfile[].class)
+                    s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
-
-//    public MostRecentlyUsedList<ParsingProfile> getUserParsingProfiles() {
-//        return userParsingProfiles;
-//    }
-
-//    private static class ParsingRulesMruFactory extends MruFactory {
-//        public ParsingRulesMruFactory(String backingStoreKey) {
-//            super(backingStoreKey);
-//        }
-//
-//        public MostRecentlyUsedList<ParsingProfile> rulesMostRecentlyUsedList(String key, int capacity) {
-//            var mru = new MostRecentlyUsedList<ParsingProfile>(key, capacity, backingStore) {
-//                @Override
-//                protected boolean validate(ParsingProfile value) {
-//                    return (value != null);
-//                }
-//
-//                @Override
-//                protected void saveToBackend(int index, ParsingProfile value) {
-//                    getBackingStore().node(getKey()).put("value_" + index, gson.toJson(value));
-//                }
-//
-//                @Override
-//                protected Optional<ParsingProfile> loadFromBackend(int index) {
-//                    var p = getBackingStore().node(getKey()).get("value_" + index, null);
-//                    if (p != null) {
-//                        return Optional.of(gson.fromJson(p, BuiltInParsingProfile.class));
-//                    }
-//                    return Optional.empty();
-//                }
-//            };
-//            storedItems.put(key, mru);
-//            return mru;
-//        }
-//    }
 }
