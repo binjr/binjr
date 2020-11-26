@@ -344,8 +344,9 @@ public class ParsingProfilesController {
             resetTest();
             colorLineTemplateField(newText);
         });
-        this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.ISO);
-
+        profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
+                .filter(p -> p.getProfileName().equals(userPrefs.mostRecentlyUsedParsingProfile.get()))
+                .findAny().orElse(BuiltInParsingProfile.ISO));
         this.nameColumn.setCellFactory(list -> new ColoredTableCell(new StringConverter<>() {
             @Override
             public String toString(NamedCaptureGroup object) {

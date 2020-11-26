@@ -67,7 +67,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         parsingChoiceBox.getItems().clear();
         parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
         parsingChoiceBox.getItems().addAll(newValue);
-        parsingChoiceBox.setValue(Arrays.stream(BuiltInParsingProfile.values())
+        parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
                 .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
                 .findAny().orElse(BuiltInParsingProfile.ISO));
     }
@@ -96,6 +96,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
+                prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
                 Parent root = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
                 final Scene scene = new Scene(root);
                 var stage = new Stage();
@@ -106,6 +107,9 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                 stage.initOwner(this.getOwner());
                 stage.initModality(Modality.APPLICATION_MODAL);
                 stage.showAndWait();
+                parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
+                        .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
+                        .findAny().orElse(BuiltInParsingProfile.ISO));
             } catch (Exception e) {
                 Dialogs.notifyException("Failed to show parsing profile windows", e, owner);
             }
