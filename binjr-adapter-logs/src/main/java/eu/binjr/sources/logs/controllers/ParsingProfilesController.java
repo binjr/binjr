@@ -16,6 +16,7 @@
 package eu.binjr.sources.logs.controllers;
 
 import com.google.gson.Gson;
+import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -369,6 +370,8 @@ public class ParsingProfilesController {
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setExpression(t.getNewValue())
         );
+
+        TableViewUtils.autoFillTableWidthWithColumn(captureGroupTable, 1);
     }
 
     private void colorLineTemplateField() {

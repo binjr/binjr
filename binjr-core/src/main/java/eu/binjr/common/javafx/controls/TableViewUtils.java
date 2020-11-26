@@ -25,20 +25,29 @@ public final class TableViewUtils {
     private static final double SCROLL_BAR_WIDTH = 20.0;
 
     public static void autoFillTableWidthWithLastColumn(TableView<?> table) {
-        int lastIdx = table.getColumns().size() - 1;
-        if (lastIdx > 0) {
-            ReadOnlyDoubleProperty[] widthProperties = new ReadOnlyDoubleProperty[lastIdx + 1];
-            for (int i = 0; i < lastIdx; i++) {
-                widthProperties[i] = table.getColumns().get(i).widthProperty();
+        autoFillTableWidthWithColumn(table, table.getColumns().size() - 1);
+    }
+
+    public static void autoFillTableWidthWithColumn(TableView<?> table, int columnIdx) {
+        if (columnIdx > 0) {
+            ReadOnlyDoubleProperty[] widthProperties = new ReadOnlyDoubleProperty[table.getColumns().size()];
+            for (int i = 0; i < table.getColumns().size(); i++) {
+                if (i != columnIdx) {
+                    widthProperties[i] = table.getColumns().get(i).widthProperty();
+                }
             }
-            widthProperties[lastIdx] = table.widthProperty();
-            table.getColumns().get(lastIdx).prefWidthProperty().bind(Bindings.createDoubleBinding(() -> {
-                double width = widthProperties[lastIdx].getValue() - SCROLL_BAR_WIDTH;
-                for (int i = 0; i < lastIdx; i++) {
-                    width -= widthProperties[i].getValue();
+
+            widthProperties[columnIdx] = table.widthProperty();
+            table.getColumns().get(columnIdx).prefWidthProperty().bind(Bindings.createDoubleBinding(() -> {
+                double width = widthProperties[columnIdx].getValue() - SCROLL_BAR_WIDTH;
+                for (int i = 0; i < table.getColumns().size(); i++) {
+                    if (i != columnIdx) {
+                        width -= widthProperties[i].getValue();
+                    }
                 }
                 return Math.max(width, 100.0);
             }, widthProperties));
         }
     }
+
 }

@@ -45,17 +45,17 @@
                         </HBox>
                         <TableView fx:id="captureGroupTable" prefHeight="258.0" prefWidth="762.0" styleClass="search-field-outer">
                             <columns>
-                                <TableColumn fx:id="nameColumn" prefWidth="220.0" text="Group Name">
+                                <TableColumn fx:id="nameColumn" prefWidth="220.0" sortable="false"  text="Group Name">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="name" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn fx:id="expressionColumn" minWidth="0.0" prefWidth="550.0" text="Capture Expression">
+                                <TableColumn fx:id="expressionColumn" minWidth="0.0" prefWidth="550.0"  sortable="false" text="Capture Expression">
                                     <cellValueFactory>
                                         <PropertyValueFactory property="expression" />
                                     </cellValueFactory>
                                 </TableColumn>
-                                <TableColumn editable="false" maxWidth="56" minWidth="56" prefWidth="56.0" resizable="false">
+                                <TableColumn editable="false" maxWidth="56" minWidth="56" prefWidth="56.0" sortable="false"  resizable="false">
                                     <graphic>
                                         <HBox>
                                             <Button fx:id="addGroupButton" cache="true" contentDisplay="GRAPHIC_ONLY" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" onAction="#handleOnAddGroup" prefHeight="25.0" prefWidth="25.0" styleClass="dialog-button" text="Add">
