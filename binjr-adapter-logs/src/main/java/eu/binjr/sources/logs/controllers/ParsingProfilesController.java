@@ -99,6 +99,7 @@ public class ParsingProfilesController {
     private Button importProfileButton;
     @FXML
     private Button exportProfileButton;
+    private final AtomicInteger groupSequence = new AtomicInteger(0);
 
     @FXML
     private void handleOnCloneProfile(ActionEvent actionEvent) {
@@ -166,12 +167,15 @@ public class ParsingProfilesController {
 
     @FXML
     private void handleOnAddGroup(ActionEvent actionEvent) {
-
+        this.captureGroupTable.getItems().add(new NameExpressionPair(CaptureGroup.of("GROUP" + groupSequence.incrementAndGet()), ".*"));
     }
 
     @FXML
     private void handleOnDeleteGroup(ActionEvent actionEvent) {
-
+        var idx = this.captureGroupTable.getSelectionModel().getSelectedIndex();
+        if (idx >= 0) {
+            this.captureGroupTable.getItems().remove(idx);
+        }
     }
 
     @FXML
