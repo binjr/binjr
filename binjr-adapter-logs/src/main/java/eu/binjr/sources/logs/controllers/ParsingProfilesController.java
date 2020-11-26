@@ -15,6 +15,7 @@
  */
 package eu.binjr.sources.logs.controllers;
 
+import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
@@ -27,6 +28,7 @@ import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.sources.logs.adapters.LogsAdapterPreferences;
 import eu.binjr.sources.logs.adapters.LogsDataAdapter;
 import javafx.event.ActionEvent;
@@ -40,11 +42,14 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
+import java.io.File;
+import java.nio.file.Files;
 import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -58,6 +63,7 @@ public class ParsingProfilesController {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
     private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
     private final LogsAdapterPreferences userPrefs;
+    private static final Gson gson = new Gson();
 
     @FXML
     private TableColumn<NameExpressionPair, String> expressionColumn;
@@ -127,17 +133,50 @@ public class ParsingProfilesController {
 
     @FXML
     void handleOnDeleteProfile(ActionEvent event) {
-
+        if (this.profileComboBox.getValue() instanceof CustomParsingProfile) {
+            this.profileComboBox.getItems().remove(this.profileComboBox.getValue());
+        }
     }
 
     @FXML
     void handleOnExportProfile(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Export Profiles");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Parsing Profiles", "*.json"));
+        fileChooser.setInitialFileName("parsing_profiles.json");
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
+        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (exportPath != null) {
+            try {
+                Files.deleteIfExists(exportPath.toPath());
+                UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
+                Files.writeString(exportPath.toPath(), gson.toJson(profileComboBox.getItems().stream()
+                        .filter(p -> p instanceof CustomParsingProfile)
+                        .collect(Collectors.toList())
+                        .toArray(ParsingProfile[]::new)));
+                logger.info("Parsing profiles successfully exported to " + exportPath);
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while exporting profiles: " + e.getMessage(), e, root);
+            }
+        }
 
     }
 
     @FXML
     void handleOnImportProfile(ActionEvent event) {
-
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Import Profiles");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Parsing Profiles", "*.json"));
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
+        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        if (importPath != null) {
+            try {
+                profileComboBox.getItems().addAll(gson.fromJson(Files.readString(importPath.toPath()), CustomParsingProfile[].class));
+                logger.info("Parsing profiles successfully imported to " + importPath);
+            } catch (Exception e) {
+                Dialogs.notifyException("An error occurred while importing profiles: " + e.getMessage(), e, root);
+            }
+        }
     }
 
     @FXML
