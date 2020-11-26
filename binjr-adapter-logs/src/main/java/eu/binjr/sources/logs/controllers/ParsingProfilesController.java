@@ -56,7 +56,7 @@ import java.util.stream.Stream;
 
 public class ParsingProfilesController {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
-    private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[A-Z]{2,}");
+    private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
     private final LogsAdapterPreferences userPrefs;
 
     @FXML
@@ -205,12 +205,14 @@ public class ParsingProfilesController {
 
     @FXML
     private void handleOnOk(ActionEvent actionEvent) {
-        userPrefs.userParsingProfiles.set(profileComboBox.getItems().stream()
-                .filter(p -> p instanceof CustomParsingProfile)
-                .collect(Collectors.toList())
-                .toArray(ParsingProfile[]::new));
-        userPrefs.mostRecentlyUsedParsingProfile.set(profileComboBox.getValue().getProfileName());
-        Dialogs.getStage(root).close();
+        if (applyChanges()) {
+            userPrefs.userParsingProfiles.set(profileComboBox.getItems().stream()
+                    .filter(p -> p instanceof CustomParsingProfile)
+                    .collect(Collectors.toList())
+                    .toArray(ParsingProfile[]::new));
+            userPrefs.mostRecentlyUsedParsingProfile.set(profileComboBox.getValue().getProfileName());
+            Dialogs.getStage(root).close();
+        }
     }
 
     @FXML
@@ -296,11 +298,11 @@ public class ParsingProfilesController {
         });
         lineTemplateExpression.textProperty().addListener((obs, oldText, newText) -> {
             resetTest();
-            lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(newText));
+            colorLineTemplateField(newText);
         });
         this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
 
-        this.nameColumn.setCellFactory(ColoredTableCell.forTableColumn(new StringConverter<>() {
+        this.nameColumn.setCellFactory(list -> new ColoredTableCell(new StringConverter<>() {
             @Override
             public String toString(NamedCaptureGroup object) {
                 return object.toString();
@@ -312,14 +314,26 @@ public class ParsingProfilesController {
             }
         }, TemporalCaptureGroup.values()));
         this.nameColumn.setOnEditCommit(
-                t -> t.getTableView().getItems().get(
-                        t.getTablePosition().getRow()).setName(t.getNewValue())
+                t -> {
+                    t.getTableView().getItems().get(
+                            t.getTablePosition().getRow()).setName(t.getNewValue());
+                    applyChanges();
+                    colorLineTemplateField();
+                }
         );
         this.expressionColumn.setCellFactory(TextFieldTableCell.forTableColumn());
         this.expressionColumn.setOnEditCommit(
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setExpression(t.getNewValue())
         );
+    }
+
+    private void colorLineTemplateField() {
+        colorLineTemplateField(lineTemplateExpression.getText());
+    }
+
+    private void colorLineTemplateField(String text) {
+        lineTemplateExpression.setStyleSpans(0, computeParsingProfileSyntaxHighlighting(text));
     }
 
     private void resetTest() {
@@ -329,12 +343,19 @@ public class ParsingProfilesController {
         testArea.setStyleSpans(0, spans.create());
     }
 
-   private  class ColoredTableCell extends ComboBoxTableCell<NameExpressionPair, NamedCaptureGroup>{
-   //     private  class ColoredTableCell extends TextFieldTableCell<NameExpressionPair, NamedCaptureGroup>{
+    private class ColoredTableCell extends ComboBoxTableCell<NameExpressionPair, NamedCaptureGroup> {
+        public ColoredTableCell(StringConverter<NamedCaptureGroup> converter, NamedCaptureGroup... items) {
+            super(converter, items);
+            setComboBoxEditable(true);
+        }
+
         @Override
         public void updateItem(NamedCaptureGroup item, boolean empty) {
             super.updateItem(item, empty);
-            if (!isEmpty()) {
+            if (empty || item == null) {
+                setText(null);
+                setGraphic(null);
+            } else {
                 var idx = getCaptureGroupPaletteIndex(item);
                 this.setStyle("-fx-font-weight: bold; -fx-text-fill:-palette-color-" + idx + ";");
                 setText(item.toString());
@@ -349,7 +370,6 @@ public class ParsingProfilesController {
             profile.getCaptureGroups().forEach((k, v) -> {
                 this.captureGroupTable.getItems().add(new NameExpressionPair(k, v));
             });
-
             this.lineTemplateExpression.clear();
             this.lineTemplateExpression.appendText(profile.getLineTemplateExpression());
 
@@ -358,7 +378,7 @@ public class ParsingProfilesController {
             this.addGroupButton.setDisable(!isEditable);
             this.deleteGroupButton.setDisable(!isEditable);
             this.deleteProfileButton.setDisable(!isEditable);
-
+            this.captureGroupTable.setDisable(!isEditable);
             this.captureGroupTable.setEditable(isEditable);
             this.nameColumn.setEditable(isEditable);
             this.expressionColumn.setEditable(isEditable);
@@ -367,26 +387,29 @@ public class ParsingProfilesController {
                 Exception e) {
             Dialogs.notifyException("Error loading profile", e, root);
         }
-
     }
 
-    private void saveProfile(CustomParsingProfile profile) {
+    private boolean saveProfile(CustomParsingProfile profile) {
         try {
             profile.setCaptureGroups(this.captureGroupTable.getItems().stream()
                     .collect(Collectors.toMap(NameExpressionPair::getName, NameExpressionPair::getExpression)));
             profile.setLineTemplateExpression(this.lineTemplateExpression.getText());
+            return true;
         } catch (Exception e) {
-            Dialogs.notifyException("Error saving profile", e, root);
+            notifyError("Invalid profile:\n" + e.getMessage());
+            logger.debug(() -> "Error saving profile", e);
         }
-
+        return false;
     }
 
-    private void applyChanges() {
+    private boolean applyChanges() {
+        clearNotification();
+        boolean success = true;
         if (this.profileComboBox.getValue() instanceof CustomParsingProfile) {
             var editable = (CustomParsingProfile) this.profileComboBox.getValue();
-            saveProfile(editable);
+            success &= saveProfile(editable);
         }
-
+        return success;
     }
 
     private final AtomicInteger paletteEntriesSequence = new AtomicInteger(0);

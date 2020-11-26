@@ -26,7 +26,8 @@ public class CaptureGroup implements NamedCaptureGroup {
     }
 
     private CaptureGroup(String name) {
-        this.name = name;
+        Objects.requireNonNull(name);
+        this.name = name.replaceAll("[^a-zA-Z0-9]", "");
     }
 
     @Override
@@ -41,7 +42,7 @@ public class CaptureGroup implements NamedCaptureGroup {
 
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return name().hashCode();
     }
 
     @Override
@@ -49,10 +50,10 @@ public class CaptureGroup implements NamedCaptureGroup {
         if (this == obj) {
             return true;
         }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (!(obj instanceof NamedCaptureGroup)) {
             return false;
         }
-        CaptureGroup other = (CaptureGroup) obj;
-        return Objects.equals(name, other.name);
+        NamedCaptureGroup other = (NamedCaptureGroup) obj;
+        return Objects.equals(name(), other.name());
     }
 }

@@ -17,6 +17,7 @@
 package eu.binjr.core.data.indexes.parser;
 
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -33,19 +34,22 @@ public class EventParser {
     private final Set<String> namedGroups = new HashSet<>();
     private final ParsingProfile profile;
     private final ZoneId zoneId;
+    private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
 
     public EventParser(ParsingProfile profile, ZoneId zoneId) {
         this.profile = profile;
         this.zoneId = zoneId;
-        String regexString = profile.getLineTemplateExpression();
-        for (Map.Entry<NamedCaptureGroup, String> entry : profile.getCaptureGroups().entrySet()) {
-            NamedCaptureGroup t = entry.getKey();
-            String e = entry.getValue();
-            regexString = regexString.replace("$" + t.name(), String.format("(?<%s>%s)", t.name(), e));
+        var regexString = new String[]{ profile.getLineTemplateExpression()};
+        var matcher = GROUP_TAG_PATTERN.matcher(regexString[0]);
+        while(matcher.find()) {
+            var value = matcher.group();
+             profile.getCaptureGroups().entrySet().stream()
+                    .filter(e->CaptureGroup.of(value).equals(e.getKey()))
+                    .map(e-> String.format("(?<%s>%s)", e.getKey().name(), e.getValue()))
+                    .findAny().ifPresent(r -> regexString[0] = regexString[0].replace(value, r));
         }
-        logger.debug("regexString = " + regexString);
-        parsingRegex = Pattern.compile(regexString);
-
+        logger.debug("regexString = " + regexString[0]);
+        parsingRegex = Pattern.compile(regexString[0]);
     }
 
     private ParsedEvent doParse(long lineNumber, String text) {
@@ -80,6 +84,7 @@ public class EventParser {
     public EventAggregator aggregator() {
         return new EventAggregator();
     }
+
     public Optional<ParsedEvent> parse(long sequence, String text) {
         return Optional.ofNullable(doParse(sequence, text));
     }
@@ -116,7 +121,6 @@ public class EventParser {
             return buffered != null ? Optional.of(buffered) : Optional.empty();
         }
     }
-
 
 
 }
