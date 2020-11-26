@@ -1831,16 +1831,19 @@
     -fx-fill: LIGHTBLUE;
 }
 
+.styled-text-area .from_cache,
 .styled-text-area .perf,
 .log-perf {
     -fx-fill: #42eab3;
 }
 
+.styled-text-area .ok,
 .styled-text-area .info,
 .log-info {
     -fx-fill: -fx-text-background-color;
 }
 
+.styled-text-area .timeout,
 .styled-text-area .warn,
 .log-warn {
     -fx-fill: GOLD;
@@ -1883,24 +1886,27 @@
     -fx-background-color: STEELBLUE;
 }
 
+.facet-pill-from_cache,
 .facet-pill-perf {
     -fx-background-color: #268f69;
 }
 
+.facet-pill-ok,
 .facet-pill-info {
     -fx-text-fill: black;
     -fx-background-color: #d6d5d5;
 }
 
-.facet-pill-info:selected .box .mark {
-    -fx-background-color: black;
-}
-
+.facet-pill-timeout,
 .facet-pill-warn {
     -fx-text-fill: black;
     -fx-background-color: #c8b23e;
 }
 
+.facet-pill-error:selected .box .mark,
+.facet-pill-ok:selected .box .mark,
+.facet-pill-info:selected .box .mark,
+.facet-pill-timeout:selected .box .mark,
 .facet-pill-warn:selected .box .mark {
     -fx-background-color: black;
 }
@@ -1908,10 +1914,6 @@
 .facet-pill-error {
     -fx-text-fill: black;
     -fx-background-color: #fd5454;
-}
-
-.facet-pill-error:selected .box .mark {
-    -fx-background-color: black;
 }
 
 .facet-pill-fatal {

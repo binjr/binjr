@@ -1623,16 +1623,19 @@
     -fx-fill: STEELBLUE;
 }
 
+.styled-text-area .from_cache,
 .styled-text-area .perf,
 .log-perf {
     -fx-fill: #268f69;
 }
 
+.styled-text-area .ok,
 .styled-text-area .info,
 .log-info {
     -fx-fill: black;
 }
 
+.styled-text-area .timeout,
 .styled-text-area .warn,
 .log-warn {
     -fx-fill: DARKORANGE;
@@ -1680,21 +1683,26 @@
     -fx-background-color: STEELBLUE;
 }
 
+.facet-pill-from_cache,
 .facet-pill-perf {
     -fx-text-fill: white;
     -fx-background-color: #268f69;
 }
 
+.facet-pill-ok,
 .facet-pill-info {
     -fx-text-fill: white;
     -fx-background-color: #0e0d0d;
 }
 
+.facet-pill-timeout,
 .facet-pill-warn {
     -fx-text-fill: black;
     -fx-background-color: #ff8c00;
 }
 
+.facet-pill-from_cache:selected .box .mark,
+.facet-pill-ok:selected .box .mark,
 .facet-pill-fatal:selected .box .mark,
 .facet-pill-perf:selected .box .mark,
 .facet-pill-info:selected .box .mark {
