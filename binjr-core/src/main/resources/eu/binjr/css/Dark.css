@@ -1947,3 +1947,7 @@
     -fx-background-insets: 0, 0 0 0 0, 1 1 1 1;
     -fx-background-radius: 0, 0, 0;
 }
+
+.caret {
+    -fx-stroke: -fx-text-background-color;
+}
