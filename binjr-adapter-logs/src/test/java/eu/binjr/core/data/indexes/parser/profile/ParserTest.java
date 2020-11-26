@@ -29,24 +29,24 @@ public class ParserTest {
 
     @Test
     public void parseBinjrLogsFull() {
-        assertTrue(parsingTest(BINJR, "[2020/07/21-02:56:42.460] [info] Hello World!"));
-        assertTrue(parsingTest(BINJR, "[2020-11-13 19:59:22.627] [INFO ] Hello world!"));
+        assertTrue(parsingTest(ISO, "[2020/07/21-02:56:42.460] [info] Hello World!"));
+        assertTrue(parsingTest(ISO, "[2020-11-13 19:59:22.627] [INFO ] Hello world!"));
     }
 
     @Test
     public void parseBinjrLogsNoFraction() {
-        assertTrue(parsingTest(BINJR, "[2020/07/21-02:56:42] [info] Hello World!"));
-        assertTrue(parsingTest(BINJR, "[2020-11-13 19:59:22] [INFO ] Hello world!"));
+        assertTrue(parsingTest(ISO, "[2020/07/21-02:56:42] [info] Hello World!"));
+        assertTrue(parsingTest(ISO, "[2020-11-13 19:59:22] [INFO ] Hello world!"));
     }
 
     @Test
     public void parseBinjrLogsUnknownSeverity() {
-        assertTrue(parsingTest(BINJR, "[2020-11-13 19:59:22.627] [FOO  ] Hello world!"));
+        assertTrue(parsingTest(ISO, "[2020-11-13 19:59:22.627] [FOO  ] Hello world!"));
     }
 
     @Test
     public void parseBinjrLogsNoSeverity() {
-        assertTrue(parsingTest(BINJR, "[2020-11-13 19:59:22.627] Hello world!"));
+        assertTrue(parsingTest(ISO, "[2020-11-13 19:59:22.627] Hello world!"));
     }
 
     @Test

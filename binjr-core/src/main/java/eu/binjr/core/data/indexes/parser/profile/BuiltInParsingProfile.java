@@ -19,12 +19,13 @@ package eu.binjr.core.data.indexes.parser.profile;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
+import java.util.Collections;
 import java.util.Map;
 
 import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
-    BINJR("binjr logs",
+    ISO("ISO-like timestamps",
             Map.of(YEAR, "\\d{4}",
                     MONTH, "\\d{2}",
                     DAY, "\\d{2}",
@@ -34,7 +35,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*"),
-    BINJR_STRICT("binjr logs (Strict)",
+    BINJR_STRICT("binjr logs",
             Map.of(YEAR, "\\d{4}",
                     MONTH, "\\d{2}",
                     DAY, "\\d{2}",
@@ -49,7 +50,10 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL",
                     CaptureGroup.of("PHASE"), ".*"),
-            "\\[$EPOCH[\\.,]$FRACTIONs\\]\\[$SEVERITY\\]\\[$PHASE\\s*\\].*");
+            "\\[$EPOCH[\\.,]($FRACTION)s\\]\\[$SEVERITY\\]\\[$PHASE\\s*\\].*"),
+    ALL("Non empty lines",
+            Map.of(CaptureGroup.of("LINE"), ".+"),
+            "$LINE");
 
     private final String profileName;
     private final String lineTemplateExpression;

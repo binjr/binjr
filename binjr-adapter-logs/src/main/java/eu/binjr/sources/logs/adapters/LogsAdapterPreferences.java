@@ -47,7 +47,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             s -> gson.fromJson(s, String[].class));
 
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
-            stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.BINJR.name());
+            stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.ISO.name());
 
     public ObservablePreference<ParsingProfile[]> userParsingProfiles =
             objectPreference(ParsingProfile[].class,

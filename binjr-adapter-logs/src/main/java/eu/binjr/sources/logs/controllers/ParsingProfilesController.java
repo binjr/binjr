@@ -343,7 +343,7 @@ public class ParsingProfilesController {
             resetTest();
             colorLineTemplateField(newText);
         });
-        this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.BINJR);
+        this.profileComboBox.getSelectionModel().select(BuiltInParsingProfile.ISO);
 
         this.nameColumn.setCellFactory(list -> new ColoredTableCell(new StringConverter<>() {
             @Override
