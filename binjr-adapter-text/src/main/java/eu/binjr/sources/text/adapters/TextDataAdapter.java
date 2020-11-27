@@ -136,7 +136,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
                             .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
-                                    .map(ext -> ext.equalsIgnoreCase("*") || path.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
+                                    .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = rootNode;

@@ -18,8 +18,6 @@ package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializer;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -36,9 +34,6 @@ import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
 import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.indexes.parser.EventParser;
-import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
@@ -69,8 +64,9 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     public static final String LOG_FILE_INDEX = "logFileIndex";
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
+    public static final String DEFAULT_PREFIX = "[Logs]";
+    private final String sourceNamePrefix;
 
-    //protected final LogsAdapterPreferences prefs = (LogsAdapterPreferences) getAdapterInfo().getPreferences();
     private final Set<String> indexedFiles = new HashSet<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
@@ -92,6 +88,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      */
     public LogsDataAdapter() throws DataAdapterException {
         super();
+        sourceNamePrefix = DEFAULT_PREFIX;
     }
 
     /**
@@ -104,7 +101,22 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
     public LogsDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile profile) throws DataAdapterException {
+        this(DEFAULT_PREFIX, rootPath, folderFilters, fileExtensionsFilters, profile);
+    }
+
+    /**
+     * Initializes a new instance of the {@link LogsDataAdapter} class from the provided {@link Path}
+     *
+     * @param sourcePrefix          the name to prepend the source with.
+     * @param rootPath              the {@link Path} from which to load content.
+     * @param folderFilters         a list of names of folders to inspect for content.
+     * @param fileExtensionsFilters a list of file extensions to inspect for content.
+     * @param profile               the parsing profile to use.
+     * @throws DataAdapterException if an error occurs initializing the adapter.
+     */
+    public LogsDataAdapter(String sourcePrefix, Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile profile) throws DataAdapterException {
         super();
+        this.sourceNamePrefix = sourcePrefix;
         this.rootPath = rootPath;
         Map<String, String> params = new HashMap<>();
         initParams(rootPath, folderFilters, fileExtensionsFilters, profile);
@@ -171,7 +183,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                             .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
-                                    .map(ext -> ext.equalsIgnoreCase("*") || configPath.getFileName().toString().toLowerCase(Locale.US).endsWith(ext))
+                                    .map(f -> configPath.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
                                     .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = configNode;
@@ -319,7 +331,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     @Override
     public String getSourceName() {
-        return "[Logs] " + rootPath.getFileName();
+        return String.format("%s %s", sourceNamePrefix, rootPath.getFileName());
     }
 
     @Override
