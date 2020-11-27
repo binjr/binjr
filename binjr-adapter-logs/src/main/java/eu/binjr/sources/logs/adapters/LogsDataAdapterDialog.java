@@ -28,6 +28,7 @@ import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.sources.logs.controllers.ParsingProfilesController;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
@@ -46,7 +47,6 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -97,7 +97,9 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         editParsingButton.setOnAction(event -> {
             try {
                 prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
-                Parent root = FXMLLoader.load(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
+                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
+                fXMLLoader.setController(new ParsingProfilesController());
+                Parent root = fXMLLoader.load();
                 final Scene scene = new Scene(root);
                 var stage = new Stage();
                 stage.setScene(scene);

@@ -2,6 +2,22 @@
 
 <!--
   ~    Copyright 2020 Frederic Thevenet
+  ~
+  ~    Licensed under the Apache License, Version 2.0 (the "License");
+  ~    you may not use this file except in compliance with the License.
+  ~    You may obtain a copy of the License at
+  ~
+  ~         http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~    Unless required by applicable law or agreed to in writing, software
+  ~    distributed under the License is distributed on an "AS IS" BASIS,
+  ~    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~    See the License for the specific language governing permissions and
+  ~    limitations under the License.
+  -->
+
+<!--
+  ~    Copyright 2020 Frederic Thevenet
   ~     
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -32,7 +48,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.fxmisc.richtext.CodeArea?>
 
-<AnchorPane fx:id="root" prefHeight="777.0" prefWidth="853.0" styleClass="skinnable-pane-border, tool-dialog-window" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.sources.logs.controllers.ParsingProfilesController">
+<AnchorPane fx:id="root" prefHeight="777.0" prefWidth="853.0" styleClass="skinnable-pane-border, tool-dialog-window" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <children>
         <VBox fx:id="expressions" layoutX="14.0" layoutY="64.0" spacing="10.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="64.0">
             <children>
