@@ -201,7 +201,7 @@ public class LogFileIndex implements Searchable {
                     while (!taskAborted.get() && (line = reader.readLine()) != null) {
                         charRead += line.length();
                         if (charRead >= 10240) {
-                            kilobytesRead.set(kilobytesRead.get() + charRead );
+                            kilobytesRead.set(kilobytesRead.get() + charRead);
                             charRead = 0;
                         }
                         aggregator.yield(n.incrementAndGet(), line).ifPresent(CheckedLambdas.wrap(queue::put));
@@ -379,6 +379,10 @@ public class LogFileIndex implements Searchable {
         String severity = event.getSections().get(SEVERITY) == null ? "unknown" : event.getSections().get(SEVERITY).toLowerCase();
         doc.add(new FacetField(SEVERITY, severity));
         doc.add(new StoredField(SEVERITY, severity));
+        // add all other sections as prefixed search fields
+        event.getSections().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e -> {
+            doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO));
+        });
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
     }
 
