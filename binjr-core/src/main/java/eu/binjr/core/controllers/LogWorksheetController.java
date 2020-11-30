@@ -48,6 +48,7 @@ import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.SearchHitsProcessor;
 import eu.binjr.core.data.indexes.logs.LogFileIndex;
+import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.LogWorksheet;
@@ -547,7 +548,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             pager.setPageCount((int) Math.ceil((double) res.getTotalHits() / res.getHitsPerPage()));
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
-                            var severityFacetEntries = res.getFacetResults().get(LogFileIndex.SEVERITY);
+                            var severityFacetEntries = res.getFacetResults().get(CaptureGroup.SEVERITY);
                             severityListView.setAllEntries((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
                             severityListView.getFacetPills()
                                     .forEach(f -> {
@@ -568,7 +569,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         Collections.emptyList());
                                 for (var data : res.getData()) {
                                     var hit = data.getYValue();
-                                    var severity = hit.getFacets().get(LogFileIndex.SEVERITY).getLabel();
+                                    var severity = hit.getFacets().get(CaptureGroup.SEVERITY).getLabel();
                                     var path = hit.getFacets().get(LogFileIndex.PATH).getLabel();
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
@@ -844,7 +845,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .map(i -> i.getBinding().getPath())
                 .collect(Collectors.toList()));
         var params = worksheet.getQueryParameters();
-        facets.put(LogFileIndex.SEVERITY, params.getSeverities());
+        facets.put(CaptureGroup.SEVERITY, params.getSeverities());
         try {
             return (facets.get(LogFileIndex.PATH).size() == 0) ? new SearchHitsProcessor() :
                     Indexes.LOG_FILES.get().search(start.toEpochMilli(), end.toEpochMilli(),

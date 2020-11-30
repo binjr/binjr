@@ -59,6 +59,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
+
 
 public class ParsingProfilesController {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
@@ -347,6 +349,9 @@ public class ParsingProfilesController {
         profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
                 .filter(p -> p.getProfileName().equals(userPrefs.mostRecentlyUsedParsingProfile.get()))
                 .findAny().orElse(BuiltInParsingProfile.ISO));
+        NamedCaptureGroup[] knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
+        System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);
+        knownGroups[TemporalCaptureGroup.values().length] = CaptureGroup.of(SEVERITY);
         this.nameColumn.setCellFactory(list -> new ColoredTableCell(new StringConverter<>() {
             @Override
             public String toString(NamedCaptureGroup object) {
@@ -357,7 +362,7 @@ public class ParsingProfilesController {
             public NamedCaptureGroup fromString(String string) {
                 return CaptureGroup.of(string);
             }
-        }, TemporalCaptureGroup.values()));
+        }, knownGroups));
         this.nameColumn.setOnEditCommit(
                 t -> {
                     t.getTableView().getItems().get(

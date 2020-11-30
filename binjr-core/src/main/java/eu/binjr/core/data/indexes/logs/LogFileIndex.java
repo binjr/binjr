@@ -67,12 +67,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
+import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
+
 public class LogFileIndex implements Searchable {
     public static final String TIMESTAMP = "timestamp";
     public static final String LINE_NUMBER = "lineNumber";
     public static final String FIELD_CONTENT = "content";
     public static final String PATH = "filePath";
-    public static final String SEVERITY = "SEVERITY";
     private static final Logger logger = Logger.create(LogFileIndex.class);
     protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;

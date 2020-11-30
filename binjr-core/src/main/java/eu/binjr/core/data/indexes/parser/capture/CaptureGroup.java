@@ -19,6 +19,7 @@ package eu.binjr.core.data.indexes.parser.capture;
 import java.util.Objects;
 
 public class CaptureGroup implements NamedCaptureGroup {
+    public static final String SEVERITY = "SEVERITY";
     private final String name;
 
     public static NamedCaptureGroup of(String name) {
