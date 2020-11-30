@@ -318,11 +318,6 @@ task expandMdTemplates(type: Copy) {
     filteringCharset = 'UTF-8'
     def changeHistory = new File("./CHANGELOG.md").getText("UTF-8")
     def currentChanges = new File("./UNRELEASED.md").getText("UTF-8")
-    if (!IS_RELEASE) {
-        currentChanges = "## THIS IS A SNAPSHOT PREVIEW\n" +
-                "#### New features are not entirely stable and might change in incompatible ways in the next release\n" +
-                currentChanges
-    }
     expand(["version"       : "$BINJR_VERSION",
             "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
             "changeHistory" : "$changeHistory",
