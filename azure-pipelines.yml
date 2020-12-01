@@ -51,7 +51,7 @@ stages:
       # Finalize release
   - stage: deploy_site
     dependsOn: build
-    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')))
+    condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'), not(endsWith(variables['Build.SourceBranch'], '-SNAPSHOT')), not(contains(variables['Build.SourceBranch'], '-b')))
     jobs:
     - job: deploy_site
       pool:

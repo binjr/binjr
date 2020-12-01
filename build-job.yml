@@ -119,7 +119,7 @@ jobs:
           git add .
           git commit --amend -am "Release  $BUILD_SOURCEBRANCHNAME"
           git push -f
-        condition: and(succeeded(), eq(variables['isTag'], 'true'), ne(variables['isSnapshot'], 'true'), eq(variables['Agent.OS'], 'Linux'))
+        condition: and(succeeded(), eq(variables['isTag'], 'true'), ne(variables['isSnapshot'], 'true'), not(contains(variables['Build.SourceBranch'], '-b')), eq(variables['Agent.OS'], 'Linux'))
 
 
 

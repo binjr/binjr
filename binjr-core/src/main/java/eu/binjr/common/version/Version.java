@@ -116,7 +116,7 @@ public class Version implements Comparable<Version> {
         }
 
         try {
-            StringTokenizer st = new StringTokenizer(version, SEPARATOR, true);
+            StringTokenizer st = new StringTokenizer(version, SEPARATOR+"-", true);
             major = Integer.parseInt(st.nextToken());
             if (st.hasMoreTokens()) {
                 st.nextToken(); // consume delimiter
@@ -239,7 +239,7 @@ public class Version implements Comparable<Version> {
      * <br>
      * The format of the version string will be <code>major.minor.micro</code>
      * if qualifier is the empty string or
-     * <code>major.minor.micro.qualifier</code> otherwise.
+     * <code>major.minor.micro-qualifier</code> otherwise.
      *
      * @return The string representation of this version identifier.
      */
@@ -249,7 +249,7 @@ public class Version implements Comparable<Version> {
         if (qualifier.length() == 0) { //$NON-NLS-1$
             return isSnapshot ? base + SNAPSHOT : base;
         } else {
-            return isSnapshot ? base + SEPARATOR + qualifier + SNAPSHOT : base + SEPARATOR + qualifier;
+            return isSnapshot ? base + "-" + qualifier + SNAPSHOT : base + "-" + qualifier;
         }
     }
 

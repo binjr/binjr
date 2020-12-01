@@ -34,7 +34,9 @@ plugins {
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.BINJR_VERSION_STEM = "3.0.0"
+ext.IS_BETA = true
+ext.BINJR_BETA_VERSION = "2.99.99.1"
+ext.BINJR_VERSION_STEM = "3.0.0-b01"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
@@ -456,7 +458,7 @@ task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
             "-out", "${buildDir}/wix/obj/",
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
-            "-dbinjrVersion=${BINJR_VERSION_STEM}",
+            "-dbinjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
             "-dbuildSourceDir=${DISTRIBUTION_PATH}",
             "-dresourcesDir=${projectDir}/distribution"
     ]
@@ -485,7 +487,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--type", DISTRIBUTION_EXTENSION,
             "--copyright", "Copyright (c) 2016-2020 Frederic Thevenet",
             "--description", "A Time Series Browser",
-            "--app-version", BINJR_VERSION_STEM,
+            "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
             "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac_tar/file-associations.properties",
             "--arguments", "--packaging=MAC_DMG",
@@ -496,7 +498,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--java-options", "-XX:ShenandoahAllocationThreshold=20"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${buildDir}/${project.name}-${BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
+        def source = java.nio.file.Path.of("${buildDir}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"))
     }
 }

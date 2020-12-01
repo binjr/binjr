@@ -1,5 +1,5 @@
-## THIS IS A SNAPSHOT PREVIEW
-#### New features are not entirely stable and might change in incompatible ways in the next release
+## THIS IS A BETA BUILD OF BINJR v3.0.0
+#### New features are not entirely stable and might change in incompatible ways in the final release
 
 * _[Breaking Change]_ The plugin API for *binjr* v3.0.0 is no longer compatible with previous versions.
 * _[Breaking Change]_ The format for saved workspace in *binjr* v3.0.0 has changed and is not compatible with previous versions
