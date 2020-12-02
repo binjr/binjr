@@ -41,8 +41,8 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             s -> gson.fromJson(s, String[].class));
 
     public ObservablePreference<String[]> fileExtensionFilters = objectPreference(String[].class,
-            "fileExtensionFilters",
-            new String[]{".log", ".txt"},
+            "extensionFilters",
+            new String[]{"*.log", "*.txt"},
             gson::toJson,
             s -> gson.fromJson(s, String[].class));
 

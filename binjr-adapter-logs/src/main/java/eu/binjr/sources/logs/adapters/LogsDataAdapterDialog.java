@@ -47,6 +47,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -59,7 +60,6 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
     private static final Logger logger = Logger.create(LogsDataAdapterDialog.class);
     private final TextField extensionFiltersTextField;
     private final LogsAdapterPreferences prefs;
-    private static final Gson gson = new Gson();
     private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
 
 
@@ -82,7 +82,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         super(owner, Mode.PATH, "mostRecentLogsArchives", true);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Zip Archive or Folder");
-        extensionFiltersTextField = new TextField(gson.toJson(prefs.fileExtensionFilters.get()));
+        extensionFiltersTextField = new TextField( String.join(", ", prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
@@ -169,7 +169,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(path);
-        prefs.fileExtensionFilters.set(gson.fromJson(extensionFiltersTextField.getText(), String[].class));
+        prefs.fileExtensionFilters.set(Arrays.stream(extensionFiltersTextField.getText().split("[,;\" ]+")).filter(e-> !e.isBlank()).toArray(String[]::new));
         prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
 
         return List.of(new LogsDataAdapter(path,
