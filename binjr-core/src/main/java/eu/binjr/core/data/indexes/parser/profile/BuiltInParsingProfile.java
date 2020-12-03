@@ -45,13 +45,13 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"),
-    GC("JVM GC logs",
+    GC("JVM Unified Logging",
             Map.of(EPOCH, "\\d+",
                     FRACTION, "\\d{3}",
-                    CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL",
-                    CaptureGroup.of("PHASE"), ".*"),
-            "\\[$EPOCH[\\.,]($FRACTION)s\\]\\[$SEVERITY\\]\\[$PHASE\\s*\\].*"),
-    ALL("Non empty lines",
+                    CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
+                    CaptureGroup.of("TAGS"), ".*"),
+            "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*"),
+    ALL("All non empty lines",
             Map.of(CaptureGroup.of("LINE"), ".+"),
             "$LINE");
 

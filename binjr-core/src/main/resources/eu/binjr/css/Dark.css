@@ -1820,35 +1820,42 @@
 .styled-text-area .comment {
     -fx-fill: teal;
 }
-
+.styled-text-area .finest,
+.styled-text-area .finer,
 .styled-text-area .trace,
 .log-trace {
     -fx-fill: GRAY;
 }
 
+.styled-text-area .fine,
 .styled-text-area .debug,
 .log-debug {
     -fx-fill: LIGHTBLUE;
 }
 
+.styled-text-area .config,
 .styled-text-area .from_cache,
 .styled-text-area .perf,
 .log-perf {
     -fx-fill: #42eab3;
 }
 
+.styled-text-area .stdout,
 .styled-text-area .ok,
 .styled-text-area .info,
 .log-info {
     -fx-fill: -fx-text-background-color;
 }
 
+.styled-text-area .warning,
 .styled-text-area .timeout,
 .styled-text-area .warn,
 .log-warn {
     -fx-fill: GOLD;
 }
 
+.styled-text-area .severe,
+.styled-text-area .stderr,
 .styled-text-area .error,
 .log-error {
     -fx-fill: TOMATO;
@@ -1878,31 +1885,42 @@
     /*-fx-border-radius: 15;*/
 }
 
+.facet-pill-finer,
+.facet-pill-finest,
 .facet-pill-trace {
     -fx-background-color: GRAY;
 }
 
+.facet-pill-fine,
 .facet-pill-debug {
     -fx-background-color: STEELBLUE;
 }
 
+.facet-pill-config,
 .facet-pill-from_cache,
 .facet-pill-perf {
     -fx-background-color: #268f69;
 }
 
+.facet-pill-stdout,
 .facet-pill-ok,
 .facet-pill-info {
     -fx-text-fill: black;
     -fx-background-color: #d6d5d5;
 }
 
+.facet-pill-warning,
 .facet-pill-timeout,
 .facet-pill-warn {
     -fx-text-fill: black;
     -fx-background-color: #c8b23e;
 }
 
+
+.facet-pill-severe:selected .box .mark,
+.facet-pill-warning:selected .box .mark,
+.facet-pill-stderr:selected .box .mark,
+.facet-pill-stdout:selected .box .mark,
 .facet-pill-error:selected .box .mark,
 .facet-pill-ok:selected .box .mark,
 .facet-pill-info:selected .box .mark,
@@ -1911,6 +1929,8 @@
     -fx-background-color: black;
 }
 
+.facet-pill-severe,
+.facet-pill-stderr,
 .facet-pill-error {
     -fx-text-fill: black;
     -fx-background-color: #fd5454;
