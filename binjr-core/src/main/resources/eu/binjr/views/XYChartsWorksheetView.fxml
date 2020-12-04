@@ -86,16 +86,12 @@
                             </tooltip>
                         </Button>
                         <Pane HBox.hgrow="ALWAYS"/>
-                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER" graphicTextGap="16.0"
-                                         contentDisplay="GRAPHIC_ONLY"
-                                         maxHeight="1.7976931348623157E308" maxWidth="4000.0" mnemonicParsing="false"
+                        <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
+                                         maxHeight="1.7976931348623157E308" maxWidth="4000.0"
                                          minWidth="425"
                                          minHeight="40"
-                                         styleClass="dialog-button"
+                                         styleClass="tool-bar"
                                          text="" HBox.hgrow="SOMETIMES">
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Edit the time range for the current worksheet."/>
-                            </tooltip>
                         </TimeRangePicker>
                         <Pane HBox.hgrow="ALWAYS"/>
                         <ToolBar fx:id="chartsToolbar">

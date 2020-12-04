@@ -1,6 +1,8 @@
 ## THIS IS A BETA BUILD OF BINJR v3.0.0
 #### New features are not entirely stable and might change in incompatible ways in the final release
 
+### Beta 1
+
 * _[Breaking Change]_ The plugin API for *binjr* v3.0.0 is no longer compatible with previous versions.
 * _[Breaking Change]_ The format for saved workspace in *binjr* v3.0.0 has changed and is not compatible with previous versions
 * _[New]_ *binjr* is now able to handle and render time series with data types other than numerical values. 
@@ -14,3 +16,6 @@
 * _[Fixed]_ A sharp performance drop when zooming extremely close up on the time axis (i.e. displaying less than a few seconds)
 * _[Fixed]_ Removed unused time zone selection field on Netdata adapter dialog. 
 * _[Fixed]_ Snapshots taken with the default output scaling use the main monitor scaling factor instead of the one on which the window is displayed. 
+
+### Beta 2
+* _[New]_ Added a "Reset Time Range" button to TimeRangePicker control 

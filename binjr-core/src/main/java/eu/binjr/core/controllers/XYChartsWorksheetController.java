@@ -634,6 +634,14 @@ public class XYChartsWorksheetController extends WorksheetController {
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
         });
+        timeRangePicker.setOnResetInterval(() -> {
+            try {
+                return worksheet.getCharts().get(0).getInitialTimeRange();
+            } catch (Exception e) {
+                Dialogs.notifyException("Error resetting range", e);
+            }
+            return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
+        });
 
         currentState.timeRangeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {

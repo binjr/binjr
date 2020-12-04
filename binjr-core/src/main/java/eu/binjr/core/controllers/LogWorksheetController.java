@@ -95,6 +95,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -105,7 +106,6 @@ import static java.util.stream.Collectors.groupingBy;
 import static javafx.scene.control.SelectionMode.MULTIPLE;
 
 public class LogWorksheetController extends WorksheetController implements Syncable {
-    // private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat("x-binjr/LogFilesBinding");
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final Gson gson = new Gson();
@@ -221,6 +221,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
         timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             invalidateFilter(true);
+        });
+        timeRangePicker.setOnResetInterval(() -> {
+            try {
+               return worksheet.getInitialTimeRange();
+            } catch (Exception e) {
+                Dialogs.notifyException("Error resetting time range", e);
+            }
+            return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
         });
         // Init navigation
         backButton.setOnAction(bindingManager.registerHandler(this::handleHistoryBack));

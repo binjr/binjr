@@ -22,12 +22,14 @@ import eu.binjr.core.dialogs.Dialogs;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Bounds;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -47,25 +49,31 @@ import java.time.temporal.ChronoUnit;
 import java.util.ResourceBundle;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class TimeRangePicker extends ToggleButton {
+public class TimeRangePicker extends HBox {
     private static final Logger logger = Logger.create(TimeRangePicker.class);
-    private final Label timeRangeText;
+    private final ToggleButton timeRangeLabel;
+    private final ButtonBase previousIntervalBtn;
+    private final ButtonBase nextIntervalBtn;
+    private final ButtonBase resetIntervalBtn;
+
+
     private TimeRangePickerController timeRangePickerController;
     private final PopupControl popup;
     private final Property<ZoneId> zoneId;
     private final Property<TimeRange> timeRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now(), ZonedDateTime.now()));
     private final ObjectProperty<TimeRange> selectedRange = new SimpleObjectProperty<>(TimeRange.of(ZonedDateTime.now().minusHours(1), ZonedDateTime.now()));
     private final BindingManager bindingManager = new BindingManager();
+    private final ObjectProperty<Supplier<TimeRange>> onResetInterval = new SimpleObjectProperty<>();
 
     public TimeRangePicker() throws IOException {
         super();
-        var previousIntervalBtn = new ToolButtonBuilder<>()
-                .setStyleClass("inner-button")
-                .bind(Node::visibleProperty, selectedProperty().not())
-                .setHeight(25.0)
-                .setWidth(18.0)
+        this.previousIntervalBtn = new ToolButtonBuilder<>()
+                .setStyleClass("dialog-button")
+                .setHeight(USE_COMPUTED_SIZE)
+                .setWidth(20.0)
                 .setIconStyleClass("left-arrow-icon")
                 .setAction(event -> {
                     timeRangePickerController.stepBy(
@@ -75,11 +83,11 @@ public class TimeRangePicker extends ToggleButton {
                 })
                 .setTooltip("Step Back")
                 .build(Button::new);
-        var nextIntervalBtn = new ToolButtonBuilder<>()
-                .setHeight(25.0)
-                .setWidth(18.0)
-                .bind(Node::visibleProperty, selectedProperty().not())
-                .setStyleClass("inner-button")
+        previousIntervalBtn.setMaxHeight(Double.MAX_VALUE);
+        this.nextIntervalBtn = new ToolButtonBuilder<>()
+                .setHeight(USE_COMPUTED_SIZE)
+                .setWidth(20)
+                .setStyleClass("dialog-button")
                 .setIconStyleClass("right-arrow-icon")
                 .setAction(event -> {
                     timeRangePickerController.stepBy(
@@ -89,18 +97,38 @@ public class TimeRangePicker extends ToggleButton {
                 })
                 .setTooltip("Step Forward")
                 .build(Button::new);
-        timeRangeText = new Label("");
-        HBox graphic = new HBox();
-        graphic.setAlignment(Pos.CENTER);
-        graphic.getStyleClass().add("icon-container");
-        graphic.setSpacing(15.0);
-        graphic.getChildren().addAll(
+        nextIntervalBtn.setMaxHeight(Double.MAX_VALUE);
+        this.resetIntervalBtn = new ToolButtonBuilder<>()
+                .setHeight(USE_COMPUTED_SIZE)
+                .setWidth(40.0)
+                .setStyleClass("dialog-button")
+                .setAction(event -> {
+                    if (getOnResetInterval() != null) {
+                        var range = getOnResetInterval().get();
+                        timeRangePickerController.applyNewTimeRange.accept(range.getBeginning(), range.getEnd());
+                    }
+                    event.consume();
+                })
+                .setIconStyleClass("reset-clock-icon", "medium-icon")
+                .setTooltip("Reset Time Range")
+                .build(Button::new);
+        resetIntervalBtn.setMaxHeight(Double.MAX_VALUE);
+        timeRangeLabel = new ToggleButton();
+        var tooltip = new Tooltip("Edit the time range");
+        tooltip.setShowDelay(javafx.util.Duration.millis(500));
+        timeRangeLabel.setTooltip(tooltip);
+        timeRangeLabel.setMaxHeight(Double.MAX_VALUE);
+        this.setAlignment(Pos.CENTER);
+        this.getChildren().addAll(
                 previousIntervalBtn,
-                ToolButtonBuilder.makeIconNode(Pos.CENTER, "time-icon"),
-                timeRangeText,
-                ToolButtonBuilder.makeIconNode(Pos.CENTER, "combo-box-arrow-icon"),
+                timeRangeLabel,
+                resetIntervalBtn,
                 nextIntervalBtn);
-        this.setGraphic(graphic);
+
+        timeRangeLabel.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "combo-box-arrow-icon", "small-icon"));
+        timeRangeLabel.setContentDisplay(ContentDisplay.RIGHT);
+        timeRangeLabel.setGraphicTextGap(8);
+        timeRangeLabel.setPadding(new Insets(0, 10, 0, 10));
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/eu/binjr/views/TimeRangePickerView.fxml"));
         this.timeRangePickerController = new TimeRangePickerController();
         loader.setController(timeRangePickerController);
@@ -109,10 +137,10 @@ public class TimeRangePicker extends ToggleButton {
         popup.setAutoHide(true);
         popup.getScene().setRoot(timeRangePickerPane);
         popup.showingProperty().addListener((observable, oldValue, newValue) -> {
-            setSelected(newValue);
+            timeRangeLabel.setSelected(newValue);
         });
 
-        this.setOnAction(actionEvent -> {
+        this.timeRangeLabel.setOnAction(actionEvent -> {
             Node owner = (Node) actionEvent.getSource();
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
             this.popup.show(owner.getScene().getWindow(), bounds.getMinX(), bounds.getMaxY());
@@ -168,6 +196,17 @@ public class TimeRangePicker extends ToggleButton {
                 });
     }
 
+    public String getText() {
+        return timeRangeLabel.getText();
+    }
+
+    public StringProperty textProperty() {
+        return timeRangeLabel.textProperty();
+    }
+
+    public void setText(String text) {
+        timeRangeLabel.setText(text);
+    }
 
     public ZoneId getZoneId() {
         return zoneId.getValue();
@@ -182,13 +221,25 @@ public class TimeRangePicker extends ToggleButton {
     }
 
     private void updateText() {
-        Dialogs.runOnFXThread(()->{
+        Dialogs.runOnFXThread(() -> {
             this.timeRange.setValue(TimeRange.of(timeRangePickerController.startDate.getDateTimeValue(), timeRangePickerController.endDate.getDateTimeValue()));
-            timeRangeText.setText(String.format("From %s to %s (%s)",
+            timeRangeLabel.setText(String.format("From %s to %s (%s)",
                     timeRangePickerController.startDate.getDateTimeValue().format(timeRangePickerController.startDate.getFormatter()),
                     timeRangePickerController.endDate.getDateTimeValue().format(timeRangePickerController.endDate.getFormatter()),
                     getZoneId().toString()));
         });
+    }
+
+    public Supplier<TimeRange> getOnResetInterval() {
+        return onResetInterval.get();
+    }
+
+    public ObjectProperty<Supplier<TimeRange>> onResetIntervalProperty() {
+        return onResetInterval;
+    }
+
+    public void setOnResetInterval(Supplier<TimeRange> onResetInterval) {
+        this.onResetInterval.set(onResetInterval);
     }
 
     public TimeRange getSelectedRange() {
