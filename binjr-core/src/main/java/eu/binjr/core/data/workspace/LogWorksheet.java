@@ -72,7 +72,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
-        this.dividerPosition = new SimpleDoubleProperty(0.7);
+        this.dividerPosition = new SimpleDoubleProperty(0.85);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
