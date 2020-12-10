@@ -19,3 +19,8 @@
 
 ### Beta 2
 * _[New]_ Added a "Reset Time Range" button to TimeRangePicker control 
+
+### Beta 3
+* _[Change]_ Visual tweaks on severity tags on log worksheet view in dark theme. 
+* _[Fixed]_ Failed to load a workspace containing a log worksheet that uses a built-in parsing profile.
+
