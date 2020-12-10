@@ -30,6 +30,8 @@ import org.apache.logging.log4j.Level;
 
 import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Locale;
+import java.util.Map;
 
 /**
  * Manage all user preferences
@@ -278,5 +280,29 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     private static class UserPreferencesHolder {
         private final static UserPreferences instance = new UserPreferences();
+    }
+
+    private final Map<String, String> severityStyleMap = Map.ofEntries(
+            Map.entry("finer", "trace"),
+            Map.entry("finest", "trace"),
+            Map.entry("trace", "trace"),
+            Map.entry("fine", "debug"),
+            Map.entry("debug", "debug"),
+            Map.entry("config", "perf"),
+            Map.entry("from_cache", "perf"),
+            Map.entry("perf", "perf"),
+            Map.entry("stdout", "info"),
+            Map.entry("ok", "info"),
+            Map.entry("info", "info"),
+            Map.entry("timeout", "warn"),
+            Map.entry("warning", "warn"),
+            Map.entry("warn", "warn"),
+            Map.entry("severe", "error"),
+            Map.entry("stderr", "error"),
+            Map.entry("error", "error"),
+            Map.entry("fatal", "fatal"));
+    public String mapSeverityStyle(String toMap) {
+        var style = severityStyleMap.get(toMap.toLowerCase(Locale.ROOT));
+        return (style == null) ? "unknown" : style;
     }
 }

@@ -1820,51 +1820,6 @@
 .styled-text-area .comment {
     -fx-fill: teal;
 }
-.styled-text-area .finest,
-.styled-text-area .finer,
-.styled-text-area .trace,
-.log-trace {
-    -fx-fill: GRAY;
-}
-
-.styled-text-area .fine,
-.styled-text-area .debug,
-.log-debug {
-    -fx-fill: LIGHTBLUE;
-}
-
-.styled-text-area .config,
-.styled-text-area .from_cache,
-.styled-text-area .perf,
-.log-perf {
-    -fx-fill: #42eab3;
-}
-
-.styled-text-area .stdout,
-.styled-text-area .ok,
-.styled-text-area .info,
-.log-info {
-    -fx-fill: -fx-text-background-color;
-}
-
-.styled-text-area .warning,
-.styled-text-area .timeout,
-.styled-text-area .warn,
-.log-warn {
-    -fx-fill: GOLD;
-}
-
-.styled-text-area .severe,
-.styled-text-area .stderr,
-.styled-text-area .error,
-.log-error {
-    -fx-fill: TOMATO;
-}
-
-.styled-text-area .fatal,
-.log-fatal {
-    -fx-fill: RED;
-}
 
 .syntax-help-popup {
     -fx-effect: null;
@@ -1876,69 +1831,195 @@
 
 .facet-pill {
     -fx-padding: 5 10 5 10;
-    -fx-text-fill: white;
     -fx-background-radius: 15;
-    -fx-background-color: -binjr-button-background-color;
+    -fx-background-color: #FFFFFF50;
 
-    /*-fx-border-with: 0;*/
-    /*-fx-border-color: -binjr-button-background-color;*/
-    /*-fx-border-radius: 15;*/
+    -fx-text-fill: #FFFFFF;
+    -fx-border-color: #FFFFFF;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 15;
 }
 
-.facet-pill-finer,
-.facet-pill-finest,
+.facet-pill .box {
+    -fx-border-width: 0.5;
+}
+.facet-pill:selected .box .mark {
+    -fx-border-width: 0;
+}
+
+/**** TRACE ****/
+{
+    -trace-color:  #808080;
+}
+
 .facet-pill-trace {
-    -fx-background-color: GRAY;
+    -fx-background-color: #80808050;
+    -fx-text-fill: -trace-color;
+    -fx-border-color: -trace-color;
 }
 
-.facet-pill-fine,
+.facet-pill-trace .box {
+    -fx-text-fill:  -trace-color;
+    -fx-border-color: -trace-color;
+}
+
+.facet-pill-trace:selected .box .mark{
+    -fx-background-color:  -trace-color;
+}
+
+.styled-text-area .trace,
+.log-trace {
+    -fx-fill: -trace-color;
+}
+
+/**** DEBUG ****/
+{
+    -debug-color:  #ADD8E6;
+}
+
 .facet-pill-debug {
-    -fx-background-color: STEELBLUE;
+    -fx-background-color: #ADD8E650;
+    -fx-text-fill: -debug-color;
+    -fx-border-color: -debug-color;
 }
 
-.facet-pill-config,
-.facet-pill-from_cache,
+.facet-pill-debug .box {
+    -fx-text-fill:  -debug-color;
+    -fx-border-color: -debug-color;
+}
+
+.facet-pill-debug:selected .box .mark{
+    -fx-background-color:  -debug-color;
+}
+
+.styled-text-area .debug,
+.log-debug {
+    -fx-fill: -debug-color;
+}
+
+/**** PERF ****/
+{
+    -perf-color:  #42eab3;
+}
+
 .facet-pill-perf {
-    -fx-background-color: #268f69;
+    -fx-background-color: #42eab350;
+    -fx-text-fill: -perf-color;
+    -fx-border-color: -perf-color;
 }
 
-.facet-pill-stdout,
-.facet-pill-ok,
+.facet-pill-perf .box {
+    -fx-text-fill:  -perf-color;
+    -fx-border-color: -perf-color;
+}
+
+.facet-pill-perf:selected .box .mark{
+    -fx-background-color:  -perf-color;
+}
+
+.styled-text-area .perf,
+.log-perf {
+    -fx-fill: -perf-color;
+}
+
+/**** INFO ****/
+{
+    -info-color: white;
+}
 .facet-pill-info {
-    -fx-text-fill: black;
-    -fx-background-color: #d6d5d5;
+    -fx-background-color: #ffffff50;
+    -fx-text-fill:  -info-color;
+    -fx-border-color: -info-color;
+}
+.facet-pill-info .box {
+    -fx-text-fill: -info-color;
+    -fx-border-color: -info-color;
 }
 
-.facet-pill-warning,
-.facet-pill-timeout,
+.facet-pill-info:selected .box .mark{
+    -fx-background-color: -info-color;
+}
+
+.styled-text-area .info,
+.log-info {
+    -fx-fill: -info-color;
+}
+
+/**** WARN ****/
+{
+    -warn-color: #fbca04;
+}
+
 .facet-pill-warn {
-    -fx-text-fill: black;
-    -fx-background-color: #c8b23e;
+    -fx-background-color: #fbca0450;
+    -fx-text-fill:  -warn-color;
+    -fx-border-color:  -warn-color;
 }
 
-
-.facet-pill-severe:selected .box .mark,
-.facet-pill-warning:selected .box .mark,
-.facet-pill-stderr:selected .box .mark,
-.facet-pill-stdout:selected .box .mark,
-.facet-pill-error:selected .box .mark,
-.facet-pill-ok:selected .box .mark,
-.facet-pill-info:selected .box .mark,
-.facet-pill-timeout:selected .box .mark,
-.facet-pill-warn:selected .box .mark {
-    -fx-background-color: black;
+.facet-pill-warn .box {
+    -fx-text-fill:  -warn-color;
+    -fx-border-color:  -warn-color;
 }
 
-.facet-pill-severe,
-.facet-pill-stderr,
+.facet-pill-warn:selected .box .mark{
+    -fx-background-color:  -warn-color;
+}
+
+.styled-text-area .warn,
+.log-warn {
+    -fx-fill: -warn-color;
+}
+
+/**** ERROR ****/
+{
+    -error-color:  #FF6347;
+}
+
 .facet-pill-error {
-    -fx-text-fill: black;
-    -fx-background-color: #fd5454;
+    -fx-background-color: #FF634750;
+    -fx-text-fill: -error-color;
+    -fx-border-color: -error-color;
+}
+
+.facet-pill-error .box {
+    -fx-text-fill:  -error-color;
+    -fx-border-color: -error-color;
+}
+
+.facet-pill-error:selected .box .mark{
+    -fx-background-color:  -error-color;
+}
+
+.styled-text-area .error,
+.log-error {
+    -fx-fill:  -error-color;
+}
+
+/**** FATAL ****/
+{
+    -fatal-color:  #FF0000;
 }
 
 .facet-pill-fatal {
-    -fx-background-color: DARKRED;
+    -fx-background-color: #FF000050;
+    -fx-text-fill: -fatal-color;
+    -fx-border-color: -fatal-color;
 }
+
+.facet-pill-fatal .box {
+    -fx-text-fill:  -fatal-color;
+    -fx-border-color: -fatal-color;
+}
+
+.facet-pill-fatal:selected .box .mark{
+    -fx-background-color:  -fatal-color;
+}
+
+.styled-text-area .fatal,
+.log-fatal {
+    -fx-fill: -fatal-color;
+}
+
 
 .busy-indicator {
     -fx-background-color: rgba(0, 0, 0, .6);
@@ -1946,7 +2027,7 @@
 
 .busy-indicator .title-frame {
     -fx-background-radius: 8;
-    -fx-background-color:  rgba(0, 0, 0, .8);
+    -fx-background-color: rgba(0, 0, 0, .8);
 }
 
 .progress-bar {
@@ -1955,17 +2036,20 @@
     -fx-indeterminate-bar-flip: false;
     -fx-indeterminate-bar-animation-time: 2;
 }
+
 .progress-bar > .bar {
     -fx-background-color: -binjr-dark-blue-color;
     -fx-background-insets: 2 2 2 2;
     -fx-background-radius: 0;
     -fx-padding: 0.75em;
 }
+
 .progress-bar:indeterminate > .bar {
     -fx-background-color: linear-gradient(to left, transparent, -binjr-dark-blue-color);
 }
+
 .progress-bar > .track {
-    -fx-background-color:  -binjr-window-background-color, -binjr-pane-background-color,  -binjr-window-background-color,  -binjr-window-background-color;
+    -fx-background-color: -binjr-window-background-color, -binjr-pane-background-color, -binjr-window-background-color, -binjr-window-background-color;
     -fx-background-insets: 0, 0 0 0 0, 1 1 1 1;
     -fx-background-radius: 0, 0, 0;
 }

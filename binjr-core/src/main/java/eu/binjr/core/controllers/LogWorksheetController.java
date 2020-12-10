@@ -224,7 +224,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
         timeRangePicker.setOnResetInterval(() -> {
             try {
-               return worksheet.getInitialTimeRange();
+                return worksheet.getInitialTimeRange();
             } catch (Exception e) {
                 Dialogs.notifyException("Error resetting time range", e);
             }
@@ -381,8 +381,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
 
         }, progressIndicator.progressProperty()));
-//        worksheet.getSeriesInfo().stream()
-//                .map(t -> t.getBinding().getAdapter()).findAny().ifPresent(a ->
         bindingManager.bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
         refresh();
@@ -451,7 +449,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 if (sourceBindings != null && !sourceBindings.isEmpty()) {
                     var l = sourceBindings.stream()
                             .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
-                            //      .map( binding-> (TimeSeriesInfo<SearchHit>)TimeSeriesInfo.fromBinding(binding))
                             .collect(Collectors.toList());
                     addBindings(l);
 
@@ -560,7 +557,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             severityListView.setAllEntries((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
                             severityListView.getFacetPills()
                                     .forEach(f -> {
-                                        f.getStyleClass().add("facet-pill-" + f.getFacet().getLabel().toLowerCase());
+                                        f.getStyleClass().add("facet-pill-" + userPrefs.mapSeverityStyle(f.getFacet().getLabel()));
                                         f.setSelected(worksheet.getQueryParameters().getSeverities().contains(f.getFacet().getLabel()));
                                     });
                             // Update filePath facet view
@@ -582,7 +579,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,
-                                            List.of(severity),
+                                            List.of(userPrefs.mapSeverityStyle(severity)),
                                             List.of("file-" + path.hashCode()));
                                 }
                                 // Add a dummy paragraph if result set is empty, otherwise doc creation will fail
@@ -654,7 +651,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void intiLogFileTable() {
         DecimalFormatTableCellFactory<TimeSeriesInfo<SearchHit>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
         alignRightCellFactory.setAlignment(TextAlignment.LEFT);
-        // alignRightCellFactory.setPattern("###");
         CheckBox showAllCheckBox = new CheckBox();
         TableColumn<TimeSeriesInfo<SearchHit>, Boolean> visibleColumn = new TableColumn<>();
         visibleColumn.setGraphic(showAllCheckBox);
@@ -834,7 +830,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if ( byAdapterEntry.getKey() instanceof ProgressAdapter) {
+            if (byAdapterEntry.getKey() instanceof ProgressAdapter) {
                 var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
                 // Group all queries with the same adapter and path
                 var bindingsByPath =
