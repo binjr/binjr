@@ -128,7 +128,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         params.put("rootPath", rootPath.toString());
         params.put("folderFilters", gson.toJson(folderFilters));
         params.put("fileExtensionsFilters", gson.toJson(fileExtensionsFilters));
-        params.put("parsingProfile", gson.toJson(parsingProfile));
+        params.put("parsingProfile", gson.toJson(CustomParsingProfile.of(parsingProfile)));
         return params;
     }
 
