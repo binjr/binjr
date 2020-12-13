@@ -16,9 +16,9 @@
 
 package eu.binjr.common.xml.adapters;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import javafx.beans.property.SimpleDoubleProperty;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 public class SimpleDoublePropertyXmlAdapter extends XmlAdapter<Double, SimpleDoubleProperty> {
 

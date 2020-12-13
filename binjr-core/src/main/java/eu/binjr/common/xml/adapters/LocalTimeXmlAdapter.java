@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
  * <p>
  * String format details: {@link DateTimeFormatter#ISO_LOCAL_TIME}
  *
- * @see javax.xml.bind.annotation.adapters.XmlAdapter
  * @see LocalTime
  */
 public class LocalTimeXmlAdapter extends TemporalAccessorXmlAdapter<LocalTime> {

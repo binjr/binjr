@@ -24,7 +24,7 @@ import java.time.format.DateTimeFormatter;
  * <p>
  * String format details: {@link DateTimeFormatter#ISO_ZONED_DATE_TIME}
  *
- * @see javax.xml.bind.annotation.adapters.XmlAdapter
+ * @see jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @see ZonedDateTime
  */
 public class ZonedDateTimeXmlAdapter extends TemporalAccessorXmlAdapter<ZonedDateTime> {

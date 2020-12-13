@@ -16,12 +16,14 @@
 
 package eu.binjr.common.xml;
 
-import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
+import jakarta.xml.bind.Unmarshaller;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 
-import javax.xml.bind.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
@@ -40,10 +42,6 @@ import java.nio.file.Path;
  * @author Frederic Thevenet
  */
 public class XmlUtils {
-
-    private static class XMLInputFactoryHolder {
-        private final static XMLInputFactory instance = XMLInputFactory.newInstance();
-    }
 
     public static String getFirstAttributeValue(File file, String attribute) throws IOException, XMLStreamException {
         // Create stream reader
@@ -80,20 +78,20 @@ public class XmlUtils {
     /**
      * Deserialize the XML content of a stream into a Java object of the specified type.
      *
-     * @param classes    The classes of the object to unmarshall the XML as
+     * @param classes     The classes of the object to unmarshall the XML as
      * @param inputStream An input stream containing the XML to deserialize
      * @param <T>         The type of object to unmarshall the XML as
      * @return The deserialized object
      * @throws JAXBException if an error occurs during deserialization
      */
-    public static <T> T deSerialize( InputStream inputStream, Class<?>... classes) throws JAXBException {
+    public static <T> T deSerialize(InputStream inputStream, Class<?>... classes) throws JAXBException {
         return deSerialize(new StreamSource(inputStream), classes);
     }
 
     /**
      * Deserialize the XML content of a string into a Java object of the specified type.
      *
-     * @param classes  The classes of the object to unmarshall the XML as
+     * @param classes   The classes of the object to unmarshall the XML as
      * @param xmlString The XML to deserialize, as a string
      * @param <T>       The type of object to unmarshall the XML as
      * @return The deserialized object
@@ -106,7 +104,7 @@ public class XmlUtils {
     private static <T> T deSerialize(StreamSource source, Class<?>... classes) throws JAXBException {
         JAXBContext jc = JAXBContext.newInstance(classes);
         Unmarshaller unmarshaller = jc.createUnmarshaller();
-        return (T)unmarshaller.unmarshal(source);
+        return (T) unmarshaller.unmarshal(source);
     }
 
     /**
@@ -135,7 +133,7 @@ public class XmlUtils {
         }
     }
 
-    public static <T> String serialize(T object, Class<?>... classes ) throws IOException, JAXBException {
+    public static <T> String serialize(T object, Class<?>... classes) throws IOException, JAXBException {
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
             serialize(object, out, classes);
             return new String(out.toByteArray(), StandardCharsets.UTF_8);
@@ -144,12 +142,16 @@ public class XmlUtils {
     }
 
     public static <T> void serialize(T object, OutputStream out, Class<?>... classes) throws JAXBException {
-        if (classes ==null || classes.length == 0){
+        if (classes == null || classes.length == 0) {
             classes = new Class<?>[]{object.getClass()};
         }
         JAXBContext jaxbContext = JAXBContext.newInstance(classes);
         Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
         jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         jaxbMarshaller.marshal(object, out);
+    }
+
+    private static class XMLInputFactoryHolder {
+        private final static XMLInputFactory instance = XMLInputFactory.newInstance();
     }
 }

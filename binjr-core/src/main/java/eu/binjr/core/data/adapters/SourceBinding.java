@@ -20,7 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Worksheet;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

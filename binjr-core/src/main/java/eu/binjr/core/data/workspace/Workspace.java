@@ -31,8 +31,8 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.annotation.*;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileNotFoundException;

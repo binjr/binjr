@@ -32,10 +32,10 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.xml.adapters.*;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;

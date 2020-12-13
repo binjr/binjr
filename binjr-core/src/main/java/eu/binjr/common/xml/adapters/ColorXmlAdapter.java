@@ -16,9 +16,9 @@
 
 package eu.binjr.common.xml.adapters;
 
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
 
 /**
  * An {@link XmlAdapter} for {@link Color} objects

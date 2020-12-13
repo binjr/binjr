@@ -18,9 +18,9 @@ package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlAttribute;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import jakarta.xml.bind.annotation.XmlAttribute;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

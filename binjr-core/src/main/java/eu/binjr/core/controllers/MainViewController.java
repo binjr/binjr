@@ -70,7 +70,7 @@ import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;

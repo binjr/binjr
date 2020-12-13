@@ -16,7 +16,7 @@
 
 package eu.binjr.common.xml.adapters;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.time.ZoneId;
 
 /**

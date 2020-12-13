@@ -17,8 +17,7 @@
 package eu.binjr.common.xml.adapters;
 
 import eu.binjr.common.version.Version;
-
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
 
 public class VersionXmlAdapter extends XmlAdapter<String, Version> {

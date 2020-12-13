@@ -17,9 +17,10 @@
 package eu.binjr.common.xml.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+
 import java.sql.Time;
 
 /**

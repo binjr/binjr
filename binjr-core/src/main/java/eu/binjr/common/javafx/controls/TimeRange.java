@@ -20,10 +20,10 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.JsonAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 import javafx.scene.input.DataFormat;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.ZoneId;
@@ -40,6 +40,14 @@ public class TimeRange {
     private final ZonedDateTime end;
     private final ZoneId zoneId;
 
+    private TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
+        Objects.requireNonNull(beginning, "Parameter 'beginning' must not be null");
+        Objects.requireNonNull(end, "Parameter 'end' must not be null");
+        this.zoneId = beginning.getZone();
+        this.beginning = beginning;
+        this.end = end.withZoneSameInstant(zoneId);
+    }
+
     public static TimeRange of(TimeRange range) {
         return new TimeRange(range.getBeginning(), range.getEnd());
     }
@@ -53,12 +61,12 @@ public class TimeRange {
         return new TimeRange(end.minusHours(24), end);
     }
 
-    private TimeRange(ZonedDateTime beginning, ZonedDateTime end) {
-        Objects.requireNonNull(beginning, "Parameter 'beginning' must not be null");
-        Objects.requireNonNull(end, "Parameter 'end' must not be null");
-        this.zoneId = beginning.getZone();
-        this.beginning = beginning;
-        this.end = end.withZoneSameInstant(zoneId);
+    public static TimeRange deSerialize(String valueStr) {
+        String[] s = valueStr.split(DELIMITER);
+        if (s.length != 2) {
+            throw new IllegalArgumentException("Could not parse provided string as a TimeRange");
+        }
+        return TimeRange.of(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[0], ZonedDateTime::from), DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[1], ZonedDateTime::from));
     }
 
     public ZonedDateTime getBeginning() {
@@ -83,14 +91,6 @@ public class TimeRange {
 
     public String serialize() {
         return DateTimeFormatter.ISO_ZONED_DATE_TIME.format(beginning) + DELIMITER + DateTimeFormatter.ISO_ZONED_DATE_TIME.format(end);
-    }
-
-    public static TimeRange deSerialize(String valueStr) {
-        String[] s = valueStr.split(DELIMITER);
-        if (s.length != 2) {
-            throw new IllegalArgumentException("Could not parse provided string as a TimeRange");
-        }
-        return TimeRange.of(DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[0], ZonedDateTime::from), DateTimeFormatter.ISO_ZONED_DATE_TIME.parse(s[1], ZonedDateTime::from));
     }
 
     @Override

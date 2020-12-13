@@ -25,7 +25,7 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import javafx.beans.property.*;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.*;
+import jakarta.xml.bind.annotation.*;
 
 /**
  * A class that represents and holds the current state of the representation of a single time series

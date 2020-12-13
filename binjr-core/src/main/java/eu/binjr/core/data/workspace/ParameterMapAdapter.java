@@ -16,7 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
-import javax.xml.bind.annotation.adapters.XmlAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 import java.util.Map;
 import java.util.stream.Collectors;
 

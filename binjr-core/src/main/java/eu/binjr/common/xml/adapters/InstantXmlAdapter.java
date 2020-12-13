@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
  * <p>
  * String format details: {@link DateTimeFormatter#ISO_INSTANT}
  *
- * @see javax.xml.bind.annotation.adapters.XmlAdapter
  * @see Instant
  */
 public class InstantXmlAdapter extends TemporalAccessorXmlAdapter<Instant> {

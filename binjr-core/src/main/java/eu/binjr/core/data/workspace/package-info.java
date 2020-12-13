@@ -35,11 +35,11 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.xml.adapters.*;
 import eu.binjr.common.version.Version;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
+import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.scene.paint.Color;
 
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
