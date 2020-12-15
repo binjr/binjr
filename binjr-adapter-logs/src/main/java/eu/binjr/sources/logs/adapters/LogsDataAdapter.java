@@ -177,10 +177,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private void attachNodes(FilterableTreeItem<SourceBinding> configNode) throws DataAdapterException {
         try (var p = Profiler.start("Building log files binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
-            nodeDict.put(fileBrowser.toPath("/"), configNode);
-            for (var fsEntry : fileBrowser.listEntries(configPath ->
+            nodeDict.put(fileBrowser.toInternalPath("/"), configNode);
+            for (var fsEntry : fileBrowser.listEntries(configPath -> configPath.getFileName() != null &&
                     Arrays.stream(folderFilters)
-                            .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toPath(folder)))
+                            .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toInternalPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
                                     .map(f -> configPath.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))

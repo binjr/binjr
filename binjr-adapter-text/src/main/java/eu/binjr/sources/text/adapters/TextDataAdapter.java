@@ -130,10 +130,10 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
     private void attachTextFilesTree(FilterableTreeItem<SourceBinding> rootNode) throws DataAdapterException {
         try (var p = Profiler.start("Building text binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
-            nodeDict.put(fileBrowser.toPath("/"), rootNode);
+            nodeDict.put(fileBrowser.toInternalPath("/"), rootNode);
             for (var fsEntry : fileBrowser.listEntries(path ->
                     Arrays.stream(folderFilters)
-                            .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toPath(folder)))
+                            .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toInternalPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                             Arrays.stream(fileExtensionsFilters)
                                     .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
