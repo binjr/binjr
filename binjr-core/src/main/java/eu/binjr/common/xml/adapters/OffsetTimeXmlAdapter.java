@@ -24,7 +24,6 @@ import java.time.format.DateTimeFormatter;
  * <p>
  * String format details: {@link DateTimeFormatter#ISO_OFFSET_TIME}
  *
- * @see jakarta.xml.bind.annotation.adapters.XmlAdapter;
  * @see OffsetTime
  */
 public class OffsetTimeXmlAdapter extends TemporalAccessorXmlAdapter<OffsetTime> {
