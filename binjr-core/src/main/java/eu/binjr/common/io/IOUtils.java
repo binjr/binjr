@@ -16,6 +16,7 @@
 
 package eu.binjr.common.io;
 
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
 
 import java.io.ByteArrayOutputStream;
@@ -25,10 +26,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
-import java.nio.file.FileVisitResult;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.SimpleFileVisitor;
+import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.Objects;
@@ -145,6 +143,23 @@ public class IOUtils {
             } catch (Exception e) {
                 onError.accept(closeable, e);
             }
+        }
+    }
+
+    public static void copyDirectory(Path from, Path to, CopyOption... options) throws IOException {
+        try (final Stream<Path> sources = Files.walk(from)) {
+            sources.forEach(CheckedLambdas.wrap(src -> {
+                final Path dest = to.resolve(from.relativize(src).toString());
+                if (Files.isDirectory(src)) {
+                    if (Files.notExists(dest)) {
+                        logger.trace("Creating directory {}", dest);
+                        Files.createDirectories(dest);
+                    }
+                } else {
+                    logger.trace("Extracting file {} to {}", src, dest);
+                    Files.copy(src, dest, options);
+                }
+            }));
         }
     }
 
