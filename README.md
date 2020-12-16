@@ -1,4 +1,4 @@
-> *A public beta for* ***binjr***  *version 3 is  currently underway. [Visit the discussion thread here if you'd like to know more.]()*
+> *A public beta for* ***binjr***  *version 3 is  currently underway. [Visit the discussion thread here if you'd like to know more.](https://github.com/binjr/binjr/discussions/107)*
 ---
 # <a href="https://binjr.eu"> <img alt="binjr" width="30%" height="auto" src="https://binjr.eu/assets/images/binjr_title_dark.png"/></a>  
 
