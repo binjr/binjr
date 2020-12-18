@@ -51,7 +51,7 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
                     </padding>
                     <AnchorPane minHeight="0.0" minWidth="0.0">
-                        <VBox layoutX="53.0" layoutY="-10.0" spacing="10.0" AnchorPane.bottomAnchor="0.0"
+                        <VBox layoutX="53.0"  spacing="10.0" AnchorPane.bottomAnchor="0.0"
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" fillWidth="true">
                             <Label text="Theme"/>
                             <ChoiceBox fx:id="uiThemeChoiceBox"  maxWidth="1.7976931348623157E308" />

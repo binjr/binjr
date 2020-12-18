@@ -24,10 +24,12 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Point2D;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -74,7 +76,6 @@ public class XYChartCrosshair<X, Y> {
     private Point2D selectionStart = new Point2D(-1, -1);
     private Point2D mousePosition = new Point2D(-1, -1);
     private Consumer<Map<XYChart<X, Y>, XYChartSelection<X, Y>>> selectionDoneEvent;
-
 
     /**
      * Initializes a new instance of the {@link XYChartCrosshair} class.
@@ -250,10 +251,10 @@ public class XYChartCrosshair<X, Y> {
             var plotArea = chartInfo.getPlotArea();
             charts.forEach((c, f) -> {
                 s.put(c, new XYChartSelection<>(
-                        getValueFromXcoord(selection.getX() - 0.5),
-                        getValueFromXcoord(selection.getX() + selection.getWidth() - 0.5),
-                        getValueFromYcoord(c, Math.min(plotArea.getMaxY(), (selection.getY() + selection.getHeight()) - 0.5)),
-                        getValueFromYcoord(c, Math.max(plotArea.getMinY(), (selection.getY() - 0.5))),
+                        getValueFromXcoord(selection.getX()),
+                        getValueFromXcoord(selection.getX() + selection.getWidth()),
+                        getValueFromYcoord(c, Math.min(plotArea.getMaxY(), (selection.getY() + selection.getHeight()))),
+                        getValueFromYcoord(c, Math.max(plotArea.getMinY(), (selection.getY()))),
                         selection.getHeight() != plotArea.getHeight()));
             });
             selectionDoneEvent.accept(s);
@@ -265,9 +266,9 @@ public class XYChartCrosshair<X, Y> {
             return;
         }
         var plotArea = chartInfo.getPlotArea();
-        horizontalMarker.setStartX(plotArea.getMinX() + 0.5);
-        horizontalMarker.setEndX(plotArea.getMaxX() + 0.5);
-        horizontalMarker.setStartY(mousePosition.getY() + 0.5);
+        horizontalMarker.setStartX(plotArea.getMinX());
+        horizontalMarker.setEndX(plotArea.getMaxX());
+        horizontalMarker.setStartY(mousePosition.getY());
         horizontalMarker.setEndY(horizontalMarker.getStartY());
         yAxisLabel.setLayoutX(Math.min(parent.getWidth() - yAxisLabel.getWidth(), plotArea.getMaxX() + 5));
         yAxisLabel.setLayoutY(Math.min(mousePosition.getY() + 5, plotArea.getMaxY() - yAxisLabel.getHeight()));
@@ -300,14 +301,14 @@ public class XYChartCrosshair<X, Y> {
             return;
         }
         var plotArea = chartInfo.getPlotArea();
-        verticalMarker.setStartX(mousePosition.getX() + 0.5);
+        verticalMarker.setStartX(mousePosition.getX());
         verticalMarker.setEndX(verticalMarker.getStartX());
         if (displayFullHeightMarker.getValue()) {
             verticalMarker.setStartY(2);
             verticalMarker.setEndY(parent.getHeight() - 2);
         } else {
-            verticalMarker.setStartY(plotArea.getMinY() + 0.5);
-            verticalMarker.setEndY(plotArea.getMaxY() + 0.5);
+            verticalMarker.setStartY(plotArea.getMinY());
+            verticalMarker.setEndY(plotArea.getMaxY());
         }
         xAxisLabel.setLayoutY(plotArea.getMaxY() + 4);
         xAxisLabel.setLayoutX(Math.min(mousePosition.getX() + 4, plotArea.getMaxX() - xAxisLabel.getWidth()));
@@ -315,10 +316,28 @@ public class XYChartCrosshair<X, Y> {
         xAxisLabel.setText(xValuesFormatter.apply(currentXValue.getValue()));
     }
 
+
+    public static Point2D getShift(Node descendant, Region ancestor) {
+        double retX = 0.0;
+        double retY = 0.0;
+        Node curr = descendant;
+        while (curr != ancestor) {
+            var t = curr.getLocalToParentTransform();
+            retX += ancestor.snapSpaceX(t.getTx());
+            retY += ancestor.snapSpaceX(t.getTy());
+            curr = curr.getParent();
+            if (curr == null)
+                throw new IllegalArgumentException("'descendant' Node is not a descendant of 'ancestor");
+        }
+
+        return new Point2D(retX, retY);
+    }
+
     private void handleMouseMoved(MouseEvent event) {
         Rectangle2D area = chartInfo.getPlotArea();
-        double xPos = event.getX() + getXShift(masterChart, parent);
-        double yPos = event.getY() + getYShift(masterChart, parent);
+        var shift = getShift(masterChart, parent);
+        double xPos = parent.snapSpaceX(event.getX()) + shift.getX();
+        double yPos = parent.snapSpaceX(event.getY()) + shift.getY();
         mousePosition = new Point2D(Math.max(area.getMinX(), Math.min(area.getMaxX(), xPos)), Math.max(area.getMinY(), Math.min(area.getMaxY(), yPos)));
         if (horizontalMarkerVisible.get()) {
             drawHorizontalMarker();

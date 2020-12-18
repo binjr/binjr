@@ -13,6 +13,10 @@
     -palette-color-11:  #dddd00;
 }
 
+.root {
+    -fx-box-border: transparent;
+}
+
 .command-bar .command-bar-pinned-item {
     -fx-content-display: graphic-only;
 }
@@ -118,10 +122,8 @@
 }
 
 .skinnable-pane-border {
-    -fx-border-color: transparent;
-    -fx-border-width: 0;
+    -fx-background-insets: 0;
     -fx-padding: -1;
-    -fx-background-insets: 0 0 -1 0, 0, 1, 2;
 }
 
 .series-table .titled-pane {
