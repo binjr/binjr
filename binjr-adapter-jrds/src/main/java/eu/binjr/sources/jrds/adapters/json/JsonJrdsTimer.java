@@ -16,9 +16,21 @@
 
 package eu.binjr.sources.jrds.adapters.json;
 
+/**
+ * Data class for JRDS Timer
+ */
 public class JsonJrdsTimer {
+    /**
+     * Name
+     */
     public String Name;
+    /**
+     * Last collect
+     */
     public long LastCollect;
+    /**
+     * Last duration
+     */
     public long LastDuration;
 
     @Override

@@ -22,6 +22,10 @@ import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.UnitPrefixes;
 import javafx.scene.paint.Color;
 
+/**
+ * Builder used to build instances of {@link eu.binjr.core.data.adapters.SourceBinding} from values
+ * configured by the setters, for use with {@link JrdsDataAdapter}
+ */
 public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
     private static final Logger logger = Logger.create(JrdsBindingBuilder.class);
 
@@ -30,16 +34,30 @@ public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
         return this;
     }
 
-    public JrdsBindingBuilder withGraphDesc(Graphdesc graphdesc){
+    /**
+     * Sets the builder with all the parameters contained in a {@link Graphdesc} instance.
+     *
+     * @param graphdesc the graphdesc
+     * @return This builder.
+     */
+    public JrdsBindingBuilder withGraphDesc(Graphdesc graphdesc) {
         withLabel(isNullOrEmpty(graphdesc.name) ?
                 (isNullOrEmpty(graphdesc.graphName) ?
                         "???" : graphdesc.graphName) : graphdesc.name);
-        withGraphType( getChartType(graphdesc));
+        withGraphType(getChartType(graphdesc));
         withPrefix(findPrefix(graphdesc));
         withUnitName(graphdesc.verticalLabel);
         return self();
     }
 
+    /**
+     * Sets the builder with all the parameters contained in the {@link eu.binjr.sources.jrds.adapters.Graphdesc.SeriesDesc}
+     * at the provided index
+     *
+     * @param graphdesc the graphdesc
+     * @param idx       the index
+     * @return This builder.
+     */
     public JrdsBindingBuilder withGraphDesc(Graphdesc graphdesc, int idx) {
         Graphdesc.SeriesDesc desc = graphdesc.seriesDescList.get(idx);
         withLabel(isNullOrEmpty(desc.name) ?
@@ -59,7 +77,7 @@ public class JrdsBindingBuilder extends TimeSeriesBinding.Builder {
                 (isNullOrEmpty(desc.name) ?
                         (isNullOrEmpty(desc.dsName) ?
                                 "???" : desc.dsName) : desc.name) : desc.legend);
-        withGraphType( getChartType(desc));
+        withGraphType(getChartType(desc));
         withPrefix(findPrefix(graphdesc));
         withUnitName(graphdesc.verticalLabel);
         return self();

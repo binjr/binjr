@@ -32,6 +32,9 @@ import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.sources.jrds.adapters.json.JsonJrdsItem;
 import eu.binjr.sources.jrds.adapters.json.JsonJrdsTree;
+import jakarta.xml.bind.JAXB;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import org.apache.http.HttpEntity;
@@ -43,9 +46,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import jakarta.xml.bind.JAXB;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -65,11 +65,11 @@ import java.util.stream.Collectors;
  */
 @XmlAccessorType(XmlAccessType.FIELD)
 public class JrdsDataAdapter extends HttpDataAdapter<Double> {
-    public static final String JRDS_FILTER = "filter";
-    public static final String JRDS_TREE = "tree";
-    protected static final String ENCODING_PARAM_NAME = "encoding";
-    protected static final String ZONE_ID_PARAM_NAME = "zoneId";
-    protected static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
+    private static final String JRDS_FILTER = "filter";
+    private static final String JRDS_TREE = "tree";
+    private static final String ENCODING_PARAM_NAME = "encoding";
+    private static final String ZONE_ID_PARAM_NAME = "zoneId";
+    private static final String TREE_VIEW_TAB_PARAM_NAME = "treeViewTab";
     private static final Logger logger = Logger.create(JrdsDataAdapter.class);
     private static final char DELIMITER = ',';
     private final Gson gson;
@@ -221,6 +221,13 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
 
     //endregion
 
+    /**
+     * Returns a collection of filters provided by the JRDS server.
+     *
+     * @return a collection of filters provided by the JRDS server.
+     * @throws DataAdapterException if an error occurs while parsing the server's response.
+     * @throws URISyntaxException   if the generated url is not valid.
+     */
     public Collection<String> discoverFilters() throws DataAdapterException, URISyntaxException {
         try {
             JsonJrdsTree t = gson.fromJson(getJsonTree(treeViewTab.getCommand(), treeViewTab.getArgument()), JsonJrdsTree.class);

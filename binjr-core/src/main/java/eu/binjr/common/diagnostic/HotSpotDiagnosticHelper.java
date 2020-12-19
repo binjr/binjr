@@ -24,6 +24,9 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * Defines methods for HotSpot specific diagnistic commands.
+ */
 public interface HotSpotDiagnosticHelper {
     HotSpotDiagnosticMXBean HOTSPOT_DIAGNOSTIC = ManagementFactory.getPlatformMXBean(HotSpotDiagnosticMXBean.class);
 

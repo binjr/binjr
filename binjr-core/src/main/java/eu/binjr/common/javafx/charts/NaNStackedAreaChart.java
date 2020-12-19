@@ -23,6 +23,12 @@ import javafx.scene.chart.XYChart;
 
 import java.util.*;
 
+/**
+ * A {@link StackedAreaChart} that support NaN values in series.
+ *
+ * @param <X> Type for the X axis
+ * @param <Y> Type for the Y axis
+ */
 public class NaNStackedAreaChart<X, Y> extends StackedAreaChart<X, Y> {
 
 

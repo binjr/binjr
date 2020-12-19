@@ -22,13 +22,37 @@ package eu.binjr.sources.jrds.adapters;
  * @author Frederic Thevenet
  */
 public enum JrdsTreeViewTab {
+    /**
+     * All Hosts
+     */
     HOSTS_TAB("All Hosts", "hoststab", null),
+    /**
+     * Single Host
+     */
     SINGLE_HOST("Host: ", "hoststab", "host"),
+    /**
+     * All Services
+     */
     SERVICE_TAB("All Services", "servicestab", null),
+    /**
+     * All Views
+     */
     VIEWS_TAB("All Views", "viewstab", null),
+    /**
+     * All Filters
+     */
     FILTER_TAB("All Filters", "filtertab", null),
+    /**
+     * Single Filter
+     */
     SINGLE_FILTER("Filter: ", "filtertab", "filter"),
+    /**
+     * All Tags
+     */
     TAGS_TAB("All Tags", "tagstab", null),
+    /**
+     * Single Tag
+     */
     SINGLE_TAG("Tag: ", "tagstab", "filter");
 
     private final String argument;

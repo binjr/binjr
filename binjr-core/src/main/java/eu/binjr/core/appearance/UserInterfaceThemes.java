@@ -32,6 +32,9 @@ import java.util.Set;
 public interface UserInterfaceThemes {
     Logger logger = Logger.create(UserInterfaceThemes.class);
 
+    /**
+     * A holder class for a singleton instance of set of {@link UserInterfaceThemes}
+     */
     class UiThemesHolder {
         private final static Set<UserInterfaceThemes> instance = loadUiThemes();
 

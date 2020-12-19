@@ -26,6 +26,9 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Path;
 import java.util.function.Supplier;
 
+/**
+ * Defines methods for a diagnostic command.
+ */
 public interface DiagnosticCommand {
     DiagnosticCommand local = ((Supplier<DiagnosticCommand>) () -> {
         try {

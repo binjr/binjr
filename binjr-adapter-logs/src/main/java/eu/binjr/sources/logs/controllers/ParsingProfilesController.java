@@ -34,6 +34,7 @@ import eu.binjr.sources.logs.adapters.LogsAdapterPreferences;
 import eu.binjr.sources.logs.adapters.LogsDataAdapter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.ComboBoxTableCell;
@@ -50,6 +51,7 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 import java.io.File;
+import java.net.URL;
 import java.nio.file.Files;
 import java.time.ZoneId;
 import java.util.*;
@@ -61,8 +63,10 @@ import java.util.stream.Stream;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 
-
-public class ParsingProfilesController {
+/**
+ * The controller class for ParsingProfileView
+ */
+public class ParsingProfilesController implements Initializable {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
     private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
     private final LogsAdapterPreferences userPrefs;
@@ -266,6 +270,9 @@ public class ParsingProfilesController {
         Dialogs.getStage(root).close();
     }
 
+    /**
+     * Initalizes a new instance of the {@link ParsingProfilesController} class.
+     */
     public ParsingProfilesController() {
         LogsAdapterPreferences p;
         try {
@@ -278,7 +285,8 @@ public class ParsingProfilesController {
     }
 
     @FXML
-    void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
         assert root != null : "fx:id=\"root\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert expressions != null : "fx:id=\"expressions\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert lineTemplate != null : "fx:id=\"lineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
@@ -471,7 +479,7 @@ public class ParsingProfilesController {
         return paletteLookupTable.computeIfAbsent(cg, key -> paletteEntriesSequence.getAndIncrement() % 12);
     }
 
-    public StyleSpans<Collection<String>> computeParsingProfileSyntaxHighlighting(String text) {
+    private StyleSpans<Collection<String>> computeParsingProfileSyntaxHighlighting(String text) {
         Matcher matcher = GROUP_TAG_PATTERN.matcher(text);
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
@@ -555,7 +563,10 @@ public class ParsingProfilesController {
         notificationLabel.setVisible(true);
     }
 
-    public static class NameExpressionPair {
+    /**
+     * Defines a name/expression pair.
+     */
+    private static class NameExpressionPair {
         private NamedCaptureGroup name;
         private String expression;
 
@@ -564,18 +575,34 @@ public class ParsingProfilesController {
             this.expression = expression;
         }
 
+        /**
+         * Returns he expression
+         * @return The expression
+         */
         public String getExpression() {
             return expression;
         }
 
+        /**
+         * Returns the name
+         * @return The name
+         */
         public NamedCaptureGroup getName() {
             return name;
         }
 
+        /**
+         * Sets the name
+         * @param name
+         */
         public void setName(NamedCaptureGroup name) {
             this.name = name;
         }
 
+        /**
+         * Sets the expression
+         * @param expression
+         */
         public void setExpression(String expression) {
             this.expression = expression;
         }

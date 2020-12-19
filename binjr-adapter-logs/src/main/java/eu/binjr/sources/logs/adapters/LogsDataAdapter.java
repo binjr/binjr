@@ -61,10 +61,10 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements ProgressAdapter<SearchHit> {
-    public static final String LOG_FILE_INDEX = "logFileIndex";
+    private static final String LOG_FILE_INDEX = "logFileIndex";
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
-    public static final String DEFAULT_PREFIX = "[Logs]";
+    private static final String DEFAULT_PREFIX = "[Logs]";
     private final String sourceNamePrefix;
 
     private final Set<String> indexedFiles = new HashSet<>();
@@ -73,7 +73,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
     private final MostRecentlyUsedList<String> userParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("userParsingProfiles", 100);
-    protected Path rootPath;
+    private Path rootPath;
     private Searchable index;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
@@ -182,9 +182,9 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                     Arrays.stream(folderFilters)
                             .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toInternalPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
-                            Arrays.stream(fileExtensionsFilters)
-                                    .map(f -> configPath.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
-                                    .reduce(Boolean::logicalOr).orElse(false))) {
+                    Arrays.stream(fileExtensionsFilters)
+                            .map(f -> configPath.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
+                            .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = configNode;
                 if (fsEntry.getPath().getParent() != null) {
@@ -346,6 +346,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         super.close();
     }
 
+    /**
+     * Returns the {@link EventParser} instance used by the adapter
+     *
+     * @return the {@link EventParser} instance used by the adapter
+     */
     public EventParser getLogParser() {
         return parser;
     }

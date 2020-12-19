@@ -18,14 +18,38 @@ package eu.binjr.sources.jrds.adapters.json;
 
 import java.util.Arrays;
 
+/**
+ * JRDS item data class
+ */
 public class JsonJrdsItem {
+    /**
+     * The name
+     */
     public String name;
+    /**
+     * The id
+     */
     public String id;
+    /**
+     * The type
+     */
     public String type;
+    /**
+     * The filter
+     */
     public String filter;
+    /**
+     * Children list
+     */
     public JsonTreeRef[] children;
 
+    /**
+     * TreeRef
+     */
     public static class JsonTreeRef {
+        /**
+         * reference
+         */
         public String _reference;
     }
 

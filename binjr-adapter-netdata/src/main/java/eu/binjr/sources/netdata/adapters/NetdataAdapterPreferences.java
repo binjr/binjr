@@ -50,8 +50,14 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<Number> groupingTime = integerPreference("groupingTime", 0);
 
+    /**
+     * The amount of time in seconds to read after the specified time interval
+     */
     public final ObservablePreference<Number> fetchReadBehindSeconds = integerPreference("fetchReadBehindSeconds", 10);
 
+    /**
+     *  The amount of time in seconds to read before the specified time interval
+     */
     public final ObservablePreference<Number> fetchReadAheadSeconds = integerPreference("fetchReadAheadSeconds", 10);
 
     /**
@@ -59,6 +65,12 @@ public class NetdataAdapterPreferences extends DataAdapterPreferences {
      */
     public ObservablePreference<Number> maxSamplesAllowed = integerPreference("maxSamplesAllowed", 10000);
 
+    /**
+     * Initialize a new instance of the {@link NetdataAdapterPreferences} class associated to
+     * a {@link DataAdapter} instance.
+     *
+     * @param dataAdapterClass the associated {@link DataAdapter}
+     */
     public NetdataAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }

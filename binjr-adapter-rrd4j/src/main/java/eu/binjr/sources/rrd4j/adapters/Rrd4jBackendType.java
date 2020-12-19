@@ -16,14 +16,25 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+/**
+ * RRD4J backend types.
+ */
 public enum Rrd4jBackendType {
-    //backends based on the java.io.* package. RRD data is stored in files on the disk
+    /**
+     *  Backend based on the java.io.* package. RRD data is stored in files on the disk
+     */
     FILE,
-    //backends based on the java.io.* package. RRD data is stored in files on the disk.
-    // This backend is "safe". Being safe means that RRD files can be safely shared between several JVM's.
+    /**
+     *  Backend based on the java.io.* package. RRD data is stored in files on the disk.
+     *  This backend is "safe". Being safe means that RRD files can be safely shared between several JVM's.
+     */
     SAFE,
-    // Backend based on the java.nio.* package. RRD data is stored in files on the disk
+    /**
+     * Backend based on the java.nio.* package. RRD data is stored in files on the disk
+     */
     NIO,
-    // Memory-oriented backends. RRD data is stored in memory, it gets lost as soon as JVM exits.
+    /**
+     *  Memory-oriented backend. RRD data is stored in memory, it gets lost as soon as JVM exits.
+     */
     MEMORY;
 }

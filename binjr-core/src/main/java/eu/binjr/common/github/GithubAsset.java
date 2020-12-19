@@ -21,6 +21,9 @@ import com.google.gson.annotations.SerializedName;
 import java.net.URL;
 import java.util.Date;
 
+/**
+ * A data class that represents a GitHub release asset.
+ */
 public class GithubAsset {
     private URL url;
     private int id;

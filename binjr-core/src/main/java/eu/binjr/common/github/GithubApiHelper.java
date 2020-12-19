@@ -51,14 +51,10 @@ import java.util.*;
  */
 public class GithubApiHelper {
     private static final Logger logger = Logger.create(GithubApiHelper.class);
-    protected String userCredentials;
     protected final CloseableHttpClient httpClient;
-    protected Gson gson;
     private final URI apiEndpoint;
-
-    private static class GithubApiHolder {
-        private final static GithubApiHelper instance = new GithubApiHelper();
-    }
+    protected String userCredentials;
+    protected Gson gson;
 
     private GithubApiHelper() {
         this(null);
@@ -104,20 +100,6 @@ public class GithubApiHelper {
      */
     public static ClosableGitHubApiHelper createCloseable() {
         return new ClosableGitHubApiHelper();
-    }
-
-    public static class ClosableGitHubApiHelper extends GithubApiHelper implements Closeable {
-        public ClosableGitHubApiHelper() {
-        }
-
-        public ClosableGitHubApiHelper(URI apiEndpoint) {
-            super(apiEndpoint);
-        }
-
-        @Override
-        public void close() throws IOException {
-            httpClient.close();
-        }
     }
 
     /**
@@ -301,5 +283,26 @@ public class GithubApiHelper {
             httpget.addHeader("Authorization", "Basic " + userCredentials);
         }
         return httpget;
+    }
+
+    private static class GithubApiHolder {
+        private final static GithubApiHelper instance = new GithubApiHelper();
+    }
+
+    /**
+     * An instance of {@link GithubApiHelper} that implements {@link Closeable}
+     */
+    public static class ClosableGitHubApiHelper extends GithubApiHelper implements Closeable {
+        public ClosableGitHubApiHelper() {
+        }
+
+        public ClosableGitHubApiHelper(URI apiEndpoint) {
+            super(apiEndpoint);
+        }
+
+        @Override
+        public void close() throws IOException {
+            httpClient.close();
+        }
     }
 }

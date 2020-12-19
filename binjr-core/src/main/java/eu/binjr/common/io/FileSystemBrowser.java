@@ -44,6 +44,33 @@ public class FileSystemBrowser implements Closeable {
     private final FileSystem fs;
 
     /**
+     * Initialize a new browser from a single root
+     *
+     * @param fsRoot the root path for the browser
+     * @throws IOException if an error occurs while initializing the browser.
+     */
+    private FileSystemBrowser(Path fsRoot) throws IOException {
+        this.fs = fsRoot.getFileSystem();
+        this.fsRoots = List.of(fsRoot);
+    }
+
+    /**
+     * Initialize a new browser from a list of roots and a {@link FileSystem}
+     * NB: All roots must belong to the same FileSystem
+     *
+     * @param fs      the FileSystem for the browser
+     * @param fsRoots a list of root directories to browse
+     * @throws IOException if an error occurs while initializing the browser.
+     */
+    private FileSystemBrowser(FileSystem fs, List<Path> fsRoots) throws IOException {
+        if (fsRoots.isEmpty()) {
+            throw new IOException("Cannot create a FileSystemBrowser with no root");
+        }
+        this.fs = fs;
+        this.fsRoots = fsRoots;
+    }
+
+    /**
      * Return a new {@link FileSystemBrowser} instance for the provided path.
      * Valid path can be either a folder of the default file system or a zip.jar file.
      *
@@ -94,39 +121,14 @@ public class FileSystemBrowser implements Closeable {
     }
 
     /**
-     * Initialize a new browser from a single root
-     *
-     * @param fsRoot the root path for the browser
-     * @throws IOException if an error occurs while initializing the browser.
-     */
-    private FileSystemBrowser(Path fsRoot) throws IOException {
-        this.fs = fsRoot.getFileSystem();
-        this.fsRoots = List.of(fsRoot);
-    }
-
-    /**
-     * Initialize a new browser from a list of roots and a {@link FileSystem}
-     * NB: All roots must belong to the same FileSystem
-     *
-     * @param fs      the FileSystem for the browser
-     * @param fsRoots a list of root directories to browse
-     * @throws IOException if an error occurs while initializing the browser.
-     */
-    private FileSystemBrowser(FileSystem fs, List<Path> fsRoots) throws IOException {
-        if (fsRoots.isEmpty()) {
-            throw new IOException("Cannot create a FileSystemBrowser with no root");
-        }
-        this.fs = fs;
-        this.fsRoots = fsRoots;
-    }
-
-    /**
      * Returns an {@link InputStream} for the file system entry identified by the provided path.
+     * <p>
+     * <b>NOTE:</b> It is the caller's responsibility to close the returned stream when no longer needed.
+     * </p>
      *
      * @param path the path of the file system entry to get a stream for.
      * @return an {@link InputStream} for the file system entry identified by the provided path.
      * @throws IOException If no entry could be identified in the underlying file system for the provided path.
-     * @apiNote It is the caller's responsibility to close the returned stream when no longer needed.
      */
     public InputStream getData(String path) throws IOException {
         return getData(p -> p.equals(toInternalPath(path)))
@@ -137,11 +139,12 @@ public class FileSystemBrowser implements Closeable {
 
     /**
      * Returns a collection of {@link InputStream} for all file system entries matching the provided path predicate.
-     *
+     * <p>
+     * <b>NOTE:</b> It is the caller's responsibility to close the returned stream when no longer needed.
+     * </p>
      * @param filter a predicate that filters the file system entries to return a stream for.
      * @return a collection of {@link InputStream} for all file system entries matching the provided path predicate.
      * @throws IOException If no entry could be identified in the underlying file system for the provided path.
-     * @apiNote It is the caller's responsibility to close the returned streams when no longer needed.
      */
     public Collection<InputStream> getData(Predicate<Path> filter) throws IOException {
         return getRootDirectories().stream().flatMap(CheckedLambdas.wrap(root -> {
@@ -161,7 +164,7 @@ public class FileSystemBrowser implements Closeable {
      */
     public Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException {
         return getRootDirectories().stream().flatMap(CheckedLambdas.wrap(root -> {
-            return Files.walk(root) .map(root::relativize)
+            return Files.walk(root).map(root::relativize)
                     .filter(filter)
                     .map(CheckedLambdas.wrap(p -> {
                         return new FileSystemEntry(Files.isDirectory(p), p, Files.size(root.resolve(p)));

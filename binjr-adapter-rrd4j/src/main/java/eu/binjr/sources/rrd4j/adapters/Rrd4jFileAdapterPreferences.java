@@ -28,9 +28,18 @@ import eu.binjr.core.data.adapters.DataAdapterPreferences;
  */
 public class Rrd4jFileAdapterPreferences extends DataAdapterPreferences {
 
+    /**
+     * The backend to be used by RRD4J to mount rrd files.
+     */
     public final ObservablePreference<Rrd4jBackendType> rrd4jBackend =
             enumPreference(Rrd4jBackendType.class, "rrd4jBackend", Rrd4jBackendType.NIO);
 
+    /**
+     * Initialize a new instance of the {@link Rrd4jFileAdapterPreferences} class associated to
+     * a {@link DataAdapter} instance.
+     *
+     * @param dataAdapterClass the associated {@link DataAdapter}
+     */
     public Rrd4jFileAdapterPreferences(Class<? extends DataAdapter<?>> dataAdapterClass) {
         super(dataAdapterClass);
     }

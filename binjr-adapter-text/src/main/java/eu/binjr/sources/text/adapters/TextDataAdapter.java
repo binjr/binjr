@@ -43,7 +43,10 @@ import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -53,13 +56,12 @@ import java.util.stream.Collectors;
  */
 public class TextDataAdapter extends BaseDataAdapter<String> {
     private static final Logger logger = Logger.create(TextDataAdapter.class);
-    protected Path rootPath;
     private static final Gson gson = new Gson();
-
+    private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
+    private Path rootPath;
     private FileSystemBrowser fileBrowser;
     private String[] folderFilters;
     private String[] fileExtensionsFilters;
-    private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
 
     /**
      * Initializes a new instance of the {@link TextDataAdapter} class.
@@ -239,6 +241,13 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
         super.close();
     }
 
+    /**
+     * Read the content of the text file located at the provided path
+     *
+     * @param path the path of the text file to read
+     * @return The content of the text file, as a String
+     * @throws IOException if an error occurs while reading the file.
+     */
     public String readTextFile(String path) throws IOException {
         try (Profiler ignored = Profiler.start("Extracting text from file " + path, logger::perf)) {
             try (var reader = new BufferedReader(new InputStreamReader(fileBrowser.getData(path), StandardCharsets.UTF_8))) {

@@ -24,6 +24,7 @@ import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LogEvent;
 import org.apache.logging.log4j.core.appender.AbstractAppender;
+import org.apache.logging.log4j.core.config.Property;
 import org.apache.logging.log4j.core.config.plugins.Plugin;
 import org.apache.logging.log4j.core.config.plugins.PluginAttribute;
 import org.apache.logging.log4j.core.config.plugins.PluginElement;
@@ -56,7 +57,7 @@ public final class TextFlowAppender extends AbstractAppender {
     protected TextFlowAppender(String name, Filter filter,
                                Layout<? extends Serializable> layout,
                                final boolean ignoreExceptions) {
-        super(name, filter, layout, ignoreExceptions);
+        super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
         logColors.put(Level.TRACE, "log-trace");
         logColors.put(Level.DEBUG, "log-debug");
         logColors.put(Logger.PERF, "log-perf");

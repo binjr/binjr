@@ -22,8 +22,17 @@ import java.util.Arrays;
  * POJO definition used to decode JSON message.
  */
 public class JsonJrdsTree {
+    /**
+     * indentifier
+     */
     public String identifier;
+    /**
+     * label
+     */
     public String label;
+    /**
+     * Items
+     */
     public JsonJrdsItem[] items;
 
     @Override

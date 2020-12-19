@@ -16,6 +16,9 @@
 
 package eu.binjr.sources.netdata.api;
 
+/**
+ * The gouping methods supported by Netdata
+ */
 public enum GroupingMethod {
     MIN("min"),
     MAX("max"),

@@ -16,6 +16,9 @@
 
 package eu.binjr.common.diagnostic;
 
+/**
+ * Signals that a diagnostic feature is not available for the current JVM implementation
+ */
 public class UnavailableDiagnosticFeatureException extends DiagnosticException {
     UnavailableDiagnosticFeatureException() {
         super("This diagnostic feature is not available for the current JVM implementation " +

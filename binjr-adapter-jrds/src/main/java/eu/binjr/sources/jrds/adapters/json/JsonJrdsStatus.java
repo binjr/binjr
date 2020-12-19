@@ -18,10 +18,25 @@ package eu.binjr.sources.jrds.adapters.json;
 
 import java.util.Arrays;
 
+/**
+ * Data class for JRDS status
+ */
 public class JsonJrdsStatus {
+    /**
+     * Hosts
+     */
     public int Hosts;
+    /**
+     * Probes
+     */
     public int Probes;
+    /**
+     * Timers
+     */
     public JsonJrdsTimer[] Timers;
+    /**
+     * Generation
+     */
     public int Generation;
 
     @Override

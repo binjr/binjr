@@ -16,10 +16,24 @@
 
 package eu.binjr.common.cache;
 
+/**
+ * Indicates that the implementing class can be cached using {@link LRUMapCapacityBound} or {@link LRUMapSizeBound}
+ *
+ * @param <T> The type for cached values.
+ */
 public interface Cacheable<T> {
-
+    /**
+     * Returns the cached value
+     *
+     * @return the cached value/
+     */
     T getValue();
 
+    /**
+     * Returns the size in bytes of the cached value.
+     *
+     * @return The size in bytes of the cached value.
+     */
     long getSize();
 
 }

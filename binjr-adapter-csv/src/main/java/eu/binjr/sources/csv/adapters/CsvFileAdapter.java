@@ -232,7 +232,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
         super.close();
     }
 
-    protected ConcurrentNavigableMap<Long, DataSample> getDataStore() throws DataAdapterException {
+    private ConcurrentNavigableMap<Long, DataSample> getDataStore() throws DataAdapterException {
         if (sortedDataStore == null) {
             try (InputStream in = Files.newInputStream(csvPath)) {
                 this.sortedDataStore = buildSortedDataStore(in);

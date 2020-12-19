@@ -27,6 +27,9 @@ import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ *
+ */
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogQueryParameters {
     private String filterQuery;
