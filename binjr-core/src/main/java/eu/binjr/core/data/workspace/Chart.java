@@ -17,7 +17,6 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.io.IOUtils;
-import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -25,21 +24,21 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.SourceCommunicationException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
+import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
 import eu.binjr.core.data.timeseries.transform.NanToZeroTransform;
 import eu.binjr.core.data.timeseries.transform.SortTransform;
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
+import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import jakarta.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -226,12 +225,18 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                                 String path = byPathEntry.getKey();
                                 logger.trace("Fetch sub-task '" + path + "' started");
                                 // Get data from the adapter
-                                var data = adapter.fetchData(
-                                        path,
-                                        startTime.toInstant(),
-                                        endTime.toInstant(),
-                                        byPathEntry.getValue(),
-                                        bypassCache);
+                                Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> data;
+                                try {
+                                    data = adapter.fetchData(
+                                            path,
+                                            startTime.toInstant(),
+                                            endTime.toInstant(),
+                                            byPathEntry.getValue(),
+                                            bypassCache);
+                                } catch (DataAdapterException e) {
+                                    Dialogs.notifyException("An error occurred while fetching data from source", e);
+                                    data = new HashMap<>();
+                                }
                                 if (data.isEmpty()) {
                                     // initialize processors with at least boundaries samples in it
                                     for (var info : byPathEntry.getValue()) {
