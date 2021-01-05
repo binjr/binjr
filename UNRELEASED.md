@@ -24,3 +24,6 @@
 * _[Change]_ Visual tweaks on severity tags on log worksheet view in dark theme. 
 * _[Fixed]_ Failed to load a workspace containing a log worksheet that uses a built-in parsing profile.
 
+### Beta 4  
+* _[Fixed]_ Error occurring while fetching data from a single adapter prevents plotting the data recovered from other adapters.
+
