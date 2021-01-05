@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -29,12 +29,14 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Source;
+import javax.xml.transform.*;
 import javax.xml.transform.sax.SAXSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Objects;
 
 /**
  * A collections of convenience methods to help with serialization and deserialization of XML to and from Java objects.
@@ -67,6 +69,28 @@ public class XmlUtils {
             xmlr.next();
         }
         return null;
+    }
+
+    public static String processXslt(String xslString, String xmlString) throws TransformerException, IOException {
+        Objects.requireNonNull(xslString, "xslString cannot be null");
+        Objects.requireNonNull(xmlString, "xmlString cannot be null");
+        return applyTransform(new StreamSource(new StringReader(xslString)), new StreamSource(new StringReader(xmlString)));
+    }
+
+    public static String processXslt(InputStream inXsl, InputStream inXml) throws TransformerException, IOException {
+        Objects.requireNonNull(inXsl, "inXsl cannot be null");
+        Objects.requireNonNull(inXml, "inXml cannot be null");
+        return applyTransform(new StreamSource(inXsl), new StreamSource(inXml));
+    }
+
+    private static String applyTransform(StreamSource xslt, StreamSource xml) throws TransformerException, IOException {
+        TransformerFactory factory = TransformerFactory.newInstance();
+        Transformer transformer = factory.newTransformer(xslt);
+        try (Writer outputWriter = new StringWriter()) {
+            Result outputResult = new StreamResult(outputWriter);
+            transformer.transform(xml, outputResult);
+            return outputWriter.toString();
+        }
     }
 
     public static <T> T deSerialize(File file, Class<?>... classes) throws JAXBException, IOException {

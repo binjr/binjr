@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -25,18 +25,21 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.CannotLoadWorkspaceException;
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.annotation.*;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -118,8 +121,20 @@ public class Workspace implements Dirtyable {
      * @throws CannotLoadWorkspaceException if an error occurs while loading the workspace.
      */
     public static Workspace from(File file) throws IOException, JAXBException, CannotLoadWorkspaceException {
-        sanityCheck(file);
-        Workspace workspace = XmlUtils.deSerialize(file, ReflectionHelper.INSTANCE.getClassesToBeBound().toArray(Class<?>[]::new));
+        Workspace workspace;
+        if (sanityCheck(file)) {
+            try {
+                var migrated = XmlUtils.processXslt(Workspace.class.getResourceAsStream("/eu/binjr/xsl/migrate_workspace_schema.xsl"),
+                        Files.newInputStream(file.toPath()));
+                workspace = XmlUtils.deSerialize(migrated, ReflectionHelper.INSTANCE.getClassesToBeBound().toArray(Class<?>[]::new));
+                Dialogs.notifyInfo("This workspace has been migrated from a previous version of binjr",
+                        "If you overwrite it, you might not be able to re-open it with a previous version anymore");
+            } catch (TransformerException e) {
+                throw new CannotLoadWorkspaceException("Error while migrating workspace to current schema", e);
+            }
+        } else {
+            workspace = XmlUtils.deSerialize(file, ReflectionHelper.INSTANCE.getClassesToBeBound().toArray(Class<?>[]::new));
+        }
         logger.debug(() -> "Successfully deserialized workspace " + workspace.toString());
         workspace.setPath(file.toPath());
         workspace.cleanUp();
@@ -127,7 +142,7 @@ public class Workspace implements Dirtyable {
     }
 
 
-    private static void sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
+    private static boolean sanityCheck(File file) throws IOException, CannotLoadWorkspaceException {
         if (file == null) {
             throw new IllegalArgumentException("File cannot be null");
         }
@@ -157,16 +172,15 @@ public class Workspace implements Dirtyable {
                         + foundVersion.toString() + ")");
             }
             if (foundVersion.compareTo(MINIMUM_SUPPORTED_SCHEMA_VERSION) < 0) {
-                throw new CannotLoadWorkspaceException(
-                        "This workspace is not compatible with the current version of binjr. (Minimum supported schema version="
-                                + MINIMUM_SUPPORTED_SCHEMA_VERSION.toString()
-                                + ", found="
-                                + foundVersion.toString() + ")");
+                // Returns true to signal workspace requires schema migration
+                return true;
             }
         } catch (XMLStreamException e) {
             throw new CannotLoadWorkspaceException("Error retrieving bjr schema version", e);
         }
+        return false;
     }
+
 
     /**
      * Add all the elements in the provided collection to the list of {@link XYChartsWorksheet} instances

@@ -25,5 +25,6 @@
 * _[Fixed]_ Failed to load a workspace containing a log worksheet that uses a built-in parsing profile.
 
 ### Beta 4  
+* _[Fixed]_ Workspaces saved with a previous schema version (2.2.0 or higher) are automatically migrated to the new format.
 * _[Fixed]_ Error occurring while fetching data from a single adapter prevents plotting the data recovered from other adapters.
 

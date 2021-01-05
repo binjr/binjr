@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -186,6 +186,22 @@ public class Dialogs {
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(position)
                 .owner(owner).showInformation());
+    }
+
+    /**
+     * Display an info notification
+     *
+     * @param title    the title for the notification
+     * @param message  the title for the notification
+     */
+    public static void notifyInfo(String title, String message) {
+        logger.info(title + " - " + message);
+        runOnFXThread(() -> Notifications.create()
+                .title(title)
+                .text(message)
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
+                .position(Pos.BOTTOM_RIGHT)
+                .owner(null).showInformation());
     }
 
     /**
