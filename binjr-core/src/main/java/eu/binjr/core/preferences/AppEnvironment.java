@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ public class AppEnvironment {
     public static final byte[] BINJR_PUBLIC_FINGER_PRINT = decode(
             "0xE3", "0xD2", "0xF8", "0x00", "0xBE", "0x2B", "0x44", "0xE5", "0x97", "0x44",
             "0x7F", "0x29", "0x41", "0x2E", "0xC8", "0xA8", "0x54", "0x00", "0xAC", "0x3F");
-    public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2020 Frederic Thevenet";
+    public static final String COPYRIGHT_NOTICE = "Copyright © 2016-2021 Frederic Thevenet";
     public static final String LICENSE = "Apache-2.0";
     public static final String PORTABLE_PROPERTY = "binjr.portable";
     public static final String MINIMUM_PLUGIN_API_LEVEL = "3.0.0";

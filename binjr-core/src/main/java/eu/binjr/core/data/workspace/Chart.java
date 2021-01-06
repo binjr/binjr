@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2020 Frederic Thevenet
+ *    Copyright 2016-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.Dirtyable;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.exceptions.SourceCommunicationException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.transform.AlignBoundariesTransform;
