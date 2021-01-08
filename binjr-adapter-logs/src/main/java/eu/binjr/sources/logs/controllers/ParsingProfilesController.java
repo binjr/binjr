@@ -566,7 +566,7 @@ public class ParsingProfilesController implements Initializable {
     /**
      * Defines a name/expression pair.
      */
-    private static class NameExpressionPair {
+    public static class NameExpressionPair {
         private NamedCaptureGroup name;
         private String expression;
 
@@ -577,6 +577,7 @@ public class ParsingProfilesController implements Initializable {
 
         /**
          * Returns he expression
+         *
          * @return The expression
          */
         public String getExpression() {
@@ -585,6 +586,7 @@ public class ParsingProfilesController implements Initializable {
 
         /**
          * Returns the name
+         *
          * @return The name
          */
         public NamedCaptureGroup getName() {
@@ -593,6 +595,7 @@ public class ParsingProfilesController implements Initializable {
 
         /**
          * Sets the name
+         *
          * @param name
          */
         public void setName(NamedCaptureGroup name) {
@@ -601,6 +604,7 @@ public class ParsingProfilesController implements Initializable {
 
         /**
          * Sets the expression
+         *
          * @param expression
          */
         public void setExpression(String expression) {

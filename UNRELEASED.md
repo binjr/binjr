@@ -28,3 +28,5 @@
 * _[Fixed]_ Workspaces saved with a previous schema version (2.2.0 or higher) are automatically migrated to the new format.
 * _[Fixed]_ Error occurring while fetching data from a single adapter prevents plotting the data recovered from other adapters.
 
+### Beta 5
+* _[Fixed]_ An error occurs when invoking the log parsing rules edit dialog box.
