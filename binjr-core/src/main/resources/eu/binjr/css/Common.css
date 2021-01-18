@@ -13,10 +13,6 @@
     -palette-color-11:  #dddd00;
 }
 
-.root {
-    -fx-box-border: transparent;
-}
-
 .command-bar .command-bar-pinned-item {
     -fx-content-display: graphic-only;
 }
@@ -140,15 +136,7 @@
     -fx-padding: 7;
 }
 
-/*.tooltip {*/
-/*    -fx-show-delay: 1000ms;*/
-/*}*/
 .crumb {
-    /*-fx-background-color:red;*/
-    /*-fx-border-color:blue;*/
-    /*-fx-text-fill:blue;*/
-    /*-fx-border-top-width:0;*/
-    /*-fx-border-bottom-width:1;*/
     -fx-border-width: 2;
     -fx-border-color: transparent;
     -fx-smooth: true;

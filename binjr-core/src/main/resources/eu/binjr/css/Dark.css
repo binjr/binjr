@@ -72,6 +72,9 @@
 
 }
 
+.root {
+    -fx-box-border: transparent;
+}
 
 /********************************
 *      button icons

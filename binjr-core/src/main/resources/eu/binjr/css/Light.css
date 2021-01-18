@@ -30,6 +30,9 @@
 
 }
 
+.root {
+    -fx-box-border: transparent;
+}
 
 .column-bold-text {
     /*-fx-text-fill: -binjr-background-color;*/
