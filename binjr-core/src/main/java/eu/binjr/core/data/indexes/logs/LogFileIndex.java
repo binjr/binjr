@@ -42,6 +42,7 @@ import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyWriter;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.*;
 import org.apache.lucene.store.ByteBuffersDirectory;
@@ -75,6 +76,7 @@ public class LogFileIndex implements Searchable {
     public static final String FIELD_CONTENT = "content";
     public static final String PATH = "filePath";
     private static final Logger logger = Logger.create(LogFileIndex.class);
+    public static final String DOC_URI = "docUri";
     protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;
     private final Directory taxonomyDirectory;
@@ -154,13 +156,16 @@ public class LogFileIndex implements Searchable {
     @Override
     public void add(String path, InputStream ias, boolean commit, EventParser parser) throws IOException {
         kilobytesRead.set(0);
+        try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
+            indexWriter.deleteDocuments(new Term(DOC_URI, path));
+        }
         try (Profiler ignored = Profiler.start("Indexing " + path, logger::perf)) {
             var n = new AtomicLong(0);
             try (Profiler p = Profiler.start(e -> logger.perf("Parsed and indexed " + n.get() + " lines: " + e.toMilliString()))) {
                 final AtomicLong nbLogEvents = new AtomicLong(0);
                 final AtomicBoolean taskDone = new AtomicBoolean(false);
                 final AtomicBoolean taskAborted = new AtomicBoolean(false);
-                final ArrayBlockingQueue<ParsedEvent> queue = new ArrayBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
+                final BlockingQueue<ParsedEvent> queue = new LinkedBlockingQueue<>(prefs.blockingQueueCapacity.get().intValue());
                 final List<Future<Integer>> results = new ArrayList<>();
 
                 for (int i = 0; i < parsingThreadsNumber; i++) {
@@ -174,7 +179,7 @@ public class LogFileIndex implements Searchable {
                                 // Park the thread for a while before polling again
                                 // as is it likely that producer is done.
                                 try {
-                                    Thread.sleep(100);
+                                    Thread.sleep(10);
                                 } catch (InterruptedException e) {
                                     Thread.currentThread().interrupt();
                                 }
@@ -368,7 +373,8 @@ public class LogFileIndex implements Searchable {
     }
 
     private void addLogEvent(String path, ParsedEvent event) throws IOException {
-        Document doc = new Document();
+        final Document doc = new Document();
+        doc.add(new StringField(DOC_URI, path, Field.Store.NO));
         doc.add(new TextField(FIELD_CONTENT, event.getText(), Field.Store.YES));
         doc.add(new SortedNumericDocValuesField(LINE_NUMBER, event.getSequence()));
         var millis = event.getTimestamp().toInstant().toEpochMilli();

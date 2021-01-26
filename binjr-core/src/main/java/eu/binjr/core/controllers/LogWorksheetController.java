@@ -97,6 +97,9 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -383,7 +386,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }, progressIndicator.progressProperty()));
         bindingManager.bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
-        refresh();
+        invalidate(false, false, false);
         super.initialize(location, resources);
     }
 
@@ -497,7 +500,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 }
             }
         }
-        this.refresh();
+        this.invalidate(false, false, false);
     }
 
     @Override
@@ -525,10 +528,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void refresh() {
-        invalidate(false, false);
+        invalidate(false, false, true);
     }
 
     private void invalidate(boolean saveToHistory, boolean resetPage) {
+        invalidate(saveToHistory, resetPage, false);
+    }
+
+    private void invalidate(boolean saveToHistory, boolean resetPage, boolean requestUpdate) {
         makeFilesCss(worksheet.getSeriesInfo());
         if (resetPage) {
             worksheet.setQueryParameters(new LogQueryParameters.Builder(worksheet.getQueryParameters())
@@ -536,14 +543,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
                     .build());
         }
         worksheet.getHistory().setHead(worksheet.getQueryParameters(), saveToHistory);
-        queryLogIndex();
+        queryLogIndex(requestUpdate);
     }
 
-    private void queryLogIndex() {
+    private void queryLogIndex(boolean requestUpdate) {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters());
+                        return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters(), requestUpdate);
                     },
                     event -> {
                         bindingManager.suspend();
@@ -808,7 +815,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private TimeSeriesProcessor<SearchHit> fetchDataFromSources(LogQueryParameters filter) throws DataAdapterException {
+    private TimeSeriesProcessor<SearchHit> fetchDataFromSources(LogQueryParameters filter, boolean requestUpdate) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
             if (seriesInfo.getBinding().getAdapter().isClosed()) {
@@ -839,7 +846,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         bindingsByPath.values().stream()
                                 .flatMap(Collection::stream)
                                 .filter(TimeSeriesInfo::isSelected)
-                                .collect(Collectors.toList()), true, worksheet.progressProperty());
+                                .collect(Collectors.toList()), requestUpdate, worksheet.progressProperty());
             }
         }
         Map<String, Collection<String>> facets = new HashMap<>();
