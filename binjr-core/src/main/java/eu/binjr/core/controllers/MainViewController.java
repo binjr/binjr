@@ -32,11 +32,13 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.core.update.UpdateManager;
+import jakarta.xml.bind.JAXBException;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -70,7 +72,6 @@ import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
-import jakarta.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -104,6 +105,8 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
+    private Binding<Boolean> noWorksheetPresent;
+    private Binding<Boolean> noSourcePresent;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
     public StackPane newWorksheetDropTarget;
@@ -208,13 +211,14 @@ public class MainViewController implements Initializable {
         assert saveMenuItem != null : "fx:id\"saveMenuItem\" was not injected!";
         assert openRecentMenu != null : "fx:id\"openRecentMenu\" was not injected!";
         assert contentView != null : "fx:id\"contentView\" was not injected!";
-        Binding<Boolean> selectWorksheetPresent = Bindings.size(tearableTabPane.getTabs()).isEqualTo(0);
-        Binding<Boolean> selectedSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
+        noWorksheetPresent = Bindings.size(tearableTabPane.getTabs()).isEqualTo(0);
+        noSourcePresent = Bindings.size(sourcesPane.getPanes()).isEqualTo(0);
+
         contentView.getDividers().stream().findFirst().ifPresent(divider -> {
             divider.setPosition(getWorkspace().getDividerPosition());
             getWorkspace().getBindingManager().bind(getWorkspace().dividerPositionProperty(), divider.positionProperty());
         });
-        sourcesPane.mouseTransparentProperty().bind(selectedSourcePresent);
+        sourcesPane.mouseTransparentProperty().bind(noSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
             for (var w : workspace.getWorksheets()) {
@@ -239,7 +243,7 @@ public class MainViewController implements Initializable {
                         Platform.runLater(() -> sourcesPane.setExpandedPane(oldPane));
                     }
                 });
-        addWorksheetLabel.visibleProperty().bind(selectWorksheetPresent);
+        addWorksheetLabel.visibleProperty().bind(noWorksheetPresent);
         tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
         tearableTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
@@ -1227,7 +1231,7 @@ public class MainViewController implements Initializable {
         });
 
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
-        addToCurrent.disableProperty().bind(Bindings.size(tearableTabPane.getTabs()).lessThanOrEqualTo(0));
+        addToCurrent.disableProperty().bind(noWorksheetPresent);
         addToCurrent.setOnShowing(event ->
                 addToCurrent.getItems()
                         .setAll(getSelectedWorksheetController()
