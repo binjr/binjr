@@ -85,7 +85,7 @@ public class ZonedDateTimePicker extends DatePicker {
             }
         });
 
-        valueProperty().addListener((observable, oldValue, newValue) -> {
+        ChangeListener<LocalDate> localDateChangeListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 if (dateTimeValue.get() == null) {
                     dateTimeValue.set(ZonedDateTime.of(newValue, LocalTime.now(), getZoneId()));
@@ -94,7 +94,9 @@ public class ZonedDateTimePicker extends DatePicker {
                     dateTimeValue.set(ZonedDateTime.of(newValue, time, getZoneId()));
                 }
             }
-        });
+        };
+
+        valueProperty().addListener(localDateChangeListener);
 
         ChangeListener<ZoneId> zoneIdChangeListener = (observable, oldValue, newValue) -> {
             if (newValue != null) {
@@ -103,11 +105,10 @@ public class ZonedDateTimePicker extends DatePicker {
         };
 
         dateTimeValue.addListener((observable, oldValue, newValue) -> {
-            this.zoneId.removeListener(zoneIdChangeListener);
-            zoneId.setValue(newValue.getZone());
-            this.zoneId.addListener(zoneIdChangeListener);
+            valueProperty().removeListener(localDateChangeListener);
             setValue(null);
             setValue(newValue == null ? null : newValue.toLocalDate());
+            valueProperty().addListener(localDateChangeListener);
         });
 
         getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
