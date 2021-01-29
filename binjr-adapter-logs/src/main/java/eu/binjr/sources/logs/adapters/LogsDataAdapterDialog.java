@@ -47,6 +47,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -173,6 +174,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
 
         return List.of(new LogsDataAdapter(path,
+                ZoneId.of(getSourceTimezone()),
                 prefs.folderFilters.get(),
                 prefs.fileExtensionFilters.get(),
                 parsingChoiceBox.getValue()));

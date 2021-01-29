@@ -20,6 +20,7 @@ import eu.binjr.common.logging.Logger;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.DatePicker;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
@@ -69,7 +70,6 @@ public class ZonedDateTimePicker extends DatePicker {
             }
 
             public LocalDate fromString(String stringValue) {
-
                 if (stringValue == null || stringValue.isEmpty()) {
                     dateTimeValue.set(null);
                     return null;
@@ -96,10 +96,18 @@ public class ZonedDateTimePicker extends DatePicker {
             }
         });
 
+        ChangeListener<ZoneId> zoneIdChangeListener = (observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                dateTimeValue.setValue(dateTimeValue.get().withZoneSameInstant(newValue));
+            }
+        };
+
         dateTimeValue.addListener((observable, oldValue, newValue) -> {
+            this.zoneId.removeListener(zoneIdChangeListener);
+            zoneId.setValue(newValue.getZone());
+            this.zoneId.addListener(zoneIdChangeListener);
             setValue(null);
             setValue(newValue == null ? null : newValue.toLocalDate());
-
         });
 
         getEditor().focusedProperty().addListener((observable, oldValue, newValue) -> {
@@ -111,11 +119,7 @@ public class ZonedDateTimePicker extends DatePicker {
             }
         });
 
-        this.zoneId.addListener((observable, oldValue, newValue) -> {
-            if (newValue != null) {
-                dateTimeValue.setValue(dateTimeValue.get().withZoneSameInstant(newValue));
-            }
-        });
+        this.zoneId.addListener(zoneIdChangeListener);
     }
 
     DateTimeFormatter getFormatter() {

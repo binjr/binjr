@@ -80,6 +80,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
     private EventParser parser;
+    private final ZoneId zoneId;
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -88,6 +89,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      */
     public LogsDataAdapter() throws DataAdapterException {
         super();
+        zoneId = ZoneId.systemDefault();
         sourceNamePrefix = DEFAULT_PREFIX;
     }
 
@@ -100,8 +102,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      * @param profile               the parsing profile to use.
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
-    public LogsDataAdapter(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile profile) throws DataAdapterException {
-        this(DEFAULT_PREFIX, rootPath, folderFilters, fileExtensionsFilters, profile);
+    public LogsDataAdapter(Path rootPath,
+                           ZoneId zoneId,
+                           String[] folderFilters,
+                           String[] fileExtensionsFilters,
+                           ParsingProfile profile) throws DataAdapterException {
+        this(DEFAULT_PREFIX, rootPath, zoneId, folderFilters, fileExtensionsFilters, profile);
     }
 
     /**
@@ -114,10 +120,16 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
      * @param profile               the parsing profile to use.
      * @throws DataAdapterException if an error occurs initializing the adapter.
      */
-    public LogsDataAdapter(String sourcePrefix, Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile profile) throws DataAdapterException {
+    public LogsDataAdapter(String sourcePrefix,
+                           Path rootPath,
+                           ZoneId zoneId,
+                           String[] folderFilters,
+                           String[] fileExtensionsFilters,
+                           ParsingProfile profile) throws DataAdapterException {
         super();
         this.sourceNamePrefix = sourcePrefix;
         this.rootPath = rootPath;
+        this.zoneId = zoneId;
         Map<String, String> params = new HashMap<>();
         initParams(rootPath, folderFilters, fileExtensionsFilters, profile);
     }
@@ -144,7 +156,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 gson.fromJson(validateParameterNullity(params, "parsingProfile"), CustomParsingProfile.class));
     }
 
-    private void initParams(Path rootPath, String[] folderFilters, String[] fileExtensionsFilters, ParsingProfile parsingProfile) throws DataAdapterException {
+    private void initParams(Path rootPath,
+                            String[] folderFilters,
+                            String[] fileExtensionsFilters,
+                            ParsingProfile parsingProfile) throws DataAdapterException {
         this.rootPath = rootPath;
         this.folderFilters = folderFilters;
         this.fileExtensionsFilters = fileExtensionsFilters;
@@ -328,7 +343,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     @Override
     public ZoneId getTimeZoneId() {
-        return ZoneId.systemDefault();
+        return zoneId;
     }
 
     @Override

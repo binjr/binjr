@@ -221,9 +221,6 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             if ( byAdapterEntry.getKey() instanceof ProgressAdapter) {
                 var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
-                // Group all queries with the same adapter
-                var bindingsByPath =
-                        byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
                 var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();

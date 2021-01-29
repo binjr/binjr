@@ -97,9 +97,6 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.*;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -536,14 +533,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private void invalidate(boolean saveToHistory, boolean resetPage, boolean requestUpdate) {
-        makeFilesCss(worksheet.getSeriesInfo());
-        if (resetPage) {
-            worksheet.setQueryParameters(new LogQueryParameters.Builder(worksheet.getQueryParameters())
-                    .setPage(0)
-                    .build());
-        }
-        worksheet.getHistory().setHead(worksheet.getQueryParameters(), saveToHistory);
-        queryLogIndex(requestUpdate);
+        Dialogs.runOnFXThread(() -> {
+            makeFilesCss(worksheet.getSeriesInfo());
+            if (resetPage) {
+                worksheet.setQueryParameters(new LogQueryParameters.Builder(worksheet.getQueryParameters())
+                        .setPage(0)
+                        .build());
+            }
+            worksheet.getHistory().setHead(worksheet.getQueryParameters(), saveToHistory);
+            queryLogIndex(requestUpdate);
+        });
     }
 
     private void queryLogIndex(boolean requestUpdate) {

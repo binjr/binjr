@@ -18,7 +18,7 @@
 * _[Fixed]_ Snapshots taken with the default output scaling use the main monitor scaling factor instead of the one on which the window is displayed. 
 
 ### Beta 2
-* _[New]_ Added a "Reset Time Range" button to TimeRangePicker control 
+* _[New]_ Added a "Reset Time Range" button to TimeRangePicker control.
 
 ### Beta 3
 * _[Change]_ Visual tweaks on severity tags on log worksheet view in dark theme. 
@@ -30,3 +30,7 @@
 
 ### Beta 5
 * _[Fixed]_ An error occurs when invoking the log parsing rules edit dialog box.
+
+### Beta 6
+* _[Fixed]_ Pressing 'refresh' on a log worksheet does not cause indexed data to be updated. 
+* _[Fixed]_ Logs data adapter does not acknowledge user selected time zone. 
