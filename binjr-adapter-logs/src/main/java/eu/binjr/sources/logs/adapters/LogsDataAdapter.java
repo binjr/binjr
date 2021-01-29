@@ -29,6 +29,7 @@ import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
@@ -65,6 +66,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private static final Logger logger = Logger.create(LogsDataAdapter.class);
     private static final Gson gson = new Gson();
     private static final String DEFAULT_PREFIX = "[Logs]";
+    private static final String ZONE_ID_PARAM_NAME = "zoneId";
+    public static final String ROOT_PATH_PARAM_NAME = "rootPath";
+    public static final String FOLDER_FILTERS_PARAM_NAME = "folderFilters";
+    public static final String EXTENSIONS_FILTERS_PARAM_NAME = "fileExtensionsFilters";
+    public static final String PARSING_PROFILE_PARAM_NAME = "parsingProfile";
     private final String sourceNamePrefix;
 
     private final Set<String> indexedFiles = new HashSet<>();
@@ -80,7 +86,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private String[] fileExtensionsFilters;
     private ParsingProfile parsingProfile;
     private EventParser parser;
-    private final ZoneId zoneId;
+    private ZoneId zoneId;
 
     /**
      * Initializes a new instance of the {@link LogsDataAdapter} class.
@@ -129,18 +135,19 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         super();
         this.sourceNamePrefix = sourcePrefix;
         this.rootPath = rootPath;
-        this.zoneId = zoneId;
+
         Map<String, String> params = new HashMap<>();
-        initParams(rootPath, folderFilters, fileExtensionsFilters, profile);
+        initParams(rootPath, zoneId, folderFilters, fileExtensionsFilters, profile);
     }
 
     @Override
     public Map<String, String> getParams() {
         Map<String, String> params = new HashMap<>();
-        params.put("rootPath", rootPath.toString());
-        params.put("folderFilters", gson.toJson(folderFilters));
-        params.put("fileExtensionsFilters", gson.toJson(fileExtensionsFilters));
-        params.put("parsingProfile", gson.toJson(CustomParsingProfile.of(parsingProfile)));
+        params.put(ROOT_PATH_PARAM_NAME, rootPath.toString());
+        params.put(ZONE_ID_PARAM_NAME, zoneId.toString());
+        params.put(FOLDER_FILTERS_PARAM_NAME, gson.toJson(folderFilters));
+        params.put(EXTENSIONS_FILTERS_PARAM_NAME, gson.toJson(fileExtensionsFilters));
+        params.put(PARSING_PROFILE_PARAM_NAME, gson.toJson(CustomParsingProfile.of(parsingProfile)));
         return params;
     }
 
@@ -150,17 +157,26 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             logger.debug(() -> "LogsDataAdapter params:");
             params.forEach((s, s2) -> logger.debug(() -> "key=" + s + ", value=" + s2));
         }
-        initParams(Paths.get(validateParameterNullity(params, "rootPath")),
-                gson.fromJson(validateParameterNullity(params, "folderFilters"), String[].class),
-                gson.fromJson(validateParameterNullity(params, "fileExtensionsFilters"), String[].class),
-                gson.fromJson(validateParameterNullity(params, "parsingProfile"), CustomParsingProfile.class));
+        initParams(Paths.get(validateParameterNullity(params, ROOT_PATH_PARAM_NAME)),
+                validateParameter(params, ZONE_ID_PARAM_NAME,
+                        s -> {
+                            if (s == null) {
+                                throw new InvalidAdapterParameterException("Parameter " + ZONE_ID_PARAM_NAME + " is missing in adapter " + getSourceName());
+                            }
+                            return ZoneId.of(s);
+                        }),
+                gson.fromJson(validateParameterNullity(params, FOLDER_FILTERS_PARAM_NAME), String[].class),
+                gson.fromJson(validateParameterNullity(params, EXTENSIONS_FILTERS_PARAM_NAME), String[].class),
+                gson.fromJson(validateParameterNullity(params, PARSING_PROFILE_PARAM_NAME), CustomParsingProfile.class));
     }
 
     private void initParams(Path rootPath,
+                            ZoneId zoneId,
                             String[] folderFilters,
                             String[] fileExtensionsFilters,
                             ParsingProfile parsingProfile) throws DataAdapterException {
         this.rootPath = rootPath;
+        this.zoneId = zoneId;
         this.folderFilters = folderFilters;
         this.fileExtensionsFilters = fileExtensionsFilters;
         this.parsingProfile = parsingProfile;
