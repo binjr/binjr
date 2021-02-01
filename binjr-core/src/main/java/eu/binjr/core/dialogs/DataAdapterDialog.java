@@ -118,6 +118,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
                 updateUriAutoCompletionBinding();
             }
         });
+        uriField.getSelectionModel().selectedItemProperty().addListener((obs, oldText, uri) -> validateUri(uri));
         timezoneField = (TextField) parent.lookup("#timezoneField");
         timezoneLabel = (Label) parent.lookup("#timeZoneLabel");
         timezoneField.setManaged(showTimezone);
@@ -185,6 +186,9 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         timezoneField.setText(ZoneId.systemDefault().toString());
         // Workaround JDK-8179073 (ref: https://bugs.openjdk.java.net/browse/JDK-8179073)
         this.setResizable(AppEnvironment.getInstance().isResizableDialogs());
+    }
+
+    protected void validateUri(String uri) {
     }
 
     /**
