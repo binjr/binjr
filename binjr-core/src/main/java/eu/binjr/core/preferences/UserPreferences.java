@@ -23,6 +23,7 @@ import eu.binjr.common.preferences.ObservablePreferenceFactory;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
+import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
 import javafx.geometry.Rectangle2D;
@@ -269,6 +270,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
 
     public ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
+
+    public ObservablePreference<Boolean> preventFoldingAllSourcePanes = booleanPreference("preventFoldingAllSourcePanes", false);
 
     private UserPreferences() {
         super(BINJR_GLOBAL);

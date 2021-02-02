@@ -36,7 +36,6 @@ import jakarta.xml.bind.JAXBException;
 import javafx.animation.PauseTransition;
 import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
-import javafx.beans.binding.Binding;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
@@ -105,33 +104,33 @@ public class MainViewController implements Initializable {
     private final BooleanProperty searchBarVisible = new SimpleBooleanProperty(false);
     private final BooleanProperty searchBarHidden = new SimpleBooleanProperty(!searchBarVisible.get());
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
-    private Binding<Boolean> noWorksheetPresent;
-    private Binding<Boolean> noSourcePresent;
+    private BooleanBinding noWorksheetPresent;
+    private BooleanBinding noSourcePresent;
     public AnchorPane sourcePane;
     public MenuItem hideSourcePaneMenu;
     public StackPane newWorksheetDropTarget;
     @FXML
-    public DrawerPane commandBar;
+    private DrawerPane commandBar;
     @FXML
-    public AnchorPane root;
+    private AnchorPane root;
     @FXML
-    public Label addWorksheetLabel;
+    private Label addWorksheetLabel;
     @FXML
-    public MaskerPane sourceMaskerPane;
+    private MaskerPane sourceMaskerPane;
     @FXML
-    public MaskerPane worksheetMaskerPane;
+    private MaskerPane worksheetMaskerPane;
     @FXML
-    public Pane searchBarRoot;
+    private Pane searchBarRoot;
     @FXML
-    public TextField searchField;
+    private TextField searchField;
     @FXML
-    public Button searchButton;
+    private Button searchButton;
     @FXML
-    public Button hideSearchBarButton;
+    private Button hideSearchBarButton;
     @FXML
-    public ToggleButton searchCaseSensitiveToggle;
+    private ToggleButton searchCaseSensitiveToggle;
     @FXML
-    public StackPane sourceArea;
+    private StackPane sourceArea;
     List<TreeItem<SourceBinding>> searchResultSet;
     int currentSearchHit = -1;
     private Workspace workspace;
@@ -156,6 +155,8 @@ public class MainViewController implements Initializable {
     private Menu addSourceMenu;
     @FXML
     private StackPane curtains;
+    @FXML
+    private Label addSourceLabel;
 
     /**
      * Initializes a new instance of the {@link MainViewController} class.
@@ -219,6 +220,7 @@ public class MainViewController implements Initializable {
             getWorkspace().getBindingManager().bind(getWorkspace().dividerPositionProperty(), divider.positionProperty());
         });
         sourcesPane.mouseTransparentProperty().bind(noSourcePresent);
+        addSourceLabel.visibleProperty().bind(noSourcePresent);
         workspace.sourcePaneVisibleProperty().addListener((observable, oldValue, newValue) -> toggleSourcePaneVisibilty(newValue));
         workspace.presentationModeProperty().addListener((observable, oldValue, newValue) -> {
             for (var w : workspace.getWorksheets()) {
@@ -233,14 +235,16 @@ public class MainViewController implements Initializable {
         toggleSourcePaneVisibilty(workspace.isSourcePaneVisible());
         sourcesPane.expandedPaneProperty().addListener(
                 (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-                    boolean expandRequiered = true;
-                    for (TitledPane pane : sourcesPane.getPanes()) {
-                        if (pane.isExpanded()) {
-                            expandRequiered = false;
+                    if (UserPreferences.getInstance().preventFoldingAllSourcePanes.get()) {
+                        boolean expandRequiered = true;
+                        for (TitledPane pane : sourcesPane.getPanes()) {
+                            if (pane.isExpanded()) {
+                                expandRequiered = false;
+                            }
                         }
-                    }
-                    if ((expandRequiered) && (oldPane != null)) {
-                        Platform.runLater(() -> sourcesPane.setExpandedPane(oldPane));
+                        if ((expandRequiered) && (oldPane != null)) {
+                            Platform.runLater(() -> sourcesPane.setExpandedPane(oldPane));
+                        }
                     }
                 });
         addWorksheetLabel.visibleProperty().bind(noWorksheetPresent);
@@ -595,6 +599,15 @@ public class MainViewController implements Initializable {
         source.getBindingManager().bindBidirectional(sourceNameField.textProperty(), source.nameProperty());
         editFieldsGroup.getChildren().add(sourceNameField);
 
+        sourceNameField.setOnAction(source.getBindingManager().registerHandler(event -> source.setEditable(false)));
+        source.getBindingManager().attachListener(sourceNameField.focusedProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (!newValue) {
+                        source.setEditable(false);
+                    }
+                });
+
+
         ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(source.getBindingManager())
                 .setText("Settings")
                 .setTooltip("Edit the source's settings")
@@ -615,13 +628,14 @@ public class MainViewController implements Initializable {
         toolbar.getChildren().addAll(filterButton, editButton, closeButton);
         titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
 
-        titleRegion.setOnMouseClicked(event -> {
+        newPane.setOnMouseClicked(source.getBindingManager().registerHandler(event -> {
             if (event.getClickCount() == 2) {
                 source.setEditable(true);
                 sourceNameField.selectAll();
                 sourceNameField.requestFocus();
             }
-        });
+            event.consume();
+        }));
         return newPane;
     }
 
