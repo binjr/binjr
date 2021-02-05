@@ -36,10 +36,6 @@ public final class ServiceLoaderHelper {
     /**
      * A helper method to load and return service implementations from the classpath and external jars
      *
-     * @param clazz
-     * @param <T>
-     */
-    /**
      * @param clazz          the type of service to load and return
      * @param loadedServices a set of services to witch the loaded services should be added.
      * @param <T>            the type of service to load and return

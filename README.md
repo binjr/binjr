@@ -6,7 +6,7 @@
 
 [![trailer](https://binjr.eu/assets/images/binjr_landing_poster.png)](https://binjr.eu/trailer.html)
 
-## Content
+## Contents
 * [What is binjr?](#what-is-binjr)
 * [Features](#features)
 * [Getting started](#getting-started)
