@@ -317,6 +317,7 @@
                         </HBox>
                     </graphic>
                 </MenuItem>
+                <MenuItem mnemonicParsing="false" onAction="#handleShortcutsAction" text="Keyboard Shortcuts"/>
                 <MenuItem mnemonicParsing="false" onAction="#handleBinjrWebsite" text="binjr Website">
                     <graphic>
                         <HBox styleClass="icon-container">

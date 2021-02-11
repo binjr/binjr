@@ -448,30 +448,29 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleHelpAction(ActionEvent event) {
-        try {
-            Dialogs.launchUrlInExternalBrowser(AppEnvironment.HTTP_BINJR_WIKI);
-        } catch (IOException | URISyntaxException e) {
-            logger.error("Failed to launch url in browser: " + AppEnvironment.HTTP_BINJR_WIKI);
-            logger.debug("Exception stack", e);
-        }
+        openUrlInBrowser(AppEnvironment.HTTP_BINJR_WIKI);
+    }
+
+    @FXML
+    private void handleShortcutsAction(ActionEvent actionEvent) {
+        openUrlInBrowser(AppEnvironment.HTTP_BINJR_SHORTCUTS);
     }
 
     @FXML
     protected void handleViewOnGitHub(ActionEvent event) {
-        try {
-            Dialogs.launchUrlInExternalBrowser(AppEnvironment.HTTP_GITHUB_REPO);
-        } catch (IOException | URISyntaxException e) {
-            logger.error("Failed to launch url in browser: " + AppEnvironment.HTTP_GITHUB_REPO);
-            logger.debug("Exception stack", e);
-        }
+        openUrlInBrowser(AppEnvironment.HTTP_GITHUB_REPO);
     }
 
     @FXML
     protected void handleBinjrWebsite(ActionEvent actionEvent) {
+        openUrlInBrowser(AppEnvironment.HTTP_WWW_BINJR_EU);
+    }
+
+    private void openUrlInBrowser(String url){
         try {
-            Dialogs.launchUrlInExternalBrowser(AppEnvironment.HTTP_WWW_BINJR_EU);
+            Dialogs.launchUrlInExternalBrowser(url);
         } catch (IOException | URISyntaxException e) {
-            logger.error("Failed to launch url in browser: " + AppEnvironment.HTTP_WWW_BINJR_EU);
+            logger.error("Failed to launch url in browser: " + url);
             logger.debug("Exception stack", e);
         }
     }
@@ -1461,7 +1460,8 @@ public class MainViewController implements Initializable {
         this.associatedFile = associatedFile;
     }
 
-    public void handleToggleSourcePaneVisibility(ActionEvent actionEvent) {
+    @FXML
+    private void handleToggleSourcePaneVisibility(ActionEvent actionEvent) {
         workspace.setSourcePaneVisible(!workspace.isSourcePaneVisible());
     }
 
