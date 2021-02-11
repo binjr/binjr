@@ -199,13 +199,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    @FXML
-    private void handleHistoryBack(ActionEvent actionEvent) {
+    @Override
+    public void navigateBackward() {
         worksheet.getHistory().getPrevious().ifPresent(h -> restoreQueryParameters(h, false));
     }
 
-    @FXML
-    private void handleHistoryForward(ActionEvent actionEvent) {
+    @Override
+    public void navigateForward() {
         worksheet.getHistory().getNext().ifPresent(h -> restoreQueryParameters(h, false));
     }
 
@@ -231,8 +231,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
         });
         // Init navigation
-        backButton.setOnAction(bindingManager.registerHandler(this::handleHistoryBack));
-        forwardButton.setOnAction(bindingManager.registerHandler(this::handleHistoryForward));
+        backButton.setOnAction(bindingManager.registerHandler(event -> this.navigateBackward()));
+        forwardButton.setOnAction(bindingManager.registerHandler(event -> this.navigateForward()));
         bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
         bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         // Query syntax help

@@ -1260,14 +1260,24 @@ public class XYChartsWorksheetController extends WorksheetController {
         invalidateAll(false, false, true);
     }
 
+    @Override
+    public void navigateBackward(){
+        worksheet.getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
+    }
+
+    @Override
+    public void navigateForward(){
+        worksheet.getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
+    }
+
     @FXML
     private void handleHistoryBack(ActionEvent actionEvent) {
-        worksheet.getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
+        navigateBackward();
     }
 
     @FXML
     private void handleHistoryForward(ActionEvent actionEvent) {
-        worksheet.getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
+        navigateForward();
     }
 
     @FXML

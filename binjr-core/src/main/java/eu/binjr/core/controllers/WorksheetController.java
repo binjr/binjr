@@ -77,6 +77,14 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract List<ChartViewPort> getViewPorts();
 
+    public void navigateBackward(){
+        //Noop
+    }
+
+    public void navigateForward(){
+        //Noop
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event ->  parentController.handleTogglePresentationMode()));
