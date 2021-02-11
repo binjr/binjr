@@ -377,6 +377,9 @@ public class MainViewController implements Initializable {
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::saveSnapshot);
             }
+            if (e.getCode() == KeyCode.T && e.isControlDown()) {
+                editWorksheet(new XYChartsWorksheet());
+            }
             if (e.isControlDown() && (e.getCode() == KeyCode.W || e.getCode() == KeyCode.F4)) {
                 closeWorksheetTab((EditableTab) tearableTabPane.getSelectedTab());
             }
