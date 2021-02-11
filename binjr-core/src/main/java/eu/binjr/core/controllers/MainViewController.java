@@ -379,6 +379,9 @@ public class MainViewController implements Initializable {
                     getSelectedWorksheetController().saveSnapshot();
                 }
             }
+            if (e.getCode() == KeyCode.W && e.isControlDown()) {
+                closeWorksheetTab((EditableTab) tearableTabPane.getSelectedTab());
+            }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));
         stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> handleControlKey(e, false)));
@@ -1067,6 +1070,10 @@ public class MainViewController implements Initializable {
     }
 
     private void closeWorksheetTab(EditableTab tab) {
+        if (tab == null) {
+            logger.debug("Requested tab for closure is null");
+            return;
+        }
         if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?", "",
                 ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
             EventHandler<Event> handler = tab.getOnClosed();

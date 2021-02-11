@@ -287,7 +287,7 @@
             <items>
                 <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                     <accelerator>
-                        <KeyCodeCombination alt="UP" code="W" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
+                        <KeyCodeCombination alt="UP" code="T" control="UP" meta="UP" shift="UP" shortcut="DOWN"/>
                     </accelerator>
                     <graphic>
                         <HBox styleClass="icon-container">
