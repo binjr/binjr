@@ -363,7 +363,8 @@ public class MainViewController implements Initializable {
     private void registerStageKeyEvents(Stage stage) {
         BindingManager manager = new BindingManager();
         stage.setUserData(manager);
-        stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> {
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
+            logger.trace(()-> "KEY_PRESSED event trapped, keycode=" + e.getCode());
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
