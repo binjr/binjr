@@ -280,7 +280,7 @@ public class MainViewController implements Initializable {
             unregisterStageKeyEvents((Stage) event.getSource());
         });
         sourcesPane.getPanes().addListener(this::onSourceTabChanged);
-        sourcesPane.addEventFilter(KeyEvent.KEY_RELEASED, (e -> {
+        sourcesPane.addEventFilter(KeyEvent.KEY_PRESSED, (e -> {
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 handleShowSearchBar(null);
             }
