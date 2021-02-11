@@ -380,6 +380,12 @@ public class MainViewController implements Initializable {
             if (e.isControlDown() && (e.getCode() == KeyCode.W || e.getCode() == KeyCode.F4)) {
                 closeWorksheetTab((EditableTab) tearableTabPane.getSelectedTab());
             }
+            if (e.getCode() == KeyCode.LEFT && e.isAltDown()) {
+                getSelectedWorksheetController().ifPresent(WorksheetController::navigateBackward);
+            }
+            if (e.getCode() == KeyCode.RIGHT && e.isAltDown()) {
+                getSelectedWorksheetController().ifPresent(WorksheetController::navigateForward);
+            }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));
         stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> handleControlKey(e, false)));
