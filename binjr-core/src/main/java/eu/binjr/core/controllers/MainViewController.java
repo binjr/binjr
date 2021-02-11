@@ -364,22 +364,20 @@ public class MainViewController implements Initializable {
         BindingManager manager = new BindingManager();
         stage.setUserData(manager);
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> {
-            logger.trace(()-> "KEY_PRESSED event trapped, keycode=" + e.getCode());
+            logger.trace(() -> "KEY_PRESSED event trapped, keycode=" + e.getCode());
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
-            if (e.getCode() == KeyCode.F5) {
-                handleRefreshAction();
+            if (e.getCode() == KeyCode.F5 || (e.getCode() == KeyCode.R && e.isControlDown())) {
+                getSelectedWorksheetController().ifPresent(WorksheetController::refresh);
             }
             if (e.getCode() == KeyCode.M && e.isControlDown()) {
                 handleTogglePresentationMode();
             }
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
-                if (getSelectedWorksheetController() != null) {
-                    getSelectedWorksheetController().saveSnapshot();
-                }
+                getSelectedWorksheetController().ifPresent(WorksheetController::saveSnapshot);
             }
-            if (e.getCode() == KeyCode.W && e.isControlDown()) {
+            if (e.isControlDown() && (e.getCode() == KeyCode.W || e.getCode() == KeyCode.F4)) {
                 closeWorksheetTab((EditableTab) tearableTabPane.getSelectedTab());
             }
         }));
@@ -415,12 +413,6 @@ public class MainViewController implements Initializable {
     protected void handleQuitAction(ActionEvent event) {
         if (confirmAndClearWorkspace()) {
             saveWindowPositionAndQuit();
-        }
-    }
-
-    private void handleRefreshAction() {
-        if (getSelectedWorksheetController() != null) {
-            getSelectedWorksheetController().refresh();
         }
     }
 
@@ -524,9 +516,7 @@ public class MainViewController implements Initializable {
 
     @FXML
     protected void handleDisplayChartProperties(ActionEvent actionEvent) {
-        if (getSelectedWorksheetController() != null) {
-            getSelectedWorksheetController().toggleShowPropertiesPane();
-        }
+        getSelectedWorksheetController().ifPresent(WorksheetController::toggleShowPropertiesPane);
     }
 
     @FXML
@@ -1254,11 +1244,10 @@ public class MainViewController implements Initializable {
 
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(noWorksheetPresent);
-        addToCurrent.setOnShowing(event ->
-                addToCurrent.getItems()
-                        .setAll(getSelectedWorksheetController()
-                                .getChartListContextMenu(treeView.getSelectionModel().getSelectedItems())
-                                .getItems()));
+        addToCurrent.setOnShowing(event -> getSelectedWorksheetController().ifPresent(controller ->
+                addToCurrent.getItems().setAll(controller
+                        .getChartListContextMenu(treeView.getSelectionModel().getSelectedItems())
+                        .getItems())));
         MenuItem addToNew = new MenuItem("Add to new worksheet");
         addToNew.setOnAction(event ->
                 addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
@@ -1448,12 +1437,12 @@ public class MainViewController implements Initializable {
         Platform.exit();
     }
 
-    public WorksheetController getSelectedWorksheetController() {
+    public Optional<WorksheetController> getSelectedWorksheetController() {
         Tab selectedTab = tearableTabPane.getSelectedTab();
         if (selectedTab == null) {
-            return null;
+            return Optional.empty();
         }
-        return seriesControllers.get(selectedTab);
+        return Optional.of(seriesControllers.get(selectedTab));
     }
 
     public Workspace getWorkspace() {
