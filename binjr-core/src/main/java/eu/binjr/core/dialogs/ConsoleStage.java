@@ -63,7 +63,7 @@ public class ConsoleStage {
             event.consume();
         });
 
-        stage.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+        stage.addEventFilter(KeyEvent.KEY_PRESSED, e -> {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
