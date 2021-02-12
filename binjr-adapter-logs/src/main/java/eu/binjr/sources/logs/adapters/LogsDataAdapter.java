@@ -205,23 +205,23 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         return configNode;
     }
 
-    private void attachNodes(FilterableTreeItem<SourceBinding> configNode) throws DataAdapterException {
+    private void attachNodes(FilterableTreeItem<SourceBinding> root) throws DataAdapterException {
         try (var p = Profiler.start("Building log files binding tree", logger::perf)) {
             Map<Path, FilterableTreeItem<SourceBinding>> nodeDict = new HashMap<>();
-            nodeDict.put(fileBrowser.toInternalPath("/"), configNode);
-            for (var fsEntry : fileBrowser.listEntries(configPath -> configPath.getFileName() != null &&
+            nodeDict.put(fileBrowser.toInternalPath("/"), root);
+            for (var fsEntry : fileBrowser.listEntries(path -> path.getFileName() != null &&
                     Arrays.stream(folderFilters)
-                            .map(folder -> folder.equalsIgnoreCase("*") || configPath.startsWith(fileBrowser.toInternalPath(folder)))
+                            .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toInternalPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                     Arrays.stream(fileExtensionsFilters)
-                            .map(f -> configPath.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
+                            .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
                             .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = fsEntry.getPath().getFileName().toString();
-                var attachTo = configNode;
+                var attachTo = root;
                 if (fsEntry.getPath().getParent() != null) {
                     attachTo = nodeDict.get(fsEntry.getPath().getParent());
                     if (attachTo == null) {
-                        attachTo = makeBranchNode(nodeDict, fsEntry.getPath().getParent(), configNode);
+                        attachTo = makeBranchNode(nodeDict, fsEntry.getPath().getParent(), root);
                     }
                 }
                 FilterableTreeItem<SourceBinding> filenode = new FilterableTreeItem<>(
@@ -233,7 +233,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                 .build());
                 attachTo.getInternalChildren().add(filenode);
             }
-            TreeViewUtils.sortFromBranch(configNode);
+            TreeViewUtils.sortFromBranch(root);
         } catch (Exception e) {
             Dialogs.notifyException("Error while enumerating files: " + e.getMessage(), e);
         }
