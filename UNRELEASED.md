@@ -34,3 +34,9 @@
 ### Beta 6
 * _[Fixed]_ Pressing 'refresh' on a log worksheet does not cause indexed data to be updated. 
 * _[Fixed]_ Logs data adapter does not acknowledge user selected time zone. 
+
+### Beta 7
+* _[New]_ Added new keyboard shortcuts to close a worksheet and navigate history.
+* _[Fixed]_ Modified "New Tab" and "Save As" keyboard shortcuts to be more consistent with well known applications.
+* _[Fixed]_ Clicking on an expended source tab's title does not cause it to collapse its contents.
+* _[Fixed]_ Pressing `enter` or loosing focus from text entry field when editing source tab title does not validate entry.  
