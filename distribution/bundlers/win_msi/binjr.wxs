@@ -57,6 +57,7 @@
         </InstallExecuteSequence>
 
         <Media Id="1" Cabinet="simple.cab" EmbedCab="yes"/>
+        <Property Id="OVERRIDEAPPFOLDER" Value="~"/>
 
         <Property Id="APPLICATIONFOLDER">
             <RegistrySearch Key="Software\[Manufacturer]\[ProductName]"
@@ -72,6 +73,11 @@
                                KeyPath="yes"/>
             </Component>
         </DirectoryRef>
+
+        <SetProperty Id="APPLICATIONFOLDER" Before="CostFinalize" Sequence="execute" Value="[OVERRIDEAPPFOLDER]">
+            <![CDATA[OVERRIDEAPPFOLDER<>"~"]]>
+        </SetProperty>
+
         <Directory Id="TARGETDIR" Name="SourceDir">
             <Directory Id="ProgramMenuFolder">
                 <Component Id="StartMenuShortcuts" Guid="FEE95032-6C02-4F3A-A3F7-B7C394F8E0EB">
