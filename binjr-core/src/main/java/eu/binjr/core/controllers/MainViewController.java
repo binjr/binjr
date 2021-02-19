@@ -1004,15 +1004,17 @@ public class MainViewController implements Initializable {
                 var syncableWorksheet = (Syncable) current.getWorksheet();
                 current.getBindingManager().attachListener(current.selectedRangeProperty(),
                         (ChangeListener<TimeRange>) (observable, oldValue, newValue) -> {
-                            if (getSelectedWorksheetController().equals(current) && syncableWorksheet.isTimeRangeLinked()) {
-                                seriesControllers.values().stream()
-                                        .filter(c -> c.getWorksheet() instanceof Syncable)
-                                        .forEach(i -> {
-                                            if (!i.equals(current) && ((Syncable) i.getWorksheet()).isTimeRangeLinked()) {
-                                                i.selectedRangeProperty().setValue(TimeRange.of(newValue));
-                                            }
-                                        });
-                            }
+                            getSelectedWorksheetController().ifPresent(worksheetController -> {
+                                if (worksheetController.equals(current) && syncableWorksheet.isTimeRangeLinked()) {
+                                    seriesControllers.values().stream()
+                                            .filter(c -> c.getWorksheet() instanceof Syncable)
+                                            .forEach(i -> {
+                                                if (!i.equals(current) && ((Syncable) i.getWorksheet()).isTimeRangeLinked()) {
+                                                    i.selectedRangeProperty().setValue(TimeRange.of(newValue));
+                                                }
+                                            });
+                                }
+                            });
                         }
                 );
                 current.getBindingManager().attachListener(syncableWorksheet.timeRangeLinkedProperty(),
