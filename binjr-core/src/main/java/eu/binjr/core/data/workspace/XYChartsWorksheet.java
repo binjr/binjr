@@ -42,7 +42,7 @@ import java.util.stream.Collectors;
 
 
 /**
- * A class that represents and holds the current state of a single worksheet
+ * A class that represents a worksheet that contains XY Charts
  *
  * @author Frederic Thevenet
  */
@@ -476,7 +476,6 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
                 this.setToDateTime(toDateTime);
             }
         }
-        this.setTimeRangeLinked(UserPreferences.getInstance().shiftPressed.get());
     }
 
     @Override

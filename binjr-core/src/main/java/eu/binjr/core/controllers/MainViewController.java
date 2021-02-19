@@ -475,7 +475,7 @@ public class MainViewController implements Initializable {
         openUrlInBrowser(AppEnvironment.HTTP_WWW_BINJR_EU);
     }
 
-    private void openUrlInBrowser(String url){
+    private void openUrlInBrowser(String url) {
         try {
             Dialogs.launchUrlInExternalBrowser(url);
         } catch (IOException | URISyntaxException e) {

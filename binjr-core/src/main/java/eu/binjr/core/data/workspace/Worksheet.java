@@ -34,7 +34,11 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+/**
+ * A class that represents and holds the current state of a single worksheet
+ *
+ * @author Frederic Thevenet
+ */
 public abstract class Worksheet<T> implements Dirtyable {
     protected static final AtomicInteger globalCounter = new AtomicInteger(0);
 
@@ -49,9 +53,9 @@ public abstract class Worksheet<T> implements Dirtyable {
     }
 
     /**
-     * The name of the {@link XYChartsWorksheet}
+     * The name of the {@link Worksheet}
      *
-     * @return the name of the {@link XYChartsWorksheet}
+     * @return the name of the {@link Worksheet}
      */
     @XmlAttribute()
     public String getName() {
@@ -59,18 +63,18 @@ public abstract class Worksheet<T> implements Dirtyable {
     }
 
     /**
-     * The name of the {@link XYChartsWorksheet}
+     * The name of the {@link Worksheet}
      *
-     * @return An instance of {@link Property} for the name of the {@link XYChartsWorksheet}
+     * @return An instance of {@link Property} for the name of the {@link Worksheet}
      */
     public Property<String> nameProperty() {
         return name;
     }
 
     /**
-     * The name of the {@link XYChartsWorksheet}
+     * The name of the {@link Worksheet}
      *
-     * @param name the name of the {@link XYChartsWorksheet}
+     * @param name the name of the {@link Worksheet}
      */
     public void setName(String name) {
         this.name.setValue(name);
