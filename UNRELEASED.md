@@ -40,3 +40,7 @@
 * _[Fixed]_ Modified "New Tab" and "Save As" keyboard shortcuts to be more consistent with well known applications.
 * _[Fixed]_ Clicking on an expended source tab's title does not cause it to collapse its contents.
 * _[Fixed]_ Pressing `enter` or loosing focus from text entry field when editing source tab title does not validate entry.  
+
+### Beta 8
+* _[New]_ Windows installer allows overriding existing installation path via an MSI property.
+* _[Fixed]_ A regression that brakes the worksheet synchronization feature.
