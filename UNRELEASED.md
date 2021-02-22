@@ -44,3 +44,6 @@
 ### Beta 8
 * _[New]_ Windows installer allows overriding existing installation path via an MSI property.
 * _[Fixed]_ A regression that brakes the worksheet synchronization feature.
+
+### Beta 9
+* _[Fixed]_ A concurrent modification exception when applying sampling reduction pre-processing on series.
