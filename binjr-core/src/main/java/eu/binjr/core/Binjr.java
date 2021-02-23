@@ -45,7 +45,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
- * The entry point fo the application.
+ * The entry point for the application.
  *
  * @author Frederic Thevenet
  */
