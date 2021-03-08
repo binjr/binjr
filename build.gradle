@@ -27,7 +27,7 @@ import java.time.Duration
 plugins {
     id "de.undercouch.download" version "4.1.1"
     id "org.kordamp.markdown.convert" version "1.2.0"
-    id "com.github.ben-manes.versions" version "0.36.0"
+    id "com.github.ben-manes.versions" version "0.38.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
@@ -51,7 +51,7 @@ ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
-ext.OPENJFX_VERSION = "15.0.1"
+ext.OPENJFX_VERSION = "16"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replaceAll("ea\\+[0-9]+", "ea").replace(".", "-")}-jmods-${OS_FAMILY}"
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
@@ -125,8 +125,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.0')
-            testRuntime('org.junit.jupiter:junit-jupiter-engine:5.7.0')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.1')
+            testRuntime('org.junit.jupiter:junit-jupiter-engine:5.7.1')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"

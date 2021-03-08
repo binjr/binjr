@@ -46,4 +46,5 @@
 * _[Fixed]_ A regression that brakes the worksheet synchronization feature.
 
 ### Beta 9
+* _[Fixed]_ Charts are blurry when binjr is displayed on a screen with a 125%, 150% or 175% scale ratio.
 * _[Fixed]_ A concurrent modification exception when applying sampling reduction pre-processing on series.
