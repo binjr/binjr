@@ -29,7 +29,6 @@ import eu.binjr.common.text.BinaryPrefixFormatter;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.data.exceptions.InvalidAdapterParameterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
@@ -161,7 +160,8 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 validateParameter(params, ZONE_ID_PARAM_NAME,
                         s -> {
                             if (s == null) {
-                                throw new InvalidAdapterParameterException("Parameter " + ZONE_ID_PARAM_NAME + " is missing in adapter " + getSourceName());
+                                logger.warn("Parameter " + ZONE_ID_PARAM_NAME + " is missing in adapter " + getSourceName());
+                                return ZoneId.systemDefault();
                             }
                             return ZoneId.of(s);
                         }),
@@ -364,7 +364,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     @Override
     public String getSourceName() {
-        return String.format("%s %s", sourceNamePrefix, rootPath.getFileName());
+        return String.format("%s %s", sourceNamePrefix, rootPath != null ? rootPath.getFileName() : "???");
     }
 
     @Override

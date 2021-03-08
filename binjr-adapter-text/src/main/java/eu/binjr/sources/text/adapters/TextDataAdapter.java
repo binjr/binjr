@@ -220,7 +220,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
 
     @Override
     public String getSourceName() {
-        return "[Text] " + rootPath.getFileName();
+        return "[Text] " + (rootPath != null ? rootPath.getFileName() : "???");
     }
 
     @Override
