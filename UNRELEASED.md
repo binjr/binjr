@@ -47,4 +47,5 @@
 
 ### Beta 9
 * _[Fixed]_ Charts are blurry when binjr is displayed on a screen with a 125%, 150% or 175% scale ratio.
+* _[Fixed]_ Workspaces created with beta 6 or prior cannot be loaded if they contain references to log file adapters.  
 * _[Fixed]_ A concurrent modification exception when applying sampling reduction pre-processing on series.
