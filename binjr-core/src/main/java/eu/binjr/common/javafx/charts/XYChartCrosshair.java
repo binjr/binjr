@@ -18,6 +18,7 @@ package eu.binjr.common.javafx.charts;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -384,7 +385,6 @@ public class XYChartCrosshair<X, Y> {
     }
 
     private void applyStyle(Shape shape) {
-        shape.setManaged(false);
         shape.setMouseTransparent(true);
         shape.setSmooth(false);
         shape.setStrokeWidth(1.0);
