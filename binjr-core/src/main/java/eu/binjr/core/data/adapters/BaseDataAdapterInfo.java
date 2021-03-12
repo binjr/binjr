@@ -69,7 +69,9 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this.sourceLocality = meta.sourceLocality();
         this.apiLevel = Version.parseVersion(meta.apiLevel());
         var version = Version.parseVersion(meta.version());
-        this.version = (version.equals(Version.emptyVersion)) ? AppEnvironment.getInstance().getVersion() : version;
+        this.version = (version.equals(Version.emptyVersion)) ?
+                AppEnvironment.getInstance().getVersion(AppEnvironment.getInstance().getManifest(meta.adapterClass()))
+                : version;
         try {
             var ctor = meta.preferencesClass().getDeclaredConstructor(Class.class);
             adapterPreferences = ctor.newInstance(adapterClass);
@@ -79,7 +81,6 @@ public class BaseDataAdapterInfo implements DataAdapterInfo {
         this.jarLocation = adapterClass.getResource('/' + adapterClass.getName().replace('.', '/') + ".class").toExternalForm();
         enabled.bindBidirectional(adapterPreferences.enabled.property());
     }
-
 
     /**
      * Returns the name of the data adapter.
