@@ -16,23 +16,35 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.text.BinaryPrefixFormatter;
+import eu.binjr.common.text.MetricPrefixFormatter;
+import eu.binjr.common.text.NoopPrefixFormatter;
+import eu.binjr.common.text.PrefixFormatter;
+
 /**
  * An enumeration of the support unit prefixes
  *
  * @author Frederic Thevenet
  */
 public enum UnitPrefixes {
-    METRIC("Metric"),
-    BINARY("Binary");
+    METRIC("Metric", new MetricPrefixFormatter()),
+    BINARY("Binary", new BinaryPrefixFormatter()),
+    NONE("None", new NoopPrefixFormatter());
 
     private String label;
+    private PrefixFormatter prefixFormatter;
 
-    UnitPrefixes(String label) {
+    UnitPrefixes(String label, PrefixFormatter prefixFormatter) {
         this.label = label;
+        this.prefixFormatter = prefixFormatter;
     }
 
     @Override
     public String toString() {
         return label;
+    }
+
+    public PrefixFormatter getPrefixFormatter() {
+        return prefixFormatter;
     }
 }

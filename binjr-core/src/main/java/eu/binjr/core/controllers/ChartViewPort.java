@@ -18,8 +18,6 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.charts.XYChartCrosshair;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.text.BinaryPrefixFormatter;
-import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.PrefixFormatter;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
@@ -62,17 +60,7 @@ public class ChartViewPort implements Closeable {
         this.seriesTable.getStyleClass().add("skinnable-pane-border");
         this.seriesTable.setEditable(true);
         this.propertiesController = propertiesController;
-        switch (dataStore.getUnitPrefixes()) {
-            case BINARY:
-                this.prefixFormatter = new BinaryPrefixFormatter();
-                break;
-            case METRIC:
-                this.prefixFormatter = new MetricPrefixFormatter();
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unknown unit prefix");
-        }
+        this.prefixFormatter = dataStore.getUnitPrefixes().getPrefixFormatter();
     }
 
     /**

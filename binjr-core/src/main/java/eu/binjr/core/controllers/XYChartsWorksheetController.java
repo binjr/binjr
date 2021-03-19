@@ -23,6 +23,9 @@ import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.text.BinaryPrefixFormatter;
+import eu.binjr.common.text.MetricPrefixFormatter;
+import eu.binjr.common.text.NoopPrefixFormatter;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
@@ -324,10 +327,16 @@ public class XYChartsWorksheetController extends WorksheetController {
                     break;
             }
             StableTicksAxis<Double> yAxis;
-            if (currentChart.getUnitPrefixes() == UnitPrefixes.BINARY) {
-                yAxis = new BinaryStableTicksAxis<>();
-            } else {
-                yAxis = new MetricStableTicksAxis<>();
+            switch (currentChart.getUnitPrefixes()) {
+                case BINARY:
+                    yAxis = new StableTicksAxis<>(new BinaryPrefixFormatter(), 2, 1.0, 2.0, 4.0, 8.0, 16.0);
+                    break;
+                case METRIC:
+                    yAxis = new StableTicksAxis<>(new MetricPrefixFormatter(), 10, 1.0, 2.5, 5.0);
+                    break;
+                case NONE:
+                default:
+                    yAxis = new StableTicksAxis<>(new NoopPrefixFormatter(), 10, 1.0, 2.5, 5.0);
             }
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);
@@ -1261,12 +1270,12 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     @Override
-    public void navigateBackward(){
+    public void navigateBackward() {
         worksheet.getHistory().getPrevious().ifPresent(h -> currentState.setSelection(h, false));
     }
 
     @Override
-    public void navigateForward(){
+    public void navigateForward() {
         worksheet.getHistory().getNext().ifPresent(h -> currentState.setSelection(h, false));
     }
 

@@ -23,20 +23,11 @@ import javafx.animation.Timeline;
 import javafx.beans.property.*;
 import javafx.beans.value.WritableValue;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableSet;
-import javafx.collections.SetChangeListener;
 import javafx.css.PseudoClass;
 import javafx.geometry.Dimension2D;
-import javafx.geometry.Pos;
 import javafx.geometry.Side;
-import javafx.scene.Node;
 import javafx.scene.chart.ValueAxis;
-import javafx.scene.control.Button;
-import javafx.scene.control.Control;
-import javafx.scene.control.ToolBar;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.util.Duration;
 import org.gillius.jfxutils.chart.AxisTickFormatter;
 
@@ -50,13 +41,15 @@ import java.util.List;
  *
  * @author Jason Winnebeck
  */
-public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
+public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     private T dataMaxValue = (T) Double.valueOf(0);
     private T dataMinValue = (T) Double.valueOf(0);
+    private final double[] dividers;
+    private final int base;
 
     public static class SelectableRegion extends Pane {
-        private static PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
-        private BooleanProperty selected = new BooleanPropertyBase(false) {
+        private static final PseudoClass SELECTED_PSEUDO_CLASS = PseudoClass.getPseudoClass("selected");
+        private final BooleanProperty selected = new BooleanPropertyBase(false) {
             public void invalidated() {
                 pseudoClassStateChanged(SELECTED_PSEUDO_CLASS, get());
             }
@@ -109,7 +102,7 @@ public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     };
 
     private AxisTickFormatter axisTickFormatter;
-    private SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
+    private final SimpleDoubleProperty tickSpacing = new SimpleDoubleProperty(20);
 
     private final StringProperty displayUnit = new SimpleStringProperty("");
 
@@ -118,28 +111,29 @@ public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
     /**
      * Amount of padding to add on the each end of the axis when auto ranging.
      */
-    private DoubleProperty autoRangePadding = new SimpleDoubleProperty(0.1);
+    private final DoubleProperty autoRangePadding = new SimpleDoubleProperty(0.1);
 
     /**
      * If true, when auto-ranging, force 0 to be the min or max end of the range.
      */
-    private BooleanProperty forceZeroInRange = new SimpleBooleanProperty(true);
+    private final BooleanProperty forceZeroInRange = new SimpleBooleanProperty(true);
 
     /**
      * Initializes a new instance of the {@link StableTicksAxis} class.
      *
      * @param prefixFormatter the {@link PrefixFormatter} instance to use.
+     * @param base            the numerical base used to determine tick positions.
+     * @param dividers        a list of divider candidates.
      */
-    public StableTicksAxis(PrefixFormatter prefixFormatter) {
+    public StableTicksAxis(PrefixFormatter prefixFormatter, int base, double... dividers) {
         super();
-//        this.getSelectionMarker().setMaxWidth(100);
-//        this.getSelectionMarker().prefWidthProperty().bind(widthProperty());
+        this.base = base;
+        this.dividers = dividers != null ? dividers : new double[]{1.0, 2.5, 5.0};
         getStyleClass().setAll("axis");
 
         selectionMarker.getStyleClass().add("selection-marker");
         var states = selectionMarker.getPseudoClassStates();
         this.getChildren().add(selectionMarker);
-
 
         this.axisTickFormatter = new AxisTickFormatter() {
             @Override
@@ -324,7 +318,55 @@ public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
         return ret;
     }
 
-    public abstract double calculateTickSpacing(double delta, int maxTicks);
+    public double calculateTickSpacing(double delta, int maxTicks) {
+        if (delta == 0.0) {
+            return 0.0;
+        }
+        if (delta <= 0.0) {
+            throw new IllegalArgumentException("delta must be positive");
+        }
+        if (maxTicks < 1) {
+            throw new IllegalArgumentException("must be at least one tick");
+        }
+        int divider = 0;
+        int factor = (int) (Math.log(delta) / Math.log(base));
+        double numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+        //We don't have enough ticks, so increase ticks until we're over the limit, then back off once.
+        if (numTicks < maxTicks) {
+            while (numTicks < maxTicks) {
+                //Move up
+                --divider;
+                if (divider < 0) {
+                    --factor;
+                    divider = dividers.length - 1;
+                }
+
+                numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+            }
+
+            //Now back off once unless we hit exactly
+            //noinspection FloatingPointEquality
+            if (numTicks != maxTicks) {
+                ++divider;
+                if (divider >= dividers.length) {
+                    ++factor;
+                    divider = 0;
+                }
+            }
+        } else {
+            //We have too many ticks or exactly max, so decrease until we're just under (or at) the limit.
+            while (numTicks > maxTicks) {
+                ++divider;
+                if (divider >= dividers.length) {
+                    ++factor;
+                    divider = 0;
+                }
+
+                numTicks = delta / (dividers[divider] * Math.pow(base, factor));
+            }
+        }
+        return dividers[divider] * Math.pow(base, factor);
+    }
 
 
     @Override
@@ -503,57 +545,4 @@ public abstract class StableTicksAxis<T extends Number> extends ValueAxis<T> {
                     '}';
         }
     }
-//
-//
-//    @Override
-//    protected double computePrefWidth(double height) {
-//        final Side side = getSide();
-//        if (side.isVertical()) {
-//            return super.computePrefWidth(height) + BTN_WITDTH +2;
-//        }
-//        else { // HORIZONTAL
-//            // TODO for now we have no hard and fast answer here, I guess it should work
-//            // TODO out the minimum size needed to display min, max and zero tick mark labels.
-//            return 100;
-//        }
-//    }
-//
-//    @Override
-//    protected double computePrefHeight(double width) {
-//        final Side side = getSide();
-//        if (side.isVertical()) {
-//            // TODO for now we have no hard and fast answer here, I guess it should work
-//            // TODO out the minimum size needed to display min, max and zero tick mark labels.
-//            return 100;
-//        }
-//        else { // HORIZONTAL
-//
-//            return super.computePrefHeight(width) + BTN_WITDTH + 2;
-//        }
-//    }
-//
-//    @Override
-//    protected void layoutChildren() {
-//        super.layoutChildren();
-//
-//        Side side = this.getSide();
-//        final double width = getWidth();
-//        final double height = getHeight();
-//
-//         maxAxisButton.setLayoutX(20);
-//        maxAxisButton.setLayoutY(-(BTN_WITDTH/2));
-//
-//
-//
-//        maxAxisButton.resize(BTN_WITDTH, BTN_WITDTH); //Math.ceil(maxAxisButton.prefHeight(width)));
-//
-//        minAxisButton.setLayoutX(20);
-//        minAxisButton.setLayoutY(height - (BTN_WITDTH/2));
-//        minAxisButton.resize(BTN_WITDTH, BTN_WITDTH);
-//
-//        centerAxisButton.setLayoutX(20);
-//        centerAxisButton.setLayoutY((int)(height/2) -(BTN_WITDTH/2));
-//        centerAxisButton.resize(BTN_WITDTH, BTN_WITDTH);
-//
-//    }
 }
