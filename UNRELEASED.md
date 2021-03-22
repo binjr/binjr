@@ -4,7 +4,7 @@
 ### Beta 1
 
 * _[Breaking Change]_ The plugin API for *binjr* v3.0.0 is no longer compatible with previous versions.
-* _[Breaking Change]_ The format for saved workspace in *binjr* v3.0.0 has changed and is not compatible with previous versions
+* ~~_[Breaking Change]_ The format for saved workspace in *binjr* v3.0.0 has changed and is not compatible with previous versions~~ (see beta 4)
 * _[New]_ *binjr* is now able to handle and render time series with data types other than numerical values. 
 * _[New]_ *binjr* can now extract timeseries data from log files to navigate and filter through log events , in sync with other sources. 
 * _[New]_ *binjr* can now be run under the Eclipse OpenJ9 JVM
@@ -21,19 +21,19 @@
 * _[New]_ Added a "Reset Time Range" button to TimeRangePicker control.
 
 ### Beta 3
-* _[Change]_ Visual tweaks on severity tags on log worksheet view in dark theme. 
-* _[Fixed]_ Failed to load a workspace containing a log worksheet that uses a built-in parsing profile.
+* _[Change (since b01)]_ Visual tweaks on severity tags on log worksheet view in dark theme. 
+* _[Fixed (since b01)]_ Failed to load a workspace containing a log worksheet that uses a built-in parsing profile.
 
 ### Beta 4  
-* _[Fixed]_ Workspaces saved with a previous schema version (2.2.0 or higher) are automatically migrated to the new format.
+* _[Fixed (since b01)]_ Workspaces saved with a previous schema version (2.2.0 or higher) are automatically migrated to the new format.
 * _[Fixed]_ Error occurring while fetching data from a single adapter prevents plotting the data recovered from other adapters.
 
 ### Beta 5
-* _[Fixed]_ An error occurs when invoking the log parsing rules edit dialog box.
+* _[Fixed (since b04]_ An error occurs when invoking the log parsing rules edit dialog box.
 
 ### Beta 6
-* _[Fixed]_ Pressing 'refresh' on a log worksheet does not cause indexed data to be updated. 
-* _[Fixed]_ Logs data adapter does not acknowledge user selected time zone. 
+* _[Fixed (since b01)]_ Pressing 'refresh' on a log worksheet does not cause indexed data to be updated. 
+* _[Fixed( since b01)]_ Logs data adapter does not acknowledge user selected time zone. 
 
 ### Beta 7
 * _[New]_ Added new keyboard shortcuts to close a worksheet and navigate history.
@@ -43,13 +43,13 @@
 
 ### Beta 8
 * _[New]_ Windows installer allows overriding existing installation path via an MSI property.
-* _[Fixed]_ A regression that brakes the worksheet synchronization feature.
+* _[Fixed (since b07)]_ A regression that brakes the worksheet synchronization feature.
 
 ### Beta 9
 * _[Fixed]_ Charts are blurry when binjr is displayed on a screen with a 125%, 150% or 175% scale ratio.
-* _[Fixed]_ Workspaces created with beta 6 or prior cannot be loaded if they contain references to log file adapters.  
+* _[Fixed (since b06)]_ Workspaces created with beta 6 or prior cannot be loaded if they contain references to log file adapters.  
 * _[Fixed]_ A concurrent modification exception when applying sampling reduction pre-processing on series.
-
 
 ### Beta 10
 * _[New]_ Added the option to display numerical values on charts without unit prefixes.
+* _[Fixed]_ Changes to Y axis scale in chart properties are not taken into account by navigation history.

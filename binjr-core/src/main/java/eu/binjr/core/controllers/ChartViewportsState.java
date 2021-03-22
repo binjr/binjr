@@ -320,10 +320,10 @@ public class ChartViewportsState implements AutoCloseable {
     }
 
     /**
-     * Returns an {@link Optional} of {@link AxisState} that contains the state associated to the sepcified chart.
+     * Returns an {@link Optional} of {@link AxisState} that contains the state associated to the specified chart.
      *
      * @param chart the chart to get the state for.
-     * @return an {@link Optional} of {@link AxisState} that contains the state associated to the sepcified chart.
+     * @return an {@link Optional} of {@link AxisState} that contains the state associated to the specified chart.
      */
     public Optional<AxisState> get(Chart chart) {
         AxisState yState = axisStates.get(chart);
