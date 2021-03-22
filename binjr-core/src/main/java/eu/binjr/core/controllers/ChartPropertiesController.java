@@ -132,6 +132,19 @@ public class ChartPropertiesController implements Initializable, Closeable {
         });
         yMaxFormatter.valueProperty().setValue(chart.getyAxisMaxValue());
         yMaxRange.setTextFormatter(yMaxFormatter);
+        bindingManager.attachListener(yMaxRange.focusedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            if (newValue) {
+                chart.armSaveHistory();
+            }
+        });
+        bindingManager.attachListener(yMinRange.focusedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            if (newValue) {
+                chart.armSaveHistory();
+            }
+        });
+        bindingManager.attachListener(autoScaleYAxis.selectedProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+            chart.armSaveHistory();
+        });
         chartTypeChoice.getItems().setAll(ChartType.values());
         chartTypeChoice.getSelectionModel().select(chart.getChartType());
         bindingManager.bind(chart.chartTypeProperty(), chartTypeChoice.getSelectionModel().selectedItemProperty());

@@ -83,6 +83,7 @@ import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -251,21 +252,10 @@ public class XYChartsWorksheetController extends WorksheetController {
 
         try {
             bindingManager.bind(worksheetMaskerPane.visibleProperty(), nbBusyPlotTasks.greaterThan(0));
-            bindingManager.attachListener(worksheetMaskerPane.visibleProperty(),
-                    (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
-                        if (!oldValue & newValue) {
-                            worksheetRefreshProfiler = Profiler.start(
-                                    "Worksheet " + worksheet.getName() + " refresh total elapsed time",
-                                    logger::perf);
-                        } else if (oldValue & !newValue) {
-                            worksheetRefreshProfiler.close();
-                        }
-                    }
-            );
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();
-            Platform.runLater(() -> invalidateAll(false, false, false));
+            Platform.runLater(() -> invalidate(false, false, false));
             bindingManager.attachListener(userPrefs.downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
             bindingManager.attachListener(userPrefs.downSamplingThreshold.property(), ((observable, oldValue, newValue) -> {
                 if (userPrefs.downSamplingEnabled.get())
@@ -696,9 +686,9 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             ChangeListener<Boolean> refreshListener = (observable, oldValue, newValue) -> {
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                    invalidateAll(false, false, false);
+                    invalidate(false, false, false);
                 } else {
-                    invalidate(currentViewPort, false, false);
+                    plotChart(currentViewPort, false);
                 }
             };
 
@@ -715,9 +705,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             showAllCheckBox.setOnAction(bindingManager.registerHandler(event -> {
                 ChangeListener<Boolean> r = (observable, oldValue, newValue) -> {
                     if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                        invalidateAll(false, false, false);
+                        invalidate(false, false, false);
                     } else {
-                        invalidate(currentViewPort, false, false);
+                        plotChart(currentViewPort, false);
                     }
                 };
                 boolean b = ((CheckBox) event.getSource()).isSelected();
@@ -1238,7 +1228,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                             viewPorts.stream()
                                     .filter(v -> v.getDataStore().equals(targetChart))
                                     .findFirst()
-                                    .ifPresent(v -> invalidate(v, false, false))
+                                    .ifPresent(v -> plotChart(v, false))
             );
             bindingManager.attachListener(newSeries.selectedProperty(), isVisibleListener);
             targetChart.addSeries(newSeries);
@@ -1254,19 +1244,19 @@ public class XYChartsWorksheetController extends WorksheetController {
                 logger.error("Failed to reset time range", e);
             }
         }
-        invalidateAll(false, false, false);
+        invalidate(false, false, false);
     }
 
     private void removeSelectedBinding(TableView<TimeSeriesInfo<Double>> seriesTable) {
         List<TimeSeriesInfo<Double>> selected = new ArrayList<>(seriesTable.getSelectionModel().getSelectedItems());
         seriesTable.getItems().removeAll(selected);
         seriesTable.getSelectionModel().clearSelection();
-        invalidateAll(false, false, false);
+        invalidate(false, false, false);
     }
 
     @Override
     public void refresh() {
-        invalidateAll(false, false, true);
+        invalidate(false, false, true);
     }
 
     @Override
@@ -1299,85 +1289,90 @@ public class XYChartsWorksheetController extends WorksheetController {
         saveSnapshot();
     }
 
-    public void invalidateAll(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
+    public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
+        var p = Profiler.start("Invalidate worksheet: " + getWorksheet().getName() +
+                " [saveToHistory=" + saveToHistory + ", " +
+                "dontPlotChart=" + dontPlotChart + ", " +
+                "forceRefresh=" + forceRefresh + "]", logger::perf);
         worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
         logger.debug(() -> worksheet.getHistory().backward().dump());
-        for (ChartViewPort viewPort : viewPorts) {
-            invalidate(viewPort, dontPlotChart, forceRefresh);
+        if (dontPlotChart) {
+            return CompletableFuture.completedFuture(null);
         }
+        CompletableFuture<?>[] futurePlots = new CompletableFuture<?>[viewPorts.size()];
+        for (int i = 0; i < viewPorts.size(); i++) {
+            futurePlots[i] = plotChart(viewPorts.get(i), forceRefresh);
+        }
+        var invalidatedFuture = CompletableFuture.allOf(futurePlots);
+        invalidatedFuture.whenCompleteAsync((unused, throwable) -> p.close());
+        return invalidatedFuture;
     }
 
-    public void invalidate(ChartViewPort viewPort, boolean dontPlot, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Refreshing chart " + worksheet.getName() + "\\" + viewPort.getDataStore().getName() + " (dontPlot=" + dontPlot + ")", logger::perf)) {
-            currentState.get(viewPort.getDataStore()).ifPresent(y -> {
-                XYChartSelection<ZonedDateTime, Double> currentSelection = y.asSelection();
-                logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
-                if (!dontPlot) {
-                    plotChart(viewPort, currentSelection, forceRefresh);
-                }
-            });
-        }
-    }
 
-    private void plotChart(ChartViewPort viewPort, XYChartSelection<ZonedDateTime, Double> currentSelection, boolean forceRefresh) {
-        try (Profiler p = Profiler.start("Adding series to chart " + viewPort.getDataStore().getName(), logger::perf)) {
-            nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
-            AsyncTaskManager.getInstance().submit(() -> {
-                        viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
-                        return viewPort.getDataStore().getSeries()
-                                .stream()
-                                .filter(series -> {
-                                    if (series.getProcessor() == null) {
-                                        logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
-                                        return false;
-                                    }
-                                    if (!series.isSelected()) {
-                                        logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
-                                        return false;
-                                    }
-                                    return true;
-                                })
-                                .map(ts -> makeXYChartSeries(viewPort.getDataStore(), ts))
-                                .collect(Collectors.toList());
-                    },
-                    event -> {
-                        try {
-                            if (!closed.get()) {
-                                nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
-                                viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
-                                for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
-                                    if (n instanceof Legend) {
-                                        int i = 0;
-                                        for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
-                                            legendItem.getSymbol().setStyle("-fx-background-color: " +
-                                                    colorToRgbaString(viewPort.getDataStore()
-                                                            .getSeries()
-                                                            .stream()
-                                                            .filter(TimeSeriesInfo::isSelected)
-                                                            .collect(Collectors.toList())
-                                                            .get(i)
-                                                            .getDisplayColor()));
-                                            i++;
-                                        }
-                                    }
+    public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh) {
+        if (!currentState.get(viewPort.getDataStore()).isPresent()) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
+        logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
+        nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
+        return AsyncTaskManager.getInstance().submit(() -> {
+                    viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
+                    return viewPort.getDataStore().getSeries()
+                            .stream()
+                            .filter(series -> {
+                                if (series.getProcessor() == null) {
+                                    logger.warn("Series " + series.getDisplayName() + " does not contain any data to plot");
+                                    return false;
                                 }
-                                if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                                    // Force a redraw of the charts and their Y Axis considering their proper width.
-                                    new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                                if (!series.isSelected()) {
+                                    logger.debug(() -> "Series " + series.getDisplayName() + " is not selected");
+                                    return false;
                                 }
-                            }
-                        } catch (Exception e) {
-                            Dialogs.notifyException("Unexpected error while plotting data", e, root);
-                        }
-                    },
-                    event -> {
+                                return true;
+                            })
+                            .map(ts -> makeXYChartSeries(viewPort.getDataStore(), ts))
+                            .collect(Collectors.toList());
+                },
+                event -> {
+                    try {
                         if (!closed.get()) {
                             nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
-                            Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                            viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
+                            for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
+                                if (n instanceof Legend) {
+                                    int i = 0;
+                                    for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
+                                        legendItem.getSymbol().setStyle("-fx-background-color: " +
+                                                colorToRgbaString(viewPort.getDataStore()
+                                                        .getSeries()
+                                                        .stream()
+                                                        .filter(TimeSeriesInfo::isSelected)
+                                                        .collect(Collectors.toList())
+                                                        .get(i)
+                                                        .getDisplayColor()));
+                                        i++;
+                                    }
+                                }
+                            }
+                            if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
+                                // Force a redraw of the charts and their Y Axis considering their proper width.
+                                new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
+                            }
                         }
-                    });
-        }
+                    } catch (Exception e) {
+                        Dialogs.notifyException("Unexpected error while plotting data", e, root);
+                    }
+                },
+                event -> {
+                    if (!closed.get()) {
+                        nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
+                        Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                    }
+                });
     }
+
 
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo<Double> series) {
         try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
@@ -1530,7 +1525,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 tv.getItems().add(dropIndex, draggedseries);
                 event.setDropCompleted(true);
                 tv.getSelectionModel().clearAndSelect(dropIndex);
-                invalidateAll(false, false, false);
+                invalidate(false, false, false);
                 event.consume();
             }
         }));

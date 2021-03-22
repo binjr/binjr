@@ -61,9 +61,9 @@ public class AsyncTaskManager {
      * @param <V>  the parameter type for the task
      * @return the result of the task
      */
-    public <V> Future<?> submit(Task<V> task) {
+    public <V> CompletableFuture<?> submit(Task<V> task) {
         logger.trace(() -> "Task " + task.toString() + " submitted");
-        return mainthreadPool.submit(task);
+        return CompletableFuture.runAsync(task, mainthreadPool);
     }
 
     /**
@@ -75,7 +75,7 @@ public class AsyncTaskManager {
      * @param <V>         the parameter type for the task
      * @return the result of the task
      */
-    public <V> Future<?> submit(Callable<V> action, EventHandler<WorkerStateEvent> onSucceeded, EventHandler<WorkerStateEvent> onFailed) {
+    public <V> CompletableFuture<?> submit(Callable<V> action, EventHandler<WorkerStateEvent> onSucceeded, EventHandler<WorkerStateEvent> onFailed) {
         Task<V> t = new Task<V>() {
             @Override
             protected V call() throws Exception {
@@ -85,13 +85,12 @@ public class AsyncTaskManager {
         t.setOnSucceeded(onSucceeded);
         t.setOnFailed(onFailed);
         logger.trace(() -> "Task " + t.toString() + " submitted");
-
-        return mainthreadPool.submit(t);
+        return CompletableFuture.runAsync(t, mainthreadPool);
     }
 
-    public Future<?> submitSubTask(Runnable action) {
+    public CompletableFuture<?> submitSubTask(Runnable action) {
         logger.trace(() -> "Submiting runnable directly on the thread pool");
-        return subTaskThreadPool.submit(action);
+        return CompletableFuture.runAsync(action, subTaskThreadPool);
     }
 
     private ExecutorService threadPoolFactory(String name, ThreadPoolPolicy policy, int parallelism) {
@@ -114,7 +113,7 @@ public class AsyncTaskManager {
                 break;
             case WORK_STEALING:
                 threadPool = Executors.newWorkStealingPool(parallelism);
-                logger.trace(() -> name + " work stealing pool thread started with parallelism level: " +parallelism);
+                logger.trace(() -> name + " work stealing pool thread started with parallelism level: " + parallelism);
                 break;
             default:
             case CACHED:

@@ -92,7 +92,7 @@ public class ChartViewportsState implements AutoCloseable {
          */
         public AxisState(ChartViewPort chartViewPort, double startY, double endY) {
             this.chartViewPort = chartViewPort;
-            this.onRefreshViewportRequired = (observable, oldValue, newValue) -> parent.invalidate(chartViewPort, true, false);
+            this.onRefreshViewportRequired = (observable, oldValue, newValue) ->  parent.invalidate(chartViewPort.getDataStore().isSaveHistoryArmed(), true, false);
             this.startY = new SimpleDoubleProperty(startY);
             this.endY = new SimpleDoubleProperty(endY);
             this.addListeners();
@@ -201,19 +201,18 @@ public class ChartViewportsState implements AutoCloseable {
      */
     public ChartViewportsState(XYChartsWorksheetController parent, ZonedDateTime startX, ZonedDateTime endX) {
         this.parent = parent;
-        onRefreshAllRequired = (observable, oldValue, newValue) -> parent.invalidateAll(true, false, false);
+        onRefreshAllRequired = (observable, oldValue, newValue) -> parent.invalidate(true, false, false);
         this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
         this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
         this.startX.addListener(onRefreshAllRequired);
         this.endX.addListener(onRefreshAllRequired);
         for (ChartViewPort viewPort : parent.getViewPorts()) {
-            this.put(viewPort.getDataStore(), new AxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue()));
-            this.get(viewPort.getDataStore()).ifPresent(y -> {
-                viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(y.startY);
-                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).lowerBoundProperty().bindBidirectional(y.startY);
-                viewPort.getDataStore().yAxisMaxValueProperty().bindBidirectional(y.endY);
-                ((ValueAxis<Double>) viewPort.getChart().getYAxis()).upperBoundProperty().bindBidirectional(y.endY);
-            });
+            var state = new AxisState(viewPort, viewPort.getDataStore().getyAxisMinValue(), viewPort.getDataStore().getyAxisMaxValue());
+            this.put(viewPort.getDataStore(), state);
+            viewPort.getDataStore().yAxisMinValueProperty().bindBidirectional(state.startY);
+            ((ValueAxis<Double>) viewPort.getChart().getYAxis()).lowerBoundProperty().bindBidirectional(state.startY);
+            viewPort.getDataStore().yAxisMaxValueProperty().bindBidirectional(state.endY);
+            ((ValueAxis<Double>) viewPort.getChart().getYAxis()).upperBoundProperty().bindBidirectional(state.endY);
         }
         ((XYChartsWorksheet) parent.getWorksheet()).fromDateTimeProperty().bind(this.startX);
         ((XYChartsWorksheet) parent.getWorksheet()).toDateTimeProperty().bind(this.endX);
@@ -301,7 +300,7 @@ public class ChartViewportsState implements AutoCloseable {
                 this.startX.set(newStartX);
                 this.endX.set(newEndX);
                 selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
-                parent.invalidateAll(toHistory, dontPlotChart, false);
+                parent.invalidate(toHistory, dontPlotChart, false);
             });
             timeRange.set(TimeRange.of(startX.getValue(), endX.getValue()));
         } finally {

@@ -40,6 +40,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -611,6 +612,17 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
 
     public BooleanProperty showPropertiesProperty() {
         return showProperties;
+    }
+
+    private final transient AtomicBoolean saveHistoryTrigger = new AtomicBoolean(false);
+
+    public void armSaveHistory() {
+        saveHistoryTrigger.set(true);
+
+    }
+
+    public boolean isSaveHistoryArmed() {
+        return saveHistoryTrigger.compareAndSet(true, false);
     }
 }
 
