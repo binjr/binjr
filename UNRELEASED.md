@@ -52,4 +52,5 @@
 
 ### Beta 10
 * _[New]_ Added the option to display numerical values on charts without unit prefixes.
+* _[New]_ Embedded Java runtime updated to OpenJDK 16.  
 * _[Fixed]_ Changes to Y axis scale in chart properties are not taken into account by navigation history.
