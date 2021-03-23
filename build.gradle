@@ -126,7 +126,7 @@ configure(subprojects) {
 
         dependencies {
             testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.1')
-            testRuntime('org.junit.jupiter:junit-jupiter-engine:5.7.1')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.7.1')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
@@ -421,8 +421,8 @@ task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
                 StandardCopyOption.REPLACE_EXISTING)
     }
     from DISTRIBUTION_ROOT
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.zip"
+    destinationDirectory = buildDir
+    archiveFileName = "${DISTRIBUTION_NAME}.zip"
 }
 
 task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
@@ -584,38 +584,38 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
 
 task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip]) {
     from "${buildDir}${DISTRIBUTION_NAME}.zip"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.zip"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.zip"
 }
 
 task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
     from "${buildDir}${DISTRIBUTION_NAME}.msi"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.msi"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.msi"
 }
 
 task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageMacOS]) {
     from "${buildDir}${DISTRIBUTION_NAME}.dmg"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.dmg"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.dmg"
 }
 
 task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
     from "${buildDir}${DISTRIBUTION_NAME}.tar.gz"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.tar.gz"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.tar.gz"
 }
 
 task packageAsRpm(type: WrapTaskForSigning, dependsOn: [jpackageRpm]) {
     from "${buildDir}${DISTRIBUTION_NAME}.rpm"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.rpm"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.rpm"
 }
 
 task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
     from "${buildDir}${DISTRIBUTION_NAME}.deb"
-    destinationDir buildDir
-    archiveName "${DISTRIBUTION_NAME}.deb"
+    destinationDirectory =  buildDir
+    archiveFileName =  "${DISTRIBUTION_NAME}.deb"
 }
 
 signing {

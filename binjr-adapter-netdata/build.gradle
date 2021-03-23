@@ -18,7 +18,7 @@ plugins {
 }
 
 dependencies {
-    compile project(':binjr-core')
+    compileOnly project(':binjr-core')
 }
 
 openApiValidate {
