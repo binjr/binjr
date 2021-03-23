@@ -498,7 +498,8 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
-            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED"
+            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
     ]
     doLast {
         def source = java.nio.file.Path.of("${buildDir}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
@@ -531,6 +532,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_DEB",
             "--linux-package-name", "binjr",
@@ -572,6 +574,7 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--java-options", "-XX:ShenandoahAllocationThreshold=20",
             "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
             "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED",
             "--arguments", "--system-plugins-path=/opt/binjr/plugins",
             "--arguments", "--packaging=LINUX_RPM",
             "--linux-package-name", "binjr",
