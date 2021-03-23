@@ -20,7 +20,7 @@ jobs:
 
       - task: JavaToolInstaller@0
         inputs:
-          versionSpec: "15"
+          versionSpec: "16"
           jdkArchitectureOption: x64
           jdkSourceOption: LocalDirectory
           jdkFile: ${{ parameters.jdkFile }}
@@ -39,7 +39,7 @@ jobs:
           options: '--stacktrace'
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
-          jdkVersionOption: '1.15'
+          jdkVersionOption: '1.16'
           jdkArchitectureOption: 'x64'
           publishJUnitResults: false
           tasks: 'signPackageDistribution'
