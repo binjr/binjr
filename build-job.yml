@@ -27,16 +27,23 @@ jobs:
           jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
           cleanDestinationDirectory: true
 
+      - task: DownloadSecureFile@1
+        name: gpgKeyring
+        displayName: 'Download GPG Keyring'
+        inputs:
+          secureFile: 'keyring.gpg'
+
       - task: Gradle@2
         condition: succeeded()
         env:
           GPG_KEY_NAME: $(gpg.keyname)
           GPG_PASSPHRASE: $(gpg.passphrase)
+          GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
           BINJR_BUILD_NUMBER: $(Build.BuildNumber)
           IS_TAG: $(isTag)
           REPO_TAG_NAME: $(Build.SourceBranchName)
         inputs:
-          options: '--stacktrace'
+          options: '--stacktrace --info'
           gradleWrapperFile: 'gradlew'
           javaHomeOption: 'JDKVersion'
           jdkVersionOption: '1.16'
@@ -52,14 +59,18 @@ jobs:
           action: edit
           tag: $(Build.SourceBranchName)
           assets: |
-            $(System.DefaultWorkingDirectory)/build/*.dmg
-            $(System.DefaultWorkingDirectory)/build/*.dmg.asc
-            $(System.DefaultWorkingDirectory)/build/*.msi
-            $(System.DefaultWorkingDirectory)/build/*.msi.asc
-            $(System.DefaultWorkingDirectory)/build/*.zip
-            $(System.DefaultWorkingDirectory)/build/*.zip.asc
-            $(System.DefaultWorkingDirectory)/build/*.tar.gz
-            $(System.DefaultWorkingDirectory)/build/*.tar.gz.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.msi
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.msi.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.zip
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.zip.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.tar.gz
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.tar.gz.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.deb
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.deb.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.rpm
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.rpm.asc
           assetUploadMode: 'replace'
           releaseNotesSource: 'file'
           releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
@@ -78,7 +89,7 @@ jobs:
           sudo cp /usr/bin/gpg /usr/bin/gpg_
           echo -e '#!/bin/bash\ngpg1 --batch --no-tty --passphrase "$(gpg.package.passphrase)" "$@"' | sudo tee /usr/bin/gpg > /dev/null
           sudo chmod +x /usr/bin/gpg
-          gpg --import $(System.DefaultWorkingDirectory)/distribution/publishing/keyring.gpg
+          gpg --import $(gpgKeyring.secureFilePath)
           echo "**************************************"
           echo "* Generate apt repo"
           echo "**************************************"

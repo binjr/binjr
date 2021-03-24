@@ -77,12 +77,13 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
         "${IS_WINDOWS ? ",jdk.crypto.mscapi" : ""}"
 
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
-ext.DISTRIBUTION_ROOT = "${buildDir}/distributions/${DISTRIBUTION_NAME}"
-ext.DISTRIBUTION_PATH = IS_WINDOWS ? "${DISTRIBUTION_ROOT}" : "${DISTRIBUTION_ROOT}/${BINJR_VERSION}"
+ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
+ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
 ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : IS_MAC ? "dmg" : "tar.gz"
 ext.WIX_HOME = System.getenv("WIX")
+ext.ARTIFACTS_PATH = file("${buildDir}/artifacts/")
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
-ext."signing.secretKeyRingFile" = "${projectDir}/distribution/publishing/keyring.gpg"
+ext."signing.secretKeyRingFile" = System.getenv('GPG_KEYRING_PATH')
 ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 
 System.out.println("Building version: ${BINJR_VERSION}")
@@ -238,7 +239,7 @@ task publishArtifacts(dependsOn: subprojects.publishToSonatype) {
 }
 
 task copyAppLibs(type: Copy) {
-    into "$DISTRIBUTION_PATH/libs"
+    into "$APP_IMAGE_PATH/libs"
     from(project(":binjr-core").configurations.runtimeClasspath) {
         exclude "javafx-*.jar"
     }
@@ -264,7 +265,7 @@ task copyAppLibs(type: Copy) {
 }
 
 task copyPluginLibs(type: Copy) {
-    into IS_MAC ? "$DISTRIBUTION_PATH/libs" : "$DISTRIBUTION_PATH/plugins"
+    into IS_MAC ? "$APP_IMAGE_PATH/libs" : "$APP_IMAGE_PATH/plugins"
     from project(":binjr-adapter-jrds").jar
     from project(":binjr-adapter-csv").jar
     from project(":binjr-adapter-rrd4j").jar
@@ -306,12 +307,12 @@ task copyJpackageInputLibs(type: Copy) {
 }
 
 task copyPlatformSpecific(type: Copy) {
-    into DISTRIBUTION_PATH
+    into APP_IMAGE_PATH
     from "${projectDir}/distribution/platforms/${OS_FAMILY}"
 }
 
 task copyResources(type: Copy) {
-    into "$DISTRIBUTION_PATH/resources"
+    into "$APP_IMAGE_PATH/resources"
     from "${projectDir}/distribution/resources"
 }
 
@@ -343,13 +344,13 @@ markdownToHtml.dependsOn(copyInfo)
 
 markdownToHtml {
     sourceDir = file("${buildDir}/tmp/info")
-    outputDir = file("$DISTRIBUTION_PATH")
+    outputDir = file("$APP_IMAGE_PATH")
     doLast {
-        ConfigurableFileTree tree = fileTree(dir: "$DISTRIBUTION_PATH")
+        ConfigurableFileTree tree = fileTree(dir: "$APP_IMAGE_PATH")
         tree.include '**/*.html'
         tree.each { File file ->
             String path = file.path
-            File newFile = new File("${DISTRIBUTION_PATH}/tmp_${file.name}")
+            File newFile = new File("${APP_IMAGE_PATH}/tmp_${file.name}")
             newFile << "<html lang=\"en\">\n" +
                     "<head>\n" +
                     "    <title>" + (file.name - ".html") + "</title>\n" +
@@ -395,19 +396,22 @@ task createRuntimeImage(type: Exec, dependsOn: [unzipOpenJfxModules]) {
             '--no-man-pages',
             "--vm=server",
             "--compress=2",
-            '--output', "${DISTRIBUTION_PATH}/runtime"
+            '--output', "${APP_IMAGE_PATH}/runtime"
     ]
     doLast {
         System.out.println("Application '${project.name}' packaged.")
-        System.out.println(" -> location: ${DISTRIBUTION_PATH}/")
+        System.out.println(" -> location: ${APP_IMAGE_PATH}/")
     }
 }
 
 task prepareAppBundle(dependsOn: [copyAppLibs, copyPluginLibs, copyResources, copyPlatformSpecific, markdownToHtml, createRuntimeImage]) {
+    doFirst {
+        mkdir ARTIFACTS_PATH
+    }
 }
 
 task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
-    workingDir DISTRIBUTION_PATH
+    workingDir APP_IMAGE_PATH
     commandLine = [
             "sh", "-c",
             "find . -mindepth 1 | sed -n 's@^\\./@@p' > .installed"
@@ -417,32 +421,33 @@ task listPackageContent(type: Exec, dependsOn: prepareAppBundle) {
 task packageDistributionZip(type: Zip, dependsOn: prepareAppBundle) {
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_zip/binjr.ini"),
-                Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
+                Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
                 StandardCopyOption.REPLACE_EXISTING)
     }
-    from DISTRIBUTION_ROOT
-    destinationDirectory = buildDir
+    from APP_IMAGE_ROOT
+    destinationDirectory = ARTIFACTS_PATH
     archiveFileName = "${DISTRIBUTION_NAME}.zip"
 }
 
 task packageDistributionTar(type: Exec, dependsOn: [listPackageContent]) {
-    workingDir DISTRIBUTION_ROOT
+    workingDir APP_IMAGE_ROOT
     commandLine = [
             "sh", "-c",
-            "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${buildDir}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
+            "ln -s \"${BINJR_VERSION}/binjr\" \"binjr\" && tar czf \"${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.tar.gz\" \"${BINJR_VERSION}\" \"binjr\""
     ]
+    outputs.dir ARTIFACTS_PATH
 }
 
 task wixRunHeat(type: Exec, dependsOn: prepareAppBundle) {
     doFirst {
         Files.copy(Paths.get("${projectDir}/distribution/bundlers/win_msi/binjr.ini"),
-                Paths.get("${DISTRIBUTION_PATH}/binjr.ini"),
+                Paths.get("${APP_IMAGE_PATH}/binjr.ini"),
                 StandardCopyOption.REPLACE_EXISTING)
     }
     workingDir project.projectDir
     commandLine = [
             "${WIX_HOME}/bin/heat.exe",
-            "dir", "${DISTRIBUTION_PATH}",
+            "dir", "${APP_IMAGE_PATH}",
             "-cg", "binjrFiles",
             "-suid", "-gg", "-scom", "-sreg", "-sfrag", "-srd",
             "-dr", "APPLICATIONFOLDER",
@@ -460,7 +465,7 @@ task wixRunCandle(type: Exec, dependsOn: [wixRunHeat]) {
             "${projectDir}/distribution/bundlers/win_msi/binjr.wxs",
             "${buildDir}/wix/binjrFiles.wxs",
             "-dbinjrVersion=${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
-            "-dbuildSourceDir=${DISTRIBUTION_PATH}",
+            "-dbuildSourceDir=${APP_IMAGE_PATH}",
             "-dresourcesDir=${projectDir}/distribution"
     ]
 }
@@ -470,26 +475,27 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     commandLine = [
             "${WIX_HOME}/bin/light.exe",
             "-sw", "-sice:ICE38", "-sice:ICE64",
-            "-out", "${buildDir}/${DISTRIBUTION_NAME}.msi",
+            "-out", "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.msi",
             "${buildDir}/wix/obj/*.wixobj",
             "-ext", "WixUtilExtension", "-ext", "WixUIExtension.dll"
     ]
+    outputs.dir ARTIFACTS_PATH
 }
 
 task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
-    workingDir buildDir
+    workingDir ARTIFACTS_PATH
     commandLine = [
             "jpackage",
             "--name", project.name,
             "--input", "${buildDir}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
-            "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", DISTRIBUTION_EXTENSION,
             "--copyright", "Copyright (c) 2016-2020 Frederic Thevenet",
             "--description", "A Time Series Browser",
             "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
-            "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.icns",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac_tar/file-associations.properties",
             "--arguments", "--packaging=MAC_DMG",
             "--java-options", "-Xmx4096M",
@@ -502,26 +508,27 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${buildDir}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"))
     }
+    outputs.dir ARTIFACTS_PATH
 }
 
 
 task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
-    workingDir buildDir
+    workingDir ARTIFACTS_PATH
     commandLine = [
             "jpackage",
             "--name", project.name,
             "--input", "${buildDir}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
-            "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", "deb",
             "--copyright", "2016-2020 Frederic Thevenet",
             "--description", "A Time Series Browser",
             "--app-version", BINJR_VERSION,
-            "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.png",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
             "--file-associations", "${projectDir}/distribution/bundlers/linux_deb/file-associations.properties",
             "--resource-dir", "${projectDir}/distribution/bundlers/linux_deb/",
@@ -545,25 +552,26 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--verbose"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${buildDir}/${project.name}_${BINJR_VERSION}-1_${OS_ARCH}.deb")
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}_${BINJR_VERSION}-1_${OS_ARCH}.deb")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.deb"))
     }
+    outputs.dir ARTIFACTS_PATH
 }
 
 task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
-    workingDir buildDir
+    workingDir ARTIFACTS_PATH
     commandLine = [
             "jpackage",
             "--name", project.name,
             "--input", "${buildDir}/tmp/input",
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
-            "--runtime-image", "${DISTRIBUTION_PATH}/runtime",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", "rpm",
             "--copyright", "2016-2020 Frederic Thevenet",
             "--description", "A Time Series Browser",
             "--app-version", BINJR_VERSION.replace("-", "."),
-            "--icon", "${DISTRIBUTION_PATH}/resources/icons/binjr.png",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
             "--file-associations", "${projectDir}/distribution/bundlers/linux_rpm/file-associations.properties",
             "--resource-dir", "${projectDir}/distribution/bundlers/linux_rpm/",
@@ -586,44 +594,45 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--verbose"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${buildDir}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${BINJR_VERSION.replace("-", ".")}-1.x86_64.rpm")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.rpm"))
     }
+    outputs.dir ARTIFACTS_PATH
 }
 
 task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.zip"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.zip"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.zip"
 }
 
 task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.msi"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.msi"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.msi"
 }
 
 task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageMacOS]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.dmg"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.dmg"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.dmg"
 }
 
 task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.tar.gz"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.tar.gz"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.tar.gz"
 }
 
 task packageAsRpm(type: WrapTaskForSigning, dependsOn: [jpackageRpm]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.rpm"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.rpm"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.rpm"
 }
 
 task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
-    from "${buildDir}${DISTRIBUTION_NAME}.deb"
-    destinationDirectory =  buildDir
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.deb"
+    destinationDirectory =  ARTIFACTS_PATH
     archiveFileName =  "${DISTRIBUTION_NAME}.deb"
 }
 
@@ -671,11 +680,11 @@ dependencyUpdates {
 
 
 /**
- * This class is a no-op copy task whose purpose is to allow using the 
+ * This class is a no-op copy task whose purpose is to allow using the
  * standard gradle signing plugin to sign any arbitrary file.
  * The idea is to piggy-back on the existing support for signing
- * of tasks extending AbstractArchiveTask; to use it, simply declare a 
- * task of that type and use the path to the file to be signed both as 
+ * of tasks extending AbstractArchiveTask; to use it, simply declare a
+ * task of that type and use the path to the file to be signed both as
  * the source and target of the archive.
  * NB: No copy/move/archiving will actually take place.
  */
