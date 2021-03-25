@@ -43,6 +43,8 @@ ext.GROUP_ID = 'eu.binjr'
 ext.LICENSE_NAME = 'Apache License, Version 2.0'
 ext.LICENSE_URL = 'http ://www.apache.org/licenses/LICENSE-2.0.txt'
 ext.LICENSE_DISTRIBUTION = 'repo'
+ext.BINJR_COPYRIGHT = "Copyright (c) 2016-2021 Frederic Thevenet"
+ext.BINJR_DESCRIPTION = "A Time Series Browser"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
 ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
@@ -79,7 +81,6 @@ ext.JLINK_ADD_MODULES = "javafx.controls," +
 ext.DISTRIBUTION_NAME = "${project.name}-${BINJR_VERSION}_${OS_FAMILY}-${OS_ARCH}"
 ext.APP_IMAGE_ROOT = "${buildDir}/app_image/${DISTRIBUTION_NAME}"
 ext.APP_IMAGE_PATH = IS_WINDOWS ? "${APP_IMAGE_ROOT}" : "${APP_IMAGE_ROOT}/${BINJR_VERSION}"
-ext.DISTRIBUTION_EXTENSION = IS_WINDOWS ? "msi" : IS_MAC ? "dmg" : "tar.gz"
 ext.WIX_HOME = System.getenv("WIX")
 ext.ARTIFACTS_PATH = file("${buildDir}/artifacts/")
 ext."signing.keyId" = System.getenv('GPG_KEY_NAME')
@@ -106,7 +107,7 @@ configure(subprojects) {
     version BINJR_VERSION
     sourceCompatibility = 11
     targetCompatibility = 11
-    description 'A Time Series Browser'
+    description BINJR_DESCRIPTION
     compileJava.options.encoding = 'UTF-8'
 
     if (project != project(':binjr-app')) {
@@ -363,7 +364,7 @@ markdownToHtml {
                         "    <br>\n" +
                         "    <hr>\n" +
                         "    <p style=\"text-align:left;\">\n" +
-                        "        (c) 2016-2020 <a href=\"https://www.fthevenet.eu\">Frederic Thevenet</a>\n" +
+                        "        (c) 2016-2021 <a href=\"https://www.fthevenet.eu\">Frederic Thevenet</a>\n" +
                         "        <span style=\"float:right;\"><a href=\"https://binjr.eu\">https://binjr.eu</a></span>\n" +
                         "    </p>\n" +
                         "</footer>"
@@ -389,7 +390,7 @@ task createRuntimeImage(type: Exec, dependsOn: [unzipOpenJfxModules]) {
     workingDir project.projectDir
     commandLine = [
             "${JDK_HOME}/bin/jlink",
-            '-p', "${JDK_HOME}/jmods${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION.replaceAll"\\-ea\\+[0-9]+", ""}",
+            '-p', "${JDK_HOME}/jmods${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION.replaceAll "\\-ea\\+[0-9]+", ""}",
             '--add-modules', JLINK_ADD_MODULES,
             '--strip-debug',
             '--no-header-files',
@@ -491,12 +492,12 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
-            "--type", DISTRIBUTION_EXTENSION,
-            "--copyright", "Copyright (c) 2016-2020 Frederic Thevenet",
-            "--description", "A Time Series Browser",
+            "--type", "dmg",
+            "--copyright",  BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
             "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
-            "--file-associations", "${projectDir}/distribution/bundlers/mac_tar/file-associations.properties",
+            "--file-associations", "${projectDir}/distribution/bundlers/mac_dmg/file-associations.properties",
             "--arguments", "--packaging=MAC_DMG",
             "--java-options", "-Xmx4096M",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
@@ -508,8 +509,8 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
     ]
     doLast {
-        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.${DISTRIBUTION_EXTENSION}")
-        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.${DISTRIBUTION_EXTENSION}"))
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.dmg")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.dmg"))
     }
     outputs.dir ARTIFACTS_PATH
 }
@@ -525,8 +526,8 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", "deb",
-            "--copyright", "2016-2020 Frederic Thevenet",
-            "--description", "A Time Series Browser",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
             "--app-version", BINJR_VERSION,
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
@@ -568,8 +569,8 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", "rpm",
-            "--copyright", "2016-2020 Frederic Thevenet",
-            "--description", "A Time Series Browser",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
             "--app-version", BINJR_VERSION.replace("-", "."),
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.png",
             "--license-file", "${projectDir}/LICENSE.md",
@@ -602,38 +603,38 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
 
 task packageAsZip(type: WrapTaskForSigning, dependsOn: [packageDistributionZip]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.zip"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.zip"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.zip"
 }
 
 task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.msi"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.msi"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.msi"
 }
 
 task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageMacOS]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.dmg"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.dmg"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.dmg"
 }
 
 task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.tar.gz"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.tar.gz"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.tar.gz"
 }
 
 task packageAsRpm(type: WrapTaskForSigning, dependsOn: [jpackageRpm]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.rpm"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.rpm"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.rpm"
 }
 
 task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.deb"
-    destinationDirectory =  ARTIFACTS_PATH
-    archiveFileName =  "${DISTRIBUTION_NAME}.deb"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.deb"
 }
 
 signing {
