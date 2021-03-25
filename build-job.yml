@@ -75,8 +75,7 @@ jobs:
           releaseNotesSource: 'file'
           releaseNotesFile: $(System.DefaultWorkingDirectory)/UNRELEASED.md
           addChangeLog: false
-          isPreRelease: true
-#          isPreRelease: $(isSnapshot)
+          isPreRelease: $(isSnapshot)
 
       - bash: |
           echo "**************************************"

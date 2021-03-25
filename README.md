@@ -1,5 +1,3 @@
-> *A public beta for* ***binjr***  *version 3 is  currently underway. [Visit the discussion thread here if you'd like to know more.](https://github.com/binjr/binjr/discussions/107)*
----
 # <a href="https://binjr.eu"> <img alt="binjr" width="30%" height="auto" src="https://binjr.eu/assets/images/binjr_title_dark.png"/></a>  
 
 [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1) [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22) 
@@ -21,7 +19,7 @@
 editable charts and provides advanced features to navigate through the data in a natural and fluent fashion 
 (drag & drop, zoom, history, detacheable tabs, advanced time-range picker).
  
-It is a standalone client application, that runs independently from the applications that produce the data; there are
+It is a standalone client application, that runs independently of the applications that produce the data; there are
 no application server or server side components dedicated to ***binjr*** that needs to be installed on the source.   
 Like a generic SQL browser only requires a driver to connect and retrieve data from a given DBMS, ***binjr*** 
 only needs one specifically written piece of code - here called a data adapter - to enable the dialog with a specific 
@@ -41,7 +39,7 @@ The user can then save the current state of the session at any time to a file, i
 with someone else.
 
 ### ...and what it isn't
-* _binjr_ is **not** a system performance collector, nor a collector of anything else for that matter. What it provides is
+* _binjr_ is **not** a system performance collector, nor a collector of anything else for that matter. What it provides is
    efficient navigation and pretty presentation for time series collected elsewhere. 
 * _binjr_ is **not** a cloud solution. It's not even a server based solution; it's entirely a client application, 
   albeit one that can get its data from remote servers. Think of it as a browser, only just for time series. 
@@ -158,7 +156,7 @@ If you encounter an issue, or would like to suggest an enhancement or a new feat
 ## Contributing
 
 At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
-that it is a fully community driven effort with a tiny number of contributors.  
+that it is a fully community-driven effort with a tiny number of contributors.  
 
 The great thing about it being an open source, community driven project, though, is that should you believe that there is 
  is a use case where ***binjr*** could be a good fit but lacks supports for a specific time-series DB or some other feature,

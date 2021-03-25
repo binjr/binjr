@@ -34,9 +34,9 @@ plugins {
 
 ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true" : false
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
-ext.IS_BETA = true
-ext.BINJR_BETA_VERSION = "2.99.10"
-ext.BINJR_VERSION_STEM = "3.0.0-b10"
+ext.IS_BETA = false
+ext.BINJR_BETA_VERSION = "0.0.0"
+ext.BINJR_VERSION_STEM = "3.0.0"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
