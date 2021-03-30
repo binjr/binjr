@@ -198,7 +198,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         FilterableTreeItem<SourceBinding> configNode = new FilterableTreeItem<>(
                 new LogFilesBinding.Builder()
-                        .withLabel("Log Files")
+                        .withLabel(getSourceName())
                         .withAdapter(this)
                         .build());
         attachNodes(configNode);

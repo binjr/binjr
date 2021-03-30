@@ -122,7 +122,7 @@ public class TextDataAdapter extends BaseDataAdapter<String> {
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
         FilterableTreeItem<SourceBinding> rootNode = new FilterableTreeItem<>(
                 new TextFilesBinding.Builder()
-                        .withLabel("Text Files")
+                        .withLabel(getSourceName())
                         .withAdapter(this)
                         .build());
         attachTextFilesTree(rootNode);
