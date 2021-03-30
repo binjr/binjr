@@ -89,13 +89,13 @@ jobs:
           echo "* Generate apt repo"
           echo "**************************************"
           aptly --distribution="stable" --comment="binjr apt repository" repo create binjr
-          aptly repo add binjr  $(System.DefaultWorkingDirectory)/build/binjr-*_linux-amd64.deb
+          aptly repo add binjr  $(System.DefaultWorkingDirectory)/build/artifacts/binjr-*_linux-amd64.deb
           aptly -gpg-key="$(gpg.package.keyname)" publish repo binjr
           echo "**************************************"
           echo "* Signing rpm"
           echo "**************************************"
           echo "%_gpg_name $(gpg.package.keyname)" >> ~/.rpmmacros
-          rpm --addsign -v build/binjr-*_linux-amd64.rpm
+          rpm --addsign -v build/artifacts/binjr-*_linux-amd64.rpm
           echo "**************************************"
           echo "* Cloning repos.binjr.eu"
           echo "**************************************"
@@ -111,7 +111,7 @@ jobs:
           cp -r ~/.aptly/public/pool apt/pool
           rm -rf rpm/stable
           mkdir rpm/stable
-          cp $(System.DefaultWorkingDirectory)/build/binjr-*_linux-amd64.rpm rpm/stable
+          cp $(System.DefaultWorkingDirectory)/build/artifacts/binjr-*_linux-amd64.rpm rpm/stable
           echo "**************************************"
           echo "* Generate rpm repo"
           echo "**************************************"
