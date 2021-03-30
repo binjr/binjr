@@ -319,14 +319,14 @@ public class XYChartsWorksheetController extends WorksheetController {
             StableTicksAxis<Double> yAxis;
             switch (currentChart.getUnitPrefixes()) {
                 case BINARY:
-                    yAxis = new StableTicksAxis<>(new BinaryPrefixFormatter(), 2, 1.0, 2.0, 4.0, 8.0, 16.0);
+                    yAxis = new BinaryStableTicksAxis<>();
                     break;
                 case METRIC:
-                    yAxis = new StableTicksAxis<>(new MetricPrefixFormatter(), 10, 1.0, 2.5, 5.0);
+                    yAxis = new MetricStableTicksAxis<>();
                     break;
                 case NONE:
                 default:
-                    yAxis = new StableTicksAxis<>(new NoopPrefixFormatter(), 10, 1.0, 2.5, 5.0);
+                    yAxis = new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
             }
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);

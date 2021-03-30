@@ -125,7 +125,7 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
      * @param base            the numerical base used to determine tick positions.
      * @param dividers        a list of divider candidates.
      */
-    public StableTicksAxis(PrefixFormatter prefixFormatter, int base, double... dividers) {
+    public StableTicksAxis(PrefixFormatter prefixFormatter, int base, double[] dividers) {
         super();
         this.base = base;
         this.dividers = dividers != null ? dividers : new double[]{1.0, 2.5, 5.0};
