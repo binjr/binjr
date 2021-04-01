@@ -1,0 +1,1 @@
+* _[Fixed]_ Incorrect progression reporting when indexing more than one log file at a time.

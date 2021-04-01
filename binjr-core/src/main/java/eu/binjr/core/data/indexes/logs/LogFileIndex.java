@@ -29,8 +29,7 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
-import javafx.beans.property.ReadOnlyLongProperty;
-import javafx.beans.property.ReadOnlyLongWrapper;
+import javafx.beans.property.LongProperty;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
@@ -91,8 +90,6 @@ public class LogFileIndex implements Searchable {
     private DirectoryReader indexReader;
     private IndexSearcher searcher;
 
-    private final ReadOnlyLongWrapper kilobytesRead = new ReadOnlyLongWrapper(0);
-
     public LogFileIndex() throws IOException {
 
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
@@ -149,13 +146,12 @@ public class LogFileIndex implements Searchable {
     }
 
     @Override
-    public void add(String path, InputStream ias, EventParser parser) throws IOException {
-        add(path, ias, true, parser);
+    public void add(String path, InputStream ias, EventParser parser, LongProperty progress) throws IOException {
+        add(path, ias, true, parser, progress);
     }
 
     @Override
-    public void add(String path, InputStream ias, boolean commit, EventParser parser) throws IOException {
-        kilobytesRead.set(0);
+    public void add(String path, InputStream ias, boolean commit, EventParser parser, LongProperty progress) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
             indexWriter.deleteDocuments(new Term(DOC_URI, path));
         }
@@ -207,7 +203,7 @@ public class LogFileIndex implements Searchable {
                     while (!taskAborted.get() && (line = reader.readLine()) != null) {
                         charRead += line.length();
                         if (charRead >= 10240) {
-                            kilobytesRead.set(kilobytesRead.get() + charRead);
+                            progress.set(progress.get() + charRead);
                             charRead = 0;
                         }
                         aggregator.yield(n.incrementAndGet(), line).ifPresent(CheckedLambdas.wrap(queue::put));
@@ -391,14 +387,6 @@ public class LogFileIndex implements Searchable {
             doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO));
         });
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
-    }
-
-    public long getKilobytesRead() {
-        return kilobytesRead.get();
-    }
-
-    public ReadOnlyLongProperty kilobytesReadProperty() {
-        return kilobytesRead.getReadOnlyProperty();
     }
 
     private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files, ZoneId zoneId) throws IOException {

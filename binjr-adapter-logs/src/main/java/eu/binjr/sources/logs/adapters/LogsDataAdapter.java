@@ -32,7 +32,6 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.Indexes;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.Searchable;
-import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -41,6 +40,8 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.LongProperty;
+import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.value.ChangeListener;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -311,16 +312,17 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                     }
                 }
             };
-            ((LogFileIndex) index).kilobytesReadProperty().addListener(progressListener);
+            final LongProperty charRead = new SimpleLongProperty(0);
+            charRead.addListener(progressListener);
             try {
                 for (int i = 0; i < toDo.size(); i++) {
                     String path = toDo.get(i);
-                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), getLogParser());
+                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), getLogParser(), charRead);
                     indexedFiles.add(path);
                 }
             } finally {
                 //remove listener
-                ((LogFileIndex) index).kilobytesReadProperty().removeListener(progressListener);
+                charRead.removeListener(progressListener);
                 if (progress != null) {
                     Dialogs.runOnFXThread(() -> progress.setValue(-1));
                 }
