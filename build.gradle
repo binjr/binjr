@@ -36,7 +36,7 @@ ext.IS_TAG = System.getenv('IS_TAG') != null ? System.getenv('IS_TAG') == "true"
 ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'))
 ext.IS_BETA = false
 ext.BINJR_BETA_VERSION = "0.0.0"
-ext.BINJR_VERSION_STEM = "3.0.1"
+ext.BINJR_VERSION_STEM = "3.0.2"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
@@ -321,8 +321,8 @@ task expandMdTemplates(type: Copy) {
     from "${projectDir}/distribution/templates"
     into "${buildDir}/tmp/expanded"
     filteringCharset = 'UTF-8'
-    def changeHistory = new File("./CHANGELOG.md").getText("UTF-8")
-    def currentChanges = new File("./UNRELEASED.md").getText("UTF-8")
+    def changeHistory = new File("${project.projectDir}/CHANGELOG.md").getText("UTF-8")
+    def currentChanges = new File("${project.projectDir}/UNRELEASED.md").getText("UTF-8")
     expand(["version"       : "$BINJR_VERSION",
             "releaseDate"   : "${new SimpleDateFormat("EEE, d MMM yyyy").format(new Date())}",
             "changeHistory" : "$changeHistory",
