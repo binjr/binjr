@@ -36,6 +36,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
+import org.apache.http.config.SocketConfig;
 import org.apache.http.conn.socket.ConnectionSocketFactory;
 import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
@@ -60,6 +61,7 @@ import java.security.Principal;
 import java.security.Security;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -226,7 +228,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         try {
             SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
                     createSslCustomContext(),
-                    null,
+                    new String[] { "TLSv1.2" },
                     null,
                     SSLConnectionSocketFactory.getDefaultHostnameVerifier());
             RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
@@ -249,8 +251,15 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
             var clientBuilder = HttpClients.custom()
                     .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
                     .setDefaultCredentialsProvider(credsProvider)
+                    .setConnectionTimeToLive(1, TimeUnit.MINUTES)
+                    .setDefaultSocketConfig(SocketConfig.custom()
+                            .setSoTimeout(5000)
+                            .build())
                     .setSSLSocketFactory(csf)
-                    .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build());
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(5000)
+                            .setSocketTimeout(5000)
+                            .setCookieSpec(CookieSpecs.STANDARD_STRICT).build());
 
             if (UserPreferences.getInstance().httpPoolingEnabled.get()) {
                 Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
