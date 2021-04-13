@@ -16,7 +16,8 @@
 
 package eu.binjr.core.data.adapters;
 
-import org.apache.http.NameValuePair;
+
+import org.apache.hc.core5.http.NameValuePair;
 
 public class UriParameter implements NameValuePair {
 

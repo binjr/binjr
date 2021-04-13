@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,39 +20,37 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
-import eu.binjr.core.preferences.UserPreferences;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.auth.AuthSchemeProvider;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.auth.Credentials;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.config.AuthSchemes;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.config.Registry;
-import org.apache.http.config.RegistryBuilder;
-import org.apache.http.config.SocketConfig;
-import org.apache.http.conn.socket.ConnectionSocketFactory;
-import org.apache.http.conn.socket.PlainConnectionSocketFactory;
-import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
-import org.apache.http.impl.auth.SPNegoSchemeFactory;
-import org.apache.http.impl.client.AbstractResponseHandler;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.http.ssl.SSLContexts;
-import org.apache.http.util.EntityUtils;
+import jakarta.xml.bind.annotation.XmlAccessType;
+import jakarta.xml.bind.annotation.XmlAccessorType;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.client5.http.SystemDefaultDnsResolver;
+import org.apache.hc.client5.http.auth.*;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.auth.*;
+import org.apache.hc.client5.http.impl.classic.AbstractHttpClientResponseHandler;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.config.RegistryBuilder;
+import org.apache.hc.core5.http.io.HttpClientResponseHandler;
+import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.ssl.TLS;
+import org.apache.hc.core5.net.URIBuilder;
+import org.apache.hc.core5.pool.PoolConcurrencyPolicy;
+import org.apache.hc.core5.pool.PoolReusePolicy;
+import org.apache.hc.core5.ssl.SSLContexts;
+import org.apache.hc.core5.util.TimeValue;
+import org.apache.hc.core5.util.Timeout;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLHandshakeException;
-import jakarta.xml.bind.annotation.XmlAccessType;
-import jakarta.xml.bind.annotation.XmlAccessorType;
 import java.io.IOException;
 import java.net.*;
 import java.security.KeyStore;
@@ -61,7 +59,6 @@ import java.security.Principal;
 import java.security.Security;
 import java.time.Instant;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
 /**
@@ -130,7 +127,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
 
     @Override
     public byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException {
-        return doHttpGet(craftFetchUri(path, begin, end), new AbstractResponseHandler<byte[]>() {
+        return doHttpGet(craftFetchUri(path, begin, end), new AbstractHttpClientResponseHandler<>() {
             @Override
             public byte[] handleEntity(HttpEntity entity) throws IOException {
                 return EntityUtils.toByteArray(entity);
@@ -164,7 +161,6 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     }
                 });
     }
-    //endregion
 
     @Override
     public void close() {
@@ -176,13 +172,10 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         super.close();
     }
 
-    protected <R> R doHttpGet(URI requestUri, ResponseHandler<R> responseHandler) throws DataAdapterException {
+    protected <R> R doHttpGet(URI requestUri, HttpClientResponseHandler<R> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::perf)) {
             logger.debug(() -> "requestUri = " + requestUri);
-            HttpGet httpget = new HttpGet(requestUri);
-            // Set user-agent pattern to workaround CAS server not proposing SPNEGO authentication unless it thinks agent can handle it.
-            httpget.setHeader("User-Agent", AppEnvironment.APP_NAME + "/" + AppEnvironment.getInstance().getVersion() + " (Authenticates like: Firefox/Safari/Internet Explorer)");
-            R result = httpClient.execute(httpget, responseHandler);
+            R result = httpClient.execute(new HttpGet(requestUri), responseHandler);
             if (result == null) {
                 throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri.toString() + "\"");
             }
@@ -226,16 +219,23 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
 
     protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
-            SSLConnectionSocketFactory csf = new SSLConnectionSocketFactory(
-                    createSslCustomContext(),
-                    new String[] { "TLSv1.2" },
-                    null,
-                    SSLConnectionSocketFactory.getDefaultHostnameVerifier());
-            RegistryBuilder<AuthSchemeProvider> schemeProviderBuilder = RegistryBuilder.create();
-            schemeProviderBuilder.register(AuthSchemes.SPNEGO, new SPNegoSchemeFactory());
-            CredentialsProvider credsProvider = new BasicCredentialsProvider();
+            var schemeFactoryRegistry = RegistryBuilder.<AuthSchemeFactory>create()
+                    .register(StandardAuthScheme.BASIC, BasicSchemeFactory.INSTANCE)
+                    .register(StandardAuthScheme.DIGEST, DigestSchemeFactory.INSTANCE)
+                    .register(StandardAuthScheme.NTLM, NTLMSchemeFactory.INSTANCE)
+                    .register(StandardAuthScheme.KERBEROS, KerberosSchemeFactory.DEFAULT)
+                    .register(StandardAuthScheme.SPNEGO, new SPNegoSchemeFactory(
+                            KerberosConfig.custom()
+                                    .setRequestDelegCreds(KerberosConfig.Option.DEFAULT)
+                                    .setStripPort(KerberosConfig.Option.DEFAULT)
+                                    .setUseCanonicalHostname(KerberosConfig.Option.DEFAULT)
+                                    .build(),
+                            SystemDefaultDnsResolver.INSTANCE))
+                    .build();
+
+            var credsProvider = new BasicCredentialsProvider();
             credsProvider.setCredentials(
-                    new AuthScope(null, -1, null),
+                    new AuthScope(null, -1),
                     new Credentials() {
                         @Override
                         public Principal getUserPrincipal() {
@@ -243,37 +243,40 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                         }
 
                         @Override
-                        public String getPassword() {
+                        public char[] getPassword() {
                             return null;
                         }
                     });
 
-            var clientBuilder = HttpClients.custom()
-                    .setDefaultAuthSchemeRegistry(schemeProviderBuilder.build())
-                    .setDefaultCredentialsProvider(credsProvider)
-                    .setConnectionTimeToLive(1, TimeUnit.MINUTES)
-                    .setDefaultSocketConfig(SocketConfig.custom()
-                            .setSoTimeout(5000)
+            PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
+                    .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
+                            .setSslContext(createSslCustomContext())
+                            .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                             .build())
-                    .setSSLSocketFactory(csf)
-                    .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(5000)
-                            .setSocketTimeout(5000)
-                            .setCookieSpec(CookieSpecs.STANDARD_STRICT).build());
+                    .setDefaultSocketConfig(SocketConfig.custom()
+                            .setSoTimeout(Timeout.ofSeconds(5))
+                            .build())
+                    .setConnectionTimeToLive(TimeValue.ofMinutes(1))
+                    .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
+                    .setConnPoolPolicy(PoolReusePolicy.LIFO)
+                    .setMaxConnPerRoute(16)
+                    .setMaxConnTotal(100)
+                    .setConnectionTimeToLive(TimeValue.ofMinutes(1L))
+                    .build();
 
-            if (UserPreferences.getInstance().httpPoolingEnabled.get()) {
-                Registry<ConnectionSocketFactory> socketFactoryRegistry = RegistryBuilder
-                        .<ConnectionSocketFactory>create()
-                        .register("https", csf)
-                        .register("http", new PlainConnectionSocketFactory())
-                        .build();
-                PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager(socketFactoryRegistry);
-                cm.setDefaultMaxPerRoute(16);
-                cm.setMaxTotal(100);
-                clientBuilder.setConnectionManager(cm);
-                logger.trace("Http client connection pooling is enabled");
-            }
-            return clientBuilder.build();
+            return HttpClients.custom()
+                    .setUserAgent(AppEnvironment.APP_NAME + "/" +
+                            AppEnvironment.getInstance().getVersion() +
+                            " (Authenticates like: Firefox/Safari/Internet Explorer)")
+                    .setConnectionManager(connectionManager)
+                    .setDefaultAuthSchemeRegistry(schemeFactoryRegistry)
+                    .setDefaultCredentialsProvider(credsProvider)
+                    .setDefaultRequestConfig(RequestConfig.custom()
+                            .setConnectTimeout(Timeout.ofSeconds(5))
+                            .setResponseTimeout(Timeout.ofSeconds(5))
+                            .setCookieSpec(StandardCookieSpec.STRICT)
+                            .build())
+                    .build();
 
         } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" +
@@ -328,13 +331,9 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
      */
     public boolean ping() {
         try {
-            return doHttpGet(craftRequestUri(""), new AbstractResponseHandler<Boolean>() {
-                @Override
-                public Boolean handleEntity(HttpEntity entity) throws IOException {
-                    String entityString = EntityUtils.toString(entity);
-                    logger.trace(entityString);
-                    return true;
-                }
+            return doHttpGet(craftRequestUri(""), response -> {
+                EntityUtils.consume(response.getEntity());
+                return true;
             });
         } catch (Exception e) {
             logger.debug(() -> "Ping failed", e);
@@ -342,6 +341,13 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         }
     }
 
+    /**
+     * Infers a URL from a user provided string (adds protocol if not present).
+     *
+     * @param address the spring to generate a URL from/
+     * @return the URL
+     * @throws CannotInitializeDataAdapterException if an error occurs while forming a URL.
+     */
     public static URL urlFromString(String address) throws CannotInitializeDataAdapterException {
         try {
             // Detect if URL protocol is present. If not, assume http.

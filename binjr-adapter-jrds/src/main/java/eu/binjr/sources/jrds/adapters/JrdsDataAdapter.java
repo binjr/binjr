@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2020 Frederic Thevenet
+ *    Copyright 2016-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,13 +37,11 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.entity.ContentType;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.HttpResponseException;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.IOException;
@@ -121,8 +119,6 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
     public static JrdsDataAdapter fromUrl(String address, ZoneId zoneId, JrdsTreeViewTab treeViewTab, String filter) throws DataAdapterException {
         return new JrdsDataAdapter(urlFromString(address), zoneId, "utf-8", treeViewTab, filter);
     }
-
-    //region [DataAdapter Members]
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
@@ -219,8 +215,6 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         super.close();
     }
 
-    //endregion
-
     /**
      * Returns a collection of filters provided by the JRDS server.
      *
@@ -289,11 +283,11 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         String entityString = doHttpGet(craftRequestUri("jsontree", params), response -> {
             var entity = response.getEntity();
             try {
-                if ("application/json".equalsIgnoreCase(ContentType.getOrDefault(entity).getMimeType())) {
+                if ("application/json".equalsIgnoreCase(entity.getContentType())) {
                     return EntityUtils.toString(entity);
                 }
                 logger.error("HTTP response content type is '" +
-                        ContentType.getOrDefault(entity).getMimeType() +
+                       entity.getContentType() +
                         " (expected 'application/json')");
                 return null;
             } finally {
@@ -309,8 +303,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         URI requestUri = craftRequestUri("graphdesc", new BasicNameValuePair("id", id));
 
         return doHttpGet(requestUri, response -> {
-            StatusLine statusLine = response.getStatusLine();
-            if (statusLine.getStatusCode() == 404) {
+            if (response.getCode() == 404) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,
                 // so we're falling back to recovering the datastore name from the csv file provided by
                 // the download service.
@@ -318,14 +311,13 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
                 try {
                     return getGraphDescriptorLegacy(id);
                 } catch (Exception e) {
-                    throw new IOException("", e);
+                    throw new IOException(e);
                 }
             }
             HttpEntity entity = response.getEntity();
-            if (statusLine.getStatusCode() >= 300) {
+            if (response.getCode() >= 300) {
                 EntityUtils.consume(entity);
-                throw new HttpResponseException(statusLine.getStatusCode(),
-                        statusLine.getReasonPhrase());
+                throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
             }
             if (entity != null) {
                 try {

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,28 +20,28 @@ package eu.binjr.common.github;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.logging.Logger;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpResponseException;
-import org.apache.http.client.config.CookieSpecs;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.AbstractResponseHandler;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.net.URIBuilder;
 
 import java.io.Closeable;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * A series of helper methods to wrap some GitHub APIs
@@ -56,6 +56,11 @@ public class GithubApiHelper {
     protected String userCredentials;
     protected Gson gson;
 
+    private final static Type ghReleaseArrayType = new TypeToken<ArrayList<GithubRelease>>() {
+    }.getType();
+    private final static Type ghAssetArrayType = new TypeToken<ArrayList<GithubAsset>>() {
+    }.getType();
+
     private GithubApiHelper() {
         this(null);
     }
@@ -69,7 +74,7 @@ public class GithubApiHelper {
         }
         httpClient = HttpClients
                 .custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(CookieSpecs.STANDARD).build())
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).build())
                 .build();
     }
 
@@ -155,19 +160,8 @@ public class GithubApiHelper {
                 .setPath("/repos/" + slug + "/releases/" + id);
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
-        return Optional.ofNullable(httpClient.execute(httpget, new AbstractResponseHandler<>() {
-            @Override
-            public GithubRelease handleResponse(HttpResponse response) throws HttpResponseException, IOException {
-                logger.debug(() -> Arrays.toString(response.getHeaders("X-RateLimit-Limit")) + " " +
-                        Arrays.toString(response.getHeaders("X-RateLimit-Remaining")));
-                return super.handleResponse(response);
-            }
-
-            @Override
-            public GithubRelease handleEntity(HttpEntity entity) throws IOException {
-                return gson.fromJson(EntityUtils.toString(entity), GithubRelease.class);
-            }
-        }));
+        return Optional.ofNullable(httpClient.execute(httpget,
+                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), GithubRelease.class)));
     }
 
     /**
@@ -197,14 +191,8 @@ public class GithubApiHelper {
                 .addParameter("per_page", "100");
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
-
-        return httpClient.execute(httpget, new AbstractResponseHandler<>() {
-            @Override
-            public List<GithubRelease> handleEntity(HttpEntity entity) throws IOException {
-                return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubRelease>>() {
-                }.getType());
-            }
-        });
+        return httpClient.execute(httpget,
+                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), ghReleaseArrayType));
     }
 
     /**
@@ -218,14 +206,8 @@ public class GithubApiHelper {
     public List<GithubAsset> getAssets(GithubRelease release) throws URISyntaxException, IOException {
         logger.debug(() -> "requestUrl = " + release.getAssetsUrl());
         HttpGet httpget = basicAuthGet(release.getAssetsUrl().toURI());
-
-        return httpClient.execute(httpget, new AbstractResponseHandler<>() {
-            @Override
-            public List<GithubAsset> handleEntity(HttpEntity entity) throws IOException {
-                return gson.fromJson(EntityUtils.toString(entity), new TypeToken<ArrayList<GithubAsset>>() {
-                }.getType());
-            }
-        });
+        return httpClient.execute(httpget,
+                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), ghAssetArrayType));
     }
 
     /**
