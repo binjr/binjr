@@ -57,6 +57,8 @@ ext.OPENJFX_VERSION = "16"
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
 ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replaceAll("ea\\+[0-9]+", "ea").replace(".", "-")}-jmods-${OS_FAMILY}"
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
+ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPresent()
+ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION.replaceAll "\\-ea\\+[0-9]+", ""}"
 
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
@@ -90,7 +92,6 @@ ext."signing.password" = System.getenv('GPG_PASSPHRASE')
 System.out.println("Building version: ${BINJR_VERSION}")
 System.out.println("Is tag: ${IS_TAG}")
 System.out.println("Is release: ${IS_RELEASE}")
-
 
 if (IS_TAG && System.getenv('REPO_TAG_NAME') != "v${BINJR_VERSION}") {
     throw new GradleException("Tag name [${System.getenv('REPO_TAG_NAME')}] does not match version [${BINJR_VERSION}]")
@@ -386,11 +387,14 @@ task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
     into "${buildDir}/jmods/"
 }
 
-task createRuntimeImage(type: Exec, dependsOn: [unzipOpenJfxModules]) {
+task createRuntimeImage(type: Exec) {
+    if (!IS_JAVAFX_BUNDLED){
+        dependsOn unzipOpenJfxModules
+    }
     workingDir project.projectDir
     commandLine = [
             "${JDK_HOME}/bin/jlink",
-            '-p', "${JDK_HOME}/jmods${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION.replaceAll "\\-ea\\+[0-9]+", ""}",
+            '-p', "${JDK_HOME}/jmods${ADDITIONAL_JMOD_PATH}",
             '--add-modules', JLINK_ADD_MODULES,
             '--strip-debug',
             '--no-header-files',
@@ -493,7 +497,7 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
             "--type", "dmg",
-            "--copyright",  BINJR_COPYRIGHT,
+            "--copyright", BINJR_COPYRIGHT,
             "--description", BINJR_DESCRIPTION,
             "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",

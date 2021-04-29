@@ -1,0 +1,1 @@
+* _[Fixed]_ Application fails to start on Windows if Visual Studio 2019 Redistributable is not installed.

@@ -23,7 +23,7 @@ stages:
         parameters:
           name: app_bundle_linux
           platform: linux
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-jdk16.0.0-linux_x64.tar.gz'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-fx-jdk16.0.0-linux_x64.tar.gz'
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           pool:
             vmImage: 'ubuntu-18.04'
@@ -33,7 +33,7 @@ stages:
         parameters:
           name: app_bundle_mac
           platform: mac
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-jdk16.0.0-macosx_x64.tar.gz'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-fx-jdk16.0.0-macosx_x64.tar.gz'
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
           pool:
             vmImage: 'macOS-10.15'
@@ -43,7 +43,7 @@ stages:
         parameters:
           name: app_bundle_windows
           platform: win
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-jdk16.0.0-win_x64.zip'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.28.11-ca-fx-jdk16.0.0-win_x64.zip'
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           pool:
             vmImage: 'windows-2019'
