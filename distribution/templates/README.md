@@ -83,7 +83,7 @@ with someone else.
   
 ## Getting help
 
-The documentation can be found [here](https://github.com/binjr/binjr/wiki/).
+The documentation can be found [here](https://binjr.eu/documentation/user_guide/main/).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
