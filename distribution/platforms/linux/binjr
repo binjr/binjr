@@ -15,6 +15,8 @@ exec "$JAVACMD" \
   --add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED \
   --add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED \
   --add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED \
+  --add-opens=javafx.graphics/com.sun.javafx.scene=ALL-UNNAMED \
+  --add-opens=javafx.graphics/com.sun.javafx.scene.traversal=ALL-UNNAMED \
   -Dapp.name="binjr" \
   -Dapp.pid="$$" \
   -Dapp.home="$BASEDIR" \
