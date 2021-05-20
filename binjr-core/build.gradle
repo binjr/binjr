@@ -24,8 +24,8 @@ dependencies {
     api 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.8.6'
     api 'org.apache.commons:commons-csv:1.8'
-    api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.0'
-    api 'org.glassfish.jaxb:jaxb-runtime:3.0.0'
+    api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    api 'org.glassfish.jaxb:jaxb-runtime:3.0.1'
     api "org.bouncycastle:bcpg-jdk15on:1.68"
     api 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.6'
