@@ -70,8 +70,8 @@ stages:
             GPG_KEY_NAME: $(gpg.keyname)
             GPG_PASSPHRASE: $(gpg.passphrase)
             GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-            OSSRH_JIRA_PASSWORD: $(ossrh.password)
-            OSSRH_JIRA_USERNAME: $(ossrh.username)
+            OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
+            OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'
@@ -127,8 +127,8 @@ stages:
             GPG_KEY_NAME: $(gpg.package.keyname)
             GPG_PASSPHRASE: $(gpg.package.passphrase)
             GPG_KEYRING_PATH: $(gpgKeyring.secureFilePath)
-            OSSRH_JIRA_PASSWORD: $(ossrh.password)
-            OSSRH_JIRA_USERNAME: $(ossrh.username)
+            OSSRH_TOKEN_PASSWORD: $(ossrh.token.password)
+            OSSRH_TOKEN_USERNAME: $(ossrh.token.username)
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'

@@ -225,8 +225,8 @@ configure(subprojects) {
     nexusPublishing {
         repositories {
             sonatype {
-                username = System.getenv('OSSRH_JIRA_USERNAME')
-                password = System.getenv('OSSRH_JIRA_PASSWORD')
+                username = System.getenv('OSSRH_TOKEN_USERNAME')
+                password = System.getenv('OSSRH_TOKEN_PASSWORD')
                 connectTimeout = Duration.ofSeconds(300)
                 clientTimeout = Duration.ofSeconds(300)
             }
