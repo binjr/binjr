@@ -44,11 +44,4 @@ public final class Bootstrap {
             System.exit(1);
         }
     }
-
-    @SafeVarargs
-    private static <T> T[] appendToArray(T[] array, T... elements) {
-        T[] newArray = Arrays.copyOf(array, array.length + elements.length);
-        System.arraycopy(elements, 0, newArray, array.length, elements.length);
-        return newArray;
-    }
 }
