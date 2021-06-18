@@ -27,12 +27,11 @@ import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
-import eu.binjr.core.preferences.UserPreferences;
+import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import jakarta.xml.bind.annotation.*;
 import java.beans.Transient;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -52,6 +51,8 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
     private final transient Property<Integer> selectedChart;
+
+    private final transient Set<Integer> multiSelectedIndices = new HashSet<>();
     @IsDirtyable
     private ObservableList<Chart> charts;
     @IsDirtyable
@@ -66,6 +67,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
     private final DoubleProperty dividerPosition;
+
 
     //  private Class<? extends WorksheetController> controllerClass = XYChartsWorksheetController.class;
 
@@ -282,12 +284,26 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
         return selectedChart.getValue();
     }
 
+
+    @XmlTransient
+    public Set<Integer> getMultiSelectedIndices() {
+        return Collections.unmodifiableSet(multiSelectedIndices);
+    }
+
     /**
      * Sets  the worksheet's currently selected chart.
      *
      * @param selectedChart the worksheet's currently selected chart.
      */
     public void setSelectedChart(Integer selectedChart) {
+        setSelectedChart(selectedChart, false);
+    }
+
+    public void setSelectedChart(Integer selectedChart, boolean multiSelection) {
+        if (!multiSelection) {
+            this.multiSelectedIndices.clear();
+        }
+        this.multiSelectedIndices.add(selectedChart);
         this.selectedChart.setValue(selectedChart);
     }
 
@@ -482,7 +498,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     protected List<TimeSeriesInfo<Double>> listAllSeriesInfo() {
         List<TimeSeriesInfo<Double>> allInfo = new ArrayList<>();
         for (Chart chart : getCharts()) {
-            allInfo.addAll( chart.getSeries());
+            allInfo.addAll(chart.getSeries());
         }
         return allInfo;
     }

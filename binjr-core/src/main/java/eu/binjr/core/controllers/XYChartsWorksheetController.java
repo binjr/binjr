@@ -23,8 +23,6 @@ import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
-import eu.binjr.common.text.BinaryPrefixFormatter;
-import eu.binjr.common.text.MetricPrefixFormatter;
 import eu.binjr.common.text.NoopPrefixFormatter;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.SourceBinding;
@@ -369,7 +367,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
                 for (int i = 0; i < viewPorts.size(); i++) {
                     if (viewPorts.get(i).getChart() == viewPort) {
-                        worksheet.setSelectedChart(i);
+
+                        worksheet.setSelectedChart(i, event.isControlDown());
                     }
                 }
             }));
@@ -400,7 +399,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
-                    .setAction(event -> warnAndRemoveChart(currentChart))
+                    .setAction(event -> warnAndRemoveChart())
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
             ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
@@ -439,10 +438,19 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
         if (viewPorts.size() > 1) {
             ChangeListener<Integer> changeListener = (observable, oldValue, newValue) -> {
-                ChartViewPort previousChart;
-                if (oldValue > -1 && viewPorts.size() > oldValue && (previousChart = viewPorts.get(oldValue)) != null) {
-                    ((StableTicksAxis) previousChart.getChart().getYAxis()).setSelected(false);
+
+                for (int i = 0; i < viewPorts.size(); i++) {
+                    var a = (StableTicksAxis) viewPorts.get(i).getChart().getYAxis();
+                    if (worksheet.getMultiSelectedIndices().contains(i)) {
+                        a.setSelected(true);
+                    } else {
+                        a.setSelected(false);
+                    }
                 }
+//                ChartViewPort previousChart;
+//                if (oldValue > -1 && viewPorts.size() > oldValue && (previousChart = viewPorts.get(oldValue)) != null) {
+//                    ((StableTicksAxis) previousChart.getChart().getYAxis()).setSelected(false);
+//                }
                 ChartViewPort selectedChart;
                 if (newValue > -1 && viewPorts.size() > newValue && (selectedChart = viewPorts.get(newValue)) != null) {
                     ((StableTicksAxis) selectedChart.getChart().getYAxis()).setSelected(true);
@@ -846,7 +854,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
-                    .setAction(event -> warnAndRemoveChart(currentViewPort.getDataStore()))
+                    .setAction(event -> warnAndRemoveChart())
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
 
@@ -889,6 +897,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             newPane.setGraphic(titleRegion);
             newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             newPane.setAnimated(false);
+            newPane.setOnMouseClicked(bindingManager.registerHandler(event -> getAttachedViewport(newPane).ifPresent(nv -> worksheet.setSelectedChart(viewPorts.indexOf(nv), event.isControlDown()))));
             seriesTableContainer.getPanes().add(newPane);
         }
         Platform.runLater(() -> seriesTableContainer.getPanes().get(worksheet.getSelectedChart()).setExpanded(true));
@@ -913,13 +922,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                         }
                     }
                     getAttachedViewport(newPane).ifPresent(nv -> {
-                        worksheet.setSelectedChart(viewPorts.indexOf(nv));
                         if (editButtonsGroup.getSelectedToggle() != null) {
                             nv.getDataStore().setShowProperties(true);
                         }
                     });
                     if ((expandRequiered) && (oldPane != null)) {
-                        worksheet.setSelectedChart(seriesTableContainer.getPanes().indexOf(oldPane));
                         Platform.runLater(() -> {
                             seriesTableContainer.setExpandedPane(oldPane);
                         });
@@ -937,10 +944,19 @@ public class XYChartsWorksheetController extends WorksheetController {
         return Optional.empty();
     }
 
-    private void warnAndRemoveChart(Chart chart) {
-        if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" + chart.getName() + "\"?",
+    private void warnAndRemoveChart() {
+        List<Chart> charts = new ArrayList<>();
+        for (int i = 0; i < viewPorts.size(); i++) {
+            if (worksheet.getMultiSelectedIndices().contains(i)) {
+                charts.add(viewPorts.get(i).getDataStore());
+            }
+        }
+
+        if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" +
+                        charts.stream().map(Chart::getName).collect(Collectors.joining("\", \"")) +
+                        "\"?",
                 "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
-            worksheet.getCharts().remove(chart);
+            worksheet.getCharts().removeAll(charts);
         }
     }
 
@@ -1182,10 +1198,10 @@ public class XYChartsWorksheetController extends WorksheetController {
                                 worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
                             }
                         }
-                        logger.debug(() -> "Reloading worksheet controller because list changed: " + c.toString() + " in controller " + this.toString());
+                        logger.debug(() -> "Reloading worksheet controller because list changed: " + c + " in controller " + this);
                         action.accept(this);
                     } else {
-                        logger.debug(() -> "Reload explicitly prevented on change " + c.toString());
+                        logger.debug(() -> "Reload explicitly prevented on change " + c);
                     }
                 }
             }
@@ -1482,11 +1498,11 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private ChartViewPort getSelectedViewPort() {
-        var v = viewPorts.get(worksheet.getSelectedChart());
+        var v = viewPorts.get(Math.max(0, Math.min(viewPorts.size() - 1, worksheet.getSelectedChart())));
         if (v != null) {
             return v;
         }
-        throw new IllegalStateException("Could not retreive selected viewport on current worksheet");
+        throw new IllegalStateException("Could not retrieve selected viewport on current worksheet");
     }
 
     private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
@@ -1534,7 +1550,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void toggleShowPropertiesPane() {
-        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        ChartViewPort currentViewport = getSelectedViewPort();
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
         }
@@ -1542,7 +1558,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void setShowPropertiesPane(boolean value) {
-        ChartViewPort currentViewport = viewPorts.get(worksheet.getSelectedChart());
+        ChartViewPort currentViewport = getSelectedViewPort();
         if (currentViewport != null) {
             currentViewport.getDataStore().setShowProperties(value);
         }
