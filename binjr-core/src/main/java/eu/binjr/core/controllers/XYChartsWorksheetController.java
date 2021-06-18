@@ -303,6 +303,10 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void initChartViewPorts() throws IOException {
         ZonedDateTimeAxis defaultXAxis = buildTimeAxis();
+        if (worksheet.getCharts().size() == 0){
+            worksheet.getCharts().add(new Chart());
+        }
+
         for (Chart currentChart : worksheet.getCharts()) {
             ZonedDateTimeAxis xAxis;
             switch (worksheet.getChartLayout()) {
