@@ -1195,11 +1195,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                         reloadNeeded = true;
                     }
                     if (c.wasRemoved()) {
-                        if (worksheet.getSelectedChart() == c.getFrom()) {
-                            worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
-                        } else if (worksheet.getSelectedChart() > c.getFrom()) {
-                            worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
-                        }
+                        worksheet.setSelectedChart(Math.min(c.getList().size() - 1, c.getFrom()));
                         reloadNeeded = true;
                     }
                 }
