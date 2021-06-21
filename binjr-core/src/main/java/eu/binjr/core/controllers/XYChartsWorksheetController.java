@@ -403,7 +403,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
-                    .setAction(event -> warnAndRemoveChart())
+                    .setAction(event -> warnAndRemoveChart(currentChart))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
             ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
@@ -858,7 +858,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
                     .setIconStyleClass("cross-icon", "small-icon")
-                    .setAction(event -> warnAndRemoveChart())
+                    .setAction(event -> warnAndRemoveChart(currentViewPort.getDataStore()))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
 
@@ -948,19 +948,19 @@ public class XYChartsWorksheetController extends WorksheetController {
         return Optional.empty();
     }
 
-    private void warnAndRemoveChart() {
-        List<Chart> charts = new ArrayList<>();
+    private void warnAndRemoveChart(Chart currentChart) {
+        List<Chart> chartsInSelection = new ArrayList<>();
         for (int i = 0; i < viewPorts.size(); i++) {
             if (worksheet.getMultiSelectedIndices().contains(i)) {
-                charts.add(viewPorts.get(i).getDataStore());
+                chartsInSelection.add(viewPorts.get(i).getDataStore());
             }
         }
-
+        var chartsToRemove = chartsInSelection.contains(currentChart) ? chartsInSelection : List.of(currentChart);
         if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" +
-                        charts.stream().map(Chart::getName).collect(Collectors.joining("\", \"")) +
+                        chartsToRemove.stream().map(Chart::getName).collect(Collectors.joining("\", \"")) +
                         "\"?",
                 "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
-            worksheet.getCharts().removeAll(charts);
+            worksheet.getCharts().removeAll(chartsToRemove);
         }
     }
 

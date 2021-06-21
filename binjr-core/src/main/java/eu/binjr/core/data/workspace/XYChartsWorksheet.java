@@ -301,10 +301,20 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
 
     public void setSelectedChart(Integer selectedChart, boolean multiSelection) {
         if (!multiSelection) {
+            // Reset multiple selection
             this.multiSelectedIndices.clear();
+            this.multiSelectedIndices.add(selectedChart);
+            this.selectedChart.setValue(selectedChart);
+        } else{
+            if (multiSelectedIndices.contains(selectedChart) && multiSelectedIndices.size() > 1){
+                // Remove selected index from multiple selection
+                this.multiSelectedIndices.remove(selectedChart);
+                this.selectedChart.setValue(multiSelectedIndices.stream().findFirst().orElse(0));
+            }else{
+                this.multiSelectedIndices.add(selectedChart);
+                this.selectedChart.setValue(selectedChart);
+            }
         }
-        this.multiSelectedIndices.add(selectedChart);
-        this.selectedChart.setValue(selectedChart);
     }
 
     /**
