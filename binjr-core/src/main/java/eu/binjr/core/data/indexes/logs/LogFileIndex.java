@@ -130,9 +130,9 @@ public class LogFileIndex implements Searchable {
         searcher = new IndexSearcher(indexReader);
         facetsConfig = new FacetsConfig();
         facetsConfig.setRequireDimCount(SEVERITY, true);
-        facetsConfig.setRequireDimensionDrillDown(PATH, true);
+        facetsConfig.setDrillDownTermsIndexing(PATH, FacetsConfig.DrillDownTermsIndexing.ALL);
         facetsConfig.setRequireDimCount(PATH, true);
-        facetsConfig.setRequireDimensionDrillDown(PATH, true);
+        facetsConfig.setDrillDownTermsIndexing(PATH, FacetsConfig.DrillDownTermsIndexing.ALL);
         logger.debug(() -> "New indexer initialized at " + indexDirectoryPath +
                 " using " + parsingThreadsNumber + " parsing indexing threads");
         logger.debug(() -> facetsConfig.getDimConfigs().entrySet().stream()
@@ -140,8 +140,7 @@ public class LogFileIndex implements Searchable {
                         " field= " + e.getValue().indexFieldName +
                         " multivalued=" + e.getValue().multiValued +
                         " hierarchical=" + e.getValue().hierarchical +
-                        " requireDimCount=" + e.getValue().requireDimCount +
-                        " requireDimensionDrillDown=" + e.getValue().requireDimensionDrillDown)
+                        " requireDimCount=" + e.getValue().requireDimCount)
                 .collect(Collectors.joining("\n")));
     }
 
