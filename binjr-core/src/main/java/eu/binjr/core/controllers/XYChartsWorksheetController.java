@@ -303,7 +303,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void initChartViewPorts() throws IOException {
         ZonedDateTimeAxis defaultXAxis = buildTimeAxis();
-        if (worksheet.getCharts().size() == 0){
+        if (worksheet.getCharts().size() == 0) {
             worksheet.getCharts().add(new Chart());
         }
 
@@ -1148,8 +1148,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                 pane.setContent(null);
             });
             this.seriesTableContainer.getPanes().clear();
-            //Workaround JDK-8220012
-            this.seriesTableContainer.getPanes().add(new TitledPane());
             IOUtils.closeAll(viewPorts);
             viewPorts = null;
             timeRangePicker.dispose();
@@ -1179,6 +1177,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         });
 
         ListChangeListener<Chart> chartListListener = c -> {
+            boolean reloadNeeded = false;
             while (c.next()) {
                 if (c.wasPermutated()) {
                     for (int i = c.getFrom(); i < c.getTo(); ++i) {
@@ -1187,27 +1186,29 @@ public class XYChartsWorksheetController extends WorksheetController {
                 } else if (c.wasUpdated()) {
                     // nothing for now
                 } else {
-                    if (!preventReload) {
-                        if (c.wasAdded()) {
-                            parentController.getWorkspace().setPresentationMode(false);
-                            List<? extends Chart> added = c.getAddedSubList();
-                            Chart chart = added.get(added.size() - 1);
-                            int chartIndex = worksheet.getCharts().indexOf(chart);
-                            worksheet.setSelectedChart(chartIndex);
+                    if (c.wasAdded()) {
+                        parentController.getWorkspace().setPresentationMode(false);
+                        List<? extends Chart> added = c.getAddedSubList();
+                        Chart chart = added.get(added.size() - 1);
+                        int chartIndex = worksheet.getCharts().indexOf(chart);
+                        worksheet.setSelectedChart(chartIndex);
+                        reloadNeeded = true;
+                    }
+                    if (c.wasRemoved()) {
+                        if (worksheet.getSelectedChart() == c.getFrom()) {
+                            worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
+                        } else if (worksheet.getSelectedChart() > c.getFrom()) {
+                            worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
                         }
-                        if (c.wasRemoved()) {
-                            if (worksheet.getSelectedChart() == c.getFrom()) {
-                                worksheet.setSelectedChart(Math.max(0, c.getFrom() - 1));
-                            } else if (worksheet.getSelectedChart() > c.getFrom()) {
-                                worksheet.setSelectedChart(Math.max(0, worksheet.getSelectedChart() - 1));
-                            }
-                        }
-                        logger.debug(() -> "Reloading worksheet controller because list changed: " + c + " in controller " + this);
-                        action.accept(this);
-                    } else {
-                        logger.debug(() -> "Reload explicitly prevented on change " + c);
+                        reloadNeeded = true;
                     }
                 }
+            }
+            if (!preventReload && reloadNeeded) {
+                logger.debug(() -> "Reloading worksheet controller because list changed: " + c + " in controller " + this);
+                action.accept(this);
+            } else {
+                logger.debug(() -> "Reload explicitly prevented on change " + c);
             }
         };
         bindingManager.attachListener(worksheet.getCharts(), chartListListener);
