@@ -279,10 +279,6 @@ public class DrawerPane extends AnchorPane {
         return ReadOnlyBooleanProperty.readOnlyBooleanProperty(expanded);
     }
 
-//    private void setExpanded(boolean expanded) {
-//        this.expanded.set(expanded);
-//    }
-
     public void expand() {
         this.expanded.set(true);
     }

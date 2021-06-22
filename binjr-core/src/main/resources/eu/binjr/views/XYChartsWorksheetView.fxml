@@ -236,10 +236,8 @@
                 <ScrollPane id="chartLegendScoll" styleClass="skinnable-pane-border" AnchorPane.bottomAnchor="0.0"
                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"
                             fitToHeight="true" fitToWidth="true" minHeight="0.0">
-                    <Accordion fx:id="seriesTableContainer" styleClass="series-table">
-                        <panes>
-                        </panes>
-                    </Accordion>
+                    <StackPane fx:id="seriesTableContainer" styleClass="series-table">
+                    </StackPane>
                 </ScrollPane>
             </AnchorPane>
         </SplitPane>

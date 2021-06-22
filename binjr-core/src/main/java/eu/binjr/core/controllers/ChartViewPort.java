@@ -25,6 +25,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TitledPane;
 
 import java.io.Closeable;
 import java.time.ZonedDateTime;
@@ -45,6 +46,7 @@ public class ChartViewPort implements Closeable {
     private final AtomicBoolean closing = new AtomicBoolean(false);
     private final BooleanProperty selected = new SimpleBooleanProperty(false);
     private XYChartCrosshair<ZonedDateTime, Double> crosshair;
+    private TitledPane seriesDetailsPane;
 
     /**
      * Initializes a new instance of the {@link ChartViewPort} class.
@@ -56,9 +58,11 @@ public class ChartViewPort implements Closeable {
     public ChartViewPort(Chart dataStore, XYChart<ZonedDateTime, Double> chart, ChartPropertiesController propertiesController) {
         this.dataStore = dataStore;
         this.chart = chart;
+
         this.seriesTable = new TableView<>();
         this.seriesTable.getStyleClass().add("skinnable-pane-border");
         this.seriesTable.setEditable(true);
+        this.seriesDetailsPane = new TitledPane();
         this.propertiesController = propertiesController;
         this.prefixFormatter = dataStore.getUnitPrefixes().getPrefixFormatter();
     }
@@ -133,5 +137,13 @@ public class ChartViewPort implements Closeable {
 
     public void setCrosshair(XYChartCrosshair<ZonedDateTime, Double> crosshair) {
         this.crosshair = crosshair;
+    }
+
+    public TitledPane getSeriesDetailsPane() {
+        return seriesDetailsPane;
+    }
+
+    public void setSeriesDetailsPane(TitledPane seriesDetailsPane) {
+        this.seriesDetailsPane = seriesDetailsPane;
     }
 }

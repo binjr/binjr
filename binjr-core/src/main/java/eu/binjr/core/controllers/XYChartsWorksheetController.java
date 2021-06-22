@@ -43,7 +43,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
@@ -122,7 +121,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     @FXML
     private TextField yMaxRange;
     @FXML
-    private Accordion seriesTableContainer;
+    private StackPane seriesTableContainer;
     @FXML
     private SplitPane splitPane;
     @FXML
@@ -270,6 +269,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             newChartDropTarget.setOnDragExited(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
             bindingManager.bind(newChartDropTarget.managedProperty(), parentController.treeItemDragAndDropInProgressProperty());
             bindingManager.bind(newChartDropTarget.visibleProperty(), parentController.treeItemDragAndDropInProgressProperty());
+
+            setSelectedChart(worksheet.getSelectedChart());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));
         }
@@ -440,32 +441,28 @@ public class XYChartsWorksheetController extends WorksheetController {
                 setupStackedChartLayout(screenshotCanvas);
                 break;
         }
-        if (viewPorts.size() > 1) {
-            ChangeListener<Integer> changeListener = (observable, oldValue, newValue) -> {
+        if (viewPorts.size() > 0) {
+            bindingManager.attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
+        }
+    }
 
-                for (int i = 0; i < viewPorts.size(); i++) {
-                    var a = (StableTicksAxis) viewPorts.get(i).getChart().getYAxis();
-                    if (worksheet.getMultiSelectedIndices().contains(i)) {
-                        a.setSelected(true);
-                    } else {
-                        a.setSelected(false);
-                    }
-                }
-//                ChartViewPort previousChart;
-//                if (oldValue > -1 && viewPorts.size() > oldValue && (previousChart = viewPorts.get(oldValue)) != null) {
-//                    ((StableTicksAxis) previousChart.getChart().getYAxis()).setSelected(false);
-//                }
-                ChartViewPort selectedChart;
-                if (newValue > -1 && viewPorts.size() > newValue && (selectedChart = viewPorts.get(newValue)) != null) {
-                    ((StableTicksAxis) selectedChart.getChart().getYAxis()).setSelected(true);
-                }
-                TitledPane seriesPane;
-                if (newValue > -1 && seriesTableContainer.getPanes().size() > newValue && (seriesPane = seriesTableContainer.getPanes().get(newValue)) != null) {
-                    seriesPane.setExpanded(true);
-                }
-            };
-            bindingManager.attachListener(worksheet.selectedChartProperty(), changeListener);
-            changeListener.changed(worksheet.selectedChartProperty(), 0, worksheet.getSelectedChart());
+    private void setSelectedChart(int selectedChartIndex) {
+        for (int i = 0; i < viewPorts.size(); i++) {
+            var a = (StableTicksAxis) viewPorts.get(i).getChart().getYAxis();
+            if (worksheet.getMultiSelectedIndices().contains(i)) {
+                a.setSelected(true);
+            } else {
+                a.setSelected(false);
+            }
+        }
+        ChartViewPort selectedChart;
+        if (selectedChartIndex > -1 && viewPorts.size() > selectedChartIndex && (selectedChart = viewPorts.get(selectedChartIndex)) != null) {
+            ((StableTicksAxis) selectedChart.getChart().getYAxis()).setSelected(true);
+            seriesTableContainer.getChildren().clear();
+            seriesTableContainer.getChildren().add(selectedChart.getSeriesDetailsPane());
+            if (editButtonsGroup.getSelectedToggle() != null) {
+                selectedChart.getDataStore().setShowProperties(true);
+            }
         }
     }
 
@@ -867,7 +864,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setTooltip("Edit the chart's settings")
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("settings-icon", "small-icon")
-                    .setAction(event -> newPane.setExpanded(true))
                     .bindBidirectionnal(ToggleButton::selectedProperty, currentViewPort.getDataStore().showPropertiesProperty())
                     .build(ToggleButton::new);
 
@@ -879,7 +875,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("upArrow-icon")
                     .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
-                    .bind(Node::disableProperty, Bindings.createBooleanBinding(() -> seriesTableContainer.getPanes().indexOf(newPane) == 0, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), -1))
                     .build(Button::new);
             Button moveDownButton = new ToolButtonBuilder<Button>(bindingManager)
@@ -888,8 +883,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setStyleClass("dialog-button")
                     .setIconStyleClass("downArrow-icon")
                     .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
-                    .bind(Node::disableProperty, Bindings.createBooleanBinding(
-                            () -> seriesTableContainer.getPanes().indexOf(newPane) >= seriesTableContainer.getPanes().size() - 1, seriesTableContainer.getPanes()))
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), 1))
                     .build(Button::new);
             toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
@@ -898,13 +891,12 @@ public class XYChartsWorksheetController extends WorksheetController {
             hBox.setAlignment(Pos.CENTER);
             GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
             GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
+            newPane.setCollapsible(false);
             newPane.setGraphic(titleRegion);
             newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
             newPane.setAnimated(false);
-            newPane.setOnMouseClicked(bindingManager.registerHandler(event -> getAttachedViewport(newPane).ifPresent(nv -> worksheet.setSelectedChart(viewPorts.indexOf(nv), event.isControlDown()))));
-            seriesTableContainer.getPanes().add(newPane);
+            currentViewPort.setSeriesDetailsPane(newPane);
         }
-        Platform.runLater(() -> seriesTableContainer.getPanes().get(worksheet.getSelectedChart()).setExpanded(true));
         bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 chartProperties.expand();
@@ -916,26 +908,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (editButtonsGroup.getSelectedToggle() != null) {
             chartProperties.expand();
         }
-
-        bindingManager.attachListener(seriesTableContainer.expandedPaneProperty(),
-                (ObservableValue<? extends TitledPane> observable, TitledPane oldPane, TitledPane newPane) -> {
-                    Boolean expandRequiered = true;
-                    for (TitledPane pane : seriesTableContainer.getPanes()) {
-                        if (pane.isExpanded()) {
-                            expandRequiered = false;
-                        }
-                    }
-                    getAttachedViewport(newPane).ifPresent(nv -> {
-                        if (editButtonsGroup.getSelectedToggle() != null) {
-                            nv.getDataStore().setShowProperties(true);
-                        }
-                    });
-                    if ((expandRequiered) && (oldPane != null)) {
-                        Platform.runLater(() -> {
-                            seriesTableContainer.setExpandedPane(oldPane);
-                        });
-                    }
-                });
         splitPane.setDividerPositions(worksheet.getDividerPosition());
         bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
@@ -1004,7 +976,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                     }
                     try {
                         TitledPane droppedPane = (TitledPane) event.getSource();
-                        droppedPane.setExpanded(true);
                         ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
                         addBindings(TreeViewUtils.flattenLeaves(item, true).stream().filter(b -> b instanceof TimeSeriesBinding)
                                 .map(b -> (TimeSeriesBinding) b).collect(Collectors.toList()), viewPort.getDataStore());
@@ -1143,11 +1114,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             hCrosshair.selectedProperty().unbindBidirectional(userPrefs.horizontalMarkerOn.property());
             vCrosshair.selectedProperty().unbindBidirectional(userPrefs.verticalMarkerOn.property());
             currentState = null;
-            this.seriesTableContainer.getPanes().forEach(pane -> {
-                pane.setUserData(null);
-                pane.setContent(null);
-            });
-            this.seriesTableContainer.getPanes().clear();
             IOUtils.closeAll(viewPorts);
             viewPorts = null;
             timeRangePicker.dispose();
