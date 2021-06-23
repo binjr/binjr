@@ -50,10 +50,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.HPos;
-import javafx.geometry.Pos;
-import javafx.geometry.Side;
-import javafx.geometry.VPos;
+import javafx.geometry.*;
 import javafx.scene.CacheHint;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -813,10 +810,11 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             GridPane titleRegion = new GridPane();
             titleRegion.setHgap(5);
+            titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, false));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
-            bindingManager.bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(30));
-            bindingManager.bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(30));
+            bindingManager.bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(15));
+            bindingManager.bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(15));
 
             Label label = new Label();
             bindingManager.bind(label.textProperty(), currentViewPort.getDataStore().nameProperty());
@@ -850,6 +848,45 @@ public class XYChartsWorksheetController extends WorksheetController {
             HBox toolbar = new HBox();
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
+
+            Button selectChartButton = new ToolButtonBuilder<Button>(bindingManager)
+                    .setText("Select")
+                    .setTooltip("Select a chart")
+                    .setStyleClass("dialog-button")
+                    .setIconStyleClass("hamburger-icon", "small-icon")
+                    .setAction(event -> {
+                        var btn = (Button) event.getSource();
+                        Bounds bounds = btn.getBoundsInLocal();
+                        Bounds screenBounds = btn.localToScreen(bounds);
+                        int x = (int) screenBounds.getMinX();
+                        int y = (int) screenBounds.getMinY();
+                        if (btn.getContextMenu() != null) {
+                            btn.getContextMenu().show(btn, x, y + btn.getHeight());
+                        }
+                    })
+                    .build(Button::new);
+            ContextMenu menu = new ContextMenu();
+            selectChartButton.setContextMenu(menu);
+            ToggleGroup group = new ToggleGroup();
+            for (int i = 0; i < viewPorts.size(); i++) {
+                var m = new RadioMenuItem();
+                final int chartIdx = i;
+                bindingManager.bind(m.textProperty(), viewPorts.get(i).getDataStore().nameProperty());
+                m.setToggleGroup(group);
+                m.setOnAction(bindingManager.registerHandler(event -> {
+                    worksheet.setSelectedChart(chartIdx);
+                }));
+                menu.getItems().add(m);
+                if (worksheet.getSelectedChart() == i) {
+                    group.selectToggle(m);
+                }
+            }
+            bindingManager.attachListener(worksheet.selectedChartProperty(),(ChangeListener<Integer>) (obs, oldVal, newVal) -> {
+                if (newVal >= 0 && newVal < group.getToggles().size()) {
+                    group.selectToggle(group.getToggles().get(newVal));
+                }
+            });
+
             Button closeButton = new ToolButtonBuilder<Button>(bindingManager)
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
@@ -886,11 +923,13 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), 1))
                     .build(Button::new);
             toolbar.getChildren().addAll(moveUpButton, moveDownButton, editButton, closeButton);
-            titleRegion.getChildren().addAll(label, editFieldsGroup, toolbar);
+            titleRegion.getChildren().addAll(selectChartButton, label, editFieldsGroup, toolbar);
             HBox hBox = new HBox();
             hBox.setAlignment(Pos.CENTER);
-            GridPane.setConstraints(label, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
-            GridPane.setConstraints(toolbar, 1, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
+            GridPane.setConstraints(selectChartButton, 0, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+            GridPane.setConstraints(label, 1, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+            GridPane.setConstraints(editFieldsGroup, 1, 0, 1, 1, HPos.LEFT, VPos.CENTER);
+            GridPane.setConstraints(toolbar, 2, 0, 1, 1, HPos.RIGHT, VPos.CENTER);
             newPane.setCollapsible(false);
             newPane.setGraphic(titleRegion);
             newPane.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
