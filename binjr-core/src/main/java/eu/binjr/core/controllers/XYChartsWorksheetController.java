@@ -93,6 +93,7 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
 public class XYChartsWorksheetController extends WorksheetController {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+    private static final DataFormat VIEWPORT_DRAG_FORMAT = new DataFormat("viewport_drag_format");
     private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
     private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
@@ -305,7 +306,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             worksheet.getCharts().add(new Chart());
         }
 
-        for (Chart currentChart : worksheet.getCharts()) {
+        for (int i = 0; i < worksheet.getCharts().size(); i++) {
+            final int currentIndex = i;
+            final Chart currentChart = worksheet.getCharts().get(i);
             ZonedDateTimeAxis xAxis;
             switch (worksheet.getChartLayout()) {
                 case OVERLAID:
@@ -367,12 +370,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
-                for (int i = 0; i < viewPorts.size(); i++) {
-                    if (viewPorts.get(i).getChart() == viewPort) {
-
-                        worksheet.setSelectedChart(i, event.isControlDown());
-                    }
-                }
+                worksheet.setSelectedChart(currentIndex, event.isControlDown());
             }));
             bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
             viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
@@ -414,6 +412,31 @@ public class XYChartsWorksheetController extends WorksheetController {
             var toolBar = new HBox(editButton, closeButton);
             toolBar.getStyleClass().add("worksheet-tool-bar");
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
+            yAxis.getSelectionMarker().setOnDragDetected(bindingManager.registerHandler(event -> {
+                Dragboard db = viewPort.startDragAndDrop(TransferMode.MOVE);
+                db.setDragView(SnapshotUtils.scaledSnapshot(viewPort, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
+                ClipboardContent cc = new ClipboardContent();
+                cc.put(VIEWPORT_DRAG_FORMAT, currentIndex);
+                db.setContent(cc);
+                event.consume();
+
+            }));
+            yAxis.getSelectionMarker().setOnDragOver(bindingManager.registerHandler(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(VIEWPORT_DRAG_FORMAT) && currentIndex != (Integer) db.getContent(VIEWPORT_DRAG_FORMAT)) {
+                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
+                    event.consume();
+                }
+            }));
+            yAxis.getSelectionMarker().setOnDragDropped(bindingManager.registerHandler(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(VIEWPORT_DRAG_FORMAT)) {
+                    int draggedIndex = (Integer) db.getContent(VIEWPORT_DRAG_FORMAT);
+                    event.setDropCompleted(true);
+                    event.consume();
+                    moveChartOrder(viewPorts.get(draggedIndex).getDataStore(), currentIndex - draggedIndex);
+                }
+            }));
             yAxis.getSelectionMarker().getChildren().add(toolBar);
         }
 
@@ -881,7 +904,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     group.selectToggle(m);
                 }
             }
-            bindingManager.attachListener(worksheet.selectedChartProperty(),(ChangeListener<Integer>) (obs, oldVal, newVal) -> {
+            bindingManager.attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (obs, oldVal, newVal) -> {
                 if (newVal >= 0 && newVal < group.getToggles().size()) {
                     group.selectToggle(group.getToggles().get(newVal));
                 }
