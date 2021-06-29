@@ -74,6 +74,7 @@ import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
@@ -705,6 +706,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
         nameColumn.setSortable(false);
         nameColumn.setPrefWidth(350);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+        nameColumn.setEditable(true);
+        nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+        nameColumn.setOnEditCommit(bindingManager.registerHandler(
+                t -> t.getTableView().getItems().get(
+                        t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
+        );
 
         TableColumn<TimeSeriesInfo<SearchHit>, String> eventNumColumn = new TableColumn<>("Nb events");
         eventNumColumn.setSortable(false);
