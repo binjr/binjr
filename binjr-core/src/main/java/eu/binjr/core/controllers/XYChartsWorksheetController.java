@@ -58,6 +58,7 @@ import javafx.scene.chart.*;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
@@ -67,6 +68,7 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 
@@ -754,10 +756,16 @@ public class XYChartsWorksheetController extends WorksheetController {
             colorColumn.setResizable(false);
             colorColumn.setPrefWidth(32);
 
-            TableColumn<TimeSeriesInfo<Double>, Boolean> nameColumn = new TableColumn<>("Name");
+            TableColumn<TimeSeriesInfo<Double>, String> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
+            nameColumn.setEditable(true);
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
+            nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+            nameColumn.setOnEditCommit(
+                    t -> t.getTableView().getItems().get(
+                            t.getTablePosition().getRow()).setDisplayName(t.getNewValue())
+            );
 
             TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
             minColumn.setSortable(false);
