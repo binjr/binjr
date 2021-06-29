@@ -68,7 +68,6 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 
@@ -759,12 +758,12 @@ public class XYChartsWorksheetController extends WorksheetController {
             TableColumn<TimeSeriesInfo<Double>, String> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
-            nameColumn.setEditable(true);
+            bindingManager.bind(nameColumn.editableProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
             nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-            nameColumn.setOnEditCommit(
+            nameColumn.setOnEditCommit(bindingManager.registerHandler(
                     t -> t.getTableView().getItems().get(
-                            t.getTablePosition().getRow()).setDisplayName(t.getNewValue())
+                            t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
             );
 
             TableColumn<TimeSeriesInfo<Double>, String> minColumn = new TableColumn<>("Min.");
