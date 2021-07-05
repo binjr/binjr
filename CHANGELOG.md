@@ -1,3 +1,11 @@
+#### [binjr v3.1.0](https://github.com/binjr/binjr/releases/tag/v3.1.0)
+Released on Wed, 30 July 2021
+
+* _[New]_ It is now possible to select multiple charts in a worksheet to delete them all at once.
+* _[New]_ It is now possible to re-organize the position of charts in a worksheet using drag and drop.
+* _[New]_ The panel that shows the series details for charts has been redesigned to make better use of available screen real estate.
+* _[New]_ It is now possible to edit the name of a timeseries after it has been added to a worksheet.
+
 ## [binjr v3.0.2](https://github.com/binjr/binjr/releases/tag/v3.0.2)
 Released on Fri, 30 Apr 2021
 
