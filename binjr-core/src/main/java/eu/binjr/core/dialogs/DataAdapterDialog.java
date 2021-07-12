@@ -118,7 +118,11 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
                 updateUriAutoCompletionBinding();
             }
         });
-        uriField.getSelectionModel().selectedItemProperty().addListener((obs, oldText, uri) -> validateUri(uri));
+        uriField.getSelectionModel().selectedItemProperty().addListener((obs, oldText, uri) -> {
+            if (!uri.isEmpty()) {
+                validateUri(uri);
+            }
+        });
         timezoneField = (TextField) parent.lookup("#timezoneField");
         timezoneLabel = (Label) parent.lookup("#timeZoneLabel");
         timezoneField.setManaged(showTimezone);
