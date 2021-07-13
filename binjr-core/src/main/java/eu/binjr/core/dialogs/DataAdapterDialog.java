@@ -154,10 +154,10 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
                 result = getDataAdapters();
                 switch (mode) {
                     case PATH:
-                        mostRecentList.push((T) Path.of(uriField.getValue()));
+                        mostRecentList.push((T) Path.of(uriField.getEditor().getText()));
                         break;
                     case URI:
-                        mostRecentList.push((T) URI.create(uriField.getValue()));
+                        mostRecentList.push((T) URI.create(uriField.getEditor().getText()));
                         break;
                     default:
                         throw new UnsupportedOperationException("Unknown mode type");
@@ -220,7 +220,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
     }
 
     public String getSourceUri() {
-        return this.uriField.getValue();
+         return this.uriField.getEditor().getText();
     }
 
     public void setSourceUri(String value) {
