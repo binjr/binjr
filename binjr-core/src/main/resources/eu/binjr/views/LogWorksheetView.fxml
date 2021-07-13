@@ -156,9 +156,9 @@
                                     <Tooltip showDelay="500ms" text="Apply Filtering Query"/>
                                 </tooltip>
                             </Button>
-                            <TextField fx:id="filterTextField" maxWidth="1.7976931348623157E308" minHeight="-Infinity"
-                                       minWidth="-Infinity" promptText="Filter Events" styleClass="search-field-inner"
-                                       HBox.hgrow="ALWAYS"/>
+                            <ComboBox fx:id="filterField" editable="true" maxWidth="1.7976931348623157E308"
+                                       minHeight="-Infinity" minWidth="-Infinity" promptText="Filter Events"
+                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
                             <Button fx:id="clearFilterButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
