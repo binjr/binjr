@@ -96,6 +96,9 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
         if (!Files.exists(csvPath)) {
             throw new CannotInitializeDataAdapterException("Cannot find " + getSourceUri());
         }
+        if (!csvPath.isAbsolute()) {
+            throw new CannotInitializeDataAdapterException("The provided path is not valid.");
+        }
         getMostRecentList().push(csvPath);
         return List.of(new CsvFileAdapter(
                 getSourceUri(),

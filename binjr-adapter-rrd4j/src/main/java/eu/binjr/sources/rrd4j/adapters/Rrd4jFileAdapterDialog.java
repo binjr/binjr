@@ -141,6 +141,9 @@ public class Rrd4jFileAdapterDialog extends Dialog<Collection<DataAdapter>> {
      * @throws DataAdapterException if the provided parameters are invalid
      */
     private DataAdapter<Double> getDataAdapter() throws DataAdapterException {
+        if (pathsField.getText().isBlank()){
+            throw new CannotInitializeDataAdapterException("Path cannot be blank");
+        }
         List<Path> rrdFiles = Arrays.stream(pathsField.getText().split(";")).map(Paths::get).collect(Collectors.toList());
         rrdFiles.forEach(mostRecentRrdFiles::push);
         return new Rrd4jFileAdapter(rrdFiles);
