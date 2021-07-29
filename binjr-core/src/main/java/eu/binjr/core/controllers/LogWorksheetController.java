@@ -40,6 +40,7 @@ import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
+import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -56,6 +57,7 @@ import eu.binjr.core.data.workspace.Syncable;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -65,8 +67,8 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.collections.SetChangeListener;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
@@ -114,6 +116,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
+    private final MostRecentlyUsedList<String> mostRecentLogFilters = UserHistory.getInstance().mostRecentLogFilters;
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private Path tmpCssPath;
@@ -162,6 +165,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private FacetPillsContainer severityListView;
     @FXML
+    private ComboBox<String> filterField;
     private TextField filterTextField;
     @FXML
     private Button clearFilterButton;
@@ -285,6 +289,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         // init filter controls
+        filterField.setOnShowing(bindingManager.registerHandler(event -> {
+            // reset display combobox list with updated MRU
+            filterField.setItems(FXCollections.observableArrayList(mostRecentLogFilters.getAll()));
+        }));
+
+        filterTextField = filterField.getEditor();
         filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
         pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
         bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
@@ -299,9 +309,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.attachListener(severityListView.getSelectedPills(),
                 (SetChangeListener<FacetPillsContainer.FacetPill>) l -> invalidateFilter(true));
         bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
-        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
+        filterField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
         clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
             filterTextField.clear();
+            filterField.setValue(null);
             invalidateFilter(true);
         }));
         applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
@@ -354,7 +365,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
             if (e.getCode() == KeyCode.K && e.isControlDown()) {
                 filterToggleButton.setSelected(true);
-                filterTextField.requestFocus();
+                filterField.requestFocus();
             }
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 findToggleButton.setSelected(true);
@@ -767,6 +778,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         if (newParams != worksheet.getQueryParameters()) {
             worksheet.setQueryParameters(newParams);
             invalidate(true, resetPage);
+            String filter = filterTextField.getText();
+            if (!filter.isBlank()) {
+                mostRecentLogFilters.push(filter);
+            }
         }
     }
 
