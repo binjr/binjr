@@ -38,6 +38,9 @@ public class UserHistory extends MruFactory {
     public final MostRecentlyUsedList<Path> mostRecentSaveFolders =
             pathMostRecentlyUsedList("mostRecentSaveFolders", 20, true);
 
+    public  final MostRecentlyUsedList<String> mostRecentLogFilters =
+            stringMostRecentlyUsedList("logWorksheetMostRecentFilters", 20);
+
     private UserHistory() {
         super("binjr/history");
         logFilesHistory.setOnItemEvicted(path -> {
