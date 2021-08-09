@@ -410,6 +410,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 favoritesRoot.getInternalChildren().setAll(
                         favoriteLogFilters.getAll()
                                 .stream()
+                                .sorted()
                                 .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_FAVORITES)))
                                 .collect(Collectors.toList()));
                 suggestFilterField.setText(filterTextField.getText());
