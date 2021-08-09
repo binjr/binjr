@@ -13,6 +13,38 @@
     -palette-color-11:  #dddd00;
 }
 
+
+.suggest-popup .tree-cell:category {
+    -fx-font-weight: bold ;
+    -fx-font-size: 14;
+    -fx-padding: 0.5em 0.25em 0.5em 0.25em ;
+}
+
+.suggest-popup .tree-cell:hover {
+    -fx-background-color: -fx-accent;
+}
+
+/*.suggest-popup .tree-cell,*/
+/*.suggest-popup .tree-view {*/
+/*    -fx-background-color: transparent;*/
+/*}*/
+
+
+/*.suggest-popup .tree-cell {*/
+/*    -fx-padding: 0.25em;*/
+/*    -fx-indent: 10;*/
+/*}*/
+
+/*.suggest-popup .tree-cell .tree-disclosure-node,*/
+/*.suggest-popup .tree-cell .arrow {*/
+/*    -fx-min-width: 0;*/
+/*    -fx-pref-width: 0;*/
+/*    -fx-max-width: 0;*/
+/*    -fx-min-height: 0;*/
+/*    -fx-pref-height: 0;*/
+/*    -fx-max-height: 0;*/
+/*}*/
+
 .command-bar .command-bar-pinned-item {
     -fx-content-display: graphic-only;
 }

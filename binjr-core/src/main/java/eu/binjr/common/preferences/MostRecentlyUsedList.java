@@ -89,6 +89,27 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
     }
 
     /**
+     * Returns true is the list contains the specified value, false otherwise.
+     * @param value the value whose presence is to be tested
+     * @return true is the list contains the specified value, false otherwise
+     */
+    public boolean contains(T value) {
+        return monitor.read().lock(() -> mruList.contains(value));
+    }
+
+    /**
+     * Remove a value from the most recently used list.
+     *
+     * @param value the value to remove
+     */
+    public void remove(T value) {
+        monitor.write().lock(() -> {
+            mruList.remove(value);
+            failSafeSave();
+        });
+    }
+
+    /**
      * Get the head of the stack, i.e. the last pushed item.
      *
      * @return the head of the stack

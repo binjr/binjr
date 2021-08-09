@@ -24,6 +24,7 @@
 <?import javafx.scene.text.Font?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import eu.binjr.common.javafx.controls.TearableTabPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0"
             xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -143,22 +144,25 @@
                             <padding>
                                 <Insets left="3.0" right="3.0"/>
                             </padding>
+                            <HBox alignment="CENTER" styleClass="icon-container" prefHeight="20.0" prefWidth="20.0">
+                                <Region styleClass="filter-icon, small-icon"/>
+                            </HBox>
+                            <TextField fx:id="filterTextField" editable="true" maxWidth="1.7976931348623157E308"
+                                       minHeight="-Infinity" minWidth="-Infinity" promptText="Filter Events"
+                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
                             <Button fx:id="applyFilterButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
                                     styleClass="dialog-button" text="Filter" textAlignment="CENTER">
                                 <graphic>
                                     <HBox alignment="CENTER" styleClass="icon-container">
-                                        <Region styleClass="filter-icon, small-icon"/>
+                                        <Region styleClass="forwardArrow-icon, small-icon"/>
                                     </HBox>
                                 </graphic>
                                 <tooltip>
                                     <Tooltip showDelay="500ms" text="Apply Filtering Query"/>
                                 </tooltip>
                             </Button>
-                            <ComboBox fx:id="filterField" editable="true" maxWidth="1.7976931348623157E308"
-                                       minHeight="-Infinity" minWidth="-Infinity" promptText="Filter Events"
-                                       styleClass="search-field-inner" HBox.hgrow="ALWAYS"/>
                             <Button fx:id="clearFilterButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
@@ -172,6 +176,19 @@
                                     <Tooltip showDelay="500ms" text="Clear Filtering Query"/>
                                 </tooltip>
                             </Button>
+                            <Button fx:id="favoriteButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
+                                    styleClass="dialog-button" text="Favorite" textAlignment="CENTER">
+                                <graphic>
+                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                        <Region styleClass="favorite-icon, small-icon"/>
+                                    </HBox>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip showDelay="500ms" text="Add to favorites"/>
+                                </tooltip>
+                            </Button>
                             <Button fx:id="querySyntaxButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
@@ -183,6 +200,19 @@
                                 </graphic>
                                 <tooltip>
                                     <Tooltip showDelay="500ms" text="Display Query Syntax Help"/>
+                                </tooltip>
+                            </Button>
+                            <Button fx:id="showSuggestButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="1.0"
+                                    maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+                                    minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0" prefWidth="20.0"
+                                    styleClass="dialog-button" text="expanf" textAlignment="CENTER">
+                                <graphic>
+                                    <HBox alignment="CENTER" styleClass="icon-container">
+                                        <Region styleClass="drop-down-icon, small-icon"/>
+                                    </HBox>
+                                </graphic>
+                                <tooltip>
+                                    <Tooltip showDelay="500ms" text="Show Previously Used and Favorite Filters"/>
                                 </tooltip>
                             </Button>
                         </HBox>
@@ -199,21 +229,9 @@
                         <padding>
                             <Insets left="3.0" right="3.0"/>
                         </padding>
-                        <Button fx:id="searchHistoryButton" contentDisplay="GRAPHIC_ONLY"
-                                graphicTextGap="1.0"
-                                maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-                                minWidth="-Infinity" mnemonicParsing="false" prefHeight="20.0"
-                                prefWidth="20.0"
-                                styleClass="dialog-button" text="forward" textAlignment="CENTER">
-                            <graphic>
-                                <HBox alignment="CENTER" styleClass="icon-container">
-                                    <Region styleClass="find-icon, small-icon"/>
-                                </HBox>
-                            </graphic>
-                            <tooltip>
-                                <Tooltip showDelay="500ms" text="Find on Current Page"/>
-                            </tooltip>
-                        </Button>
+                        <HBox alignment="CENTER" styleClass="icon-container" prefHeight="20.0" prefWidth="20.0">
+                            <Region styleClass="find-icon, small-icon"/>
+                        </HBox>
                         <TextField fx:id="searchTextField"
                                    maxWidth="1.7976931348623157E308"
                                    minHeight="-Infinity" minWidth="-Infinity" promptText="Find in page"

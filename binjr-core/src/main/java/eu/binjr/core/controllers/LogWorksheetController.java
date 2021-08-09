@@ -41,6 +41,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
+import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.DataAdapterException;
@@ -63,29 +64,27 @@ import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
 import javafx.collections.SetChangeListener;
+import javafx.event.ActionEvent;
+import javafx.event.WeakEventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.*;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
@@ -112,13 +111,18 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/LogWorksheetView.fxml";
     private static final Logger logger = Logger.create(LogWorksheetController.class);
     private static final Gson gson = new Gson();
+    public static final String PSEUDOCLASS_FAVORITES = "favorites";
+    public static final String PSEUDOCLASS_HISTORY = "history";
+    public static final String PSEUDOCLASS_CATEGORY = "category";
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
     private final MostRecentlyUsedList<String> mostRecentLogFilters = UserHistory.getInstance().mostRecentLogFilters;
+    private final MostRecentlyUsedList<String> favoriteLogFilters = UserHistory.getInstance().favoriteLogFilters;
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
+    private final BooleanProperty filterApplied = new SimpleBooleanProperty(true);
     private Path tmpCssPath;
     @FXML
     private AnchorPane root;
@@ -165,7 +169,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private FacetPillsContainer severityListView;
     @FXML
-    private ComboBox<String> filterField;
     private TextField filterTextField;
     @FXML
     private Button clearFilterButton;
@@ -173,6 +176,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button applyFilterButton;
     @FXML
     private HBox filteringBar;
+    @FXML
+    private HBox filterBar;
     @FXML
     private ToggleButton findToggleButton;
     @FXML
@@ -187,6 +192,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private SplitPane splitPane;
     @FXML
     private VBox logsToolPane;
+    @FXML
+    private Button showSuggestButton;
+    @FXML
+    private Button favoriteButton;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -244,7 +253,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var syntaxPopupRoot = new StackPane();
         syntaxPopupRoot.getStyleClass().addAll("syntax-help-popup");
         syntaxPopupRoot.setPadding(new Insets(10.0, 10.0, 10.0, 10.0));
-        syntaxPopupRoot.setPrefSize(600, 700);
+        syntaxPopupRoot.setPrefSize(600, 740);
         var syntaxCheatSheet = new StyleClassedTextArea();
         syntaxCheatSheet.setEditable(false);
         syntaxCheatSheet.append("Query Syntax\n\n", "syntax-help-title");
@@ -279,23 +288,163 @@ public class LogWorksheetController extends WorksheetController implements Synca
         syntaxCheatSheet.append("Search for \"foo bar\" within 4 words from each other:\n", "syntax-help-text");
         syntaxCheatSheet.append(" \"foo bar\"~4 \n", "syntax-help-code");
         syntaxPopupRoot.getChildren().add(syntaxCheatSheet);
-        var popup = new PopupControl();
-        popup.setAutoHide(true);
-        popup.getScene().setRoot(syntaxPopupRoot);
-        querySyntaxButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+        var queryHelpPopup = new PopupControl();
+        queryHelpPopup.setAutoHide(true);
+        queryHelpPopup.getScene().setRoot(syntaxPopupRoot);
+        WeakEventHandler<ActionEvent> syntaxHelpEventHandler = bindingManager.registerHandler(actionEvent -> {
             Node owner = (Node) actionEvent.getSource();
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
-            popup.show(owner.getScene().getWindow(), bounds.getMaxX() - 600, bounds.getMaxY());
+            queryHelpPopup.show(owner.getScene().getWindow(), bounds.getMaxX() - 600, bounds.getMaxY());
+        });
+        querySyntaxButton.setOnAction(syntaxHelpEventHandler);
+
+        // init filter popup
+        var suggestTree = new TreeView<StylableTreeItem>();
+        StylableTreeItem.setCellFactory(suggestTree);
+        suggestTree.getStyleClass().add("suggest-popup");
+        var suggestRoot = new FilterableTreeItem<>(new StylableTreeItem("Filter Suggestions", PSEUDOCLASS_CATEGORY));
+
+        var historyRoot = new FilterableTreeItem<>(new StylableTreeItem("History", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_HISTORY));
+        historyRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "time-icon", "medium-icon", "tree-item-icon"));
+        historyRoot.setExpanded(true);
+        var favoritesRoot = new FilterableTreeItem<>(new StylableTreeItem("Favorites", PSEUDOCLASS_CATEGORY, PSEUDOCLASS_FAVORITES));
+        favoritesRoot.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-solid-icon", "small-icon", "tree-item-icon"));
+        favoritesRoot.setExpanded(true);
+        suggestRoot.getInternalChildren().addAll(favoritesRoot, historyRoot);
+        suggestTree.setRoot(suggestRoot);
+        suggestTree.setShowRoot(false);
+        var suggestPopup = new PopupControl();
+        suggestPopup.setAutoHide(true);
+        var suggestPane = new VBox();
+        suggestPane.setSpacing(5);
+        suggestPane.getStyleClass().addAll("syntax-help-popup");
+        suggestPane.setPadding(new Insets(6));
+        var suggestFilterField = new TextField();
+        suggestFilterField.getStyleClass().add("search-field-inner");
+        suggestFilterField.setPromptText("Enter a filter query or select one from the suggestions below");
+        suggestFilterField.setOnAction(bindingManager.registerHandler(event -> {
+            suggestPopup.hide();
+            invalidateFilter(true);
         }));
 
-        // init filter controls
-        filterField.setOnShowing(bindingManager.registerHandler(event -> {
-            // reset display combobox list with updated MRU
-            filterField.setItems(FXCollections.observableArrayList(mostRecentLogFilters.getAll()));
+        suggestTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
+        bindingManager.attachListener(suggestTree.getSelectionModel().selectedItemProperty(),
+                (ChangeListener<TreeItem<StylableTreeItem>>) (obs, oldVal, newVal) -> {
+                    if (newVal != null && !newVal.getParent().equals(suggestRoot)) {
+                        suggestPopup.hide();
+                        filterTextField.setText(newVal.getValue().getLabel());
+                        invalidateFilter(true);
+                    }
+                });
+
+        favoriteButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+            var favText = filterTextField.getText();
+            if (favoriteLogFilters.contains(favText)) {
+                favoriteLogFilters.remove(favText);
+            } else {
+                favoriteLogFilters.push(favText);
+            }
+            updateFavoriteButtonStatus(favText);
+        }));
+        bindingManager.bind(favoriteButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(),
+                        filterTextField.textProperty()));
+        bindingManager.bind(favoriteButton.managedProperty(), favoriteButton.visibleProperty());
+
+        var goButton = new ToolButtonBuilder<Button>(bindingManager)
+                .setText("Go")
+                .setTooltip("Filter the log view")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("forwardArrow-icon", "small-icon")
+                .setAction(event -> {
+                    suggestPopup.hide();
+                    invalidateFilter(true);
+                }).build(Button::new);
+        var clearSuggestButton = new ToolButtonBuilder<Button>(bindingManager)
+                .setText("Clear")
+                .setTooltip("Clear filter suggestions")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("cross-icon", "small-icon")
+                .setAction(event -> {
+                    suggestFilterField.clear();
+                }).build(Button::new);
+        var suggestSyntaxButton = new ToolButtonBuilder<Button>(bindingManager)
+                .setText("help")
+                .setTooltip("Display Query Syntax Help")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("help-icon", "small-icon")
+                .setAction(syntaxHelpEventHandler).build(Button::new);
+        bindingManager.bind(clearSuggestButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !suggestFilterField.getText().isEmpty(),
+                        suggestFilterField.textProperty()));
+        bindingManager.bind(clearSuggestButton.managedProperty(), clearSuggestButton.visibleProperty());
+        var collapseButton = new ToolButtonBuilder<Button>(bindingManager)
+                .setText("Collapse")
+                .setTooltip("Hide Filter Suggestions")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("drop-down-icon", "small-icon")
+                .setAction(event -> {
+                    suggestPopup.hide();
+                }).build(Button::new);
+        var hb = new HBox(suggestFilterField, goButton, clearSuggestButton, suggestSyntaxButton, collapseButton);
+        HBox.setHgrow(suggestFilterField, Priority.ALWAYS);
+        hb.setFillHeight(true);
+        hb.setSpacing(2);
+        hb.setAlignment(Pos.CENTER_LEFT);
+
+        suggestPane.getChildren().add(hb);
+        var separator = new Region();
+        separator.getStyleClass().add("horizontal-separator");
+        suggestPane.getChildren().add(separator);
+        suggestPane.getChildren().add(suggestTree);
+        bindingManager.bind(suggestPane.prefWidthProperty(), Bindings.add(10, filterBar.widthProperty()));
+        suggestPopup.getScene().setRoot(suggestPane);
+        suggestPopup.showingProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                suggestTree.getSelectionModel().clearSelection();
+                historyRoot.getInternalChildren().setAll(
+                        mostRecentLogFilters.getAll()
+                                .stream()
+                                .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_HISTORY)))
+                                .collect(Collectors.toList()));
+                favoritesRoot.getInternalChildren().setAll(
+                        favoriteLogFilters.getAll()
+                                .stream()
+                                .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_FAVORITES)))
+                                .collect(Collectors.toList()));
+                suggestFilterField.setText(filterTextField.getText());
+            } else {
+                filterTextField.setText(suggestFilterField.getText());
+            }
+        });
+        showSuggestButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+            Node owner = filteringBar;
+            Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
+            suggestPopup.show(owner.getScene().getWindow(), bounds.getMinX() - 7, bounds.getMinY() - 5);
+            suggestFilterField.requestFocus();
+        }));
+        suggestPopup.setOnHiding(bindingManager.registerHandler(windowEvent -> {
+            filterTextField.requestFocus();
         }));
 
-        filterTextField = filterField.getEditor();
+        bindingManager.attachListener(suggestFilterField.textProperty(), (o -> {
+            suggestRoot.setPredicate((treeItem, stylableTreeItem) -> {
+                var isMatch = stylableTreeItem != null && StringUtils.contains(
+                        stylableTreeItem.getLabel(),
+                        suggestFilterField.getText(),
+                        false);
+                if (isMatch) {
+                    TreeViewUtils.expandBranch(treeItem, TreeViewUtils.ExpandDirection.UP);
+                }
+                return isMatch;
+            });
+        }));
+
         filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
+        bindingManager.attachListener(filterTextField.textProperty(), (ChangeListener<String>) (o, oldVal, newVal) -> {
+            updateFavoriteButtonStatus(newVal);
+            filterApplied.setValue(false);
+        });
         pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
         bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
         bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
@@ -309,15 +458,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
         bindingManager.attachListener(severityListView.getSelectedPills(),
                 (SetChangeListener<FacetPillsContainer.FacetPill>) l -> invalidateFilter(true));
         bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
-        filterField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
+        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
         clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
             filterTextField.clear();
-            filterField.setValue(null);
             invalidateFilter(true);
         }));
         applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
-        bindingManager.bind(clearFilterButton.visibleProperty(),
-                Bindings.createBooleanBinding(() -> !filterTextField.getText().isBlank(), filterTextField.textProperty()));
+
+        bindingManager.bind(applyFilterButton.visibleProperty(), filterApplied.not());
+        bindingManager.bind(applyFilterButton.managedProperty(), applyFilterButton.visibleProperty());
+
         //Search bar initialization
         bindingManager.bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
         bindingManager.bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
@@ -333,8 +483,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
-        bindingManager.bind(clearSearchButton.visibleProperty(),
-                Bindings.createBooleanBinding(() -> !searchTextField.getText().isBlank(), searchTextField.textProperty()));
+        bindingManager.bind(clearFilterButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(), filterTextField.textProperty()));
+        bindingManager.bind(clearFilterButton.managedProperty(), clearFilterButton.visibleProperty());
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
@@ -365,7 +516,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
             if (e.getCode() == KeyCode.K && e.isControlDown()) {
                 filterToggleButton.setSelected(true);
-                filterField.requestFocus();
+                filterTextField.requestFocus();
             }
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 findToggleButton.setSelected(true);
@@ -421,6 +572,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
             addToCurrentWorksheet(treeView);
         })));
         return new ContextMenu(item);
+    }
+
+    private void updateFavoriteButtonStatus(String filterValue) {
+        if (favoriteLogFilters.contains(filterValue)) {
+            favoriteButton.getTooltip().setText("Remove from favorites");
+            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-solid-icon", "small-icon"));
+        } else {
+            favoriteButton.getTooltip().setText("Add to favorites");
+            favoriteButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "favorite-icon", "small-icon"));
+        }
     }
 
     private void handleDragOverWorksheetView(DragEvent event) {
@@ -782,6 +943,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             if (!filter.isBlank()) {
                 mostRecentLogFilters.push(filter);
             }
+            filterApplied.setValue(true);
         }
     }
 

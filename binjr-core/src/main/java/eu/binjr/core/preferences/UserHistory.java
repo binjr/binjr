@@ -38,8 +38,11 @@ public class UserHistory extends MruFactory {
     public final MostRecentlyUsedList<Path> mostRecentSaveFolders =
             pathMostRecentlyUsedList("mostRecentSaveFolders", 20, true);
 
-    public  final MostRecentlyUsedList<String> mostRecentLogFilters =
-            stringMostRecentlyUsedList("logWorksheetMostRecentFilters", 20);
+    public final MostRecentlyUsedList<String> mostRecentLogFilters =
+            stringMostRecentlyUsedList("logWorksheetMostRecentFilters", 30);
+
+    public MostRecentlyUsedList<String> favoriteLogFilters =
+            stringMostRecentlyUsedList("favoriteLogFilters", 1000);
 
     private UserHistory() {
         super("binjr/history");

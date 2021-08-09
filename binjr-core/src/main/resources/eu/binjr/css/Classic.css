@@ -130,6 +130,11 @@
    -fx-max-width: 200;*/
 }
 
+.horizontal-separator {
+    -fx-border-width: 0 0 1 0;
+    -fx-border-color: -binjr-control-border-color;
+}
+
 
  .command-bar .menu-button .arrow-button {
     -fx-padding:-2;
