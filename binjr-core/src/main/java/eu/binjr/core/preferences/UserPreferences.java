@@ -273,6 +273,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Boolean> preventFoldingAllSourcePanes = booleanPreference("preventFoldingAllSourcePanes", false);
 
+    public ObservablePreference<Boolean> expandSuggestTreeOnMatch= booleanPreference("expandSuggestTreeOnMatch", false);
+
     private UserPreferences() {
         super(BINJR_GLOBAL);
     }

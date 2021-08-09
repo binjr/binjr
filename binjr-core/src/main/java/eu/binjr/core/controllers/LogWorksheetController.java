@@ -433,7 +433,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         stylableTreeItem.getLabel(),
                         suggestFilterField.getText(),
                         false);
-                if (isMatch) {
+                if (isMatch && userPrefs.expandSuggestTreeOnMatch.get()) {
                     TreeViewUtils.expandBranch(treeItem, TreeViewUtils.ExpandDirection.UP);
                 }
                 return isMatch;
