@@ -1,53 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-/*
- *    Copyright 2019 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-/*
- *    Copyright 2019 Frederic Thevenet
- *
- *    Licensed under the Apache License, Version 2.0 (the "License");
- *    you may not use this file except in compliance with the License.
- *    You may obtain a copy of the License at
- *
- *         http://www.apache.org/licenses/LICENSE-2.0
- *
- *    Unless required by applicable law or agreed to in writing, software
- *    distributed under the License is distributed on an "AS IS" BASIS,
- *    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *    See the License for the specific language governing permissions and
- *    limitations under the License.
- */
-
-/*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2019-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -98,6 +50,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     private List<String> iconStyleClass = new ArrayList<>();
     private EventHandler<ActionEvent> action = null;
     private final List<Consumer<T>> bindings = new ArrayList<>();
+    private boolean focusTraversable = true;
 
     public ToolButtonBuilder() {
         this(null);
@@ -116,6 +69,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         btn.setPrefWidth(width);
         btn.setMaxWidth(width);
         btn.setMinWidth(width);
+        btn.setFocusTraversable(focusTraversable);
         if (styleClass != null) {
             btn.getStyleClass().addAll(styleClass);
         }
@@ -142,6 +96,11 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     public ToolButtonBuilder<T> setWidth(double width) {
         this.width = width;
+        return this;
+    }
+
+    public ToolButtonBuilder<T> setFocusTraversable(boolean focusTraversable){
+        this.focusTraversable = focusTraversable;
         return this;
     }
 

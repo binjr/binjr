@@ -322,20 +322,45 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var suggestFilterField = new TextField();
         suggestFilterField.getStyleClass().add("search-field-inner");
         suggestFilterField.setPromptText("Enter a filter query or select one from the suggestions below");
-        suggestFilterField.setOnAction(bindingManager.registerHandler(event -> {
+        Consumer<String> commitSuggest = value -> {
             suggestPopup.hide();
+            filterTextField.setText(value);
             invalidateFilter(true);
+        };
+        Runnable cancelSuggest = () -> {
+            suggestPopup.hide();
+        };
+        Runnable treeSelectionCommit = () -> {
+            var selected = suggestTree.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.getParent() != null && !selected.getParent().equals(suggestRoot)) {
+                commitSuggest.accept(selected.getValue().getLabel());
+            }
+        };
+        suggestFilterField.setOnAction(bindingManager.registerHandler(event ->
+                commitSuggest.accept(((TextField) event.getSource()).getText())));
+
+        suggestFilterField.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
+            var key = e.getCode();
+            if (key == KeyCode.DOWN) {
+                suggestTree.requestFocus();
+                suggestRoot.getChildren().stream().findFirst().ifPresent(n -> {
+                    suggestTree.getSelectionModel().select(n);
+                });
+            }
         }));
 
         suggestTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        bindingManager.attachListener(suggestTree.getSelectionModel().selectedItemProperty(),
-                (ChangeListener<TreeItem<StylableTreeItem>>) (obs, oldVal, newVal) -> {
-                    if (newVal != null && !newVal.getParent().equals(suggestRoot)) {
-                        suggestPopup.hide();
-                        filterTextField.setText(newVal.getValue().getLabel());
-                        invalidateFilter(true);
-                    }
-                });
+        suggestTree.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(event -> {
+            if (event.getCode() == KeyCode.ENTER) {
+                treeSelectionCommit.run();
+            }
+            if (event.getCode() == KeyCode.ESCAPE) {
+                cancelSuggest.run();
+            }
+        }));
+        suggestTree.setOnMouseClicked(bindingManager.registerHandler(event -> {
+            treeSelectionCommit.run();
+        }));
 
         favoriteButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
             var favText = filterTextField.getText();
@@ -356,23 +381,21 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setTooltip("Filter the log view")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("forwardArrow-icon", "small-icon")
-                .setAction(event -> {
-                    suggestPopup.hide();
-                    invalidateFilter(true);
-                }).build(Button::new);
+                .setFocusTraversable(false)
+                .setAction(event -> commitSuggest.accept(suggestFilterField.getText())).build(Button::new);
         var clearSuggestButton = new ToolButtonBuilder<Button>(bindingManager)
                 .setText("Clear")
                 .setTooltip("Clear filter suggestions")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("cross-icon", "small-icon")
-                .setAction(event -> {
-                    suggestFilterField.clear();
-                }).build(Button::new);
+                .setFocusTraversable(false)
+                .setAction(event -> suggestFilterField.clear()).build(Button::new);
         var suggestSyntaxButton = new ToolButtonBuilder<Button>(bindingManager)
                 .setText("help")
                 .setTooltip("Display Query Syntax Help")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("help-icon", "small-icon")
+                .setFocusTraversable(false)
                 .setAction(syntaxHelpEventHandler).build(Button::new);
         bindingManager.bind(clearSuggestButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !suggestFilterField.getText().isEmpty(),
@@ -383,8 +406,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setTooltip("Hide Filter Suggestions")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("drop-down-icon", "small-icon")
+                .setFocusTraversable(false)
                 .setAction(event -> {
-                    suggestPopup.hide();
+                    cancelSuggest.run();
                 }).build(Button::new);
         var hb = new HBox(suggestFilterField, goButton, clearSuggestButton, suggestSyntaxButton, collapseButton);
         HBox.setHgrow(suggestFilterField, Priority.ALWAYS);
@@ -399,25 +423,24 @@ public class LogWorksheetController extends WorksheetController implements Synca
         suggestPane.getChildren().add(suggestTree);
         bindingManager.bind(suggestPane.prefWidthProperty(), Bindings.add(10, filterBar.widthProperty()));
         suggestPopup.getScene().setRoot(suggestPane);
-        suggestPopup.showingProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue) {
-                suggestTree.getSelectionModel().clearSelection();
-                historyRoot.getInternalChildren().setAll(
-                        mostRecentLogFilters.getAll()
-                                .stream()
-                                .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_HISTORY)))
-                                .collect(Collectors.toList()));
-                favoritesRoot.getInternalChildren().setAll(
-                        favoriteLogFilters.getAll()
-                                .stream()
-                                .sorted()
-                                .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_FAVORITES)))
-                                .collect(Collectors.toList()));
-                suggestFilterField.setText(filterTextField.getText());
-            } else {
-                filterTextField.setText(suggestFilterField.getText());
-            }
-        });
+        bindingManager.attachListener(suggestPopup.showingProperty(),
+                (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
+                    if (newValue) {
+                        suggestFilterField.clear();
+                        suggestTree.getSelectionModel().clearSelection();
+                        historyRoot.getInternalChildren().setAll(
+                                mostRecentLogFilters.getAll()
+                                        .stream()
+                                        .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_HISTORY)))
+                                        .collect(Collectors.toList()));
+                        favoritesRoot.getInternalChildren().setAll(
+                                favoriteLogFilters.getAll()
+                                        .stream()
+                                        .sorted()
+                                        .map(s -> new FilterableTreeItem<>(new StylableTreeItem(s, PSEUDOCLASS_FAVORITES)))
+                                        .collect(Collectors.toList()));
+                    }
+                });
         showSuggestButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
             Node owner = filteringBar;
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
@@ -464,6 +487,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
             filterTextField.clear();
             invalidateFilter(true);
         }));
+
+        filterTextField.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
+            var key = e.getCode();
+            logger.trace(() -> "KEY_PRESSED event trapped, keycode=" + e.getCode());
+            if ((key == KeyCode.K && e.isControlDown()) || key == KeyCode.UP || key == KeyCode.DOWN) {
+                showSuggestButton.getOnAction().handle(new ActionEvent());
+            }
+            if (key == KeyCode.D && e.isControlDown()) {
+                favoriteButton.fire();
+            }
+
+        }));
+
         applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
 
         bindingManager.bind(applyFilterButton.visibleProperty(), filterApplied.not());
