@@ -18,21 +18,26 @@ package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.preferences.MostRecentlyUsedList;
+import eu.binjr.common.preferences.MruFactory;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.common.preferences.ObservablePreferenceFactory;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
-import eu.binjr.core.controllers.ChartViewportsState;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
 import javafx.geometry.Rectangle2D;
 import org.apache.logging.log4j.Level;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.Locale;
 import java.util.Map;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
 
 /**
  * Manage all user preferences
@@ -43,6 +48,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
     private static final Logger logger = Logger.create(UserPreferences.class);
     private static final Gson gson = new Gson();
     public static final String BINJR_GLOBAL = "binjr/global";
+
+    private final UserFavorites favorites = new UserFavorites(BINJR_GLOBAL);
 
     /**
      * True if series down-sampling is enabled, false otherwise.
@@ -241,39 +248,75 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> maxLogFilesToKeep = integerPreference("maxLogFilesToKeep", 10);
 
-    public ObservablePreference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
+    public final ObservablePreference<Boolean> persistLogsToFile = booleanPreference("persistLogsToFile", true);
 
-    public ObservablePreference<SnapshotOutputScale> snapshotOutputScale =
+    public final ObservablePreference<SnapshotOutputScale> snapshotOutputScale =
             enumPreference(SnapshotOutputScale.class, "snapshotOutputScale", SnapshotOutputScale.AUTO);
 
-    public ObservablePreference<DownSamplingAlgorithm> downSamplingAlgorithm =
+    public final ObservablePreference<DownSamplingAlgorithm> downSamplingAlgorithm =
             enumPreference(DownSamplingAlgorithm.class, "downSamplingAlgorithm", DownSamplingAlgorithm.AUTO);
 
-    public ObservablePreference<BuiltInChartColorPalettes> chartColorPalette =
+    public final ObservablePreference<BuiltInChartColorPalettes> chartColorPalette =
             enumPreference(BuiltInChartColorPalettes.class, "chartColorPalette", BuiltInChartColorPalettes.VIBRANT);
 
-    public ObservablePreference<BuiltInChartColorPalettes> logFilesColorPalette =
+    public final ObservablePreference<BuiltInChartColorPalettes> logFilesColorPalette =
             enumPreference(BuiltInChartColorPalettes.class, "logFilesColorPalette", BuiltInChartColorPalettes.GRAY_SCALE);
 
-    public ObservablePreference<LocalDateTime> lastCheckForUpdate =
+    public final ObservablePreference<LocalDateTime> lastCheckForUpdate =
             localDateTimePreference("lastCheckForUpdate", LocalDateTime.MIN);
 
-    public ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 600);
+    public final ObservablePreference<Number> searchFieldInputDelayMs = integerPreference("searchFieldInputDelayMs", 600);
 
-    public ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
+    public final ObservablePreference<Number> hitsPerPage = integerPreference("hitsPerPage", 10000);
 
-    public ObservablePreference<IndexDirectoryLocation> indexLocation =
+    public final ObservablePreference<IndexDirectoryLocation> indexLocation =
             enumPreference(IndexDirectoryLocation.class, "indexLocation", IndexDirectoryLocation.FILES_SYSTEM);
 
-    public ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
+    public final ObservablePreference<Number> parsingThreadNumber = integerPreference("parsingThreadNumber", 0);
 
-    public ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
+    public final ObservablePreference<Number> blockingQueueCapacity = integerPreference("blockingQueueCapacity", 10000);
 
-    public ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
+    public final ObservablePreference<Number> parsingThreadDrainSize = integerPreference("parsingThreadDrainSize", 512);
 
-    public ObservablePreference<Boolean> preventFoldingAllSourcePanes = booleanPreference("preventFoldingAllSourcePanes", false);
+    public final ObservablePreference<Boolean> preventFoldingAllSourcePanes = booleanPreference("preventFoldingAllSourcePanes", false);
 
-    public ObservablePreference<Boolean> expandSuggestTreeOnMatch= booleanPreference("expandSuggestTreeOnMatch", false);
+    public final ObservablePreference<Boolean> expandSuggestTreeOnMatch = booleanPreference("expandSuggestTreeOnMatch", false);
+
+    public static class UserFavorites extends MruFactory {
+
+        public final MostRecentlyUsedList<String> favoriteLogFilters =
+                stringMostRecentlyUsedList("favoriteLogFilters", 1000);
+
+        public UserFavorites(String root) {
+            super(root + "/favorites");
+        }
+    }
+
+    public UserFavorites getFavorites() {
+        return favorites;
+    }
+
+    @Override
+    public void reset() throws BackingStoreException {
+        super.reset();
+        // Reset adapter preferences
+        for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
+            di.getPreferences().reset();
+        }
+        // Reset user favorites
+        favorites.reset();
+    }
+
+    @Override
+    public void importFromFile(Path savePath) throws IOException, InvalidPreferencesFormatException {
+        super.importFromFile(savePath);
+        // Reload imported settings to adapter preferences
+        for (var di : DataAdapterFactory.getInstance().getAllAdapters()) {
+            di.getPreferences().reload();
+        }
+        // Reload User favorites
+        favorites.reload();
+    }
 
     private UserPreferences() {
         super(BINJR_GLOBAL);
@@ -306,6 +349,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
             Map.entry("stderr", "error"),
             Map.entry("error", "error"),
             Map.entry("fatal", "fatal"));
+
     public String mapSeverityStyle(String toMap) {
         var style = severityStyleMap.get(toMap.toLowerCase(Locale.ROOT));
         return (style == null) ? "unknown" : style;

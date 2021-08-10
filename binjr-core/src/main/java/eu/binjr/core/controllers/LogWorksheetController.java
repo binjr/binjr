@@ -119,7 +119,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final Property<Collection<FacetEntry>> pathFacetEntries = new SimpleObjectProperty<>();
     private final MostRecentlyUsedList<String> mostRecentLogFilters = UserHistory.getInstance().mostRecentLogFilters;
-    private final MostRecentlyUsedList<String> favoriteLogFilters = UserHistory.getInstance().favoriteLogFilters;
+    private final MostRecentlyUsedList<String> favoriteLogFilters = userPrefs.getFavorites().favoriteLogFilters;
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private final BooleanProperty filterApplied = new SimpleBooleanProperty(true);
