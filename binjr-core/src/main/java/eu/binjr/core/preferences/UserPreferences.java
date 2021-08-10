@@ -285,7 +285,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
-                stringMostRecentlyUsedList("favoriteLogFilters", 1000);
+                stringMostRecentlyUsedList("favoriteLogFilters", Integer.MAX_VALUE);
 
         public UserFavorites(String root) {
             super(root + "/favorites");
