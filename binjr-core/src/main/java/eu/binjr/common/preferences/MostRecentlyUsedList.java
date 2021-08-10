@@ -90,6 +90,7 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
 
     /**
      * Returns true is the list contains the specified value, false otherwise.
+     *
      * @param value the value whose presence is to be tested
      * @return true is the list contains the specified value, false otherwise
      */
@@ -154,7 +155,12 @@ public abstract class MostRecentlyUsedList<T> implements ReloadableItemStore.Rel
         var mru = new LinkedList<T>();
         try {
             for (int i = 0; i < capacity; i++) {
-                loadFromBackend(i).ifPresent(mru::add);
+                var o = loadFromBackend(i);
+                if (o.isPresent()) {
+                    mru.add(o.get());
+                } else {
+                    break;
+                }
             }
         } catch (Throwable t) {
             logger.error("Failed to load preference " + key + " from backend: " + t.getMessage(), t);
