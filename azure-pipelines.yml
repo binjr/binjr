@@ -135,5 +135,4 @@ stages:
             jdkVersionOption: '1.11'
             jdkArchitectureOption: 'x64'
             publishJUnitResults: false
-            options: '-Dorg.gradle.internal.publish.checksums.insecure=true'
             tasks: 'publishArtifacts'
