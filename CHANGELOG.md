@@ -1,4 +1,12 @@
-#### [binjr v3.1.0](https://github.com/binjr/binjr/releases/tag/v3.1.0)
+## [binjr v3.2.0](https://github.com/binjr/binjr/releases/tag/v3.2.0)
+Released on Thu, 12 August 2021
+
+* _[New]_ Keep the most recently used log filters in the user history and allow users to save filters as favorites.
+* _[Fixed]_ Freeze when clicking on “browse” to open a file or folder on Linux.
+* _[Fixed]_ The entered URL may be ignored when pressing "Enter" in the new source dialog.
+* _[Fixed]_ An error occurs when accepting an empty path in the RRD and CSV adapters dialogs.
+
+## [binjr v3.1.0](https://github.com/binjr/binjr/releases/tag/v3.1.0)
 Released on Wed, 30 July 2021
 
 * _[New]_ It is now possible to select multiple charts in a worksheet to delete them all at once.
