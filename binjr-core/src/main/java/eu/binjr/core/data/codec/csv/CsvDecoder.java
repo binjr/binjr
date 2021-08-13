@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2020 Frederic Thevenet
+ *    Copyright 2019-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -41,7 +41,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 /**
- * This class provides an implementation of a {@link Decoder} that decode data from a CSV formatted text stream into a {@link TimeSeriesProcessor}.
+ * This class provides an implementation of a {@link Decoder} that decode data from a
+ * CSV formatted text stream into a {@link TimeSeriesProcessor}.
  *
  * @author Frederic Thevenet
  */
@@ -107,23 +108,26 @@ public class CsvDecoder implements Decoder<Double> {
      */
     public List<String> getDataColumnHeaders(InputStream in) throws IOException, DecodingDataFromAdapterException {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-            CSVFormat csvFormat = CSVFormat.DEFAULT
-                    .withAllowMissingColumnNames(false)
-                    .withDelimiter(delimiter);
+            CSVFormat csvFormat = CSVFormat.Builder.create()
+                    .setAllowMissingColumnNames(false)
+                    .setDelimiter(delimiter)
+                    .build();
             Iterable<CSVRecord> records = csvFormat.parse(reader);
             return this.parseColumnHeaders(records.iterator().next());
         }
     }
 
     @Override
-    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> decode(InputStream in, List<TimeSeriesInfo<Double>> seriesInfo) throws IOException, DecodingDataFromAdapterException {
+    public Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> decode(InputStream in, List<TimeSeriesInfo<Double>> seriesInfo)
+            throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::perf)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-                CSVFormat csvFormat = CSVFormat.DEFAULT
-                        .withAllowMissingColumnNames(false)
-                        .withFirstRecordAsHeader()
-                        .withSkipHeaderRecord()
-                        .withDelimiter(delimiter);
+                CSVFormat csvFormat = CSVFormat.Builder.create()
+                        .setAllowMissingColumnNames(false)
+                        .setHeader()
+                        .setSkipHeaderRecord(true)
+                        .setDelimiter(delimiter)
+                        .build();
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
                 Map<TimeSeriesInfo<Double>, TimeSeriesProcessor<Double>> series = new HashMap<>();
                 final AtomicLong nbpoints = new AtomicLong(0);
@@ -137,7 +141,8 @@ public class CsvDecoder implements Decoder<Double> {
                         l.addSample(point);
                     }
                 }
-                logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)", seriesInfo.size(), nbpoints.get(), seriesInfo.size() * nbpoints.get()));
+                logger.trace(() -> String.format("Built %d series with %d samples each (%d total samples)",
+                        seriesInfo.size(), nbpoints.get(), seriesInfo.size() * nbpoints.get()));
                 return series;
             }
         }
@@ -152,14 +157,16 @@ public class CsvDecoder implements Decoder<Double> {
      * @throws IOException                      in the event of an I/O error.
      * @throws DecodingDataFromAdapterException if an error occurred while decoding the CSV file.
      */
-    public void decode(InputStream in, List<String> headers, Consumer<DataSample> mapToResult) throws IOException, DecodingDataFromAdapterException {
+    public void decode(InputStream in, List<String> headers, Consumer<DataSample> mapToResult)
+            throws IOException, DecodingDataFromAdapterException {
         try (Profiler ignored = Profiler.start("Building time series from csv data", logger::perf)) {
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-                CSVFormat csvFormat = CSVFormat.DEFAULT
-                        .withAllowMissingColumnNames(false)
-                        .withFirstRecordAsHeader()
-                        .withSkipHeaderRecord()
-                        .withDelimiter(delimiter);
+                CSVFormat csvFormat = CSVFormat.Builder.create()
+                        .setAllowMissingColumnNames(false)
+                        .setHeader()
+                        .setSkipHeaderRecord(true)
+                        .setDelimiter(delimiter)
+                        .build();
                 Iterable<CSVRecord> records = csvFormat.parse(reader);
                 for (CSVRecord csvRecord : records) {
                     ZonedDateTime timeStamp = dateParser.apply(csvRecord.get(0));
