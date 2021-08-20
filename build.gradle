@@ -528,7 +528,7 @@ task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
             "--main-class", "eu.binjr.core.Binjr",
             "--runtime-image", "${APP_IMAGE_PATH}/runtime",
-            "--type", "pjg",
+            "--type", "pkg",
             "--copyright", BINJR_COPYRIGHT,
             "--description", BINJR_DESCRIPTION,
             "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
