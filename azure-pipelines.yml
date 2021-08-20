@@ -23,7 +23,7 @@ stages:
         parameters:
           name: app_bundle_linux
           platform: linux
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jdk16.0.2-linux_x64.tar.gz'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz'
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           pool:
             vmImage: 'ubuntu-18.04'
@@ -33,7 +33,7 @@ stages:
         parameters:
           name: app_bundle_mac
           platform: mac
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jdk16.0.2-macosx_x64.tar.gz'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-macosx_x64.tar.gz'
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
           pool:
             vmImage: 'macOS-10.15'
@@ -43,7 +43,7 @@ stages:
         parameters:
           name: app_bundle_windows
           platform: win
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu16.32.15-ca-jdk16.0.2-win_x64.zip'
+          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-win_x64.zip'
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           pool:
             vmImage: 'windows-2019'
@@ -57,6 +57,15 @@ stages:
       pool:
         vmImage: 'ubuntu-18.04'
       steps:
+        - task: JavaToolInstaller@0
+          inputs:
+            versionSpec: "17"
+            jdkArchitectureOption: x64
+            jdkSourceOption: LocalDirectory
+            jdkFile: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz'
+            jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
+            cleanDestinationDirectory: true
+
         - task: DownloadSecureFile@1
           name: gpgKeyring
           displayName: 'Download GPG Keyring'
@@ -75,7 +84,7 @@ stages:
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'
-            jdkVersionOption: '1.11'
+            jdkVersionOption: '1.17'
             jdkArchitectureOption: 'x64'
             publishJUnitResults: false
             tasks: 'expandMdTemplates'
@@ -113,6 +122,15 @@ stages:
             echo '##vso[task.setvariable variable=isTag;]true'
           condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
+        - task: JavaToolInstaller@0
+          inputs:
+            versionSpec: "17"
+            jdkArchitectureOption: x64
+            jdkSourceOption: LocalDirectory
+            jdkFile: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz'
+            jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
+            cleanDestinationDirectory: true
+
         - task: DownloadSecureFile@1
           name: gpgKeyring
           displayName: 'Download GPG Keyring'
@@ -132,7 +150,7 @@ stages:
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'
-            jdkVersionOption: '1.11'
+            jdkVersionOption: '1.17'
             jdkArchitectureOption: 'x64'
             publishJUnitResults: false
             tasks: 'publishArtifacts'
