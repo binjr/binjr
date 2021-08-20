@@ -57,12 +57,15 @@ stages:
       pool:
         vmImage: 'ubuntu-18.04'
       steps:
+        - script: |
+            curl 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz' --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+
         - task: JavaToolInstaller@0
           inputs:
             versionSpec: "17"
             jdkArchitectureOption: x64
             jdkSourceOption: LocalDirectory
-            jdkFile: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz'
+            jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
             jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
             cleanDestinationDirectory: true
 
@@ -122,12 +125,15 @@ stages:
             echo '##vso[task.setvariable variable=isTag;]true'
           condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
+        - script: |
+            curl 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz' --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+
         - task: JavaToolInstaller@0
           inputs:
             versionSpec: "17"
             jdkArchitectureOption: x64
             jdkSourceOption: LocalDirectory
-            jdkFile: 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz'
+            jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
             jdkDestinationDirectory: $(Agent.ToolsDirectory)/binaries/openjdk
             cleanDestinationDirectory: true
 
