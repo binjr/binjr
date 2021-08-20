@@ -61,6 +61,8 @@ jobs:
           assets: |
             $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg
             $(System.DefaultWorkingDirectory)/build/artifacts/*.dmg.asc
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.pkg
+            $(System.DefaultWorkingDirectory)/build/artifacts/*.pkg.asc
             $(System.DefaultWorkingDirectory)/build/artifacts/*.msi
             $(System.DefaultWorkingDirectory)/build/artifacts/*.msi.asc
             $(System.DefaultWorkingDirectory)/build/artifacts/*.zip

@@ -487,7 +487,7 @@ task wixRunLight(type: Exec, dependsOn: [wixRunCandle]) {
     outputs.dir ARTIFACTS_PATH
 }
 
-task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+task jpackageDmg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
     workingDir ARTIFACTS_PATH
     commandLine = [
             "jpackage",
@@ -515,6 +515,38 @@ task jpackageMacOS(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLi
     doLast {
         def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.dmg")
         Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.dmg"))
+    }
+    outputs.dir ARTIFACTS_PATH
+}
+
+task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs]) {
+    workingDir ARTIFACTS_PATH
+    commandLine = [
+            "jpackage",
+            "--name", project.name,
+            "--input", "${buildDir}/tmp/input",
+            "--main-jar", "binjr-core-${BINJR_VERSION}.jar",
+            "--main-class", "eu.binjr.core.Binjr",
+            "--runtime-image", "${APP_IMAGE_PATH}/runtime",
+            "--type", "pjg",
+            "--copyright", BINJR_COPYRIGHT,
+            "--description", BINJR_DESCRIPTION,
+            "--app-version", "${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}",
+            "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
+            "--file-associations", "${projectDir}/distribution/bundlers/mac_pkg/file-associations.properties",
+            "--arguments", "--packaging=MAC_PKG",
+            "--java-options", "-Xmx4096M",
+            "--java-options", "-XX:+UnlockExperimentalVMOptions",
+            "--java-options", "-XX:+UseShenandoahGC",
+            "--java-options", "-XX:ShenandoahGCHeuristics=compact",
+            "--java-options", "-XX:ShenandoahAllocationThreshold=20",
+            "--java-options", "--add-exports=javafx.base/com.sun.javafx.event=ALL-UNNAMED",
+            "--java-options", "--add-exports=javafx.controls/com.sun.javafx.charts=ALL-UNNAMED",
+            "--java-options", "--add-opens=javafx.graphics/javafx.geometry=ALL-UNNAMED"
+    ]
+    doLast {
+        def source = java.nio.file.Path.of("${ARTIFACTS_PATH}/${project.name}-${IS_BETA ? BINJR_BETA_VERSION : BINJR_VERSION_STEM}.pkg")
+        Files.move(source, source.resolveSibling("${DISTRIBUTION_NAME}.pkg"))
     }
     outputs.dir ARTIFACTS_PATH
 }
@@ -617,10 +649,16 @@ task packageAsMsi(type: WrapTaskForSigning, dependsOn: [wixRunLight]) {
     archiveFileName = "${DISTRIBUTION_NAME}.msi"
 }
 
-task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageMacOS]) {
+task packageAsDmg(type: WrapTaskForSigning, dependsOn: [jpackageDmg]) {
     from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.dmg"
     destinationDirectory = ARTIFACTS_PATH
     archiveFileName = "${DISTRIBUTION_NAME}.dmg"
+}
+
+task packageAsPkg(type: WrapTaskForSigning, dependsOn: [jpackagePkg]) {
+    from "${ARTIFACTS_PATH}/${DISTRIBUTION_NAME}.pkg"
+    destinationDirectory = ARTIFACTS_PATH
+    archiveFileName = "${DISTRIBUTION_NAME}.pkg"
 }
 
 task packageAsTarGz(type: WrapTaskForSigning, dependsOn: [packageDistributionTar]) {
@@ -644,7 +682,7 @@ task packageAsDeb(type: WrapTaskForSigning, dependsOn: [jpackageDeb]) {
 signing {
     sign packageAsZip
     sign packageAsMsi
-    sign packageAsDmg
+    sign packageAsPkg
     sign packageAsTarGz
     sign packageAsRpm
     sign packageAsDeb
@@ -654,7 +692,7 @@ task packageDistribution() {
     if (IS_WINDOWS) {
         finalizedBy(packageAsMsi, packageAsZip)
     } else if (IS_MAC) {
-        finalizedBy(packageAsDmg, packageAsTarGz)
+        finalizedBy(packageAsPkg, packageAsTarGz)
     } else {
         finalizedBy(packageAsTarGz, packageAsDeb, packageAsRpm)
     }
@@ -664,7 +702,7 @@ task signPackageDistribution() {
     if (IS_WINDOWS) {
         finalizedBy(signPackageAsMsi, signPackageAsZip)
     } else if (IS_MAC) {
-        finalizedBy(signPackageAsDmg, signPackageAsTarGz)
+        finalizedBy(signPackageAsPkg, signPackageAsTarGz)
     } else {
         finalizedBy(signPackageAsTarGz, signPackageAsDeb, signPackageAsRpm)
     }
