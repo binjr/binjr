@@ -19,21 +19,14 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
-import eu.binjr.common.javafx.controls.TreeViewUtils;
 import eu.binjr.core.data.adapters.SourceBinding;
-import eu.binjr.core.data.adapters.TimeSeriesBinding;
-import eu.binjr.core.data.workspace.Chart;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
-import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 
 import java.io.Closeable;
@@ -42,8 +35,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class WorksheetController implements Initializable, Closeable {
-    protected final BindingManager bindingManager = new BindingManager();
-    protected final MainViewController parentController;
+    private final BindingManager bindingManager = new BindingManager();
+    private final MainViewController parentController;
 
     @FXML
     public Button toggleChartDisplayModeButton;
@@ -87,7 +80,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event ->  parentController.handleTogglePresentationMode()));
+        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event ->  getParentController().handleTogglePresentationMode()));
         getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             setEditChartMode(newValue);
         });
@@ -98,8 +91,14 @@ public abstract class WorksheetController implements Initializable, Closeable {
         return bindingManager;
     }
 
+    public MainViewController getParentController() {
+        return parentController;
+    }
+
     @Override
-    public abstract void close();
+    public  void close(){
+        bindingManager.close();
+    }
 
     public abstract String getView();
 
@@ -112,4 +111,5 @@ public abstract class WorksheetController implements Initializable, Closeable {
             toggleChartDisplayModeButton.setGraphic(ToolButtonBuilder.makeIconNode(Pos.CENTER, "expand-view-icon"));
         }
     }
+
 }

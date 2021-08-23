@@ -245,10 +245,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
             return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
         });
         // Init navigation
-        backButton.setOnAction(bindingManager.registerHandler(event -> this.navigateBackward()));
-        forwardButton.setOnAction(bindingManager.registerHandler(event -> this.navigateForward()));
-        bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
-        bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
+        backButton.setOnAction(getBindingManager().registerHandler(event -> this.navigateBackward()));
+        forwardButton.setOnAction(getBindingManager().registerHandler(event -> this.navigateForward()));
+        getBindingManager().bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
+        getBindingManager().bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         // Query syntax help
         var syntaxPopupRoot = new StackPane();
         syntaxPopupRoot.getStyleClass().addAll("syntax-help-popup");
@@ -291,7 +291,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var queryHelpPopup = new PopupControl();
         queryHelpPopup.setAutoHide(true);
         queryHelpPopup.getScene().setRoot(syntaxPopupRoot);
-        WeakEventHandler<ActionEvent> syntaxHelpEventHandler = bindingManager.registerHandler(actionEvent -> {
+        WeakEventHandler<ActionEvent> syntaxHelpEventHandler = getBindingManager().registerHandler(actionEvent -> {
             Node owner = (Node) actionEvent.getSource();
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
             queryHelpPopup.show(owner.getScene().getWindow(), bounds.getMaxX() - 600, bounds.getMaxY());
@@ -336,10 +336,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 commitSuggest.accept(selected.getValue().getLabel());
             }
         };
-        suggestFilterField.setOnAction(bindingManager.registerHandler(event ->
+        suggestFilterField.setOnAction(getBindingManager().registerHandler(event ->
                 commitSuggest.accept(((TextField) event.getSource()).getText())));
 
-        suggestFilterField.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
+        suggestFilterField.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(e -> {
             var key = e.getCode();
             if (key == KeyCode.DOWN) {
                 suggestTree.requestFocus();
@@ -350,7 +350,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         suggestTree.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-        suggestTree.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(event -> {
+        suggestTree.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 treeSelectionCommit.run();
             }
@@ -358,11 +358,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 cancelSuggest.run();
             }
         }));
-        suggestTree.setOnMouseClicked(bindingManager.registerHandler(event -> {
+        suggestTree.setOnMouseClicked(getBindingManager().registerHandler(event -> {
             treeSelectionCommit.run();
         }));
 
-        favoriteButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+        favoriteButton.setOnAction(getBindingManager().registerHandler(actionEvent -> {
             var favText = filterTextField.getText();
             if (favoriteLogFilters.contains(favText)) {
                 favoriteLogFilters.remove(favText);
@@ -371,37 +371,37 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
             updateFavoriteButtonStatus(favText);
         }));
-        bindingManager.bind(favoriteButton.visibleProperty(),
+        getBindingManager().bind(favoriteButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(),
                         filterTextField.textProperty()));
-        bindingManager.bind(favoriteButton.managedProperty(), favoriteButton.visibleProperty());
+        getBindingManager().bind(favoriteButton.managedProperty(), favoriteButton.visibleProperty());
 
-        var goButton = new ToolButtonBuilder<Button>(bindingManager)
+        var goButton = new ToolButtonBuilder<Button>(getBindingManager())
                 .setText("Go")
                 .setTooltip("Filter the log view")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("forwardArrow-icon", "small-icon")
                 .setFocusTraversable(false)
                 .setAction(event -> commitSuggest.accept(suggestFilterField.getText())).build(Button::new);
-        var clearSuggestButton = new ToolButtonBuilder<Button>(bindingManager)
+        var clearSuggestButton = new ToolButtonBuilder<Button>(getBindingManager())
                 .setText("Clear")
                 .setTooltip("Clear filter suggestions")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("cross-icon", "small-icon")
                 .setFocusTraversable(false)
                 .setAction(event -> suggestFilterField.clear()).build(Button::new);
-        var suggestSyntaxButton = new ToolButtonBuilder<Button>(bindingManager)
+        var suggestSyntaxButton = new ToolButtonBuilder<Button>(getBindingManager())
                 .setText("help")
                 .setTooltip("Display Query Syntax Help")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("help-icon", "small-icon")
                 .setFocusTraversable(false)
                 .setAction(syntaxHelpEventHandler).build(Button::new);
-        bindingManager.bind(clearSuggestButton.visibleProperty(),
+        getBindingManager().bind(clearSuggestButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !suggestFilterField.getText().isEmpty(),
                         suggestFilterField.textProperty()));
-        bindingManager.bind(clearSuggestButton.managedProperty(), clearSuggestButton.visibleProperty());
-        var collapseButton = new ToolButtonBuilder<Button>(bindingManager)
+        getBindingManager().bind(clearSuggestButton.managedProperty(), clearSuggestButton.visibleProperty());
+        var collapseButton = new ToolButtonBuilder<Button>(getBindingManager())
                 .setText("Collapse")
                 .setTooltip("Hide Filter Suggestions")
                 .setStyleClass("dialog-button")
@@ -421,9 +421,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         separator.getStyleClass().add("horizontal-separator");
         suggestPane.getChildren().add(separator);
         suggestPane.getChildren().add(suggestTree);
-        bindingManager.bind(suggestPane.prefWidthProperty(), Bindings.add(10, filterBar.widthProperty()));
+        getBindingManager().bind(suggestPane.prefWidthProperty(), Bindings.add(10, filterBar.widthProperty()));
         suggestPopup.getScene().setRoot(suggestPane);
-        bindingManager.attachListener(suggestPopup.showingProperty(),
+        getBindingManager().attachListener(suggestPopup.showingProperty(),
                 (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
                     if (newValue) {
                         suggestFilterField.clear();
@@ -441,17 +441,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         .collect(Collectors.toList()));
                     }
                 });
-        showSuggestButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+        showSuggestButton.setOnAction(getBindingManager().registerHandler(actionEvent -> {
             Node owner = filteringBar;
             Bounds bounds = owner.localToScreen(owner.getBoundsInLocal());
             suggestPopup.show(owner.getScene().getWindow(), bounds.getMinX() - 7, bounds.getMinY() - 5);
             suggestFilterField.requestFocus();
         }));
-        suggestPopup.setOnHiding(bindingManager.registerHandler(windowEvent -> {
+        suggestPopup.setOnHiding(getBindingManager().registerHandler(windowEvent -> {
             filterTextField.requestFocus();
         }));
 
-        bindingManager.attachListener(suggestFilterField.textProperty(), (o -> {
+        getBindingManager().attachListener(suggestFilterField.textProperty(), (o -> {
             suggestRoot.setPredicate((treeItem, stylableTreeItem) -> {
                 var isMatch = stylableTreeItem != null && StringUtils.contains(
                         stylableTreeItem.getLabel(),
@@ -465,30 +465,30 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
-        bindingManager.attachListener(filterTextField.textProperty(), (ChangeListener<String>) (o, oldVal, newVal) -> {
+        getBindingManager().attachListener(filterTextField.textProperty(), (ChangeListener<String>) (o, oldVal, newVal) -> {
             updateFavoriteButtonStatus(newVal);
             filterApplied.setValue(false);
         });
         pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
-        bindingManager.bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
-        bindingManager.bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
+        getBindingManager().bind(paginationBar.managedProperty(), paginationBar.visibleProperty());
+        getBindingManager().bind(paginationBar.visibleProperty(), pager.pageCountProperty().greaterThan(1));
 
         // Filter selection
-        bindingManager.bind(logsToolPane.managedProperty(), logsToolPane.visibleProperty());
-        bindingManager.bind(logsToolPane.visibleProperty(), filteringBar.visibleProperty().or(highlightControls.visibleProperty()));
+        getBindingManager().bind(logsToolPane.managedProperty(), logsToolPane.visibleProperty());
+        getBindingManager().bind(logsToolPane.visibleProperty(), filteringBar.visibleProperty().or(highlightControls.visibleProperty()));
 
-        bindingManager.bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
-        bindingManager.bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
-        bindingManager.attachListener(severityListView.getSelectedPills(),
+        getBindingManager().bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
+        getBindingManager().bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
+        getBindingManager().attachListener(severityListView.getSelectedPills(),
                 (SetChangeListener<FacetPillsContainer.FacetPill>) l -> invalidateFilter(true));
-        bindingManager.attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
-        filterTextField.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
-        clearFilterButton.setOnAction(bindingManager.registerHandler(actionEvent -> {
+        getBindingManager().attachListener(pager.currentPageIndexProperty(), (o, oldVal, newVal) -> invalidateFilter(false));
+        filterTextField.setOnAction(getBindingManager().registerHandler(event -> invalidateFilter(true)));
+        clearFilterButton.setOnAction(getBindingManager().registerHandler(actionEvent -> {
             filterTextField.clear();
             invalidateFilter(true);
         }));
 
-        filterTextField.addEventFilter(KeyEvent.KEY_PRESSED, bindingManager.registerHandler(e -> {
+        filterTextField.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(e -> {
             var key = e.getCode();
             logger.trace(() -> "KEY_PRESSED event trapped, keycode=" + e.getCode());
             if ((key == KeyCode.K && e.isControlDown()) || key == KeyCode.UP || key == KeyCode.DOWN) {
@@ -500,14 +500,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         }));
 
-        applyFilterButton.setOnAction(bindingManager.registerHandler(event -> invalidateFilter(true)));
+        applyFilterButton.setOnAction(getBindingManager().registerHandler(event -> invalidateFilter(true)));
 
-        bindingManager.bind(applyFilterButton.visibleProperty(), filterApplied.not());
-        bindingManager.bind(applyFilterButton.managedProperty(), applyFilterButton.visibleProperty());
+        getBindingManager().bind(applyFilterButton.visibleProperty(), filterApplied.not());
+        getBindingManager().bind(applyFilterButton.managedProperty(), applyFilterButton.visibleProperty());
 
         //Search bar initialization
-        bindingManager.bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
-        bindingManager.bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
+        getBindingManager().bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
+        getBindingManager().bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
 
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
@@ -520,9 +520,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
-        bindingManager.bind(clearFilterButton.visibleProperty(),
+        getBindingManager().bind(clearFilterButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(), filterTextField.textProperty()));
-        bindingManager.bind(clearFilterButton.managedProperty(), clearFilterButton.visibleProperty());
+        getBindingManager().bind(clearFilterButton.managedProperty(), clearFilterButton.visibleProperty());
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
@@ -544,13 +544,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
         intiLogFileTable();
 
         splitPane.setDividerPositions(worksheet.getDividerPosition());
-        bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+        getBindingManager().bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
 
         var eventTarget = root.getParent();
         if (eventTarget == null) {
             eventTarget = root;
         }
-        eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, bindingManager.registerHandler(e -> {
+        eventTarget.addEventFilter(KeyEvent.KEY_RELEASED, getBindingManager().registerHandler(e -> {
             if (e.getCode() == KeyCode.K && e.isControlDown()) {
                 filterToggleButton.setSelected(true);
                 filterTextField.requestFocus();
@@ -573,7 +573,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;");
         }));
 
-        bindingManager.bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
+        getBindingManager().bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
             if (progressIndicator.getProgress() < 0) {
                 return "";
             } else {
@@ -581,7 +581,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
 
         }, progressIndicator.progressProperty()));
-        bindingManager.bind(progressIndicator.progressProperty(), worksheet.progressProperty());
+        getBindingManager().bind(progressIndicator.progressProperty(), worksheet.progressProperty());
 
         invalidate(false, false, false);
         super.initialize(location, resources);
@@ -605,7 +605,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
         MenuItem item = new MenuItem(worksheet.getName());
-        item.setOnAction((bindingManager.registerHandler(event -> {
+        item.setOnAction((getBindingManager().registerHandler(event -> {
             addToCurrentWorksheet(treeView);
         })));
         return new ContextMenu(item);
@@ -632,7 +632,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(LogFilesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
             if (treeView != null) {
                 TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
@@ -700,9 +700,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 //    logFilesBindings.add((LogFilesBinding) sb);
                 if (worksheet.getSeriesInfo().stream().filter(s -> s.getBinding().equals(binding)).findAny().isEmpty()) {
                     var i = TimeSeriesInfo.fromBinding(binding);
-                    bindingManager.attachListener(i.selectedProperty(), isVisibleListener);
-                    bindingManager.attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
-                    bindingManager.attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
+                    getBindingManager().attachListener(i.selectedProperty(), isVisibleListener);
+                    getBindingManager().attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
+                    getBindingManager().attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
                     worksheet.getSeriesInfo().add(i);
                 }
             }
@@ -717,7 +717,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     protected void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            bindingManager.suspend(worksheet.dividerPositionProperty());
+            getBindingManager().suspend(worksheet.dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             fileTablePane.setVisible(false);
             fileTablePane.setManaged(false);
@@ -727,7 +727,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             fileTablePane.setManaged(true);
             fileTablePane.setVisible(true);
             splitPane.setDividerPositions(worksheet.getDividerPosition());
-            bindingManager.resume(worksheet.dividerPositionProperty());
+            getBindingManager().resume(worksheet.dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
         super.setEditChartMode(newValue);
@@ -762,7 +762,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters(), requestUpdate);
                     },
                     event -> {
-                        bindingManager.suspend();
+                        getBindingManager().suspend();
                         try {
                             // Reset page number
                             var res = (SearchHitsProcessor) event.getSource().getValue();
@@ -815,7 +815,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 Dialogs.notifyException(e);
                             }
                         } finally {
-                            bindingManager.resume();
+                            getBindingManager().resume();
                             busyIndicator.setVisible(false);
                         }
                     }, event -> {
@@ -852,9 +852,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void close() {
+        super.close();
         if (closed.compareAndSet(false, true)) {
             timeRangePicker.dispose();
-            bindingManager.close();
         }
     }
 
@@ -888,20 +888,20 @@ public class LogWorksheetController extends WorksheetController implements Synca
         };
 
         for (var i : worksheet.getSeriesInfo()) {
-            bindingManager.attachListener(i.selectedProperty(), isVisibleListener);
-            bindingManager.attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
-            bindingManager.attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
+            getBindingManager().attachListener(i.selectedProperty(), isVisibleListener);
+            getBindingManager().attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
+            getBindingManager().attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
         }
 
-        showAllCheckBox.setOnAction(bindingManager.registerHandler(event -> {
+        showAllCheckBox.setOnAction(getBindingManager().registerHandler(event -> {
             ChangeListener<Boolean> r = (o, oldVal, newVal) -> invalidate(false, true);
             boolean b = ((CheckBox) event.getSource()).isSelected();
-            worksheet.getSeriesInfo().forEach(s -> bindingManager.detachAllChangeListeners(s.selectedProperty()));
+            worksheet.getSeriesInfo().forEach(s -> getBindingManager().detachAllChangeListeners(s.selectedProperty()));
             worksheet.getSeriesInfo().forEach(t -> t.setSelected(b));
             r.changed(null, null, null);
-            worksheet.getSeriesInfo().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
+            worksheet.getSeriesInfo().forEach(s -> getBindingManager().attachListener(s.selectedProperty(), r));
         }));
 
         TableColumn<TimeSeriesInfo<SearchHit>, Color> colorColumn = new TableColumn<>();
@@ -917,7 +917,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
         nameColumn.setEditable(true);
         nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-        nameColumn.setOnEditCommit(bindingManager.registerHandler(
+        nameColumn.setOnEditCommit(getBindingManager().registerHandler(
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
         );
@@ -939,12 +939,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
         pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
 
         fileTable.getSelectionModel().setSelectionMode(MULTIPLE);
-        fileTable.setOnKeyReleased(bindingManager.registerHandler(event -> {
+        fileTable.setOnKeyReleased(getBindingManager().registerHandler(event -> {
             if (event.getCode().equals(KeyCode.DELETE)) {
                 var selected = new ArrayList<>(fileTable.getSelectionModel().getSelectedItems());
                 selected.forEach(s -> {
-                    bindingManager.detachAllInvalidationListeners(s.selectedProperty());
-                    bindingManager.detachAllInvalidationListeners(s.displayColorProperty());
+                    getBindingManager().detachAllInvalidationListeners(s.selectedProperty());
+                    getBindingManager().detachAllInvalidationListeners(s.displayColorProperty());
                 });
                 fileTable.getItems().removeAll(selected);
                 fileTable.getSelectionModel().clearSelection();
@@ -986,14 +986,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void restoreQueryParameters(LogQueryParameters newParams, boolean resetPage) {
         if (newParams != worksheet.getQueryParameters()) {
-            bindingManager.suspend();
+            getBindingManager().suspend();
             try {
                 worksheet.setQueryParameters(newParams);
                 timeRangePicker.updateSelectedRange(newParams.getTimeRange());
                 filterTextField.setText(newParams.getFilterQuery());
                 pager.setCurrentPageIndex(newParams.getPage());
             } finally {
-                bindingManager.resume();
+                getBindingManager().resume();
             }
             invalidate(false, resetPage);
         }

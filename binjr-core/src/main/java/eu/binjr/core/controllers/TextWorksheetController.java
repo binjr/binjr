@@ -155,7 +155,7 @@ public class TextWorksheetController extends WorksheetController {
     public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
         MenuItem item = new MenuItem(worksheet.getName());
         item.setDisable(true);
-        return  new ContextMenu(item);
+        return new ContextMenu(item);
     }
 
     @Override
@@ -200,7 +200,7 @@ public class TextWorksheetController extends WorksheetController {
 
     @Override
     public void close() {
-
+        super.close();
     }
 
     @Override
@@ -229,17 +229,17 @@ public class TextWorksheetController extends WorksheetController {
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
-        bindingManager.bind(clearSearchButton.visibleProperty(),
+        getBindingManager().bind(clearSearchButton.visibleProperty(),
                 Bindings.createBooleanBinding(() -> !searchTextField.getText().isBlank(), searchTextField.textProperty()));
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
                 (ChangeListener<String>) (obs, oldText, newText) -> {
-            delay.setOnFinished(event -> doSearchHighlight(newText,
-                    searchMatchCaseToggle.isSelected(),
-                    searchRegExToggle.isSelected()));
-            delay.playFromStart();
-        });
+                    delay.setOnFinished(event -> doSearchHighlight(newText,
+                            searchMatchCaseToggle.isSelected(),
+                            searchRegExToggle.isSelected()));
+                    delay.playFromStart();
+                });
 
         getBindingManager().attachListener(searchMatchCaseToggle.selectedProperty(),
                 (ChangeListener<Boolean>) (obs, oldVal, newVal) ->

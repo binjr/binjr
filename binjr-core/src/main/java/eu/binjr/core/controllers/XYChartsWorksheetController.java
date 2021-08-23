@@ -18,7 +18,6 @@ package eu.binjr.core.controllers;
 
 import com.sun.javafx.charts.Legend;
 import eu.binjr.common.io.IOUtils;
-import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.charts.*;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
@@ -247,27 +246,27 @@ public class XYChartsWorksheetController extends WorksheetController {
         assert snapshotButton != null : "fx:id\"snapshotButton\" was not injected!";
 
         try {
-            bindingManager.bind(worksheetMaskerPane.visibleProperty(), nbBusyPlotTasks.greaterThan(0));
+            getBindingManager().bind(worksheetMaskerPane.visibleProperty(), nbBusyPlotTasks.greaterThan(0));
             initChartViewPorts();
             initNavigationPane();
             initTableViewPane();
             Platform.runLater(() -> invalidate(false, false, false));
-            bindingManager.attachListener(userPrefs.downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
-            bindingManager.attachListener(userPrefs.downSamplingThreshold.property(), ((observable, oldValue, newValue) -> {
+            getBindingManager().attachListener(userPrefs.downSamplingEnabled.property(), ((observable, oldValue, newValue) -> refresh()));
+            getBindingManager().attachListener(userPrefs.downSamplingThreshold.property(), ((observable, oldValue, newValue) -> {
                 if (userPrefs.downSamplingEnabled.get())
                     refresh();
             }));
-            bindingManager.attachListener(userPrefs.downSamplingAlgorithm.property(), ((observable, oldValue, newValue) -> {
+            getBindingManager().attachListener(userPrefs.downSamplingAlgorithm.property(), ((observable, oldValue, newValue) -> {
                 if (userPrefs.downSamplingEnabled.get())
                     refresh();
             }));
 
-            newChartDropTarget.setOnDragOver(bindingManager.registerHandler(this::handleDragOverNewChartTarget));
-            newChartDropTarget.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedONewChartTarget));
-            newChartDropTarget.setOnDragEntered(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
-            newChartDropTarget.setOnDragExited(bindingManager.registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
-            bindingManager.bind(newChartDropTarget.managedProperty(), parentController.treeItemDragAndDropInProgressProperty());
-            bindingManager.bind(newChartDropTarget.visibleProperty(), parentController.treeItemDragAndDropInProgressProperty());
+            newChartDropTarget.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverNewChartTarget));
+            newChartDropTarget.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedONewChartTarget));
+            newChartDropTarget.setOnDragEntered(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
+            newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
+            getBindingManager().bind(newChartDropTarget.managedProperty(), getParentController().treeItemDragAndDropInProgressProperty());
+            getBindingManager().bind(newChartDropTarget.visibleProperty(), getParentController().treeItemDragAndDropInProgressProperty());
 
             setSelectedChart(worksheet.getSelectedChart());
         } catch (Exception e) {
@@ -279,7 +278,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     @Override
     protected void setEditChartMode(Boolean newValue) {
         if (!newValue) {
-            bindingManager.suspend(worksheet.dividerPositionProperty());
+            getBindingManager().suspend(worksheet.dividerPositionProperty());
             splitPane.setDividerPositions(1.0);
             chartsLegendsPane.setVisible(false);
             chartsLegendsPane.setMaxHeight(0.0);
@@ -287,7 +286,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             chartsLegendsPane.setMaxHeight(Double.MAX_VALUE);
             chartsLegendsPane.setVisible(true);
             splitPane.setDividerPositions(worksheet.getDividerPosition());
-            bindingManager.resume(worksheet.dividerPositionProperty());
+            getBindingManager().resume(worksheet.dividerPositionProperty());
         }
         setShowPropertiesPane(newValue);
         super.setEditChartMode(newValue);
@@ -295,7 +294,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private ZonedDateTimeAxis buildTimeAxis() {
         ZonedDateTimeAxis axis = new ZonedDateTimeAxis(worksheet.getTimeZone());
-        bindingManager.bind(axis.zoneIdProperty(), worksheet.timeZoneProperty());
+        getBindingManager().bind(axis.zoneIdProperty(), worksheet.timeZoneProperty());
         axis.setAnimated(false);
         axis.setSide(Side.BOTTOM);
         return axis;
@@ -336,7 +335,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             yAxis.setAnimated(false);
             yAxis.setTickSpacing(30);
 
-            bindingManager.bind(yAxis.labelProperty(),
+            getBindingManager().bind(yAxis.labelProperty(),
                     Bindings.createStringBinding(
                             () -> String.format("%s - %s", currentChart.getName(), currentChart.getUnit()),
                             currentChart.nameProperty(),
@@ -370,10 +369,10 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
-            viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, bindingManager.registerHandler(event -> {
+            viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, getBindingManager().registerHandler(event -> {
                 worksheet.setSelectedChart(currentIndex, event.isControlDown());
             }));
-            bindingManager.bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
+            getBindingManager().bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
             viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
             viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
@@ -395,7 +394,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 }
             }));
             // Add buttons to chart axis
-            Button closeButton = new ToolButtonBuilder<Button>(bindingManager)
+            Button closeButton = new ToolButtonBuilder<Button>(getBindingManager())
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
@@ -403,7 +402,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .setAction(event -> warnAndRemoveChart(currentChart))
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
-            ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
+            ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(getBindingManager())
                     .setText("Settings")
                     .setTooltip("Edit the chart's settings")
                     .setStyleClass("dialog-button")
@@ -413,7 +412,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             var toolBar = new HBox(editButton, closeButton);
             toolBar.getStyleClass().add("worksheet-tool-bar");
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
-            yAxis.getSelectionMarker().setOnDragDetected(bindingManager.registerHandler(event -> {
+            yAxis.getSelectionMarker().setOnDragDetected(getBindingManager().registerHandler(event -> {
                 Dragboard db = viewPort.startDragAndDrop(TransferMode.MOVE);
                 db.setDragView(SnapshotUtils.scaledSnapshot(viewPort, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
                 ClipboardContent cc = new ClipboardContent();
@@ -422,14 +421,14 @@ public class XYChartsWorksheetController extends WorksheetController {
                 event.consume();
 
             }));
-            yAxis.getSelectionMarker().setOnDragOver(bindingManager.registerHandler(event -> {
+            yAxis.getSelectionMarker().setOnDragOver(getBindingManager().registerHandler(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(VIEWPORT_DRAG_FORMAT) && currentIndex != (Integer) db.getContent(VIEWPORT_DRAG_FORMAT)) {
                     event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
                     event.consume();
                 }
             }));
-            yAxis.getSelectionMarker().setOnDragDropped(bindingManager.registerHandler(event -> {
+            yAxis.getSelectionMarker().setOnDragDropped(getBindingManager().registerHandler(event -> {
                 Dragboard db = event.getDragboard();
                 if (db.hasContent(VIEWPORT_DRAG_FORMAT)) {
                     int draggedIndex = (Integer) db.getContent(VIEWPORT_DRAG_FORMAT);
@@ -441,11 +440,11 @@ public class XYChartsWorksheetController extends WorksheetController {
             yAxis.getSelectionMarker().getChildren().add(toolBar);
         }
 
-        bindingManager.bind(selectChartLayout.disableProperty(),
+        getBindingManager().bind(selectChartLayout.disableProperty(),
                 Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
         selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
             MenuItem item = new MenuItem(chartLayout.toString());
-            item.setOnAction(bindingManager.registerHandler(event -> worksheet.setChartLayout(chartLayout)));
+            item.setOnAction(getBindingManager().registerHandler(event -> worksheet.setChartLayout(chartLayout)));
             return item;
         }).collect(Collectors.toList()));
 
@@ -463,7 +462,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 break;
         }
         if (viewPorts.size() > 0) {
-            bindingManager.attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
+            getBindingManager().attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
         }
     }
 
@@ -509,11 +508,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .findFirst()
                     .ifPresent(node -> node.setPickOnBounds(false));
             hBox.setAlignment(Pos.CENTER_LEFT);
-            bindingManager.bind(hBox.prefHeightProperty(), chartParent.heightProperty());
-            bindingManager.bind(hBox.prefWidthProperty(), chartParent.widthProperty());
-            bindingManager.bind(chart.minWidthProperty(), chartParent.widthProperty().subtract(n));
-            bindingManager.bind(chart.prefWidthProperty(), chartParent.widthProperty().subtract(n));
-            bindingManager.bind(chart.maxWidthProperty(), chartParent.widthProperty().subtract(n));
+            getBindingManager().bind(hBox.prefHeightProperty(), chartParent.heightProperty());
+            getBindingManager().bind(hBox.prefWidthProperty(), chartParent.widthProperty());
+            getBindingManager().bind(chart.minWidthProperty(), chartParent.widthProperty().subtract(n));
+            getBindingManager().bind(chart.prefWidthProperty(), chartParent.widthProperty().subtract(n));
+            getBindingManager().bind(chart.maxWidthProperty(), chartParent.widthProperty().subtract(n));
             if (i == 0) {
                 chart.getYAxis().setSide(Side.LEFT);
             } else {
@@ -522,8 +521,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                 chart.setHorizontalZeroLineVisible(false);
                 chart.setVerticalGridLinesVisible(false);
                 chart.setHorizontalGridLinesVisible(false);
-                bindingManager.bind(chart.translateXProperty(), viewPorts.get(0).getChart().getYAxis().widthProperty());
-                bindingManager.bind(chart.getYAxis().translateXProperty(), Bindings.createDoubleBinding(
+                getBindingManager().bind(chart.translateXProperty(), viewPorts.get(0).getChart().getYAxis().widthProperty());
+                getBindingManager().bind(chart.getYAxis().translateXProperty(), Bindings.createDoubleBinding(
                         () -> viewPorts.stream()
                                 .filter(c -> viewPorts.indexOf(c) != 0 && viewPorts.indexOf(c) < viewPorts.indexOf(v))
                                 .map(c -> c.getChart().getYAxis().getWidth())
@@ -543,11 +542,11 @@ public class XYChartsWorksheetController extends WorksheetController {
         });
         hCrosshair.selectedProperty().bindBidirectional(userPrefs.horizontalMarkerOn.property());
         vCrosshair.selectedProperty().bindBidirectional(userPrefs.verticalMarkerOn.property());
-        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
+        getBindingManager().bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() -> userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
                         userPrefs.shiftPressed.property()));
-        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
+        getBindingManager().bind(crossHair.verticalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() -> userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
                         userPrefs.ctrlPressed.property()));
@@ -556,8 +555,8 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private void setupStackedChartLayout(VBox vBox) {
-        bindingManager.bind(vBox.prefHeightProperty(), chartParent.heightProperty());
-        bindingManager.bind(vBox.prefWidthProperty(), chartParent.widthProperty());
+        getBindingManager().bind(vBox.prefHeightProperty(), chartParent.heightProperty());
+        getBindingManager().bind(vBox.prefWidthProperty(), chartParent.widthProperty());
         for (int i = 0; i < viewPorts.size(); i++) {
             ChartViewPort v = viewPorts.get(i);
             XYChart<ZonedDateTime, Double> chart = v.getChart();
@@ -585,20 +584,20 @@ public class XYChartsWorksheetController extends WorksheetController {
         var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
         var crosshairHeightBinding = BooleanBinding.booleanExpression(userPrefs.fullHeightCrosshairMarker.property())
                 .and(Bindings.greaterThan(nbChartObs, 1));
-        bindingManager.bind(crossHair.displayFullHeightMarkerProperty(), crosshairHeightBinding);
+        getBindingManager().bind(crossHair.displayFullHeightMarkerProperty(), crosshairHeightBinding);
         viewPorts.get(0).setCrosshair(crossHair);
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             currentState.setSelection(convertSelection(s), true);
         });
-        bindingManager.bindBidirectional(hCrosshair.selectedProperty(), userPrefs.horizontalMarkerOn.property());
-        bindingManager.bindBidirectional(vCrosshair.selectedProperty(), userPrefs.verticalMarkerOn.property());
-        bindingManager.bind(crossHair.horizontalMarkerVisibleProperty(),
+        getBindingManager().bindBidirectional(hCrosshair.selectedProperty(), userPrefs.horizontalMarkerOn.property());
+        getBindingManager().bindBidirectional(vCrosshair.selectedProperty(), userPrefs.verticalMarkerOn.property());
+        getBindingManager().bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
                                 userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
                         userPrefs.shiftPressed.property()));
-        bindingManager.bind(crossHair.verticalMarkerVisibleProperty(),
+        getBindingManager().bind(crossHair.verticalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
                                 userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
@@ -612,12 +611,12 @@ public class XYChartsWorksheetController extends WorksheetController {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());
                 currentState.setSelection(convertSelection(s), true);
             });
-            bindingManager.bind(ch.horizontalMarkerVisibleProperty(),
+            getBindingManager().bind(ch.horizontalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
                                     userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
                             hCrosshair.selectedProperty(),
                             userPrefs.shiftPressed.property()));
-            bindingManager.bind(ch.verticalMarkerVisibleProperty(),
+            getBindingManager().bind(ch.verticalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
                                     userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
@@ -649,13 +648,13 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private void initNavigationPane() {
-        backButton.setOnAction(bindingManager.registerHandler(this::handleHistoryBack));
-        forwardButton.setOnAction(bindingManager.registerHandler(this::handleHistoryForward));
-        refreshButton.setOnAction(bindingManager.registerHandler(this::handleRefresh));
-        snapshotButton.setOnAction(bindingManager.registerHandler(this::handleTakeSnapshot));
-        bindingManager.bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
-        bindingManager.bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
-        addChartButton.setOnAction(bindingManager.registerHandler(this::handleAddNewChart));
+        backButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryBack));
+        forwardButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryForward));
+        refreshButton.setOnAction(getBindingManager().registerHandler(this::handleRefresh));
+        snapshotButton.setOnAction(getBindingManager().registerHandler(this::handleTakeSnapshot));
+        getBindingManager().bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
+        getBindingManager().bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
+        addChartButton.setOnAction(getBindingManager().registerHandler(this::handleAddNewChart));
         currentState = new ChartViewportsState(this, worksheet.getFromDateTime(), worksheet.getToDateTime());
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
@@ -723,8 +722,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             };
 
             currentViewPort.getDataStore().getSeries().forEach(doubleTimeSeriesInfo -> {
-                bindingManager.attachListener(doubleTimeSeriesInfo.selectedProperty(), refreshListener);
-                bindingManager.attachListener(doubleTimeSeriesInfo.selectedProperty(), isVisibleListener);
+                getBindingManager().attachListener(doubleTimeSeriesInfo.selectedProperty(), refreshListener);
+                getBindingManager().attachListener(doubleTimeSeriesInfo.selectedProperty(), isVisibleListener);
                 // Explicitly call the listener to initialize the proper status of the checkbox
                 isVisibleListener.invalidated(null);
             });
@@ -732,7 +731,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             visibleColumn.setCellValueFactory(p -> p.getValue().selectedProperty());
             visibleColumn.setCellFactory(CheckBoxTableCell.forTableColumn(visibleColumn));
 
-            showAllCheckBox.setOnAction(bindingManager.registerHandler(event -> {
+            showAllCheckBox.setOnAction(getBindingManager().registerHandler(event -> {
                 ChangeListener<Boolean> r = (observable, oldValue, newValue) -> {
                     if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                         invalidate(false, false, false);
@@ -741,10 +740,10 @@ public class XYChartsWorksheetController extends WorksheetController {
                     }
                 };
                 boolean b = ((CheckBox) event.getSource()).isSelected();
-                currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.detachAllChangeListeners(s.selectedProperty()));
+                currentViewPort.getDataStore().getSeries().forEach(s -> getBindingManager().detachAllChangeListeners(s.selectedProperty()));
                 currentViewPort.getDataStore().getSeries().forEach(t -> t.setSelected(b));
                 r.changed(null, null, null);
-                currentViewPort.getDataStore().getSeries().forEach(s -> bindingManager.attachListener(s.selectedProperty(), r));
+                currentViewPort.getDataStore().getSeries().forEach(s -> getBindingManager().attachListener(s.selectedProperty(), r));
             }));
 
             DecimalFormatTableCellFactory<TimeSeriesInfo<Double>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
@@ -758,10 +757,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             TableColumn<TimeSeriesInfo<Double>, String> nameColumn = new TableColumn<>("Name");
             nameColumn.setSortable(false);
             nameColumn.setPrefWidth(160);
-            bindingManager.bind(nameColumn.editableProperty(), currentViewPort.getDataStore().showPropertiesProperty());
+            getBindingManager().bind(nameColumn.editableProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
             nameColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-            nameColumn.setOnEditCommit(bindingManager.registerHandler(
+            nameColumn.setOnEditCommit(getBindingManager().registerHandler(
                     t -> t.getTableView().getItems().get(
                             t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
             );
@@ -793,7 +792,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
 
             currentColumn.setVisible(getSelectedViewPort().getCrosshair().isVerticalMarkerVisible());
-            bindingManager.attachListener(getSelectedViewPort().getCrosshair().verticalMarkerVisibleProperty(),
+            getBindingManager().attachListener(getSelectedViewPort().getCrosshair().verticalMarkerVisibleProperty(),
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
 
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -823,7 +822,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     }, getSelectedViewPort().getCrosshair().currentXValueProperty()));
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
-            currentViewPort.getSeriesTable().setOnKeyReleased(bindingManager.registerHandler(event -> {
+            currentViewPort.getSeriesTable().setOnKeyReleased(getBindingManager().registerHandler(event -> {
                 if (event.getCode().equals(KeyCode.DELETE)) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
@@ -834,8 +833,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);
-            newPane.setOnDragOver(bindingManager.registerHandler(this::handleDragOverWorksheetView));
-            newPane.setOnDragDropped(bindingManager.registerHandler(this::handleDragDroppedOnLegendTitledPane));
+            newPane.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
+            newPane.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnLegendTitledPane));
             newPane.setUserData(currentViewPort);
 
             GridPane titleRegion = new GridPane();
@@ -843,18 +842,18 @@ public class XYChartsWorksheetController extends WorksheetController {
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.LEFT, false));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.ALWAYS, HPos.LEFT, true));
             titleRegion.getColumnConstraints().add(new ColumnConstraints(USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, USE_COMPUTED_SIZE, Priority.NEVER, HPos.RIGHT, false));
-            bindingManager.bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(15));
-            bindingManager.bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(15));
+            getBindingManager().bind(titleRegion.minWidthProperty(), newPane.widthProperty().subtract(15));
+            getBindingManager().bind(titleRegion.maxWidthProperty(), newPane.widthProperty().subtract(15));
 
             Label label = new Label();
-            bindingManager.bind(label.textProperty(), currentViewPort.getDataStore().nameProperty());
-            bindingManager.bind(label.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty().not());
+            getBindingManager().bind(label.textProperty(), currentViewPort.getDataStore().nameProperty());
+            getBindingManager().bind(label.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty().not());
             HBox editFieldsGroup = new HBox();
             DoubleBinding db = Bindings.createDoubleBinding(() -> editFieldsGroup.isVisible() ? USE_COMPUTED_SIZE : 0.0, editFieldsGroup.visibleProperty());
-            bindingManager.bind(editFieldsGroup.prefHeightProperty(), db);
-            bindingManager.bind(editFieldsGroup.maxHeightProperty(), db);
-            bindingManager.bind(editFieldsGroup.minHeightProperty(), db);
-            bindingManager.bind(editFieldsGroup.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
+            getBindingManager().bind(editFieldsGroup.prefHeightProperty(), db);
+            getBindingManager().bind(editFieldsGroup.maxHeightProperty(), db);
+            getBindingManager().bind(editFieldsGroup.minHeightProperty(), db);
+            getBindingManager().bind(editFieldsGroup.visibleProperty(), currentViewPort.getDataStore().showPropertiesProperty());
             editFieldsGroup.setSpacing(5);
             TextField chartNameField = new TextField();
             chartNameField.textProperty().bindBidirectional(currentViewPort.getDataStore().nameProperty());
@@ -863,9 +862,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             ChoiceBox<UnitPrefixes> unitPrefixChoiceBox = new ChoiceBox<>();
             unitPrefixChoiceBox.getItems().setAll(UnitPrefixes.values());
             unitPrefixChoiceBox.getSelectionModel().select(currentViewPort.getDataStore().getUnitPrefixes());
-            bindingManager.bind(currentViewPort.getDataStore().unitPrefixesProperty(), unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
+            getBindingManager().bind(currentViewPort.getDataStore().unitPrefixesProperty(), unitPrefixChoiceBox.getSelectionModel().selectedItemProperty());
             HBox.setHgrow(chartNameField, Priority.ALWAYS);
-            titleRegion.setOnMouseClicked(bindingManager.registerHandler(event -> {
+            titleRegion.setOnMouseClicked(getBindingManager().registerHandler(event -> {
                 if (event.getClickCount() == 2) {
                     chartNameField.selectAll();
                     chartNameField.requestFocus();
@@ -879,7 +878,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             toolbar.getStyleClass().add("title-pane-tool-bar");
             toolbar.setAlignment(Pos.CENTER);
 
-            Button selectChartButton = new ToolButtonBuilder<Button>(bindingManager)
+            Button selectChartButton = new ToolButtonBuilder<Button>(getBindingManager())
                     .setText("Select")
                     .setTooltip("Select a chart")
                     .setStyleClass("dialog-button")
@@ -901,9 +900,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             for (int i = 0; i < viewPorts.size(); i++) {
                 var m = new RadioMenuItem();
                 final int chartIdx = i;
-                bindingManager.bind(m.textProperty(), viewPorts.get(i).getDataStore().nameProperty());
+                getBindingManager().bind(m.textProperty(), viewPorts.get(i).getDataStore().nameProperty());
                 m.setToggleGroup(group);
-                m.setOnAction(bindingManager.registerHandler(event -> {
+                m.setOnAction(getBindingManager().registerHandler(event -> {
                     worksheet.setSelectedChart(chartIdx);
                 }));
                 menu.getItems().add(m);
@@ -911,13 +910,13 @@ public class XYChartsWorksheetController extends WorksheetController {
                     group.selectToggle(m);
                 }
             }
-            bindingManager.attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (obs, oldVal, newVal) -> {
+            getBindingManager().attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (obs, oldVal, newVal) -> {
                 if (newVal >= 0 && newVal < group.getToggles().size()) {
                     group.selectToggle(group.getToggles().get(newVal));
                 }
             });
 
-            Button closeButton = new ToolButtonBuilder<Button>(bindingManager)
+            Button closeButton = new ToolButtonBuilder<Button>(getBindingManager())
                     .setText("Close")
                     .setTooltip("Remove this chart from the worksheet.")
                     .setStyleClass("exit")
@@ -926,7 +925,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .bind(Button::disableProperty, Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not())
                     .build(Button::new);
 
-            ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(bindingManager)
+            ToggleButton editButton = new ToolButtonBuilder<ToggleButton>(getBindingManager())
                     .setText("Settings")
                     .setTooltip("Edit the chart's settings")
                     .setStyleClass("dialog-button")
@@ -936,7 +935,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             editButtonsGroup.getToggles().add(editButton);
 
-            Button moveUpButton = new ToolButtonBuilder<Button>(bindingManager)
+            Button moveUpButton = new ToolButtonBuilder<Button>(getBindingManager())
                     .setText("Up")
                     .setTooltip("Move the chart up the list.")
                     .setStyleClass("dialog-button")
@@ -944,7 +943,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     .bind(Node::visibleProperty, currentViewPort.getDataStore().showPropertiesProperty())
                     .setAction(event -> moveChartOrder(currentViewPort.getDataStore(), -1))
                     .build(Button::new);
-            Button moveDownButton = new ToolButtonBuilder<Button>(bindingManager)
+            Button moveDownButton = new ToolButtonBuilder<Button>(getBindingManager())
                     .setText("Down")
                     .setTooltip("Move the chart down the list.")
                     .setStyleClass("dialog-button")
@@ -966,7 +965,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             newPane.setAnimated(false);
             currentViewPort.setSeriesDetailsPane(newPane);
         }
-        bindingManager.attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
+        getBindingManager().attachListener(editButtonsGroup.selectedToggleProperty(), (ChangeListener<Toggle>) (observable, oldValue, newValue) -> {
             if (newValue != null) {
                 chartProperties.expand();
             } else {
@@ -978,7 +977,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             chartProperties.expand();
         }
         splitPane.setDividerPositions(worksheet.getDividerPosition());
-        bindingManager.bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
+        getBindingManager().bind(worksheet.dividerPositionProperty(), splitPane.getDividers().get(0).positionProperty());
     }
 
     @Override
@@ -1035,7 +1034,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnLegendTitledPane(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
             if (treeView != null) {
                 TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
@@ -1065,7 +1064,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedOnWorksheetView(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
             if (treeView != null) {
                 TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
                 if (item != null) {
@@ -1100,7 +1099,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void handleDragDroppedONewChartTarget(DragEvent event) {
         Dragboard db = event.getDragboard();
         if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = parentController.getSelectedTreeView();
+            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
             if (treeView != null) {
                 Collection<TreeItem<SourceBinding>> items = treeView.getSelectionModel().getSelectedItems();
                 if (items != null && !items.isEmpty()) {
@@ -1162,12 +1161,12 @@ public class XYChartsWorksheetController extends WorksheetController {
                 .stream()
                 .map(c -> {
                     MenuItem m = new MenuItem(c.getName());
-                    m.setOnAction(bindingManager.registerHandler(e -> addToCurrentWorksheet(items, c)));
+                    m.setOnAction(getBindingManager().registerHandler(e -> addToCurrentWorksheet(items, c)));
                     return m;
                 })
                 .toArray(MenuItem[]::new));
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction((bindingManager.registerHandler(event -> {
+        newChart.setOnAction((getBindingManager().registerHandler(event -> {
             addToNewChart(new ArrayList<>(items));
         })));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
@@ -1176,9 +1175,9 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void close() {
+        super.close();
         if (closed.compareAndSet(false, true)) {
             logger.debug(() -> "Closing worksheetController " + this.toString());
-            bindingManager.close();
             currentState.close();
             hCrosshair.selectedProperty().unbindBidirectional(userPrefs.horizontalMarkerOn.property());
             vCrosshair.selectedProperty().unbindBidirectional(userPrefs.verticalMarkerOn.property());
@@ -1204,11 +1203,11 @@ public class XYChartsWorksheetController extends WorksheetController {
                 this.close();
             }
         };
-        bindingManager.attachListener(worksheet.chartLayoutProperty(), controllerReloadListener);
+        getBindingManager().attachListener(worksheet.chartLayoutProperty(), controllerReloadListener);
 
         this.worksheet.getCharts().forEach(c -> {
-            bindingManager.attachListener(c.unitPrefixesProperty(), controllerReloadListener);
-            bindingManager.attachListener(c.chartTypeProperty(), controllerReloadListener);
+            getBindingManager().attachListener(c.unitPrefixesProperty(), controllerReloadListener);
+            getBindingManager().attachListener(c.chartTypeProperty(), controllerReloadListener);
         });
 
         ListChangeListener<Chart> chartListListener = c -> {
@@ -1222,7 +1221,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     // nothing for now
                 } else {
                     if (c.wasAdded()) {
-                        parentController.getWorkspace().setPresentationMode(false);
+                        getParentController().getWorkspace().setPresentationMode(false);
                         List<? extends Chart> added = c.getAddedSubList();
                         Chart chart = added.get(added.size() - 1);
                         int chartIndex = worksheet.getCharts().indexOf(chart);
@@ -1242,7 +1241,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 logger.debug(() -> "Reload explicitly prevented on change " + c);
             }
         };
-        bindingManager.attachListener(worksheet.getCharts(), chartListListener);
+        getBindingManager().attachListener(worksheet.getCharts(), chartListListener);
     }
 
     private void addBindings(Collection<SourceBinding> sourceBindings, Chart targetChart) {
@@ -1275,14 +1274,14 @@ public class XYChartsWorksheetController extends WorksheetController {
         };
         for (TimeSeriesBinding b : timeSeriesBindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
-            bindingManager.attachListener(newSeries.selectedProperty(),
+            getBindingManager().attachListener(newSeries.selectedProperty(),
                     (observable, oldValue, newValue) ->
                             viewPorts.stream()
                                     .filter(v -> v.getDataStore().equals(targetChart))
                                     .findFirst()
                                     .ifPresent(v -> plotChart(v, false))
             );
-            bindingManager.attachListener(newSeries.selectedProperty(), isVisibleListener);
+            getBindingManager().attachListener(newSeries.selectedProperty(), isVisibleListener);
             targetChart.addSeries(newSeries);
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
@@ -1441,12 +1440,12 @@ public class XYChartsWorksheetController extends WorksheetController {
             if (currentChart.getChartType() == ChartType.SCATTER) {
                 for (var data : newSeries.getData()) {
                     var c = new Circle();
-                    bindingManager.bind(c.radiusProperty(), currentChart.strokeWidthProperty());
-                    bindingManager.bind(c.fillProperty(), series.displayColorProperty());
+                    getBindingManager().bind(c.radiusProperty(), currentChart.strokeWidthProperty());
+                    getBindingManager().bind(c.fillProperty(), series.displayColorProperty());
                     data.setNode(c);
                 }
             } else {
-                bindingManager.attachListener(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
+                getBindingManager().attachListener(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
                     if (newNode != null) {
                         switch (currentChart.getChartType()) {
                             case AREA:
@@ -1543,7 +1542,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
         TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
-        row.setOnDragDetected(bindingManager.registerHandler(event -> {
+        row.setOnDragDetected(getBindingManager().registerHandler(event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
@@ -1555,7 +1554,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             }
         }));
 
-        row.setOnDragOver(bindingManager.registerHandler(event -> {
+        row.setOnDragOver(getBindingManager().registerHandler(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE) && row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
                 event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
@@ -1563,7 +1562,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             }
         }));
 
-        row.setOnDragDropped(bindingManager.registerHandler(event -> {
+        row.setOnDragDropped(getBindingManager().registerHandler(event -> {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
@@ -1603,12 +1602,6 @@ public class XYChartsWorksheetController extends WorksheetController {
     @Override
     public List<ChartViewPort> getViewPorts() {
         return viewPorts;
-    }
-
-
-    @Override
-    public BindingManager getBindingManager() {
-        return bindingManager;
     }
 
 }

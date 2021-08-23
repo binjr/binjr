@@ -242,7 +242,7 @@ public class BindingManager implements AutoCloseable {
                 // weak counterpart may be collected.
                 registeredHandlers.clear();
             } catch (Exception e) {
-                logger.warn("An error occuured while closing BindingManager instance", e);
+                logger.warn("An error occurred while closing BindingManager instance", e);
             }
         }
     }
