@@ -470,8 +470,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
         ZonedDateTime fromDateTime = null;
         Comparator<ZonedDateTime> comparator = Comparator.comparing(ZonedDateTime::toEpochSecond);
         for (var bindingsHierarchy : bindingsHierarchies) {
-            if (bindingsHierarchy.getRoot() instanceof TimeSeriesBinding) {
-                TimeSeriesBinding binding = (TimeSeriesBinding) bindingsHierarchy.getRoot();
+            if (bindingsHierarchy.getRoot() instanceof TimeSeriesBinding binding) {
                 Chart chart = new Chart(
                         binding.getLegend(),
                         binding.getGraphType(),
@@ -479,8 +478,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
                         binding.getUnitPrefix());
 
                 for (var b : bindingsHierarchy.getBindings()) {
-                    if (b instanceof TimeSeriesBinding) {
-                        TimeSeriesBinding tsb = (TimeSeriesBinding) b;
+                    if (b instanceof TimeSeriesBinding tsb) {
                         chart.addSeries(TimeSeriesInfo.fromBinding(tsb));
                     }
                 }

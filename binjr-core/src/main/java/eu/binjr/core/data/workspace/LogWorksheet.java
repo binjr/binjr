@@ -126,8 +126,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         for (var root : bindingsHierarchies) {
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
-                if (b instanceof LogFilesBinding) {
-                    this.seriesInfo.add(TimeSeriesInfo.fromBinding((LogFilesBinding) b));
+                if (b instanceof LogFilesBinding logBinding) {
+                    this.seriesInfo.add(TimeSeriesInfo.fromBinding(logBinding));
                 }
             }
         }
@@ -219,8 +219,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         var bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if ( byAdapterEntry.getKey() instanceof ProgressAdapter) {
-                var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
+            if ( byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();

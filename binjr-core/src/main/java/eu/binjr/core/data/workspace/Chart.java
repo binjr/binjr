@@ -274,8 +274,8 @@ public class Chart implements Dirtyable, AutoCloseable, Rangeable<Double> {
                 if (!errors.isEmpty()) {
                     for (var t : errors) {
                         //FIXME only first exception is rethrown
-                        if (t instanceof DataAdapterException) {
-                            throw (DataAdapterException) t;
+                        if (t instanceof DataAdapterException dataAdapterException) {
+                            throw dataAdapterException;
                         } else {
                             throw new DataAdapterException("Unexpected error while retrieving data from adapter: " + t.getMessage(), t);
                         }

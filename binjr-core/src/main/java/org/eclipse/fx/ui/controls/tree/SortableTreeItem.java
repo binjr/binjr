@@ -39,8 +39,8 @@ public class SortableTreeItem<T> extends FilterableTreeItem<T> {
 	public SortableTreeItem(T value) {
 		super(value);
 		parentProperty().addListener((o, oV, nV) -> {
-			if (nV != null && nV instanceof SortableTreeItem && getComparator() == null) {
-				comparatorProperty().bind(((SortableTreeItem<T>) nV).comparatorProperty());
+			if (nV instanceof SortableTreeItem<T> sortableTreeItem && getComparator() == null) {
+				comparatorProperty().bind(sortableTreeItem.comparatorProperty());
 			}
 		});
 	}

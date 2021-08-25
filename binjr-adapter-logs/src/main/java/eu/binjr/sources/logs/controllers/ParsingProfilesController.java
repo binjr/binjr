@@ -247,8 +247,8 @@ public class ParsingProfilesController implements Initializable {
         var parent = node.getParent();
         if (parent != null) {
             var field = parent.lookup(".search-field-inner");
-            if (field instanceof TextField) {
-                ((TextField) field).setText("");
+            if (field instanceof TextField textField) {
+                textField.setText("");
             }
         }
     }
@@ -319,8 +319,8 @@ public class ParsingProfilesController implements Initializable {
             @Override
             public ParsingProfile fromString(String string) {
                 var val = profileComboBox.getValue();
-                if (val instanceof CustomParsingProfile) {
-                    ((CustomParsingProfile) val).setProfileName(string);
+                if (val instanceof CustomParsingProfile custom) {
+                    custom.setProfileName(string);
                 }
                 return val;
             }
@@ -464,12 +464,10 @@ public class ParsingProfilesController implements Initializable {
 
     private boolean applyChanges() {
         clearNotification();
-        boolean success = true;
-        if (this.profileComboBox.getValue() instanceof CustomParsingProfile) {
-            var editable = (CustomParsingProfile) this.profileComboBox.getValue();
-            success &= saveProfile(editable);
+        if (this.profileComboBox.getValue() instanceof CustomParsingProfile editable) {
+            return saveProfile(editable);
         }
-        return success;
+        return true;
     }
 
     private final AtomicInteger paletteEntriesSequence = new AtomicInteger(0);

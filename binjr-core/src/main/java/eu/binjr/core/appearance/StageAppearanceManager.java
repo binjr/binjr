@@ -121,12 +121,11 @@ public class StageAppearanceManager {
     }
 
     private Node installCurtain(Stage stage) {
-        if (stage.getScene() != null && stage.getScene().getRoot() instanceof Pane) {
+        if (stage.getScene() != null && stage.getScene().getRoot() instanceof Pane root) {
             ImageView logo = new ImageView(new Image(getClass().getResourceAsStream("/eu/binjr/images/avatar_512.png")));
             logo.setFitHeight(256.0);
             logo.setFitWidth(256.0);
             StackPane curtain = new StackPane(logo);
-            Pane root = (Pane) stage.getScene().getRoot();
             curtain.setStyle("-fx-background-color: #204656;");
             root.getChildren().add(curtain);
             AnchorPane.setLeftAnchor(curtain, 0.0);
@@ -140,8 +139,7 @@ public class StageAppearanceManager {
     }
 
     private void raiseCurtain(Stage stage, Node curtain) {
-        if (curtain != null && stage.getScene().getRoot() instanceof Pane) {
-            Pane root = (Pane) stage.getScene().getRoot();
+        if (curtain != null && stage.getScene().getRoot() instanceof Pane root) {
             FadeTransition ft = new FadeTransition(Duration.millis(250), curtain);
             ft.setDelay(Duration.millis(350));
             ft.setFromValue(1.0);

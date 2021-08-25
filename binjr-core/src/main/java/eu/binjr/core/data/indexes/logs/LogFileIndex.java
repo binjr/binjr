@@ -118,8 +118,8 @@ public class LogFileIndex implements Searchable {
                 indexDirectory = FSDirectory.open(indexDirectoryPath.resolve("index"));
                 taxonomyDirectory = FSDirectory.open(indexDirectoryPath.resolve("taxonomy"));
                 logger.debug("Lucene index directory stored at " + indexDirectoryPath);
-                if (indexDirectory instanceof MMapDirectory) {
-                    logger.debug("Use unmap:" + ((MMapDirectory) indexDirectory).getUseUnmap());
+                if (indexDirectory instanceof MMapDirectory mmapDir) {
+                    logger.debug("Use unmap:" + mmapDir.getUseUnmap());
                 }
         }
         IndexWriterConfig iwc = new IndexWriterConfig(new StandardAnalyzer());

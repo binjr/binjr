@@ -672,8 +672,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void addBindings(Collection<SourceBinding> sourceBindings) {
         Collection<LogFilesBinding> logFilesBindings = new ArrayList<>();
         for (var sb : sourceBindings) {
-            if (sb instanceof LogFilesBinding) {
-                logFilesBindings.add((LogFilesBinding) sb);
+            if (sb instanceof LogFilesBinding logFilesBinding) {
+                logFilesBindings.add(logFilesBinding);
             }
         }
         if (logFilesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
@@ -697,7 +697,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         };
         for (var binding : logFilesBindings) {
             if (binding instanceof LogFilesBinding) {
-                //    logFilesBindings.add((LogFilesBinding) sb);
                 if (worksheet.getSeriesInfo().stream().filter(s -> s.getBinding().equals(binding)).findAny().isEmpty()) {
                     var i = TimeSeriesInfo.fromBinding(binding);
                     getBindingManager().attachListener(i.selectedProperty(), isVisibleListener);
@@ -1057,8 +1056,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if (byAdapterEntry.getKey() instanceof ProgressAdapter) {
-                var adapter = (ProgressAdapter<SearchHit>) byAdapterEntry.getKey();
+            if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 // Group all queries with the same adapter and path
                 var bindingsByPath =
                         byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));

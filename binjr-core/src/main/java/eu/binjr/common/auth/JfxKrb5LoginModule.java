@@ -47,11 +47,9 @@ public class JfxKrb5LoginModule extends Krb5LoginModule {
             try {
                 credentials = obtainCredentials(CredentialsEntry.copyOf(credentials));
                 for (Callback callback : callbacks) {
-                    if (callback instanceof NameCallback) {
-                        NameCallback nc = (NameCallback) callback;
+                    if (callback instanceof NameCallback nc) {
                         nc.setName(credentials.getLogin());
-                    } else if (callback instanceof PasswordCallback) {
-                        PasswordCallback pc = (PasswordCallback) callback;
+                    } else if (callback instanceof PasswordCallback pc) {
                         pc.setPassword(credentials.getPwd());
                         credentials.clearPassword();
                     } else {

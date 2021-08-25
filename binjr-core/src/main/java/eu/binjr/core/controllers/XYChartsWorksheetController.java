@@ -185,8 +185,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         var totalBindings = 0;
         for (var treeItem : treeItems) {
             for (var t : TreeViewUtils.splitAboveLeaves(treeItem, true)) {
-                if (t.getValue() instanceof TimeSeriesBinding) {
-                    TimeSeriesBinding binding = (TimeSeriesBinding) t.getValue();
+                if (t.getValue() instanceof TimeSeriesBinding binding) {
                     Chart chart = new Chart(
                             binding.getLegend(),
                             binding.getGraphType(),
@@ -194,8 +193,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                             binding.getUnitPrefix()
                     );
                     for (var b : TreeViewUtils.flattenLeaves(t)) {
-                        if (b instanceof TimeSeriesBinding) {
-                            chart.addSeries(TimeSeriesInfo.fromBinding((TimeSeriesBinding) b));
+                        if (b instanceof TimeSeriesBinding leafBinding) {
+                            chart.addSeries(TimeSeriesInfo.fromBinding(leafBinding));
                             totalBindings++;
                         }
                     }
@@ -982,8 +981,8 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public Optional<ChartViewPort> getAttachedViewport(TitledPane pane) {
-        if (pane != null && (pane.getUserData() instanceof ChartViewPort)) {
-            return Optional.of((ChartViewPort) pane.getUserData());
+        if (pane != null && (pane.getUserData() instanceof ChartViewPort chartViewPort)) {
+            return Optional.of(chartViewPort);
         }
         return Optional.empty();
     }
@@ -1045,7 +1044,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                     try {
                         TitledPane droppedPane = (TitledPane) event.getSource();
                         ChartViewPort viewPort = (ChartViewPort) droppedPane.getUserData();
-                        addBindings(TreeViewUtils.flattenLeaves(item, true).stream().filter(b -> b instanceof TimeSeriesBinding)
+                        addBindings(TreeViewUtils.flattenLeaves(item, true).stream()
+                                .filter(b -> b instanceof TimeSeriesBinding)
                                 .map(b -> (TimeSeriesBinding) b).collect(Collectors.toList()), viewPort.getDataStore());
                     } catch (Exception e) {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
@@ -1247,8 +1247,8 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void addBindings(Collection<SourceBinding> sourceBindings, Chart targetChart) {
         Collection<TimeSeriesBinding> timeSeriesBindings = new ArrayList<>();
         for (var sb : sourceBindings) {
-            if (sb instanceof TimeSeriesBinding) {
-                timeSeriesBindings.add((TimeSeriesBinding) sb);
+            if (sb instanceof TimeSeriesBinding timeSeriesBinding) {
+                timeSeriesBindings.add(timeSeriesBinding);
             }
         }
         if (timeSeriesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
@@ -1392,9 +1392,9 @@ public class XYChartsWorksheetController extends WorksheetController {
                             nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
                             viewPort.getChart().getData().setAll((Collection<? extends XYChart.Series<ZonedDateTime, Double>>) event.getSource().getValue());
                             for (Node n : viewPort.getChart().getChildrenUnmodifiable()) {
-                                if (n instanceof Legend) {
+                                if (n instanceof Legend legend) {
                                     int i = 0;
-                                    for (Legend.LegendItem legendItem : ((Legend) n).getItems()) {
+                                    for (Legend.LegendItem legendItem : legend.getItems()) {
                                         legendItem.getSymbol().setStyle("-fx-background-color: " +
                                                 colorToRgbaString(viewPort.getDataStore()
                                                         .getSeries()

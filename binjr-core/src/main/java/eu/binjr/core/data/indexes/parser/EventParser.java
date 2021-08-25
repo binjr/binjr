@@ -58,13 +58,13 @@ public class EventParser {
         final Map<String, String> sections = new HashMap<>();
         if (m.find()) {
             for (Map.Entry<NamedCaptureGroup, String> entry : profile.getCaptureGroups().entrySet()) {
-                var t = entry.getKey();
-                var parsed = m.group(t.name());
+                var captureGroup = entry.getKey();
+                var parsed = m.group(captureGroup.name());
                 if (parsed != null && !parsed.isBlank()) {
-                    if (t instanceof TemporalCaptureGroup) {
-                        timestamp = timestamp.with(((TemporalCaptureGroup) t).getMapping(), Long.parseLong(parsed));
+                    if (captureGroup instanceof TemporalCaptureGroup temporalGroup) {
+                        timestamp = timestamp.with(temporalGroup.getMapping(), Long.parseLong(parsed));
                     } else {
-                        sections.put(t.name(), parsed);
+                        sections.put(captureGroup.name(), parsed);
                     }
                 }
             }

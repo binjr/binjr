@@ -91,9 +91,9 @@ public class DecimalFormatTableCellFactory<S, T> implements Callback<TableColumn
                     super.setGraphic(null);
                 } else if (formatter != null) {
                     super.setText(formatter.format(item));
-                } else if (item instanceof Node) {
+                } else if (item instanceof Node node) {
                     super.setText(null);
-                    super.setGraphic((Node) item);
+                    super.setGraphic(node);
                 } else {
                     super.setText(item.toString());
                     super.setGraphic(null);

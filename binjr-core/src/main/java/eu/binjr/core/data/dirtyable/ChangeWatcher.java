@@ -66,8 +66,8 @@ public class ChangeWatcher implements Dirtyable, Closeable {
         for (Field field : toWatch) {
             try {
                 Object fieldValue = readField(field, source);
-                if (fieldValue instanceof Property) {
-                    bindingManager.attachListener((Property<?>) fieldValue, (observable, oldValue, newValue) -> forceDirty());
+                if (fieldValue instanceof Property property) {
+                    bindingManager.attachListener(property, (observable, oldValue, newValue) -> forceDirty());
                 }
                 if (fieldValue instanceof ObservableList) {
                     ParameterizedType pType = (ParameterizedType) field.getGenericType();

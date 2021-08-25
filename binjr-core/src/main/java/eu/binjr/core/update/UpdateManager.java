@@ -346,9 +346,9 @@ public class UpdateManager {
             //couldn't find NotificationBar, giving up.
             return;
         }
-        if (n instanceof NotificationBar) {
+        if (n instanceof NotificationBar notifBar) {
             // found it, hide the popup.
-            ((NotificationBar) n).hide();
+            notifBar.hide();
             return;
         }
         // keep looking.

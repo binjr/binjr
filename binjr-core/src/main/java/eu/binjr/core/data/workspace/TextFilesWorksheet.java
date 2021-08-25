@@ -87,8 +87,8 @@ public class TextFilesWorksheet extends Worksheet<String> {
         for (var root : bindingsHierarchies) {
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
-                if (b instanceof TextFilesBinding) {
-                    this.seriesInfo.add(TimeSeriesInfo.fromBinding((TextFilesBinding)b));
+                if (b instanceof TextFilesBinding textBinding) {
+                    this.seriesInfo.add(TimeSeriesInfo.fromBinding(textBinding));
                 }
             }
         }
