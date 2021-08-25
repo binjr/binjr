@@ -22,7 +22,7 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
     api 'org.controlsfx:controlsfx:11.1.0'
     api 'org.gillius:jfxutils:1.0'
-    api 'com.google.code.gson:gson:2.8.7'
+    api 'com.google.code.gson:gson:2.8.8'
     api 'org.apache.commons:commons-csv:1.9.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     api 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
