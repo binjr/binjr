@@ -20,6 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.OutputConsoleController;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -56,7 +57,6 @@ public class ConsoleStage {
         stage.setScene(scene);
         stage.setTitle("binjr debug console");
         StageAppearanceManager.getInstance().register(stage);
-        stage.initStyle(StageStyle.UTILITY);
         stage.show();
         stage.setOnCloseRequest(event -> {
             AppEnvironment.getInstance().setDebugMode(false);
@@ -71,7 +71,7 @@ public class ConsoleStage {
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
             stage.setAlwaysOnTop(newValue);
         });
-        controller.getAlwaysOnTopToggle().setSelected(true);
+        controller.getAlwaysOnTopToggle().setSelected(UserPreferences.getInstance().consoleAlwaysOnTop.get());
     }
 
     /**
