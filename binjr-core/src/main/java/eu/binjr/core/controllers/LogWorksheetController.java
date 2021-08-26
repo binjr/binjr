@@ -487,6 +487,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             filterTextField.clear();
             invalidateFilter(true);
         }));
+        getBindingManager().bind(clearFilterButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(), filterTextField.textProperty()));
+        getBindingManager().bind(clearFilterButton.managedProperty(), clearFilterButton.visibleProperty());
 
         filterTextField.addEventFilter(KeyEvent.KEY_PRESSED, getBindingManager().registerHandler(e -> {
             var key = e.getCode();
@@ -520,9 +523,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
         }));
         clearSearchButton.setOnAction(getBindingManager().registerHandler(event -> searchTextField.clear()));
-        getBindingManager().bind(clearFilterButton.visibleProperty(),
-                Bindings.createBooleanBinding(() -> !filterTextField.getText().isEmpty(), filterTextField.textProperty()));
-        getBindingManager().bind(clearFilterButton.managedProperty(), clearFilterButton.visibleProperty());
+        getBindingManager().bind(clearSearchButton.visibleProperty(),
+                Bindings.createBooleanBinding(() -> !searchTextField.getText().isEmpty(), searchTextField.textProperty()));
+        getBindingManager().bind(clearSearchButton.managedProperty(), clearSearchButton.visibleProperty());
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         getBindingManager().attachListener(searchTextField.textProperty(),
