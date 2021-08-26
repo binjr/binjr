@@ -143,6 +143,7 @@ public class OutputConsoleController implements Initializable {
                     .map(Log4j2Level::getLevel)
                     .sorted(Level::compareTo)
                     .collect(Collectors.toList());
+            l.add(Logger.PERF);
             l.sort(Level::compareTo);
             logLevelChoice.getItems().setAll(l);
             logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
