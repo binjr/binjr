@@ -180,6 +180,10 @@
     -fx-font-size: 10pt;
 }
 
+.output-console {
+    -fx-font-size: 9pt;
+}
+
 .styled-text-area .syntax-help-title {
     -fx-font-size: 14pt;
     /*-fx-font-weight: bold;*/

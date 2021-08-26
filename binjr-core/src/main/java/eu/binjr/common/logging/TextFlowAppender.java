@@ -58,13 +58,13 @@ public final class TextFlowAppender extends AbstractAppender {
                                Layout<? extends Serializable> layout,
                                final boolean ignoreExceptions) {
         super(name, filter, layout, ignoreExceptions, Property.EMPTY_ARRAY);
-        logColors.put(Level.TRACE, "log-trace");
-        logColors.put(Level.DEBUG, "log-debug");
-        logColors.put(Logger.PERF, "log-perf");
-        logColors.put(Level.INFO, "log-info");
-        logColors.put(Level.WARN, "log-warn");
-        logColors.put(Level.ERROR, "log-error");
-        logColors.put(Level.FATAL, "log-fatal");
+        logColors.put(Level.TRACE, "trace");
+        logColors.put(Level.DEBUG, "debug");
+        logColors.put(Logger.PERF, "perf");
+        logColors.put(Level.INFO, "info");
+        logColors.put(Level.WARN, "warn");
+        logColors.put(Level.ERROR, "error");
+        logColors.put(Level.FATAL, "fatal");
         Timer timer = new Timer(true);
         timer.schedule(new TimerTask() {
             @Override

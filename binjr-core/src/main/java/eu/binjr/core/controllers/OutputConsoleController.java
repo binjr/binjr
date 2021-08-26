@@ -18,7 +18,6 @@ package eu.binjr.core.controllers;
 
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
-import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.logging.Logger;
@@ -43,18 +42,18 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.FontSmoothingType;
-import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
 import org.controlsfx.control.PropertySheet;
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
+import org.fxmisc.richtext.model.SegmentOps;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.ResourceBundle;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
@@ -72,7 +71,7 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private MenuButton debugMenuButton;
     @FXML
-    private ListView<Text> textOutput;
+    private CodeArea textOutput;
     @FXML
     private ChoiceBox<Level> logLevelChoice;
     @FXML
@@ -81,35 +80,37 @@ public class OutputConsoleController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         populateDebugCommandMenu();
+        textOutput.setEditable(false);
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter());
         consoleMaxLinesText.setTextFormatter(formatter);
         formatter.valueProperty().bindBidirectional(UserPreferences.getInstance().consoleMaxLineCapacity.property());
         if (DEBUG_CONSOLE_APPENDER == null) {
-            Text log = new Text("<ERROR: The debug console appender is unavailable!>\n");
-            log.getStyleClass().add("log-error");
-            textOutput.getItems().add(log);
-
+            String log = "<ERROR: The debug console appender is unavailable!>\n";
+            textOutput.append(log, ".styled-text-area .error");
         } else {
             DEBUG_CONSOLE_APPENDER.setRenderTextDelegate(msgSet -> {
-                textOutput.getItems().clear();
+                textOutput.clear();
+                var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
+                        SegmentOps.styledTextOps(),
+                        Collections.emptyList());
                 msgSet.forEach(l -> {
-                    Text text = new Text(l.getMessage());
-                    text.setFontSmoothingType(FontSmoothingType.LCD);
-                    text.getStyleClass().add(l.getStyleClass());
-                    textOutput.getItems().add(text);
+                    docBuilder.addParagraph(
+                            l.getMessage(),
+                            List.of(l.getStyleClass()),
+                            Collections.emptyList());
                 });
+                docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
+                textOutput.replace(docBuilder.build());
             });
         }
         Platform.runLater(() -> {
             var l = Arrays.stream(Log4j2Level.values())
                     .map(Log4j2Level::getLevel)
-                    .sorted( Level::compareTo)
+                    .sorted(Level::compareTo)
                     .collect(Collectors.toList());
             l.add(Logger.PERF);
             l.sort(Level::compareTo);
             logLevelChoice.getItems().setAll(l);
-
-         //   logLevelChoice.getItems().add(Logger.PROFILE);
             logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
             UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldValue, newValue) -> {
                 logLevelChoice.getSelectionModel().select(newValue);
@@ -171,7 +172,7 @@ public class OutputConsoleController implements Initializable {
             File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
             if (selectedFile != null) {
                 try (Writer writer = new BufferedWriter(new FileWriter(selectedFile))) {
-                    textOutput.getItems().stream().map(text -> text.getText() + "\n").forEach(CheckedLambdas.<String, IOException>wrap(writer::write));
+                    writer.write(textOutput.getText());
                 } catch (IOException e) {
                     Dialogs.notifyException("Error writing log message to file", e, textOutput);
                 }
@@ -186,7 +187,7 @@ public class OutputConsoleController implements Initializable {
     private void handleCopyConsoleOutput(ActionEvent actionEvent) {
         try {
             final ClipboardContent content = new ClipboardContent();
-            content.putString(textOutput.getItems().stream().map(Text::getText).collect(Collectors.joining("\n")));
+            content.putString(textOutput.getText());
             Clipboard.getSystemClipboard().setContent(content);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to copy console output to clipboard", e, textOutput);
@@ -306,8 +307,6 @@ public class OutputConsoleController implements Initializable {
         }
     }
 
-
-
     public void handleDebugDumpHeap(ActionEvent actionEvent) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Dump Heap");
@@ -325,24 +324,24 @@ public class OutputConsoleController implements Initializable {
         }
     }
 
-    private void populateDebugCommandMenu(){
-        addMenuItem(debugMenuButton, "Dump Heap Stats", "debug-low-icon",this::handleDebugDumpHeapStats, false);
-        addMenuItem(debugMenuButton, "Dump VM Flags", "debug-low-icon",this::handleDebugDumpVmFlags, true);
-        addMenuItem(debugMenuButton, "Dump VM Command Line", "debug-low-icon",this::handleDebugDumpVmCommandLine, true);
-        addMenuItem(debugMenuButton, "Dump VM System Properties", "debug-low-icon",this::handleDebugDumpVmSystemProperties, true);
+    private void populateDebugCommandMenu() {
+        addMenuItem(debugMenuButton, "Dump Heap Stats", "debug-low-icon", this::handleDebugDumpHeapStats, false);
+        addMenuItem(debugMenuButton, "Dump VM Flags", "debug-low-icon", this::handleDebugDumpVmFlags, true);
+        addMenuItem(debugMenuButton, "Dump VM Command Line", "debug-low-icon", this::handleDebugDumpVmCommandLine, true);
+        addMenuItem(debugMenuButton, "Dump VM System Properties", "debug-low-icon", this::handleDebugDumpVmSystemProperties, true);
 
-        addMenuItem(debugMenuButton, "Run GC", "debug-med-icon",this::handleDebugForceGC, false);
-        addMenuItem(debugMenuButton, "Run Finalization", "debug-med-icon",this::handleDebugRunFinalization, false);
-        addMenuItem(debugMenuButton, "List Hotspot VM Options", "debug-med-icon",this::handleListHotspotVmOptions, true);
-        addMenuItem(debugMenuButton, "Export User History", "debug-med-icon",this::handleExportUserHistory, false);
-        addMenuItem(debugMenuButton, "Import User History", "debug-med-icon",this::handleImportUserHistory, false);
+        addMenuItem(debugMenuButton, "Run GC", "debug-med-icon", this::handleDebugForceGC, false);
+        addMenuItem(debugMenuButton, "Run Finalization", "debug-med-icon", this::handleDebugRunFinalization, false);
+        addMenuItem(debugMenuButton, "List Hotspot VM Options", "debug-med-icon", this::handleListHotspotVmOptions, true);
+        addMenuItem(debugMenuButton, "Export User History", "debug-med-icon", this::handleExportUserHistory, false);
+        addMenuItem(debugMenuButton, "Import User History", "debug-med-icon", this::handleImportUserHistory, false);
 
-        addMenuItem(debugMenuButton, "Dump Threads Stacks", "debug-high-icon",this::handleDebugDumpThreadsStacks, true);
-        addMenuItem(debugMenuButton, "Dump GC Class Histogram", "debug-high-icon",this::handleDebugDumpClassHistogram, true);
-        addMenuItem(debugMenuButton, "Dump Heap", "debug-high-icon",this::handleDebugDumpHeap, true);
+        addMenuItem(debugMenuButton, "Dump Threads Stacks", "debug-high-icon", this::handleDebugDumpThreadsStacks, true);
+        addMenuItem(debugMenuButton, "Dump GC Class Histogram", "debug-high-icon", this::handleDebugDumpClassHistogram, true);
+        addMenuItem(debugMenuButton, "Dump Heap", "debug-high-icon", this::handleDebugDumpHeap, true);
     }
 
-    private void addMenuItem(MenuButton menu, String text, String iconclass, EventHandler<ActionEvent> actionHandler, boolean hotspotOnly){
+    private void addMenuItem(MenuButton menu, String text, String iconclass, EventHandler<ActionEvent> actionHandler, boolean hotspotOnly) {
         if (!hotspotOnly || AppEnvironment.getInstance().getRunningJvm() == JvmImplementation.HOTSPOT) {
             var m = new MenuItem();
             var r = new Region();
