@@ -19,9 +19,11 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
+import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
+import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.Binjr;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -30,7 +32,9 @@ import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.JvmImplementation;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.MapChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -43,18 +47,21 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
 import org.apache.logging.log4j.Level;
 import org.controlsfx.control.PropertySheet;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
+import org.fxmisc.richtext.model.StyleSpans;
 
 import java.io.*;
 import java.net.URL;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
 
@@ -65,9 +72,26 @@ import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
  */
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = Logger.create(OutputConsoleController.class);
-    public TextField consoleMaxLinesText;
-    public VBox root;
-    public PropertySheet preferenceEditor;
+    @FXML
+    private Button prevOccurrenceButton;
+    @FXML
+    private Button nextOccurrenceButton;
+    @FXML
+    private ToggleButton searchRegExToggle;
+    @FXML
+    private ToggleButton searchMatchCaseToggle;
+    @FXML
+    private Button clearSearchButton;
+    @FXML
+    private TextField searchTextField;
+    @FXML
+    private TextField consoleMaxLinesText;
+    @FXML
+    private VBox root;
+    @FXML
+    private PropertySheet preferenceEditor;
+    @FXML
+    private Label searchResultsLabel;
     @FXML
     private MenuButton debugMenuButton;
     @FXML
@@ -76,6 +100,9 @@ public class OutputConsoleController implements Initializable {
     private ChoiceBox<Level> logLevelChoice;
     @FXML
     private ToggleButton alwaysOnTopToggle;
+
+    private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
+    private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -100,7 +127,15 @@ public class OutputConsoleController implements Initializable {
                             Collections.emptyList());
                 });
                 docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
-                textOutput.replace(docBuilder.build());
+                var doc = docBuilder.build();
+                syntaxHighlightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
+                textOutput.replace(doc);
+                // Refresh search highlight if necessary
+                if (!searchTextField.getText().isEmpty()) {
+                    doSearchHighlight(searchTextField.getText(),
+                            searchMatchCaseToggle.isSelected(),
+                            searchRegExToggle.isSelected());
+                }
             });
         }
         Platform.runLater(() -> {
@@ -108,7 +143,6 @@ public class OutputConsoleController implements Initializable {
                     .map(Log4j2Level::getLevel)
                     .sorted(Level::compareTo)
                     .collect(Collectors.toList());
-            l.add(Logger.PERF);
             l.sort(Level::compareTo);
             logLevelChoice.getItems().setAll(l);
             logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
@@ -143,6 +177,67 @@ public class OutputConsoleController implements Initializable {
                 }
             });
         });
+        prevOccurrenceButton.setOnAction(event -> {
+            if (searchHitIterator.hasPrevious()) {
+                focusOnSearchHit(searchHitIterator.previous());
+            }
+        });
+        nextOccurrenceButton.setOnAction(event -> {
+            if (searchHitIterator.hasNext()) {
+                focusOnSearchHit(searchHitIterator.next());
+            }
+        });
+        clearSearchButton.setOnAction(event -> searchTextField.clear());
+        clearSearchButton.visibleProperty().bind(Bindings.createBooleanBinding(() -> !searchTextField.getText().isEmpty(), searchTextField.textProperty()));
+        clearSearchButton.managedProperty().bind(clearSearchButton.visibleProperty());
+        // Delay the search until at least the following amount of time elapsed since the last character was entered
+        var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
+        searchTextField.textProperty().addListener((obs, oldText, newText) -> {
+            delay.setOnFinished(event -> doSearchHighlight(newText,
+                    searchMatchCaseToggle.isSelected(),
+                    searchRegExToggle.isSelected()));
+            delay.playFromStart();
+        });
+
+        // Refresh search highlight if necessary
+        searchMatchCaseToggle.selectedProperty().addListener((obs, oldVal, newVal) ->
+                doSearchHighlight(searchTextField.getText(), newVal, searchRegExToggle.isSelected()));
+        searchRegExToggle.selectedProperty().addListener((obs, oldVal, newVal) ->
+                doSearchHighlight(searchTextField.getText(), searchMatchCaseToggle.isSelected(), newVal));
+    }
+
+    private void focusOnSearchHit(CodeAreaHighlighter.SearchHitRange hit) {
+        if (hit == null) {
+            textOutput.selectRange(0, 0);
+            searchResultsLabel.setText("No results");
+        } else {
+            textOutput.selectRange(hit.getStart(), hit.getEnd());
+            textOutput.requestFollowCaret();
+            searchResultsLabel.setText(String.format("%d/%d",
+                    searchHitIterator.peekCurrentIndex() + 1,
+                    searchHitIterator.peekLastIndex() + 1));
+        }
+    }
+
+    private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
+        var searchResults =
+                CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+        prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+        searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
+        searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
+        if (syntaxHighlightStyleSpans != null) {
+            textOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
+                    (strings, strings2) -> Stream.concat(strings.stream(),
+                            strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
+        } else {
+            textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+        }
+        if (searchHitIterator.hasNext()) {
+            focusOnSearchHit(searchHitIterator.next());
+        } else {
+            focusOnSearchHit(null);
+        }
     }
 
     /**
@@ -303,7 +398,7 @@ public class OutputConsoleController implements Initializable {
         try {
             Binjr.runtimeDebuggingFeatures.debug(DiagnosticCommand.dumpVmOptions());
         } catch (Exception e) {
-            Dialogs.notifyException("Error attempting to list Hotspot VM options: "+ e.getMessage(), e);
+            Dialogs.notifyException("Error attempting to list Hotspot VM options: " + e.getMessage(), e);
         }
     }
 

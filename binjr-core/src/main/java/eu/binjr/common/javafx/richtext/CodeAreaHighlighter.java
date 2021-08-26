@@ -116,7 +116,6 @@ public class CodeAreaHighlighter {
         if (!matchCase) {
             searchExpression.insert(0, "(?i)");
         }
-        logger.debug(() -> "Search expression= " + searchExpression.toString());
         List<SearchHitRange> hits = new ArrayList<>();
         int lastKwEnd = 0;
         StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
