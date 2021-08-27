@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2020 Frederic Thevenet
+ *    Copyright 2019-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -158,7 +158,7 @@ public abstract class ReloadableItemStore<T extends ReloadableItemStore.Reloadab
     }
 
     /**
-     * Defines a items whose value can be stored into  a {@link ReloadableItemStore} instance.
+     * Defines an item whose value can be stored into  a {@link ReloadableItemStore} instance.
      */
     public interface Reloadable {
         /**

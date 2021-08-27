@@ -1,6 +1,6 @@
 
 /*
- *    Copyright 2019-2020 Frederic Thevenet
+ *    Copyright 2019-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -114,13 +114,13 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
             @Override
             protected ZonedDateTime loadFromBackend() {
                 return ZonedDateTime.parse(getBackingStore().get(getKey(),
-                        getDefaultValue().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
-                        DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+                        getDefaultValue().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)),
+                        DateTimeFormatter.ISO_ZONED_DATE_TIME);
             }
 
             @Override
             protected void saveToBackend(ZonedDateTime value) {
-                getBackingStore().put(getKey(), value.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
+                getBackingStore().put(getKey(), value.format(DateTimeFormatter.ISO_ZONED_DATE_TIME));
             }
         };
         storedItems.put(p.getKey(), p);
