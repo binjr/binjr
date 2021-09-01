@@ -42,7 +42,7 @@ language to hack through vast quantities logged events.
 
 It also allows _binjr_ to open log files of any size; unlike most text editors which will fail to load multi
 gigabytes-sized files as they try to fit it all in memory, _binjr_ will happily index those and present a paginated view so
- that memory usage remains reasonable, while the backing index ensures navigating and searching is lighting fast.
+ that memory usage remains reasonable, while the backing index ensures navigating and searching is lightning fast.
 
 
 With these abilities, _binjr_ aims to become the missing link between text editors and command line tools
