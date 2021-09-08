@@ -31,7 +31,9 @@ dependencies {
     api 'org.fxmisc.richtext:richtextfx:0.10.6'
     implementation 'org.apache.lucene:lucene-core:8.9.0'
     implementation 'org.apache.lucene:lucene-facet:8.9.0'
-    implementation 'org.apache.lucene:lucene-queryparser:8.9.0'
+    implementation(group: 'org.apache.lucene', name: 'lucene-queryparser', version: '8.9.0') {
+        exclude group: 'org.apache.lucene', module: 'lucene-sandbox'
+    }
     // Only to prepare POM for Maven central upload
     api "org.openjfx:javafx-base:$OPENJFX_VERSION"
     api "org.openjfx:javafx-graphics:$OPENJFX_VERSION"
