@@ -21,26 +21,25 @@ dependencies {
     api 'org.apache.httpcomponents.client5:httpclient5:5.1'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
     api 'org.controlsfx:controlsfx:11.1.0'
-    api 'org.gillius:jfxutils:1.0'
+    implementation 'org.gillius:jfxutils:1.0'
     api 'com.google.code.gson:gson:2.8.8'
     api 'org.apache.commons:commons-csv:1.9.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
-    api 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
-    api "org.bouncycastle:bcpg-jdk15on:1.69"
-    api 'org.reflections:reflections:0.9.12'
+    implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
+    implementation "org.bouncycastle:bcpg-jdk15on:1.69"
+    implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.6'
     implementation 'org.apache.lucene:lucene-core:8.9.0'
     implementation 'org.apache.lucene:lucene-facet:8.9.0'
-    implementation(group: 'org.apache.lucene', name: 'lucene-queryparser', version: '8.9.0') {
-        exclude group: 'org.apache.lucene', module: 'lucene-sandbox'
-    }
+    implementation 'org.apache.lucene:lucene-queryparser:8.9.0'
     // Only to prepare POM for Maven central upload
-    api "org.openjfx:javafx-base:$OPENJFX_VERSION"
-    api "org.openjfx:javafx-graphics:$OPENJFX_VERSION"
-    api "org.openjfx:javafx-controls:$OPENJFX_VERSION"
-    api "org.openjfx:javafx-fxml:$OPENJFX_VERSION"
-    api "org.openjfx:javafx-swing:$OPENJFX_VERSION"
+    compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
+    compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"
+    compileOnlyApi "org.openjfx:javafx-controls:${OPENJFX_VERSION}"
+    compileOnlyApi "org.openjfx:javafx-fxml:${OPENJFX_VERSION}"
+    compileOnlyApi "org.openjfx:javafx-swing:${OPENJFX_VERSION}"
 }
+
 
 compileJava {
     doFirst {
@@ -63,6 +62,10 @@ jar {
                 'Build-Number': BINJR_BUILD_NUMBER
         )
     }
+}
+
+repositories {
+    mavenCentral()
 }
 
 

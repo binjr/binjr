@@ -54,11 +54,13 @@ ext.IS_LINUX = OS_NAME.contains("linux")
 ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "17"
+ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
 ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
-ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://gluonhq.com/download/javafx-${OPENJFX_VERSION.replaceAll("ea\\+[0-9]+", "ea").replace(".", "-")}-jmods-${OS_FAMILY}"
+ext.OPENJFX_PLATEFORM_DOWNLOAD = IS_MAC ? 'osx' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
+ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${OPENJFX_PLATEFORM_DOWNLOAD}-x64_bin-jmods.zip"
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
 ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPresent()
-ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION.replaceAll "\\-ea\\+[0-9]+", ""}"
+ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
 
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
