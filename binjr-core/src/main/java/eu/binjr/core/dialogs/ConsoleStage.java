@@ -79,6 +79,9 @@ public class ConsoleStage {
      */
     public static void show() {
         ConsoleStageHolder.instance.stage.show();
+        // Ensure visibility
+        ConsoleStageHolder.instance.stage.setIconified(false);
+        ConsoleStageHolder.instance.stage.toFront();
     }
 
     /**

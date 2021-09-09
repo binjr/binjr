@@ -47,7 +47,7 @@ import java.util.function.Consumer;
         category = "Core",
         elementType = "appender",
         printObject = true)
-public final class TextFlowAppender extends AbstractAppender {
+public  class TextFlowAppender extends AbstractAppender {
     private final Lock renderTextLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
@@ -151,14 +151,7 @@ public final class TextFlowAppender extends AbstractAppender {
         });
     }
 
-    public static class Log {
-        private final String message;
-        private final String styleClass;
-
-        private Log(String message, String styleClass) {
-            this.message = message;
-            this.styleClass = styleClass;
-        }
+    public record Log(String message, String styleClass) {
 
         public String getMessage() {
             return message;
@@ -169,7 +162,7 @@ public final class TextFlowAppender extends AbstractAppender {
         }
     }
 
-    private class LogBuffer<K, V> extends LinkedHashMap<K, V> {
+    private static class LogBuffer<K, V> extends LinkedHashMap<K, V> {
         private volatile boolean dirty;
 
         public void clean() {
