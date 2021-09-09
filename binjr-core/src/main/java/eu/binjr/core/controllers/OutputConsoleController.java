@@ -43,9 +43,11 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Duration;
 import javafx.util.converter.NumberStringConverter;
@@ -73,6 +75,10 @@ import static eu.binjr.core.Binjr.DEBUG_CONSOLE_APPENDER;
 public class OutputConsoleController implements Initializable {
     private static final Logger logger = Logger.create(OutputConsoleController.class);
     @FXML
+    private ToggleButton findInPageToggle;
+    @FXML
+    private HBox highlightControls;
+    @FXML
     private Button prevOccurrenceButton;
     @FXML
     private Button nextOccurrenceButton;
@@ -87,7 +93,7 @@ public class OutputConsoleController implements Initializable {
     @FXML
     private TextField consoleMaxLinesText;
     @FXML
-    private VBox root;
+    private Pane root;
     @FXML
     private PropertySheet preferenceEditor;
     @FXML
@@ -198,6 +204,21 @@ public class OutputConsoleController implements Initializable {
                     searchMatchCaseToggle.isSelected(),
                     searchRegExToggle.isSelected()));
             delay.playFromStart();
+        });
+
+        root.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                findInPageToggle.setSelected(true);
+            }
+        });
+        highlightControls.managedProperty().bind(findInPageToggle.selectedProperty());
+        highlightControls.visibleProperty().bind(findInPageToggle.selectedProperty());
+        highlightControls.visibleProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue) {
+                searchTextField.requestFocus();
+            } else{
+                searchTextField.clear();
+            }
         });
 
         // Refresh search highlight if necessary

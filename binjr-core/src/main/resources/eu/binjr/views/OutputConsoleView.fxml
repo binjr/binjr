@@ -22,7 +22,7 @@
 <?import org.controlsfx.control.PropertySheet?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<AnchorPane prefHeight="481.0" prefWidth="734.0" xmlns="http://javafx.com/javafx/11.0.2"
+<AnchorPane fx:id="root" prefHeight="481.0" prefWidth="734.0" xmlns="http://javafx.com/javafx/11.0.2"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.OutputConsoleController">
     <children>
         <TabPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
@@ -68,6 +68,20 @@
                                         <HBox alignment="CENTER_LEFT" spacing="5.0" AnchorPane.bottomAnchor="0.0"
                                               AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <children>
+                                                <ToggleButton fx:id="findInPageToggle" contentDisplay="GRAPHIC_ONLY"
+                                                              mnemonicParsing="false"
+                                                              prefHeight="30.0"
+                                                              prefWidth="30.0"
+                                                              styleClass="dialog-button" text="Find">
+                                                    <graphic>
+                                                        <HBox alignment="CENTER" styleClass="icon-container">
+                                                            <Region styleClass="find-icon"/>
+                                                        </HBox>
+                                                    </graphic>
+                                                    <tooltip>
+                                                        <Tooltip showDelay="500ms" text="Find in page"/>
+                                                    </tooltip>
+                                                </ToggleButton>
                                                 <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false"
                                                         onAction="#handleClearConsole" prefHeight="30.0"
                                                         prefWidth="30.0" styleClass="dialog-button" text="Clear">
@@ -120,7 +134,8 @@
                                         <CodeArea fx:id="textOutput" styleClass="output-console"/>
                                     </content>
                                 </VirtualizedScrollPane>
-                                <HBox fx:id="highlightControls" alignment="CENTER_LEFT" styleClass="worksheet-tool-bar">
+                                <HBox fx:id="highlightControls" alignment="CENTER_LEFT" styleClass="worksheet-tool-bar"
+                                      visible="false" managed="false">
                                     <HBox fx:id="highlightBar" alignment="CENTER_LEFT" maxHeight="-Infinity"
                                           maxWidth="600" prefHeight="27.0" prefWidth="350.0" spacing="2.0"
                                           styleClass="search-field-outer">
