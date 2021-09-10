@@ -67,6 +67,9 @@ public class ConsoleStage {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
+            if (e.getCode() == KeyCode.F && e.isControlDown()) {
+                controller.getFindInPageToggle().setSelected(true);
+            }
         });
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {
             stage.setAlwaysOnTop(newValue);

@@ -43,8 +43,6 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
@@ -206,11 +204,6 @@ public class OutputConsoleController implements Initializable {
             delay.playFromStart();
         });
 
-        root.addEventFilter(KeyEvent.KEY_RELEASED, e -> {
-            if (e.getCode() == KeyCode.F && e.isControlDown()) {
-                findInPageToggle.setSelected(true);
-            }
-        });
         highlightControls.managedProperty().bind(findInPageToggle.selectedProperty());
         highlightControls.visibleProperty().bind(findInPageToggle.selectedProperty());
         highlightControls.visibleProperty().addListener((observable, oldValue, newValue) -> {
@@ -269,6 +262,10 @@ public class OutputConsoleController implements Initializable {
      */
     public ToggleButton getAlwaysOnTopToggle() {
         return alwaysOnTopToggle;
+    }
+
+    public ToggleButton getFindInPageToggle() {
+        return findInPageToggle;
     }
 
     @FXML
