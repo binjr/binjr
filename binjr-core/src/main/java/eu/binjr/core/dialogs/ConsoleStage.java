@@ -27,7 +27,6 @@ import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 import java.io.IOException;
 
@@ -68,7 +67,8 @@ public class ConsoleStage {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
-                controller.getFindInPageToggle().setSelected(true);
+                controller.setSearchToolbarVisibility(true);
+
             }
         });
         controller.getAlwaysOnTopToggle().selectedProperty().addListener((observable, oldValue, newValue) -> {

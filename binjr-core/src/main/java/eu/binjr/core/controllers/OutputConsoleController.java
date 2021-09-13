@@ -264,8 +264,11 @@ public class OutputConsoleController implements Initializable {
         return alwaysOnTopToggle;
     }
 
-    public ToggleButton getFindInPageToggle() {
-        return findInPageToggle;
+    public void setSearchToolbarVisibility(boolean visible){
+        if (visible){
+            searchTextField.requestFocus();
+        }
+        findInPageToggle.setSelected(visible);
     }
 
     @FXML
