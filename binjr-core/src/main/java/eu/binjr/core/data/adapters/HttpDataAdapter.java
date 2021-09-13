@@ -22,6 +22,7 @@ import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
+import org.apache.hc.client5.http.ClientProtocolException;
 import org.apache.hc.client5.http.HttpResponseException;
 import org.apache.hc.client5.http.SystemDefaultDnsResolver;
 import org.apache.hc.client5.http.auth.*;
@@ -37,6 +38,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.apache.hc.core5.http.config.RegistryBuilder;
 import org.apache.hc.core5.http.io.HttpClientResponseHandler;
 import org.apache.hc.core5.http.io.SocketConfig;
@@ -71,6 +73,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     protected static final String BASE_ADDRESS_PARAM_NAME = "baseUri";
     private final static Pattern uriSchemePattern = Pattern.compile("^[a-zA-Z]*://");
     private static final Logger logger = Logger.create(HttpDataAdapter.class);
+    public static final String APPLICATION_JSON = "application/json";
     private final CloseableHttpClient httpClient;
     private URL baseAddress;
 
@@ -172,34 +175,46 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
         super.close();
     }
 
+    protected String doHttpGetJson(URI requestUri) throws DataAdapterException {
+        return doHttpGet(requestUri, response -> {
+            var entity = response.getEntity();
+            if (response.getCode() >= 300) {
+                EntityUtils.consume(entity);
+                throw new HttpResponseException(response.getCode(), response.getReasonPhrase());
+            }
+            if (entity == null) {
+                throw new NoHttpResponseException("Invalid response to \"" + requestUri + "\": null");
+            }
+            String contentType = entity.getContentType();
+            if (contentType == null || contentType.isBlank()) {
+                throw new ClientProtocolException("No content type specified");
+            }
+            if (!APPLICATION_JSON.equalsIgnoreCase(contentType.split(";")[0].trim())) {
+                throw new ClientProtocolException("Invalid content type: received: '" +
+                        entity.getContentType() +
+                        "', expected: '" + APPLICATION_JSON + "')");
+            }
+            return EntityUtils.toString(entity);
+        });
+    }
+
     protected <R> R doHttpGet(URI requestUri, HttpClientResponseHandler<R> responseHandler) throws DataAdapterException {
         try (Profiler p = Profiler.start("Executing HTTP request: [" + requestUri.toString() + "]", logger::perf)) {
             logger.debug(() -> "requestUri = " + requestUri);
             R result = httpClient.execute(new HttpGet(requestUri), responseHandler);
             if (result == null) {
-                throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri.toString() + "\"");
+                throw new FetchingDataFromAdapterException("Invalid response to \"" + requestUri + "\"");
             }
             return result;
         } catch (HttpResponseException e) {
-            String msg;
-            switch (e.getStatusCode()) {
-                case 401:
-                    msg = "Authentication failed while trying to access \"" + requestUri.toString() + "\"";
-                    break;
-                case 403:
-                    msg = "Access to the resource at \"" + requestUri.toString() + "\" is denied.";
-                    break;
-                case 404:
-                    msg = "The resource at \"" + requestUri.toString() + "\" could not be found.";
-                    break;
-                case 500:
-                    msg = "A server-side error has occurred while trying to access the resource at \""
-                            + requestUri.toString() + "\": " + e.getMessage();
-                    break;
-                default:
-                    msg = "Error executing HTTP request \"" + requestUri.toString() + "\": " + e.getMessage();
-                    break;
-            }
+            String msg = switch (e.getStatusCode()) {
+                case 401 -> "Authentication failed while trying to access \"" + requestUri + "\"";
+                case 403 -> "Access to the resource at \"" + requestUri + "\" is denied.";
+                case 404 -> "The resource at \"" + requestUri + "\" could not be found.";
+                case 500 -> "A server-side error has occurred while trying to access the resource at \""
+                        + requestUri + "\": " + e.getMessage();
+                default -> "Error executing HTTP request \"" + requestUri + "\": " + e.getMessage();
+            };
             throw new SourceCommunicationException(msg, e);
         } catch (ConnectException e) {
             throw new SourceCommunicationException(e.getMessage(), e);
@@ -332,8 +347,13 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
     public boolean ping() {
         try {
             return doHttpGet(craftRequestUri(""), response -> {
-                EntityUtils.consume(response.getEntity());
-                return true;
+                HttpEntity entity = null;
+                try {
+                    entity = response.getEntity();
+                    return response.getCode() < 300 && entity != null;
+                } finally {
+                    EntityUtils.consumeQuietly(entity);
+                }
             });
         } catch (Exception e) {
             logger.debug(() -> "Ping failed", e);

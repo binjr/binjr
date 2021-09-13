@@ -280,20 +280,7 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
         if (argName != null && argValue != null && argValue.trim().length() > 0) {
             params.add(new BasicNameValuePair(argName, argValue));
         }
-        String entityString = doHttpGet(craftRequestUri("jsontree", params), response -> {
-            var entity = response.getEntity();
-            try {
-                if ("application/json".equalsIgnoreCase(entity.getContentType())) {
-                    return EntityUtils.toString(entity);
-                }
-                logger.error("HTTP response content type is '" +
-                       entity.getContentType() +
-                        " (expected 'application/json')");
-                return null;
-            } finally {
-                EntityUtils.consumeQuietly(entity);
-            }
-        });
+        String entityString = doHttpGetJson(craftRequestUri("jsontree", params));
         logger.trace(entityString);
         return entityString;
     }
@@ -301,7 +288,6 @@ public class JrdsDataAdapter extends HttpDataAdapter<Double> {
 
     private Graphdesc getGraphDescriptor(String id) throws DataAdapterException {
         URI requestUri = craftRequestUri("graphdesc", new BasicNameValuePair("id", id));
-
         return doHttpGet(requestUri, response -> {
             if (response.getCode() == 404) {
                 // This is probably an older version of JRDS that doesn't provide the graphdesc service,

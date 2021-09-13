@@ -30,9 +30,7 @@ import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.preferences.UserPreferences;
 import eu.binjr.sources.netdata.api.Chart;
 import eu.binjr.sources.netdata.api.ChartSummary;
-
 import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.net.URI;
@@ -120,10 +118,7 @@ public class NetdataAdapter extends HttpDataAdapter<Double> {
 
     @Override
     public FilterableTreeItem<SourceBinding> getBindingTree() throws DataAdapterException {
-        var chartSummary = doHttpGet(
-                craftRequestUri(ChartSummary.ENDPOINT),
-                response -> jsonParser.fromJson(EntityUtils.toString(response.getEntity()), ChartSummary.class)
-        );
+        var chartSummary = jsonParser.fromJson(doHttpGetJson(craftRequestUri(ChartSummary.ENDPOINT)), ChartSummary.class);
         FilterableTreeItem<SourceBinding> tree = new FilterableTreeItem<>(
                 new TimeSeriesBinding.Builder()
                         .withAdapter(this)
@@ -179,9 +174,7 @@ public class NetdataAdapter extends HttpDataAdapter<Double> {
 
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
-        Chart chart = doHttpGet(craftRequestUri(path.replace("/data?", "/chart?")), response ->
-                jsonParser.fromJson(EntityUtils.toString(response.getEntity()), Chart.class)
-        );
+        Chart chart = jsonParser.fromJson(doHttpGetJson(craftRequestUri(path.replace("/data?", "/chart?"))), Chart.class);
         return TimeRange.of(ZonedDateTime.ofInstant(Instant.ofEpochSecond(chart.getFirstEntry().longValue()), zoneId),
                 ZonedDateTime.ofInstant(Instant.ofEpochSecond(chart.getLastEntry().longValue()), zoneId));
     }
