@@ -381,7 +381,7 @@ markdownToHtml {
 task downloadOpenJfxModules(type: Download) {
     onlyIfModified true
     src OPENJFX_JMODS_DOWNLOAD_URL
-    dest new File(DL_CACHE_PATH, 'openjfx-jmods.zip')
+    dest new File(DL_CACHE_PATH, "openjfx-jmods_${OPENJFX_VERSION}.zip")
 }
 
 task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
