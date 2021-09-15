@@ -12,13 +12,13 @@ Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/L
 Copyright 2001-2020 The Apache Software Foundation
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
 
-^bBouncy Castle Cryptography APIs
-Copyright (c) 2000 - 2020 The Legion of the Bouncy Castle Inc.
-Licensed under the MIT License (https://opensource.org/licenses/MIT)
-
 ^bApache Log4j
 Copyright 1999-2017 Apache Software Foundation
 Licensed under the Apache License, Version 2.0 (http://www.apache.org/licenses/LICENSE-2.0)
+
+^bBouncy Castle Cryptography APIs
+Copyright (c) 2000 - 2020 The Legion of the Bouncy Castle Inc.
+Licensed under the MIT License (https://opensource.org/licenses/MIT)
 
 ^bControlsFX
 Copyright (c) 2013, 2014, ControlsFX. All rights reserved.
