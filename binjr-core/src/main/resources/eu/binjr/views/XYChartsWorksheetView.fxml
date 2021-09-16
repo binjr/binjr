@@ -137,7 +137,7 @@
                                     <Tooltip showDelay="500ms" text="Add a new chart to the current worksheet."/>
                                 </tooltip>
                             </Button>
-                            <MenuButton fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
+                            <Button fx:id="selectChartLayout" alignment="CENTER" contentDisplay="GRAPHIC_ONLY"
                                         maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                         minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0"
                                         prefWidth="40.0"
@@ -151,7 +151,7 @@
                                         <Region styleClass="layout-icon"/>
                                     </HBox>
                                 </graphic>
-                            </MenuButton>
+                            </Button>
                             <Button fx:id="snapshotButton" styleClass="dialog-button" contentDisplay="GRAPHIC_ONLY"
                                     maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
                                     minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0"

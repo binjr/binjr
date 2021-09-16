@@ -141,7 +141,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     @FXML
     private ContextMenu seriesListMenu;
     @FXML
-    private MenuButton selectChartLayout;
+    private Button selectChartLayout;
     @FXML
     private TimeRangePicker timeRangePicker;
     @FXML
@@ -441,11 +441,16 @@ public class XYChartsWorksheetController extends WorksheetController {
 
         getBindingManager().bind(selectChartLayout.disableProperty(),
                 Bindings.createBooleanBinding(() -> worksheet.getCharts().size() > 1, worksheet.getCharts()).not());
-        selectChartLayout.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
+        var contextMenu = new ContextMenu();
+        contextMenu.getItems().setAll(Arrays.stream(ChartLayout.values()).map(chartLayout -> {
             MenuItem item = new MenuItem(chartLayout.toString());
             item.setOnAction(getBindingManager().registerHandler(event -> worksheet.setChartLayout(chartLayout)));
             return item;
         }).collect(Collectors.toList()));
+
+        selectChartLayout.setOnAction(getBindingManager().registerHandler(event -> {
+            contextMenu.show((Node) event.getSource(), Side.BOTTOM, 0, 0);
+        }));
 
         this.worksheetTitleBlock = buildTitleBlock();
         screenshotCanvas = new VBox();
