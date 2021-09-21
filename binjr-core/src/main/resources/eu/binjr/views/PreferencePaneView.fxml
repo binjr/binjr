@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2019 Frederic Thevenet
+  ~    Copyright 2017-2021 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -122,6 +122,13 @@
                             </VBox>
                             <Label fx:id="maxSampleLabel" text="Maximum number of samples" wrapText="true"/>
                             <TextField fx:id="downSamplingThreshold" prefHeight="25.0" prefWidth="-1.0" text="1000"/>
+                            <Label text="Default min. chart height" wrapText="true"/>
+                            <VBox>
+                                <HBox alignment="CENTER_LEFT">
+                                    <Slider fx:id="minChartHeightSlider" blockIncrement="1" max="500" min="80"/>
+                                    <Label fx:id="minChartHeightText" text="150"/>
+                                </HBox>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

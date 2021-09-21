@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <!--
-  ~    Copyright 2017-2019 Frederic Thevenet
+  ~    Copyright 2017-2021 Frederic Thevenet
   ~
   ~    Licensed under the Apache License, Version 2.0 (the "License");
   ~    you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@
             <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
         </padding>
 
-        <VBox spacing="10.0" >
+        <VBox spacing="10.0">
             <VBox>
                 <children>
                     <ChoiceBox fx:id="chartTypeChoice" prefHeight="25.0" prefWidth="256.0"/>
@@ -71,7 +71,6 @@
                 </HBox>
             </VBox>
             <Separator prefWidth="200.0"/>
-            <!--<CheckBox fx:id="autoScaleYAxis" mnemonicParsing="false" text="Auto Scale Y Axis"/>-->
             <Label text="Auto scale Y axis" wrapText="true"/>
             <VBox fillWidth="false">
                 <ToggleSwitch fx:id="autoScaleYAxis" prefWidth="1.0"/>
@@ -110,9 +109,16 @@
                     </GridPane>
                 </children>
             </HBox>
-            <VBox/>
+            <Separator prefWidth="200.0"/>
+            <Label text="Minimum chart height" wrapText="true"/>
+            <VBox>
+                <HBox alignment="CENTER_LEFT">
+                    <Slider fx:id="minChartHeightSlider" blockIncrement="1" max="500" min="80"/>
+                    <Label fx:id="minChartHeightText" text="150"/>
+                </HBox>
+            </VBox>
         </VBox>
 
     </ScrollPane>
-    <Separator orientation="VERTICAL" />
+    <Separator orientation="VERTICAL"/>
 </AnchorPane>

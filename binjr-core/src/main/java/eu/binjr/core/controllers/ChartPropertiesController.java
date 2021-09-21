@@ -21,6 +21,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
 import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -45,7 +46,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class ChartPropertiesController implements Initializable, Closeable {
     private static final Logger logger = Logger.create(ChartPropertiesController.class);
     private final Chart chart;
-    private final Worksheet worksheet;
+    private final XYChartsWorksheet worksheet;
     private final AtomicBoolean closing = new AtomicBoolean(false);
     @FXML
     private AnchorPane root;
@@ -77,10 +78,14 @@ public class ChartPropertiesController implements Initializable, Closeable {
     private ToggleSwitch autoScaleYAxis;
     @FXML
     private HBox yAxisScaleSettings;
+    @FXML
+    private Slider minChartHeightSlider;
+    @FXML
+    private Label minChartHeightText;
 
     private final BindingManager bindingManager = new BindingManager();
 
-    public ChartPropertiesController(Worksheet worksheet, Chart chart) {
+    public ChartPropertiesController(XYChartsWorksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
         this.chart = chart;
     }
@@ -95,6 +100,8 @@ public class ChartPropertiesController implements Initializable, Closeable {
         assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
         assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
 
+        bindingManager.bindBidirectional(minChartHeightSlider.valueProperty(), worksheet.minChartHeightProperty());
+        bindingManager.bind(minChartHeightText.textProperty(), Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
         bindingManager.bindBidirectional(graphOpacitySlider.valueProperty(), chart.graphOpacityProperty());
         bindingManager.bind(opacityText.textProperty(), Bindings.format("%.0f%%", graphOpacitySlider.valueProperty().multiply(100)));
         bindingManager.bindBidirectional(strokeWidthSlider.valueProperty(), chart.strokeWidthProperty());

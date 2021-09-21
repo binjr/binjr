@@ -64,24 +64,37 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
-    public TextField downSamplingThreshold;
-    public TextField pluginLocTextfield;
-    public Button browsePluginLocButton;
-    public TableView<DataAdapterInfo> availableAdapterTable;
-    public TableColumn<DataAdapterInfo, Boolean> enabledColumn;
-    public ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+    private Label minChartHeightText;
     @FXML
-    public ChoiceBox<SnapshotOutputScale> snapshotScaleChoiceBox;
+    private TextField downSamplingThreshold;
     @FXML
-    public TitledPane updatePreferences;
+    private TextField pluginLocTextfield;
     @FXML
-    public ToggleSwitch fullHeightCrosshair;
+    private Button browsePluginLocButton;
     @FXML
-    public ChoiceBox<BuiltInChartColorPalettes> chartPaletteChoiceBox;
-    public ToggleSwitch showOutlineStackedAreaCharts;
-    public Slider stackedAreaChartOpacitySlider;
-    public Label stackedAreaChartsOpacityText;
-    public ChoiceBox<BuiltInChartColorPalettes> logsPaletteChoiceBox;
+    private TableView<DataAdapterInfo> availableAdapterTable;
+    @FXML
+    private TableColumn<DataAdapterInfo, Boolean> enabledColumn;
+    @FXML
+    private ChoiceBox<NotificationDurationChoices> notifcationDurationChoiceBox;
+    @FXML
+    private ChoiceBox<SnapshotOutputScale> snapshotScaleChoiceBox;
+    @FXML
+    private TitledPane updatePreferences;
+    @FXML
+    private ToggleSwitch fullHeightCrosshair;
+    @FXML
+    private ChoiceBox<BuiltInChartColorPalettes> chartPaletteChoiceBox;
+    @FXML
+    private ToggleSwitch showOutlineStackedAreaCharts;
+    @FXML
+    private Slider stackedAreaChartOpacitySlider;
+    @FXML
+    private Label stackedAreaChartsOpacityText;
+    @FXML
+    private ChoiceBox<BuiltInChartColorPalettes> logsPaletteChoiceBox;
+    @FXML
+    private Slider minChartHeightSlider;
     @FXML
     private ToggleSwitch loadExternalToggle;
     @FXML
@@ -122,6 +135,8 @@ public class PreferenceDialogController implements Initializable {
         UserPreferences userPrefs = UserPreferences.getInstance();
         areaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
         areaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", areaChartOpacitySlider.valueProperty().multiply(100)));
+        minChartHeightSlider.valueProperty().bindBidirectional(userPrefs.minChartHeight.property());
+        minChartHeightText.textProperty().bind(Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
         stackedAreaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());
         stackedAreaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", stackedAreaChartOpacitySlider.valueProperty().multiply(100)));
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {

@@ -567,8 +567,11 @@ public class XYChartsWorksheetController extends WorksheetController {
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
             chart.minHeightProperty().bind(Bindings.createDoubleBinding(
-                    () -> worksheet.isEditModeEnabled() ? 150.0 : 250.0,
-                    worksheet.editModeEnabledProperty()
+                    () -> worksheet.isEditModeEnabled() ?
+                            Math.max(worksheet.minChartHeightProperty().doubleValue(), 80)
+                            : Math.max(worksheet.minChartHeightProperty().doubleValue(), 250),
+                    worksheet.editModeEnabledProperty(),
+                    worksheet.minChartHeightProperty()
             ));
             VBox.setVgrow(chart, Priority.ALWAYS);
             chart.getYAxis().setSide(Side.LEFT);

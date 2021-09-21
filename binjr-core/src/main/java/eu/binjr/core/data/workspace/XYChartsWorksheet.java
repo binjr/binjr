@@ -27,6 +27,7 @@ import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
@@ -67,6 +68,8 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     private final Property<Boolean> timeRangeLinked;
     @IsDirtyable
     private final DoubleProperty dividerPosition;
+    @IsDirtyable
+    private final DoubleProperty minChartHeight;
 
 
     //  private Class<? extends WorksheetController> controllerClass = XYChartsWorksheetController.class;
@@ -177,6 +180,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
         this.timeRangeLinked = new SimpleBooleanProperty(timeRangeLinked);
         this.selectedChart = new SimpleObjectProperty<>(0);
         this.dividerPosition = new SimpleDoubleProperty(0.7);
+        this.minChartHeight =  new SimpleDoubleProperty(UserPreferences.getInstance().minChartHeight.get().doubleValue());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -390,6 +394,19 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
      */
     public Property<ChartLayout> chartLayoutProperty() {
         return chartLayout;
+    }
+
+    @XmlAttribute
+    public double getMinChartHeight() {
+        return minChartHeight.get();
+    }
+
+    public DoubleProperty minChartHeightProperty() {
+        return minChartHeight;
+    }
+
+    public void setMinChartHeight(double minChartHeight) {
+        this.minChartHeight.set(minChartHeight);
     }
 
     @Override

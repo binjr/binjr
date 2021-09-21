@@ -17,7 +17,6 @@
 package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
-import eu.binjr.common.auth.JfxKrb5LoginModule;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.MruFactory;
@@ -284,6 +283,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> expandSuggestTreeOnMatch = booleanPreference("expandSuggestTreeOnMatch", false);
 
     public final ObservablePreference<Boolean>  consoleAlwaysOnTop = booleanPreference("consoleAlwaysOnTop", false);
+    public final  ObservablePreference<Number> minChartHeight = doublePreference("minChartHeight", 150.0);
 
     public static class UserFavorites extends MruFactory {
 
