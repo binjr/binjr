@@ -1,0 +1,1 @@
+* _[Fixed]_ Series legend panel in chart worksheets does not fill all available space. 

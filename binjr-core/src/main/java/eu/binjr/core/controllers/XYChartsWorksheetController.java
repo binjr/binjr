@@ -837,6 +837,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);
+            newPane.setMaxHeight(Double.MAX_VALUE);
             newPane.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
             newPane.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnLegendTitledPane));
             newPane.setUserData(currentViewPort);
