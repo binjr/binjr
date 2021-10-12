@@ -69,7 +69,7 @@ public class Workspace implements Dirtyable {
     @XmlElementWrapper(name = "Worksheets")
     @XmlElements(@XmlElement(name = "Worksheet"))
     @IsDirtyable
-    private final ObservableList<Worksheet> worksheets;
+    private final ObservableList<Worksheet<?>> worksheets;
     @XmlAttribute
     private final SimpleDoubleProperty dividerPosition;
     @XmlTransient
@@ -97,7 +97,7 @@ public class Workspace implements Dirtyable {
      * @param worksheets the list of  {@link XYChartsWorksheet} instances to initialize the workspace with
      * @param sources    the list of  {@link Source} instances to initialize the workspace with
      */
-    private Workspace(ObservableList<Worksheet> worksheets, ObservableList<Source> sources) {
+    private Workspace(ObservableList<Worksheet<?>> worksheets, ObservableList<Source> sources) {
         this.path = new SimpleObjectProperty<>(Paths.get("Untitled"));
         this.worksheets = worksheets;
         this.sources = sources;
@@ -187,7 +187,7 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToAdd the list of {@link XYChartsWorksheet} instances to add
      */
-    public void addWorksheets(Collection<Worksheet> worksheetsToAdd) {
+    public void addWorksheets(Collection<Worksheet<?>> worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
@@ -196,7 +196,7 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToAdd the {@link XYChartsWorksheet} instances to add
      */
-    public void addWorksheets(Worksheet... worksheetsToAdd) {
+    public void addWorksheets(Worksheet<?>... worksheetsToAdd) {
         this.worksheets.addAll(worksheetsToAdd);
     }
 
@@ -205,7 +205,7 @@ public class Workspace implements Dirtyable {
      *
      * @param worksheetsToRemove the list of {@link XYChartsWorksheet} instances to remove
      */
-    public void removeWorksheets(Worksheet... worksheetsToRemove) {
+    public void removeWorksheets(Worksheet<?>... worksheetsToRemove) {
         for (var w : worksheetsToRemove) {
             w.close();
             this.worksheets.remove(w);
@@ -270,7 +270,7 @@ public class Workspace implements Dirtyable {
      *
      * @return all {@link XYChartsWorksheet} instances currently held by the {@link Workspace} as an {@link Iterable} structure.
      */
-    public ObservableList<Worksheet> getWorksheets() {
+    public ObservableList<Worksheet<?>> getWorksheets() {
         return worksheets;
     }
 

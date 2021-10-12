@@ -575,7 +575,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     @Override
-    public Worksheet getWorksheet() {
+    public Worksheet<?> getWorksheet() {
         return worksheet;
     }
 

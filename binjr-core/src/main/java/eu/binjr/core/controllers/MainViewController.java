@@ -1044,7 +1044,7 @@ public class MainViewController implements Initializable {
         }
     }
 
-    private EditableTab loadWorksheetInTab(Worksheet worksheet, boolean editMode) {
+    private EditableTab loadWorksheetInTab(Worksheet<?> worksheet, boolean editMode) {
         workspace.setPresentationMode(false);
         var buttons = new ArrayList<ButtonBase>();
         if (worksheet instanceof Syncable syncable) {

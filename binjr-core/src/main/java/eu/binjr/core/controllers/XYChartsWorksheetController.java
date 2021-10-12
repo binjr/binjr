@@ -228,7 +228,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     @Override
-    public Worksheet getWorksheet() {
+    public Worksheet<?> getWorksheet() {
         return this.worksheet;
     }
 

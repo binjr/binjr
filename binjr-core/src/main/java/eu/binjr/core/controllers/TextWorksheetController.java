@@ -118,7 +118,7 @@ public class TextWorksheetController extends WorksheetController {
     private Button nextOccurrenceButton;
 
     @Override
-    public Worksheet getWorksheet() {
+    public Worksheet<?> getWorksheet() {
         return worksheet;
     }
 

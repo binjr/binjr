@@ -50,7 +50,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
      *
      * @return the {@link XYChartsWorksheet} instance associated with this controller
      */
-    public abstract Worksheet getWorksheet();
+    public abstract Worksheet<?> getWorksheet();
 
     public abstract Property<TimeRange> selectedRangeProperty();
 
