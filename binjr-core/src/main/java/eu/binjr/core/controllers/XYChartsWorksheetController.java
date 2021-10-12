@@ -376,6 +376,9 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
             viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
+                if (closed.get()) {
+                    return;
+                }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
                 } else {
@@ -386,6 +389,9 @@ public class XYChartsWorksheetController extends WorksheetController {
                 }
             }));
             viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
+                if (closed.get()) {
+                    return;
+                }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                     ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
                 } else {
