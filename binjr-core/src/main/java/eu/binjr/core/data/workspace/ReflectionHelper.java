@@ -18,6 +18,7 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.data.adapters.SourceBinding;
 import org.reflections.Reflections;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -34,7 +35,7 @@ public enum ReflectionHelper {
         // Add Workspace class
         classesToBeBound.add(Workspace.class);
         // scan classpath
-        scan(new Reflections(EU_BINJR));
+        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR)));
     }
 
     public Collection<Class<?>> getClassesToBeBound() {
@@ -43,7 +44,9 @@ public enum ReflectionHelper {
 
     public void scanClassLoader(ClassLoader cl) {
         // scan
-        scan(new Reflections(EU_BINJR, cl));
+        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR, cl)));
+
+
     }
 
     private void scan(Reflections reflections) {
