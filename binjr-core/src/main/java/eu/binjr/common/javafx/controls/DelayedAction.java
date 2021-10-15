@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2018 Frederic Thevenet
+ *    Copyright 2017-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,11 +26,11 @@ import javafx.util.Duration;
  * @author Frederic Thevenet
  */
 public class DelayedAction {
-    private Task<Object> delayedTask;
+    private final Task<Object> delayedTask;
 
     public DelayedAction(Runnable action, Duration delay) {
 
-        delayedTask = new Task<Object>() {
+        delayedTask = new Task<>() {
             @Override
             protected Object call() throws Exception {
                 Thread.sleep(((long) delay.toMillis()));

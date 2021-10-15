@@ -20,8 +20,8 @@ import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.ChartType;
-import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -48,6 +48,7 @@ public class ChartPropertiesController implements Initializable, Closeable {
     private final Chart chart;
     private final XYChartsWorksheet worksheet;
     private final AtomicBoolean closing = new AtomicBoolean(false);
+    private final BindingManager bindingManager = new BindingManager();
     @FXML
     private AnchorPane root;
     @FXML
@@ -83,8 +84,6 @@ public class ChartPropertiesController implements Initializable, Closeable {
     @FXML
     private Label minChartHeightText;
 
-    private final BindingManager bindingManager = new BindingManager();
-
     public ChartPropertiesController(XYChartsWorksheet worksheet, Chart chart) {
         this.worksheet = worksheet;
         this.chart = chart;
@@ -99,7 +98,8 @@ public class ChartPropertiesController implements Initializable, Closeable {
         assert strokeWidthSlider != null : "fx:id\"strokeWidthSlider\" was not injected!";
         assert autoScaleYAxis != null : "fx:id\"autoScaleYAxis\" was not injected!";
         assert yAxisScaleSettings != null : "fx:id\"yAxisScaleSettings\" was not injected!";
-
+        bindingManager.bind(minChartHeightSlider.minProperty(), UserPreferences.getInstance().lowerStackedChartHeight.property());
+        bindingManager.bind(minChartHeightSlider.maxProperty(), UserPreferences.getInstance().upperChartHeight.property());
         bindingManager.bindBidirectional(minChartHeightSlider.valueProperty(), worksheet.minChartHeightProperty());
         bindingManager.bind(minChartHeightText.textProperty(), Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
         bindingManager.bindBidirectional(graphOpacitySlider.valueProperty(), chart.graphOpacityProperty());

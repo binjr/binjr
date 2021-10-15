@@ -135,6 +135,8 @@ public class PreferenceDialogController implements Initializable {
         UserPreferences userPrefs = UserPreferences.getInstance();
         areaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
         areaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", areaChartOpacitySlider.valueProperty().multiply(100)));
+        minChartHeightSlider.minProperty().bind(userPrefs.lowerStackedChartHeight.property());
+        minChartHeightSlider.maxProperty().bind(userPrefs.upperChartHeight.property());
         minChartHeightSlider.valueProperty().bindBidirectional(userPrefs.minChartHeight.property());
         minChartHeightText.textProperty().bind(Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
         stackedAreaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());

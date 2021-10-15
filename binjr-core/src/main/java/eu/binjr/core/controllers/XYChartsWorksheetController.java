@@ -35,6 +35,7 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.SnapshotOutputScale;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.animation.PauseTransition;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -76,6 +77,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -100,6 +102,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
+    private final AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
     public AnchorPane root;
     @FXML
@@ -107,7 +110,6 @@ public class XYChartsWorksheetController extends WorksheetController {
     private List<ChartViewPort> viewPorts = new ArrayList<>();
     private XYChartsWorksheet worksheet;
     private volatile boolean preventReload = false;
-    private final AtomicBoolean closed = new AtomicBoolean(false);
     @FXML
     private Pane chartParent;
     @FXML
@@ -471,6 +473,31 @@ public class XYChartsWorksheetController extends WorksheetController {
                 setupStackedChartLayout(screenshotCanvas);
                 break;
         }
+        var delay = new PauseTransition(Duration.millis(userPrefs.chartZoomTriggerDelayMs.get().doubleValue()));
+        ZonedDateTime[] zoomTimeRange = new ZonedDateTime[]{worksheet.getFromDateTime(), worksheet.getToDateTime()};
+        delay.setOnFinished(getBindingManager().registerHandler(e -> selectedRangeProperty()
+                .setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]))));
+        screenshotCanvas.setOnScroll(getBindingManager().registerHandler(event -> {
+            if (event.isShiftDown()) {
+                worksheet.setMinChartHeight(Math.min(Math.max(worksheet.getMinChartHeight() + event.getDeltaX(),
+                                userPrefs.lowerStackedChartHeight.get().doubleValue()),
+                        userPrefs.upperChartHeight.get().doubleValue()));
+            }
+            if (event.isControlDown() || event.isAltDown()) {
+                for (var v : viewPorts) {
+                    ZonedDateTimeAxis xAxis = (ZonedDateTimeAxis) v.getChart().getXAxis();
+                    double zoomAmount = event.getDeltaY() / userPrefs.chartZoomFactor.get().doubleValue() * -1;
+                    Number xZoomDelta = (xAxis.getUpperBound().toInstant().toEpochMilli() - xAxis.getLowerBound().toInstant().toEpochMilli()) * zoomAmount;
+                    xAxis.setAutoRanging(false);
+                    zoomTimeRange[0] = xAxis.getLowerBound().minus((event.isAltDown() ? -1 : 1) * xZoomDelta.longValue(), ChronoUnit.MILLIS);
+                    zoomTimeRange[1] = xAxis.getUpperBound().plus(xZoomDelta.longValue(), ChronoUnit.MILLIS);
+                    xAxis.setLowerBound(zoomTimeRange[0]);
+                    xAxis.setUpperBound(zoomTimeRange[1]);
+                    delay.playFromStart();
+                }
+                event.consume();
+            }
+        }));
         if (viewPorts.size() > 0) {
             getBindingManager().attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
         }
@@ -574,8 +601,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             chart.maxHeight(Double.MAX_VALUE);
             chart.minHeightProperty().bind(Bindings.createDoubleBinding(
                     () -> worksheet.isEditModeEnabled() ?
-                            Math.max(worksheet.minChartHeightProperty().doubleValue(), 80)
-                            : Math.max(worksheet.minChartHeightProperty().doubleValue(), 250),
+                            Math.max(worksheet.minChartHeightProperty().doubleValue(),
+                                    userPrefs.lowerStackedChartHeight.get().doubleValue())
+                            : Math.max(worksheet.minChartHeightProperty().doubleValue(),
+                            userPrefs.lowerOverlaidChartHeight.get().doubleValue()),
                     worksheet.editModeEnabledProperty(),
                     worksheet.minChartHeightProperty()
             ));
@@ -589,6 +618,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         scrollPane.setFitToWidth(true);
         scrollPane.getStyleClass().add("skinnable-pane-border");
         chartParent.getChildren().add(scrollPane);
+
         // setup crosshair
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.RFC_1123_DATE_TIME;
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
@@ -1380,6 +1410,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             return CompletableFuture.completedFuture(null);
         }
 
+
         XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
         logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
@@ -1422,6 +1453,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                                     }
                                 }
                             }
+                            viewPort.getChart().getXAxis().setAutoRanging(true);
                             if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
                                 // Force a redraw of the charts and their Y Axis considering their proper width.
                                 new DelayedAction(() -> viewPort.getChart().resize(0.0, 0.0), Duration.millis(50)).submit();
