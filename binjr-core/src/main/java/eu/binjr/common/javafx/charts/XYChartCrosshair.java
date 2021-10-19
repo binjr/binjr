@@ -18,7 +18,6 @@ package eu.binjr.common.javafx.charts;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -71,7 +70,7 @@ public class XYChartCrosshair<X, Y> {
     private final Map<XYChart<X, Y>, Property<Y>> currentYValues = new HashMap<>();
     private final Property<X> currentXValue = new SimpleObjectProperty<>();
     private final XYChart<X, Y> masterChart;
-    private final BooleanProperty isMouseOverChart = new SimpleBooleanProperty(false);
+    private final BooleanProperty mouseOverChart = new SimpleBooleanProperty(false);
     private final BindingManager bindingManager = new BindingManager();
     private final BooleanProperty displayFullHeightMarker = new SimpleBooleanProperty(false);
     private Point2D selectionStart = new Point2D(-1, -1);
@@ -129,12 +128,12 @@ public class XYChartCrosshair<X, Y> {
                 currentXValue.setValue(null);
             }
         });
-        masterChart.setOnMouseExited(bindingManager.registerHandler(event -> isMouseOverChart.set(false)));
-        masterChart.setOnMouseEntered(bindingManager.registerHandler(event -> isMouseOverChart.set(true)));
-        bindingManager.bind(horizontalMarker.visibleProperty(), horizontalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind(yAxisLabel.visibleProperty(), horizontalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind(verticalMarker.visibleProperty(), verticalMarkerVisible.and(isMouseOverChart));
-        bindingManager.bind(xAxisLabel.visibleProperty(), verticalMarkerVisible.and(isMouseOverChart));
+        masterChart.setOnMouseExited(bindingManager.registerHandler(event -> mouseOverChart.set(false)));
+        masterChart.setOnMouseEntered(bindingManager.registerHandler(event -> mouseOverChart.set(true)));
+        bindingManager.bind(horizontalMarker.visibleProperty(), horizontalMarkerVisible.and(mouseOverChart));
+        bindingManager.bind(yAxisLabel.visibleProperty(), horizontalMarkerVisible.and(mouseOverChart));
+        bindingManager.bind(verticalMarker.visibleProperty(), verticalMarkerVisible.and(mouseOverChart));
+        bindingManager.bind(xAxisLabel.visibleProperty(), verticalMarkerVisible.and(mouseOverChart));
     }
 
     /**
@@ -228,6 +227,14 @@ public class XYChartCrosshair<X, Y> {
         return currentXValue;
     }
 
+    public boolean isMouseOverChart() {
+        return mouseOverChart.get();
+    }
+
+    public BooleanProperty mouseOverChartProperty() {
+        return mouseOverChart;
+    }
+
     public boolean isDisplayFullHeightMarker() {
         return displayFullHeightMarker.get();
     }
@@ -241,7 +248,7 @@ public class XYChartCrosshair<X, Y> {
     }
 
     public void dispose() {
-        logger.debug(() -> "Disposing XYChartCrossHair " + toString());
+        logger.debug(() -> "Disposing XYChartCrossHair " + this);
         selectionDoneEvent = null;
         bindingManager.close();
     }
