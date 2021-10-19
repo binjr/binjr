@@ -484,17 +484,39 @@ public class XYChartsWorksheetController extends WorksheetController {
                         userPrefs.upperChartHeight.get().doubleValue()));
             }
             if (event.isControlDown() || event.isAltDown()) {
-                for (var v : viewPorts) {
-                    ZonedDateTimeAxis xAxis = (ZonedDateTimeAxis) v.getChart().getXAxis();
-                    double zoomAmount = event.getDeltaY() / userPrefs.chartZoomFactor.get().doubleValue() * -1;
-                    Number xZoomDelta = (xAxis.getUpperBound().toInstant().toEpochMilli() - xAxis.getLowerBound().toInstant().toEpochMilli()) * zoomAmount;
-                    xAxis.setAutoRanging(false);
-                    zoomTimeRange[0] = xAxis.getLowerBound().minus((event.isAltDown() ? -1 : 1) * xZoomDelta.longValue(), ChronoUnit.MILLIS);
-                    zoomTimeRange[1] = xAxis.getUpperBound().plus(xZoomDelta.longValue(), ChronoUnit.MILLIS);
-                    xAxis.setLowerBound(zoomTimeRange[0]);
-                    xAxis.setUpperBound(zoomTimeRange[1]);
-                    delay.playFromStart();
+                ZonedDateTimeAxis axis = (ZonedDateTimeAxis) getSelectedViewPort().getChart().getXAxis();
+                ZonedDateTime lower = axis.getLowerBound();
+                ZonedDateTime upper = axis.getUpperBound();
+                double zoomAmount = event.getDeltaY() / userPrefs.chartZoomFactor.get().doubleValue() * -1;
+                double interval = java.time.Duration.between(lower, upper).toMillis();
+                double xZoomDelta = interval * zoomAmount;
+                double lowerBoundOffset;
+                double upperBoundOffset;
+                if (event.isAltDown()) {
+                    // Calculate offsets when panning
+                    lowerBoundOffset = -1 * xZoomDelta;
+                    upperBoundOffset = xZoomDelta;
+                } else {
+                    // Calculate offsets when zooming
+                    ZonedDateTime currentTime = null;
+                    for (var v : viewPorts) {
+                        if (v.getCrosshair().isMouseOverChart()) {
+                            currentTime = v.getCrosshair().getCurrentXValue();
+                            break;
+                        }
+                    }
+                    double r = currentTime == null ? 0.5 : java.time.Duration.between(currentTime, upper).toMillis() / interval;
+                    lowerBoundOffset = (1 - r) * xZoomDelta;
+                    upperBoundOffset = r * xZoomDelta;
                 }
+                zoomTimeRange[0] = lower.minus(Math.round(lowerBoundOffset), ChronoUnit.MILLIS);
+                zoomTimeRange[1] = upper.plus(Math.round(upperBoundOffset), ChronoUnit.MILLIS);
+                for (var x : viewPorts.stream().map(v -> (ZonedDateTimeAxis) v.getChart().getXAxis()).toList()) {
+                    x.setAutoRanging(false);
+                    x.setLowerBound(zoomTimeRange[0]);
+                    x.setUpperBound(zoomTimeRange[1]);
+                }
+                delay.playFromStart();
                 event.consume();
             }
         }));
