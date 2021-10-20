@@ -158,7 +158,6 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private Pane worksheetTitleBlock;
     private VBox screenshotCanvas;
-    private Profiler worksheetRefreshProfiler = null;
 
     public XYChartsWorksheetController(MainViewController parentController, XYChartsWorksheet worksheet, Collection<DataAdapter<Double>> sourcesAdapters)
             throws NoAdapterFoundException {
@@ -302,7 +301,6 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     private void initChartViewPorts() throws IOException {
-        ZonedDateTimeAxis defaultXAxis = buildTimeAxis();
         if (worksheet.getCharts().size() == 0) {
             worksheet.getCharts().add(new Chart());
         }
@@ -311,27 +309,12 @@ public class XYChartsWorksheetController extends WorksheetController {
             final int currentIndex = i;
             final Chart currentChart = worksheet.getCharts().get(i);
             ZonedDateTimeAxis xAxis;
-            switch (worksheet.getChartLayout()) {
-                case OVERLAID:
-                    xAxis = defaultXAxis;
-                    break;
-                case STACKED:
-                default:
-                    xAxis = buildTimeAxis();
-                    break;
-            }
-            StableTicksAxis<Double> yAxis;
-            switch (currentChart.getUnitPrefixes()) {
-                case BINARY:
-                    yAxis = new BinaryStableTicksAxis<>();
-                    break;
-                case METRIC:
-                    yAxis = new MetricStableTicksAxis<>();
-                    break;
-                case NONE:
-                default:
-                    yAxis = new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
-            }
+            xAxis = buildTimeAxis();
+            StableTicksAxis<Double> yAxis = switch (currentChart.getUnitPrefixes()) {
+                case BINARY -> new BinaryStableTicksAxis<>();
+                case METRIC -> new MetricStableTicksAxis<>();
+                case NONE -> new StableTicksAxis<>(new NoopPrefixFormatter(), 10, new double[]{1.0, 2.5, 5.0});
+            };
             yAxis.autoRangingProperty().bindBidirectional(currentChart.autoScaleYAxisProperty());
             yAxis.setAnimated(false);
             yAxis.setTickSpacing(30);
@@ -345,11 +328,11 @@ public class XYChartsWorksheetController extends WorksheetController {
             switch (currentChart.getChartType()) {
                 case AREA:
                     viewPort = new AreaChart<>(xAxis, yAxis);
-                    ((AreaChart) viewPort).setCreateSymbols(false);
+                    ((AreaChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
                     break;
                 case STACKED:
                     viewPort = new NaNStackedAreaChart<>(xAxis, yAxis);
-                    ((StackedAreaChart) viewPort).setCreateSymbols(false);
+                    ((StackedAreaChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
                     break;
                 case SCATTER:
                     viewPort = new ScatterChart<>(xAxis, yAxis);
@@ -357,7 +340,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 case LINE:
                 default:
                     viewPort = new LineChart<>(xAxis, yAxis);
-                    ((LineChart) viewPort).setCreateSymbols(false);
+                    ((LineChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
             }
             viewPort.setCache(true);
             viewPort.setCacheHint(CacheHint.SPEED);
@@ -365,15 +348,14 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setFocusTraversable(true);
             viewPort.legendVisibleProperty().bind(worksheet.editModeEnabledProperty()
                     .not()
-                    .and(Bindings.equal(ChartLayout.STACKED, (ObjectProperty) worksheet.chartLayoutProperty())));
+                    .and(Bindings.equal(ChartLayout.STACKED, (ObjectProperty<ChartLayout>) worksheet.chartLayoutProperty())));
             viewPort.setLegendSide(Side.BOTTOM);
 
             viewPort.setAnimated(false);
             viewPorts.add(new ChartViewPort(currentChart, viewPort, buildChartPropertiesController(currentChart)));
-            viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, getBindingManager().registerHandler(event -> {
-                worksheet.setSelectedChart(currentIndex, event.isControlDown());
-            }));
-            getBindingManager().bind(((StableTicksAxis) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
+            viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, getBindingManager().registerHandler(event ->
+                    worksheet.setSelectedChart(currentIndex, event.isControlDown())));
+            getBindingManager().bind(((StableTicksAxis<Double>) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
             viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
             viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
@@ -382,7 +364,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                    ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
                 } else {
                     //FIXME WARNING: Caught 'java.lang.ClassCastException: class java.lang.String cannot be cast to class javafx.scene.paint.Paint
                     // (java.lang.String is in module java.base of loader 'bootstrap'; javafx.scene.paint.Paint is in unnamed module of loader 'app')'
@@ -395,7 +377,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                    ((StableTicksAxis) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
                 } else {
                     viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
                 }
@@ -456,9 +438,8 @@ public class XYChartsWorksheetController extends WorksheetController {
             return item;
         }).collect(Collectors.toList()));
 
-        selectChartLayout.setOnAction(getBindingManager().registerHandler(event -> {
-            contextMenu.show((Node) event.getSource(), Side.BOTTOM, 0, 0);
-        }));
+        selectChartLayout.setOnAction(getBindingManager().registerHandler(event ->
+                contextMenu.show((Node) event.getSource(), Side.BOTTOM, 0, 0)));
 
         this.worksheetTitleBlock = buildTitleBlock();
         screenshotCanvas = new VBox();
@@ -466,12 +447,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         screenshotCanvas.setAlignment(Pos.TOP_LEFT);
         screenshotCanvas.getChildren().add(worksheetTitleBlock);
         switch (worksheet.getChartLayout()) {
-            case OVERLAID:
-                setupOverlayChartLayout(screenshotCanvas);
-                break;
-            case STACKED:
-                setupStackedChartLayout(screenshotCanvas);
-                break;
+            case OVERLAID -> setupOverlayChartLayout(screenshotCanvas);
+            case STACKED -> setupStackedChartLayout(screenshotCanvas);
         }
         var delay = new PauseTransition(Duration.millis(userPrefs.chartZoomTriggerDelayMs.get().doubleValue()));
         ZonedDateTime[] zoomTimeRange = new ZonedDateTime[]{worksheet.getFromDateTime(), worksheet.getToDateTime()};
@@ -527,16 +504,12 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private void setSelectedChart(int selectedChartIndex) {
         for (int i = 0; i < viewPorts.size(); i++) {
-            var a = (StableTicksAxis) viewPorts.get(i).getChart().getYAxis();
-            if (worksheet.getMultiSelectedIndices().contains(i)) {
-                a.setSelected(true);
-            } else {
-                a.setSelected(false);
-            }
+            var a = (StableTicksAxis<Double>) viewPorts.get(i).getChart().getYAxis();
+            a.setSelected(worksheet.getMultiSelectedIndices().contains(i));
         }
         ChartViewPort selectedChart;
         if (selectedChartIndex > -1 && viewPorts.size() > selectedChartIndex && (selectedChart = viewPorts.get(selectedChartIndex)) != null) {
-            ((StableTicksAxis) selectedChart.getChart().getYAxis()).setSelected(true);
+            ((StableTicksAxis<Double>) selectedChart.getChart().getYAxis()).setSelected(true);
             seriesTableContainer.getChildren().clear();
             seriesTableContainer.getChildren().add(selectedChart.getSeriesDetailsPane());
             if (editButtonsGroup.getSelectedToggle() != null) {
@@ -616,8 +589,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void setupStackedChartLayout(VBox vBox) {
         getBindingManager().bind(vBox.prefHeightProperty(), chartParent.heightProperty());
         getBindingManager().bind(vBox.prefWidthProperty(), chartParent.widthProperty());
-        for (int i = 0; i < viewPorts.size(); i++) {
-            ChartViewPort v = viewPorts.get(i);
+        for (ChartViewPort v : viewPorts) {
             XYChart<ZonedDateTime, Double> chart = v.getChart();
             vBox.getChildren().add(chart);
             chart.maxHeight(Double.MAX_VALUE);
@@ -724,9 +696,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
         timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
         timeRangePicker.initSelectedRange(TimeRange.of(currentState.getStartX(), currentState.getEndX()));
-        timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
-            currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true);
-        });
+        timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) ->
+                currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true));
         timeRangePicker.setOnResetInterval(() -> {
             try {
                 return worksheet.getCharts().get(0).getInitialTimeRange();
@@ -745,12 +716,10 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private Map<Chart, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
-        selection.forEach((xyChart, xyChartSelection) -> {
-            viewPorts.stream()
-                    .filter(v -> v.getChart().equals(xyChart))
-                    .findFirst()
-                    .ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection));
-        });
+        selection.forEach((xyChart, xyChartSelection) -> viewPorts.stream()
+                .filter(v -> v.getChart().equals(xyChart))
+                .findFirst()
+                .ifPresent(viewPort -> result.put(viewPort.getDataStore(), xyChartSelection)));
         return result;
     }
 
@@ -968,9 +937,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 final int chartIdx = i;
                 getBindingManager().bind(m.textProperty(), viewPorts.get(i).getDataStore().nameProperty());
                 m.setToggleGroup(group);
-                m.setOnAction(getBindingManager().registerHandler(event -> {
-                    worksheet.setSelectedChart(chartIdx);
-                }));
+                m.setOnAction(getBindingManager().registerHandler(event -> worksheet.setSelectedChart(chartIdx)));
                 menu.getItems().add(m);
                 if (worksheet.getSelectedChart() == i) {
                     group.selectToggle(m);
@@ -1117,7 +1084,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     } catch (Exception e) {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                     }
-                    logger.debug("dropped to " + event.toString());
+                    logger.debug("dropped to " + event);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1233,9 +1200,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 })
                 .toArray(MenuItem[]::new));
         MenuItem newChart = new MenuItem("Add to new chart");
-        newChart.setOnAction((getBindingManager().registerHandler(event -> {
-            addToNewChart(new ArrayList<>(items));
-        })));
+        newChart.setOnAction((getBindingManager().registerHandler(event -> addToNewChart(new ArrayList<>(items)))));
         contextMenu.getItems().addAll(new SeparatorMenuItem(), newChart);
         return contextMenu;
     }
@@ -1244,7 +1209,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     public void close() {
         super.close();
         if (closed.compareAndSet(false, true)) {
-            logger.debug(() -> "Closing worksheetController " + this.toString());
+            logger.debug(() -> "Closing worksheetController " + this);
             currentState.close();
             hCrosshair.selectedProperty().unbindBidirectional(userPrefs.horizontalMarkerOn.property());
             vCrosshair.selectedProperty().unbindBidirectional(userPrefs.verticalMarkerOn.property());
@@ -1280,25 +1245,17 @@ public class XYChartsWorksheetController extends WorksheetController {
         ListChangeListener<Chart> chartListListener = c -> {
             boolean reloadNeeded = false;
             while (c.next()) {
-                if (c.wasPermutated()) {
-                    for (int i = c.getFrom(); i < c.getTo(); ++i) {
-                        // nothing for now
-                    }
-                } else if (c.wasUpdated()) {
-                    // nothing for now
-                } else {
-                    if (c.wasAdded()) {
-                        getParentController().getWorkspace().setPresentationMode(false);
-                        List<? extends Chart> added = c.getAddedSubList();
-                        Chart chart = added.get(added.size() - 1);
-                        int chartIndex = worksheet.getCharts().indexOf(chart);
-                        worksheet.setSelectedChart(chartIndex);
-                        reloadNeeded = true;
-                    }
-                    if (c.wasRemoved()) {
-                        worksheet.setSelectedChart(Math.min(c.getList().size() - 1, c.getFrom()));
-                        reloadNeeded = true;
-                    }
+                if (c.wasAdded()) {
+                    getParentController().getWorkspace().setPresentationMode(false);
+                    List<? extends Chart> added = c.getAddedSubList();
+                    Chart chart = added.get(added.size() - 1);
+                    int chartIndex = worksheet.getCharts().indexOf(chart);
+                    worksheet.setSelectedChart(chartIndex);
+                    reloadNeeded = true;
+                }
+                if (c.wasRemoved()) {
+                    worksheet.setSelectedChart(Math.min(c.getList().size() - 1, c.getFrom()));
+                    reloadNeeded = true;
                 }
             }
             if (!preventReload && reloadNeeded) {
@@ -1326,19 +1283,18 @@ public class XYChartsWorksheetController extends WorksheetController {
                 return;
             }
         }
-        InvalidationListener isVisibleListener = (observable) -> {
-            viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
-                boolean andAll = true;
-                boolean orAll = false;
-                for (TimeSeriesInfo<Double> t : targetChart.getSeries()) {
-                    andAll &= t.isSelected();
-                    orAll |= t.isSelected();
-                }
-                CheckBox showAllCheckBox = (CheckBox) v.getSeriesTable().getColumns().get(0).getGraphic();
-                showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
-                showAllCheckBox.setSelected(andAll);
-            });
-        };
+        InvalidationListener isVisibleListener = (observable) ->
+                viewPorts.stream().filter(v -> v.getDataStore().equals(targetChart)).findFirst().ifPresent(v -> {
+                    boolean andAll = true;
+                    boolean orAll = false;
+                    for (TimeSeriesInfo<Double> t : targetChart.getSeries()) {
+                        andAll &= t.isSelected();
+                        orAll |= t.isSelected();
+                    }
+                    CheckBox showAllCheckBox = (CheckBox) v.getSeriesTable().getColumns().get(0).getGraphic();
+                    showAllCheckBox.setIndeterminate(Boolean.logicalXor(andAll, orAll));
+                    showAllCheckBox.setSelected(andAll);
+                });
         for (TimeSeriesBinding b : timeSeriesBindings) {
             TimeSeriesInfo<Double> newSeries = TimeSeriesInfo.fromBinding(b);
             getBindingManager().attachListener(newSeries.selectedProperty(),
@@ -1428,7 +1384,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
 
     public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh) {
-        if (!currentState.get(viewPort.getDataStore()).isPresent()) {
+        if (currentState.get(viewPort.getDataStore()).isEmpty()) {
             return CompletableFuture.completedFuture(null);
         }
 
@@ -1493,9 +1449,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                 });
     }
 
-
     private XYChart.Series<ZonedDateTime, Double> makeXYChartSeries(Chart currentChart, TimeSeriesInfo<Double> series) {
-        try (Profiler p = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
+        try (Profiler ignored = Profiler.start("Building  XYChart.Series data for" + series.getDisplayName(), logger::perf)) {
             XYChart.Series<ZonedDateTime, Double> newSeries = new XYChart.Series<>();
             newSeries.setName(series.getDisplayName());
             var r = new Region();
@@ -1517,8 +1472,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 getBindingManager().attachListener(newSeries.nodeProperty(), (ChangeListener<Node>) (node, oldNode, newNode) -> {
                     if (newNode != null) {
                         switch (currentChart.getChartType()) {
-                            case AREA:
-                            case STACKED:
+                            case AREA, STACKED -> {
                                 ObservableList<Node> children = ((Group) newNode).getChildren();
                                 if (children != null && children.size() >= 1) {
                                     Path stroke = (Path) children.get(1);
@@ -1532,15 +1486,13 @@ public class XYChartsWorksheetController extends WorksheetController {
                                             series.displayColorProperty(),
                                             currentChart.graphOpacityProperty()));
                                 }
-                                break;
-                            case LINE:
+                            }
+                            case LINE -> {
                                 Path stroke = (Path) newNode;
                                 logger.trace(() -> "Setting color of series " + series.getBinding().getLabel() + " to " + series.getDisplayColor());
                                 stroke.strokeWidthProperty().bind(currentChart.strokeWidthProperty());
                                 stroke.strokeProperty().bind(series.displayColorProperty());
-                                break;
-                            default:
-                                break;
+                            }
                         }
                     }
                 });
@@ -1654,18 +1606,12 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     @Override
     public void toggleShowPropertiesPane() {
-        ChartViewPort currentViewport = getSelectedViewPort();
-        if (currentViewport != null) {
-            currentViewport.getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
-        }
+        getSelectedViewPort().getDataStore().setShowProperties((editButtonsGroup.getSelectedToggle() == null));
     }
 
     @Override
     public void setShowPropertiesPane(boolean value) {
-        ChartViewPort currentViewport = getSelectedViewPort();
-        if (currentViewport != null) {
-            currentViewport.getDataStore().setShowProperties(value);
-        }
+        getSelectedViewPort().getDataStore().setShowProperties(value);
     }
 
     @Override
