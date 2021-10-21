@@ -27,7 +27,7 @@ dependencies {
     api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
     implementation "org.bouncycastle:bcpg-jdk15on:1.69"
-    implementation 'org.reflections:reflections:0.10.1'
+    implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.6'
     implementation 'org.fxmisc.flowless:flowless:0.6.6'
     implementation 'org.apache.lucene:lucene-core:8.9.0'

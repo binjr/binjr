@@ -35,7 +35,7 @@ public enum ReflectionHelper {
         // Add Workspace class
         classesToBeBound.add(Workspace.class);
         // scan classpath
-        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR)));
+        scan(new Reflections(EU_BINJR));
     }
 
     public Collection<Class<?>> getClassesToBeBound() {
@@ -44,9 +44,7 @@ public enum ReflectionHelper {
 
     public void scanClassLoader(ClassLoader cl) {
         // scan
-        scan(new Reflections(new ConfigurationBuilder().forPackage(EU_BINJR, cl)));
-
-
+        scan(new Reflections(EU_BINJR, cl));
     }
 
     private void scan(Reflections reflections) {
