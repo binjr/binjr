@@ -30,9 +30,9 @@ dependencies {
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.6'
     implementation 'org.fxmisc.flowless:flowless:0.6.6'
-    implementation 'org.apache.lucene:lucene-core:8.9.0'
-    implementation 'org.apache.lucene:lucene-facet:8.9.0'
-    implementation 'org.apache.lucene:lucene-queryparser:8.9.0'
+    implementation 'org.apache.lucene:lucene-core:8.10.1'
+    implementation 'org.apache.lucene:lucene-facet:8.10.1'
+    implementation 'org.apache.lucene:lucene-queryparser:8.10.1'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"
