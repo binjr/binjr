@@ -282,19 +282,21 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> expandSuggestTreeOnMatch = booleanPreference("expandSuggestTreeOnMatch", false);
 
-    public final ObservablePreference<Boolean>  consoleAlwaysOnTop = booleanPreference("consoleAlwaysOnTop", false);
+    public final ObservablePreference<Boolean> consoleAlwaysOnTop = booleanPreference("consoleAlwaysOnTop", false);
 
-    public final  ObservablePreference<Number> minChartHeight = doublePreference("minChartHeight", 150.0);
+    public final ObservablePreference<Number> minChartHeight = doublePreference("minChartHeight", 150.0);
 
-    public final  ObservablePreference<Number> lowerStackedChartHeight = doublePreference("lowerStackedChartHeight", 80.0);
+    public final ObservablePreference<Number> lowerStackedChartHeight = doublePreference("lowerStackedChartHeight", 80.0);
 
-    public final  ObservablePreference<Number> lowerOverlaidChartHeight = doublePreference("lowerOverlaidChartHeight", 250.0);
+    public final ObservablePreference<Number> lowerOverlaidChartHeight = doublePreference("lowerOverlaidChartHeight", 250.0);
 
-    public final  ObservablePreference<Number> upperChartHeight = doublePreference("upperChartHeight", 600.0);
+    public final ObservablePreference<Number> upperChartHeight = doublePreference("upperChartHeight", 600.0);
 
-    public final  ObservablePreference<Number> chartZoomFactor = doublePreference("chartZoomFactor", 200.0);
+    public final ObservablePreference<Number> chartZoomFactor = doublePreference("chartZoomFactor", 200.0);
 
-    public final  ObservablePreference<Number> chartZoomTriggerDelayMs = doublePreference("chartZoomTriggerDelayMs", 500.0);
+    public final ObservablePreference<Number> chartZoomTriggerDelayMs = doublePreference("chartZoomTriggerDelayMs", 500.0);
+
+    public final ObservablePreference<Number> logHeatmapNbBuckets = integerPreference("logHeatmapNbBuckets", 100);
 
     public static class UserFavorites extends MruFactory {
 

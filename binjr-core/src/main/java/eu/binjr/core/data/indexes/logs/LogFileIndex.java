@@ -34,6 +34,9 @@ import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
+import org.apache.lucene.facet.range.LongRange;
+import org.apache.lucene.facet.range.LongRangeFacetCounts;
+import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
@@ -288,13 +291,50 @@ public class LogFileIndex implements Searchable {
                 logger.trace("Query text=" + query);
                 QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
                 filterQuery = new BooleanQuery.Builder()
-                        .add(rangeQuery, BooleanClause.Occur.FILTER)
+                        //   .add(rangeQuery, BooleanClause.Occur.FILTER)
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
+            int nbBuckets = prefs.logHeatmapNbBuckets.get().intValue();
+            long intervalLength = Math.round((end - start) / (double) nbBuckets);
+            LongRange[] ranges = new LongRange[nbBuckets];
+            for (int i = 0; i < nbBuckets; i++) {
+                long bucket_start = start + i * intervalLength;
+                long bucket_end = bucket_start + intervalLength;
+                ranges[i] = new LongRange(Long.toString(bucket_end), bucket_start, true, bucket_end, true);
+            }
             var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
-            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
+            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader) {
+                @Override
+                protected Facets buildFacetsResult(
+                        FacetsCollector drillDowns,
+                        FacetsCollector[] drillSideways,
+                        String[] drillSidewaysDims)
+                        throws IOException {
+                    Facets drillDownFacets = null;
+                    Map<String, Facets> drillSidewaysFacets = new HashMap<>();
+                    if (drillDowns != null) {
+                        drillDownFacets = new FastTaxonomyFacetCounts(taxoReader, config, drillDowns);
+                    }
+                    for (int i = 0; i < drillSideways.length; i++) {
+                        if (drillSidewaysDims[i].equals(TIMESTAMP)) {
+                            drillSidewaysFacets.put(TIMESTAMP, new LongRangeFacetCounts(TIMESTAMP, drillSideways[i], ranges));
+                        } else {
+                            drillSidewaysFacets.put(drillSidewaysDims[i],
+                                    new FastTaxonomyFacetCounts(taxoReader, config, drillSideways[i]));
+                        }
+                    }
+
+                    if (drillSidewaysFacets.isEmpty()) {
+                        return drillDownFacets;
+                    } else {
+                        return new MultiFacets(drillSidewaysFacets, drillDownFacets);
+                    }
+                }
+            };
+
             var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
+            drillDownQuery.add(TIMESTAMP, rangeQuery);
             for (var facet : params.entrySet()) {
                 for (var label : facet.getValue()) {
                     drillDownQuery.add(facet.getKey(), label);
@@ -314,9 +354,11 @@ public class LogFileIndex implements Searchable {
             logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
             var severityFacet = new HashMap<String, FacetEntry>();
             var pathFacet = new HashMap<String, FacetEntry>();
+            var timestampFacet = new HashMap<String, FacetEntry>();
             try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                 pathFacet = makeFacetResult(PATH, results.facets, params);
                 severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+                timestampFacet = makeFacetResult(TIMESTAMP, results.facets, params);
                 for (int i = skip; i < topDocs.scoreDocs.length; i++) {
                     var hit = topDocs.scoreDocs[i];
                     var doc = searcher.doc(hit.doc);
@@ -335,12 +377,16 @@ public class LogFileIndex implements Searchable {
                     pathFacet.values()
                             .stream()
                             .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
-                            .collect(Collectors.toList()));
+                            .toList());
             proc.addFacetResults(SEVERITY,
                     severityFacet.values()
                             .stream()
                             .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
-                            .collect(Collectors.toList()));
+                            .toList());
+            proc.addFacetResults(TIMESTAMP, timestampFacet.values()
+                    .stream()
+                    .sorted(Comparator.comparing(FacetEntry::getLabel))
+                    .toList());
             proc.setTotalHits(collector.getTotalHits());
             proc.setHitsPerPage(pageSize);
             return proc;
@@ -412,7 +458,7 @@ public class LogFileIndex implements Searchable {
 
     private HashMap<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params) throws IOException {
         var facetEntryMap = new HashMap<String, FacetEntry>();
-        var synthesis = facets.getTopChildren(100, facetName);
+        var synthesis = facets.getTopChildren(10, facetName);
         var labels = new ArrayList<String>();
         if (synthesis != null) {
             for (var f : synthesis.labelValues) {

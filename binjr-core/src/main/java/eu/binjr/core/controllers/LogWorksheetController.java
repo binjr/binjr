@@ -81,6 +81,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -769,6 +770,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             } else {
                                 this.pathFacetEntries.setValue(Collections.emptyList());
                             }
+                            // Update timestamp Range facet view
+                            var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP);
+                            logger.debug(timestampFacetEntries.stream()
+                                    .map(e-> String.format("%s: (%d)",ZonedDateTime.ofInstant(
+                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()).toString(), e.getNbOccurrences()))
+                                    .collect(Collectors.joining("\n")));
+
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
