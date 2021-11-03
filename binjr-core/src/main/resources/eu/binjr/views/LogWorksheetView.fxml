@@ -24,7 +24,6 @@
 <?import javafx.scene.text.Font?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<?import eu.binjr.common.javafx.controls.TearableTabPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0"
             xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -75,7 +74,7 @@
                 </Button>
                 <Pane HBox.hgrow="ALWAYS"/>
                 <TimeRangePicker fx:id="timeRangePicker" alignment="CENTER"
-                              maxHeight="1.7976931348623157E308" maxWidth="4000.0"
+                                 maxHeight="1.7976931348623157E308" maxWidth="4000.0"
                                  minHeight="40" minWidth="425"
                                  text="" HBox.hgrow="SOMETIMES">
                 </TimeRangePicker>
@@ -278,9 +277,7 @@
                             </graphic>
                         </ToggleButton>
                     </HBox>
-                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0"
-                           text="No results">
-                    </Label>
+                    <Label fx:id="searchResultsLabel" alignment="CENTER" minWidth="70.0" text="No results"/>
                     <Button fx:id="prevOccurrenceButton" alignment="CENTER"
                             contentDisplay="GRAPHIC_ONLY"
                             disable="true" graphicTextGap="1.0" maxHeight="-Infinity"
@@ -317,8 +314,26 @@
                     </Button>
                     <Pane HBox.hgrow="ALWAYS"/>
                 </HBox>
+
             </VBox>
+            <AnchorPane fx:id="heatmapArea"
+                        cache="true"
+                        cacheHint="SPEED"
+                        depthTest="DISABLE"
+                        minWidth="0"
+                        prefWidth="200"
+                        maxWidth="Infinity"
+                        minHeight="0"
+                        maxHeight="Infinity"
+                        prefHeight="120"
+                        styleClass="skinnable-pane-border,chart-viewport-parent">
+                <!--                  >-->
+            </AnchorPane>
         </VBox>
+        <!--        <VBox fx:id="heatmapBar" alignment="CENTER">-->
+
+
+        <!--        </VBox>-->
         <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
                     styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
             <SplitPane fx:id="splitPane" dividerPositions="0.8"
@@ -330,14 +345,15 @@
                        AnchorPane.topAnchor="0.0">
                 <items>
                     <VBox>
-                        <VirtualizedScrollPane VBox.vgrow="SOMETIMES" >
+                        <VirtualizedScrollPane VBox.vgrow="SOMETIMES">
                             <content>
-                                <CodeArea fx:id="textOutput" styleClass="log-view" />
+                                <CodeArea fx:id="textOutput" styleClass="log-view"/>
                             </content>
                         </VirtualizedScrollPane>
                         <HBox fx:id="paginationBar" styleClass="worksheet-tool-bar">
                             <children>
-                                <Pagination fx:id="pager" maxPageIndicatorCount="50" pageCount="1" HBox.hgrow="SOMETIMES">
+                                <Pagination fx:id="pager" maxPageIndicatorCount="50" pageCount="1"
+                                            HBox.hgrow="SOMETIMES">
                                     <HBox.margin>
                                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                                     </HBox.margin>
