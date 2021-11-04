@@ -352,9 +352,9 @@ public class LogFileIndex implements Searchable {
             }
             var topDocs = collector.topDocs();
             logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
-            var severityFacet = new HashMap<String, FacetEntry>();
-            var pathFacet = new HashMap<String, FacetEntry>();
-            var timestampFacet = new HashMap<String, FacetEntry>();
+            Map<String, FacetEntry> severityFacet;
+            Map<String, FacetEntry> pathFacet;
+            Map<String, FacetEntry> timestampFacet;
             try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                 pathFacet = makeFacetResult(PATH, results.facets, params);
                 severityFacet = makeFacetResult(SEVERITY, results.facets, params);
@@ -383,10 +383,10 @@ public class LogFileIndex implements Searchable {
                             .stream()
                             .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
                             .toList());
-            proc.addFacetResults(TIMESTAMP, timestampFacet.values()
-                    .stream()
-                    .sorted(Comparator.comparing(FacetEntry::getLabel))
-                    .toList());
+            proc.addFacetResults(TIMESTAMP, timestampFacet.values());
+//                    .stream()
+//                    .sorted(Comparator.comparing(FacetEntry::getLabel))
+//                    .toList());
             proc.setTotalHits(collector.getTotalHits());
             proc.setHitsPerPage(pageSize);
             return proc;
@@ -456,8 +456,8 @@ public class LogFileIndex implements Searchable {
         });
     }
 
-    private HashMap<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params) throws IOException {
-        var facetEntryMap = new HashMap<String, FacetEntry>();
+    private Map<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params) throws IOException {
+        var facetEntryMap = new TreeMap<String, FacetEntry>();
         var synthesis = facets.getTopChildren(10, facetName);
         var labels = new ArrayList<String>();
         if (synthesis != null) {

@@ -21,15 +21,12 @@ import com.google.gson.Gson;
 import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
-import eu.binjr.common.javafx.charts.XYChartCrosshair;
-import eu.binjr.common.javafx.charts.ZonedDateTimeAxis;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
-import eu.binjr.common.text.NoopPrefixFormatter;
 import eu.binjr.common.text.StringUtils;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -83,6 +80,7 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.reactfx.value.Val;
 
 import java.io.IOException;
 import java.net.URL;
@@ -92,11 +90,9 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -194,7 +190,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button showSuggestButton;
     @FXML
     private Button favoriteButton;
-    private XYChart<ZonedDateTime, Double> heatmap;
+    private XYChart<String, Integer> heatmap;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -594,23 +590,37 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void initHeatmap() {
-        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(timeRangePicker.getZoneId());
-        getBindingManager().bind(xAxis.zoneIdProperty(), timeRangePicker.zoneIdProperty());
+//        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(timeRangePicker.getZoneId());
+//        getBindingManager().bind(xAxis.zoneIdProperty(), timeRangePicker.zoneIdProperty());
+//        xAxis.setAnimated(false);
+//        xAxis.setSide(Side.BOTTOM);
+
+
+        CategoryAxis xAxis = new CategoryAxis();
+        xAxis.setAutoRanging(true);
         xAxis.setAnimated(false);
-        xAxis.setSide(Side.BOTTOM);
-        StableTicksAxis<Double> yAxis = new MetricStableTicksAxis<>();
+        xAxis.setTickLabelsVisible(false);
+        xAxis.setTickMarkVisible(false);
+
+        StableTicksAxis<Integer> yAxis = new MetricStableTicksAxis<>();
         yAxis.setAutoRanging(true);
         yAxis.setAnimated(false);
-//        yAxis.setTickSpacing(30);
-//        yAxis.setMinorTickVisible(false);
+       // yAxis.setTickLabelsVisible(false);
         yAxis.setTickMarkVisible(false);
-        yAxis.setTickLabelsVisible(false);
-
-        var tmpchart = new StackedAreaChart<>(xAxis, yAxis);
-        tmpchart.setCreateSymbols(false);
+//        yAxis.setTickSpacing(30);
+        yAxis.setMinorTickVisible(false);
+//        yAxis.setTickMarkVisible(false);
+//        yAxis.setTickLabelsVisible(false);
+//
+        BarChart<String, Integer> tmpchart = new BarChart<>(xAxis, yAxis);
+        tmpchart.setCategoryGap(0.0);
+        tmpchart.setBarGap(0.5);
+      // tmpchart.setCreateSymbols(false);
         heatmap = tmpchart;
 
-        //   heatmap = new ScatterChart<>(xAxis, yAxis);
+heatmap.setVerticalGridLinesVisible(false);
+heatmap.setHorizontalGridLinesVisible(false);
+
 
         heatmap.setCache(true);
         heatmap.setCacheHint(CacheHint.SPEED);
@@ -626,17 +636,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         heatmapArea.getChildren().add(heatmap);
         heatmapArea.setOnDragDetected(Event::consume);
 
-        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-        map.put(heatmap, v -> v.toString());
-        var crossHair = new XYChartCrosshair<>(map, heatmapArea, DateTimeFormatter.RFC_1123_DATE_TIME::format);
-        crossHair.setDisplayFullHeightMarker(false);
-        crossHair.setVerticalMarkerVisible(true);
-        crossHair.setHorizontalMarkerVisible(false);
-
-        crossHair.onSelectionDone(s -> {
-            logger.debug(() -> "Applying zoom selection: " + s.toString());
-
-        });
+//        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
+//        map.put(heatmap, v -> v.toString());
+//        var crossHair = new XYChartCrosshair<>(map, heatmapArea, DateTimeFormatter.RFC_1123_DATE_TIME::format);
+//        crossHair.setDisplayFullHeightMarker(false);
+//        crossHair.setVerticalMarkerVisible(true);
+//        crossHair.setHorizontalMarkerVisible(false);
+//
+//        crossHair.onSelectionDone(s -> {
+//            logger.debug(() -> "Applying zoom selection: " + s.toString());
+//
+//        });
     }
 
 
@@ -842,11 +852,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                             Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()).toString(), e.getNbOccurrences()))
                                     .collect(Collectors.joining("\n")));
 
-                            List<XYChart.Data<ZonedDateTime, Double>> foo = timestampFacetEntries.stream()
-                                    .map(e -> new XYChart.Data<>(ZonedDateTime.ofInstant(
-                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), timeRangePicker.getZoneId()),Double.valueOf (e.getNbOccurrences())))
+                            List<XYChart.Data<String, Integer>> foo = timestampFacetEntries.stream()
+//                                    .map(e -> new XYChart.Data<>(ZonedDateTime.ofInstant(
+//                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), timeRangePicker.getZoneId()),Double.valueOf (e.getNbOccurrences())))
+
+                                    .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
                                     .toList();
-                            XYChart.Series<ZonedDateTime, Double> heatmapData = new XYChart.Series<>();
+                            XYChart.Series<String, Integer> heatmapData = new XYChart.Series<>();
                             heatmapData.getData().setAll(foo);
 
 
