@@ -216,6 +216,12 @@
     -fx-background-color: #0000FF30;
 }
 
+.default-color0.chart-bar {
+    -fx-bar-fill: #336F87;
+/*4babc5*/
+
+}
+
 .styled-text-area .complete-log {
     -rtfx-background-color: #80808030;
 }

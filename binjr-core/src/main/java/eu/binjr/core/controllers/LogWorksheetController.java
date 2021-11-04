@@ -21,6 +21,8 @@ import com.google.gson.Gson;
 import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.charts.MetricStableTicksAxis;
 import eu.binjr.common.javafx.charts.StableTicksAxis;
+import eu.binjr.common.javafx.charts.XYChartCrosshair;
+import eu.binjr.common.javafx.charts.ZonedDateTimeAxis;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.logging.Logger;
@@ -63,7 +65,10 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
-import javafx.scene.chart.*;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.LineChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -80,7 +85,6 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
-import org.reactfx.value.Val;
 
 import java.io.IOException;
 import java.net.URL;
@@ -90,9 +94,11 @@ import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -106,6 +112,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
     public static final String PSEUDOCLASS_CATEGORY = "category";
+    private static final DateTimeFormatter TIMELINE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+    public static final double AXIS_WIDTH = 15.0;
+    public static final double AXIS_HEIGHT = 15.0;
     private final LogWorksheet worksheet;
     private final AtomicBoolean closed = new AtomicBoolean(false);
     private final UserPreferences userPrefs = UserPreferences.getInstance();
@@ -190,7 +199,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button showSuggestButton;
     @FXML
     private Button favoriteButton;
-    private XYChart<String, Integer> heatmap;
+    private BarChart<String, Integer> heatmap;
+    private XYChart<ZonedDateTime, Double> timeline;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
             throws NoAdapterFoundException {
@@ -590,38 +600,30 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void initHeatmap() {
-//        ZonedDateTimeAxis xAxis = new ZonedDateTimeAxis(timeRangePicker.getZoneId());
-//        getBindingManager().bind(xAxis.zoneIdProperty(), timeRangePicker.zoneIdProperty());
-//        xAxis.setAnimated(false);
-//        xAxis.setSide(Side.BOTTOM);
-
-
         CategoryAxis xAxis = new CategoryAxis();
         xAxis.setAutoRanging(true);
         xAxis.setAnimated(false);
         xAxis.setTickLabelsVisible(false);
         xAxis.setTickMarkVisible(false);
-
+        xAxis.setPrefHeight(AXIS_HEIGHT);
+        xAxis.setMaxHeight(AXIS_HEIGHT);
+        xAxis.setMinHeight(AXIS_HEIGHT);
         StableTicksAxis<Integer> yAxis = new MetricStableTicksAxis<>();
         yAxis.setAutoRanging(true);
         yAxis.setAnimated(false);
-       // yAxis.setTickLabelsVisible(false);
+        yAxis.setTickLabelsVisible(true);
         yAxis.setTickMarkVisible(false);
-//        yAxis.setTickSpacing(30);
+        yAxis.setTickSpacing(30);
         yAxis.setMinorTickVisible(false);
-//        yAxis.setTickMarkVisible(false);
-//        yAxis.setTickLabelsVisible(false);
-//
-        BarChart<String, Integer> tmpchart = new BarChart<>(xAxis, yAxis);
-        tmpchart.setCategoryGap(0.0);
-        tmpchart.setBarGap(0.5);
-      // tmpchart.setCreateSymbols(false);
-        heatmap = tmpchart;
+        yAxis.setPrefWidth(AXIS_WIDTH);
+        yAxis.setMinWidth(AXIS_WIDTH);
+        yAxis.setMaxWidth(AXIS_WIDTH);
 
-heatmap.setVerticalGridLinesVisible(false);
-heatmap.setHorizontalGridLinesVisible(false);
-
-
+        heatmap = new BarChart<>(xAxis, yAxis);
+        heatmap.setCategoryGap(0.0);
+        heatmap.setBarGap(0.5);
+        heatmap.setVerticalGridLinesVisible(false);
+        heatmap.setHorizontalGridLinesVisible(false);
         heatmap.setCache(true);
         heatmap.setCacheHint(CacheHint.SPEED);
         heatmap.setCacheShape(true);
@@ -629,6 +631,7 @@ heatmap.setHorizontalGridLinesVisible(false);
         heatmap.setLegendVisible(false);
         heatmap.setLegendSide(Side.BOTTOM);
         heatmap.setAnimated(false);
+        heatmap.getStyleClass().add("heatmap-chart");
         AnchorPane.setLeftAnchor(heatmap, 0.0);
         AnchorPane.setRightAnchor(heatmap, 0.0);
         AnchorPane.setTopAnchor(heatmap, 0.0);
@@ -636,19 +639,56 @@ heatmap.setHorizontalGridLinesVisible(false);
         heatmapArea.getChildren().add(heatmap);
         heatmapArea.setOnDragDetected(Event::consume);
 
-//        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
-//        map.put(heatmap, v -> v.toString());
-//        var crossHair = new XYChartCrosshair<>(map, heatmapArea, DateTimeFormatter.RFC_1123_DATE_TIME::format);
-//        crossHair.setDisplayFullHeightMarker(false);
-//        crossHair.setVerticalMarkerVisible(true);
-//        crossHair.setHorizontalMarkerVisible(false);
-//
-//        crossHair.onSelectionDone(s -> {
-//            logger.debug(() -> "Applying zoom selection: " + s.toString());
-//
-//        });
-    }
+        ZonedDateTimeAxis timeAxis = new ZonedDateTimeAxis(timeRangePicker.getZoneId());
+        getBindingManager().bind(timeAxis.zoneIdProperty(), timeRangePicker.zoneIdProperty());
+        timeAxis.setAnimated(false);
+        timeAxis.setLowerBound(timeRangePicker.getTimeRange().getBeginning());
+        timeAxis.setUpperBound(timeRangePicker.getTimeRange().getEnd());
+        timeAxis.setAutoRanging(false);
+        timeAxis.setSide(Side.BOTTOM);
+        timeAxis.setTickLabelsVisible(true);
+        timeAxis.setTickMarkVisible(true);
+        timeAxis.setPrefHeight(AXIS_HEIGHT);
+        timeAxis.setMaxHeight(AXIS_HEIGHT);
+        timeAxis.setMinHeight(AXIS_HEIGHT);
 
+        StableTicksAxis<Double> y = new MetricStableTicksAxis<>();
+        y.setAutoRanging(false);
+        y.setAnimated(false);
+        y.setTickLabelsVisible(false);
+        y.setTickMarkVisible(false);
+        y.setMinorTickVisible(false);
+        y.setPrefWidth(AXIS_WIDTH);
+        y.setMinWidth(AXIS_WIDTH);
+        y.setMaxWidth(AXIS_WIDTH);
+
+        timeline = new LineChart<>(timeAxis, y);
+        timeline.setVerticalGridLinesVisible(false);
+        timeline.setHorizontalGridLinesVisible(false);
+
+        AnchorPane.setLeftAnchor(timeline, 0.0);
+        AnchorPane.setRightAnchor(timeline, 0.0);
+        AnchorPane.setTopAnchor(timeline, 0.0);
+        AnchorPane.setBottomAnchor(timeline, 0.0);
+        heatmapArea.getChildren().add(timeline);
+
+        LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
+        map.put(timeline, Object::toString);
+        var crossHair = new XYChartCrosshair<>(map, heatmapArea, TIMELINE_FORMATTER::format);
+        crossHair.setDisplayFullHeightMarker(false);
+        crossHair.setVerticalMarkerVisible(true);
+        crossHair.setHorizontalMarkerVisible(false);
+
+        crossHair.onSelectionDone(s -> {
+            logger.debug(() -> "Applying zoom selection: " + s.toString());
+            var selection = s.get(timeline);
+            var range = TimeRange.of(selection.getStartX(), selection.getEndX());
+            if (range.getDuration().compareTo(java.time.Duration.ofSeconds(1)) > 0) {
+                timeRangePicker.updateSelectedRange(range);
+                invalidateFilter(true);
+            }
+        });
+    }
 
     @Override
     public Worksheet<?> getWorksheet() {
@@ -847,22 +887,23 @@ heatmap.setHorizontalGridLinesVisible(false);
                             }
                             // Update timestamp Range facet view
                             var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP);
-                            logger.debug(timestampFacetEntries.stream()
+                            logger.trace(timestampFacetEntries.stream()
                                     .map(e -> String.format("%s: (%d)", ZonedDateTime.ofInstant(
                                             Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()).toString(), e.getNbOccurrences()))
                                     .collect(Collectors.joining("\n")));
 
                             List<XYChart.Data<String, Integer>> foo = timestampFacetEntries.stream()
-//                                    .map(e -> new XYChart.Data<>(ZonedDateTime.ofInstant(
-//                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), timeRangePicker.getZoneId()),Double.valueOf (e.getNbOccurrences())))
-
                                     .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
                                     .toList();
                             XYChart.Series<String, Integer> heatmapData = new XYChart.Series<>();
                             heatmapData.getData().setAll(foo);
 
-
                             heatmap.getData().setAll(heatmapData);
+                            // Update timeline selection widget
+                            if (timeline.getXAxis() instanceof ZonedDateTimeAxis timeAxis) {
+                                timeAxis.setLowerBound(worksheet.getQueryParameters().getTimeRange().getBeginning());
+                                timeAxis.setUpperBound(worksheet.getQueryParameters().getTimeRange().getEnd());
+                            }
 
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {

@@ -325,7 +325,7 @@
                         maxWidth="Infinity"
                         minHeight="0"
                         maxHeight="Infinity"
-                        prefHeight="120"
+                        prefHeight="100"
                         styleClass="skinnable-pane-border,chart-viewport-parent">
                 <!--                  >-->
             </AnchorPane>
