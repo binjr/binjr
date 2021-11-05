@@ -204,8 +204,8 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
         ZonedDateTime upper = (ZonedDateTime) r[1];
         setLowerBound(lower);
         setUpperBound(upper);
-        currentLowerBound.set(getLowerBound().toEpochSecond());
-        currentUpperBound.set(getUpperBound().toEpochSecond());
+        currentLowerBound.set(getLowerBound().toInstant().toEpochMilli());
+        currentUpperBound.set(getUpperBound().toInstant().toEpochMilli());
     }
 
     @Override
@@ -231,7 +231,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
         // Then get the difference from the actual date to the min date and divide it by the total difference.
         // We get a value between 0 and 1, if the date is within the min and max date.
-        double d = (date.toEpochSecond() - currentLowerBound.get()) / diff;
+        double d = (date.toInstant().toEpochMilli() - currentLowerBound.get()) / diff;
 
         // Multiply this percent value with the range and add the zero offset.
         if (getSide().isVertical()) {
@@ -254,26 +254,26 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
 
         if (getSide().isVertical()) {
             long v = Math.round((displayPosition - getZeroPosition() - getHeight()) / -range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(v), zoneId.getValue());
         } else {
             long v = Math.round((displayPosition - getZeroPosition()) / range * diff + currentLowerBound.get());
-            return ZonedDateTime.ofInstant(Instant.ofEpochSecond(v), zoneId.getValue());
+            return ZonedDateTime.ofInstant(Instant.ofEpochMilli(v), zoneId.getValue());
         }
     }
 
     @Override
     public boolean isValueOnAxis(ZonedDateTime date) {
-        return date.toEpochSecond() > currentLowerBound.get() && date.toEpochSecond() < currentUpperBound.get();
+        return date.toInstant().toEpochMilli() > currentLowerBound.get() && date.toInstant().toEpochMilli() < currentUpperBound.get();
     }
 
     @Override
     public double toNumericValue(ZonedDateTime date) {
-        return date.toEpochSecond();
+        return date.toInstant().toEpochMilli();
     }
 
     @Override
     public ZonedDateTime toRealValue(double v) {
-        return ZonedDateTime.ofInstant(Instant.ofEpochSecond(Math.round(v)), zoneId.getValue());
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(Math.round(v)), zoneId.getValue());
     }
 
     @Override
@@ -295,7 +295,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             dateList.clear();
             actualInterval = interval;
             // Loop as long we exceeded the upper bound.
-            while (currentLower.toEpochSecond() <= currentUpper.toEpochSecond()) {
+            while (currentLower.toInstant().toEpochMilli() <= currentUpper.toInstant().toEpochMilli()) {
                 dateList.add(currentLower);
                 currentLower = currentLower.plus(interval.amount, interval.unit);
             }
@@ -316,13 +316,14 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
             ZonedDateTime previousLastDate = evenDateList.get(dateList.size() - 3);
 
             // If the second date is too near by the lower bound, remove it.
-//            if (secondDate.toEpochSecond() - lower.toEpochSecond() < (thirdDate.toEpochSecond() - secondDate.toEpochSecond()) / 2) {
+//            if (secondDate.toInstant().toEpochMilli() - lower.toInstant().toEpochMilli() < (thirdDate.toInstant().toEpochMilli() - secondDate.toInstant().toEpochMilli()) / 2) {
 //                evenDateList.remove(secondDate);
 //            }
 
             // If difference from the upper bound to the last date is less than the half of the difference of the previous two dates,
             // we better remove the last date, as it comes to close to the upper bound.
-            if (upper.toEpochSecond() - lastDate.toEpochSecond() < (lastDate.toEpochSecond() - previousLastDate.toEpochSecond()) / 2) {
+            if (upper.toInstant().toEpochMilli() - lastDate.toInstant().toEpochMilli() <
+                    (lastDate.toInstant().toEpochMilli() - previousLastDate.toInstant().toEpochMilli()) / 2) {
                 evenDateList.remove(lastDate);
             }
         }
@@ -333,8 +334,8 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
     @Override
     protected void layoutChildren() {
         if (!isAutoRanging()) {
-            currentLowerBound.set(getLowerBound().toEpochSecond());
-            currentUpperBound.set(getUpperBound().toEpochSecond());
+            currentLowerBound.set(getLowerBound().toInstant().toEpochMilli());
+            currentUpperBound.set(getUpperBound().toInstant().toEpochMilli());
         }
         super.layoutChildren();
     }
@@ -365,7 +366,7 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                     formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM);
                     break;
                 case MILLIS:
-                    formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.FULL);
+                    formatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
                     break;
             }
         }
@@ -447,9 +448,20 @@ public final class ZonedDateTimeAxis extends Axis<ZonedDateTime> {
                                 date.getHour(),
                                 date.getMinute(),
                                 date.getSecond(),
-                                1, dates.get(i).getZone());
+                                1,
+                                dates.get(i).getZone());
                         break;
-
+                    case MILLIS:
+                        normalizedDate = ZonedDateTime.of(
+                                date.getYear(),
+                                date.getMonthValue(),
+                                date.getDayOfMonth(),
+                                date.getHour(),
+                                date.getMinute(),
+                                date.getSecond(),
+                                (date.getNano() / 1000) * 1000,
+                                dates.get(i).getZone());
+                        break;
                 }
                 evenDates.add(normalizedDate);
             }

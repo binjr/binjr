@@ -683,10 +683,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
             logger.debug(() -> "Applying zoom selection: " + s.toString());
             var selection = s.get(timeline);
             var range = TimeRange.of(selection.getStartX(), selection.getEndX());
-            if (range.getDuration().compareTo(java.time.Duration.ofSeconds(1)) > 0) {
-                timeRangePicker.updateSelectedRange(range);
-                invalidateFilter(true);
-            }
+            timeRangePicker.updateSelectedRange(range);
+            invalidateFilter(true);
         });
     }
 

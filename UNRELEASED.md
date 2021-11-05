@@ -1,0 +1,1 @@
+* _[New]_ The precision of the time axis for charts has been increased from seconds to milli-seconds.

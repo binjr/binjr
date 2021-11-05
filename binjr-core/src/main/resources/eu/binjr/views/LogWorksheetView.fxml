@@ -314,7 +314,6 @@
                     </Button>
                     <Pane HBox.hgrow="ALWAYS"/>
                 </HBox>
-
             </VBox>
             <AnchorPane fx:id="heatmapArea"
                         cache="true"
@@ -325,15 +324,10 @@
                         maxWidth="Infinity"
                         minHeight="0"
                         maxHeight="Infinity"
-                        prefHeight="100"
-                        styleClass="skinnable-pane-border,chart-viewport-parent">
-                <!--                  >-->
+                        prefHeight="110">
             </AnchorPane>
         </VBox>
-        <!--        <VBox fx:id="heatmapBar" alignment="CENTER">-->
 
-
-        <!--        </VBox>-->
         <AnchorPane fx:id="viewArea" minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0"
                     styleClass="text-viewport-parent" VBox.vgrow="ALWAYS">
             <SplitPane fx:id="splitPane" dividerPositions="0.8"
