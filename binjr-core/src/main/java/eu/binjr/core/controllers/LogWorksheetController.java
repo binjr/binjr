@@ -182,6 +182,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private ToggleButton findToggleButton;
     @FXML
+    private ToggleButton heatmapToggleButton;
+    @FXML
     private HBox highlightControls;
     @FXML
     private Pane heatmapArea;
@@ -517,6 +519,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
         getBindingManager().bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
 
+        getBindingManager().bind(heatmapArea.managedProperty(), heatmapArea.visibleProperty());
+        getBindingManager().bind(heatmapArea.visibleProperty(), heatmapToggleButton.selectedProperty());
+
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {
                 focusOnSearchHit(searchHitIterator.previous());
@@ -566,6 +571,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
             if (e.getCode() == KeyCode.F && e.isControlDown()) {
                 findToggleButton.setSelected(true);
                 searchTextField.requestFocus();
+            }
+            if (e.getCode() == KeyCode.H && e.isControlDown()) {
+                heatmapToggleButton.setSelected(!heatmapToggleButton.isSelected());
             }
         }));
 
