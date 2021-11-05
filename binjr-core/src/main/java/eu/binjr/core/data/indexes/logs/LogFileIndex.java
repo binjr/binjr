@@ -295,13 +295,14 @@ public class LogFileIndex implements Searchable {
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
-            int nbBuckets = prefs.logHeatmapNbBuckets.get().intValue();
-            long intervalLength = Math.round((end - start) / (double) nbBuckets);
+            long durationMs = end - start;
+            int nbBuckets = (int) Math.min(prefs.logHeatmapNbBuckets.get().intValue(), durationMs);
+            long intervalLength = Math.round(durationMs / (double) nbBuckets);
             LongRange[] ranges = new LongRange[nbBuckets];
             for (int i = 0; i < nbBuckets; i++) {
                 long bucket_start = start + i * intervalLength;
                 long bucket_end = bucket_start + intervalLength;
-                ranges[i] = new LongRange(Long.toString(bucket_end), bucket_start, true, bucket_end, true);
+                ranges[i] = new LongRange(Long.toString(bucket_end), bucket_start, false, bucket_end, true);
             }
             var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader) {
@@ -384,9 +385,6 @@ public class LogFileIndex implements Searchable {
                             .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
                             .toList());
             proc.addFacetResults(TIMESTAMP, timestampFacet.values());
-//                    .stream()
-//                    .sorted(Comparator.comparing(FacetEntry::getLabel))
-//                    .toList());
             proc.setTotalHits(collector.getTotalHits());
             proc.setHitsPerPage(pageSize);
             return proc;

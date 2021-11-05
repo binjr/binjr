@@ -613,7 +613,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         yAxis.setAnimated(false);
         yAxis.setTickLabelsVisible(true);
         yAxis.setTickMarkVisible(false);
-        yAxis.setTickSpacing(30);
         yAxis.setMinorTickVisible(false);
         yAxis.setPrefWidth(AXIS_WIDTH);
         yAxis.setMinWidth(AXIS_WIDTH);
