@@ -36,7 +36,6 @@ import org.apache.lucene.document.*;
 import org.apache.lucene.facet.*;
 import org.apache.lucene.facet.range.LongRange;
 import org.apache.lucene.facet.range.LongRangeFacetCounts;
-import org.apache.lucene.facet.taxonomy.FastTaxonomyFacetCounts;
 import org.apache.lucene.facet.taxonomy.TaxonomyReader;
 import org.apache.lucene.facet.taxonomy.TaxonomyWriter;
 import org.apache.lucene.facet.taxonomy.directory.DirectoryTaxonomyReader;
@@ -291,7 +290,7 @@ public class LogFileIndex implements Searchable {
                 logger.trace("Query text=" + query);
                 QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
                 filterQuery = new BooleanQuery.Builder()
-                        //   .add(rangeQuery, BooleanClause.Occur.FILTER)
+                        //  .add(rangeQuery, BooleanClause.Occur.FILTER)
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
@@ -305,37 +304,10 @@ public class LogFileIndex implements Searchable {
                 ranges[i] = new LongRange(Long.toString(bucket_end), bucket_start, false, bucket_end, true);
             }
             var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
-            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader) {
-                @Override
-                protected Facets buildFacetsResult(
-                        FacetsCollector drillDowns,
-                        FacetsCollector[] drillSideways,
-                        String[] drillSidewaysDims)
-                        throws IOException {
-                    Facets drillDownFacets = null;
-                    Map<String, Facets> drillSidewaysFacets = new HashMap<>();
-                    if (drillDowns != null) {
-                        drillDownFacets = new FastTaxonomyFacetCounts(taxoReader, config, drillDowns);
-                    }
-                    for (int i = 0; i < drillSideways.length; i++) {
-                        if (drillSidewaysDims[i].equals(TIMESTAMP)) {
-                            drillSidewaysFacets.put(TIMESTAMP, new LongRangeFacetCounts(TIMESTAMP, drillSideways[i], ranges));
-                        } else {
-                            drillSidewaysFacets.put(drillSidewaysDims[i],
-                                    new FastTaxonomyFacetCounts(taxoReader, config, drillSideways[i]));
-                        }
-                    }
-
-                    if (drillSidewaysFacets.isEmpty()) {
-                        return drillDownFacets;
-                    } else {
-                        return new MultiFacets(drillSidewaysFacets, drillDownFacets);
-                    }
-                }
-            };
+            var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
 
             var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
-            drillDownQuery.add(TIMESTAMP, rangeQuery);
+            //   drillDownQuery.add(TIMESTAMP, rangeQuery);
             for (var facet : params.entrySet()) {
                 for (var label : facet.getValue()) {
                     drillDownQuery.add(facet.getKey(), label);
@@ -384,9 +356,36 @@ public class LogFileIndex implements Searchable {
                             .stream()
                             .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
                             .toList());
-            proc.addFacetResults(TIMESTAMP, timestampFacet.values());
             proc.setTotalHits(collector.getTotalHits());
             proc.setHitsPerPage(pageSize);
+
+            try (Profiler p = Profiler.start("Retrieving log density facets", logger::perf)) {
+                var severities = params.entrySet().stream()
+                        .filter(e -> e.getKey().equals(SEVERITY))
+                        .flatMap(e -> e.getValue().stream())
+                        .toList();
+                if (severities.isEmpty()) {
+                    severities = severityFacet.values().stream().map(FacetEntry::getLabel).toList();
+                }
+                for (var severityLabel : severities) {
+                    var q = new DrillDownQuery(facetsConfig, filterQuery);
+                    q.add(TIMESTAMP, rangeQuery);
+                    for (var facet : params.entrySet()) {
+                        if (facet.getKey().equals(SEVERITY)) {
+                            q.add(facet.getKey(), severityLabel);
+                        } else {
+                            for (var label : facet.getValue()) {
+                                q.add(facet.getKey(), label);
+                            }
+                        }
+                    }
+                    FacetsCollector fc = new FacetsCollector();
+                    FacetsCollector.search(searcher, q, 0, fc);
+                    Facets facets = new LongRangeFacetCounts(TIMESTAMP, fc, ranges);
+                    proc.addFacetResults(TIMESTAMP + "_" + severityLabel,
+                            makeFacetResult(TIMESTAMP, facets, params).values());
+                }
+            }
             return proc;
         });
     }

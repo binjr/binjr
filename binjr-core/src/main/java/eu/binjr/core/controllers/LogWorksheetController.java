@@ -65,9 +65,9 @@ import javafx.geometry.Pos;
 import javafx.geometry.Side;
 import javafx.scene.CacheHint;
 import javafx.scene.Node;
-import javafx.scene.chart.BarChart;
 import javafx.scene.chart.CategoryAxis;
 import javafx.scene.chart.LineChart;
+import javafx.scene.chart.StackedBarChart;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
@@ -201,7 +201,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button showSuggestButton;
     @FXML
     private Button favoriteButton;
-    private BarChart<String, Integer> heatmap;
+    private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
 
     public LogWorksheetController(MainViewController parent, LogWorksheet worksheet, Collection<DataAdapter<SearchHit>> adapters)
@@ -629,9 +629,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         yAxis.setMinWidth(AXIS_WIDTH);
         yAxis.setMaxWidth(AXIS_WIDTH);
 
-        heatmap = new BarChart<>(xAxis, yAxis);
-        heatmap.setCategoryGap(0.0);
-        heatmap.setBarGap(0.5);
+        heatmap = new StackedBarChart<>(xAxis, yAxis);
+        heatmap.setCategoryGap(0.5);
+//          heatmap.setCategoryGap(0.5);
         heatmap.setVerticalGridLinesVisible(false);
         heatmap.setHorizontalGridLinesVisible(false);
         heatmap.setCache(true);
@@ -880,7 +880,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             pager.setCurrentPageIndex(worksheet.getQueryParameters().getPage());
                             // Update severity facet view
                             var severityFacetEntries = res.getFacetResults().get(CaptureGroup.SEVERITY);
-                            severityListView.setAllEntries((severityFacetEntries != null) ? severityFacetEntries : Collections.emptyList());
+                            if (severityFacetEntries == null) {
+                                severityFacetEntries = Collections.emptyList();
+                            }
+                            severityListView.setAllEntries(severityFacetEntries);
                             severityListView.getFacetPills()
                                     .forEach(f -> {
                                         f.getStyleClass().add("facet-pill-" + userPrefs.mapSeverityStyle(f.getFacet().getLabel()));
@@ -893,26 +896,37 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             } else {
                                 this.pathFacetEntries.setValue(Collections.emptyList());
                             }
-                            // Update timestamp Range facet view
-                            var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP);
-                            logger.trace(timestampFacetEntries.stream()
-                                    .map(e -> String.format("%s: (%d)", ZonedDateTime.ofInstant(
-                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()), e.getNbOccurrences()))
-                                    .collect(Collectors.joining("\n")));
-                            List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
-                                    .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
-                                    .toList();
-                            XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
-                            heatmapSeries.getData().setAll(heatmapData);
-                            heatmap.getData().setAll(heatmapSeries);
+                            ZonedDateTime lowerBound = timeRangePicker.getTimeRange().getBeginning();
+                            ZonedDateTime upperBound = timeRangePicker.getTimeRange().getEnd();
+                            heatmap.getData().clear();
+                            for (var s : severityFacetEntries) {
+                                // Update timestamp Range facet view
+                                var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP + "_" + s.getLabel());
+                                if (timestampFacetEntries != null) {
+                                    logger.trace(timestampFacetEntries.stream()
+                                            .map(e -> String.format("%s: (%d)", ZonedDateTime.ofInstant(
+                                                    Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()), e.getNbOccurrences()))
+                                            .collect(Collectors.joining("\n")));
+                                    List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
+                                            .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
+                                            .toList();
+                                    XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
+                                    heatmapSeries.getData().setAll(heatmapData);
+                                    heatmap.getData().add(heatmapSeries);
+
+                                    lowerBound = ZonedDateTime.ofInstant(
+                                            Instant.ofEpochMilli(Long.parseLong(heatmapData.get(0).getXValue())),
+                                            timeRangePicker.getZoneId());
+
+                                    upperBound = ZonedDateTime.ofInstant(
+                                            Instant.ofEpochMilli(Long.parseLong(heatmapData.get(heatmapData.size() - 1).getXValue())),
+                                            timeRangePicker.getZoneId());
+                                }
+                            }
                             // Update timeline selection widget
                             if (timeline.getXAxis() instanceof ZonedDateTimeAxis timeAxis) {
-                                timeAxis.setLowerBound(ZonedDateTime.ofInstant(
-                                        Instant.ofEpochMilli(Long.parseLong(heatmapData.get(0).getXValue())),
-                                        timeRangePicker.getZoneId()));
-                                timeAxis.setUpperBound(ZonedDateTime.ofInstant(
-                                        Instant.ofEpochMilli(Long.parseLong(heatmapData.get(heatmapData.size() - 1).getXValue())),
-                                        timeRangePicker.getZoneId()));
+                                timeAxis.setLowerBound(lowerBound);
+                                timeAxis.setUpperBound(upperBound);
                             }
 
                             // Color and display message text
