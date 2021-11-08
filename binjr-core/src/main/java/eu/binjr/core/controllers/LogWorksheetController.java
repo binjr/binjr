@@ -894,20 +894,22 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP);
                             logger.trace(timestampFacetEntries.stream()
                                     .map(e -> String.format("%s: (%d)", ZonedDateTime.ofInstant(
-                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()).toString(), e.getNbOccurrences()))
+                                            Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()), e.getNbOccurrences()))
                                     .collect(Collectors.joining("\n")));
-
-                            List<XYChart.Data<String, Integer>> foo = timestampFacetEntries.stream()
+                            List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
                                     .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
                                     .toList();
-                            XYChart.Series<String, Integer> heatmapData = new XYChart.Series<>();
-                            heatmapData.getData().setAll(foo);
-
-                            heatmap.getData().setAll(heatmapData);
+                            XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
+                            heatmapSeries.getData().setAll(heatmapData);
+                            heatmap.getData().setAll(heatmapSeries);
                             // Update timeline selection widget
                             if (timeline.getXAxis() instanceof ZonedDateTimeAxis timeAxis) {
-                                timeAxis.setLowerBound(worksheet.getQueryParameters().getTimeRange().getBeginning());
-                                timeAxis.setUpperBound(worksheet.getQueryParameters().getTimeRange().getEnd());
+                                timeAxis.setLowerBound(ZonedDateTime.ofInstant(
+                                        Instant.ofEpochMilli(Long.parseLong(heatmapData.get(0).getXValue())),
+                                        timeRangePicker.getZoneId()));
+                                timeAxis.setUpperBound(ZonedDateTime.ofInstant(
+                                        Instant.ofEpochMilli(Long.parseLong(heatmapData.get(heatmapData.size() - 1).getXValue())),
+                                        timeRangePicker.getZoneId()));
                             }
 
                             // Color and display message text
