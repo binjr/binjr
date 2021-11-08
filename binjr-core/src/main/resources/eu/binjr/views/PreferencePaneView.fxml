@@ -143,7 +143,18 @@
                               AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                             <Label text="Default color palette"/>
                             <ChoiceBox fx:id="logsPaletteChoiceBox"  maxWidth="1.7976931348623157E308" />
-
+                            <Label text="Show filter bar" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="filterBarVisibleToggle" prefWidth="1.0" selected="true"/>
+                            </VBox>
+                            <Label text="Show log timeline" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="heatmapVisibleToggle" prefWidth="1.0" selected="false"/>
+                            </VBox>
+                            <Label text="Show find bar" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="findBarVisibleToggle" prefWidth="1.0" selected="false"/>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

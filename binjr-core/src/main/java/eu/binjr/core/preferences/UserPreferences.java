@@ -298,6 +298,12 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> logHeatmapNbBuckets = integerPreference("logHeatmapNbBuckets", 2000);
 
+    public final ObservablePreference<Boolean> logFilterBarVisible = booleanPreference("logFilterBarVisible", true);
+
+    public final ObservablePreference<Boolean> logFindBarVisible = booleanPreference("logFindBarVisible", false);
+
+    public final ObservablePreference<Boolean> logHeatmapVisible = booleanPreference("logHeatmapVisible", false);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

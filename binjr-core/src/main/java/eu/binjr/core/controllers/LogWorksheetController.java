@@ -484,6 +484,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(logsToolPane.managedProperty(), logsToolPane.visibleProperty());
         getBindingManager().bind(logsToolPane.visibleProperty(), filteringBar.visibleProperty().or(highlightControls.visibleProperty()));
 
+        getBindingManager().bindBidirectional(filterToggleButton.selectedProperty(), worksheet.filterBarVisibleProperty());
         getBindingManager().bind(filteringBar.managedProperty(), filteringBar.visibleProperty());
         getBindingManager().bind(filteringBar.visibleProperty(), filterToggleButton.selectedProperty());
         getBindingManager().attachListener(severityListView.getSelectedPills(),
@@ -516,9 +517,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(applyFilterButton.managedProperty(), applyFilterButton.visibleProperty());
 
         //Search bar initialization
+        getBindingManager().bindBidirectional(findToggleButton.selectedProperty(), worksheet.findBarVisibleProperty());
         getBindingManager().bind(highlightControls.managedProperty(), highlightControls.visibleProperty());
         getBindingManager().bind(highlightControls.visibleProperty(), findToggleButton.selectedProperty());
 
+        getBindingManager().bindBidirectional(heatmapToggleButton.selectedProperty(), worksheet.heatmapVisibleProperty());
         getBindingManager().bind(heatmapArea.managedProperty(), heatmapArea.visibleProperty());
         getBindingManager().bind(heatmapArea.visibleProperty(), heatmapToggleButton.selectedProperty());
 

@@ -64,6 +64,12 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private ToggleSwitch filterBarVisibleToggle;
+    @FXML
+    private ToggleSwitch findBarVisibleToggle;
+    @FXML
+    private ToggleSwitch heatmapVisibleToggle;
+    @FXML
     private Label minChartHeightText;
     @FXML
     private TextField downSamplingThreshold;
@@ -194,6 +200,9 @@ public class PreferenceDialogController implements Initializable {
         updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
         showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
         showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
+        filterBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
+        findBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
+        heatmapVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
     }
 

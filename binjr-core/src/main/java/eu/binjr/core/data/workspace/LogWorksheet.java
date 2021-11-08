@@ -27,11 +27,12 @@ import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.preferences.UserPreferences;
+import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-import jakarta.xml.bind.annotation.*;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,11 +50,18 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     @IsDirtyable
     private final Property<LogQueryParameters> queryParameters;
     @IsDirtyable
-    private final ObservableList<TimeSeriesInfo<SearchHit>> seriesInfo = FXCollections.observableList(new LinkedList<>());
+    private final ObservableList<TimeSeriesInfo<SearchHit>> seriesInfo;
     @IsDirtyable
-    private final IntegerProperty textViewFontSize = new SimpleIntegerProperty(10);
+    private final IntegerProperty textViewFontSize;
     @IsDirtyable
     private final DoubleProperty dividerPosition;
+    @IsDirtyable
+    private final BooleanProperty filterBarVisible;
+    @IsDirtyable
+    private final BooleanProperty findBarVisible;
+    @IsDirtyable
+    private final BooleanProperty heatmapVisible;
+
 
     private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
 
@@ -73,6 +81,12 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         this.timeRangeLinked = new SimpleBooleanProperty(isLinked);
         this.queryParameters = new SimpleObjectProperty<>(queryParameters);
         this.dividerPosition = new SimpleDoubleProperty(0.85);
+        this.textViewFontSize = new SimpleIntegerProperty(10);
+        this.seriesInfo = FXCollections.observableList(new LinkedList<>());
+        this.filterBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFilterBarVisible.get());
+        this.findBarVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logFindBarVisible.get());
+        this.heatmapVisible = new SimpleBooleanProperty(UserPreferences.getInstance().logHeatmapVisible.get());
+
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -169,6 +183,45 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @XmlAttribute
+    public boolean isFilterBarVisible() {
+        return filterBarVisible.get();
+    }
+
+    public BooleanProperty filterBarVisibleProperty() {
+        return filterBarVisible;
+    }
+
+    public void setFilterBarVisible(boolean filterBarVisible) {
+        this.filterBarVisible.set(filterBarVisible);
+    }
+
+    @XmlAttribute
+    public boolean isFindBarVisible() {
+        return findBarVisible.get();
+    }
+
+    public BooleanProperty findBarVisibleProperty() {
+        return findBarVisible;
+    }
+
+    public void setFindBarVisible(boolean findBarVisible) {
+        this.findBarVisible.set(findBarVisible);
+    }
+
+    @XmlAttribute
+    public boolean isHeatmapVisible() {
+        return heatmapVisible.get();
+    }
+
+    public BooleanProperty heatmapVisibleProperty() {
+        return heatmapVisible;
+    }
+
+    public void setHeatmapVisible(boolean heatmapVisible) {
+        this.heatmapVisible.set(heatmapVisible);
+    }
+
+    @XmlAttribute
     public boolean isSyntaxHighlightEnabled() {
         return syntaxHighlightEnabled;
     }
@@ -219,7 +272,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
         var bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
-            if ( byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
+            if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();
