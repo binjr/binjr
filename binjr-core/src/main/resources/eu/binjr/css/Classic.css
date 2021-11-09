@@ -370,45 +370,6 @@
     -fx-fill: #008000;
 }
 
-.styled-text-area .trace,
-.log-trace {
-    -fx-fill: GRAY;
-}
-
-.styled-text-area .debug,
-.log-debug {
-    -fx-fill: STEELBLUE;
-}
-
-.styled-text-area .perf,
-.log-perf {
-    -fx-fill: #268f69;
-}
-
-.styled-text-area .info,
-.log-info {
-    -fx-fill: black;
-}
-
-.styled-text-area .warn,
-.log-warn {
-    -fx-fill: DARKORANGE;
-}
-
-
-.styled-text-area .error,
-.log-error {
-    -fx-fill: RED;
-}
-
-.styled-text-area .fatal,
-.log-fatal {
-    -fx-fill: DARKRED;
-}
-/*.styled-text-area .search-result-highlight {*/
-/*    -rtfx-background-color: yellow;*/
-/*}*/
-
 .syntax-help-popup {
     -fx-effect: null;
     -fx-border-with: 1;
@@ -418,60 +379,172 @@
 }
 
 
+/***** LOG SEVERITY *************************************************************/
 .facet-pill {
     -fx-padding: 5 10 5 10;
     -fx-background-radius: 15;
-    -fx-background-color: -binjr-pane-background-color;
-    -fx-text-fill: black;
-}
+    -fx-background-color: #00000050;
 
-.facet-pill:selected .box .mark {
-    -fx-background-color: black;
+    -fx-text-fill: #000000;
+    -fx-border-color: #000000;
+    -fx-border-width: 0.5;
+    -fx-border-radius: 15;
 }
-
 
 .facet-pill .box {
-    -fx-background-color: transparent;
+    -fx-border-width: 0.5;
+}
+.facet-pill:selected .box .mark {
+    -fx-border-width: 0;
 }
 
-.facet-pill-trace {
-    -fx-background-color: GRAY;
+/**** Lookup colors ****/
+{
+    -trace-color:  #808080;
+    -debug-color: STEELBLUE;
+    -perf-color: #268f69;
+    -info-color: black;
+    -unknown-color: black;
+    -warn-color: DARKORANGE;
+    -error-color: red;
+    -fatal-color: DARKRED;
+}
+/**** TRACE ****/
+.facet-pill-trace,
+.facet-pill-trace .box {
+    -fx-background-color: derive(-trace-color, 80%);
+    -fx-text-fill: derive(-trace-color, -20%);
+    -fx-border-color: derive(-trace-color, -20%);
 }
 
-.facet-pill-debug {
-    -fx-background-color: STEELBLUE;
+.facet-pill-trace:selected .box .mark{
+    -fx-background-color: derive(-trace-color, -20%);
 }
 
-.facet-pill-perf {
-    -fx-text-fill: white;
-    -fx-background-color: #268f69;
+.styled-text-area .trace,
+.log-trace {
+    -fx-fill: -trace-color;
 }
 
-.facet-pill-info {
-    -fx-text-fill: white;
-    -fx-background-color: #0e0d0d;
+/**** DEBUG ****/
+.facet-pill-debug,
+.facet-pill-debug .box {
+    -fx-background-color: derive(-debug-color, 80%);
+    -fx-text-fill: derive(-debug-color, -20%);
+    -fx-border-color: derive(-debug-color, -20%);
 }
 
-.facet-pill-warn {
-    -fx-text-fill: black;
-    -fx-background-color: #ff8c00;
+.facet-pill-debug:selected .box .mark{
+    -fx-background-color: derive(-debug-color, -20%);
 }
 
-.facet-pill-fatal:selected .box .mark,
-.facet-pill-perf:selected .box .mark,
-.facet-pill-info:selected .box .mark {
-    -fx-background-color: white;
+.styled-text-area .debug,
+.log-debug {
+    -fx-fill: -debug-color;
 }
 
-.facet-pill-error {
-    -fx-background-color: red;
+/**** PERF ****/
+.facet-pill-perf,
+.facet-pill-perf .box {
+    -fx-background-color: derive(-perf-color, 80%);
+    -fx-text-fill: derive(-perf-color, -20%);
+    -fx-border-color: derive(-perf-color, -20%);
 }
 
-.facet-pill-fatal {
-    -fx-text-fill: white;
-    -fx-background-color: DARKRED;
+.facet-pill-perf:selected .box .mark{
+    -fx-background-color: derive(-perf-color, -20%);
 }
 
+.styled-text-area .perf,
+.log-perf {
+    -fx-fill: -perf-color;
+}
+
+/**** INFO ****/
+.facet-pill-info,
+.facet-pill-info .box {
+    -fx-background-color: derive(-info-color, 80%);
+    -fx-text-fill:  derive(-info-color, -20%);
+    -fx-border-color: derive(-info-color, -20%);
+}
+
+.facet-pill-info:selected .box .mark{
+    -fx-background-color: derive(-info-color, -20%);
+}
+
+.styled-text-area .info,
+.log-info {
+    -fx-fill: -info-color;
+}
+
+/**** UNKNOWN ****/
+.facet-pill-unknown,
+.facet-pill-unknown .box {
+    -fx-background-color: derive(-unknown-color, 80%);
+    -fx-text-fill: derive(-unknown-color, -20%);
+    -fx-border-color: derive(-unknown-color, -20%);
+}
+
+.facet-pill-unknown:selected .box .mark{
+    -fx-background-color: derive(-unknown-color, -20%);
+}
+
+.styled-text-area .unknown,
+.log-unknown {
+    -fx-fill: -unknown-color;
+}
+
+/**** WARN ****/
+.facet-pill-warn,
+.facet-pill-warn .box {
+    -fx-background-color: derive(-warn-color, 80%);
+    -fx-text-fill:  derive(-warn-color, -20%);
+    -fx-border-color:  derive(-warn-color, -20%);
+}
+
+.facet-pill-warn:selected .box .mark{
+    -fx-background-color: derive(-warn-color, -20%);
+}
+
+.styled-text-area .warn,
+.log-warn {
+    -fx-fill: -warn-color;
+}
+
+/**** ERROR ****/
+.facet-pill-error,
+.facet-pill-error .box {
+    -fx-background-color: derive(-error-color, 80%);
+    -fx-text-fill: derive(-error-color, -20%);
+    -fx-border-color: derive(-error-color, -20%);
+}
+
+.facet-pill-error:selected .box .mark{
+    -fx-background-color:  derive(-error-color, -20%);
+}
+
+.styled-text-area .error,
+.log-error {
+    -fx-fill:  -error-color;
+}
+
+/**** FATAL ****/
+.facet-pill-fatal,
+.facet-pill-fatal .box {
+    -fx-background-color: derive(-fatal-color, 80%);
+    -fx-text-fill: derive(-fatal-color, -20%);
+    -fx-border-color: derive(-fatal-color, -20%);
+}
+
+.facet-pill-fatal:selected .box .mark{
+    -fx-background-color: derive(-fatal-color, -20%);
+}
+
+.styled-text-area .fatal,
+.log-fatal {
+    -fx-fill: -fatal-color;
+}
+/****************************************************************************/
 
 .busy-indicator {
     -fx-background-color: rgba(255, 255, 255, .6);

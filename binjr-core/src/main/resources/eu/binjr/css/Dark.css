@@ -1953,6 +1953,29 @@
     -fx-fill: -info-color;
 }
 
+/**** UNKNOWN ****/
+{
+    -unknown-color: white;
+}
+.facet-pill-unknown {
+    -fx-background-color: #ffffff50;
+    -fx-text-fill:  -unknown-color;
+    -fx-border-color: -unknown-color;
+}
+.facet-pill-unknown .box {
+    -fx-text-fill: -unknown-color;
+    -fx-border-color: -unknown-color;
+}
+
+.facet-pill-unknown:selected .box .mark{
+    -fx-background-color: -unknown-color;
+}
+
+.styled-text-area .unknown,
+.log-unknown {
+    -fx-fill: -unknown-color;
+}
+
 /**** WARN ****/
 {
     -warn-color: #fbca04;

@@ -455,7 +455,7 @@ public class LogFileIndex implements Searchable {
 
     private Map<String, FacetEntry> makeFacetResult(String facetName, Facets facets, Map<String, Collection<String>> params) throws IOException {
         var facetEntryMap = new TreeMap<String, FacetEntry>();
-        var synthesis = facets.getTopChildren(10, facetName);
+        var synthesis = facets.getTopChildren(100, facetName);
         var labels = new ArrayList<String>();
         if (synthesis != null) {
             for (var f : synthesis.labelValues) {

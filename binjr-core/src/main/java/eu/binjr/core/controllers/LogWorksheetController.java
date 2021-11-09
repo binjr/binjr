@@ -908,7 +908,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                                     Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()), e.getNbOccurrences()))
                                             .collect(Collectors.joining("\n")));
                                     List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
-                                            .map(e -> new XYChart.Data<>(e.getLabel(), e.getNbOccurrences()))
+                                            .map(e -> createDataPoint(s.getLabel(), e.getLabel(), e.getNbOccurrences()))
                                             .toList();
                                     XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
                                     heatmapSeries.getData().setAll(heatmapData);
@@ -974,6 +974,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
         } catch (Exception e) {
             Dialogs.notifyException(e);
         }
+    }
+    private XYChart.Data<String, Integer> createDataPoint(String severityLabel, String bucketName, int nbOccurrences) {
+        XYChart.Data<String, Integer> data = new XYChart.Data<>(bucketName, nbOccurrences);
+        StackPane bar = new StackPane();
+     //   bar.getStyleClass().add("facet-pill-" + UserPreferences.getInstance().mapSeverityStyle(severityLabel));
+        bar.setStyle("-fx-background-color: -" + UserPreferences.getInstance().mapSeverityStyle(severityLabel) + "-color;");
+        data.setNode(bar);
+        return data;
     }
 
     @Override
