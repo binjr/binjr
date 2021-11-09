@@ -95,6 +95,7 @@ import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
@@ -611,27 +612,26 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void initHeatmap() {
-        CategoryAxis xAxis = new CategoryAxis();
-        xAxis.setAutoRanging(true);
-        xAxis.setAnimated(false);
-        xAxis.setTickLabelsVisible(false);
-        xAxis.setTickMarkVisible(false);
-        xAxis.setPrefHeight(AXIS_HEIGHT);
-        xAxis.setMaxHeight(AXIS_HEIGHT);
-        xAxis.setMinHeight(AXIS_HEIGHT);
-        StableTicksAxis<Integer> yAxis = new MetricStableTicksAxis<>();
-        yAxis.setAutoRanging(true);
-        yAxis.setAnimated(false);
-        yAxis.setTickLabelsVisible(true);
-        yAxis.setTickMarkVisible(false);
-        yAxis.setMinorTickVisible(false);
-        yAxis.setPrefWidth(AXIS_WIDTH);
-        yAxis.setMinWidth(AXIS_WIDTH);
-        yAxis.setMaxWidth(AXIS_WIDTH);
+        CategoryAxis categoryAxis = new CategoryAxis();
+        categoryAxis.setAutoRanging(true);
+        categoryAxis.setAnimated(false);
+        categoryAxis.setTickLabelsVisible(false);
+        categoryAxis.setTickMarkVisible(false);
+        categoryAxis.setPrefHeight(AXIS_HEIGHT);
+        categoryAxis.setMaxHeight(AXIS_HEIGHT);
+        categoryAxis.setMinHeight(AXIS_HEIGHT);
+        StableTicksAxis<Integer> heatmapY = new MetricStableTicksAxis<>();
+        heatmapY.setAutoRanging(true);
+        heatmapY.setAnimated(false);
+        heatmapY.setTickLabelsVisible(true);
+        heatmapY.setTickMarkVisible(false);
+        heatmapY.setMinorTickVisible(false);
+        heatmapY.setPrefWidth(AXIS_WIDTH);
+        heatmapY.setMinWidth(AXIS_WIDTH);
+        heatmapY.setMaxWidth(AXIS_WIDTH);
 
-        heatmap = new StackedBarChart<>(xAxis, yAxis);
+        heatmap = new StackedBarChart<>(categoryAxis, heatmapY);
         heatmap.setCategoryGap(0.5);
-//          heatmap.setCategoryGap(0.5);
         heatmap.setVerticalGridLinesVisible(false);
         heatmap.setHorizontalGridLinesVisible(false);
         heatmap.setCache(true);
@@ -662,17 +662,17 @@ public class LogWorksheetController extends WorksheetController implements Synca
         timeAxis.setMaxHeight(AXIS_HEIGHT);
         timeAxis.setMinHeight(AXIS_HEIGHT);
 
-        StableTicksAxis<Double> y = new MetricStableTicksAxis<>();
-        y.setAutoRanging(false);
-        y.setAnimated(false);
-        y.setTickLabelsVisible(false);
-        y.setTickMarkVisible(false);
-        y.setMinorTickVisible(false);
-        y.setPrefWidth(AXIS_WIDTH);
-        y.setMinWidth(AXIS_WIDTH);
-        y.setMaxWidth(AXIS_WIDTH);
+        StableTicksAxis<Double> timelineY = new MetricStableTicksAxis<>();
+        timelineY.setAutoRanging(false);
+        timelineY.setAnimated(false);
+        timelineY.setTickLabelsVisible(false);
+        timelineY.setTickMarkVisible(false);
+        timelineY.setMinorTickVisible(false);
+        timelineY.setPrefWidth(AXIS_WIDTH);
+        timelineY.setMinWidth(AXIS_WIDTH);
+        timelineY.setMaxWidth(AXIS_WIDTH);
 
-        timeline = new LineChart<>(timeAxis, y);
+        timeline = new LineChart<>(timeAxis, timelineY);
         timeline.setVerticalGridLinesVisible(false);
         timeline.setHorizontalGridLinesVisible(false);
 
@@ -696,6 +696,48 @@ public class LogWorksheetController extends WorksheetController implements Synca
             timeRangePicker.updateSelectedRange(range);
             invalidateFilter(true);
         });
+
+        var delay = new PauseTransition(Duration.millis(userPrefs.chartZoomTriggerDelayMs.get().doubleValue()));
+        ZonedDateTime[] zoomTimeRange = new ZonedDateTime[]{
+                timeRangePicker.getTimeRange().getBeginning(),
+                timeRangePicker.getTimeRange().getEnd()
+        };
+        delay.setOnFinished(getBindingManager().registerHandler(e -> {
+            selectedRangeProperty().setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]));
+            heatmap.setVisible(true);
+        }));
+        heatmapArea.setOnScroll(getBindingManager().registerHandler(event -> {
+            if (event.isControlDown() || event.isAltDown()) {
+                heatmap.setVisible(false);
+                ZonedDateTime lower = timeAxis.getLowerBound();
+                ZonedDateTime upper = timeAxis.getUpperBound();
+                double zoomAmount = event.getDeltaY() / userPrefs.chartZoomFactor.get().doubleValue() * -1;
+                double interval = java.time.Duration.between(lower, upper).toMillis();
+                double xZoomDelta = interval * zoomAmount;
+                double lowerBoundOffset;
+                double upperBoundOffset;
+                if (event.isAltDown()) {
+                    // Calculate offsets when panning
+                    lowerBoundOffset = -1 * xZoomDelta;
+                    upperBoundOffset = xZoomDelta;
+                } else {
+                    // Calculate offsets when zooming
+                    ZonedDateTime currentTime = crossHair.getCurrentXValue();
+                    double r = currentTime == null ? 0.5 : java.time.Duration.between(currentTime, upper).toMillis() / interval;
+                    lowerBoundOffset = (1 - r) * xZoomDelta;
+                    upperBoundOffset = r * xZoomDelta;
+                }
+                zoomTimeRange[0] = lower.minus(Math.round(lowerBoundOffset), ChronoUnit.MILLIS);
+                zoomTimeRange[1] = upper.plus(Math.round(upperBoundOffset), ChronoUnit.MILLIS);
+
+                timeAxis.setAutoRanging(false);
+                timeAxis.setLowerBound(zoomTimeRange[0]);
+                timeAxis.setUpperBound(zoomTimeRange[1]);
+
+                delay.playFromStart();
+                event.consume();
+            }
+        }));
     }
 
     @Override
@@ -899,6 +941,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             ZonedDateTime lowerBound = timeRangePicker.getTimeRange().getBeginning();
                             ZonedDateTime upperBound = timeRangePicker.getTimeRange().getEnd();
                             heatmap.getData().clear();
+                            heatmap.setScaleX(1.0);
                             for (var s : severityFacetEntries) {
                                 // Update timestamp Range facet view
                                 var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP + "_" + s.getLabel());
@@ -928,7 +971,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                 timeAxis.setLowerBound(lowerBound);
                                 timeAxis.setUpperBound(upperBound);
                             }
-
                             // Color and display message text
                             try (var p = Profiler.start("Display text", logger::perf)) {
                                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
@@ -975,10 +1017,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
             Dialogs.notifyException(e);
         }
     }
+
     private XYChart.Data<String, Integer> createDataPoint(String severityLabel, String bucketName, int nbOccurrences) {
         XYChart.Data<String, Integer> data = new XYChart.Data<>(bucketName, nbOccurrences);
         StackPane bar = new StackPane();
-     //   bar.getStyleClass().add("facet-pill-" + UserPreferences.getInstance().mapSeverityStyle(severityLabel));
+        //   bar.getStyleClass().add("facet-pill-" + UserPreferences.getInstance().mapSeverityStyle(severityLabel));
         bar.setStyle("-fx-background-color: -" + UserPreferences.getInstance().mapSeverityStyle(severityLabel) + "-color;");
         data.setNode(bar);
         return data;
