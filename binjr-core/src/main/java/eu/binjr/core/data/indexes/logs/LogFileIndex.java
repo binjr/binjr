@@ -359,6 +359,7 @@ public class LogFileIndex implements Searchable {
             proc.setTotalHits(collector.getTotalHits());
             proc.setHitsPerPage(pageSize);
 
+            //TODO: No need to recalculate time range when only the page number changes.
             try (Profiler p = Profiler.start("Retrieving log density facets", logger::perf)) {
                 var severities = params.entrySet().stream()
                         .filter(e -> e.getKey().equals(SEVERITY))
