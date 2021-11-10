@@ -290,7 +290,7 @@ public class LogFileIndex implements Searchable {
                 logger.trace("Query text=" + query);
                 QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
                 filterQuery = new BooleanQuery.Builder()
-                        //  .add(rangeQuery, BooleanClause.Occur.FILTER)
+                        .add(rangeQuery, BooleanClause.Occur.FILTER)
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
@@ -307,7 +307,6 @@ public class LogFileIndex implements Searchable {
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
 
             var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
-            //   drillDownQuery.add(TIMESTAMP, rangeQuery);
             for (var facet : params.entrySet()) {
                 for (var label : facet.getValue()) {
                     drillDownQuery.add(facet.getKey(), label);
