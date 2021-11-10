@@ -93,7 +93,6 @@ public class LogFileIndex implements Searchable {
     private IndexSearcher searcher;
 
     public LogFileIndex() throws IOException {
-
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
@@ -294,18 +293,8 @@ public class LogFileIndex implements Searchable {
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
             }
-            long durationMs = end - start;
-            int nbBuckets = (int) Math.min(prefs.logHeatmapNbBuckets.get().intValue(), durationMs);
-            long intervalLength = Math.round(durationMs / (double) nbBuckets);
-            LongRange[] ranges = new LongRange[nbBuckets];
-            for (int i = 0; i < nbBuckets; i++) {
-                long bucket_start = start + i * intervalLength;
-                long bucket_end = bucket_start + intervalLength;
-                ranges[i] = new LongRange(Long.toString(bucket_end), bucket_start, false, bucket_end, true);
-            }
             var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
-
             var drillDownQuery = new DrillDownQuery(facetsConfig, filterQuery);
             for (var facet : params.entrySet()) {
                 for (var label : facet.getValue()) {
@@ -360,6 +349,7 @@ public class LogFileIndex implements Searchable {
 
             //TODO: No need to recalculate time range when only the page number changes.
             try (Profiler p = Profiler.start("Retrieving log density facets", logger::perf)) {
+                var ranges = computeRanges(start, end);
                 var severities = params.entrySet().stream()
                         .filter(e -> e.getKey().equals(SEVERITY))
                         .flatMap(e -> e.getValue().stream())
@@ -410,6 +400,19 @@ public class LogFileIndex implements Searchable {
         }
     }
 
+    private LongRange[] computeRanges(long start, long end) {
+        long durationMs = end - start;
+        int nbBuckets = (int) Math.min(prefs.logHeatmapNbBuckets.get().intValue(), durationMs);
+        double intervalLength = durationMs / (double) nbBuckets;
+        LongRange[] ranges = new LongRange[nbBuckets];
+        for (int i = 0; i < nbBuckets; i++) {
+            long bucket_start = Math.round(start + i * intervalLength);
+            long bucket_end = Math.round((start + i * intervalLength) + intervalLength);
+            ranges[i] = new LongRange(String.format("%d;%d", bucket_start, bucket_end), bucket_start, false, bucket_end, true);
+        }
+        return ranges;
+    }
+
     private void addLogEvent(String path, ParsedEvent event) throws IOException {
         final Document doc = new Document();
         doc.add(new StringField(DOC_URI, path, Field.Store.NO));
@@ -431,7 +434,7 @@ public class LogFileIndex implements Searchable {
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
     }
 
-    private ZonedDateTime getTimeRangeBoundary(boolean getMin, List<String> files, ZoneId zoneId) throws IOException {
+    private ZonedDateTime getTimeRangeBoundary(boolean getMax, List<String> files, ZoneId zoneId) throws IOException {
         return indexLock.read().lock(() -> {
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
             var dq = new DrillDownQuery(facetsConfig);
@@ -442,12 +445,12 @@ public class LogFileIndex implements Searchable {
                     null,
                     null,
                     1,
-                    new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, getMin)),
+                    new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, getMax)),
                     false);
             if (top.hits.scoreDocs.length > 0) {
                 return ZonedDateTime.ofInstant(
                         Instant.ofEpochMilli(Long.parseLong(
-                                searcher.doc(top.hits.scoreDocs[0].doc).get(TIMESTAMP))), zoneId);
+                                searcher.doc(top.hits.scoreDocs[0].doc).get(TIMESTAMP))).plusMillis(getMax ? 1 : -1), zoneId);
             }
             return null;
         });

@@ -92,7 +92,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -620,6 +619,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         categoryAxis.setPrefHeight(AXIS_HEIGHT);
         categoryAxis.setMaxHeight(AXIS_HEIGHT);
         categoryAxis.setMinHeight(AXIS_HEIGHT);
+        categoryAxis.setStartMargin(0.0);
+        categoryAxis.setEndMargin(0.0);
+        categoryAxis.setGapStartAndEnd(true);
         StableTicksAxis<Integer> heatmapY = new MetricStableTicksAxis<>();
         heatmapY.setAutoRanging(true);
         heatmapY.setAnimated(false);
@@ -704,7 +706,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
         };
         delay.setOnFinished(getBindingManager().registerHandler(e -> {
             selectedRangeProperty().setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]));
-            heatmap.setVisible(true);
         }));
         heatmapArea.setOnScroll(getBindingManager().registerHandler(event -> {
             if (event.isControlDown() || event.isAltDown()) {
@@ -938,17 +939,16 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             } else {
                                 this.pathFacetEntries.setValue(Collections.emptyList());
                             }
-                            ZonedDateTime lowerBound = timeRangePicker.getTimeRange().getBeginning();
-                            ZonedDateTime upperBound = timeRangePicker.getTimeRange().getEnd();
+                            ZonedDateTime lowerBound = worksheet.getQueryParameters().getTimeRange().getBeginning();
+                            ZonedDateTime upperBound = worksheet.getQueryParameters().getTimeRange().getEnd();
                             heatmap.getData().clear();
-                            heatmap.setScaleX(1.0);
+                            heatmap.setVisible(true);
                             for (var s : severityFacetEntries) {
                                 // Update timestamp Range facet view
                                 var timestampFacetEntries = res.getFacetResults().get(LogFileIndex.TIMESTAMP + "_" + s.getLabel());
                                 if (timestampFacetEntries != null) {
-                                    logger.trace(timestampFacetEntries.stream()
-                                            .map(e -> String.format("%s: (%d)", ZonedDateTime.ofInstant(
-                                                    Instant.ofEpochMilli(Long.parseLong(e.getLabel())), ZoneId.systemDefault()), e.getNbOccurrences()))
+                                    logger.trace(() -> timestampFacetEntries.stream()
+                                            .map(e -> String.format("%s: (%d)", e.getLabel(), e.getNbOccurrences()))
                                             .collect(Collectors.joining("\n")));
                                     List<XYChart.Data<String, Integer>> heatmapData = timestampFacetEntries.stream()
                                             .map(e -> createDataPoint(s.getLabel(), e.getLabel(), e.getNbOccurrences()))
@@ -956,14 +956,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     XYChart.Series<String, Integer> heatmapSeries = new XYChart.Series<>();
                                     heatmapSeries.getData().setAll(heatmapData);
                                     heatmap.getData().add(heatmapSeries);
-
-                                    lowerBound = ZonedDateTime.ofInstant(
-                                            Instant.ofEpochMilli(Long.parseLong(heatmapData.get(0).getXValue())),
-                                            timeRangePicker.getZoneId());
-
-                                    upperBound = ZonedDateTime.ofInstant(
-                                            Instant.ofEpochMilli(Long.parseLong(heatmapData.get(heatmapData.size() - 1).getXValue())),
-                                            timeRangePicker.getZoneId());
                                 }
                             }
                             // Update timeline selection widget
