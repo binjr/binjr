@@ -296,7 +296,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> chartZoomTriggerDelayMs = doublePreference("chartZoomTriggerDelayMs", 500.0);
 
-    public final ObservablePreference<Number> logHeatmapNbBuckets = integerPreference("logHeatmapNbBuckets", 2000);
+    public final ObservablePreference<Number> logHeatmapNbBuckets = integerPreference("logHeatmapNbBuckets", 150);
 
     public final ObservablePreference<Boolean> logFilterBarVisible = booleanPreference("logFilterBarVisible", true);
 
