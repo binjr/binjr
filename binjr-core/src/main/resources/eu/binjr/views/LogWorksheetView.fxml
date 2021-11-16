@@ -79,41 +79,41 @@
                                  text="" HBox.hgrow="SOMETIMES">
                 </TimeRangePicker>
                 <Pane HBox.hgrow="ALWAYS"/>
-
-                <ToggleButton fx:id="filterToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                              prefWidth="40.0" selected="true" styleClass="dialog-button">
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Filter log events (Ctrl+K)"/>
-                    </tooltip>
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="filter-icon"/>
-                        </HBox>
-                    </graphic>
-                </ToggleButton>
-                <ToggleButton fx:id="heatmapToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                              prefWidth="40.0" selected="false" styleClass="dialog-button">
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Display/Hide log events heatmap"/>
-                    </tooltip>
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="bar-chart-icon"/>
-                        </HBox>
-                    </graphic>
-                </ToggleButton>
-                <ToggleButton fx:id="findToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
-                              prefWidth="40.0" selected="false" styleClass="dialog-button">
-                    <tooltip>
-                        <Tooltip showDelay="500ms" text="Find in current page (Ctrl+F)"/>
-                    </tooltip>
-                    <graphic>
-                        <HBox alignment="CENTER" styleClass="icon-container">
-                            <Region styleClass="find-icon"/>
-                        </HBox>
-                    </graphic>
-                </ToggleButton>
                 <ToolBar fx:id="chartsToolbar">
+                    <ToggleButton fx:id="filterToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                                  prefWidth="40.0" selected="true" styleClass="dialog-button">
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Filter log events (Ctrl+K)"/>
+                        </tooltip>
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="filter-icon"/>
+                            </HBox>
+                        </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="heatmapToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                                  prefWidth="40.0" selected="false" styleClass="dialog-button">
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Display/Hide log events heatmap"/>
+                        </tooltip>
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="bar-chart-icon"/>
+                            </HBox>
+                        </graphic>
+                    </ToggleButton>
+                    <ToggleButton fx:id="findToggleButton" contentDisplay="GRAPHIC_ONLY" prefHeight="40.0"
+                                  prefWidth="40.0" selected="false" styleClass="dialog-button">
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Find in current page (Ctrl+F)"/>
+                        </tooltip>
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="find-icon"/>
+                            </HBox>
+                        </graphic>
+                    </ToggleButton>
+
                     <ToggleButton fx:id="wordWrapButton" contentDisplay="GRAPHIC_ONLY" maxHeight="-Infinity"
                                   maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
                                   mnemonicParsing="false" prefHeight="40.0" prefWidth="40.0" styleClass="dialog-button"
