@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.workspace;
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
@@ -68,7 +69,7 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     public TimeSeriesInfo(TimeSeriesInfo<T> seriesInfo) {
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
-                seriesInfo.getDisplayColor(),
+                ColorUtils.copy(seriesInfo.getDisplayColor()),
                 seriesInfo.getBinding());
     }
 

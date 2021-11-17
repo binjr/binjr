@@ -17,10 +17,10 @@
 package eu.binjr.core.data.adapters;
 
 import eu.binjr.common.javafx.controls.TimeRange;
-
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -44,7 +44,7 @@ public class LogQueryParameters {
 
     private LogQueryParameters() {
         this(TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
-                ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())),
+                        ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault())),
                 "", new HashSet<>(), 0);
     }
 
@@ -107,45 +107,48 @@ public class LogQueryParameters {
                 page == filter.page;
     }
 
-    public static class Builder{
+    public static class Builder {
         private String filterQuery;
         private Set<String> severities;
         private int page;
         private TimeRange timeRange;
 
-        public Builder(){
+        public Builder() {
             this.timeRange = TimeRange.of(ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
                     ZonedDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()));
-            this.filterQuery ="";
+            this.filterQuery = "";
             this.page = 0;
-            this.severities= new HashSet<>();
+            this.severities = new HashSet<>();
         }
 
-        public Builder(LogQueryParameters params){
-            this.timeRange =params.getTimeRange();
-            this.filterQuery =params.getFilterQuery();
+        public Builder(LogQueryParameters params) {
+            this.timeRange = params.getTimeRange();
+            this.filterQuery = params.getFilterQuery();
             this.page = params.getPage();
-            this.severities= params.getSeverities();
+            this.severities = params.getSeverities();
         }
 
-        public Builder setTimeRange(TimeRange value){
+        public Builder setTimeRange(TimeRange value) {
             this.timeRange = value;
             return this;
         }
-        public Builder setFilterQuery(String value){
+
+        public Builder setFilterQuery(String value) {
             this.filterQuery = value;
             return this;
         }
-        public Builder setPage(int value){
+
+        public Builder setPage(int value) {
             this.page = value;
             return this;
         }
-        public Builder setSeverities(Set<String> value){
+
+        public Builder setSeverities(Set<String> value) {
             this.severities = value;
             return this;
         }
 
-        public LogQueryParameters build(){
+        public LogQueryParameters build() {
             return new LogQueryParameters(timeRange, filterQuery, severities, page);
         }
     }

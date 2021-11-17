@@ -96,7 +96,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
                 worksheet.getQueryParameters(),
                 worksheet.isEditModeEnabled(),
                 worksheet.isTimeRangeLinked());
-        seriesInfo.addAll(worksheet.getSeriesInfo());
+        seriesInfo.addAll(worksheet.getSeriesInfo().stream().map(TimeSeriesInfo::new).toList());
     }
 
     @XmlAttribute

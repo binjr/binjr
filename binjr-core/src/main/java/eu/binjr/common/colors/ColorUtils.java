@@ -80,4 +80,11 @@ public class ColorUtils {
                 Math.round(color.getBlue() * 255),
                 Math.round(alpha * 255));
     }
+
+    public static Color copy(Color color){
+        return  Color.color(color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                color.getOpacity());
+    }
 }
