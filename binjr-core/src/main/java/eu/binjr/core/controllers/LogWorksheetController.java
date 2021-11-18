@@ -833,8 +833,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
         if (logFilesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(root,
                     "This action will add " + logFilesBindings.size() + " series on a single view.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                    "Are you sure you want to proceed?"
+            ) != ButtonType.YES) {
                 return;
             }
         }

@@ -80,6 +80,22 @@
                                              text="The output scale factor to apply to the snapshot"/>
                                 </tooltip>
                             </ChoiceBox>
+                            <Label text="Don't ask before closing tab" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="dontAskBeforeClosingTabCheckbox" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
+                            <Label text="Don't ask before removing chart" wrapText="true"/>
+                            <VBox fillWidth="false">
+                                <ToggleSwitch fx:id="dontAskBeforeRemovingChartCheckbox" prefWidth="1.0">
+                                    <font>
+                                        <Font size="10.0"/>
+                                    </font>
+                                </ToggleSwitch>
+                            </VBox>
                         </VBox>
                     </AnchorPane>
                 </ScrollPane>

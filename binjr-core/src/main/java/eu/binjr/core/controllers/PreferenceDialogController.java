@@ -64,6 +64,10 @@ import java.util.prefs.BackingStoreException;
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
     @FXML
+    private ToggleSwitch dontAskBeforeClosingTabCheckbox;
+    @FXML
+    private ToggleSwitch dontAskBeforeRemovingChartCheckbox;
+    @FXML
     private ToggleSwitch filterBarVisibleToggle;
     @FXML
     private ToggleSwitch findBarVisibleToggle;
@@ -204,6 +208,8 @@ public class PreferenceDialogController implements Initializable {
         findBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
         heatmapVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
         updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
+        dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
+        dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
     }
 
     @SafeVarargs

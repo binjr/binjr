@@ -18,13 +18,14 @@ package eu.binjr.core.dialogs;
 
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
+import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.application.Platform;
-import javafx.geometry.Point2D;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.layout.Region;
 import javafx.stage.Screen;
@@ -42,7 +43,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -191,8 +191,8 @@ public class Dialogs {
     /**
      * Display an info notification
      *
-     * @param title    the title for the notification
-     * @param message  the title for the notification
+     * @param title   the title for the notification
+     * @param message the title for the notification
      */
     public static void notifyInfo(String title, String message) {
         logger.info(title + " - " + message);
@@ -291,7 +291,7 @@ public class Dialogs {
         String msg = "Workspace \"" + fileName + "\" contains unsaved modifications.";
         Region icon = new Region();
         icon.getStyleClass().addAll("dialog-icon", "fileSave-icon");
-        return confirmDialog(node, msg, "Save the changes?", icon, ButtonType.YES, ButtonType.NO, ButtonType.CANCEL);
+        return confirmDialog(node, msg, "Save the changes?", icon, null, true);
     }
 
     /**
@@ -300,11 +300,17 @@ public class Dialogs {
      * @param node    a node attached to the stage to be used as the owner of the dialog.
      * @param header  the header message for the dialog.
      * @param content the main message for the dialog.
-     * @param buttons the {@link ButtonType} that should be displayed on the confirmation dialog.
      * @return the {@link ButtonType} corresponding to user's choice.
      */
-    public static ButtonType confirmDialog(Node node, String header, String content, ButtonType... buttons) {
-        return confirmDialog(node, header, content, null, buttons);
+    public static ButtonType confirmDialog(Node node, String header, String content) {
+        return confirmDialog(node, header, content, null, null, false);
+    }
+
+    public static ButtonType confirmDialog(Node node,
+                                           String header,
+                                           String content,
+                                           ObservablePreference<Boolean> doNotAskAgain) {
+        return confirmDialog(node, header, content, null, doNotAskAgain, false);
     }
 
     /**
@@ -314,10 +320,14 @@ public class Dialogs {
      * @param header  the header message for the dialog.
      * @param content the main message for the dialog.
      * @param icon    the icon for the dialog.
-     * @param buttons the {@link ButtonType} that should be displayed on the confirmation dialog.
      * @return the {@link ButtonType} corresponding to user's choice.
      */
-    public static ButtonType confirmDialog(Node node, String header, String content, Node icon, ButtonType... buttons) {
+    public static ButtonType confirmDialog(Node node,
+                                           String header,
+                                           String content,
+                                           Node icon,
+                                           ObservablePreference<Boolean> doNotAskAgain,
+                                           boolean isCancelable) {
         Dialog<ButtonType> dlg = new Dialog<>();
         dlg.initOwner(Dialogs.getStage(node));
         setAlwaysOnTop(dlg);
@@ -331,10 +341,20 @@ public class Dialogs {
             icon.getStyleClass().addAll("dialog-icon", "help-icon");
         }
         dlg.getDialogPane().setGraphic(icon);
-        if (buttons == null || buttons.length == 0) {
-            buttons = new ButtonType[]{ButtonType.YES, ButtonType.NO};
+        dlg.getDialogPane().getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
+        if (isCancelable) {
+            dlg.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
         }
-        dlg.getDialogPane().getButtonTypes().addAll(buttons);
+        if (doNotAskAgain != null) {
+            if (doNotAskAgain.get()) {
+                return ButtonType.YES;
+            }
+            var checkBox = new CheckBox("Do not ask again");
+            checkBox.selectedProperty().bindBidirectional(doNotAskAgain.property());
+            dlg.getDialogPane().setExpandableContent(checkBox);
+            dlg.getDialogPane().setExpanded(true);
+        }
+
         return dlg.showAndWait().orElse(ButtonType.CANCEL);
     }
 

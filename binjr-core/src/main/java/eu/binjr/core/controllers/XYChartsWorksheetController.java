@@ -206,8 +206,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(dlgRoot,
                     "This action will add " + totalBindings + " series on a single worksheet.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                    "Are you sure you want to proceed?"
+            ) != ButtonType.YES) {
                 return Optional.empty();
             }
         }
@@ -1030,9 +1030,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
         var chartsToRemove = chartsInSelection.contains(currentChart) ? chartsInSelection : List.of(currentChart);
         if (Dialogs.confirmDialog(root, "Are you sure you want to remove chart \"" +
-                        chartsToRemove.stream().map(Chart::getName).collect(Collectors.joining("\", \"")) +
-                        "\"?",
-                "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                chartsToRemove.stream().map(Chart::getName).collect(Collectors.joining("\", \"")) +
+                "\"?", "", userPrefs.doNotWarnOnChartClose) == ButtonType.YES) {
             worksheet.getCharts().removeAll(chartsToRemove);
         }
     }
@@ -1278,8 +1277,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (timeSeriesBindings.size() >= userPrefs.maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(root,
                     "This action will add " + timeSeriesBindings.size() + " series on a single chart.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                    "Are you sure you want to proceed?"
+            ) != ButtonType.YES) {
                 return;
             }
         }

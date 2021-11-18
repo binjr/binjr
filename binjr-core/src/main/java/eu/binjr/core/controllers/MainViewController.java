@@ -184,8 +184,8 @@ public class MainViewController implements Initializable {
         if (totalBindings >= UserPreferences.getInstance().maxSeriesPerChartBeforeWarning.get().intValue()) {
             if (Dialogs.confirmDialog(dlgRoot,
                     "This action will add " + totalBindings + " series on a single worksheet.",
-                    "Are you sure you want to proceed?",
-                    ButtonType.YES, ButtonType.NO) != ButtonType.YES) {
+                    "Are you sure you want to proceed?"
+            ) != ButtonType.YES) {
                 return Optional.empty();
             }
         }
@@ -570,8 +570,8 @@ public class MainViewController implements Initializable {
                 .setIconStyleClass("cross-icon", "small-icon")
                 .setAction(event -> {
                     if (Dialogs.confirmDialog(root, "Are you sure you want to remove source \"" + source.getName() + "\"?",
-                            "WARNING: This will remove all associated series from existing worksheets.",
-                            ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                            "WARNING: This will remove all associated series from existing worksheets."
+                    ) == ButtonType.YES) {
                         sourcesPane.getPanes().remove(newPane);
                     }
                 }).build(Button::new);
@@ -1075,7 +1075,7 @@ public class MainViewController implements Initializable {
             return;
         }
         if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?", "",
-                ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                UserPreferences.getInstance().doNotWarnOnTabClose) == ButtonType.YES) {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
                 handler.handle(null);
@@ -1104,7 +1104,7 @@ public class MainViewController implements Initializable {
         MenuItem closeOthers = new MenuItem("Close Other Worksheets");
         closeOthers.setOnAction(manager.registerHandler(event -> {
             if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all worksheets except for '" + tab.getName() + "'?",
-                    "", ButtonType.YES, ButtonType.NO) == ButtonType.YES) {
+                    "") == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
                         .filter(tab1 -> !tab1.equals(tab))

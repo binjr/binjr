@@ -304,6 +304,10 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Boolean> logHeatmapVisible = booleanPreference("logHeatmapVisible", false);
 
+    public final ObservablePreference<Boolean> doNotWarnOnChartClose = booleanPreference("doNotWarnOnChartClose", false);
+
+    public final ObservablePreference<Boolean> doNotWarnOnTabClose = booleanPreference("doNotWarnOnTabClose", false);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =
