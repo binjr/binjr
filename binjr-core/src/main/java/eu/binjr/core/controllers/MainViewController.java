@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.logging.Logger;
@@ -24,6 +25,7 @@ import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.adapters.*;
 import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
+import eu.binjr.core.data.exceptions.CannotLoadWorksheetException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.*;
@@ -73,6 +75,7 @@ import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -377,7 +380,7 @@ public class MainViewController implements Initializable {
             if (e.getCode() == KeyCode.P && e.isControlDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::saveSnapshot);
             }
-            if (e.getCode() == KeyCode.T && e.isControlDown()) {
+            if (e.getCode() == KeyCode.T && e.isControlDown() && !e.isShiftDown()) {
                 editWorksheet(new XYChartsWorksheet());
             }
             if (e.isControlDown() && (e.getCode() == KeyCode.W || e.getCode() == KeyCode.F4)) {
@@ -388,6 +391,9 @@ public class MainViewController implements Initializable {
             }
             if (e.getCode() == KeyCode.RIGHT && e.isAltDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::navigateForward);
+            }
+            if (e.getCode() == KeyCode.T && e.isShiftDown() && e.isControlDown()) {
+                restoreLatestClosedWorksheet();
             }
         }));
         stage.addEventFilter(KeyEvent.KEY_PRESSED, manager.registerHandler(e -> handleControlKey(e, true)));
@@ -762,12 +768,25 @@ public class MainViewController implements Initializable {
         }
     }
 
+    private void restoreLatestClosedWorksheet() {
+        this.workspace.pollClosedWorksheet().ifPresent(w -> {
+            try {
+                loadWorksheet(w);
+            } catch (CannotLoadWorksheetException e) {
+                logger.warn("Could not restore worksheet: " + e.getMessage());
+                logger.debug(() -> "Could not restore worksheet", e);
+            }
+        });
+    }
+
     private void loadWorksheets(Workspace wsFromfile) {
         try {
             for (var worksheet : wsFromfile.getWorksheets()) {
-                loadWorksheet(worksheet);
-                // Attach DataAdapter to the worksheet TimeSeriesInfo
-                //     worksheet.attachAdaptersToSeriesInfo(wsFromfile.getSources());
+                try {
+                    loadWorksheet(worksheet);
+                } catch (CannotLoadWorksheetException e) {
+                    Dialogs.notifyException(e);
+                }
             }
             workspace.cleanUp();
             UserHistory.getInstance().mostRecentWorkspaces.push(workspace.getPath());
@@ -947,14 +966,29 @@ public class MainViewController implements Initializable {
         return sourcePaneContent;
     }
 
-    private boolean loadWorksheet(Worksheet<?> worksheet) {
+    private boolean loadWorksheet(Worksheet<?> worksheet) throws CannotLoadWorksheetException {
         EditableTab newTab = loadWorksheetInTab(worksheet, false);
         tearableTabPane.getTabs().add(newTab);
         tearableTabPane.getSelectionModel().select(newTab);
         return false;
     }
 
-    private void reloadController(WorksheetController worksheetCtrl) {
+    private void editWorksheet(Worksheet<?> worksheet) {
+        try {
+            editWorksheet(tearableTabPane.getSelectedTabPane(), worksheet);
+        } catch (CannotLoadWorksheetException e) {
+            Dialogs.notifyException("Error loading worksheet", e, root);
+        }
+    }
+
+    private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) throws CannotLoadWorksheetException {
+        var newTab = loadWorksheetInTab(worksheet, true);
+        targetTabPane.getTabs().add(newTab);
+        targetTabPane.getSelectionModel().select(newTab);
+        return true;
+    }
+
+    private void reloadController(WorksheetController worksheetCtrl) throws CannotLoadWorksheetException {
         if (worksheetCtrl == null) {
             throw new IllegalArgumentException("Provided Worksheet controller cannot be null");
         }
@@ -977,7 +1011,7 @@ public class MainViewController implements Initializable {
         loadWorksheet(worksheet, tab, false);
     }
 
-    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode) {
+    private WorksheetController loadWorksheet(Worksheet<?> worksheet, EditableTab newTab, boolean setToEditMode) throws CannotLoadWorksheetException {
         try {
             WorksheetController current = worksheet.getControllerClass()
                     .getDeclaredConstructor(this.getClass(),
@@ -990,7 +1024,7 @@ public class MainViewController implements Initializable {
                                     .collect(Collectors.toList()));
             try {
                 // Register reload listener
-                current.setReloadRequiredHandler(this::reloadController);
+                current.setReloadRequiredHandler(CheckedLambdas.wrap(this::reloadController));
                 FXMLLoader fXMLLoader = new FXMLLoader(current.getClass().getResource(current.getView()));
                 fXMLLoader.setController(current);
                 Parent p = fXMLLoader.load();
@@ -1038,13 +1072,19 @@ public class MainViewController implements Initializable {
             }
             newTab.setContextMenu(getTabContextMenu(newTab, worksheet, current.getBindingManager()));
             return current;
-        } catch (Exception e) {
-            Dialogs.notifyException("Error loading worksheet into new tab", e, root);
-            return null;
+        } catch (Throwable e) {
+            Throwable toThrow = e;
+            if (e instanceof InvocationTargetException && e.getCause() != null) {
+                // Rethrow original exception thrown by constructor, if captured
+                toThrow = e.getCause();
+            }
+            logger.debug(() -> "Error loading worksheet into new tab", toThrow);
+            throw new CannotLoadWorksheetException("Failed to load worksheet " +
+                    (worksheet != null ? worksheet.getName() : "null") + ": " + toThrow.getMessage(), toThrow);
         }
     }
 
-    private EditableTab loadWorksheetInTab(Worksheet<?> worksheet, boolean editMode) {
+    private EditableTab loadWorksheetInTab(Worksheet<?> worksheet, boolean editMode) throws CannotLoadWorksheetException {
         workspace.setPresentationMode(false);
         var buttons = new ArrayList<ButtonBase>();
         if (worksheet instanceof Syncable syncable) {
@@ -1143,17 +1183,6 @@ public class MainViewController implements Initializable {
             items.add(link);
         }
         return items;
-    }
-
-    private boolean editWorksheet(Worksheet<?> worksheet) {
-        return editWorksheet(tearableTabPane.getSelectedTabPane(), worksheet);
-    }
-
-    private boolean editWorksheet(TabPane targetTabPane, Worksheet<?> worksheet) {
-        var newTab = loadWorksheetInTab(worksheet, true);
-        targetTabPane.getTabs().add(newTab);
-        targetTabPane.getSelectionModel().select(newTab);
-        return true;
     }
 
     private Image renderTextTooltip(String text) {
@@ -1337,19 +1366,24 @@ public class MainViewController implements Initializable {
         while (c.next()) {
             if (c.wasAdded()) {
                 c.getAddedSubList().forEach(tab -> {
-                    workspace.addWorksheets(seriesControllers.get(tab).getWorksheet());
-                    worksheetMenu.getItems().add(
-                            getWorksheetMenuItem((EditableTab) tab,
-                                    seriesControllers.get(tab).getWorksheet(),
-                                    seriesControllers.get(tab).getBindingManager()));
+                    WorksheetController ctlr = seriesControllers.get(tab);
+                    if (ctlr != null) {
+                        workspace.addWorksheets(seriesControllers.get(tab).getWorksheet());
+                        worksheetMenu.getItems().add(
+                                getWorksheetMenuItem((EditableTab) tab,
+                                        seriesControllers.get(tab).getWorksheet(),
+                                        seriesControllers.get(tab).getBindingManager()));
+                    } else {
+                        logger.warn("Could not find a controller assigned to tab " + tab.getText());
+                    }
                 });
             }
             if (c.wasRemoved()) {
-                c.getRemoved().forEach((t -> {
-                    WorksheetController ctlr = seriesControllers.get(t);
+                c.getRemoved().forEach((tab -> {
+                    WorksheetController ctlr = seriesControllers.get(tab);
                     // sever ref to allow collect
-                    t.setContent(null);
-                    t.setContextMenu(null);
+                    tab.setContent(null);
+                    tab.setContextMenu(null);
                     if (ctlr != null) {
                         worksheetMenu.getItems()
                                 .stream()
@@ -1358,10 +1392,10 @@ public class MainViewController implements Initializable {
                                 .ifPresent(item -> worksheetMenu.getItems().remove(item));
 
                         workspace.removeWorksheets(ctlr.getWorksheet());
-                        seriesControllers.remove(t);
+                        seriesControllers.remove(tab);
                         ctlr.close();
                     } else {
-                        logger.warn("Could not find a controller assigned to tab " + t.getText());
+                        logger.warn("Could not find a controller assigned to tab " + tab.getText());
                     }
                 }));
             }
@@ -1406,7 +1440,12 @@ public class MainViewController implements Initializable {
     }
 
     private Optional<Tab> worksheetTabFactory(ActionEvent event) {
-        return Optional.of(loadWorksheetInTab(new XYChartsWorksheet(), true));
+        try {
+            return Optional.of(loadWorksheetInTab(new XYChartsWorksheet(), true));
+        } catch (CannotLoadWorksheetException e) {
+            logger.error(e);
+            return Optional.empty();
+        }
     }
 
     @FXML

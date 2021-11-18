@@ -42,8 +42,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A class that represents and holds the current state of the application
@@ -83,6 +82,7 @@ public class Workspace implements Dirtyable {
     private final BooleanProperty presentationMode;
 
     private transient final BooleanProperty sourcePaneVisible;
+    private transient final Deque<Worksheet<?>> closedWorksheet = new ArrayDeque<>();
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -207,15 +207,23 @@ public class Workspace implements Dirtyable {
      */
     public void removeWorksheets(Worksheet<?>... worksheetsToRemove) {
         for (var w : worksheetsToRemove) {
+            closedWorksheet.push(w.clone());
             w.close();
             this.worksheets.remove(w);
         }
+    }
+
+    public Optional<Worksheet<?>> pollClosedWorksheet() {
+        var w = this.closedWorksheet.poll();
+        return w != null ? Optional.of(w) : Optional.empty();
     }
 
     /**
      * Clear the {@link XYChartsWorksheet} list
      */
     public void clearWorksheets() {
+        IOUtils.closeAll(closedWorksheet);
+        closedWorksheet.clear();
         IOUtils.closeAll(worksheets);
         worksheets.clear();
     }

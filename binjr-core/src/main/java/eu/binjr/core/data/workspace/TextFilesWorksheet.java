@@ -82,6 +82,11 @@ public class TextFilesWorksheet extends Worksheet<String> {
     }
 
     @Override
+    public TextFilesWorksheet clone(){
+        return new TextFilesWorksheet(this);
+    }
+
+    @Override
     public void initWithBindings(String title, BindingsHierarchy... bindingsHierarchies) throws DataAdapterException {
         this.setName(title);
         for (var root : bindingsHierarchies) {

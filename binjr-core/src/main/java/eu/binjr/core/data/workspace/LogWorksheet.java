@@ -135,6 +135,11 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @Override
+    public LogWorksheet clone(){
+        return new LogWorksheet(this);
+    }
+
+    @Override
     public void initWithBindings(String title, BindingsHierarchy... bindingsHierarchies) throws DataAdapterException {
         this.setName(title);
         for (var root : bindingsHierarchies) {
