@@ -109,9 +109,15 @@ public class MainViewController implements Initializable {
     private final BooleanProperty treeItemDragAndDropInProgress = new SimpleBooleanProperty(false);
     private BooleanBinding noWorksheetPresent;
     private BooleanBinding noSourcePresent;
-    public AnchorPane sourcePane;
-    public MenuItem hideSourcePaneMenu;
-    public StackPane newWorksheetDropTarget;
+
+    @FXML
+    private MenuItem restoreClosedWorksheetMenu;
+    @FXML
+    private AnchorPane sourcePane;
+    @FXML
+    private MenuItem hideSourcePaneMenu;
+    @FXML
+    private StackPane newWorksheetDropTarget;
     @FXML
     private DrawerPane commandBar;
     @FXML
@@ -315,11 +321,12 @@ public class MainViewController implements Initializable {
             }
         });
         this.addSourceMenu.getItems().addAll(populateSourceMenu());
-        this.addSourceMenu.setOnShowing(event -> addSourceMenu.getItems().setAll(populateSourceMenu()));//getItems().addAll(populateSourceMenu());
+        this.addSourceMenu.setOnShowing(event -> addSourceMenu.getItems().setAll(populateSourceMenu()));
         newWorksheetDropTarget.managedProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
         newWorksheetDropTarget.visibleProperty()
                 .bind(tearableTabPane.emptyProperty().not().and(treeItemDragAndDropInProgressProperty()));
+        this.restoreClosedWorksheetMenu.disableProperty().bind(workspace.closedWorksheetQueueEmptyProperty());
         Platform.runLater(this::runAfterInitialize);
     }
 
@@ -1556,6 +1563,11 @@ public class MainViewController implements Initializable {
 
     public BooleanProperty treeItemDragAndDropInProgressProperty() {
         return treeItemDragAndDropInProgress;
+    }
+
+    @FXML
+    private void handleRestoreClosedWorksheet(ActionEvent actionEvent) {
+        restoreLatestClosedWorksheet();
     }
 
     //endregion

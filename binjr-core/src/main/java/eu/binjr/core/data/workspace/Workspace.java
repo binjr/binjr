@@ -82,7 +82,8 @@ public class Workspace implements Dirtyable {
     private final BooleanProperty presentationMode;
 
     private transient final BooleanProperty sourcePaneVisible;
-    private transient final Deque<Worksheet<?>> closedWorksheet = new ArrayDeque<>();
+    private transient final Deque<Worksheet<?>> closedWorksheetQueue = new ArrayDeque<>();
+    private transient final BooleanProperty closedWorksheetQueueEmpty = new SimpleBooleanProperty(true);
 
     /**
      * Initializes a new instance of the {@link Workspace} class
@@ -207,23 +208,35 @@ public class Workspace implements Dirtyable {
      */
     public void removeWorksheets(Worksheet<?>... worksheetsToRemove) {
         for (var w : worksheetsToRemove) {
-            closedWorksheet.push(w.clone());
+            closedWorksheetQueue.push(w.clone());
+            closedWorksheetQueueEmpty.setValue(false);
             w.close();
             this.worksheets.remove(w);
         }
     }
 
     public Optional<Worksheet<?>> pollClosedWorksheet() {
-        var w = this.closedWorksheet.poll();
-        return w != null ? Optional.of(w) : Optional.empty();
+        var head = this.closedWorksheetQueue.poll();
+        closedWorksheetQueueEmpty.setValue(closedWorksheetQueue.isEmpty());
+        return (head != null ? Optional.of(head) : Optional.empty());
     }
+
+    public boolean isClosedWorksheetQueueEmpty() {
+        return closedWorksheetQueueEmpty.get();
+    }
+
+    public ReadOnlyBooleanProperty closedWorksheetQueueEmptyProperty() {
+        return ReadOnlyBooleanProperty.readOnlyBooleanProperty(closedWorksheetQueueEmpty);
+    }
+
 
     /**
      * Clear the {@link XYChartsWorksheet} list
      */
     public void clearWorksheets() {
-        IOUtils.closeAll(closedWorksheet);
-        closedWorksheet.clear();
+        IOUtils.closeAll(closedWorksheetQueue);
+        closedWorksheetQueue.clear();
+        closedWorksheetQueueEmpty.setValue(true);
         IOUtils.closeAll(worksheets);
         worksheets.clear();
     }

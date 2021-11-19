@@ -282,10 +282,17 @@
                <Tooltip showDelay="500ms" text="Worksheets"/>
             </tooltip>
             <items>
-                <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
+                <MenuItem  mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addWorksheet-icon"/>
+                        </HBox>
+                    </graphic>
+                </MenuItem>
+                <MenuItem fx:id="restoreClosedWorksheetMenu" mnemonicParsing="false" onAction="#handleRestoreClosedWorksheet" text="Restore Closed Worksheet">
+                    <graphic>
+                        <HBox styleClass="icon-container">
+                            <Region styleClass="undo-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>
