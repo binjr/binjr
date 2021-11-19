@@ -1114,7 +1114,8 @@ public class MainViewController implements Initializable {
             logger.debug("Requested tab for closure is null");
             return;
         }
-        if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?", "",
+        if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?" +
+                "\n\n(Closed tabs can be restored by pressing ctrl+shift+T)", "",
                 UserPreferences.getInstance().doNotWarnOnTabClose) == ButtonType.YES) {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
@@ -1143,7 +1144,8 @@ public class MainViewController implements Initializable {
         close.setOnAction(manager.registerHandler(event -> closeWorksheetTab(tab)));
         MenuItem closeOthers = new MenuItem("Close Other Worksheets");
         closeOthers.setOnAction(manager.registerHandler(event -> {
-            if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all worksheets except for '" + tab.getName() + "'?",
+            if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all worksheets except for '" + tab.getName() + "'?" +
+                            "\n\n(Closed tabs can be restored by pressing ctrl+shift+T)",
                     "") == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
