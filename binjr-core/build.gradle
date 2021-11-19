@@ -18,7 +18,7 @@
 dependencies {
     api 'org.apache.logging.log4j:log4j-core:2.14.1'
     api 'org.apache.logging.log4j:log4j-jcl:2.14.1'
-    api 'org.apache.httpcomponents.client5:httpclient5:5.1'
+    api 'org.apache.httpcomponents.client5:httpclient5:5.1.2'
     implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.14.1'
     api 'org.controlsfx:controlsfx:11.1.0'
     implementation 'org.gillius:jfxutils:1.0'
@@ -29,9 +29,9 @@ dependencies {
     implementation "org.bouncycastle:bcpg-jdk15on:1.69"
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.7'
-    implementation 'org.apache.lucene:lucene-core:8.10.1'
-    implementation 'org.apache.lucene:lucene-facet:8.10.1'
-    implementation 'org.apache.lucene:lucene-queryparser:8.10.1'
+    implementation 'org.apache.lucene:lucene-core:8.11.0'
+    implementation 'org.apache.lucene:lucene-facet:8.11.0'
+    implementation 'org.apache.lucene:lucene-queryparser:8.11.0'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"
