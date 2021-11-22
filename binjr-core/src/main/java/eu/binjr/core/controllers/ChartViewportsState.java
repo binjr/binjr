@@ -287,7 +287,7 @@ public class ChartViewportsState implements AutoCloseable {
      * Mutates the current state according to the provided map of selections.
      *
      * @param selectionMap a map of selections to apply.
-     * @param toHistory    true if state change should be added to hitory, false otherwise.
+     * @param toHistory    true if state change should be added to history, false otherwise.
      */
     public void setSelection(Map<Chart, XYChartSelection<ZonedDateTime, Double>> selectionMap, boolean toHistory) {
         this.suspendAxisListeners();
@@ -311,7 +311,7 @@ public class ChartViewportsState implements AutoCloseable {
     /**
      * Associate the provided state to the specified chart.
      *
-     * @param chart            the chart to associated a state to
+     * @param chart            the chart to associate a state to
      * @param xyChartViewState the state to associate.
      * @return the state associated.
      */

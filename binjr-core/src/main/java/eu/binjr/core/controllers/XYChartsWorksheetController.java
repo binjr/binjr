@@ -693,8 +693,8 @@ public class XYChartsWorksheetController extends WorksheetController {
         getBindingManager().bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         addChartButton.setOnAction(getBindingManager().registerHandler(this::handleAddNewChart));
         currentState = new ChartViewportsState(this, worksheet.getFromDateTime(), worksheet.getToDateTime());
-        timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
-        timeRangePicker.zoneIdProperty().bindBidirectional(worksheet.timeZoneProperty());
+        getBindingManager().bindBidirectional(timeRangePicker.timeRangeLinkedProperty(), worksheet.timeRangeLinkedProperty());
+        getBindingManager().bindBidirectional(timeRangePicker.zoneIdProperty(), worksheet.timeZoneProperty());
         timeRangePicker.initSelectedRange(TimeRange.of(currentState.getStartX(), currentState.getEndX()));
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) ->
                 currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true));

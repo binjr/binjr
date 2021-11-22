@@ -3,3 +3,4 @@
 * _[New]_ Added the option to skip the confirmation dialog on closing worksheet tabs or charts.
 * _[New]_ Added the ability to restore closed tabs using the `Ctrl`+`Shift`+`t` shortcut, similarly to web browsers.
 * _[Fixed]_ After duplicating a log worksheet, changing properties of the log files (in the bottom view) affects both the original and duplicated worksheet.
+* _[Fixed]_ Navigating backward or forward on a log worksheet does not change the timeline of linked worksheets.

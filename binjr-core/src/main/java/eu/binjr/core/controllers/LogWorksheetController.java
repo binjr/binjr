@@ -238,7 +238,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
         // TimeRange Picker initialization
-        timeRangePicker.timeRangeLinkedProperty().bindBidirectional(worksheet.timeRangeLinkedProperty());
+        getBindingManager().bindBidirectional(timeRangePicker.timeRangeLinkedProperty(), worksheet.timeRangeLinkedProperty());
         timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
             invalidateFilter(true);
@@ -508,7 +508,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
             if (key == KeyCode.D && e.isControlDown()) {
                 favoriteButton.fire();
             }
-
         }));
 
         applyFilterButton.setOnAction(getBindingManager().registerHandler(event -> invalidateFilter(true)));
@@ -1178,12 +1177,12 @@ public class LogWorksheetController extends WorksheetController implements Synca
             getBindingManager().suspend();
             try {
                 worksheet.setQueryParameters(newParams);
-                timeRangePicker.updateSelectedRange(newParams.getTimeRange());
                 filterTextField.setText(newParams.getFilterQuery());
                 pager.setCurrentPageIndex(newParams.getPage());
             } finally {
                 getBindingManager().resume();
             }
+            timeRangePicker.updateSelectedRange(newParams.getTimeRange());
             invalidate(false, resetPage);
         }
     }
@@ -1297,13 +1296,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private Path getTmpCssPath() throws IOException {
-
         if (this.tmpCssPath == null) {
             tmpCssPath = Files.createTempFile("tmp_", ".css");
             tmpCssPath.toFile().deleteOnExit();
         }
         return tmpCssPath;
-
     }
 
     @Override
