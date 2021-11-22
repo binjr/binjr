@@ -1081,8 +1081,8 @@ public class MainViewController implements Initializable {
             return current;
         } catch (Throwable e) {
             Throwable toThrow = e;
+            // Rethrow original exception thrown by constructor, if captured
             if (e instanceof InvocationTargetException && e.getCause() != null) {
-                // Rethrow original exception thrown by constructor, if captured
                 toThrow = e.getCause();
             }
             logger.debug(() -> "Error loading worksheet into new tab", toThrow);
@@ -1121,8 +1121,8 @@ public class MainViewController implements Initializable {
             logger.debug("Requested tab for closure is null");
             return;
         }
-        if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close tab '" + tab.getName() + "'?" +
-                "\n\n(Closed tabs can be restored by pressing ctrl+shift+T)", "",
+        if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close worksheet '" + tab.getName() + "'?" +
+                "\n\n(Closed worksheets can be restored by pressing ctrl+shift+T)", "",
                 UserPreferences.getInstance().doNotWarnOnTabClose) == ButtonType.YES) {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
@@ -1152,7 +1152,7 @@ public class MainViewController implements Initializable {
         MenuItem closeOthers = new MenuItem("Close Other Worksheets");
         closeOthers.setOnAction(manager.registerHandler(event -> {
             if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close all worksheets except for '" + tab.getName() + "'?" +
-                            "\n\n(Closed tabs can be restored by pressing ctrl+shift+T)",
+                            "\n\n(Closed worksheets can be restored by pressing ctrl+shift+T)",
                     "") == ButtonType.YES) {
                 var tabs = tab.getTabPane().getTabs();
                 tabs.removeAll(tabs.stream()
