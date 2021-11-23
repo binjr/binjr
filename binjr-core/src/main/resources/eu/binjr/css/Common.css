@@ -13,6 +13,23 @@
     -palette-color-11:  #dddd00;
 }
 
+.pagination > .pagination-control .right-arrow,
+.pagination > .pagination-control .left-arrow {
+    -fx-background-color: -fx-mark-color;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-scale-x: 3;
+    -fx-scale-y: 3;
+    -fx-scale-shape: false;
+    -fx-position-shape: true;
+    -fx-snap-to-pixel: true;
+    -fx-shape: "m 61.796417,136.84737 q 0.03543,0.0354 0.03543,0.0815 0,0.0461 -0.03543,0.0815 l -1.651284,1.65128 q -0.03543,0.0354 -0.0815,0.0354 -0.04607,0 -0.0815,-0.0354 l -0.177176,-0.17717 q -0.03544,-0.0354 -0.03544,-0.0815 0,-0.0461 0.03544,-0.0815 l 1.392606,-1.3926 -1.392606,-1.39261 q -0.03544,-0.0354 -0.03544,-0.0815 0,-0.0461 0.03544,-0.0815 l 0.177176,-0.17718 q 0.03543,-0.0354 0.0815,-0.0354 0.04607,0 0.0815,0.0354 z";
+    -fx-effect: null;
+}
+
+.pagination > .pagination-control .left-arrow {
+    -fx-rotate: 180;
+}
 
 .suggest-popup .tree-cell:category {
     -fx-font-weight: bold ;

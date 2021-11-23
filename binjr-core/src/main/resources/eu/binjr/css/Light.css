@@ -108,6 +108,8 @@
 }
 
 .exit,
+.left-arrow-button,
+.right-arrow-button,
 .add-tab-button,
 .dialog-button,
 .toggle-button,
@@ -284,7 +286,8 @@
 }
 
 .date-picker-popup,
-.interval-picker-popup {
+.interval-picker-popup,
+.pagination-popup {
     /* -fx-effect: null;*/
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 10, 0.0, 0, 0.5);
     -fx-background-color: white;
