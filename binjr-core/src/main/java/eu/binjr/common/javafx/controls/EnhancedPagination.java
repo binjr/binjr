@@ -76,7 +76,7 @@ public class EnhancedPagination extends Pagination {
             var input = new TextField();
             HBox.setHgrow(input, Priority.NEVER);
             var label = new Label("Jump to:");
-            label.setMinWidth(50);
+            label.setMinWidth(55);
             HBox.setHgrow(label, Priority.ALWAYS);
             var hbox = new HBox();
             hbox.setSpacing(10);
@@ -84,7 +84,7 @@ public class EnhancedPagination extends Pagination {
             hbox.setAlignment(Pos.CENTER_LEFT);
             hbox.getStyleClass().addAll("pagination-popup");
             hbox.setPadding(new Insets(5.0, 5.0, 5.0, 5.0));
-            hbox.setPrefSize(130, 40);
+            hbox.setPrefSize(135, 40);
             var popup = new PopupControl();
             popup.setAutoHide(true);
             popup.getScene().setRoot(hbox);
