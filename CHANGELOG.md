@@ -1,3 +1,14 @@
+## [binjr v3.5.0](https://github.com/binjr/binjr/releases/tag/v3.5.0)
+Released on Thu, 25 Nov 2021
+
+* _[New]_ Added a bar chart to log worksheets that shows the distributions over time of events' severity.
+* _[New]_ The precision of the time axis for charts has been increased from seconds to milli-seconds.
+* _[New]_ Added the option to skip the confirmation dialog on closing worksheet tabs or charts.
+* _[New]_ Added the ability to restore closed tabs using the `Ctrl`+`Shift`+`t` shortcut, similarly to web browsers.
+* _[New]_ Enhanced the pagination control on log worksheets with the ability to jump directly to the first, last or arbitrary page.
+* _[Fixed]_ After duplicating a log worksheet, changing properties of the log files (in the bottom view) affects both the original and duplicated worksheet.
+* _[Fixed]_ Navigating backward or forward on a log worksheet does not change the timeline of linked worksheets.
+
 ## [binjr v3.4.0](https://github.com/binjr/binjr/releases/tag/v3.4.0)
 Released on Thu, 22 Oct 2021
 
