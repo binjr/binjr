@@ -208,7 +208,7 @@ public class Workspace implements Dirtyable {
      */
     public void removeWorksheets(Worksheet<?>... worksheetsToRemove) {
         for (var w : worksheetsToRemove) {
-            closedWorksheetQueue.push(w.clone());
+            closedWorksheetQueue.push(w.duplicate());
             closedWorksheetQueueEmpty.setValue(false);
             w.close();
             this.worksheets.remove(w);

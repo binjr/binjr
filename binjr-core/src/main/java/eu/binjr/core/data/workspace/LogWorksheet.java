@@ -125,7 +125,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @Override
-    public Worksheet<SearchHit> duplicate() {
+    public LogWorksheet duplicate() {
         return new LogWorksheet(this);
     }
 
@@ -135,8 +135,9 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @Override
+    @Deprecated
     public LogWorksheet clone(){
-        return new LogWorksheet(this);
+        return duplicate();
     }
 
     @Override

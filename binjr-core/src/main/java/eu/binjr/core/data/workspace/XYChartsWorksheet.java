@@ -161,8 +161,9 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     }
 
     @Override
+    @Deprecated
     public XYChartsWorksheet clone(){
-      return new XYChartsWorksheet(this);
+      return duplicate();
     }
 
     private XYChartsWorksheet(String name,
@@ -455,7 +456,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     }
 
     @Override
-    public Worksheet<Double> duplicate() {
+    public XYChartsWorksheet duplicate() {
         return new XYChartsWorksheet(this);
     }
 

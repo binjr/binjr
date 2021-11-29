@@ -72,7 +72,7 @@ public class TextFilesWorksheet extends Worksheet<String> {
     }
 
     @Override
-    public Worksheet<String> duplicate() {
+    public TextFilesWorksheet duplicate() {
         return new TextFilesWorksheet(this);
     }
 
@@ -82,8 +82,9 @@ public class TextFilesWorksheet extends Worksheet<String> {
     }
 
     @Override
+    @Deprecated
     public TextFilesWorksheet clone(){
-        return new TextFilesWorksheet(this);
+        return duplicate();
     }
 
     @Override
