@@ -34,7 +34,7 @@ public class StringUtils {
 
         // Just one long word. Chop it off.
         if (end == -1)
-            return text.substring(0, max-3) + "...";
+            return text.substring(0, max - 3) + "...";
 
         // Step forward as long as textWidth allows.
         int newEnd = end;
@@ -52,18 +52,26 @@ public class StringUtils {
     }
 
     public static boolean contains(String str, String searchStr, boolean caseSensistive) {
-        if (str == null || searchStr == null) return false;
-        if (caseSensistive) {
-            return str.contains(searchStr);
-        }
-        final int length = searchStr.length();
-        if (length == 0)
-            return true;
+        return contains(str, searchStr, caseSensistive, false);
+    }
 
-        for (int i = str.length() - length; i >= 0; i--) {
-            if (str.regionMatches(true, i, searchStr, 0, length))
+    public static boolean contains(String str, String searchStr, boolean caseSensistive, boolean useRegex) {
+        if (str == null || searchStr == null) return false;
+        if (useRegex) {
+            String regex = (caseSensistive ? "" : "(?i)") + ".*" + searchStr + ".*";
+            return str.matches(regex);
+        } else {
+            if (caseSensistive) {
+                return str.contains(searchStr);
+            }
+            final int length = searchStr.length();
+            if (length == 0)
                 return true;
+            for (int i = str.length() - length; i >= 0; i--) {
+                if (str.regionMatches(true, i, searchStr, 0, length))
+                    return true;
+            }
+            return false;
         }
-        return false;
     }
 }

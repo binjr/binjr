@@ -919,7 +919,13 @@ public class MainViewController implements Initializable {
                 .setIconStyleClass("match-case-icon")
                 .setTooltip("Match Case")
                 .build(ToggleButton::new);
-        var filterBar = new HBox(filterField, clearFilterbutton, filterCaseSensitiveToggle);
+        var filterUseRegexToggle = new ToolButtonBuilder<ToggleButton>()
+                .setText(".*")
+                .setStyleClass("dialog-button")
+                .setIconStyleClass("regex-icon", "small-icon")
+                .setTooltip("Use regular expression")
+                .build(ToggleButton::new);
+        var filterBar = new HBox(filterField, clearFilterbutton, filterCaseSensitiveToggle, filterUseRegexToggle);
         filterBar.getStyleClass().add("search-field-outer");
         filterBar.setPadding(new Insets(0, 3, 0, 3));
         filterBar.setSpacing(2);
@@ -959,7 +965,8 @@ public class MainViewController implements Initializable {
                         var isMatch = seriesBinding != null && StringUtils.contains(
                                 seriesBinding.getTreeHierarchy(),
                                 filterField.getText(),
-                                filterCaseSensitiveToggle.isSelected());
+                                filterCaseSensitiveToggle.isSelected(),
+                                filterUseRegexToggle.isSelected());
                         if (isMatch) {
                             TreeViewUtils.expandBranch(parent, TreeViewUtils.ExpandDirection.UP);
                         }
@@ -968,7 +975,8 @@ public class MainViewController implements Initializable {
                 },
                 source.filterableProperty(),
                 textChangedTrigger,
-                filterCaseSensitiveToggle.selectedProperty()));
+                filterCaseSensitiveToggle.selectedProperty(),
+                filterUseRegexToggle.selectedProperty()));
         sourcePaneContent.getChildren().addAll(treeView);
         return sourcePaneContent;
     }
@@ -1122,7 +1130,7 @@ public class MainViewController implements Initializable {
             return;
         }
         if (Dialogs.confirmDialog(tab.getTabPane(), "Are you sure you want to close worksheet '" + tab.getName() + "'?" +
-                "\n\n(Closed worksheets can be restored by pressing ctrl+shift+T)", "",
+                        "\n\n(Closed worksheets can be restored by pressing ctrl+shift+T)", "",
                 UserPreferences.getInstance().doNotWarnOnTabClose) == ButtonType.YES) {
             EventHandler<Event> handler = tab.getOnClosed();
             if (null != handler) {
