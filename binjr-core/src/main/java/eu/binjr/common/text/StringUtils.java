@@ -16,8 +16,14 @@
 
 package eu.binjr.common.text;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.regex.Pattern;
+
 public class StringUtils {
     private final static String NON_THIN = "[^iIl1\\.,']";
+    private static final Logger logger = LogManager.getLogger(StringUtils.class);
 
     private static int textWidth(String str) {
         return (int) (str.length() - str.replaceAll(NON_THIN, "").length() / 2);
@@ -51,27 +57,18 @@ public class StringUtils {
         return text.substring(0, end) + "...";
     }
 
-    public static boolean contains(String str, String searchStr, boolean caseSensistive) {
-        return contains(str, searchStr, caseSensistive, false);
+    public static boolean contains(String str, String searchStr, boolean caseSensitive) {
+        if (str == null || searchStr == null) return false;
+        if (searchStr.isEmpty()) return true;
+        if (caseSensitive) {
+            return str.contains(searchStr);
+        }
+        final int length = searchStr.length();
+        for (int i = str.length() - length; i >= 0; i--) {
+            if (str.regionMatches(true, i, searchStr, 0, length))
+                return true;
+        }
+        return false;
     }
 
-    public static boolean contains(String str, String searchStr, boolean caseSensistive, boolean useRegex) {
-        if (str == null || searchStr == null) return false;
-        if (useRegex) {
-            String regex = (caseSensistive ? "" : "(?i)") + ".*" + searchStr + ".*";
-            return str.matches(regex);
-        } else {
-            if (caseSensistive) {
-                return str.contains(searchStr);
-            }
-            final int length = searchStr.length();
-            if (length == 0)
-                return true;
-            for (int i = str.length() - length; i >= 0; i--) {
-                if (str.regionMatches(true, i, searchStr, 0, length))
-                    return true;
-            }
-            return false;
-        }
-    }
 }

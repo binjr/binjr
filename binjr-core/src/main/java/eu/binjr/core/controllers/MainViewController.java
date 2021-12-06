@@ -43,6 +43,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -81,6 +82,8 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -948,13 +951,37 @@ public class MainViewController implements Initializable {
         treeView.setMaxHeight(Double.MAX_VALUE);
         treeView.setId("sourceTreeView");
 
+
+        var treeFilterExpressionProperty = new SimpleObjectProperty<Pattern>();
+        var filterCriteriaChanged = new SimpleBooleanProperty(false);
+        Runnable onFilterChangeAction = () -> {
+            filterField.setStyle("");
+            try {
+                treeFilterExpressionProperty.setValue(Pattern.compile((filterCaseSensitiveToggle.isSelected() ? "" : "(?i)") + filterField.getText()));
+                filterCriteriaChanged.setValue(!filterCriteriaChanged.get());
+            } catch (PatternSyntaxException e) {
+                treeFilterExpressionProperty.setValue(null);
+                if (filterUseRegexToggle.isSelected()) {
+                    filterField.setStyle("-fx-background-color: #FF002040;");
+                    logger.info("Bad pattern: " + e.getMessage());
+                    logger.debug("Stack", e);
+                } else {
+                    // validate change anyway if we don't care about the pattern
+                    filterCriteriaChanged.setValue(!filterCriteriaChanged.get());
+                }
+            }
+        };
         // Delay the search until at least the following amount of time elapsed since the last character was entered
-        var textChangedTrigger = new SimpleBooleanProperty(false);
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
         filterField.textProperty().addListener(o -> {
-            delay.setOnFinished(event -> textChangedTrigger.setValue(!textChangedTrigger.get()));
+            delay.setOnFinished(event -> {
+                onFilterChangeAction.run();
+            });
             delay.playFromStart();
         });
+
+        filterUseRegexToggle.selectedProperty().addListener(observable -> onFilterChangeAction.run());
+        filterCaseSensitiveToggle.selectedProperty().addListener(observable -> onFilterChangeAction.run());
 
         ((FilterableTreeItem<SourceBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() ||
@@ -962,11 +989,15 @@ public class MainViewController implements Initializable {
                             filterField.getText().length() < UserPreferences.getInstance().minCharsTreeFiltering.get().intValue())
                         return null;
                     return (parent, seriesBinding) -> {
-                        var isMatch = seriesBinding != null && StringUtils.contains(
-                                seriesBinding.getTreeHierarchy(),
-                                filterField.getText(),
-                                filterCaseSensitiveToggle.isSelected(),
-                                filterUseRegexToggle.isSelected());
+                        boolean isMatch = seriesBinding != null;
+                        if (filterUseRegexToggle.isSelected() && treeFilterExpressionProperty.getValue() != null) {
+                            isMatch = isMatch && treeFilterExpressionProperty.getValue().matcher(seriesBinding.getTreeHierarchy()).find();
+                        } else {
+                            isMatch = isMatch && StringUtils.contains(
+                                    seriesBinding.getTreeHierarchy(),
+                                    filterField.getText(),
+                                    filterCaseSensitiveToggle.isSelected());
+                        }
                         if (isMatch) {
                             TreeViewUtils.expandBranch(parent, TreeViewUtils.ExpandDirection.UP);
                         }
@@ -974,9 +1005,7 @@ public class MainViewController implements Initializable {
                     };
                 },
                 source.filterableProperty(),
-                textChangedTrigger,
-                filterCaseSensitiveToggle.selectedProperty(),
-                filterUseRegexToggle.selectedProperty()));
+                filterCriteriaChanged));
         sourcePaneContent.getChildren().addAll(treeView);
         return sourcePaneContent;
     }
