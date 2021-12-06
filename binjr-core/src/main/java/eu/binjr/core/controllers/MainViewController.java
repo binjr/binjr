@@ -906,23 +906,22 @@ public class MainViewController implements Initializable {
         HBox.setHgrow(filterField, Priority.ALWAYS);
         filterField.setMaxWidth(Double.MAX_VALUE);
         filterField.getStyleClass().add("search-field-inner");
-        var clearFilterbutton = new ToolButtonBuilder<Button>()
+        var clearFilterbutton = new ToolButtonBuilder<Button>(source.getBindingManager())
                 .setText("Clear")
                 .setTooltip("Clear filter")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("cross-icon", "small-icon")
                 .setAction(event -> filterField.clear())
+                .bind(Node::visibleProperty,
+                        Bindings.createBooleanBinding(() -> !filterField.getText().isBlank(), filterField.textProperty()))
                 .build(Button::new);
-        clearFilterbutton.visibleProperty().bind(
-                Bindings.createBooleanBinding(() -> !filterField.getText().isBlank(),
-                        filterField.textProperty()));
-        var filterCaseSensitiveToggle = new ToolButtonBuilder<ToggleButton>()
+        var filterCaseSensitiveToggle = new ToolButtonBuilder<ToggleButton>(source.getBindingManager())
                 .setText("Aa")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("match-case-icon")
                 .setTooltip("Match Case")
                 .build(ToggleButton::new);
-        var filterUseRegexToggle = new ToolButtonBuilder<ToggleButton>()
+        var filterUseRegexToggle = new ToolButtonBuilder<ToggleButton>(source.getBindingManager())
                 .setText(".*")
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("regex-icon", "small-icon")
@@ -933,13 +932,13 @@ public class MainViewController implements Initializable {
         filterBar.setPadding(new Insets(0, 3, 0, 3));
         filterBar.setSpacing(2);
         filterBar.setAlignment(Pos.CENTER_LEFT);
-        source.filterableProperty().addListener((observable, oldValue, newValue) -> {
+        source.getBindingManager().attachListener(source.filterableProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             if (newValue) {
                 filterField.requestFocus();
             }
         });
-        filterBar.managedProperty().bind(source.filterableProperty());
-        filterBar.visibleProperty().bind(filterBar.managedProperty());
+        source.getBindingManager().bind(filterBar.managedProperty(), source.filterableProperty());
+        source.getBindingManager().bind(filterBar.visibleProperty(), filterBar.managedProperty());
         VBox.setMargin(filterBar, new Insets(10, 15, 5, 15));
         VBox sourcePaneContent = new VBox(filterBar);
         sourcePaneContent.getStyleClass().addAll("skinnable-pane-border", "chart-viewport-parent");
@@ -973,17 +972,17 @@ public class MainViewController implements Initializable {
         };
         // Delay the search until at least the following amount of time elapsed since the last character was entered
         var delay = new PauseTransition(Duration.millis(UserPreferences.getInstance().searchFieldInputDelayMs.get().intValue()));
-        filterField.textProperty().addListener(o -> {
+        source.getBindingManager().attachListener(filterField.textProperty(), o -> {
             delay.setOnFinished(event -> {
                 onFilterChangeAction.run();
             });
             delay.playFromStart();
         });
 
-        filterUseRegexToggle.selectedProperty().addListener(observable -> onFilterChangeAction.run());
-        filterCaseSensitiveToggle.selectedProperty().addListener(observable -> onFilterChangeAction.run());
+        source.getBindingManager().attachListener(filterUseRegexToggle.selectedProperty(), observable -> onFilterChangeAction.run());
+        source.getBindingManager().attachListener(filterCaseSensitiveToggle.selectedProperty(), observable -> onFilterChangeAction.run());
 
-        ((FilterableTreeItem<SourceBinding>) treeView.getRoot()).predicateProperty().bind(Bindings.createObjectBinding(() -> {
+        source.getBindingManager().bind(((FilterableTreeItem<SourceBinding>) treeView.getRoot()).predicateProperty(), Bindings.createObjectBinding(() -> {
                     if (!source.isFilterable() ||
                             filterField.getText() == null ||
                             filterField.getText().length() < UserPreferences.getInstance().minCharsTreeFiltering.get().intValue())
