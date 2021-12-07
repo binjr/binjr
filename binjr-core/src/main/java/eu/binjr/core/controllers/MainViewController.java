@@ -429,10 +429,19 @@ public class MainViewController implements Initializable {
         Dialog<String> dialog = new Dialog<>();
         dialog.initStyle(StageStyle.DECORATED);
         dialog.setTitle("About " + AppEnvironment.APP_NAME);
-        dialog.setDialogPane(FXMLLoader.load(getClass().getResource("/eu/binjr/views/AboutBoxView.fxml")));
+        dialog.setDialogPane(FXMLLoader.load(getResourceUrl("/eu/binjr/views/AboutBoxView.fxml")));
         dialog.initOwner(Dialogs.getStage(root));
-        dialog.getDialogPane().getStylesheets().add(getClass().getResource(StageAppearanceManager.getFontFamilyCssPath()).toExternalForm());
+        dialog.getDialogPane().getStylesheets().add(getResourceUrl(StageAppearanceManager.getFontFamilyCssPath()).toExternalForm());
         dialog.showAndWait();
+    }
+
+    private URL getResourceUrl(String path) throws IOException {
+        Objects.requireNonNull(path);
+        var url = getClass().getResource(path);
+        if (url == null){
+            throw new IOException("Failed to load resource from: " + path);
+        }
+        return url;
     }
 
     @FXML
