@@ -241,9 +241,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // TimeRange Picker initialization
         getBindingManager().bindBidirectional(timeRangePicker.timeRangeLinkedProperty(), worksheet.timeRangeLinkedProperty());
         timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
-        timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> {
-            invalidateFilter(true);
-        });
+        timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> invalidateFilter(true));
         timeRangePicker.setOnResetInterval(() -> {
             try {
                 return worksheet.getInitialTimeRange();
@@ -335,9 +333,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             filterTextField.setText(value);
             invalidateFilter(true);
         };
-        Runnable cancelSuggest = () -> {
-            suggestPopup.hide();
-        };
+        Runnable cancelSuggest = suggestPopup::hide;
         Runnable treeSelectionCommit = () -> {
             var selected = suggestTree.getSelectionModel().getSelectedItem();
             if (selected != null && selected.getParent() != null && !selected.getParent().equals(suggestRoot)) {
@@ -351,9 +347,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             var key = e.getCode();
             if (key == KeyCode.DOWN) {
                 suggestTree.requestFocus();
-                suggestRoot.getChildren().stream().findFirst().ifPresent(n -> {
-                    suggestTree.getSelectionModel().select(n);
-                });
+                suggestRoot.getChildren().stream().findFirst().ifPresent(n -> suggestTree.getSelectionModel().select(n));
             }
         }));
 
@@ -366,9 +360,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 cancelSuggest.run();
             }
         }));
-        suggestTree.setOnMouseClicked(getBindingManager().registerHandler(event -> {
-            treeSelectionCommit.run();
-        }));
+        suggestTree.setOnMouseClicked(getBindingManager().registerHandler(event -> treeSelectionCommit.run()));
 
         favoriteButton.setOnAction(getBindingManager().registerHandler(actionEvent -> {
             var favText = filterTextField.getText();
@@ -415,9 +407,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 .setStyleClass("dialog-button")
                 .setIconStyleClass("drop-down-icon", "small-icon")
                 .setFocusTraversable(false)
-                .setAction(event -> {
-                    cancelSuggest.run();
-                }).build(Button::new);
+                .setAction(event -> cancelSuggest.run()).build(Button::new);
         var hb = new HBox(suggestFilterField, goButton, clearSuggestButton, suggestSyntaxButton, collapseButton);
         HBox.setHgrow(suggestFilterField, Priority.ALWAYS);
         hb.setFillHeight(true);
@@ -455,22 +445,19 @@ public class LogWorksheetController extends WorksheetController implements Synca
             suggestPopup.show(owner.getScene().getWindow(), bounds.getMinX() - 7, bounds.getMinY() - 5);
             suggestFilterField.requestFocus();
         }));
-        suggestPopup.setOnHiding(getBindingManager().registerHandler(windowEvent -> {
-            filterTextField.requestFocus();
-        }));
+        suggestPopup.setOnHiding(getBindingManager().registerHandler(windowEvent -> filterTextField.requestFocus()));
 
-        getBindingManager().attachListener(suggestFilterField.textProperty(), (o -> {
-            suggestRoot.setPredicate((treeItem, stylableTreeItem) -> {
-                var isMatch = stylableTreeItem != null && StringUtils.contains(
-                        stylableTreeItem.getLabel(),
-                        suggestFilterField.getText(),
-                        false);
-                if (isMatch && userPrefs.expandSuggestTreeOnMatch.get()) {
-                    TreeViewUtils.expandBranch(treeItem, TreeViewUtils.ExpandDirection.UP);
-                }
-                return isMatch;
-            });
-        }));
+        getBindingManager().attachListener(suggestFilterField.textProperty(), (o ->
+                suggestRoot.setPredicate((treeItem, stylableTreeItem) -> {
+                    var isMatch = stylableTreeItem != null && StringUtils.contains(
+                            stylableTreeItem.getLabel(),
+                            suggestFilterField.getText(),
+                            false);
+                    if (isMatch && userPrefs.expandSuggestTreeOnMatch.get()) {
+                        TreeViewUtils.expandBranch(treeItem, TreeViewUtils.ExpandDirection.UP);
+                    }
+                    return isMatch;
+                })));
 
         filterTextField.setText(worksheet.getQueryParameters().getFilterQuery());
         getBindingManager().attachListener(filterTextField.textProperty(), (ChangeListener<String>) (o, oldVal, newVal) -> {
@@ -584,13 +571,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
         textOutput.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
         textOutput.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
-        textOutput.setOnDragEntered(getBindingManager().registerHandler(event -> {
-            textOutput.setStyle("-fx-background-color:  -fx-accent-translucide;");
-
-        }));
-        textOutput.setOnDragExited(getBindingManager().registerHandler(event -> {
-            textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;");
-        }));
+        textOutput.setOnDragEntered(getBindingManager().registerHandler(event ->
+                textOutput.setStyle("-fx-background-color:  -fx-accent-translucide;")));
+        textOutput.setOnDragExited(getBindingManager().registerHandler(event ->
+                textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;")));
 
         getBindingManager().bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
             if (progressIndicator.getProgress() < 0) {
@@ -704,9 +688,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 timeRangePicker.getTimeRange().getBeginning(),
                 timeRangePicker.getTimeRange().getEnd()
         };
-        delay.setOnFinished(getBindingManager().registerHandler(e -> {
-            selectedRangeProperty().setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]));
-        }));
+        delay.setOnFinished(getBindingManager().registerHandler(e ->
+                selectedRangeProperty().setValue(TimeRange.of(zoomTimeRange[0], zoomTimeRange[1]))));
         heatmapArea.setOnScroll(getBindingManager().registerHandler(event -> {
             if (event.isControlDown() || event.isAltDown()) {
                 heatmap.setVisible(false);
@@ -759,9 +742,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @Override
     public ContextMenu getChartListContextMenu(Collection<TreeItem<SourceBinding>> treeView) {
         MenuItem item = new MenuItem(worksheet.getName());
-        item.setOnAction((getBindingManager().registerHandler(event -> {
-            addToCurrentWorksheet(treeView);
-        })));
+        item.setOnAction((getBindingManager().registerHandler(event -> addToCurrentWorksheet(treeView))));
         return new ContextMenu(item);
     }
 
@@ -850,7 +831,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             showAllCheckBox.setSelected(andAll);
         };
         for (var binding : logFilesBindings) {
-            if (binding instanceof LogFilesBinding) {
+            if (binding != null) {
                 if (worksheet.getSeriesInfo().stream().filter(s -> s.getBinding().equals(binding)).findAny().isEmpty()) {
                     var i = TimeSeriesInfo.fromBinding(binding);
                     getBindingManager().attachListener(i.selectedProperty(), isVisibleListener);
@@ -934,11 +915,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                     });
                             // Update filePath facet view
                             var fileFacetEntries = res.getFacetResults().get(LogFileIndex.PATH);
-                            if (fileFacetEntries != null) {
-                                this.pathFacetEntries.setValue(fileFacetEntries);
-                            } else {
-                                this.pathFacetEntries.setValue(Collections.emptyList());
-                            }
+                            this.pathFacetEntries.setValue(Objects.requireNonNullElse(fileFacetEntries, Collections.emptyList()));
                             ZonedDateTime lowerBound = worksheet.getQueryParameters().getTimeRange().getBeginning();
                             ZonedDateTime upperBound = worksheet.getQueryParameters().getTimeRange().getEnd();
                             heatmap.getData().clear();
@@ -1289,9 +1266,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         try {
             Path cssPath = getTmpCssPath();
             String cssUrl = cssPath.toUri().toURL().toExternalForm();
-            if (root.getStylesheets().contains(cssUrl)) {
-                root.getStylesheets().remove(cssUrl);
-            }
+            root.getStylesheets().remove(cssUrl);
             String cssStr = info
                     .stream()
                     .map((i) -> ".file-" + i.getBinding().getPath().hashCode() +

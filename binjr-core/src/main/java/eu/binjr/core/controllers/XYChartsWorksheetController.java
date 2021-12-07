@@ -1423,7 +1423,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                                                         .getSeries()
                                                         .stream()
                                                         .filter(TimeSeriesInfo::isSelected)
-                                                        .collect(Collectors.toList())
+                                                        .toList()
                                                         .get(i)
                                                         .getDisplayColor()));
                                         i++;

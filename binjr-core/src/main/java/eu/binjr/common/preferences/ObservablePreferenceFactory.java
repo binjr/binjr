@@ -63,7 +63,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
     }
 
     public ObservablePreference<String> stringPreference(String key, String defaultValue) {
-        var p = new ObservablePreference<String>(String.class, key, defaultValue, backingStore) {
+        var p = new ObservablePreference<>(String.class, key, defaultValue, backingStore) {
             @Override
             protected Property<String> makeProperty(String value) {
                 return new SimpleStringProperty(value);
@@ -214,10 +214,10 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
     }
 
     public <E extends Enum<E>> ObservablePreference<E> enumPreference(Class<E> type, String key, E defaultValue) {
-        var p = new ObservablePreference<E>(type, key, defaultValue, backingStore) {
+        var p = new ObservablePreference<>(type, key, defaultValue, backingStore) {
             @Override
             protected Property<E> makeProperty(E value) {
-                return new SimpleObjectProperty<E>(value);
+                return new SimpleObjectProperty<>(value);
             }
 
             @Override
@@ -239,10 +239,10 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
                                                         T defaultValue,
                                                         Function<T, String> convertToString,
                                                         Function<String, T> parseFromString) {
-        var p = new ObservablePreference<T>(type, key, defaultValue, backingStore) {
+        var p = new ObservablePreference<>(type, key, defaultValue, backingStore) {
             @Override
             protected Property<T> makeProperty(T value) {
-                return new SimpleObjectProperty<T>(value);
+                return new SimpleObjectProperty<>(value);
             }
 
             @Override

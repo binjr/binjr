@@ -126,12 +126,10 @@ public class OutputConsoleController implements Initializable {
                 var docBuilder = new ReadOnlyStyledDocumentBuilder<Collection<String>, String, Collection<String>>(
                         SegmentOps.styledTextOps(),
                         Collections.emptyList());
-                msgSet.forEach(l -> {
-                    docBuilder.addParagraph(
-                            l.getMessage(),
-                            List.of(l.getStyleClass()),
-                            Collections.emptyList());
-                });
+                msgSet.forEach(l -> docBuilder.addParagraph(
+                        l.getMessage(),
+                        List.of(l.getStyleClass()),
+                        Collections.emptyList()));
                 docBuilder.addParagraph("", Collections.emptyList(), Collections.emptyList());
                 var doc = docBuilder.build();
                 syntaxHighlightStyleSpans = doc.getStyleSpans(0, doc.getText().length());
@@ -153,19 +151,17 @@ public class OutputConsoleController implements Initializable {
             l.sort(Level::compareTo);
             logLevelChoice.getItems().setAll(l);
             logLevelChoice.getSelectionModel().select(UserPreferences.getInstance().rootLoggingLevel.get());
-            UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldValue, newValue) -> {
-                logLevelChoice.getSelectionModel().select(newValue);
-            });
-            logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-                UserPreferences.getInstance().rootLoggingLevel.set(newValue);
-            });
+            UserPreferences.getInstance().rootLoggingLevel.property().addListener((observable, oldValue, newValue) ->
+                    logLevelChoice.getSelectionModel().select(newValue));
+            logLevelChoice.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) ->
+                    UserPreferences.getInstance().rootLoggingLevel.set(newValue));
         });
         preferenceEditor.setPropertyEditorFactory(new ExtendedPropertyEditorFactory());
         preferenceEditor.getItems().addAll(UserPreferences.getInstance()
                 .getAll().values()
                 .stream()
                 .map(ObservablePreference::asPropertyItem)
-                .collect(Collectors.toList()));
+                .toList());
         UserPreferences.getInstance().getAll().addListener((MapChangeListener<String, ObservablePreference<?>>) c -> {
             if (c.wasAdded()) {
                 preferenceEditor.getItems().add(c.getValueAdded().asPropertyItem());
@@ -176,7 +172,7 @@ public class OutputConsoleController implements Initializable {
                     .getAll().values()
                     .stream()
                     .map(ObservablePreference::asPropertyItem)
-                    .collect(Collectors.toList()));
+                    .toList());
 
             di.getPreferences().getAll().addListener((MapChangeListener<String, ObservablePreference<?>>) c -> {
                 if (c.wasAdded()) {
@@ -403,7 +399,7 @@ public class OutputConsoleController implements Initializable {
         if (importPath != null) {
             try {
                 UserHistory.getInstance().importFromFile(importPath.toPath());
-                Binjr.runtimeDebuggingFeatures.debug("User history successfully imported from " + importPath.toString());
+                Binjr.runtimeDebuggingFeatures.debug("User history successfully imported from " + importPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while importing user history: " + e.getMessage(), e, root);
             }
@@ -420,7 +416,7 @@ public class OutputConsoleController implements Initializable {
             try {
                 Files.deleteIfExists(exportPath.toPath());
                 UserHistory.getInstance().exportToFile(exportPath.toPath());
-                Binjr.runtimeDebuggingFeatures.debug("User history successfully exported to " + exportPath.toString());
+                Binjr.runtimeDebuggingFeatures.debug("User history successfully exported to " + exportPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while exporting user history: " + e.getMessage(), e, root);
             }
@@ -445,7 +441,7 @@ public class OutputConsoleController implements Initializable {
             try {
                 Files.deleteIfExists(exportPath.toPath());
                 DiagnosticCommand.dumpHeap(exportPath.toPath());
-                Binjr.runtimeDebuggingFeatures.debug("JVM's heap successfully dumped to " + exportPath.toString());
+                Binjr.runtimeDebuggingFeatures.debug("JVM's heap successfully dumped to " + exportPath);
             } catch (Exception e) {
                 Dialogs.notifyException("An error occurred while dumping JVM's heap: " + e.getMessage(), e, root);
             }

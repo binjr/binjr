@@ -146,7 +146,7 @@ public class MainViewController implements Initializable {
     private StackPane sourceArea;
     List<TreeItem<SourceBinding>> searchResultSet;
     int currentSearchHit = -1;
-    private Workspace workspace;
+    private final Workspace workspace;
     @FXML
     private MenuButton worksheetMenu;
     private Optional<String> associatedFile = Optional.empty();
@@ -1299,18 +1299,16 @@ public class MainViewController implements Initializable {
 
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
-            case SHIFT:
+            case SHIFT -> {
                 UserPreferences.getInstance().shiftPressed.set(pressed);
                 event.consume();
-                break;
-            case CONTROL:
-            case META:
-            case SHORTCUT: // shortcut does not seem to register as Control on Windows here, so check them all.
+            }
+            case CONTROL, META, SHORTCUT -> { // shortcut does not seem to register as Control on Windows here, so check them all.
                 UserPreferences.getInstance().ctrlPressed.set(pressed);
                 event.consume();
-                break;
-            default:
-                //do nothing
+            }
+            default -> {
+            }
         }
     }
 
@@ -1352,7 +1350,7 @@ public class MainViewController implements Initializable {
                             .stream()
                             .map(s -> s.getValue().getWorksheetClass())
                             .distinct()
-                            .collect(Collectors.toList())) {
+                            .toList()) {
                         var worksheet = WorksheetFactory.getInstance().createWorksheet(t, title, charts.get());
                         editWorksheet(tabPane, worksheet);
                     }
@@ -1457,9 +1455,7 @@ public class MainViewController implements Initializable {
     private void onSourceTabChanged(ListChangeListener.Change<? extends TitledPane> c) {
         AtomicBoolean removed = new AtomicBoolean(false);
         while (c.next()) {
-            c.getAddedSubList().forEach(t -> {
-                workspace.addSource(sourcesAdapters.get(t));
-            });
+            c.getAddedSubList().forEach(t -> workspace.addSource(sourcesAdapters.get(t)));
             c.getRemoved().forEach(t -> {
                 removed.set(true);
                 try {

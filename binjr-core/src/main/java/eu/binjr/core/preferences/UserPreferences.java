@@ -192,7 +192,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Rectangle2D> windowLastPosition = objectPreference(Rectangle2D.class,
             "windowLastPosition",
             new Rectangle2D(Double.MAX_VALUE, Double.MAX_VALUE, 0, 0),
-            rectangle2D -> gson.toJson(rectangle2D),
+            gson::toJson,
             s -> gson.fromJson(s, Rectangle2D.class));
 
     /**

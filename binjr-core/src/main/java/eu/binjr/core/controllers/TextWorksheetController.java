@@ -251,7 +251,7 @@ public class TextWorksheetController extends WorksheetController {
     }
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
-        CodeAreaHighlighter.SearchHighlightResults searchResults = null;
+        CodeAreaHighlighter.SearchHighlightResults searchResults;
         try {
             searchTextField.setStyle("");
             searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);

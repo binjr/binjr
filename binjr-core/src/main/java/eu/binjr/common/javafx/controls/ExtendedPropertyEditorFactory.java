@@ -128,6 +128,7 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
             this(item, textFormatter, null);
         }
 
+        @SuppressWarnings("unchecked")
         FormattedPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter, BiFunction<Node, T, Optional<T>> editAction) {
             this.textFormatter = textFormatter;
             editor = new HBox();
