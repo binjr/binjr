@@ -17,8 +17,10 @@
 package eu.binjr.core.controllers;
 
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
+import eu.binjr.common.javafx.richtext.HighlightPatternException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.RingIterator;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -249,22 +251,33 @@ public class TextWorksheetController extends WorksheetController {
     }
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
-        var searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
-        prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
-        searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
-        if (syntaxHilightStyleSpans != null) {
-            textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
-                    (strings, strings2) -> Stream.concat(strings.stream(),
-                            strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
-        } else {
-            textOutput.setStyleSpans(0, searchResults.getStyleSpans());
-        }
-        if (searchHitIterator.hasNext()) {
-            focusOnSearchHit(searchHitIterator.next());
-        } else {
-            focusOnSearchHit(null);
+        CodeAreaHighlighter.SearchHighlightResults searchResults = null;
+        try {
+            searchTextField.setStyle("");
+            searchResults = CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+            prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
+            searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
+            if (syntaxHilightStyleSpans != null) {
+                textOutput.setStyleSpans(0, syntaxHilightStyleSpans.overlay(searchResults.getStyleSpans(),
+                        (strings, strings2) -> Stream.concat(strings.stream(),
+                                strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
+            } else {
+                textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+            }
+            if (searchHitIterator.hasNext()) {
+                focusOnSearchHit(searchHitIterator.next());
+            } else {
+                focusOnSearchHit(null);
+            }
+        } catch (HighlightPatternException e) {
+            if (searchRegExToggle.isSelected()) {
+                logger.debug(e.getMessage(), e);
+                searchTextField.setStyle(String.format("-fx-background-color: %s;",
+                        ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                searchResultsLabel.setText("Bad pattern");
+            }
         }
     }
 

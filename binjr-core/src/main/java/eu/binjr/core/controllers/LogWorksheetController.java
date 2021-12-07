@@ -25,6 +25,7 @@ import eu.binjr.common.javafx.charts.XYChartCrosshair;
 import eu.binjr.common.javafx.charts.ZonedDateTimeAxis;
 import eu.binjr.common.javafx.controls.*;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
+import eu.binjr.common.javafx.richtext.HighlightPatternException;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.common.navigation.RingIterator;
@@ -1202,6 +1203,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
         try (var p = Profiler.start("Applying search result highlights", logger::perf)) {
+            searchTextField.setStyle("");
             var searchResults =
                     CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
             prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
@@ -1219,6 +1221,13 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 focusOnSearchHit(searchHitIterator.next());
             } else {
                 focusOnSearchHit(null);
+            }
+        } catch (HighlightPatternException e) {
+            if (searchRegExToggle.isSelected()) {
+                logger.debug(e.getMessage(), e);
+                searchTextField.setStyle(String.format("-fx-background-color: %s;",
+                        ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                searchResultsLabel.setText("Bad pattern");
             }
         }
     }

@@ -29,6 +29,7 @@ import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
 import javafx.geometry.Rectangle2D;
+import javafx.scene.paint.Color;
 import org.apache.logging.log4j.Level;
 
 import java.io.IOException;
@@ -307,6 +308,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> doNotWarnOnChartClose = booleanPreference("doNotWarnOnChartClose", false);
 
     public final ObservablePreference<Boolean> doNotWarnOnTabClose = booleanPreference("doNotWarnOnTabClose", false);
+
+    public final ObservablePreference<Color> invalidInputColor =
+            objectPreference(Color.class, "invalidInputColor", Color.valueOf("0xff000040"), Color::toString, Color::valueOf);
 
     public static class UserFavorites extends MruFactory {
 

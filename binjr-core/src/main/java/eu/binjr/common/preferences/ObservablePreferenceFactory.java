@@ -259,6 +259,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
         return p;
     }
 
+    @SuppressWarnings("unchecked")
     public <U> Optional<ObservablePreference<U>> getByName(String name, Class<U> type) {
         var p = storedItems.get(name);
         if (p == null || !type.isAssignableFrom(p.getInnerType())) {
@@ -268,6 +269,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
     }
 
     @Override
+
     public String toString() {
         return storedItems.values().stream().map(p -> p.getKey() + "=" + p.get()).collect(Collectors.joining("\n"));
     }

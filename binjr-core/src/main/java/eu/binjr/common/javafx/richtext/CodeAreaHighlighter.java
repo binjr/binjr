@@ -83,7 +83,10 @@ public class CodeAreaHighlighter {
         }
     }
 
-    public static SearchHighlightResults computeSearchHitsHighlighting(String text, String searchText, boolean matchCase, boolean regEx) {
+    public static SearchHighlightResults computeSearchHitsHighlighting(String text,
+                                                                       String searchText,
+                                                                       boolean matchCase,
+                                                                       boolean regEx) throws HighlightPatternException {
         StringBuilder searchExpression = new StringBuilder();
         if (!regEx) {
             searchText.codePoints().forEachOrdered(value -> {
@@ -115,8 +118,7 @@ public class CodeAreaHighlighter {
                 }
             }
         } catch (PatternSyntaxException e) {
-            logger.error("Incorrect search expression pattern: " + e.getMessage());
-            logger.debug("", e);
+           throw new HighlightPatternException(e);
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return new SearchHighlightResults(hits, spansBuilder.create());

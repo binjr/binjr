@@ -16,10 +16,12 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
+import eu.binjr.common.javafx.richtext.HighlightPatternException;
 import eu.binjr.common.logging.Log4j2Level;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
@@ -209,7 +211,7 @@ public class OutputConsoleController implements Initializable {
         highlightControls.visibleProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue) {
                 searchTextField.requestFocus();
-            } else{
+            } else {
                 searchTextField.clear();
             }
         });
@@ -235,23 +237,32 @@ public class OutputConsoleController implements Initializable {
     }
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
-        var searchResults =
-                CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
-        prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
-        searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
-        searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
-        if (syntaxHighlightStyleSpans != null) {
-            textOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
-                    (strings, strings2) -> Stream.concat(strings.stream(),
-                            strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
-        } else {
-            textOutput.setStyleSpans(0, searchResults.getStyleSpans());
-        }
-        if (searchHitIterator.hasNext()) {
-            focusOnSearchHit(searchHitIterator.next());
-        } else {
-            focusOnSearchHit(null);
+        try {
+            searchTextField.setStyle("");
+            var searchResults =
+                    CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
+            prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            nextOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
+            searchHitIterator = RingIterator.of(searchResults.getSearchHitRanges());
+            searchResultsLabel.setText(searchResults.getSearchHitRanges().size() + " results");
+            if (syntaxHighlightStyleSpans != null) {
+                textOutput.setStyleSpans(0, syntaxHighlightStyleSpans.overlay(searchResults.getStyleSpans(),
+                        (strings, strings2) -> Stream.concat(strings.stream(),
+                                strings2.stream()).collect(Collectors.toCollection(ArrayList<String>::new))));
+            } else {
+                textOutput.setStyleSpans(0, searchResults.getStyleSpans());
+            }
+            if (searchHitIterator.hasNext()) {
+                focusOnSearchHit(searchHitIterator.next());
+            } else {
+                focusOnSearchHit(null);
+            }
+        } catch (HighlightPatternException e) {
+            if (searchRegExToggle.isSelected()) {
+                searchTextField.setStyle(String.format("-fx-background-color: %s;",
+                        ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                searchResultsLabel.setText("Bad pattern");
+            }
         }
     }
 
@@ -264,8 +275,8 @@ public class OutputConsoleController implements Initializable {
         return alwaysOnTopToggle;
     }
 
-    public void setSearchToolbarVisibility(boolean visible){
-        if (visible){
+    public void setSearchToolbarVisibility(boolean visible) {
+        if (visible) {
             searchTextField.requestFocus();
         }
         findInPageToggle.setSelected(visible);

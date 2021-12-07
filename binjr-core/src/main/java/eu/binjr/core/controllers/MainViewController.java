@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
@@ -961,7 +962,8 @@ public class MainViewController implements Initializable {
             } catch (PatternSyntaxException e) {
                 treeFilterExpressionProperty.setValue(null);
                 if (filterUseRegexToggle.isSelected()) {
-                    filterField.setStyle("-fx-background-color: #FF002040;");
+                    filterField.setStyle(String.format("-fx-background-color: %s;",
+                            ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
                     logger.info("Bad pattern: " + e.getMessage());
                     logger.debug("Stack", e);
                 } else {
@@ -1391,7 +1393,7 @@ public class MainViewController implements Initializable {
             selectedTreeView.getSelectionModel().select(searchResultSet.get(currentSearchHit));
             selectedTreeView.scrollTo(selectedTreeView.getRow(searchResultSet.get(currentSearchHit)));
         } else {
-            searchField.setStyle("-fx-background-color: #FF002040;");
+            searchField.setStyle("-fx-background-color: #FF000040;");
         }
         logger.trace(() -> "Search for " + searchField.getText() + " yielded " + searchResultSet.size() + " match(es)");
     }
