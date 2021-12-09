@@ -26,7 +26,7 @@ dependencies {
     api 'org.apache.commons:commons-csv:1.9.0'
     api 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     implementation 'org.glassfish.jaxb:jaxb-runtime:3.0.2'
-    implementation "org.bouncycastle:bcpg-jdk15on:1.69"
+    implementation "org.bouncycastle:bcpg-jdk15on:1.70"
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.7'
     implementation 'org.apache.lucene:lucene-core:8.11.0'
