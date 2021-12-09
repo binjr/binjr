@@ -310,7 +310,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Boolean> doNotWarnOnTabClose = booleanPreference("doNotWarnOnTabClose", false);
 
     public final ObservablePreference<Color> invalidInputColor =
-            objectPreference(Color.class, "invalidInputColor", Color.valueOf("0xff000040"), Color::toString, Color::valueOf);
+            objectPreference(Color.class, "invalidInputColor", Color.valueOf("0xff646440"), Color::toString, Color::valueOf);
 
     public static class UserFavorites extends MruFactory {
 
