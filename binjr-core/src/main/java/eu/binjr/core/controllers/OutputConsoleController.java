@@ -16,10 +16,10 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
+import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.javafx.richtext.HighlightPatternException;
 import eu.binjr.common.logging.Log4j2Level;
@@ -234,7 +234,6 @@ public class OutputConsoleController implements Initializable {
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
         try {
-            searchTextField.setStyle("");
             var searchResults =
                     CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
             prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
@@ -255,8 +254,7 @@ public class OutputConsoleController implements Initializable {
             }
         } catch (HighlightPatternException e) {
             if (searchRegExToggle.isSelected()) {
-                searchTextField.setStyle(String.format("-fx-background-color: %s;",
-                        ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                TextFieldValidator.fail(searchTextField, true);
                 searchResultsLabel.setText("Bad pattern");
             }
         }

@@ -1180,7 +1180,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private void doSearchHighlight(String searchText, boolean matchCase, boolean regEx) {
         try (var p = Profiler.start("Applying search result highlights", logger::perf)) {
-            searchTextField.setStyle("");
             var searchResults =
                     CodeAreaHighlighter.computeSearchHitsHighlighting(textOutput.getText(), searchText, matchCase, regEx);
             prevOccurrenceButton.setDisable(searchResults.getSearchHitRanges().isEmpty());
@@ -1202,8 +1201,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         } catch (HighlightPatternException e) {
             if (searchRegExToggle.isSelected()) {
                 logger.debug(e.getMessage(), e);
-                searchTextField.setStyle(String.format("-fx-background-color: %s;",
-                        ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                TextFieldValidator.fail(searchTextField, true);
                 searchResultsLabel.setText("Bad pattern");
             }
         }

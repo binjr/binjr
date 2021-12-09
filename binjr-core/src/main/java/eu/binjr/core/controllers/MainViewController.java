@@ -16,7 +16,6 @@
 
 package eu.binjr.core.controllers;
 
-import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.*;
@@ -438,7 +437,7 @@ public class MainViewController implements Initializable {
     private URL getResourceUrl(String path) throws IOException {
         Objects.requireNonNull(path);
         var url = getClass().getResource(path);
-        if (url == null){
+        if (url == null) {
             throw new IOException("Failed to load resource from: " + path);
         }
         return url;
@@ -964,15 +963,13 @@ public class MainViewController implements Initializable {
         var treeFilterExpressionProperty = new SimpleObjectProperty<Pattern>();
         var filterCriteriaChanged = new SimpleBooleanProperty(false);
         Runnable onFilterChangeAction = () -> {
-            filterField.setStyle("");
             try {
                 treeFilterExpressionProperty.setValue(Pattern.compile((filterCaseSensitiveToggle.isSelected() ? "" : "(?i)") + filterField.getText()));
                 filterCriteriaChanged.setValue(!filterCriteriaChanged.get());
             } catch (PatternSyntaxException e) {
                 treeFilterExpressionProperty.setValue(null);
                 if (filterUseRegexToggle.isSelected()) {
-                    filterField.setStyle(String.format("-fx-background-color: %s;",
-                            ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+                    TextFieldValidator.fail(filterField, true);
                     logger.info("Bad pattern: " + e.getMessage());
                     logger.debug("Stack", e);
                 } else {
@@ -1391,7 +1388,6 @@ public class MainViewController implements Initializable {
             });
         }
         if (!searchResultSet.isEmpty()) {
-            searchField.setStyle("");
             currentSearchHit++;
             if (currentSearchHit > searchResultSet.size() - 1) {
                 currentSearchHit = 0;
@@ -1407,7 +1403,6 @@ public class MainViewController implements Initializable {
 
     private void invalidateSearchResults() {
         logger.trace("Invalidating search result");
-        searchField.setStyle("");
         this.searchResultSet = null;
         this.currentSearchHit = -1;
     }
