@@ -80,6 +80,9 @@ import javafx.scene.paint.Color;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.queryparser.classic.QueryParser;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -100,6 +103,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1128,7 +1132,24 @@ public class LogWorksheetController extends WorksheetController implements Synca
         TableViewUtils.autoFillTableWidthWithLastColumn(fileTable);
     }
 
+    private final QueryParser queryParser = new QueryParser(LogFileIndex.FIELD_CONTENT, new StandardAnalyzer());
+
+    private final Predicate<String> queryValidator = text -> {
+        if (!text.isBlank()) {
+            try {
+                queryParser.parse(text);
+            } catch (ParseException e) {
+                Dialogs.notifyError("Invalid syntax in query", e.getMessage(), Pos.BOTTOM_RIGHT, filterTextField);
+                return false;
+            }
+        }
+        return true;
+    };
+
     private void invalidateFilter(boolean resetPage) {
+        if (!TextFieldValidator.validate(filterTextField, true, queryValidator)) {
+            return;
+        }
         var newParams = new LogQueryParameters.Builder()
                 .setTimeRange(timeRangePicker.getSelectedRange())
                 .setFilterQuery(filterTextField.getText())
