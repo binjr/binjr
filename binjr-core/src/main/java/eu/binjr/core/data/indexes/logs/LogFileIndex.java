@@ -277,7 +277,8 @@ public class LogFileIndex implements Searchable {
     }
 
     @Override
-    public SearchHitsProcessor search(long start, long end,
+    public SearchHitsProcessor search(long start,
+                                      long end,
                                       Map<String, Collection<String>> params,
                                       String query,
                                       int page,
@@ -304,6 +305,8 @@ public class LogFileIndex implements Searchable {
             var pageSize = prefs.hitsPerPage.get().intValue();
             var skip = page * pageSize;
             DrillSideways.DrillSidewaysResult results;
+            Map<String, FacetEntry> severityFacet;
+            Map<String, FacetEntry> pathFacet;
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
@@ -311,16 +314,12 @@ public class LogFileIndex implements Searchable {
             try (Profiler p = Profiler.start("Executing query", logger::perf)) {
                 results = drill.search(drillDownQuery, collector);
             }
-            var topDocs = collector.topDocs();
-            logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
-            Map<String, FacetEntry> severityFacet;
-            Map<String, FacetEntry> pathFacet;
-            Map<String, FacetEntry> timestampFacet;
             try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
                 pathFacet = makeFacetResult(PATH, results.facets, params);
                 severityFacet = makeFacetResult(SEVERITY, results.facets, params);
-                timestampFacet = makeFacetResult(TIMESTAMP, results.facets, params);
-                for (int i = skip; i < topDocs.scoreDocs.length; i++) {
+                var topDocs = collector.topDocs(skip, pageSize);
+                logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
+                for (int i = 0; i < topDocs.scoreDocs.length; i++) {
                     var hit = topDocs.scoreDocs[i];
                     var doc = searcher.doc(hit.doc);
                     var severity = severityFacet.get(doc.get(SEVERITY));
