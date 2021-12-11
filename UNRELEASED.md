@@ -1,0 +1,1 @@
+* _[Fixed]_ Updated Log4j to version 2.15.0 in response to [CVE-2021-44228](https://github.com/advisories/GHSA-jfh8-c2jp-5v3q)
