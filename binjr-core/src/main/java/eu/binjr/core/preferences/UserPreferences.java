@@ -312,6 +312,10 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Color> invalidInputColor =
             objectPreference(Color.class, "invalidInputColor", Color.valueOf("0xff646440"), Color::toString, Color::valueOf);
 
+    public final ObservablePreference<Number> facetResultCacheEntries = integerPreference("facetResultCacheEntries", 200);
+
+    public final ObservablePreference<Number> hitResultCacheEntries = integerPreference("hitResultCacheEntries", 20);
+
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

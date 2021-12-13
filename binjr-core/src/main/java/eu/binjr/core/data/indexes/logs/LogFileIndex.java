@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.indexes.logs;
 
+import eu.binjr.common.cache.LRUMapCapacityBound;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.IOUtils;
@@ -91,8 +92,14 @@ public class LogFileIndex implements Searchable {
     private TaxonomyReader taxonomyReader;
     private DirectoryReader indexReader;
     private IndexSearcher searcher;
+    private final Map<String, SearchHitsProcessor> facetResultCache;
+    private final Map<String, SearchHitsProcessor> hitResultCache;
 
     public LogFileIndex() throws IOException {
+        this.facetResultCache =
+                Collections.synchronizedMap(new LRUMapCapacityBound<>(prefs.facetResultCacheEntries.get().intValue()));
+        this.hitResultCache =
+                Collections.synchronizedMap(new LRUMapCapacityBound<>(prefs.hitResultCacheEntries.get().intValue()));
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
@@ -285,7 +292,7 @@ public class LogFileIndex implements Searchable {
                                       ZoneId zoneId) throws Exception {
         return indexLock.read().lock(() -> {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
-            Query filterQuery = rangeQuery;
+            final Query filterQuery;
             if (query != null && !query.isBlank()) {
                 logger.trace("Query text=" + query);
                 QueryParser parser = new QueryParser(FIELD_CONTENT, new StandardAnalyzer());
@@ -293,6 +300,8 @@ public class LogFileIndex implements Searchable {
                         .add(rangeQuery, BooleanClause.Occur.FILTER)
                         .add(parser.parse(query), BooleanClause.Occur.FILTER)
                         .build();
+            } else {
+                filterQuery = rangeQuery;
             }
             var logs = new ArrayList<XYChart.Data<ZonedDateTime, SearchHit>>();
             var drill = new DrillSideways(searcher, facetsConfig, taxonomyReader);
@@ -304,78 +313,88 @@ public class LogFileIndex implements Searchable {
             }
             var pageSize = prefs.hitsPerPage.get().intValue();
             var skip = page * pageSize;
-            DrillSideways.DrillSidewaysResult results;
-            Map<String, FacetEntry> severityFacet;
-            Map<String, FacetEntry> pathFacet;
+           // DrillSideways.DrillSidewaysResult results;
+
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);
             logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
-            try (Profiler p = Profiler.start("Executing query", logger::perf)) {
-                results = drill.search(drillDownQuery, collector);
-            }
-            try (Profiler p = Profiler.start("Retrieving hits & facets", logger::perf)) {
-                pathFacet = makeFacetResult(PATH, results.facets, params);
-                severityFacet = makeFacetResult(SEVERITY, results.facets, params);
-                var topDocs = collector.topDocs(skip, pageSize);
-                logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
-                for (int i = 0; i < topDocs.scoreDocs.length; i++) {
-                    var hit = topDocs.scoreDocs[i];
-                    var doc = searcher.doc(hit.doc);
-                    var severity = severityFacet.get(doc.get(SEVERITY));
-                    var path = pathFacet.get(doc.get(PATH));
-                    logs.add(new XYChart.Data<>(
-                            ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId),
-                            new SearchHit(doc.get(FIELD_CONTENT) + "\n",
-                                    severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
-                                    path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
+            String facetCacheKey = drillDownQuery.toString(FIELD_CONTENT);
+            String hitCacheKey = facetCacheKey + "_" + page;
+            var hitProc = hitResultCache.computeIfAbsent(hitCacheKey, CheckedLambdas.wrap(k -> {
+                var proc = new SearchHitsProcessor();
+                DrillSideways.DrillSidewaysResult results;
+                try (Profiler p = Profiler.start("Executing query", logger::perf)) {
+                    results = drill.search(drillDownQuery, collector);
                 }
-            }
-            var proc = new SearchHitsProcessor();
-            proc.setData(logs);
-            proc.addFacetResults(PATH,
-                    pathFacet.values()
-                            .stream()
-                            .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
-                            .toList());
-            proc.addFacetResults(SEVERITY,
-                    severityFacet.values()
-                            .stream()
-                            .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
-                            .toList());
-            proc.setTotalHits(collector.getTotalHits());
-            proc.setHitsPerPage(pageSize);
-
-            //TODO: No need to recalculate time range when only the page number changes.
-            try (Profiler p = Profiler.start("Retrieving log density facets", logger::perf)) {
-                var ranges = computeRanges(start, end);
-                var severities = params.entrySet().stream()
-                        .filter(e -> e.getKey().equals(SEVERITY))
-                        .flatMap(e -> e.getValue().stream())
-                        .toList();
-                if (severities.isEmpty()) {
-                    severities = severityFacet.values().stream().map(FacetEntry::getLabel).toList();
+                try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
+                    Map<String, FacetEntry> severityFacet;
+                    Map<String, FacetEntry> pathFacet;
+                    pathFacet = makeFacetResult(PATH, results.facets, params);
+                    severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+                    var topDocs = collector.topDocs(skip, pageSize);
+                    logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
+                    for (int i = 0; i < topDocs.scoreDocs.length; i++) {
+                        var hit = topDocs.scoreDocs[i];
+                        var doc = searcher.doc(hit.doc);
+                        var severity = severityFacet.get(doc.get(SEVERITY));
+                        var path = pathFacet.get(doc.get(PATH));
+                        logs.add(new XYChart.Data<>(
+                                ZonedDateTime.ofInstant(Instant.ofEpochMilli(Long.parseLong(doc.get(TIMESTAMP))), zoneId),
+                                new SearchHit(doc.get(FIELD_CONTENT) + "\n",
+                                        severity != null ? severity : new FacetEntry(SEVERITY, "Unknown", 0),
+                                        path != null ? path : new FacetEntry(PATH, "Unknown", 0))));
+                    }
+                    proc.addFacetResults(PATH,
+                            pathFacet.values()
+                                    .stream()
+                                    .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
+                                    .toList());
+                    proc.addFacetResults(SEVERITY,
+                            severityFacet.values()
+                                    .stream()
+                                    .sorted(Comparator.comparingInt(FacetEntry::getNbOccurrences).reversed())
+                                    .toList());
+                    proc.setTotalHits(collector.getTotalHits());
+                    proc.setHitsPerPage(pageSize);
+                    proc.setData(logs);
                 }
-                for (var severityLabel : severities) {
-                    var q = new DrillDownQuery(facetsConfig, filterQuery);
-                    q.add(TIMESTAMP, rangeQuery);
-                    for (var facet : params.entrySet()) {
-                        if (facet.getKey().equals(SEVERITY)) {
-                            q.add(facet.getKey(), severityLabel);
-                        } else {
-                            for (var label : facet.getValue()) {
-                                q.add(facet.getKey(), label);
+                return proc;
+            }));
+            var facetProc = facetResultCache.computeIfAbsent(facetCacheKey, CheckedLambdas.wrap(k -> {
+                var proc = new SearchHitsProcessor();
+                try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
+                    var ranges = computeRanges(start, end);
+                    var severities = params.entrySet().stream()
+                            .filter(e -> e.getKey().equals(SEVERITY))
+                            .flatMap(e -> e.getValue().stream())
+                            .toList();
+                    if (severities.isEmpty()) {
+                        severities = hitProc.getFacetResults().get(SEVERITY).stream().map(FacetEntry::getLabel).toList();
+                    }
+                    for (var severityLabel : severities) {
+                        var q = new DrillDownQuery(facetsConfig, filterQuery);
+                        q.add(TIMESTAMP, rangeQuery);
+                        for (var facet : params.entrySet()) {
+                            if (facet.getKey().equals(SEVERITY)) {
+                                q.add(facet.getKey(), severityLabel);
+                            } else {
+                                for (var label : facet.getValue()) {
+                                    q.add(facet.getKey(), label);
+                                }
                             }
                         }
+                        FacetsCollector fc = new FacetsCollector();
+                        FacetsCollector.search(searcher, q, 0, fc);
+                        Facets facets = new LongRangeFacetCounts(TIMESTAMP, fc, ranges);
+                        proc.addFacetResults(TIMESTAMP + "_" + severityLabel,
+                                makeFacetResult(TIMESTAMP, facets, params).values());
                     }
-                    FacetsCollector fc = new FacetsCollector();
-                    FacetsCollector.search(searcher, q, 0, fc);
-                    Facets facets = new LongRangeFacetCounts(TIMESTAMP, fc, ranges);
-                    proc.addFacetResults(TIMESTAMP + "_" + severityLabel,
-                            makeFacetResult(TIMESTAMP, facets, params).values());
                 }
-            }
-            return proc;
+                return proc;
+            }));
+            hitProc.mergeFacetResults(facetProc);
+            return hitProc;
         });
     }
 

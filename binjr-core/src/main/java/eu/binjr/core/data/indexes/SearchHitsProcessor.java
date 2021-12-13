@@ -52,6 +52,10 @@ public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
         this.facetResults.put(name, synthesis);
     }
 
+    public void mergeFacetResults(SearchHitsProcessor toMerge){
+        toMerge.getFacetResults().forEach(this::addFacetResults);
+    }
+
     public int getTotalHits() {
         return totalHits;
     }
