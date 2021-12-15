@@ -89,6 +89,7 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.util.UndoUtils;
 
 import java.io.IOException;
 import java.net.URL;
@@ -237,9 +238,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        //Disable undo feature on text output
+        textOutput.setUndoManager(UndoUtils.noOpUndoManager());
+        textOutput.setEditable(false);
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
-        textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
         // TimeRange Picker initialization

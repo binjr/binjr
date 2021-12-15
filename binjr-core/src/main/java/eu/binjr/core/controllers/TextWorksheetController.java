@@ -48,6 +48,7 @@ import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.util.UndoUtils;
 
 import java.net.URL;
 import java.time.ZonedDateTime;
@@ -199,6 +200,7 @@ public class TextWorksheetController extends WorksheetController {
         getBindingManager().attachListener(worksheet.textViewFontSizeProperty(),
                 (ChangeListener<Integer>) (obs, oldVal, newVal) -> textOutput.setStyle("-fx-font-size: " + newVal + "pt;"));
         textOutput.setParagraphGraphicFactory(LineNumberFactory.get(textOutput));
+        textOutput.setUndoManager(UndoUtils.noOpUndoManager());
         textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));

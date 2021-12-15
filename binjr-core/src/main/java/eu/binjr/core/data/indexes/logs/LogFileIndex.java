@@ -313,8 +313,6 @@ public class LogFileIndex implements Searchable {
             }
             var pageSize = prefs.hitsPerPage.get().intValue();
             var skip = page * pageSize;
-           // DrillSideways.DrillSidewaysResult results;
-
             var sort = new Sort(new SortedNumericSortField(TIMESTAMP, SortField.Type.LONG, false),
                     new SortedNumericSortField(LINE_NUMBER, SortField.Type.LONG, false));
             TopFieldCollector collector = TopFieldCollector.create(sort, skip + pageSize, Integer.MAX_VALUE);

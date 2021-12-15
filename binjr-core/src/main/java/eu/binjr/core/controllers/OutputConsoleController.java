@@ -57,6 +57,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.model.ReadOnlyStyledDocumentBuilder;
 import org.fxmisc.richtext.model.SegmentOps;
 import org.fxmisc.richtext.model.StyleSpans;
+import org.fxmisc.richtext.util.UndoUtils;
 
 import java.io.*;
 import java.net.URL;
@@ -113,6 +114,7 @@ public class OutputConsoleController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         populateDebugCommandMenu();
+        textOutput.setUndoManager(UndoUtils.noOpUndoManager());
         textOutput.setEditable(false);
         final TextFormatter<Number> formatter = new TextFormatter<>(new NumberStringConverter());
         consoleMaxLinesText.setTextFormatter(formatter);
