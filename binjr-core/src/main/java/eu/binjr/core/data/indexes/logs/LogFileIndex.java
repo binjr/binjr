@@ -403,6 +403,8 @@ public class LogFileIndex implements Searchable {
         IOUtils.close(taxonomyWriter);
         IOUtils.close(indexWriter);
         IOUtils.close(indexDirectory);
+        hitResultCache.clear();
+        facetResultCache.clear();
         if (parsingThreadPool != null) {
             try {
                 parsingThreadPool.shutdown();
