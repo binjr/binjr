@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2021 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,27 +18,5 @@ package eu.binjr.core.data.indexes;
 
 import eu.binjr.core.data.timeseries.FacetEntry;
 
-import java.util.HashMap;
-import java.util.Map;
-
-public class SearchHit {
-    private final String text;
-    private final Map<String, FacetEntry> facets = new HashMap<>();
-
-    public SearchHit(String text, FacetEntry... categories) {
-        this.text = text;
-        if (categories != null) {
-            for (var category : categories) {
-                this.facets.put(category.getFacetName(), category);
-            }
-        }
-    }
-
-    public String getText() {
-        return text;
-    }
-
-    public Map<String, FacetEntry> getFacets() {
-        return facets;
-    }
+public record SearchHit(String getText, FacetEntry getSeverity, FacetEntry getPath) {
 }

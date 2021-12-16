@@ -326,10 +326,8 @@ public class LogFileIndex implements Searchable {
                     results = drill.search(drillDownQuery, collector);
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
-                    Map<String, FacetEntry> severityFacet;
-                    Map<String, FacetEntry> pathFacet;
-                    pathFacet = makeFacetResult(PATH, results.facets, params);
-                    severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+                    var  severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+                    var pathFacet= makeFacetResult(PATH, results.facets, params);
                     var topDocs = collector.topDocs(skip, pageSize);
                     logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
                     for (int i = 0; i < topDocs.scoreDocs.length; i++) {

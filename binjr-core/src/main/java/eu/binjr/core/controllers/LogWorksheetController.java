@@ -954,8 +954,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
                                         Collections.emptyList());
                                 for (var data : res.getData()) {
                                     var hit = data.getYValue();
-                                    var severity = hit.getFacets().get(CaptureGroup.SEVERITY).getLabel();
-                                    var path = hit.getFacets().get(LogFileIndex.PATH).getLabel();
+                                    var severity = hit.getSeverity().getLabel();
+                                    var path = hit.getPath().getLabel();
                                     var message = hit.getText().stripTrailing();
                                     docBuilder.addParagraph(
                                             message,
