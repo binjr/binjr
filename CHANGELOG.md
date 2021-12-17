@@ -1,3 +1,8 @@
+## [binjr v3.5.1](https://github.com/binjr/binjr/releases/tag/v3.5.1)
+Released on Sat, 11 Dec 2021
+
+* _[Fixed]_ Updated Log4j to version 2.15.0 in response to [CVE-2021-44228](https://nvd.nist.gov/vuln/detail/CVE-2021-44228)
+
 ## [binjr v3.5.0](https://github.com/binjr/binjr/releases/tag/v3.5.0)
 Released on Thu, 25 Nov 2021
 
