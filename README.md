@@ -169,6 +169,10 @@ The documentation can be found [here](https://github.com/binjr/binjr/wiki/).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
+## How is it licensed?
+
+***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
+
 ## Contributing
 
 At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
@@ -183,10 +187,22 @@ So, please, do not hesitate to suggest a new  feature or source support request 
 Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
 with your changes. 
 
+## Special Thanks
 
-## How is it licensed?
+![yourkit_logo](https://www.yourkit.com/images/yklogo.png)
 
-***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
+Special thanks to [YourKit](https://www.yourkit.com) for providing us with access to their Java profiler.
+
+YourKit supports open source projects with innovative and intelligent tools
+for monitoring and profiling Java and .NET applications.
+YourKit is the creator of <a href="https://www.yourkit.com/java/profiler/">YourKit Java Profiler</a>,
+<a href="https://www.yourkit.com/.net/profiler/">YourKit .NET Profiler</a>,
+and <a href="https://www.yourkit.com/youmonitor/">YourKit YouMonitor</a>.
+
+
+
+
+
 
 
 
