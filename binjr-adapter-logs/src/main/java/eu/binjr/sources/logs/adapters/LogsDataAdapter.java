@@ -293,11 +293,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                             DoubleProperty progress,
-                                            boolean requestUpdate) throws IOException {
+                                            boolean forceUpdate) throws IOException {
         final var toDo = seriesInfo.stream()
                 .map(s -> s.getBinding().getPath())
-                .filter(p -> requestUpdate || !indexedFiles.contains(p))
-                .collect(Collectors.toList());
+                .filter(p -> forceUpdate || !indexedFiles.contains(p))
+                .toList();
         if (toDo.size() > 0) {
             final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.contains(getId() + "/" + path.toString()))
                     .stream()
@@ -335,11 +335,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                                                                     Instant start,
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                    boolean bypassCache,
+                                                                                    boolean forceUpdate,
                                                                                     DoubleProperty progress) throws DataAdapterException {
         Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
         try {
-            ensureIndexed(seriesInfo, progress, bypassCache);
+            ensureIndexed(seriesInfo, progress, forceUpdate);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }

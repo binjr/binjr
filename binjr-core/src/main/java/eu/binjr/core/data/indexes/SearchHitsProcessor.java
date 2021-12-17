@@ -22,6 +22,7 @@ import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
 
@@ -52,7 +53,8 @@ public class SearchHitsProcessor extends TimeSeriesProcessor<SearchHit> {
         this.facetResults.put(name, synthesis);
     }
 
-    public void mergeFacetResults(SearchHitsProcessor toMerge){
+    public void mergeFacetResults(SearchHitsProcessor toMerge) {
+        Objects.requireNonNull(toMerge, "SearchHitsProcessor to merge facets from cannot be null");
         toMerge.getFacetResults().forEach(this::addFacetResults);
     }
 

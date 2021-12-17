@@ -62,6 +62,10 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract void refresh();
 
+    public void refresh(boolean force){
+        refresh();
+    }
+
     public abstract  void saveSnapshot();
 
     public abstract void toggleShowPropertiesPane();

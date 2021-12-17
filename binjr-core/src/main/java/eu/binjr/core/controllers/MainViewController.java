@@ -381,8 +381,11 @@ public class MainViewController implements Initializable {
             if (e.getCode() == KeyCode.F12) {
                 AppEnvironment.getInstance().setDebugMode(!AppEnvironment.getInstance().isDebugMode());
             }
-            if (e.getCode() == KeyCode.F5 || (e.getCode() == KeyCode.R && e.isControlDown())) {
+            if (e.getCode() == KeyCode.R && e.isControlDown()) {
                 getSelectedWorksheetController().ifPresent(WorksheetController::refresh);
+            }
+            if (e.getCode() == KeyCode.F5) {
+                getSelectedWorksheetController().ifPresent(w -> w.refresh(e.isControlDown()));
             }
             if (e.getCode() == KeyCode.M && e.isControlDown()) {
                 handleTogglePresentationMode();
@@ -1306,11 +1309,11 @@ public class MainViewController implements Initializable {
     private void handleControlKey(KeyEvent event, boolean pressed) {
         switch (event.getCode()) {
             case SHIFT -> {
-                UserPreferences.getInstance().shiftPressed.set(pressed);
+                AppEnvironment.getInstance().setShiftPressed(pressed);
                 event.consume();
             }
             case CONTROL, META, SHORTCUT -> { // shortcut does not seem to register as Control on Windows here, so check them all.
-                UserPreferences.getInstance().ctrlPressed.set(pressed);
+                AppEnvironment.getInstance().setCtrlPressed(pressed);
                 event.consume();
             }
             default -> {

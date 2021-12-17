@@ -68,6 +68,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
@@ -289,7 +290,8 @@ public class LogFileIndex implements Searchable {
                                       Map<String, Collection<String>> params,
                                       String query,
                                       int page,
-                                      ZoneId zoneId) throws Exception {
+                                      ZoneId zoneId,
+                                      boolean ignoreCache) throws Exception {
         return indexLock.read().lock(() -> {
             Query rangeQuery = LongPoint.newRangeQuery(TIMESTAMP, start, end);
             final Query filterQuery;
@@ -319,15 +321,15 @@ public class LogFileIndex implements Searchable {
             logger.debug(() -> "Query: " + drillDownQuery.toString(FIELD_CONTENT));
             String facetCacheKey = drillDownQuery.toString(FIELD_CONTENT);
             String hitCacheKey = facetCacheKey + "_" + page;
-            var hitProc = hitResultCache.computeIfAbsent(hitCacheKey, CheckedLambdas.wrap(k -> {
+            Function<String, SearchHitsProcessor> fillHitResultCache = CheckedLambdas.wrap(k -> {
                 var proc = new SearchHitsProcessor();
                 DrillSideways.DrillSidewaysResult results;
                 try (Profiler p = Profiler.start("Executing query", logger::perf)) {
                     results = drill.search(drillDownQuery, collector);
                 }
                 try (Profiler p = Profiler.start("Retrieving hits", logger::perf)) {
-                    var  severityFacet = makeFacetResult(SEVERITY, results.facets, params);
-                    var pathFacet= makeFacetResult(PATH, results.facets, params);
+                    var severityFacet = makeFacetResult(SEVERITY, results.facets, params);
+                    var pathFacet = makeFacetResult(PATH, results.facets, params);
                     var topDocs = collector.topDocs(skip, pageSize);
                     logger.debug("collector.getTotalHits() = " + collector.getTotalHits());
                     for (int i = 0; i < topDocs.scoreDocs.length; i++) {
@@ -356,8 +358,14 @@ public class LogFileIndex implements Searchable {
                     proc.setData(logs);
                 }
                 return proc;
-            }));
-            var facetProc = facetResultCache.computeIfAbsent(facetCacheKey, CheckedLambdas.wrap(k -> {
+            });
+            var hitProc = ignoreCache ?
+                    hitResultCache.put(hitCacheKey, fillHitResultCache.apply(hitCacheKey)) :
+                    hitResultCache.computeIfAbsent(hitCacheKey, fillHitResultCache);
+            // assert that search returned a valid HitsProcessor
+            Objects.requireNonNull(hitProc, "Failed to retrieve a non null SearchHitsProcessor");
+
+            Function<String, SearchHitsProcessor> doFacetSearch = CheckedLambdas.wrap(k -> {
                 var proc = new SearchHitsProcessor();
                 try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
                     var ranges = computeRanges(start, end);
@@ -388,7 +396,11 @@ public class LogFileIndex implements Searchable {
                     }
                 }
                 return proc;
-            }));
+            });
+            var facetProc = ignoreCache ?
+                    facetResultCache.put(facetCacheKey, doFacetSearch.apply(facetCacheKey)) :
+                    facetResultCache.computeIfAbsent(facetCacheKey, doFacetSearch);
+
             hitProc.mergeFacetResults(facetProc);
             return hitProc;
         });

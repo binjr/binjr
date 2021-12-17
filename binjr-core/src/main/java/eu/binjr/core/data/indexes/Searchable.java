@@ -39,5 +39,6 @@ public interface Searchable extends Closeable {
                                Map<String, Collection<String>> params,
                                String query,
                                int page,
-                               ZoneId zoneId) throws Exception;
+                               ZoneId zoneId,
+                               boolean ignoreCache) throws Exception;
 }
