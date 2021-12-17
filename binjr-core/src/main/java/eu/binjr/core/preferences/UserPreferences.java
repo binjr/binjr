@@ -123,16 +123,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Number> defaultOpacityStackedAreaCharts = doublePreference("defaultOpacityStackedAreaCharts", 0.70d);
 
     /**
-     * True is the shift key is pressed, false otherwise.
-     */
-    public final ObservablePreference<Boolean> shiftPressed = booleanPreference("shiftPressed", false);
-
-    /**
-     * True is the control key is pressed, false otherwise.
-     */
-    public final ObservablePreference<Boolean> ctrlPressed = booleanPreference("ctrlPressed", false);
-
-    /**
      * The amount of time notification should over before being automatically dismissed.
      */
     public final ObservablePreference<NotificationDurationChoices> notificationPopupDuration =

@@ -410,8 +410,8 @@ public class MainViewController implements Initializable {
         stage.addEventFilter(KeyEvent.KEY_RELEASED, manager.registerHandler(e -> handleControlKey(e, false)));
         manager.attachListener(stage.focusedProperty(), (observable, oldValue, newValue) -> {
             //main stage lost focus -> invalidates shift or ctrl pressed
-            UserPreferences.getInstance().shiftPressed.set(false);
-            UserPreferences.getInstance().ctrlPressed.set(false);
+            AppEnvironment.getInstance().setShiftPressed(false);
+            AppEnvironment.getInstance().setCtrlPressed(false);
         });
     }
 

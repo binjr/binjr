@@ -75,6 +75,8 @@ public class AppEnvironment {
     private final Property<AppPackaging> packaging = new SimpleObjectProperty<>(AppPackaging.UNKNOWN);
     private final StringProperty updateRepoSlug = new SimpleStringProperty("binjr/binjr");
     private final BooleanProperty signatureVerificationDisabled = new SimpleBooleanProperty(false);
+    private final BooleanProperty shiftPressed = new SimpleBooleanProperty(false);
+    private final BooleanProperty ctrlPressed = new SimpleBooleanProperty(false);
     private Optional<String> associatedWorkspace;
     private Path systemPluginPath;
 
@@ -433,6 +435,30 @@ public class AppEnvironment {
 
     public BooleanProperty signatureVerificationDisabledProperty() {
         return signatureVerificationDisabled;
+    }
+
+    public boolean isShiftPressed() {
+        return shiftPressed.get();
+    }
+
+    public BooleanProperty shiftPressedProperty() {
+        return shiftPressed;
+    }
+
+    public void setShiftPressed(boolean shiftPressed) {
+        this.shiftPressed.set(shiftPressed);
+    }
+
+    public boolean isCtrlPressed() {
+        return ctrlPressed.get();
+    }
+
+    public BooleanProperty ctrlPressedProperty() {
+        return ctrlPressed;
+    }
+
+    public void setCtrlPressed(boolean ctrlPressed) {
+        this.ctrlPressed.set(ctrlPressed);
     }
 
     public JvmImplementation getRunningJvm() {

@@ -32,6 +32,7 @@ import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.workspace.Chart;
 import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.SnapshotOutputScale;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
@@ -575,13 +576,13 @@ public class XYChartsWorksheetController extends WorksheetController {
         hCrosshair.selectedProperty().bindBidirectional(userPrefs.horizontalMarkerOn.property());
         vCrosshair.selectedProperty().bindBidirectional(userPrefs.verticalMarkerOn.property());
         getBindingManager().bind(crossHair.horizontalMarkerVisibleProperty(),
-                Bindings.createBooleanBinding(() -> userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
+                Bindings.createBooleanBinding(() -> AppEnvironment.getInstance().isShiftPressed() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
-                        userPrefs.shiftPressed.property()));
+                        AppEnvironment.getInstance().shiftPressedProperty()));
         getBindingManager().bind(crossHair.verticalMarkerVisibleProperty(),
-                Bindings.createBooleanBinding(() -> userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
+                Bindings.createBooleanBinding(() -> AppEnvironment.getInstance().isCtrlPressed() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
-                        userPrefs.ctrlPressed.property()));
+                        AppEnvironment.getInstance().ctrlPressedProperty()));
         vBox.getChildren().add(pane);
         chartParent.getChildren().add(vBox);
     }
@@ -631,14 +632,14 @@ public class XYChartsWorksheetController extends WorksheetController {
         getBindingManager().bindBidirectional(vCrosshair.selectedProperty(), userPrefs.verticalMarkerOn.property());
         getBindingManager().bind(crossHair.horizontalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                                userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
+                                AppEnvironment.getInstance().isShiftPressed() || hCrosshair.isSelected(),
                         hCrosshair.selectedProperty(),
-                        userPrefs.shiftPressed.property()));
+                        AppEnvironment.getInstance().shiftPressedProperty()));
         getBindingManager().bind(crossHair.verticalMarkerVisibleProperty(),
                 Bindings.createBooleanBinding(() ->
-                                userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
+                                AppEnvironment.getInstance().isCtrlPressed() || vCrosshair.isSelected(),
                         vCrosshair.selectedProperty(),
-                        userPrefs.ctrlPressed.property()));
+                        AppEnvironment.getInstance().ctrlPressedProperty()));
         for (int i = 1; i < viewPorts.size(); i++) {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
@@ -650,14 +651,14 @@ public class XYChartsWorksheetController extends WorksheetController {
             });
             getBindingManager().bind(ch.horizontalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                                    userPrefs.shiftPressed.get() || hCrosshair.isSelected(),
+                                    AppEnvironment.getInstance().isShiftPressed() || hCrosshair.isSelected(),
                             hCrosshair.selectedProperty(),
-                            userPrefs.shiftPressed.property()));
+                            AppEnvironment.getInstance().shiftPressedProperty()));
             getBindingManager().bind(ch.verticalMarkerVisibleProperty(),
                     Bindings.createBooleanBinding(() ->
-                                    userPrefs.ctrlPressed.get() || vCrosshair.isSelected(),
+                                    AppEnvironment.getInstance().isCtrlPressed() || vCrosshair.isSelected(),
                             vCrosshair.selectedProperty(),
-                            userPrefs.ctrlPressed.property()));
+                            AppEnvironment.getInstance().ctrlPressedProperty()));
             viewPorts.get(i).setCrosshair(ch);
         }
     }
