@@ -1,1 +1,1 @@
-* _[Fixed]_ Updated Log4j to version 2.16.0 in response to [CVE-2021-45046](https://nvd.nist.gov/vuln/detail/CVE-2021-45046)
+* _[Fixed]_ Updated Log4j to version 2.17.0 in response to [CVE-2021-45105](https://nvd.nist.gov/vuln/detail/CVE-2021-45105)
