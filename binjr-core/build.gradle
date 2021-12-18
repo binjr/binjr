@@ -29,9 +29,9 @@ dependencies {
     implementation "org.bouncycastle:bcpg-jdk15on:1.70"
     implementation 'org.reflections:reflections:0.9.12'
     api 'org.fxmisc.richtext:richtextfx:0.10.7'
-    implementation 'org.apache.lucene:lucene-core:8.11.0'
-    implementation 'org.apache.lucene:lucene-facet:8.11.0'
-    implementation 'org.apache.lucene:lucene-queryparser:8.11.0'
+    implementation 'org.apache.lucene:lucene-core:9.0.0'
+    implementation 'org.apache.lucene:lucene-facet:9.0.0'
+    implementation 'org.apache.lucene:lucene-queryparser:9.0.0'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"
