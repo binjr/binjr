@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2021 Frederic Thevenet
+ *    Copyright 2018-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ import java.time.Duration
 plugins {
     id "de.undercouch.download" version "4.1.2"
     id 'org.kordamp.gradle.markdown' version '2.2.0'
-    id "com.github.ben-manes.versions" version "0.39.0"
+    id "com.github.ben-manes.versions" version "0.40.0"
     id "de.marcphilipp.nexus-publish" version "0.4.0" apply false
     id "signing"
 }
@@ -130,8 +130,8 @@ configure(subprojects) {
         }
 
         dependencies {
-            testImplementation('org.junit.jupiter:junit-jupiter-api:5.7.2')
-            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.7.2')
+            testImplementation('org.junit.jupiter:junit-jupiter-api:5.8.2')
+            testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.8.2')
             compileOnly "org.openjfx:javafx-base:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-graphics:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"
             compileOnly "org.openjfx:javafx-controls:$OPENJFX_VERSION:$OPENJFX_PLATEFORM_CLASSIFIER"

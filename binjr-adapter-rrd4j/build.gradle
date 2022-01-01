@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2021 Frederic Thevenet
+ *    Copyright 2018-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 dependencies {
     compileOnly project(':binjr-core')
-    implementation 'org.rrd4j:rrd4j:3.8'
+    implementation 'org.rrd4j:rrd4j:3.8.1'
 }
 
 jar {
