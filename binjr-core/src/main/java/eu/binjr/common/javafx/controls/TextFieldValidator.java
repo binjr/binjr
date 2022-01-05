@@ -1,5 +1,5 @@
 /*
- *    Copyright 2021 Frederic Thevenet
+ *    Copyright 2021-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.InvalidationListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextField;
 
 import java.util.function.Predicate;
@@ -30,7 +31,9 @@ public class TextFieldValidator {
         textField.setStyle("");
     }
 
-    public static void fail(TextField textField, boolean autoReset) {
+    public static void fail(TextField textField,
+                            boolean autoReset,
+                            ObservableValue<?>... resetProperties) {
         textField.setStyle(String.format("-fx-background-color: %s;",
                 ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
         if (autoReset) {
@@ -40,15 +43,23 @@ public class TextFieldValidator {
                 manager.close();
             };
             manager.attachListener(textField.textProperty(), autoResetListener);
+            if (resetProperties != null) {
+                for (ObservableValue<?> p : resetProperties) {
+                    manager.attachListener(p, autoResetListener);
+                }
+            }
         }
     }
 
-    public static boolean validate(TextField textField, boolean autoReset, Predicate<String> validator) {
+    public static boolean validate(TextField textField,
+                                   boolean autoReset,
+                                   Predicate<String> validator,
+                                   ObservableValue<?>... resetProperties) {
         if (validator.test(textField.getText())) {
             succeed(textField);
             return true;
         } else {
-            fail(textField, autoReset);
+            fail(textField, autoReset, resetProperties);
             return false;
         }
     }

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -972,9 +972,8 @@ public class MainViewController implements Initializable {
             } catch (PatternSyntaxException e) {
                 treeFilterExpressionProperty.setValue(null);
                 if (filterUseRegexToggle.isSelected()) {
-                    TextFieldValidator.fail(filterField, true);
-                    logger.info("Bad pattern: " + e.getMessage());
-                    logger.debug("Stack", e);
+                    TextFieldValidator.fail(filterField, true, filterUseRegexToggle.selectedProperty());
+                    logger.debug("Bad pattern", e);
                 } else {
                     // validate change anyway if we don't care about the pattern
                     filterCriteriaChanged.setValue(!filterCriteriaChanged.get());

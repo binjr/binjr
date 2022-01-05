@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ public class OutputConsoleController implements Initializable {
             }
         } catch (HighlightPatternException e) {
             if (searchRegExToggle.isSelected()) {
-                TextFieldValidator.fail(searchTextField, true);
+                TextFieldValidator.fail(searchTextField, true, searchRegExToggle.selectedProperty());
                 searchResultsLabel.setText("Bad pattern");
             }
         }

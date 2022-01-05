@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -275,7 +275,7 @@ public class TextWorksheetController extends WorksheetController {
         } catch (HighlightPatternException e) {
             if (searchRegExToggle.isSelected()) {
                 logger.debug(e.getMessage(), e);
-                TextFieldValidator.fail(searchTextField, true);
+                TextFieldValidator.fail(searchTextField, true, searchRegExToggle.selectedProperty());
                 searchResultsLabel.setText("Bad pattern");
             }
         }
