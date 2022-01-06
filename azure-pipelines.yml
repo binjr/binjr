@@ -14,6 +14,9 @@ variables:
   system.debug: false
   isTag: 'false'
   isSnapshot: 'false'
+  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-linux_x64.tar.gz'
+  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-macosx_x64.tar.gz'
+  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-win_x64.zip'
 
 stages:
   - stage: build
@@ -23,7 +26,7 @@ stages:
         parameters:
           name: app_bundle_linux
           platform: linux
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-linux_x64.tar.gz'
+          jdkDownloadUrl: $(jdkUrlLinux)
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           pool:
             vmImage: 'ubuntu-18.04'
@@ -33,7 +36,7 @@ stages:
         parameters:
           name: app_bundle_mac
           platform: mac
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-macosx_x64.tar.gz'
+          jdkDownloadUrl: $(jdkUrlMacos)
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
           pool:
             vmImage: 'macOS-10.15'
@@ -43,7 +46,7 @@ stages:
         parameters:
           name: app_bundle_windows
           platform: win
-          jdkDownloadUrl: 'https://cdn.azul.com/zulu/bin/zulu17.30.15-ca-jdk17.0.1-win_x64.zip'
+          jdkDownloadUrl: $(jdkUrlWin64)
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
           pool:
             vmImage: 'windows-2019'
@@ -58,7 +61,7 @@ stages:
         vmImage: 'ubuntu-18.04'
       steps:
         - script: |
-            curl 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz' --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+            curl $(jdkUrlLinux) --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
 
         - task: JavaToolInstaller@0
           inputs:
@@ -126,7 +129,7 @@ stages:
           condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
 
         - script: |
-            curl 'https://cdn.azul.com/zulu/bin/zulu17.0.75-ea-jdk17.0.0-ea.33-linux_x64.tar.gz' --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+            curl $(jdkUrlLinux) --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
 
         - task: JavaToolInstaller@0
           inputs:
