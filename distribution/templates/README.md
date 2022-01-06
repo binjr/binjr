@@ -79,7 +79,7 @@ with someone else.
 * [Netdata](https://www.netdata.cloud):  distributed, real-time performance and health monitoring for systems and applications
 * Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
 * Comma Separated Values (CSV) files.
-* [A stand-alone demonstration data source.](#trying-it-out)
+* Text based, semi-structured log files.
   
 ## Getting help
 

@@ -104,6 +104,7 @@ setup nor maintenance to speak of.
 * [Netdata](https://www.netdata.cloud):  distributed, real-time performance and health monitoring for systems and applications
 * Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
 * Comma Separated Values (CSV) files.
+* Text based, semi-structured log files.
 * [A stand-alone demonstration data source.](#trying-it-out)
 
 ## Getting started
@@ -169,10 +170,6 @@ The documentation can be found [here](https://github.com/binjr/binjr/wiki/).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
-## How is it licensed?
-
-***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
-
 ## Contributing
 
 At the moment, sources that ***binjr*** can use are limited both in types and numbers, which is to be expected given 
@@ -186,6 +183,10 @@ So, please, do not hesitate to suggest a new  feature or source support request 
  
 Source code contributions are also welcome; if you wish to make one, please fork this repository and submit a pull request
 with your changes. 
+
+## How is it licensed?
+
+***binjr*** is released under the [Apache License version 2.0](https://github.com/binjr/binjr/blob/master/LICENSE.md).
 
 ## Special Thanks
 
