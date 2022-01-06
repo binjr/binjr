@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -47,11 +47,11 @@ import java.util.function.Consumer;
         category = "Core",
         elementType = "appender",
         printObject = true)
-public  class TextFlowAppender extends AbstractAppender {
+public class TextFlowAppender extends AbstractAppender {
     private final Lock renderTextLock = new ReentrantLock();
     private final Map<Level, String> logColors = new HashMap<>();
     private final String defaultColor = "log-info";
-    private final LogBuffer<Log, Object> logBuffer = new LogBuffer<>();
+    private final LogBuffer logBuffer = new LogBuffer();
     private Consumer<Collection<Log>> renderTextDelegate;
 
     protected TextFlowAppender(String name, Filter filter,
@@ -129,7 +129,7 @@ public  class TextFlowAppender extends AbstractAppender {
             new String(getLayout().toByteArray(event)).lines().forEach(
                     message -> {
                         Log log = new Log(message, logColors.getOrDefault(event.getLevel(), defaultColor));
-                        logBuffer.put(log, null);
+                        logBuffer.push(log);
                     });
         } finally {
             renderTextLock.unlock();
@@ -142,7 +142,7 @@ public  class TextFlowAppender extends AbstractAppender {
                 try {
                     if (renderTextDelegate != null && logBuffer.isDirty()) {
                         logBuffer.clean();
-                        renderTextDelegate.accept(logBuffer.keySet());
+                        renderTextDelegate.accept(logBuffer.getLogs());
                     }
                 } finally {
                     renderTextLock.unlock();
@@ -162,32 +162,37 @@ public  class TextFlowAppender extends AbstractAppender {
         }
     }
 
-    private static class LogBuffer<K, V> extends LinkedHashMap<K, V> {
+    private static class LogBuffer {
         private volatile boolean dirty;
+        private long lineCounter = 0;
+        private final LinkedHashMap<Long, Log> buffer = new LinkedHashMap<>() {
+            @Override
+            protected boolean removeEldestEntry(Map.Entry<Long, Log> eldest) {
+                return size() > UserPreferences.getInstance().consoleMaxLineCapacity.get().intValue();
+            }
+        };
+
+        public void clear() {
+            dirty = true;
+            buffer.clear();
+            lineCounter = 0;
+        }
 
         public void clean() {
             this.dirty = false;
         }
 
-        @Override
-        public V put(K key, V value) {
+        public Log push(Log log) {
             dirty = true;
-            return super.put(key, value);
-        }
-
-        @Override
-        public void clear() {
-            dirty = true;
-            super.clear();
-        }
-
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
-            return size() > UserPreferences.getInstance().consoleMaxLineCapacity.get().intValue();
+            return buffer.put(lineCounter++, log);
         }
 
         public boolean isDirty() {
             return dirty;
+        }
+
+        public Collection<Log> getLogs() {
+            return buffer.values();
         }
     }
 }
