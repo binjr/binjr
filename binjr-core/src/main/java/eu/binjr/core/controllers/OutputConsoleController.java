@@ -121,7 +121,7 @@ public class OutputConsoleController implements Initializable {
         formatter.valueProperty().bindBidirectional(UserPreferences.getInstance().consoleMaxLineCapacity.property());
         if (DEBUG_CONSOLE_APPENDER == null) {
             String log = "<ERROR: The debug console appender is unavailable!>\n";
-            textOutput.append(log, ".styled-text-area .error");
+            textOutput.append(log, "fatal");
         } else {
             DEBUG_CONSOLE_APPENDER.setRenderTextDelegate(msgSet -> {
                 textOutput.clear();
