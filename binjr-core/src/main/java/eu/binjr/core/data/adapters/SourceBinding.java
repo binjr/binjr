@@ -152,7 +152,11 @@ public abstract class SourceBinding<T> {
      * @return the color of the bound series as defined in the source.
      */
     public Color getColor() {
-        return this.color == null ? computeDefaultColor() : this.color;
+        return this.color == null ? computeDefaultColor(this.getLabel()) : this.color;
+    }
+
+    public Color getAutoColor(String key){
+        return computeDefaultColor(key);
     }
 
     public String getMimeType() {
@@ -194,8 +198,8 @@ public abstract class SourceBinding<T> {
 
     protected abstract Color[] getDefaultColorPalette();
 
-    protected Color computeDefaultColor() {
-        long targetNum = getHashValue(this.getLabel()) % getDefaultColorPalette().length;
+    protected Color computeDefaultColor(String key) {
+        long targetNum = getHashValue(key) % getDefaultColorPalette().length;
         if (targetNum < 0) {
             targetNum = targetNum * -1;
         }

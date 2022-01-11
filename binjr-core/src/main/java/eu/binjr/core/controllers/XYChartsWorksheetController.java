@@ -866,6 +866,11 @@ public class XYChartsWorksheetController extends WorksheetController {
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
+            currentViewPort.getSeriesTable().setOnKeyPressed(event -> {
+                if (event.getCode() == KeyCode.ESCAPE) {
+                    ((TableView<?>) event.getSource()).getSelectionModel().clearSelection();
+                }
+            });
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);
             newPane.setMaxHeight(Double.MAX_VALUE);
@@ -1563,6 +1568,61 @@ public class XYChartsWorksheetController extends WorksheetController {
 
     private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
         TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
+        var selectionIsEmpty = Bindings.createBooleanBinding(
+                () -> tv.getSelectionModel().getSelectedItems().isEmpty(),
+                tv.getSelectionModel().getSelectedItems());
+        var selectionIsMono = Bindings.createBooleanBinding(
+                () -> tv.getSelectionModel().getSelectedItems().size() < 2,
+                tv.getSelectionModel().getSelectedItems());
+        var menu = new ContextMenu();
+        var removeMenuItem = new MenuItem("Remove Series");
+        getBindingManager().bind(removeMenuItem.disableProperty(), selectionIsEmpty);
+        removeMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
+            removeSelectedBinding(tv);
+        }));
+
+        var inferNameItem = new MenuItem("Infer Series Names");
+        getBindingManager().bind(inferNameItem.disableProperty(), selectionIsMono);
+        inferNameItem.setOnAction(getBindingManager().registerHandler(e -> {
+            var tokens = tv.getSelectionModel().getSelectedItems().stream()
+                    .map(t -> t.getBinding().getTreeHierarchy().split("/")).toList();
+            tokens.stream().mapToInt(a -> a.length).max().ifPresent(maxToken -> {
+                var keepList = new ArrayList<Integer>();
+                for (int i = 0; i < maxToken; i++) {
+                    for (String[] token : tokens) {
+                        if (token.length <= i || !tokens.get(0)[i].equals(token[i])) {
+                            keepList.add(i);
+                            break;
+                        }
+                    }
+                }
+                for (int i = 0; i < tokens.size(); i++) {
+                    var token = tokens.get(i);
+                    var reduced = new ArrayList<String>();
+                    for (int j = 0; j < Math.min(maxToken, token.length); j++) {
+                        if (keepList.contains(j)) {
+                            reduced.add(token[j]);
+                        }
+                    }
+                    tv.getSelectionModel().getSelectedItems().get(i).setDisplayName(String.join(" ", reduced));
+                }
+            });
+        }));
+
+        var inferColorItem = new MenuItem("Infer Series Colors");
+        getBindingManager().bind(inferColorItem.disableProperty(), selectionIsEmpty);
+        inferColorItem.setOnAction(getBindingManager().registerHandler(e -> {
+            tv.getSelectionModel().getSelectedItems().forEach(s -> {
+                s.setDisplayColor(s.getBinding().getAutoColor(s.getDisplayName()));
+            });
+        }));
+
+        var automation = new Menu("Automation");
+        automation.getItems().setAll(inferNameItem, inferColorItem);
+        menu.getItems().setAll(removeMenuItem, automation);
+        row.setContextMenu(menu);
+
+
         row.setOnDragDetected(getBindingManager().registerHandler(event -> {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
