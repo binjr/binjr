@@ -18,11 +18,14 @@ package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableValue;
+import javafx.geometry.Pos;
 import javafx.scene.control.TextField;
 
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class TextFieldValidator {
@@ -34,8 +37,17 @@ public class TextFieldValidator {
     public static void fail(TextField textField,
                             boolean autoReset,
                             ObservableValue<?>... resetProperties) {
+        fail(textField, null, autoReset, resetProperties);
+    }
+
+    public static void fail(TextField textField, String reason,
+                            boolean autoReset,
+                            ObservableValue<?>... resetProperties) {
         textField.setStyle(String.format("-fx-background-color: %s;",
                 ColorUtils.toHex(UserPreferences.getInstance().invalidInputColor.get())));
+        if (reason != null) {
+            Dialogs.notifyError("Invalid input", reason, Pos.BOTTOM_RIGHT, textField);
+        }
         if (autoReset) {
             BindingManager manager = new BindingManager();
             InvalidationListener autoResetListener = obs -> {
@@ -62,6 +74,24 @@ public class TextFieldValidator {
             fail(textField, autoReset, resetProperties);
             return false;
         }
+    }
+
+    public static boolean validate(TextField textField,
+                                   boolean autoReset,
+                                   Function<String, ValidationStatus> validator,
+                                   ObservableValue<?>... resetProperties) {
+        var status = validator.apply(textField.getText());
+        if (status.isValid()) {
+            succeed(textField);
+            return true;
+        } else {
+            fail(textField, status.reason, autoReset, resetProperties);
+            return false;
+        }
+    }
+
+    public record ValidationStatus(boolean isValid, String reason) {
+
     }
 
 }
