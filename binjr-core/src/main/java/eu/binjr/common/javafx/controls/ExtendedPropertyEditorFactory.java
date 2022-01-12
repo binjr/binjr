@@ -34,10 +34,15 @@ import org.controlsfx.property.editor.DefaultPropertyEditorFactory;
 import org.controlsfx.property.editor.PropertyEditor;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 
 public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory {
     private static final Logger logger = Logger.create(ExtendedPropertyEditorFactory.class);
@@ -116,6 +121,30 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                 }
             }));
         }
+
+        if (URI.class.isAssignableFrom(item.getType())) {
+            return new FormattedPropertyEditor<URI>(item, new TextFormatter<>(new StringConverter<>() {
+                @Override
+                public String toString(URI object) {
+                    if (object == null) {
+                        return "";
+                    }
+                    return object.toString();
+                }
+
+                @Override
+                public URI fromString(String string) {
+                    return URI.create(string);
+                }
+            }), s -> {
+                try {
+                    new URL(s);
+                    return new TextFieldValidator.ValidationStatus(true, "");
+                } catch (MalformedURLException e) {
+                    return new TextFieldValidator.ValidationStatus(false, e.getMessage());
+                }
+            });
+        }
         return null;
     }
 
@@ -125,11 +154,22 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
         private final TextFormatter<T> textFormatter;
 
         FormattedPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter) {
-            this(item, textFormatter, null);
+            this(item, textFormatter, null, null);
+        }
+
+        FormattedPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter, Function<String, TextFieldValidator.ValidationStatus> validator) {
+            this(item, textFormatter, null, validator);
+        }
+
+        FormattedPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter, BiFunction<Node, T, Optional<T>> editAction) {
+            this(item, textFormatter, editAction, null);
         }
 
         @SuppressWarnings("unchecked")
-        FormattedPropertyEditor(PropertySheet.Item item, TextFormatter<T> textFormatter, BiFunction<Node, T, Optional<T>> editAction) {
+        FormattedPropertyEditor(PropertySheet.Item item,
+                                TextFormatter<T> textFormatter,
+                                BiFunction<Node, T, Optional<T>> editAction,
+                                Function<String, TextFieldValidator.ValidationStatus> validator) {
             this.textFormatter = textFormatter;
             editor = new HBox();
             editor.setSpacing(5);
@@ -150,6 +190,9 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                     editAction.apply(getEditor(), textFormatter.getValue()).ifPresent(textFormatter::setValue);
                 });
                 editor.getChildren().add(editButton);
+            }
+            if (validator != null) {
+                textField.setOnAction(event -> TextFieldValidator.validate(textField, true, validator));
             }
         }
 

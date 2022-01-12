@@ -20,6 +20,7 @@ package eu.binjr.common.preferences;
 import eu.binjr.common.logging.Logger;
 import javafx.beans.property.*;
 
+import java.net.URI;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
@@ -206,6 +207,27 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
 
             @Override
             protected void saveToBackend(Path value) {
+                getBackingStore().put(getKey(), value.toString());
+            }
+        };
+        storedItems.put(p.getKey(), p);
+        return p;
+    }
+
+    public ObservablePreference<URI>  uriPreference(String key, URI defaultValue) {
+        var p = new ObservablePreference<>(URI.class, key, defaultValue, backingStore) {
+            @Override
+            protected Property<URI> makeProperty(URI value) {
+                return new SimpleObjectProperty<>(value);
+            }
+
+            @Override
+            protected URI loadFromBackend() {
+                return URI.create(getBackingStore().get(getKey(), getDefaultValue().toString()));
+            }
+
+            @Override
+            protected void saveToBackend(URI value) {
                 getBackingStore().put(getKey(), value.toString());
             }
         };
