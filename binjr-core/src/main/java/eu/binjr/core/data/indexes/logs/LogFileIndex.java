@@ -359,12 +359,13 @@ public class LogFileIndex implements Searchable {
                 }
                 return proc;
             });
-            var hitProc = ignoreCache ?
-                    hitResultCache.put(hitCacheKey, fillHitResultCache.apply(hitCacheKey)) :
-                    hitResultCache.computeIfAbsent(hitCacheKey, fillHitResultCache);
-            // assert that search returned a valid HitsProcessor
-            Objects.requireNonNull(hitProc, "Failed to retrieve a non null SearchHitsProcessor");
-
+            SearchHitsProcessor hitProc;
+            if (ignoreCache){
+                hitProc = fillHitResultCache.apply(hitCacheKey);
+                hitResultCache.put(hitCacheKey, hitProc);}
+            else {
+                hitProc = hitResultCache.computeIfAbsent(hitCacheKey, fillHitResultCache);
+            }
             Function<String, SearchHitsProcessor> doFacetSearch = CheckedLambdas.wrap(k -> {
                 var proc = new SearchHitsProcessor();
                 try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
@@ -397,10 +398,13 @@ public class LogFileIndex implements Searchable {
                 }
                 return proc;
             });
-            var facetProc = ignoreCache ?
-                    facetResultCache.put(facetCacheKey, doFacetSearch.apply(facetCacheKey)) :
-                    facetResultCache.computeIfAbsent(facetCacheKey, doFacetSearch);
-
+            SearchHitsProcessor facetProc;
+            if (ignoreCache){
+                facetProc = doFacetSearch.apply(facetCacheKey);
+                facetResultCache.put(facetCacheKey, facetProc);}
+            else {
+                facetProc = facetResultCache.computeIfAbsent(facetCacheKey, doFacetSearch);
+            }
             hitProc.mergeFacetResults(facetProc);
             return hitProc;
         });
