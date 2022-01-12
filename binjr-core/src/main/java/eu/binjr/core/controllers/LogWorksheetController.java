@@ -1131,6 +1131,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }));
 
         fileTable.setItems(worksheet.getSeriesInfo());
+        fileTable.setRowFactory(this::seriesTableRowFactory);
         fileTable.getColumns().addAll(
                 visibleColumn,
                 colorColumn,

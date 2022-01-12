@@ -95,7 +95,6 @@ import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
  */
 public class XYChartsWorksheetController extends WorksheetController {
     public static final String WORKSHEET_VIEW_FXML = "/eu/binjr/views/XYChartsWorksheetView.fxml";
-    private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private static final DataFormat VIEWPORT_DRAG_FORMAT = new DataFormat("viewport_drag_format");
     private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
@@ -1564,104 +1563,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             return v;
         }
         throw new IllegalStateException("Could not retrieve selected viewport on current worksheet");
-    }
-
-    private TableRow<TimeSeriesInfo<Double>> seriesTableRowFactory(TableView<TimeSeriesInfo<Double>> tv) {
-        TableRow<TimeSeriesInfo<Double>> row = new TableRow<>();
-        var selectionIsEmpty = Bindings.createBooleanBinding(
-                () -> tv.getSelectionModel().getSelectedItems().isEmpty(),
-                tv.getSelectionModel().getSelectedItems());
-        var selectionIsMono = Bindings.createBooleanBinding(
-                () -> tv.getSelectionModel().getSelectedItems().size() < 2,
-                tv.getSelectionModel().getSelectedItems());
-        var menu = new ContextMenu();
-        var removeMenuItem = new MenuItem("Remove Series");
-        getBindingManager().bind(removeMenuItem.disableProperty(), selectionIsEmpty);
-        removeMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
-            removeSelectedBinding(tv);
-        }));
-
-        var inferNameItem = new MenuItem("Infer Series Names");
-        getBindingManager().bind(inferNameItem.disableProperty(), selectionIsMono);
-        inferNameItem.setOnAction(getBindingManager().registerHandler(e -> {
-            var tokens = tv.getSelectionModel().getSelectedItems().stream()
-                    .map(t -> t.getBinding().getTreeHierarchy().split("/")).toList();
-            tokens.stream().mapToInt(a -> a.length).max().ifPresent(maxToken -> {
-                var keepList = new ArrayList<Integer>();
-                for (int i = 0; i < maxToken; i++) {
-                    for (String[] token : tokens) {
-                        if (token.length <= i || !tokens.get(0)[i].equals(token[i])) {
-                            keepList.add(i);
-                            break;
-                        }
-                    }
-                }
-                for (int i = 0; i < tokens.size(); i++) {
-                    var token = tokens.get(i);
-                    var reduced = new ArrayList<String>();
-                    for (int j = 0; j < Math.min(maxToken, token.length); j++) {
-                        if (keepList.contains(j)) {
-                            reduced.add(token[j]);
-                        }
-                    }
-                    tv.getSelectionModel().getSelectedItems().get(i).setDisplayName(String.join(" ", reduced));
-                }
-            });
-        }));
-
-        var inferColorItem = new MenuItem("Infer Series Colors");
-        getBindingManager().bind(inferColorItem.disableProperty(), selectionIsEmpty);
-        inferColorItem.setOnAction(getBindingManager().registerHandler(e -> {
-            tv.getSelectionModel().getSelectedItems().forEach(s -> {
-                s.setDisplayColor(s.getBinding().getAutoColor(s.getDisplayName()));
-            });
-        }));
-
-        var automation = new Menu("Automation");
-        automation.getItems().setAll(inferNameItem, inferColorItem);
-        menu.getItems().setAll(removeMenuItem, automation);
-        row.setContextMenu(menu);
-
-
-        row.setOnDragDetected(getBindingManager().registerHandler(event -> {
-            if (!row.isEmpty()) {
-                Integer index = row.getIndex();
-                Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                db.setDragView(SnapshotUtils.scaledSnapshot(row, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
-                ClipboardContent cc = new ClipboardContent();
-                cc.put(SERIALIZED_MIME_TYPE, index);
-                db.setContent(cc);
-                event.consume();
-            }
-        }));
-
-        row.setOnDragOver(getBindingManager().registerHandler(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasContent(SERIALIZED_MIME_TYPE) && row.getIndex() != (Integer) db.getContent(SERIALIZED_MIME_TYPE)) {
-                event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                event.consume();
-            }
-        }));
-
-        row.setOnDragDropped(getBindingManager().registerHandler(event -> {
-            Dragboard db = event.getDragboard();
-            if (db.hasContent(SERIALIZED_MIME_TYPE)) {
-                int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                TimeSeriesInfo<Double> draggedseries = tv.getItems().remove(draggedIndex);
-                int dropIndex;
-                if (row.isEmpty()) {
-                    dropIndex = tv.getItems().size();
-                } else {
-                    dropIndex = row.getIndex();
-                }
-                tv.getItems().add(dropIndex, draggedseries);
-                event.setDropCompleted(true);
-                tv.getSelectionModel().clearAndSelect(dropIndex);
-                invalidate(false, false, false);
-                event.consume();
-            }
-        }));
-        return row;
     }
 
     @Override
