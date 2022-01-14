@@ -1,6 +1,6 @@
 
 /*
- *    Copyright 2019-2021 Frederic Thevenet
+ *    Copyright 2019-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -63,6 +63,28 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
         return p;
     }
 
+    public ObservablePreference<ObfuscatedString> obfuscatedStringPreference(String key, String defaultValue) {
+        var p = new ObservablePreference<>(ObfuscatedString.class, key, ObfuscatedString.of(defaultValue), backingStore) {
+            @Override
+            protected Property<ObfuscatedString> makeProperty(ObfuscatedString value) {
+                return new SimpleObjectProperty<>(value);
+            }
+
+            @Override
+            protected ObfuscatedString loadFromBackend() {
+                return new ObfuscatedString(getBackingStore().get(getKey(), getDefaultValue().getObfuscated()));
+            }
+
+            @Override
+            protected void saveToBackend(ObfuscatedString value) {
+                getBackingStore().put(getKey(), value.getObfuscated());
+            }
+        };
+        storedItems.put(p.getKey(), p);
+        return p;
+    }
+
+
     public ObservablePreference<String> stringPreference(String key, String defaultValue) {
         var p = new ObservablePreference<>(String.class, key, defaultValue, backingStore) {
             @Override
@@ -115,7 +137,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
             @Override
             protected ZonedDateTime loadFromBackend() {
                 return ZonedDateTime.parse(getBackingStore().get(getKey(),
-                        getDefaultValue().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)),
+                                getDefaultValue().format(DateTimeFormatter.ISO_ZONED_DATE_TIME)),
                         DateTimeFormatter.ISO_ZONED_DATE_TIME);
             }
 
@@ -138,7 +160,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
             @Override
             protected LocalDateTime loadFromBackend() {
                 return LocalDateTime.parse(getBackingStore().get(getKey(),
-                        getDefaultValue().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
+                                getDefaultValue().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)),
                         DateTimeFormatter.ISO_LOCAL_DATE_TIME);
             }
 
@@ -214,7 +236,7 @@ public class ObservablePreferenceFactory extends ReloadableItemStore<ObservableP
         return p;
     }
 
-    public ObservablePreference<URI>  uriPreference(String key, URI defaultValue) {
+    public ObservablePreference<URI> uriPreference(String key, URI defaultValue) {
         var p = new ObservablePreference<>(URI.class, key, defaultValue, backingStore) {
             @Override
             protected Property<URI> makeProperty(URI value) {
