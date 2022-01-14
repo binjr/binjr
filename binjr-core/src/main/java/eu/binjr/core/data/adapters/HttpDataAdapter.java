@@ -20,6 +20,7 @@ import eu.binjr.common.logging.Logger;
 import eu.binjr.common.logging.Profiler;
 import eu.binjr.core.data.exceptions.*;
 import eu.binjr.core.preferences.AppEnvironment;
+import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import org.apache.hc.client5.http.ClientProtocolException;
@@ -37,6 +38,7 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.client5.http.ssl.SSLConnectionSocketFactoryBuilder;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.apache.hc.core5.http.config.RegistryBuilder;
@@ -234,6 +236,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
 
     protected CloseableHttpClient httpClientFactory() throws CannotInitializeDataAdapterException {
         try {
+            var userPrefs = UserPreferences.getInstance();
             var schemeFactoryRegistry = RegistryBuilder.<AuthSchemeFactory>create()
                     .register(StandardAuthScheme.BASIC, BasicSchemeFactory.INSTANCE)
                     .register(StandardAuthScheme.DIGEST, DigestSchemeFactory.INSTANCE)
@@ -263,6 +266,14 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                         }
                     });
 
+            if (userPrefs.enableHttpProxy.get() && userPrefs.useHttpProxyAuth.get()) {
+                credsProvider.setCredentials(
+                        new AuthScope(userPrefs.httpProxyHost.get(),
+                                userPrefs.httpProxyPort.get().intValue()),
+                        new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
+                                userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
+            }
+
             PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
                             .setSslContext(createSslCustomContext())
@@ -279,7 +290,7 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     .setConnectionTimeToLive(TimeValue.ofMinutes(1L))
                     .build();
 
-            return HttpClients.custom()
+            var builder = HttpClients.custom()
                     .setUserAgent(AppEnvironment.APP_NAME + "/" +
                             AppEnvironment.getInstance().getVersion() +
                             " (Authenticates like: Firefox/Safari/Internet Explorer)")
@@ -290,9 +301,11 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             .setConnectTimeout(Timeout.ofSeconds(5))
                             .setResponseTimeout(Timeout.ofSeconds(5))
                             .setCookieSpec(StandardCookieSpec.STRICT)
-                            .build())
-                    .build();
-
+                            .build());
+            if (userPrefs.enableHttpProxy.get()) {
+                builder.setProxy(new HttpHost(userPrefs.httpProxyHost.get(), userPrefs.httpProxyPort.get().intValue()));
+            }
+            return builder.build();
         } catch (Exception e) {
             throw new CannotInitializeDataAdapterException("Could not initialize adapter to source '" +
                     this.getSourceName() + "': " + e.getMessage(), e);

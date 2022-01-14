@@ -16,22 +16,11 @@
 
 package eu.binjr.common.preferences;
 
+import eu.binjr.common.io.AesHelper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.util.Base64;
 
 public class ObfuscatedString {
     private static final Logger logger = LogManager.getLogger(ObfuscatedString.class);
@@ -59,21 +48,17 @@ public class ObfuscatedString {
         return obfuscated;
     }
 
-    //TODO generate and store random key
-    private static SecretKey KEY = AesHelper.getKeyFromPassword("foobarfoo", "salty");
-
     private static String deObfuscateString(String obfuscated) {
         try {
             if (obfuscated.isEmpty()) {
                 return obfuscated;
             }
-            return AesHelper.decrypt(obfuscated, KEY);
+            return AesHelper.decrypt(obfuscated, Keyring.getInstance().getMasterKey());
         } catch (Exception e) {
             logger.error("Error while attempting to de-obfuscate string: " + e.getMessage());
             logger.debug(() -> "Stack trace", e);
             return "";
         }
-
     }
 
     private static String obfuscateString(String clearText) {
@@ -81,7 +66,7 @@ public class ObfuscatedString {
             if (clearText.isEmpty()) {
                 return clearText;
             }
-            return AesHelper.encrypt(clearText, KEY);
+            return AesHelper.encrypt(clearText, Keyring.getInstance().getMasterKey());
         } catch (Exception e) {
             logger.error("Error while attempting to obfuscate string: " + e.getMessage());
             logger.debug(() -> "Stack trace", e);

@@ -14,7 +14,7 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.preferences;
+package eu.binjr.common.io;
 
 import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
@@ -41,36 +41,18 @@ public class AesHelper {
         var iv = generateIv();
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
         byte[] cipherText = cipher.doFinal(input.getBytes());
-        return Base64.getEncoder().encodeToString(concat(iv.getIV(), cipherText));
+        return Base64.getEncoder().encodeToString(IOUtils.concat(iv.getIV(), cipherText));
     }
 
 
     public static String decrypt(String input, SecretKey key)
             throws GeneralSecurityException {
         Cipher cipher = Cipher.getInstance(AES_CBC_PKCS_5_PADDING);
-        var b = split(Base64.getDecoder().decode(input), IV_LEN);
-        var iv = new IvParameterSpec(b.iv);
+        var b = IOUtils.split(Base64.getDecoder().decode(input), IV_LEN);
+        var iv = new IvParameterSpec(b.first());
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        byte[] plainText = cipher.doFinal(b.cypherText);
+        byte[] plainText = cipher.doFinal(b.second());
         return new String(plainText);
-    }
-
-    public static byte[] concat(byte[] a, byte[] b) {
-        byte[] c = new byte[a.length + b.length];
-        System.arraycopy(a, 0, c, 0, a.length);
-        System.arraycopy(b, 0, c, a.length, b.length);
-        return c;
-    }
-
-    public static payload split(byte[] c, int len) {
-        byte[] a = new byte[len];
-        byte[] b = new byte[c.length - len];
-        System.arraycopy(c, 0, a, 0, len);
-        System.arraycopy(c, len, b, 0, b.length);
-        return new payload(a, b);
-    }
-
-    public record payload(byte[] iv, byte[] cypherText) {
     }
 
 
@@ -78,6 +60,17 @@ public class AesHelper {
         KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
         keyGenerator.init(n);
         return keyGenerator.generateKey();
+    }
+
+    public static SecretKey getKeyFromEncoded(String encoded){
+        byte[] buffer = Base64.getDecoder().decode(encoded);
+        return new SecretKeySpec(buffer, "AES");
+    }
+
+    public static String generateEncodedKey(int n) throws NoSuchAlgorithmException {
+        KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
+        keyGenerator.init(n);
+        return Base64.getEncoder().encodeToString(keyGenerator.generateKey().getEncoded());
     }
 
     public static SecretKey getKeyFromPassword(String password, String salt) {

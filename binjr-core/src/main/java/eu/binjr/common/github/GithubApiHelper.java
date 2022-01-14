@@ -20,11 +20,16 @@ package eu.binjr.common.github;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.preferences.UserPreferences;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.net.URIBuilder;
 
@@ -51,6 +56,7 @@ import java.util.Optional;
  */
 public class GithubApiHelper {
     private static final Logger logger = Logger.create(GithubApiHelper.class);
+    public static final String HTTPS_API_GITHUB_COM = "https://api.github.com";
     protected final CloseableHttpClient httpClient;
     private final URI apiEndpoint;
     protected String userCredentials;
@@ -68,14 +74,32 @@ public class GithubApiHelper {
     private GithubApiHelper(URI apiEndpoint) {
         gson = new Gson();
         if (apiEndpoint == null) {
-            this.apiEndpoint = URI.create("https://api.github.com");
+            this.apiEndpoint = URI.create(HTTPS_API_GITHUB_COM);
         } else {
             this.apiEndpoint = apiEndpoint;
         }
-        httpClient = HttpClients
+        var builder = HttpClients
                 .custom()
-                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).build())
-                .build();
+                .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).build());
+        var userPrefs = UserPreferences.getInstance();
+        if (userPrefs.enableHttpProxy.get()) {
+            try {
+                builder.setProxy(new HttpHost(userPrefs.httpProxyHost.get(), userPrefs.httpProxyPort.get().intValue()));
+                if (userPrefs.useHttpProxyAuth.get()) {
+                    var credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope(userPrefs.httpProxyHost.get(),
+                                    userPrefs.httpProxyPort.get().intValue()),
+                            new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
+                                    userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
+                    builder.setDefaultCredentialsProvider(credsProvider);
+                }
+            } catch (Exception e){
+                logger.error("Failed to setup http proxy: ", e.getMessage());
+                logger.debug(()-> "Stack", e);
+            }
+        }
+        httpClient = builder.build();
     }
 
     /**
@@ -211,7 +235,7 @@ public class GithubApiHelper {
     }
 
     /**
-     * Download the payload of the specified github asset to a temporary location.
+     * Download the byteArrayTuple of the specified github asset to a temporary location.
      *
      * @param asset the asset to download.
      * @return the {@link Path} where it was downloaded.
@@ -223,7 +247,7 @@ public class GithubApiHelper {
     }
 
     /**
-     * Download the payload of the specified github asset into the specified directory.
+     * Download the byteArrayTuple of the specified github asset into the specified directory.
      *
      * @param asset     the asset to download.
      * @param targetDir the target directory to download the asset to.

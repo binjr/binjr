@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019-2021 Frederic Thevenet
+ *    Copyright 2019-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,10 +18,7 @@ package eu.binjr.core.preferences;
 
 import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.common.preferences.MostRecentlyUsedList;
-import eu.binjr.common.preferences.MruFactory;
-import eu.binjr.common.preferences.ObservablePreference;
-import eu.binjr.common.preferences.ObservablePreferenceFactory;
+import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
@@ -305,6 +302,18 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<Number> facetResultCacheEntries = integerPreference("facetResultCacheEntries", 150);
 
     public final ObservablePreference<Number> hitResultCacheEntries = integerPreference("hitResultCacheEntries", 10);
+
+    public final ObservablePreference<Boolean> enableHttpProxy = booleanPreference("enableHttpProxy", false);
+
+    public final ObservablePreference<String> httpProxyHost = stringPreference("httpProxyHost", "");
+
+    public final ObservablePreference<Number> httpProxyPort = integerPreference("httpProxyPort", 0);
+
+    public final ObservablePreference<Boolean> useHttpProxyAuth = booleanPreference("useHttpProxyAuth", false);
+
+    public final ObservablePreference<String> httpProxyLogin = stringPreference("httpProxyLogin", "");
+
+    public final ObservablePreference<ObfuscatedString> httpProxyPassword = obfuscatedStringPreference("httpProxyPassword", "");
 
     public static class UserFavorites extends MruFactory {
 

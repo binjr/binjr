@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -195,5 +195,23 @@ public class IOUtils {
             logger.warn("Temporary location " + path + " could not be deleted: " + e.getMessage());
             logger.debug("Stack Trace:", e);
         }
+    }
+
+    public static byte[] concat(byte[] a, byte[] b) {
+        byte[] c = new byte[a.length + b.length];
+        System.arraycopy(a, 0, c, 0, a.length);
+        System.arraycopy(b, 0, c, a.length, b.length);
+        return c;
+    }
+
+    public static byteArrayTuple split(byte[] array, int len) {
+        byte[] first = new byte[len];
+        byte[] second = new byte[array.length - len];
+        System.arraycopy(array, 0, first, 0, len);
+        System.arraycopy(array, len, second, 0, second.length);
+        return new byteArrayTuple(first, second);
+    }
+
+    public record byteArrayTuple(byte[] first, byte[] second) {
     }
 }
