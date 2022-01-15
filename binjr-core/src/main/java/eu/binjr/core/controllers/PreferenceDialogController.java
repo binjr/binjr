@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,7 +16,9 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.common.preferences.ObfuscatedString;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
@@ -63,6 +65,18 @@ import java.util.prefs.BackingStoreException;
  */
 public class PreferenceDialogController implements Initializable {
     private static final Logger logger = Logger.create(PreferenceDialogController.class);
+    @FXML
+    private ToggleSwitch enableProxyToggle;
+    @FXML
+    private TextField proxyHostnameTextfield;
+    @FXML
+    private TextField proxyPortTextfield;
+    @FXML
+    private ToggleSwitch useProxyAuthToggle;
+    @FXML
+    private TextField proxyLoginTextfield;
+    @FXML
+    private PasswordField proxyPasswordTextfield;
     @FXML
     private ToggleSwitch dontAskBeforeClosingTabCheckbox;
     @FXML
@@ -143,22 +157,30 @@ public class PreferenceDialogController implements Initializable {
         assert showOutlineAreaCharts != null : "fx:id\"showOutline\" was not injected!";
         assert areaChartOpacitySlider != null : "fx:id\"graphOpacitySlider\" was not injected!";
         UserPreferences userPrefs = UserPreferences.getInstance();
-        areaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
-        areaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", areaChartOpacitySlider.valueProperty().multiply(100)));
-        minChartHeightSlider.minProperty().bind(userPrefs.lowerStackedChartHeight.property());
-        minChartHeightSlider.maxProperty().bind(userPrefs.upperChartHeight.property());
-        minChartHeightSlider.valueProperty().bindBidirectional(userPrefs.minChartHeight.property());
-        minChartHeightText.textProperty().bind(Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
-        stackedAreaChartOpacitySlider.valueProperty().bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());
-        stackedAreaChartsOpacityText.textProperty().bind(Bindings.format("%.0f%%", stackedAreaChartOpacitySlider.valueProperty().multiply(100)));
+        areaChartOpacitySlider.valueProperty()
+                .bindBidirectional(userPrefs.defaultOpacityAreaCharts.property());
+        areaChartsOpacityText.textProperty()
+                .bind(Bindings.format("%.0f%%", areaChartOpacitySlider.valueProperty().multiply(100)));
+        minChartHeightSlider.minProperty()
+                .bind(userPrefs.lowerStackedChartHeight.property());
+        minChartHeightSlider.maxProperty()
+                .bind(userPrefs.upperChartHeight.property());
+        minChartHeightSlider.valueProperty()
+                .bindBidirectional(userPrefs.minChartHeight.property());
+        minChartHeightText.textProperty()
+                .bind(Bindings.format("%.0f", minChartHeightSlider.valueProperty()));
+        stackedAreaChartOpacitySlider.valueProperty()
+                .bindBidirectional(userPrefs.defaultOpacityStackedAreaCharts.property());
+        stackedAreaChartsOpacityText.textProperty()
+                .bind(Bindings.format("%.0f%%", stackedAreaChartOpacitySlider.valueProperty().multiply(100)));
         enableDownSampling.selectedProperty().addListener((observable, oldValue, newValue) -> {
             downSamplingThreshold.setDisable(!newValue);
             maxSampleLabel.setDisable(!newValue);
         });
-        enableDownSampling.selectedProperty().bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
-
-        fullHeightCrosshair.selectedProperty().bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
-
+        enableDownSampling.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().downSamplingEnabled.property());
+        fullHeightCrosshair.selectedProperty()
+                .bindBidirectional(userPrefs.fullHeightCrosshairMarker.property());
         final TextFormatter<Path> pathFormatter = new TextFormatter<>(new StringConverter<>() {
             @Override
             public String toString(Path object) {
@@ -187,9 +209,12 @@ public class PreferenceDialogController implements Initializable {
                         root);
             }
         });
-        loadExternalToggle.selectedProperty().bindBidirectional(userPrefs.loadPluginsFromExternalLocation.property());
-        browsePluginLocButton.disableProperty().bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
-        pluginLocTextfield.disableProperty().bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
+        loadExternalToggle.selectedProperty()
+                .bindBidirectional(userPrefs.loadPluginsFromExternalLocation.property());
+        browsePluginLocButton.disableProperty()
+                .bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
+        pluginLocTextfield.disableProperty()
+                .bind(BooleanBinding.booleanExpression(userPrefs.loadPluginsFromExternalLocation.property()).not());
         enabledColumn.setCellFactory(CheckBoxTableCell.forTableColumn(enabledColumn));
         availableAdapterTable.getItems().setAll(DataAdapterFactory.getInstance().getAllAdapters());
         loadAtStartupCheckbox.selectedProperty().bindBidirectional(userPrefs.loadLastWorkspaceOnStartup.property());
@@ -201,15 +226,79 @@ public class PreferenceDialogController implements Initializable {
         bindEnumToChoiceBox(userPrefs.logFilesColorPalette, logsPaletteChoiceBox, BuiltInChartColorPalettes.values());
         bindEnumToChoiceBox(userPrefs.notificationPopupDuration, notifcationDurationChoiceBox, NotificationDurationChoices.values());
         bindEnumToChoiceBox(userPrefs.snapshotOutputScale, snapshotScaleChoiceBox, SnapshotOutputScale.values());
-        updateCheckBox.selectedProperty().bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
-        showOutlineAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
-        showOutlineStackedAreaCharts.selectedProperty().bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
-        filterBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
-        findBarVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
-        heatmapVisibleToggle.selectedProperty().bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
-        updatePreferences.visibleProperty().bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
-        dontAskBeforeClosingTabCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
-        dontAskBeforeRemovingChartCheckbox.selectedProperty().bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
+        updateCheckBox.selectedProperty()
+                .bindBidirectional(userPrefs.checkForUpdateOnStartUp.property());
+        showOutlineAreaCharts.selectedProperty()
+                .bindBidirectional(userPrefs.showOutlineOnAreaCharts.property());
+        showOutlineStackedAreaCharts.selectedProperty()
+                .bindBidirectional(userPrefs.showOutlineOnStackedAreaCharts.property());
+        filterBarVisibleToggle.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().logFilterBarVisible.property());
+        findBarVisibleToggle.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().logFindBarVisible.property());
+        heatmapVisibleToggle.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().logHeatmapVisible.property());
+        updatePreferences.visibleProperty()
+                .bind(Bindings.not(AppEnvironment.getInstance().updateCheckDisabledProperty()));
+        dontAskBeforeClosingTabCheckbox.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().doNotWarnOnTabClose.property());
+        dontAskBeforeRemovingChartCheckbox.selectedProperty()
+                .bindBidirectional(UserPreferences.getInstance().doNotWarnOnChartClose.property());
+
+        proxyHostnameTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
+        proxyPortTextfield.disableProperty().bind(enableProxyToggle.selectedProperty().not());
+        useProxyAuthToggle.disableProperty().bind(enableProxyToggle.selectedProperty().not());
+        proxyLoginTextfield.disableProperty().bind(
+                Bindings.or(enableProxyToggle.selectedProperty().not(),
+                        useProxyAuthToggle.selectedProperty().not()));
+        proxyPasswordTextfield.disableProperty().bind(
+                Bindings.or(enableProxyToggle.selectedProperty().not(),
+                        useProxyAuthToggle.selectedProperty().not()));
+
+        enableProxyToggle.selectedProperty().bindBidirectional(userPrefs.enableHttpProxy.property());
+        proxyHostnameTextfield.textProperty().bindBidirectional(userPrefs.httpProxyHost.property());
+        final TextFormatter<Number> portFormatter =
+                new TextFormatter<>(new StringConverter<>() {
+                    @Override
+                    public String toString(Number object) {
+                        if (object == null) {
+                            return "";
+                        }
+                        return object.toString();
+                    }
+
+                    @Override
+                    public Number fromString(String string) {
+                        int ushort = Integer.parseInt(string);
+                        if (ushort < 0) {
+                            TextFieldValidator.fail(proxyPortTextfield, "Port number cannot be less than 0", true);
+                        } else if (ushort > 65535) {
+                            TextFieldValidator.fail(proxyPortTextfield, "Port number cannot be greater than 65535", true);
+                        }
+                        return ushort;
+                    }
+                });
+        proxyPortTextfield.setTextFormatter(portFormatter);
+        portFormatter.valueProperty().bindBidirectional(userPrefs.httpProxyPort.property());
+        useProxyAuthToggle.selectedProperty().bindBidirectional(userPrefs.useHttpProxyAuth.property());
+        proxyLoginTextfield.textProperty().bindBidirectional(userPrefs.httpProxyLogin.property());
+        final TextFormatter<ObfuscatedString> pwdFormatter = new TextFormatter<>(new StringConverter<>() {
+            @Override
+            public String toString(ObfuscatedString object) {
+                if (object == null) {
+                    return "";
+                }
+                return object.toPlainText();
+            }
+
+            @Override
+            public ObfuscatedString fromString(String string) {
+                return ObfuscatedString.of(string);
+            }
+        });
+        proxyPasswordTextfield.setTextFormatter(pwdFormatter);
+        pwdFormatter.valueProperty().bindBidirectional(userPrefs.httpProxyPassword.property());
+
     }
 
     @SafeVarargs
