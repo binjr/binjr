@@ -67,7 +67,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
     /**
      * The authentication token  used for authenticated access to the GitHub API.
      */
-    public final ObservablePreference<String> githubAuthToken = stringPreference("githubAuthToken", "");
+    public final ObservablePreference<ObfuscatedString> githubAuthToken = obfuscatedStringPreference("githubAuthToken", "");
 
     /**
      * The User Interface theme applied to the application.

@@ -72,14 +72,14 @@ public class UpdateManager {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU));
         UserPreferences.getInstance().githubUserName.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get());
+            github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get().toPlainText());
         });
         UserPreferences.getInstance().githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(UserPreferences.getInstance().githubUserName.get(), newValue);
+            github.setUserCredentials(UserPreferences.getInstance().githubUserName.get(), newValue.toPlainText());
         });
         github.setUserCredentials(
                 UserPreferences.getInstance().githubUserName.get(),
-                UserPreferences.getInstance().githubAuthToken.get());
+                UserPreferences.getInstance().githubAuthToken.get().toPlainText());
 
         switch (AppEnvironment.getInstance().getPackaging()) {
             case LINUX_TAR:
