@@ -59,7 +59,6 @@ import java.io.IOException;
 import java.net.*;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.Principal;
 import java.security.Security;
 import java.time.Instant;
 import java.util.*;
@@ -251,29 +250,6 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             SystemDefaultDnsResolver.INSTANCE))
                     .build();
 
-            var credsProvider = new BasicCredentialsProvider();
-            credsProvider.setCredentials(
-                    new AuthScope(null, -1),
-                    new Credentials() {
-                        @Override
-                        public Principal getUserPrincipal() {
-                            return null;
-                        }
-
-                        @Override
-                        public char[] getPassword() {
-                            return null;
-                        }
-                    });
-
-            if (userPrefs.enableHttpProxy.get() && userPrefs.useHttpProxyAuth.get()) {
-                credsProvider.setCredentials(
-                        new AuthScope(userPrefs.httpProxyHost.get(),
-                                userPrefs.httpProxyPort.get().intValue()),
-                        new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
-                                userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
-            }
-
             PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                     .setSSLSocketFactory(SSLConnectionSocketFactoryBuilder.create()
                             .setSslContext(createSslCustomContext())
@@ -296,7 +272,6 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             " (Authenticates like: Firefox/Safari/Internet Explorer)")
                     .setConnectionManager(connectionManager)
                     .setDefaultAuthSchemeRegistry(schemeFactoryRegistry)
-                    .setDefaultCredentialsProvider(credsProvider)
                     .setDefaultRequestConfig(RequestConfig.custom()
                             .setConnectTimeout(Timeout.ofSeconds(5))
                             .setResponseTimeout(Timeout.ofSeconds(5))
@@ -304,6 +279,15 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             .build());
             if (userPrefs.enableHttpProxy.get()) {
                 builder.setProxy(new HttpHost(userPrefs.httpProxyHost.get(), userPrefs.httpProxyPort.get().intValue()));
+                if (userPrefs.useHttpProxyAuth.get()) {
+                    var credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope(userPrefs.httpProxyHost.get(),
+                                    userPrefs.httpProxyPort.get().intValue()),
+                            new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
+                                    userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
+                    builder.setDefaultCredentialsProvider(credsProvider);
+                }
             }
             return builder.build();
         } catch (Exception e) {

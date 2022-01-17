@@ -317,7 +317,7 @@
                             <TextField fx:id="proxyHostnameTextfield" prefHeight="25.0" prefWidth="-1.0" text=""/>
                             <Label text="Port" wrapText="true"/>
                             <TextField fx:id="proxyPortTextfield" prefHeight="25.0" prefWidth="-1.0" text="0"/>
-                            <Label text="Use Authentication" wrapText="true"/>
+                            <Label text="Use Proxy Authentication" wrapText="true"/>
                             <VBox fillWidth="false">
                                 <ToggleSwitch fx:id="useProxyAuthToggle" prefWidth="1.0" selected="false"/>
                             </VBox>
