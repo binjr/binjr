@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -19,8 +19,8 @@ package eu.binjr.common.github;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import eu.binjr.common.io.ProxyConfiguration;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.preferences.UserPreferences;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -43,10 +43,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NotDirectoryException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A series of helper methods to wrap some GitHub APIs
@@ -60,7 +57,7 @@ public class GithubApiHelper {
     protected final CloseableHttpClient httpClient;
     private final URI apiEndpoint;
     protected String userCredentials;
-    protected Gson gson;
+    private static final Gson GSON = new Gson();
 
     private final static Type ghReleaseArrayType = new TypeToken<ArrayList<GithubRelease>>() {
     }.getType();
@@ -72,31 +69,27 @@ public class GithubApiHelper {
     }
 
     private GithubApiHelper(URI apiEndpoint) {
-        gson = new Gson();
-        if (apiEndpoint == null) {
-            this.apiEndpoint = URI.create(HTTPS_API_GITHUB_COM);
-        } else {
-            this.apiEndpoint = apiEndpoint;
-        }
+        this(apiEndpoint, null);
+    }
+
+    private GithubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfig) {
+        this.apiEndpoint = Objects.requireNonNullElseGet(apiEndpoint, () -> URI.create(HTTPS_API_GITHUB_COM));
         var builder = HttpClients
                 .custom()
                 .setDefaultRequestConfig(RequestConfig.custom().setCookieSpec(StandardCookieSpec.STRICT).build());
-        var userPrefs = UserPreferences.getInstance();
-        if (userPrefs.enableHttpProxy.get()) {
+        if (proxyConfig != null && proxyConfig.enabled()) {
             try {
-                builder.setProxy(new HttpHost(userPrefs.httpProxyHost.get(), userPrefs.httpProxyPort.get().intValue()));
-                if (userPrefs.useHttpProxyAuth.get()) {
+                builder.setProxy(new HttpHost(proxyConfig.host(), proxyConfig.port()));
+                if (proxyConfig.useAuth()) {
                     var credsProvider = new BasicCredentialsProvider();
                     credsProvider.setCredentials(
-                            new AuthScope(userPrefs.httpProxyHost.get(),
-                                    userPrefs.httpProxyPort.get().intValue()),
-                            new UsernamePasswordCredentials(userPrefs.httpProxyLogin.get(),
-                                    userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
+                            new AuthScope(proxyConfig.host(), proxyConfig.port()),
+                            new UsernamePasswordCredentials(proxyConfig.login(), proxyConfig.pwd()));
                     builder.setDefaultCredentialsProvider(credsProvider);
                 }
-            } catch (Exception e){
-                logger.error("Failed to setup http proxy: ", e.getMessage());
-                logger.debug(()-> "Stack", e);
+            } catch (Exception e) {
+                logger.error("Failed to setup http proxy: " + e.getMessage());
+                logger.debug(() -> "Stack", e);
             }
         }
         httpClient = builder.build();
@@ -117,9 +110,19 @@ public class GithubApiHelper {
      * @param apiEndpoint the URI that specifies the API endpoint.
      * @return a new instance of the {@link ClosableGitHubApiHelper} class.
      */
-
     public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint) {
         return new ClosableGitHubApiHelper(apiEndpoint);
+    }
+
+    /**
+     * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
+     *
+     * @param apiEndpoint the URI that specifies the API endpoint.
+     * @param proxyConfiguration Configuration for http proxy
+     * @return a new instance of the {@link ClosableGitHubApiHelper} class.
+     */
+    public static ClosableGitHubApiHelper createCloseable(URI apiEndpoint, ProxyConfiguration proxyConfiguration) {
+        return new ClosableGitHubApiHelper(apiEndpoint, proxyConfiguration);
     }
 
     /**
@@ -185,7 +188,7 @@ public class GithubApiHelper {
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
         return Optional.ofNullable(httpClient.execute(httpget,
-                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), GithubRelease.class)));
+                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), GithubRelease.class)));
     }
 
     /**
@@ -216,7 +219,7 @@ public class GithubApiHelper {
         logger.debug(() -> "requestUrl = " + requestUrl);
         HttpGet httpget = basicAuthGet(requestUrl.build());
         return httpClient.execute(httpget,
-                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), ghReleaseArrayType));
+                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), ghReleaseArrayType));
     }
 
     /**
@@ -231,7 +234,7 @@ public class GithubApiHelper {
         logger.debug(() -> "requestUrl = " + release.getAssetsUrl());
         HttpGet httpget = basicAuthGet(release.getAssetsUrl().toURI());
         return httpClient.execute(httpget,
-                response -> gson.fromJson(EntityUtils.toString(response.getEntity()), ghAssetArrayType));
+                response -> GSON.fromJson(EntityUtils.toString(response.getEntity()), ghAssetArrayType));
     }
 
     /**
@@ -304,6 +307,10 @@ public class GithubApiHelper {
 
         public ClosableGitHubApiHelper(URI apiEndpoint) {
             super(apiEndpoint);
+        }
+
+        public ClosableGitHubApiHelper(URI apiEndpoint, ProxyConfiguration proxyConfiguration) {
+            super(apiEndpoint, proxyConfiguration);
         }
 
         @Override

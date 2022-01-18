@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package eu.binjr.core.update;
 
 import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
+import eu.binjr.common.io.ProxyConfiguration;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -70,7 +71,14 @@ public class UpdateManager {
 
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
-        this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU));
+        this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU),
+                new ProxyConfiguration(UserPreferences.getInstance().enableHttpProxy.get(),
+                        UserPreferences.getInstance().httpProxyHost.get(),
+                        UserPreferences.getInstance().httpProxyPort.get().intValue(),
+                        UserPreferences.getInstance().useHttpProxyAuth.get(),
+                        UserPreferences.getInstance().httpProxyLogin.get(),
+                        UserPreferences.getInstance().httpProxyPassword.get().toPlainText().toCharArray()));
+
         UserPreferences.getInstance().githubUserName.property().addListener((observable, oldValue, newValue) -> {
             github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get().toPlainText());
         });
@@ -139,7 +147,7 @@ public class UpdateManager {
             }
             return;
         }
-        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore( UserPreferences.getInstance().lastCheckForUpdate.get())) {
+        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(UserPreferences.getInstance().lastCheckForUpdate.get())) {
             logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
             if (onFailure != null) {
                 onFailure.run();
