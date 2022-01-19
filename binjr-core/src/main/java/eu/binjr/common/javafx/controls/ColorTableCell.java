@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import eu.binjr.common.javafx.bindings.BindingManager;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 
@@ -28,22 +29,22 @@ import javafx.scene.paint.Color;
 public class ColorTableCell<T> extends TableCell<T, Color> {
     private final ColorPicker colorPicker;
 
-    public ColorTableCell(TableColumn<T, Color> column) {
+    public ColorTableCell(TableColumn<T, Color> column, BindingManager bindingManager) {
         colorPicker = new ColorPicker();
         colorPicker.getStyleClass().add("button");
         colorPicker.getStyleClass().add("borderless-color-picker");
-        colorPicker.editableProperty().bind(column.editableProperty());
-        colorPicker.disableProperty().bind(column.editableProperty().not());
-        colorPicker.setOnShowing(event -> {
+        bindingManager.bind(colorPicker.editableProperty(), column.editableProperty());
+        bindingManager.bind(colorPicker.disableProperty(), column.editableProperty().not());
+        colorPicker.setOnShowing(bindingManager.registerHandler(event -> {
             TableView<T> tableView = getTableView();
             tableView.getSelectionModel().select(getTableRow().getIndex());
             tableView.edit(tableView.getSelectionModel().getSelectedIndex(), column);
-        });
-        colorPicker.valueProperty().addListener((observable, oldValue, newValue) -> {
+        }));
+        colorPicker.setOnAction(bindingManager.registerHandler(event -> {
             if (isEditing()) {
-                commitEdit(newValue);
+                commitEdit(colorPicker.getValue());
             }
-        });
+        }));
         setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
     }
 

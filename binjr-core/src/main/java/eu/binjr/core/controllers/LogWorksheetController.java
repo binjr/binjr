@@ -1086,7 +1086,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         colorColumn.setSortable(false);
         colorColumn.setResizable(false);
         colorColumn.setPrefWidth(32);
-        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+        colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn, getBindingManager()));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
 
         TableColumn<TimeSeriesInfo<SearchHit>, String> nameColumn = new TableColumn<>("Name");

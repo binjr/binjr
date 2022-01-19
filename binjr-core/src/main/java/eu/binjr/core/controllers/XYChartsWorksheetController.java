@@ -830,7 +830,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     (ChangeListener<Boolean>) (observable, oldValue, newValue) -> currentColumn.setVisible(newValue));
 
             pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
-            colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn));
+            colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn, getBindingManager()));
             colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
             avgColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                     () -> p.getValue().getProcessor() == null ? "NaN" : currentViewPort.getPrefixFormatter().format(p.getValue().getProcessor().getAverageValue()),
