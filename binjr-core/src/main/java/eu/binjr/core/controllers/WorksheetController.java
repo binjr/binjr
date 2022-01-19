@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -137,7 +137,13 @@ public abstract class WorksheetController implements Initializable, Closeable {
                 () -> tv.getSelectionModel().getSelectedItems().size() < 2,
                 tv.getSelectionModel().getSelectedItems());
         var menu = new ContextMenu();
-        var removeMenuItem = new MenuItem("Remove Series");
+
+        var selectAllMenuItem = new MenuItem("Select All");
+        selectAllMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
+            tv.getSelectionModel().selectAll();
+        }));
+
+        var removeMenuItem = new MenuItem("Remove");
         getBindingManager().bind(removeMenuItem.disableProperty(), selectionIsEmpty);
         removeMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
             List<TimeSeriesInfo<T>> selected = new ArrayList<>(tv.getSelectionModel().getSelectedItems());
@@ -146,7 +152,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
             refresh();
         }));
 
-        var inferNameItem = new MenuItem("Infer Series Names");
+        var inferNameItem = new MenuItem("Automatically Rename");
         getBindingManager().bind(inferNameItem.disableProperty(), selectionIsMono);
         inferNameItem.setOnAction(getBindingManager().registerHandler(e -> {
             var tokens = tv.getSelectionModel().getSelectedItems().stream()
@@ -174,7 +180,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
             });
         }));
 
-        var inferColorItem = new MenuItem("Infer Series Colors");
+        var inferColorItem = new MenuItem("Automatically Select Color");
         getBindingManager().bind(inferColorItem.disableProperty(), selectionIsEmpty);
         inferColorItem.setOnAction(getBindingManager().registerHandler(e -> {
             tv.getSelectionModel().getSelectedItems().forEach(s -> {
@@ -182,9 +188,9 @@ public abstract class WorksheetController implements Initializable, Closeable {
             });
         }));
 
-        var automation = new Menu("Automation");
-        automation.getItems().setAll(inferNameItem, inferColorItem);
-        menu.getItems().setAll(removeMenuItem, automation);
+        var refactorMenu = new Menu("Refactor");
+        refactorMenu.getItems().setAll(inferNameItem, inferColorItem);
+        menu.getItems().setAll(selectAllMenuItem, removeMenuItem, refactorMenu);
         row.setContextMenu(menu);
 
 
