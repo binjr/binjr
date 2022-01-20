@@ -53,7 +53,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
     @FXML
     public Button toggleChartDisplayModeButton;
 
-    protected WorksheetController(MainViewController parentController){
+    protected WorksheetController(MainViewController parentController) {
         this.parentController = parentController;
     }
 
@@ -74,11 +74,11 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract void refresh();
 
-    public void refresh(boolean force){
+    public void refresh(boolean force) {
         refresh();
     }
 
-    public abstract  void saveSnapshot();
+    public abstract void saveSnapshot();
 
     public abstract void toggleShowPropertiesPane();
 
@@ -86,17 +86,17 @@ public abstract class WorksheetController implements Initializable, Closeable {
 
     public abstract List<ChartViewPort> getViewPorts();
 
-    public void navigateBackward(){
+    public void navigateBackward() {
         //Noop
     }
 
-    public void navigateForward(){
+    public void navigateForward() {
         //Noop
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event ->  getParentController().handleTogglePresentationMode()));
+        toggleChartDisplayModeButton.setOnAction(getBindingManager().registerHandler(event -> getParentController().handleTogglePresentationMode()));
         getBindingManager().attachListener(getWorksheet().editModeEnabledProperty(), (ChangeListener<Boolean>) (observable, oldValue, newValue) -> {
             setEditChartMode(newValue);
         });
@@ -112,7 +112,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
     }
 
     @Override
-    public  void close(){
+    public void close() {
         bindingManager.close();
     }
 
@@ -143,8 +143,8 @@ public abstract class WorksheetController implements Initializable, Closeable {
             tv.getSelectionModel().selectAll();
         }));
 
-        var removeMenuItem = new MenuItem("Remove");
-        getBindingManager().bind(removeMenuItem.disableProperty(), selectionIsEmpty);
+        var removeMenuItem = new MenuItem("Delete");
+        getBindingManager().bind(removeMenuItem.visibleProperty(), selectionIsEmpty.not());
         removeMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
             List<TimeSeriesInfo<T>> selected = new ArrayList<>(tv.getSelectionModel().getSelectedItems());
             tv.getItems().removeAll(selected);
@@ -152,8 +152,14 @@ public abstract class WorksheetController implements Initializable, Closeable {
             refresh();
         }));
 
-        var inferNameItem = new MenuItem("Automatically Rename");
-        getBindingManager().bind(inferNameItem.disableProperty(), selectionIsMono);
+        var renameSingleMenuItem = new MenuItem("Rename");
+        getBindingManager().bind(renameSingleMenuItem.visibleProperty(), selectionIsMono.and(selectionIsEmpty.not()));
+        renameSingleMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
+            tv.edit(tv.getSelectionModel().getSelectedIndex(), tv.getColumns().get(2));
+        }));
+
+        var inferNameItem = new MenuItem("Automatically Infer Names");
+        getBindingManager().bind(inferNameItem.visibleProperty(), selectionIsMono.not());
         inferNameItem.setOnAction(getBindingManager().registerHandler(e -> {
             var tokens = tv.getSelectionModel().getSelectedItems().stream()
                     .map(t -> t.getBinding().getTreeHierarchy().split("/")).toList();
@@ -181,16 +187,14 @@ public abstract class WorksheetController implements Initializable, Closeable {
         }));
 
         var inferColorItem = new MenuItem("Automatically Select Color");
-        getBindingManager().bind(inferColorItem.disableProperty(), selectionIsEmpty);
+        getBindingManager().bind(inferColorItem.visibleProperty(), selectionIsEmpty.not());
         inferColorItem.setOnAction(getBindingManager().registerHandler(e -> {
             tv.getSelectionModel().getSelectedItems().forEach(s -> {
                 s.setDisplayColor(s.getBinding().getAutoColor(s.getDisplayName()));
             });
         }));
 
-        var refactorMenu = new Menu("Refactor");
-        refactorMenu.getItems().setAll(inferNameItem, inferColorItem);
-        menu.getItems().setAll(selectAllMenuItem, removeMenuItem, refactorMenu);
+        menu.getItems().setAll(selectAllMenuItem, removeMenuItem, renameSingleMenuItem, inferNameItem, inferColorItem);
         row.setContextMenu(menu);
 
 
