@@ -37,6 +37,7 @@ public class ColorTableCell<T> extends TableCell<T, Color> {
         bindingManager.bind(colorPicker.disableProperty(), column.editableProperty().not());
         colorPicker.setOnShowing(bindingManager.registerHandler(event -> {
             TableView<T> tableView = getTableView();
+            tableView.getSelectionModel().clearSelection();
             tableView.getSelectionModel().select(getTableRow().getIndex());
             tableView.edit(tableView.getSelectionModel().getSelectedIndex(), column);
         }));
