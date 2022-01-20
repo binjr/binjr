@@ -860,16 +860,14 @@ public class XYChartsWorksheetController extends WorksheetController {
                 if (event.getCode().equals(KeyCode.DELETE)) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
+                if (event.getCode().equals(KeyCode.ESCAPE)) {
+                    ((TableView<?>) event.getSource()).getSelectionModel().clearSelection();
+                }
             }));
 
             currentViewPort.getSeriesTable().setItems(currentViewPort.getDataStore().getSeries());
             currentViewPort.getSeriesTable().getColumns().addAll(visibleColumn, colorColumn, nameColumn, minColumn, maxColumn, avgColumn, currentColumn, pathColumn);
             TableViewUtils.autoFillTableWidthWithLastColumn(currentViewPort.getSeriesTable());
-            currentViewPort.getSeriesTable().setOnKeyPressed(event -> {
-                if (event.getCode() == KeyCode.ESCAPE) {
-                    ((TableView<?>) event.getSource()).getSelectionModel().clearSelection();
-                }
-            });
             TitledPane newPane = new TitledPane(currentViewPort.getDataStore().getName(), currentViewPort.getSeriesTable());
             newPane.setMinHeight(90.0);
             newPane.setMaxHeight(Double.MAX_VALUE);

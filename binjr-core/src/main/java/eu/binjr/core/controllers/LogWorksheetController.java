@@ -1128,6 +1128,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 fileTable.getSelectionModel().clearSelection();
                 invalidate(false, false);
             }
+            if (event.getCode().equals(KeyCode.ESCAPE)) {
+                fileTable.getSelectionModel().clearSelection();
+            }
         }));
 
         fileTable.setItems(worksheet.getSeriesInfo());
