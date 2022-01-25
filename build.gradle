@@ -48,6 +48,8 @@ ext.BINJR_DESCRIPTION = "A Time Series Browser"
 ext.OS_NAME = System.getProperty("os.name").toLowerCase()
 ext.OS_ARCH = System.getProperty("os.arch")
 ext.IS_64 = OS_ARCH.toLowerCase().contains("64")
+ext.BINJR_MAX_HEAP_SIZE = IS_64 ? "4096M" : "2048M"
+ext.IS_MONOCLE = false
 ext.IS_MAC = OS_NAME.contains("mac") || OS_NAME.contains("darwin")
 ext.IS_WINDOWS = OS_NAME.contains("windows")
 ext.IS_LINUX = OS_NAME.contains("linux")
@@ -55,13 +57,10 @@ ext.OS_FAMILY = IS_MAC ? 'mac' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : '
 ext.JDK_HOME = System.getProperty("java.home")
 ext.OPENJFX_VERSION = "17.0.2"
 ext.OPENJFX_VERSION_STEM = OPENJFX_VERSION.replaceAll("-ea\\+[0-9]+", "")
-ext.OPENJFX_PLATEFORM_CLASSIFIER = IS_MAC ? 'mac' : IS_WINDOWS ? 'win' : IS_LINUX ? 'linux' : 'unsupported'
-ext.OPENJFX_PLATEFORM_DOWNLOAD = IS_MAC ? 'osx' : IS_WINDOWS ? 'windows' : IS_LINUX ? 'linux' : 'unsupported'
-ext.OPENJFX_JMODS_DOWNLOAD_URL = "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${OPENJFX_PLATEFORM_DOWNLOAD}-x64_bin-jmods.zip"
+ext.OPENJFX_PLATEFORM_CLASSIFIER = craftPlatformClassifier()
 ext.DL_CACHE_PATH = System.getProperty("java.io.tmpdir") + "/gradle_dl_cache/"
 ext.IS_JAVAFX_BUNDLED = ModuleLayer.boot().findModule("javafx.controls").isPresent()
 ext.ADDITIONAL_JMOD_PATH = IS_JAVAFX_BUNDLED ? "" : "${File.pathSeparator}${buildDir}/jmods/javafx-jmods-${OPENJFX_VERSION_STEM}"
-
 ext.JLINK_ADD_MODULES = "javafx.controls," +
         "javafx.fxml," +
         "javafx.swing," +
@@ -380,7 +379,7 @@ markdownToHtml {
 
 task downloadOpenJfxModules(type: Download) {
     onlyIfModified true
-    src OPENJFX_JMODS_DOWNLOAD_URL
+    src craftOpenJfxModsUrl()
     dest new File(DL_CACHE_PATH, "openjfx-jmods_${OPENJFX_VERSION}.zip")
 }
 
@@ -390,7 +389,7 @@ task unzipOpenJfxModules(dependsOn: downloadOpenJfxModules, type: Copy) {
 }
 
 task createRuntimeImage(type: Exec) {
-    if (!IS_JAVAFX_BUNDLED){
+    if (!IS_JAVAFX_BUNDLED) {
         dependsOn unzipOpenJfxModules
     }
     workingDir project.projectDir
@@ -505,7 +504,7 @@ task jpackageDmg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac_dmg/file-associations.properties",
             "--arguments", "--packaging=MAC_DMG",
-            "--java-options", "-Xmx4096M",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
@@ -537,7 +536,7 @@ task jpackagePkg(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--icon", "${APP_IMAGE_PATH}/resources/icons/binjr.icns",
             "--file-associations", "${projectDir}/distribution/bundlers/mac_pkg/file-associations.properties",
             "--arguments", "--packaging=MAC_PKG",
-            "--java-options", "-Xmx4096M",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
@@ -571,7 +570,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--license-file", "${projectDir}/LICENSE.md",
             "--file-associations", "${projectDir}/distribution/bundlers/linux_deb/file-associations.properties",
             "--resource-dir", "${projectDir}/distribution/bundlers/linux_deb/",
-            "--java-options", "-Xmx4096M",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
@@ -614,7 +613,7 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--license-file", "${projectDir}/LICENSE.md",
             "--file-associations", "${projectDir}/distribution/bundlers/linux_rpm/file-associations.properties",
             "--resource-dir", "${projectDir}/distribution/bundlers/linux_rpm/",
-            "--java-options", "-Xmx4096M",
+            "--java-options", "-Xmx${BINJR_MAX_HEAP_SIZE}",
             "--java-options", "-XX:+UnlockExperimentalVMOptions",
             "--java-options", "-XX:+UseShenandoahGC",
             "--java-options", "-XX:ShenandoahGCHeuristics=compact",
@@ -716,6 +715,67 @@ def isNonStable = { String version ->
     def regex = /(?i)^[0-9,.v-]+\-((ea)|(rc)|(b)|(m))[-\+]*[0-9.]+$/
     return (version ==~ regex)
 }
+
+
+def craftPlatformClassifier() {
+    def classifier
+    if (IS_MAC) {
+        classifier = "mac"
+        if (OS_ARCH == "aarch64"){
+            classifer += "-aarch64"
+        }
+    } else if (IS_LINUX) {
+        classifier = "linux"
+        if (OS_ARCH == "aarch64"){
+            classifer += "-aarch64"
+        } else if (OS_ARCH == "aarch32" || OS_ARCH == "arm32"){
+            classifier += "-arm32"
+        }
+    } else if (IS_WINDOWS) {
+        classifier = "win"
+        if (OS_ARCH == "x86"){
+            classifer += "-x86"
+        }
+    }
+    if (IS_MONOCLE){
+        classifier += "-monocle"
+    }
+    return classifier
+}
+
+def craftOpenJfxModsUrl() {
+    def platform
+    switch (OS_FAMILY) {
+        case "windows":
+            platform = "windows"
+            break
+        case "linux":
+            platform = "linux"
+            break
+        case "mac":
+            platform = "osx"
+            break
+        default:
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+    }
+    def arch
+    switch (OS_ARCH) {
+        case "amd64":
+        case "x86_64":
+            arch = "x64"
+            break
+        case "x86":
+            arch = "x86"
+            break
+        case "aarch64":
+            arch = "aarch64"
+            break
+        default:
+            throw new Exception("Cannot download OpenJFX modules for unsupported platform: ${OS_FAMILY} - ${OS_ARCH}")
+    }
+    return "https://download2.gluonhq.com/openjfx/${OPENJFX_VERSION_STEM}/openjfx-${OPENJFX_VERSION}_${platform}-${arch}_bin-jmods.zip"
+}
+
 
 dependencyUpdates {
     rejectVersionIf {
