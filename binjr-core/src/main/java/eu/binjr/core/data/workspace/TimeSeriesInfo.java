@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ import jakarta.xml.bind.annotation.*;
 @XmlRootElement(name = "Timeseries")
 public class TimeSeriesInfo<T> implements Dirtyable {
     @IsDirtyable
-    private final StringProperty displayName;
+    protected final StringProperty displayName;
     @IsDirtyable
-    private final BooleanProperty selected;
+    protected final BooleanProperty selected;
     @IsDirtyable
-    private final Property<Color> displayColor;
+    protected final Property<Color> displayColor;
     @XmlElement(name = "Binding", required = true, type = TimeSeriesBinding.class)
-    private final SourceBinding<T> binding;
-    private final ChangeWatcher status;
-    private final Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
+    protected final SourceBinding<T> binding;
+    protected final ChangeWatcher status;
+    protected final Property<TimeSeriesProcessor<T>> processor = new SimpleObjectProperty<>();
 
     /**
      * Parameter-less constructor (needed for XMl serialization)

@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -105,7 +105,7 @@ public abstract class Worksheet<T> implements Dirtyable {
 
     public abstract void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException;
 
-    protected abstract List<TimeSeriesInfo<T>> listAllSeriesInfo();
+    protected abstract List<? extends TimeSeriesInfo<T>> listAllSeriesInfo();
 
     public void attachAdaptersToSeriesInfo(Collection<DataAdapter<T>> adapters) throws NoAdapterFoundException {
         for (TimeSeriesInfo<T> s : listAllSeriesInfo()) {

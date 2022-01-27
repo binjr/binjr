@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
                 worksheet.getQueryParameters(),
                 worksheet.isEditModeEnabled(),
                 worksheet.isTimeRangeLinked());
-        seriesInfo.addAll(worksheet.getSeriesInfo().stream().map(TimeSeriesInfo::new).toList());
+        seriesInfo.addAll(worksheet.getSeriesInfo().stream().map(LogFileSeriesInfo::new).toList());
     }
 
     @XmlAttribute
@@ -147,14 +147,14 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
                 if (b instanceof LogFilesBinding logBinding) {
-                    this.seriesInfo.add(TimeSeriesInfo.fromBinding(logBinding));
+                    this.seriesInfo.add( LogFileSeriesInfo.fromBinding(logBinding));
                 }
             }
         }
     }
 
     @Override
-    protected List<TimeSeriesInfo<SearchHit>> listAllSeriesInfo() {
+    protected List<? extends TimeSeriesInfo<SearchHit>> listAllSeriesInfo() {
         return getSeriesInfo();
     }
 

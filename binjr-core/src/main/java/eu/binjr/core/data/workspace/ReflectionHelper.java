@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package eu.binjr.core.data.workspace;
 
 import eu.binjr.core.data.adapters.SourceBinding;
 import org.reflections.Reflections;
-import org.reflections.util.ConfigurationBuilder;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -52,6 +51,8 @@ public enum ReflectionHelper {
         classesToBeBound.addAll(reflections.getSubTypesOf(Worksheet.class));
         // Add SourceBinding classes
         classesToBeBound.addAll(reflections.getSubTypesOf(SourceBinding.class));
+        // Add TimeSeriesInfo classes
+        classesToBeBound.addAll(reflections.getSubTypesOf(TimeSeriesInfo.class));
     }
 
 }

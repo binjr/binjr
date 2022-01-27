@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -53,7 +53,7 @@ import java.util.*;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlRootElement(name = "Workspace")
 public class Workspace implements Dirtyable {
-    public static final String WORKSPACE_SCHEMA_VERSION = "3.0";
+    public static final String WORKSPACE_SCHEMA_VERSION = "3.1";
     public static final Version MINIMUM_SUPPORTED_SCHEMA_VERSION = new Version("3.0");
     public static final Version SUPPORTED_SCHEMA_VERSION = new Version(WORKSPACE_SCHEMA_VERSION);
 

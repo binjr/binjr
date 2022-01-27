@@ -210,8 +210,8 @@ public abstract class WorksheetController implements Initializable, Closeable {
         }
     }
 
-    protected <T> TableRow<TimeSeriesInfo<T>> seriesTableRowFactory(TableView<TimeSeriesInfo<T>> tv) {
-        TableRow<TimeSeriesInfo<T>> row = new TableRow<>();
+    protected < T extends TimeSeriesInfo<?>> TableRow<T> seriesTableRowFactory(TableView<T> tv) {
+        TableRow<T> row = new TableRow<>();
         var selectionIsEmpty = Bindings.createBooleanBinding(
                 () -> tv.getSelectionModel().getSelectedItems().isEmpty(),
                 tv.getSelectionModel().getSelectedItems());
@@ -228,7 +228,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         var removeMenuItem = new MenuItem("Delete");
         getBindingManager().bind(removeMenuItem.visibleProperty(), selectionIsEmpty.not());
         removeMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
-            List<TimeSeriesInfo<T>> selected = new ArrayList<>(tv.getSelectionModel().getSelectedItems());
+            List<T> selected = new ArrayList<>(tv.getSelectionModel().getSelectedItems());
             tv.getItems().removeAll(selected);
             tv.getSelectionModel().clearSelection();
             refresh();
@@ -345,14 +345,14 @@ public abstract class WorksheetController implements Initializable, Closeable {
             Dragboard db = event.getDragboard();
             if (db.hasContent(SERIALIZED_MIME_TYPE)) {
                 int draggedIndex = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
-                TimeSeriesInfo<T> draggedseries = tv.getItems().remove(draggedIndex);
+                T draggedseries = tv.getItems().remove(draggedIndex);
                 int dropIndex;
                 if (row.isEmpty()) {
                     dropIndex = tv.getItems().size();
                 } else {
                     dropIndex = row.getIndex();
                 }
-                tv.getItems().add(dropIndex, draggedseries);
+               tv.getItems().add(dropIndex, draggedseries);
                 event.setDropCompleted(true);
                 tv.getSelectionModel().clearAndSelect(dropIndex);
                 refresh();

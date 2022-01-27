@@ -42,10 +42,7 @@ import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
-import eu.binjr.core.data.workspace.LogWorksheet;
-import eu.binjr.core.data.workspace.Syncable;
-import eu.binjr.core.data.workspace.TimeSeriesInfo;
-import eu.binjr.core.data.workspace.Worksheet;
+import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
@@ -840,7 +837,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         for (var binding : logFilesBindings) {
             if (binding != null) {
                 if (worksheet.getSeriesInfo().stream().filter(s -> s.getBinding().equals(binding)).findAny().isEmpty()) {
-                    var i = TimeSeriesInfo.fromBinding(binding);
+                    var i = LogFileSeriesInfo.fromBinding(binding);
                     getBindingManager().attachListener(i.selectedProperty(), isVisibleListener);
                     getBindingManager().attachListener(i.selectedProperty(), (ChangeListener<Boolean>) (o, oldVal, newVal) -> invalidate(false, true));
                     getBindingManager().attachListener(i.displayColorProperty(), (ChangeListener<Color>) (o, oldVal, newVal) -> invalidate(false, false));
