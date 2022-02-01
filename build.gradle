@@ -722,19 +722,19 @@ def craftPlatformClassifier() {
     if (IS_MAC) {
         classifier = "mac"
         if (OS_ARCH == "aarch64"){
-            classifer += "-aarch64"
+            classifier += "-aarch64"
         }
     } else if (IS_LINUX) {
         classifier = "linux"
         if (OS_ARCH == "aarch64"){
-            classifer += "-aarch64"
+            classifier += "-aarch64"
         } else if (OS_ARCH == "aarch32" || OS_ARCH == "arm32"){
             classifier += "-arm32"
         }
     } else if (IS_WINDOWS) {
         classifier = "win"
         if (OS_ARCH == "x86"){
-            classifer += "-x86"
+            classifier += "-x86"
         }
     }
     if (IS_MONOCLE){
