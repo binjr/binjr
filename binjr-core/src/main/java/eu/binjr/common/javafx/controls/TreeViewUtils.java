@@ -166,7 +166,7 @@ public class TreeViewUtils {
                     if (!o1.isLeaf() && o2.isLeaf()) {
                         return -1;
                     }
-                    return o1.getValue().toString().compareToIgnoreCase(o1.toString());
+                    return o1.getValue().toString().compareToIgnoreCase(o2.getValue().toString());
                 });
     }
 
