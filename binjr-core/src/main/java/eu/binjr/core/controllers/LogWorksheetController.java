@@ -1118,7 +1118,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         fileTable.getSelectionModel().setSelectionMode(MULTIPLE);
         fileTable.setOnKeyReleased(getBindingManager().registerHandler(event -> {
-            if (event.getCode().equals(KeyCode.DELETE)) {
+            if (event.getCode().equals(KeyCode.DELETE) && fileTable.getEditingCell() == null) {
                 var selected = new ArrayList<>(fileTable.getSelectionModel().getSelectedItems());
                 selected.forEach(s -> {
                     getBindingManager().detachAllInvalidationListeners(s.selectedProperty());

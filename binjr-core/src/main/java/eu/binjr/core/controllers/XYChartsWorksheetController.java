@@ -857,7 +857,7 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             currentViewPort.getSeriesTable().setRowFactory(this::seriesTableRowFactory);
             currentViewPort.getSeriesTable().setOnKeyReleased(getBindingManager().registerHandler(event -> {
-                if (event.getCode().equals(KeyCode.DELETE)) {
+                if (event.getCode().equals(KeyCode.DELETE) && currentViewPort.getSeriesTable().getEditingCell() == null) {
                     removeSelectedBinding(currentViewPort.getSeriesTable());
                 }
                 if (event.getCode().equals(KeyCode.ESCAPE)) {

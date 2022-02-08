@@ -1,0 +1,1 @@
+* _[Fixed]_ Pressing the "delete" key while editing series name removes it from worksheet.
