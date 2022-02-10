@@ -25,7 +25,6 @@ import eu.binjr.core.data.async.AsyncTaskManager;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
-import impl.org.controlsfx.skin.NotificationBar;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -266,7 +265,7 @@ public class UpdateManager {
                             showUpdateReadyNotification(root);
                         },
                         exception -> Dialogs.notifyException("Error downloading update", exception, root));
-                dismissNotificationPopup((Node) event.getSource());
+                Dialogs.dismissParentNotificationPopup((Node) event.getSource());
             }));
         }
         n.action(actions.toArray(Action[]::new));
@@ -294,7 +293,7 @@ public class UpdateManager {
                 .owner(root);
         n.action(new Action("Restart & update now", event -> restartApp(root)),
                 new Action("Update when I exit", event -> {
-                    dismissNotificationPopup((Node) event.getSource());
+                    Dialogs.dismissParentNotificationPopup((Node) event.getSource());
                 }));
         n.showInformation();
     }
@@ -345,21 +344,5 @@ public class UpdateManager {
             sig.update(buff, 0, read);
         }
         return sig.verify();
-    }
-
-    // This is pretty nasty (and probably breaks with Jigsaw),
-    // but couldn't find another way to close the notification popup.
-    private void dismissNotificationPopup(Node n) {
-        if (n == null) {
-            //couldn't find NotificationBar, giving up.
-            return;
-        }
-        if (n instanceof NotificationBar notifBar) {
-            // found it, hide the popup.
-            notifBar.hide();
-            return;
-        }
-        // keep looking.
-        dismissNotificationPopup(n.getParent());
     }
 }

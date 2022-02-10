@@ -34,7 +34,6 @@ import eu.binjr.core.data.workspace.*;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.SnapshotOutputScale;
-import eu.binjr.core.preferences.UserHistory;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.animation.PauseTransition;
 import javafx.application.Platform;
@@ -47,7 +46,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.css.PseudoClass;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -60,20 +58,17 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.image.WritableImage;
+import javafx.scene.image.Image;
 import javafx.scene.input.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import org.controlsfx.control.MaskerPane;
 
-import javax.imageio.ImageIO;
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.time.ZonedDateTime;
@@ -688,7 +683,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         backButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryBack));
         forwardButton.setOnAction(getBindingManager().registerHandler(this::handleHistoryForward));
         refreshButton.setOnAction(getBindingManager().registerHandler(this::handleRefresh));
-        snapshotButton.setOnAction(getBindingManager().registerHandler(this::handleTakeSnapshot));
+        snapshotButton.setOnAction(getBindingManager().registerHandler(event -> saveSnapshot()));
         getBindingManager().bind(backButton.disableProperty(), worksheet.getHistory().backward().emptyProperty());
         getBindingManager().bind(forwardButton.disableProperty(), worksheet.getHistory().forward().emptyProperty());
         addChartButton.setOnAction(getBindingManager().registerHandler(this::handleAddNewChart));
@@ -1360,11 +1355,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         this.refresh();
     }
 
-    @FXML
-    private void handleTakeSnapshot(ActionEvent actionEvent) {
-        saveSnapshot();
-    }
-
     public CompletableFuture<?> invalidate(boolean saveToHistory, boolean dontPlotChart, boolean forceRefresh) {
         var p = Profiler.start("Invalidate worksheet: " + getWorksheet().getName() +
                 " [saveToHistory=" + saveToHistory + ", " +
@@ -1504,8 +1494,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     }
 
     @Override
-    public void saveSnapshot() {
-        WritableImage snapImg;
+    public Image captureSnapshot() {
         boolean wasModeEdit = worksheet.isEditModeEnabled();
         try {
             // Invalidate chart nodes cache so that it is re-rendered when scaled up
@@ -1522,10 +1511,10 @@ public class XYChartsWorksheetController extends WorksheetController {
             var scaleY = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
                     Dialogs.getOutputScaleY(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
-            snapImg = SnapshotUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
+            return SnapshotUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
-            return;
+            return null;
         } finally {
             viewPorts.forEach(v -> v.getChart().setCache(true));
             worksheet.setEditModeEnabled(wasModeEdit);
@@ -1533,25 +1522,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             navigationToolbar.setVisible(true);
             worksheetTitleBlock.setManaged(false);
             worksheetTitleBlock.setVisible(false);
-        }
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Save SnapShot");
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
-        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", worksheet.getName()));
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
-        if (selectedFile != null) {
-            try {
-                if (selectedFile.getParent() != null) {
-                    UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.getParentFile().toPath());
-                }
-                ImageIO.write(
-                        SwingFXUtils.fromFXImage(snapImg, null),
-                        "png",
-                        selectedFile);
-            } catch (IOException e) {
-                Dialogs.notifyException("Failed to save snapshot to disk", e, root);
-            }
         }
     }
 

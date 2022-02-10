@@ -165,11 +165,6 @@ public class TextWorksheetController extends WorksheetController {
     }
 
     @Override
-    public void saveSnapshot() {
-
-    }
-
-    @Override
     public void toggleShowPropertiesPane() {
 
     }

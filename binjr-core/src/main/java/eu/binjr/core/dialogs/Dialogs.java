@@ -21,6 +21,7 @@ import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.UserPreferences;
+import impl.org.controlsfx.skin.NotificationBar;
 import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -35,7 +36,8 @@ import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
 
-import java.awt.*;
+
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -202,6 +204,21 @@ public class Dialogs {
                 .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
                 .position(Pos.BOTTOM_RIGHT)
                 .owner(null).showInformation());
+    }
+
+
+    public static void dismissParentNotificationPopup(Node n) {
+        if (n == null) {
+            //couldn't find NotificationBar, giving up.
+            return;
+        }
+        if (n instanceof NotificationBar notificationBar) {
+            // found it, hide the popup.
+            notificationBar.hide();
+            return;
+        }
+        // keep looking.
+        dismissParentNotificationPopup(n.getParent());
     }
 
     /**

@@ -1009,21 +1009,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     @Override
-    public void saveSnapshot() {
-
-    }
-
-    @Override
-    public void toggleShowPropertiesPane() {
-
-    }
-
-    @Override
-    public void setShowPropertiesPane(boolean value) {
-
-    }
-
-    @Override
     public List<ChartViewPort> getViewPorts() {
         return new ArrayList<>();
     }

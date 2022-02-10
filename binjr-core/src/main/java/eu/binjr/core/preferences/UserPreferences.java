@@ -22,6 +22,7 @@ import eu.binjr.common.preferences.*;
 import eu.binjr.core.appearance.BuiltInChartColorPalettes;
 import eu.binjr.core.appearance.BuiltInUserInterfaceThemes;
 import eu.binjr.core.appearance.UserInterfaceThemes;
+import eu.binjr.core.controllers.ChartViewportsState;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
@@ -314,6 +315,10 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public final ObservablePreference<String> httpProxyLogin = stringPreference("httpProxyLogin", "");
 
     public final ObservablePreference<ObfuscatedString> httpProxyPassword = obfuscatedStringPreference("httpProxyPassword", "");
+
+    public ObservablePreference<Number> maxSnapshotSnippetHeight= integerPreference("maxSnapshotSnippetHeight", 400);
+
+    public ObservablePreference<Number> maxSnapshotSnippetWidth= integerPreference("maxSnapshotSnippetWidth", 200);
 
     public static class UserFavorites extends MruFactory {
 

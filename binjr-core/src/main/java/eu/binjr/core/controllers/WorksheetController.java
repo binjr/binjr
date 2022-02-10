@@ -20,30 +20,42 @@ import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.common.javafx.controls.SnapshotUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
 import eu.binjr.core.dialogs.Dialogs;
+import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.TransferMode;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import org.controlsfx.control.Notifications;
 
+import javax.imageio.ImageIO;
 import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class WorksheetController implements Initializable, Closeable {
+    private static final Logger logger = Logger.create(WorksheetController.class);
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
     private final BindingManager bindingManager = new BindingManager();
     private final MainViewController parentController;
@@ -78,11 +90,76 @@ public abstract class WorksheetController implements Initializable, Closeable {
         refresh();
     }
 
-    public abstract void saveSnapshot();
+    protected Image captureSnapshot() {
+        return null;
+    }
 
-    public abstract void toggleShowPropertiesPane();
+    protected void saveSnapshotToFile(Image snapImg) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Save SnapShot");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
+        Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
+        fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
+        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        if (selectedFile != null) {
+            try {
+                if (selectedFile.getParent() != null) {
+                    UserHistory.getInstance().mostRecentSaveFolders.push(selectedFile.getParentFile().toPath());
+                }
+                ImageIO.write(SwingFXUtils.fromFXImage(snapImg, null), "png", selectedFile);
+            } catch (IOException e) {
+                Dialogs.notifyException("Failed to save snapshot to disk", e, root);
+            }
+        }
+    }
 
-    public abstract void setShowPropertiesPane(boolean value);
+    public void saveSnapshot() {
+        var snapImg = captureSnapshot();
+        if (snapImg == null || snapImg.getWidth() == 0 || snapImg.getHeight() == 0) {
+            return;
+        }
+
+        Clipboard.getSystemClipboard().setContent(Map.of(DataFormat.IMAGE, snapImg));
+
+        var imgView = new ImageView(snapImg);
+        var ratio = snapImg.getHeight() / snapImg.getWidth();
+        var maxHeight = UserPreferences.getInstance().maxSnapshotSnippetHeight.get().intValue();
+        var maxWidth = UserPreferences.getInstance().maxSnapshotSnippetWidth.get().intValue();
+        if (ratio * maxWidth > maxHeight) {
+            imgView.setFitHeight(maxHeight);
+        } else {
+            imgView.setFitWidth(maxWidth);
+        }
+        imgView.setPreserveRatio(true);
+        var box = new VBox(imgView);
+        box.setSpacing(10);
+        box.setPadding(new Insets(10));
+        box.setAlignment(Pos.CENTER);
+        var saveBtn = new Button("Save to file");
+        saveBtn.setMaxWidth(Double.MAX_VALUE);
+        saveBtn.setOnAction(getBindingManager().registerHandler(event -> {
+            Dialogs.dismissParentNotificationPopup((Node) event.getSource());
+            saveSnapshotToFile(snapImg);
+        }));
+        box.getChildren().add(saveBtn);
+        Dialogs.runOnFXThread(() -> Notifications.create()
+                .title("Snapshot saved to clipboard")
+                .text("""
+                        You can paste it into another 
+                        application or save it to a file
+                        by pressing the button below.
+                        """)
+                .hideAfter(UserPreferences.getInstance().notificationPopupDuration.get().getDuration())
+                .position(Pos.BOTTOM_RIGHT)
+                .graphic(box)
+                .owner(root).show());
+    }
+
+    public void toggleShowPropertiesPane() {
+    }
+
+    public void setShowPropertiesPane(boolean value) {
+    }
 
     public abstract List<ChartViewPort> getViewPorts();
 
