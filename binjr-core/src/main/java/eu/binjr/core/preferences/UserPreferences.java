@@ -318,7 +318,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> maxSnapshotSnippetHeight= integerPreference("maxSnapshotSnippetHeight", 400);
 
-    public ObservablePreference<Number> maxSnapshotSnippetWidth= integerPreference("maxSnapshotSnippetWidth", 200);
+    public ObservablePreference<Number> maxSnapshotSnippetWidth= integerPreference("maxSnapshotSnippetWidth", 300);
 
     public static class UserFavorites extends MruFactory {
 
