@@ -95,7 +95,11 @@ public abstract class WorksheetController implements Initializable, Closeable {
         return null;
     }
 
-    protected void saveSnapshotToFile(Image snapImg) {
+    protected void saveSnapshotToFile() {
+        var snapImg = captureSnapshot();
+        if (snapImg == null || snapImg.getWidth() == 0 || snapImg.getHeight() == 0) {
+            return;
+        }
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Save SnapShot");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
@@ -140,7 +144,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         saveBtn.setMaxWidth(Double.MAX_VALUE);
         saveBtn.setOnAction(getBindingManager().registerHandler(event -> {
             Dialogs.dismissParentNotificationPopup((Node) event.getSource());
-            saveSnapshotToFile(snapImg);
+            saveSnapshotToFile();
         }));
         box.getChildren().add(saveBtn);
         Dialogs.runOnFXThread(() -> Notifications.create()
