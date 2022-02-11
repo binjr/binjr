@@ -256,14 +256,13 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                             .setTlsVersions(TLS.V_1_3, TLS.V_1_2)
                             .build())
                     .setDefaultSocketConfig(SocketConfig.custom()
-                            .setSoTimeout(Timeout.ofSeconds(5))
+                            .setSoTimeout(Timeout.ofMilliseconds(userPrefs.httpSocketTimeoutMs.get().intValue()))
                             .build())
-                    .setConnectionTimeToLive(TimeValue.ofMinutes(1))
+                    .setConnectionTimeToLive(Timeout.ofMilliseconds(userPrefs.httpSSLConnectionTTLMs.get().intValue()))
                     .setPoolConcurrencyPolicy(PoolConcurrencyPolicy.STRICT)
                     .setConnPoolPolicy(PoolReusePolicy.LIFO)
                     .setMaxConnPerRoute(16)
                     .setMaxConnTotal(100)
-                    .setConnectionTimeToLive(TimeValue.ofMinutes(1L))
                     .build();
 
             var builder = HttpClients.custom()
@@ -273,8 +272,8 @@ public abstract class HttpDataAdapter<T> extends SimpleCachingDataAdapter<T> {
                     .setConnectionManager(connectionManager)
                     .setDefaultAuthSchemeRegistry(schemeFactoryRegistry)
                     .setDefaultRequestConfig(RequestConfig.custom()
-                            .setConnectTimeout(Timeout.ofSeconds(5))
-                            .setResponseTimeout(Timeout.ofSeconds(5))
+                            .setConnectTimeout(Timeout.ofMilliseconds(userPrefs.httpConnectionTimeoutMs.get().intValue()))
+                            .setResponseTimeout(Timeout.ofMilliseconds(userPrefs.httpResponseTimeoutMs.get().intValue()))
                             .setCookieSpec(StandardCookieSpec.STRICT)
                             .build());
             if (userPrefs.enableHttpProxy.get()) {
