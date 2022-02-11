@@ -53,6 +53,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class WorksheetController implements Initializable, Closeable {
     private static final Logger logger = Logger.create(WorksheetController.class);
@@ -235,6 +236,34 @@ public abstract class WorksheetController implements Initializable, Closeable {
             tv.edit(tv.getSelectionModel().getSelectedIndex(), tv.getColumns().get(2));
         }));
 
+        var copyPathMenuItem = new MenuItem("Path");
+        getBindingManager().bind(copyPathMenuItem.visibleProperty(), selectionIsEmpty.not());
+        copyPathMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
+            Clipboard.getSystemClipboard().setContent(Map.of(
+                    DataFormat.PLAIN_TEXT, tv.getSelectionModel().getSelectedItems().stream()
+                            .map(s -> s.getBinding().getTreeHierarchy())
+                            .collect(Collectors.joining("\n"))));
+        }));
+
+
+        var copyAllMenuItem = new MenuItem("All Series Info");
+        getBindingManager().bind(copyAllMenuItem.visibleProperty(), selectionIsEmpty.not());
+        copyAllMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
+            Clipboard.getSystemClipboard().setContent(Map.of(
+                    DataFormat.PLAIN_TEXT, tv.getSelectionModel().getSelectedItems().stream()
+                            .map(s -> String.join("\t",
+                                    s.getDisplayName(),
+                                    s.getProcessor().getMinValue().toString(),
+                                    s.getProcessor().getMaxValue().toString(),
+                                    s.getProcessor().getAverageValue().toString(),
+                                    s.getBinding().getTreeHierarchy()))
+                            .collect(Collectors.joining("\n"))));
+        }));
+
+        var copyMenu = new Menu("Copy");
+        getBindingManager().bind(copyMenu.visibleProperty(), selectionIsEmpty.not());
+        copyMenu.getItems().addAll(copyPathMenuItem, copyAllMenuItem);
+
         var inferNameItem = new MenuItem("Automatically Infer Names");
         getBindingManager().bind(inferNameItem.visibleProperty(), selectionIsMono.not());
         inferNameItem.setOnAction(getBindingManager().registerHandler(e -> {
@@ -271,7 +300,20 @@ public abstract class WorksheetController implements Initializable, Closeable {
             });
         }));
 
-        menu.getItems().setAll(selectAllMenuItem, removeMenuItem, renameSingleMenuItem, inferNameItem, inferColorItem);
+        var separator = new SeparatorMenuItem();
+        getBindingManager().bind(separator.visibleProperty(), selectionIsEmpty.not());
+        var separator2 = new SeparatorMenuItem();
+        getBindingManager().bind(separator2.visibleProperty(), selectionIsEmpty.not());
+
+        menu.getItems().setAll(
+                selectAllMenuItem,
+                copyMenu,
+                separator,
+                removeMenuItem,
+                renameSingleMenuItem,
+                separator2,
+                inferNameItem,
+                inferColorItem);
         row.setContextMenu(menu);
 
 

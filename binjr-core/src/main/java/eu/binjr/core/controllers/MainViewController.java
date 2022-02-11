@@ -1321,28 +1321,76 @@ public class MainViewController implements Initializable {
     }
 
     private ContextMenu getTreeViewContextMenu(final TreeView<SourceBinding> treeView) {
+
+        var bindingManager = getWorkspace().getBindingManager();
+        var selectionIsEmpty = Bindings.createBooleanBinding(
+                () -> treeView.getSelectionModel().getSelectedItems().isEmpty(),
+                treeView.getSelectionModel().getSelectedItems());
+        var selectionIsMono = Bindings.createBooleanBinding(
+                () -> treeView.getSelectionModel().getSelectedItems().size() < 2,
+                treeView.getSelectionModel().getSelectedItems());
+        var menu = new ContextMenu();
+
+        var selectAllMenuItem = new MenuItem("Select All");
+        selectAllMenuItem.setOnAction(bindingManager.registerHandler(e -> {
+            treeView.getSelectionModel().selectAll();
+        }));
+
         MenuItem expandBranch = new MenuItem("Expand Branch");
-        expandBranch.setOnAction(event -> treeView.getSelectionModel().getSelectedItems().forEach(item -> TreeViewUtils.expandBranch(item, TreeViewUtils.ExpandDirection.DOWN)));
+        expandBranch.setOnAction(bindingManager.registerHandler(event ->
+                treeView.getSelectionModel().getSelectedItems().forEach(item ->
+                        TreeViewUtils.expandBranch(item, TreeViewUtils.ExpandDirection.DOWN))));
+
         MenuItem collapseBranch = new MenuItem("Collapse Branch");
-        collapseBranch.setOnAction(event -> {
+        collapseBranch.setOnAction(bindingManager.registerHandler(event -> {
             // It is necessary to clone the list of selected nodes prior to start collapsing them as it resets
             // the selection, leading to a NoSuchElementException while iterating  getSelectedItems directly.
             var items = treeView.getSelectionModel().getSelectedItems().toArray(TreeItem<?>[]::new);
             for (var item : items) {
                 TreeViewUtils.collapseBranch(item, TreeViewUtils.ExpandDirection.DOWN);
             }
-        });
+        }));
+
+        var copyPathMenuItem = new MenuItem("Label");
+        copyPathMenuItem.setOnAction(bindingManager.registerHandler(e -> {
+            Clipboard.getSystemClipboard().setContent(Map.of(
+                    DataFormat.PLAIN_TEXT, treeView.getSelectionModel().getSelectedItems().stream()
+                            .map(s -> s.getValue().getLabel())
+                            .collect(Collectors.joining("\n"))));
+        }));
+
+        var copyAllMenuItem = new MenuItem("Full Path");
+        bindingManager.bind(copyAllMenuItem.visibleProperty(), selectionIsEmpty.not());
+        copyAllMenuItem.setOnAction(bindingManager.registerHandler(e -> {
+            Clipboard.getSystemClipboard().setContent(Map.of(
+                    DataFormat.PLAIN_TEXT, treeView.getSelectionModel().getSelectedItems().stream()
+                            .map(s -> s.getValue().getTreeHierarchy())
+                            .collect(Collectors.joining("\n"))));
+        }));
+
+        var copyMenu = new Menu("Copy");
+        bindingManager.bind(copyMenu.visibleProperty(), selectionIsEmpty.not());
+        copyMenu.getItems().addAll(copyPathMenuItem, copyAllMenuItem);
 
         Menu addToCurrent = new Menu("Add to current worksheet", null, new MenuItem("none"));
         addToCurrent.disableProperty().bind(noWorksheetPresent);
-        addToCurrent.setOnShowing(event -> getSelectedWorksheetController().ifPresent(controller ->
+        addToCurrent.setOnShowing(bindingManager.registerHandler(event -> getSelectedWorksheetController().ifPresent(controller ->
                 addToCurrent.getItems().setAll(controller
                         .getChartListContextMenu(treeView.getSelectionModel().getSelectedItems())
-                        .getItems())));
+                        .getItems()))));
+
         MenuItem addToNew = new MenuItem("Add to new worksheet");
-        addToNew.setOnAction(event ->
-                addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems()));
-        return new ContextMenu(expandBranch, collapseBranch, new SeparatorMenuItem(), addToCurrent, addToNew);
+        addToNew.setOnAction(bindingManager.registerHandler(event ->
+                addToNewWorksheet(tearableTabPane.getSelectedTabPane(), treeView.getSelectionModel().getSelectedItems())));
+        return new ContextMenu(
+                selectAllMenuItem,
+                copyMenu,
+                new SeparatorMenuItem(),
+                expandBranch,
+                collapseBranch,
+                new SeparatorMenuItem(),
+                addToCurrent,
+                addToNew);
     }
 
     private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<SourceBinding>> rootItems) {
