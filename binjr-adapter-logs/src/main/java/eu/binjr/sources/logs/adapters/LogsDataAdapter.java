@@ -36,6 +36,7 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
+import eu.binjr.core.data.workspace.LogFileSeriesInfo;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
@@ -297,11 +298,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                             DoubleProperty progress,
                                             boolean forceUpdate) throws IOException {
         final var toDo = seriesInfo.stream()
-                .map(s -> s.getBinding().getPath())
                 .filter(p -> forceUpdate || !indexedFiles.contains(p))
                 .toList();
         if (toDo.size() > 0) {
-            final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.contains(getId() + "/" + path.toString()))
+            final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.stream().anyMatch(e -> e.getBinding().getPath().equals(getId() + "/" + path.toString())))
                     .stream()
                     .mapToLong(FileSystemBrowser.FileSystemEntry::getSize)
                     .reduce(Long::sum).orElse(0));
@@ -318,8 +318,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             charRead.addListener(progressListener);
             try {
                 for (int i = 0; i < toDo.size(); i++) {
-                    String path = toDo.get(i);
-                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), getLogParser(), charRead);
+                    String path = toDo.get(i).getBinding().getPath();
+                    var parser = getLogParser();
+                    if (toDo.get(i) instanceof LogFileSeriesInfo lfsi && lfsi.getParsingProfile() != null) {
+                        parser = new EventParser(lfsi.getParsingProfile(), getTimeZoneId());
+                    }
+                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), parser, charRead);
                     indexedFiles.add(path);
                 }
             } finally {
