@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2019 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -28,13 +28,17 @@
         @XmlJavaTypeAdapter(type = Version.class,
                 value = VersionXmlAdapter.class),
         @XmlJavaTypeAdapter(type = SimpleDoubleProperty.class,
-                value = SimpleDoublePropertyXmlAdapter.class)
+                value = SimpleDoublePropertyXmlAdapter.class),
+        @XmlJavaTypeAdapter(type = CustomParsingProfile.class,
+                value = CustomParsingProfileXmlAdapter.class)
 
 })
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.xml.adapters.*;
 import eu.binjr.common.version.Version;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfileXmlAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import jakarta.xml.bind.annotation.adapters.XmlJavaTypeAdapters;
 import javafx.beans.property.SimpleDoubleProperty;

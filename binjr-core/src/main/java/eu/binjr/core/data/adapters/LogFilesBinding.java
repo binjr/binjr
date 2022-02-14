@@ -24,7 +24,6 @@ import eu.binjr.core.data.workspace.Worksheet;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
-import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlTransient;
 import javafx.scene.paint.Color;
 
@@ -39,12 +38,9 @@ public class LogFilesBinding extends SourceBinding<SearchHit> {
     @XmlTransient
     private final ParsingProfile parsingProfile;
 
-    @XmlAttribute
-    private final String parsingConfig = "foo";
-
-    public LogFilesBinding() {
+    private LogFilesBinding() {
         super();
-        this.parsingProfile = BuiltInParsingProfile.ALL;
+        this.parsingProfile = null;
     }
 
     public LogFilesBinding(String label,
@@ -97,7 +93,7 @@ public class LogFilesBinding extends SourceBinding<SearchHit> {
     }
 
     public static class Builder extends SourceBinding.Builder<SearchHit, LogFilesBinding, Builder> {
-        private ParsingProfile parsingProfile = BuiltInParsingProfile.ALL;
+        private ParsingProfile parsingProfile;
 
         @Override
         protected Builder self() {

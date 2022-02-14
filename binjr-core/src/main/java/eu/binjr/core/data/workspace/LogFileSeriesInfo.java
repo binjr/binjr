@@ -22,6 +22,7 @@ import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.indexes.SearchHit;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import jakarta.xml.bind.annotation.*;
 import javafx.scene.paint.Color;
 
@@ -34,10 +35,8 @@ import javafx.scene.paint.Color;
 @XmlRootElement(name = "Timeseries")
 public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
 
-    //    @XmlElement(name = "Binding", required = true, type = LogFilesBinding.class)
-//    private final LogFilesBinding binding;
+   private CustomParsingProfile parsingProfile;
 
-    private String parsingConfig = "foo";
     @XmlTransient
     private final ChangeWatcher status;
 
@@ -48,6 +47,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     private LogFileSeriesInfo() {
         this("",
                 true,
+                null,
                 null,
                 null);
     }
@@ -65,6 +65,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 ColorUtils.copy(seriesInfo.getDisplayColor()),
+                null,
                 seriesInfo.getBinding());
     }
 
@@ -79,12 +80,10 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     public LogFileSeriesInfo(String displayName,
                              Boolean selected,
                              Color displayColor,
+                             CustomParsingProfile parsingProfile,
                              SourceBinding<SearchHit> binding) {
         super(displayName, selected, displayColor, binding);
-        //     this.binding = binding;
-//        this.displayName = new SimpleStringProperty(displayName);
-//        this.selected = new SimpleBooleanProperty(selected);
-//        this.displayColor = new SimpleObjectProperty<>(displayColor);
+        this.parsingProfile = parsingProfile;
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -102,6 +101,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         return new LogFileSeriesInfo(binding.getLegend(),
                 true,
                 binding.getColor(),
+                CustomParsingProfile.of(binding.getParsingProfile()),
                 binding);
     }
 
@@ -122,11 +122,11 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     }
 
     @XmlAttribute
-    public String getParsingConfig() {
-        return parsingConfig;
+    public CustomParsingProfile getParsingProfile() {
+        return parsingProfile;
     }
 
-    public void setParsingConfig(String parsingConfig) {
-        this.parsingConfig = parsingConfig;
+    public void setParsingProfile(CustomParsingProfile parsingProfile) {
+        this.parsingProfile = parsingProfile;
     }
 }

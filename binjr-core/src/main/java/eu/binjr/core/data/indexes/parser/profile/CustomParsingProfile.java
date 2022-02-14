@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
+import com.google.gson.Gson;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ public class CustomParsingProfile implements ParsingProfile {
     private  Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
     private String lineTemplateExpression;
     private String profileName;
+    private static final Gson GSON = new Gson();
 
     public CustomParsingProfile(){
 
@@ -44,9 +46,26 @@ public class CustomParsingProfile implements ParsingProfile {
     }
 
     public static CustomParsingProfile of(ParsingProfile profile) {
+        if (profile == null){
+            return null;
+        }
+        return new CustomParsingProfile(profile.getProfileName(),
+                profile.getCaptureGroups(),
+                profile.getLineTemplateExpression());
+    }
+
+    public static CustomParsingProfile copyOf(ParsingProfile profile) {
         return new CustomParsingProfile("Copy of " + profile.getProfileName(),
                 profile.getCaptureGroups(),
                 profile.getLineTemplateExpression());
+    }
+
+    public static CustomParsingProfile fromJson(String jsonString){
+        return GSON.fromJson(jsonString, CustomParsingProfile.class);
+    }
+
+    public String toJson(){
+        return GSON.toJson(this);
     }
 
     @Override

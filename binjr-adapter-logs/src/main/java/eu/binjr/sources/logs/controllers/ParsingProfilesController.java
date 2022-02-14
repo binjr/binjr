@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -118,7 +118,7 @@ public class ParsingProfilesController implements Initializable {
     private void handleOnCloneProfile(ActionEvent actionEvent) {
         try {
             if (this.profileComboBox.getValue() != null) {
-                var p = CustomParsingProfile.of(this.profileComboBox.getValue());
+                var p = CustomParsingProfile.copyOf(this.profileComboBox.getValue());
                 this.profileComboBox.getItems().add(p);
                 this.profileComboBox.getSelectionModel().select(p);
             }
@@ -159,7 +159,7 @@ public class ParsingProfilesController implements Initializable {
                 UserHistory.getInstance().mostRecentSaveFolders.push(exportPath.toPath().getParent());
                 Files.writeString(exportPath.toPath(), gson.toJson(profileComboBox.getItems().stream()
                         .filter(p -> p instanceof CustomParsingProfile)
-                        .collect(Collectors.toList())
+                        .toList()
                         .toArray(ParsingProfile[]::new)));
                 logger.info("Parsing profiles successfully exported to " + exportPath);
             } catch (Exception e) {

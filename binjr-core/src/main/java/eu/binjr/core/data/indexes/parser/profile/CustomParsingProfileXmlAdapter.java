@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2022 Frederic Thevenet
+ *    Copyright 2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -14,30 +14,30 @@
  *    limitations under the License.
  */
 
-package eu.binjr.common.xml.adapters;
+package eu.binjr.core.data.indexes.parser.profile;
 
-import eu.binjr.common.javafx.controls.TimeRange;
 import jakarta.xml.bind.annotation.adapters.XmlAdapter;
 
+
 /**
- * An {@link XmlAdapter} for {@link TimeRange} objects
+ * An {@link XmlAdapter} for {@link CustomParsingProfile} objects
  *
  * @author Frederic Thevenet
  */
-public class TimeRangeXmlAdapter extends XmlAdapter<String, TimeRange> {
+public class CustomParsingProfileXmlAdapter extends XmlAdapter<String, CustomParsingProfile> {
     /**
-     * Initializes a new instance of the {@link TimeRangeXmlAdapter} class
+     * Initializes a new instance of the CustomParsingProfile class
      */
-    public TimeRangeXmlAdapter() {
+    public CustomParsingProfileXmlAdapter() {
     }
 
     @Override
-    public TimeRange unmarshal(String stringValue) {
-        return stringValue != null ? TimeRange.deSerialize(stringValue) : null;
+    public CustomParsingProfile unmarshal(String stringValue) {
+        return (stringValue != null && !stringValue.isBlank()) ? CustomParsingProfile.fromJson(stringValue) : null;
     }
 
     @Override
-    public String marshal(TimeRange value) {
-        return value != null ? value.serialize() : null;
+    public String marshal(CustomParsingProfile value) {
+        return value != null ? value.toJson() : null;
     }
 }

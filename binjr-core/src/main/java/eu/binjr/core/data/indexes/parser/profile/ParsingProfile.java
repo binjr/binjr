@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -16,15 +16,8 @@
 
 package eu.binjr.core.data.indexes.parser.profile;
 
-import com.google.gson.TypeAdapter;
-import com.google.gson.stream.JsonReader;
-import com.google.gson.stream.JsonWriter;
-import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
-import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
 
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 
 public interface ParsingProfile {

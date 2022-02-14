@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -230,6 +230,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                 .withLabel(fileName + " (" + binaryPrefixFormatter.format(fsEntry.getSize()) + "B)")
                                 .withPath(getId() + "/" + fsEntry.getPath().toString())
                                 .withParent(attachTo.getValue())
+                                .withParsingProfile(parsingProfile)
                                 .withAdapter(this)
                                 .build());
                 attachTo.getInternalChildren().add(filenode);
@@ -254,6 +255,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                 .withLabel(current.getFileName().toString())
                                 .withPath(getId() + "/" + path.toString())
                                 .withParent(parent.getValue())
+                                .withParsingProfile(parsingProfile)
                                 .withAdapter(this)
                                 .build());
                 nodeDict.put(current, filenode);
