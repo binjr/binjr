@@ -40,6 +40,7 @@ import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.SearchHitsProcessor;
 import eu.binjr.core.data.indexes.logs.LogFileIndex;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.*;
@@ -193,7 +194,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private HBox paginationBar;
     @FXML
-    private TableView<TimeSeriesInfo<SearchHit>> fileTable;
+    private TableView<LogFileSeriesInfo> fileTable;
     @FXML
     private StackPane fileTablePane;
     @FXML
@@ -1025,10 +1026,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
 
     private void intiLogFileTable() {
-        DecimalFormatTableCellFactory<TimeSeriesInfo<SearchHit>, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
+        DecimalFormatTableCellFactory<LogFileSeriesInfo, String> alignRightCellFactory = new DecimalFormatTableCellFactory<>();
         alignRightCellFactory.setAlignment(TextAlignment.LEFT);
         CheckBox showAllCheckBox = new CheckBox();
-        TableColumn<TimeSeriesInfo<SearchHit>, Boolean> visibleColumn = new TableColumn<>();
+        TableColumn<LogFileSeriesInfo, Boolean> visibleColumn = new TableColumn<>();
         visibleColumn.setGraphic(showAllCheckBox);
         visibleColumn.setSortable(false);
         visibleColumn.setResizable(false);
@@ -1064,14 +1065,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
             worksheet.getSeriesInfo().forEach(s -> getBindingManager().attachListener(s.selectedProperty(), r));
         }));
 
-        TableColumn<TimeSeriesInfo<SearchHit>, Color> colorColumn = new TableColumn<>();
+        TableColumn<LogFileSeriesInfo, Color> colorColumn = new TableColumn<>();
         colorColumn.setSortable(false);
         colorColumn.setResizable(false);
         colorColumn.setPrefWidth(32);
         colorColumn.setCellFactory(param -> new ColorTableCell<>(colorColumn, getBindingManager()));
         colorColumn.setCellValueFactory(p -> p.getValue().displayColorProperty());
 
-        TableColumn<TimeSeriesInfo<SearchHit>, String> nameColumn = new TableColumn<>("Name");
+        TableColumn<LogFileSeriesInfo, String> nameColumn = new TableColumn<>("Name");
         nameColumn.setSortable(false);
         nameColumn.setPrefWidth(350);
         nameColumn.setCellValueFactory(new PropertyValueFactory<>("displayName"));
@@ -1082,18 +1083,26 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
         );
 
-        TableColumn<TimeSeriesInfo<SearchHit>, String> eventNumColumn = new TableColumn<>("Nb events");
+        TableColumn<LogFileSeriesInfo, String> eventNumColumn = new TableColumn<>("Nb events");
         eventNumColumn.setSortable(false);
         eventNumColumn.setPrefWidth(75);
         eventNumColumn.setCellFactory(alignRightCellFactory);
         eventNumColumn.setCellValueFactory(p -> Bindings.createStringBinding(
                 () -> pathFacetEntries.getValue() == null ? "-" :
                         pathFacetEntries.getValue().stream()
-                                .filter(e -> e.getLabel().equalsIgnoreCase(p.getValue().getBinding().getPath()))
+                                .filter(e -> e.getLabel().equalsIgnoreCase(p.getValue().getPathFacetValue()))
                                 .map(e -> Integer.toString(e.getNbOccurrences())).findFirst().orElse("0"),
                 pathFacetEntries));
 
-        TableColumn<TimeSeriesInfo<SearchHit>, String> pathColumn = new TableColumn<>("Path");
+        TableColumn<LogFileSeriesInfo, ParsingProfile> parsingColumn = new TableColumn<>("Parsing rules");
+        parsingColumn.setSortable(false);
+        parsingColumn.setResizable(true);
+        parsingColumn.setPrefWidth(200);
+        parsingColumn.setEditable(true);
+        parsingColumn.setCellFactory(param -> new ParsingProfileCell<>(parsingColumn, getBindingManager(), this::refresh));
+        parsingColumn.setCellValueFactory(p -> p.getValue().parsingProfileProperty());
+
+        TableColumn<LogFileSeriesInfo, String> pathColumn = new TableColumn<>("Path");
         pathColumn.setSortable(false);
         pathColumn.setPrefWidth(400);
         pathColumn.setCellValueFactory(p -> new SimpleStringProperty(p.getValue().getBinding().getTreeHierarchy()));
@@ -1122,6 +1131,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 colorColumn,
                 nameColumn,
                 eventNumColumn,
+                parsingColumn,
                 pathColumn);
         TableViewUtils.autoFillTableWidthWithLastColumn(fileTable);
     }
@@ -1249,7 +1259,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 // Group all queries with the same adapter and path
                 var bindingsByPath =
-                        byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
+                        byAdapterEntry.getValue().stream().collect(groupingBy(LogFileSeriesInfo::getPathFacetValue));
                 var data = adapter.fetchData(queryArgs, start, end,
                         bindingsByPath.values().stream()
                                 .flatMap(Collection::stream)
@@ -1261,7 +1271,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         facets.put(LogFileIndex.PATH, worksheet.getSeriesInfo()
                 .stream()
                 .filter(TimeSeriesInfo::isSelected)
-                .map(i -> i.getBinding().getPath())
+                .map(LogFileSeriesInfo::getPathFacetValue)
                 .collect(Collectors.toList()));
         var params = worksheet.getQueryParameters();
         facets.put(CaptureGroup.SEVERITY, params.getSeverities());
@@ -1278,14 +1288,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
         }
     }
 
-    private void makeFilesCss(Collection<TimeSeriesInfo<SearchHit>> info) {
+    private void makeFilesCss(Collection<LogFileSeriesInfo> info) {
         try {
             Path cssPath = getTmpCssPath();
             String cssUrl = cssPath.toUri().toURL().toExternalForm();
             root.getStylesheets().remove(cssUrl);
             String cssStr = info
                     .stream()
-                    .map((i) -> ".file-" + i.getBinding().getPath().hashCode() +
+                    .map((i) -> ".file-" + i.getPathFacetValue().hashCode() +
                             "{-fx-background-color:" + ColorUtils.toHex(i.getDisplayColor(), 0.2) + ";}")
                     .collect(Collectors.joining("\n"));
             Files.writeString(cssPath, cssStr, StandardOpenOption.TRUNCATE_EXISTING);

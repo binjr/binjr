@@ -16,6 +16,7 @@
 
 package eu.binjr.core.appearance;
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -25,17 +26,17 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.DialogPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -92,7 +93,7 @@ public class StageAppearanceManager {
         registeredStages = new WeakHashMap<>();
         UserPreferences.getInstance().userInterfaceTheme.property().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
-                registeredStages.forEach((stage, options) ->  setAppearance(stage, newValue, options));
+                registeredStages.forEach((stage, options) -> setAppearance(stage, newValue, options));
             }
         });
     }
@@ -127,7 +128,11 @@ public class StageAppearanceManager {
             logo.setFitWidth(256.0);
             StackPane curtain = new StackPane(logo);
             curtain.setStyle("-fx-background-color: #204656;");
-            root.getChildren().add(curtain);
+            if (root instanceof DialogPane dlg && dlg.getContent() instanceof Pane pane) {
+                pane.getChildren().add(curtain);
+            } else {
+                root.getChildren().add(curtain);
+            }
             AnchorPane.setLeftAnchor(curtain, 0.0);
             AnchorPane.setRightAnchor(curtain, 0.0);
             AnchorPane.setTopAnchor(curtain, 0.0);
@@ -146,7 +151,8 @@ public class StageAppearanceManager {
             ft.setToValue(0.0);
             ft.play();
             ft.setOnFinished(event -> {
-                root.getChildren().remove(curtain);
+                Pane parent = (Pane) curtain.getParent();
+                parent.getChildren().remove(curtain);
             });
         }
     }
@@ -212,7 +218,7 @@ public class StageAppearanceManager {
                 new Image(getClass().getResourceAsStream("/eu/binjr/icons/binjr_512.png")));
     }
 
-    private void setUiTheme(Scene scene, UserInterfaceThemes theme, String... extraCss ) {
+    private void setUiTheme(Scene scene, UserInterfaceThemes theme, String... extraCss) {
         Dialogs.runOnFXThread(() -> {
             scene.getStylesheets().clear();
             Application.setUserAgentStylesheet(null);
@@ -221,7 +227,7 @@ public class StageAppearanceManager {
                     getClass().getResource("/eu/binjr/css/Icons.css").toExternalForm(),
                     theme.getClass().getResource(theme.getCssPath()).toExternalForm(),
                     getClass().getResource("/eu/binjr/css/Common.css").toExternalForm());
-            if (extraCss != null && extraCss.length > 0){
+            if (extraCss != null && extraCss.length > 0) {
                 scene.getStylesheets().addAll(extraCss);
             }
         });
@@ -243,8 +249,8 @@ public class StageAppearanceManager {
         setUiTheme(scene, UserPreferences.getInstance().userInterfaceTheme.get());
     }
 
-    public void applyExtraCss(String... css){
-        registeredStages.keySet().forEach((stage)-> setUiTheme(
+    public void applyExtraCss(String... css) {
+        registeredStages.keySet().forEach((stage) -> setUiTheme(
                 stage.getScene(),
                 UserPreferences.getInstance().userInterfaceTheme.get(),
                 css));

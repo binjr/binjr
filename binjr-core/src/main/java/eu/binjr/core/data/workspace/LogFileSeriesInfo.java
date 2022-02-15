@@ -21,9 +21,13 @@ import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.adapters.SourceBinding;
 import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
+import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.indexes.SearchHit;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import jakarta.xml.bind.annotation.*;
+import javafx.beans.property.Property;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
 /**
@@ -35,7 +39,8 @@ import javafx.scene.paint.Color;
 @XmlRootElement(name = "Timeseries")
 public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
 
-   private CustomParsingProfile parsingProfile;
+    @IsDirtyable
+   private final Property<ParsingProfile> parsingProfile;
 
     @XmlTransient
     private final ChangeWatcher status;
@@ -83,7 +88,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
                              CustomParsingProfile parsingProfile,
                              SourceBinding<SearchHit> binding) {
         super(displayName, selected, displayColor, binding);
-        this.parsingProfile = parsingProfile;
+        this.parsingProfile = new SimpleObjectProperty<>(parsingProfile);
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -105,6 +110,10 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
                 binding);
     }
 
+    public static String makePathFacetValue(ParsingProfile parsingProfile, TimeSeriesInfo<?> tsInfo) {
+        return parsingProfile.hashCode() + "://" + tsInfo.getBinding().getPath();
+    }
+
 
     @Override
     public String toString() {
@@ -122,11 +131,20 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     }
 
     @XmlAttribute
-    public CustomParsingProfile getParsingProfile() {
-        return parsingProfile;
+    public ParsingProfile getParsingProfile() {
+        return parsingProfile.getValue();
     }
 
-    public void setParsingProfile(CustomParsingProfile parsingProfile) {
-        this.parsingProfile = parsingProfile;
+    public void setParsingProfile(ParsingProfile parsingProfile) {
+        this.parsingProfile.setValue(parsingProfile);
+    }
+
+    public Property<ParsingProfile> parsingProfileProperty(){
+        return this.parsingProfile;
+    }
+
+    @XmlTransient
+    public String getPathFacetValue(){
+        return makePathFacetValue(getParsingProfile(), this) ;
     }
 }

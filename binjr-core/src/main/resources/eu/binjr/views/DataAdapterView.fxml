@@ -18,7 +18,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<DialogPane fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
+<DialogPane  fx:id="dialogPane" headerText="Connect to a source" xmlns="http://javafx.com/javafx/8.0.121"
             xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <GridPane fx:id="paramsGridPane" hgap="10.0">

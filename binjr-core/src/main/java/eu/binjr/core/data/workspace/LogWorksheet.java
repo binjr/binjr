@@ -20,6 +20,7 @@ import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.LogFilesBinding;
 import eu.binjr.core.data.adapters.LogQueryParameters;
 import eu.binjr.core.data.adapters.ProgressAdapter;
@@ -33,9 +34,11 @@ import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import java.sql.Time;
 import java.time.ZonedDateTime;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -50,7 +53,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     @IsDirtyable
     private final Property<LogQueryParameters> queryParameters;
     @IsDirtyable
-    private final ObservableList<TimeSeriesInfo<SearchHit>> seriesInfo;
+    private final ObservableList<LogFileSeriesInfo> seriesInfo;
     @IsDirtyable
     private final IntegerProperty textViewFontSize;
     @IsDirtyable
@@ -115,7 +118,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     @XmlElementWrapper(name = "Files")
     @XmlElements(@XmlElement(name = "Files"))
-    public ObservableList<TimeSeriesInfo<SearchHit>> getSeriesInfo() {
+    public ObservableList<LogFileSeriesInfo> getSeriesInfo() {
         return seriesInfo;
     }
 
@@ -254,7 +257,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
 
     @Override
-    public List<TimeSeriesInfo<SearchHit>> getSeries() {
+    public List<LogFileSeriesInfo> getSeries() {
         return seriesInfo;
     }
 
@@ -275,7 +278,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     public TimeRange getInitialTimeRange() throws DataAdapterException {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
-        var bindingsByAdapters =
+        Map<DataAdapter<SearchHit>, List<TimeSeriesInfo<SearchHit>>> bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {

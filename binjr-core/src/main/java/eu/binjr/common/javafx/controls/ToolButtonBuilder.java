@@ -51,6 +51,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     private EventHandler<ActionEvent> action = null;
     private final List<Consumer<T>> bindings = new ArrayList<>();
     private boolean focusTraversable = true;
+    private ContentDisplay contentDisplay = ContentDisplay.GRAPHIC_ONLY;
 
     public ToolButtonBuilder() {
         this(null);
@@ -78,10 +79,11 @@ public class ToolButtonBuilder<T extends ButtonBase> {
             icon.getStyleClass().addAll(iconStyleClass);
             btn.setGraphic(icon);
             btn.setAlignment(Pos.CENTER);
-            btn.setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
+            btn.setContentDisplay(contentDisplay);
         } else {
             btn.setContentDisplay(ContentDisplay.TEXT_ONLY);
         }
+
         if (action != null) {
             btn.setOnAction(bindingManager != null ? bindingManager.registerHandler(action) : action);
         }
@@ -121,6 +123,11 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     public ToolButtonBuilder<T> setIconStyleClass(String... iconStyleClass) {
         this.iconStyleClass = new ArrayList<>(Arrays.asList(iconStyleClass));
+        return this;
+    }
+
+    public ToolButtonBuilder<T> setContentDisplay(ContentDisplay contentDisplay){
+        this.contentDisplay =  contentDisplay;
         return this;
     }
 

@@ -13,13 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-package eu.binjr.sources.logs.controllers;
+package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.data.adapters.DataAdapterFactory;
-import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
@@ -30,8 +28,6 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
-import eu.binjr.sources.logs.adapters.LogsAdapterPreferences;
-import eu.binjr.sources.logs.adapters.LogsDataAdapter;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -69,8 +65,9 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 public class ParsingProfilesController implements Initializable {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
     private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
-    private final LogsAdapterPreferences userPrefs;
+    //private final LogsAdapterPreferences userPrefs;
     private static final Gson gson = new Gson();
+
 
     @FXML
     private TableColumn<NameExpressionPair, String> expressionColumn;
@@ -97,10 +94,6 @@ public class ParsingProfilesController implements Initializable {
     @FXML
     private CodeArea testArea;
     @FXML
-    private Button okButton;
-    @FXML
-    private Button cancelButton;
-    @FXML
     private ComboBox<ParsingProfile> profileComboBox;
     @FXML
     private Button addProfileButton;
@@ -113,6 +106,10 @@ public class ParsingProfilesController implements Initializable {
     @FXML
     private Button exportProfileButton;
     private final AtomicInteger groupSequence = new AtomicInteger(0);
+
+    private final ParsingProfile selectedProfile;
+    private final ParsingProfile[] userParsingProfiles;
+
 
     @FXML
     private void handleOnCloneProfile(ActionEvent actionEvent) {
@@ -254,18 +251,6 @@ public class ParsingProfilesController implements Initializable {
     }
 
     @FXML
-    private void handleOnOk(ActionEvent actionEvent) {
-        if (applyChanges()) {
-            userPrefs.userParsingProfiles.set(profileComboBox.getItems().stream()
-                    .filter(p -> p instanceof CustomParsingProfile)
-                    .collect(Collectors.toList())
-                    .toArray(ParsingProfile[]::new));
-            userPrefs.mostRecentlyUsedParsingProfile.set(profileComboBox.getValue().getProfileName());
-            Dialogs.getStage(root).close();
-        }
-    }
-
-    @FXML
     private void handleOnCancel(ActionEvent actionEvent) {
         Dialogs.getStage(root).close();
     }
@@ -273,15 +258,9 @@ public class ParsingProfilesController implements Initializable {
     /**
      * Initalizes a new instance of the {@link ParsingProfilesController} class.
      */
-    public ParsingProfilesController() {
-        LogsAdapterPreferences p;
-        try {
-            p = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
-        } catch (NoAdapterFoundException e) {
-            p = new LogsAdapterPreferences(LogsDataAdapter.class);
-            e.printStackTrace();
-        }
-        this.userPrefs = p;
+    public ParsingProfilesController(ParsingProfile[] userParsingProfiles, ParsingProfile selectedProfile) {
+        this.selectedProfile = selectedProfile;
+        this.userParsingProfiles = userParsingProfiles;
     }
 
     @FXML
@@ -293,8 +272,6 @@ public class ParsingProfilesController implements Initializable {
         assert lineTemplateExpression != null : "fx:id=\"lineTemplateExpression\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert testLineTemplate != null : "fx:id=\"testLineTemplate\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert testArea != null : "fx:id=\"testArea\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
-        assert okButton != null : "fx:id=\"okButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
-        assert cancelButton != null : "fx:id=\"cancelButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert profileComboBox != null : "fx:id=\"profileComboBox\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert addProfileButton != null : "fx:id=\"importProfileButton2\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert deleteProfileButton != null : "fx:id=\"deleteProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
@@ -303,7 +280,9 @@ public class ParsingProfilesController implements Initializable {
         assert exportProfileButton != null : "fx:id=\"exportProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
 
         this.profileComboBox.getItems().setAll(BuiltInParsingProfile.values());
-        this.profileComboBox.getItems().addAll(userPrefs.userParsingProfiles.get());
+        if (userParsingProfiles != null) {
+            this.profileComboBox.getItems().addAll(userParsingProfiles);
+        }
         this.profileComboBox.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 loadParserParameters(newValue);
@@ -355,7 +334,7 @@ public class ParsingProfilesController implements Initializable {
             colorLineTemplateField(newText);
         });
         profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
-                .filter(p -> p.getProfileName().equals(userPrefs.mostRecentlyUsedParsingProfile.get()))
+                .filter(p -> p.equals(selectedProfile))
                 .findAny().orElse(BuiltInParsingProfile.ISO));
         NamedCaptureGroup[] knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
         System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);
@@ -386,6 +365,14 @@ public class ParsingProfilesController implements Initializable {
         );
 
         TableViewUtils.autoFillTableWidthWithColumn(captureGroupTable, 1);
+    }
+
+    public ParsingProfile getSelectedProfile() {
+        return profileComboBox.getValue();
+    }
+
+    public ParsingProfile[] getCustomProfiles() {
+        return profileComboBox.getItems().stream().filter(p -> p instanceof CustomParsingProfile).toArray(ParsingProfile[]::new);
     }
 
     private void colorLineTemplateField() {
@@ -462,7 +449,7 @@ public class ParsingProfilesController implements Initializable {
         return false;
     }
 
-    private boolean applyChanges() {
+    public boolean applyChanges() {
         clearNotification();
         if (this.profileComboBox.getValue() instanceof CustomParsingProfile editable) {
             return saveProfile(editable);

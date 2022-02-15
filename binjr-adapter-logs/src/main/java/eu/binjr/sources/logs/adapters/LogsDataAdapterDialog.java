@@ -16,9 +16,7 @@
 
 package eu.binjr.sources.logs.adapters;
 
-import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
-import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
@@ -28,20 +26,18 @@ import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.sources.logs.controllers.ParsingProfilesController;
-import javafx.fxml.FXMLLoader;
+import eu.binjr.core.dialogs.ParsingProfileDialog;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.stage.*;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -83,7 +79,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         super(owner, Mode.PATH, "mostRecentLogsArchives", true);
         this.prefs = (LogsAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(LogsDataAdapter.class.getName());
         setDialogHeaderText("Add a Zip Archive or Folder");
-        extensionFiltersTextField = new TextField( String.join(", ", prefs.fileExtensionFilters.get()));
+        extensionFiltersTextField = new TextField(String.join(", ", prefs.fileExtensionFilters.get()));
         var label = new Label("Extensions:");
         GridPane.setConstraints(label, 0, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
         GridPane.setConstraints(extensionFiltersTextField, 1, 2, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
@@ -97,22 +93,30 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-                prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
-                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
-                fXMLLoader.setController(new ParsingProfilesController());
-                Parent root = fXMLLoader.load();
-                final Scene scene = new Scene(root);
-                var stage = new Stage();
-                stage.setScene(scene);
-                stage.setTitle("Edit Parsing Profile");
-                StageAppearanceManager.getInstance().register(stage);
-                stage.initStyle(StageStyle.UTILITY);
-                stage.initOwner(this.getOwner());
-                stage.initModality(Modality.APPLICATION_MODAL);
-                stage.showAndWait();
-                parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
-                        .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
-                        .findAny().orElse(BuiltInParsingProfile.ISO));
+                new ParsingProfileDialog(this.getOwner(),
+                        prefs.userParsingProfiles.get(),
+                        parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
+                    prefs.mostRecentlyUsedParsingProfile.set(selection.selectedProfile().getProfileName());
+                    prefs.userParsingProfiles.set(selection.customProfiles());
+                });
+
+//                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
+//                var controller = new ParsingProfilesController(parsingChoiceBox.getValue(), prefs.userParsingProfiles.get());
+//                fXMLLoader.setController(controller);
+//                Parent root = fXMLLoader.load();
+//                final Scene scene = new Scene(root);
+//                var stage = new Stage();
+//                stage.setScene(scene);
+//                stage.setTitle("Edit Parsing Profile");
+//                StageAppearanceManager.getInstance().register(stage);
+//                stage.initStyle(StageStyle.UTILITY);
+//                stage.initOwner(getOwner());
+//                stage.initModality(Modality.APPLICATION_MODAL);
+//                stage.showAndWait();
+
+//                parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
+//                        .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
+//                        .findAny().orElse(BuiltInParsingProfile.ISO));
             } catch (Exception e) {
                 Dialogs.notifyException("Failed to show parsing profile windows", e, owner);
             }
@@ -170,7 +174,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(path);
-        prefs.fileExtensionFilters.set(Arrays.stream(extensionFiltersTextField.getText().split("[,;\" ]+")).filter(e-> !e.isBlank()).toArray(String[]::new));
+        prefs.fileExtensionFilters.set(Arrays.stream(extensionFiltersTextField.getText().split("[,;\" ]+")).filter(e -> !e.isBlank()).toArray(String[]::new));
         prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
 
         return List.of(new LogsDataAdapter(path,

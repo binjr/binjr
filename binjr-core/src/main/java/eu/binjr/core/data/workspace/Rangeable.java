@@ -17,10 +17,12 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.groupingBy;
 
@@ -31,7 +33,7 @@ public interface Rangeable<T> {
      *
      * @return all the {@link TimeSeriesInfo} for this the {@link Rangeable}
      */
-    List<TimeSeriesInfo<T>> getSeries();
+    List<? extends TimeSeriesInfo<T>> getSeries();
 
     /**
      * Returns the preferred time range to initialize a new {@link Rangeable} with.
@@ -42,7 +44,8 @@ public interface Rangeable<T> {
     default TimeRange getInitialTimeRange() throws DataAdapterException {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
-        var bindingsByAdapters =
+
+        Map<DataAdapter<T>, List<TimeSeriesInfo<T>>> bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             var adapter = byAdapterEntry.getKey();

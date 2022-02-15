@@ -216,7 +216,8 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                             .map(folder -> folder.equalsIgnoreCase("*") || path.startsWith(fileBrowser.toInternalPath(folder)))
                             .reduce(Boolean::logicalOr).orElse(false) &&
                     Arrays.stream(fileExtensionsFilters)
-                            .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E").replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
+                            .map(f -> path.getFileName().toString().matches(("\\Q" + f + "\\E")
+                                    .replace("*", "\\E.*\\Q").replace("?", "\\E.\\Q")))
                             .reduce(Boolean::logicalOr).orElse(false))) {
                 String fileName = fsEntry.getPath().getFileName().toString();
                 var attachTo = root;
@@ -270,38 +271,45 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     @Deprecated
     @Override
-    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path, Instant begin, Instant end, List<TimeSeriesInfo<SearchHit>> seriesInfo, boolean bypassCache) throws DataAdapterException {
+    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,
+                                                                                    Instant begin,
+                                                                                    Instant end,
+                                                                                    List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                                                                                    boolean bypassCache) throws DataAdapterException {
         return fetchData(path, begin, end, seriesInfo, bypassCache, null);
     }
 
     @Deprecated
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path,
+                                         List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
         return getInitialTimeRange(path, seriesInfo, null);
     }
 
     @Override
-    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo, DoubleProperty progress) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path,
+                                         List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                                         DoubleProperty progress) throws DataAdapterException {
         try {
             ensureIndexed(seriesInfo, progress, false);
             return index.getTimeRangeBoundaries(
                     seriesInfo.stream()
-                            .map(i -> i.getBinding().getPath())
+                            .map(this::getPathFacetValue)
                             .collect(Collectors.toList()), getTimeZoneId());
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);
         }
     }
 
-
     private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                             DoubleProperty progress,
                                             boolean forceUpdate) throws IOException {
         final var toDo = seriesInfo.stream()
-                .filter(p -> forceUpdate || !indexedFiles.contains(p))
+                .filter(p -> forceUpdate || !indexedFiles.contains(getPathFacetValue(p)))
                 .toList();
         if (toDo.size() > 0) {
-            final long totalSizeInBytes = (fileBrowser.listEntries(path -> toDo.stream().anyMatch(e -> e.getBinding().getPath().equals(getId() + "/" + path.toString())))
+            final long totalSizeInBytes = (fileBrowser.listEntries(path ->
+                            toDo.stream().anyMatch(e -> e.getBinding().getPath().equals(getId() + "/" + path.toString())))
                     .stream()
                     .mapToLong(FileSystemBrowser.FileSystemEntry::getSize)
                     .reduce(Long::sum).orElse(0));
@@ -318,13 +326,12 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
             charRead.addListener(progressListener);
             try {
                 for (int i = 0; i < toDo.size(); i++) {
-                    String path = toDo.get(i).getBinding().getPath();
-                    var parser = getLogParser();
-                    if (toDo.get(i) instanceof LogFileSeriesInfo lfsi && lfsi.getParsingProfile() != null) {
-                        parser = new EventParser(lfsi.getParsingProfile(), getTimeZoneId());
-                    }
-                    index.add(path, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), parser, charRead);
-                    indexedFiles.add(path);
+                    var tsInfo = toDo.get(i);
+                    String path = tsInfo.getBinding().getPath();
+                    var parser = getEventParser(tsInfo);
+                    var key = getPathFacetValue(tsInfo);
+                    index.add(key, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), parser, charRead);
+                    indexedFiles.add(key);
                 }
             } finally {
                 //remove listener
@@ -360,6 +367,20 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         }
     }
 
+    private String getPathFacetValue(TimeSeriesInfo<?> p) {
+        if (p instanceof LogFileSeriesInfo lfsi && lfsi.getParsingProfile() != null) {
+            return lfsi.getPathFacetValue();
+        }
+        return LogFileSeriesInfo.makePathFacetValue(parsingProfile, p);
+    }
+
+    private EventParser getEventParser(TimeSeriesInfo<?> p) {
+        if (p instanceof LogFileSeriesInfo lfsi && lfsi.getParsingProfile() != null) {
+            return new EventParser(lfsi.getParsingProfile(), getTimeZoneId());
+        }
+        return parser;
+    }
+
     @Override
     public String getEncoding() {
         return "utf-8";
@@ -386,14 +407,4 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         IOUtils.close(fileBrowser);
         super.close();
     }
-
-    /**
-     * Returns the {@link EventParser} instance used by the adapter
-     *
-     * @return the {@link EventParser} instance used by the adapter
-     */
-    public EventParser getLogParser() {
-        return parser;
-    }
-
 }

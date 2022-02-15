@@ -21,6 +21,7 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class CustomParsingProfile implements ParsingProfile {
     private  Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
@@ -93,6 +94,19 @@ public class CustomParsingProfile implements ParsingProfile {
 
     public void setLineTemplateExpression(String lineTemplateExpression) {
         this.lineTemplateExpression = lineTemplateExpression;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomParsingProfile that = (CustomParsingProfile) o;
+        return captureGroups.equals(that.captureGroups) && lineTemplateExpression.equals(that.lineTemplateExpression) && profileName.equals(that.profileName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(captureGroups, lineTemplateExpression, profileName);
     }
 
     @Override
