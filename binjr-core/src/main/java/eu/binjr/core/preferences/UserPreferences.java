@@ -25,6 +25,8 @@ import eu.binjr.core.appearance.UserInterfaceThemes;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.async.ThreadPoolPolicy;
 import eu.binjr.core.data.indexes.IndexDirectoryLocation;
+import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.paint.Color;
 import org.apache.logging.log4j.Level;
@@ -326,6 +328,18 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Number> httpResponseTimeoutMs = integerPreference("httpResponseTimeoutMs", 30000);
 
     public ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120000);
+
+    /**
+     * A list of user defined {@link ParsingProfile}
+     */
+    public ObservablePreference<ParsingProfile[]> userParsingProfiles =
+            objectPreference(ParsingProfile[].class,
+                    "userParsingProfiles",
+                    new ParsingProfile[0],
+                    s -> gson.toJson(s),
+                    s -> gson.fromJson(s, CustomParsingProfile[].class)
+            );
+
 
     public static class UserFavorites extends MruFactory {
 

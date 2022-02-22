@@ -44,11 +44,11 @@ public class ParsingProfileCell<T> extends TableCell<T, ParsingProfile> {
                 .setIconStyleClass("edit-icon", "small-icon")
                 .setFocusTraversable(false)
                 .setAction(event -> {
-                    getTableView().getSelectionModel().select(getTableRow().getIndex());
-                    var dlg = new ParsingProfileDialog(Dialogs.getStage(getTableView()), null, current);
+                   // getTableView().getSelectionModel().select(getTableRow().getIndex());
+                    var dlg = new ParsingProfileDialog(Dialogs.getStage(getTableView()), current);
                     dlg.showAndWait().ifPresent(selection -> {
                         getTableView().edit(getTableRow().getIndex(), column);
-                        commitEdit(selection.selectedProfile());
+                        commitEdit(selection);
                         onEdit.run();
                     });
                 })

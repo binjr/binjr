@@ -27,6 +27,7 @@ import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.dialogs.ParsingProfileDialog;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Side;
@@ -87,36 +88,15 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var parsingLabel = new Label("Parsing:");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
-        updateProfileList(prefs.userParsingProfiles.get());
-        prefs.userParsingProfiles.property().addListener((observable, oldValue, newValue) -> updateProfileList(newValue));
+        updateProfileList(UserPreferences.getInstance().userParsingProfiles.get());
         parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
-                new ParsingProfileDialog(this.getOwner(),
-                        prefs.userParsingProfiles.get(),
-                        parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
-                    prefs.mostRecentlyUsedParsingProfile.set(selection.selectedProfile().getProfileName());
-                    prefs.userParsingProfiles.set(selection.customProfiles());
+                new ParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
+                    prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileName());
+                    updateProfileList( UserPreferences.getInstance().userParsingProfiles.get());
                 });
-
-//                FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesView.fxml"));
-//                var controller = new ParsingProfilesController(parsingChoiceBox.getValue(), prefs.userParsingProfiles.get());
-//                fXMLLoader.setController(controller);
-//                Parent root = fXMLLoader.load();
-//                final Scene scene = new Scene(root);
-//                var stage = new Stage();
-//                stage.setScene(scene);
-//                stage.setTitle("Edit Parsing Profile");
-//                StageAppearanceManager.getInstance().register(stage);
-//                stage.initStyle(StageStyle.UTILITY);
-//                stage.initOwner(getOwner());
-//                stage.initModality(Modality.APPLICATION_MODAL);
-//                stage.showAndWait();
-
-//                parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
-//                        .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
-//                        .findAny().orElse(BuiltInParsingProfile.ISO));
             } catch (Exception e) {
                 Dialogs.notifyException("Failed to show parsing profile windows", e, owner);
             }

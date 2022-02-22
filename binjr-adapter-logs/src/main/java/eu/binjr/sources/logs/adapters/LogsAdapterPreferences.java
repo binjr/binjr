@@ -62,17 +62,6 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
             stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.ISO.name());
 
     /**
-     * A list of user defined {@link ParsingProfile}
-     */
-    public ObservablePreference<ParsingProfile[]> userParsingProfiles =
-            objectPreference(ParsingProfile[].class,
-                    "userParsingProfiles",
-                    new ParsingProfile[0],
-                    s -> gson.toJson(s),
-                    s -> gson.fromJson(s, CustomParsingProfile[].class)
-            );
-
-    /**
      * Initialize a new instance of the {@link LogsAdapterPreferences} class associated to
      * a {@link DataAdapter} instance.
      *

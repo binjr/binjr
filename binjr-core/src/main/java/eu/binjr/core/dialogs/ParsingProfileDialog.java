@@ -19,6 +19,7 @@ package eu.binjr.core.dialogs;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -28,13 +29,13 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 
-public class ParsingProfileDialog extends Dialog<ParsingProfileDialog.Selection> {
+public class ParsingProfileDialog extends Dialog<ParsingProfile> {
 
     private final DialogPane root;
 
-    public ParsingProfileDialog(Window owner, ParsingProfile[] profiles, ParsingProfile selectedProfile) {
+    public ParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesDialogView.fxml"));
-        var controller = new ParsingProfilesController(profiles, selectedProfile);
+        var controller = new ParsingProfilesController(UserPreferences.getInstance().userParsingProfiles.get(), selectedProfile);
         fXMLLoader.setController(controller);
 
         try {
@@ -63,16 +64,12 @@ public class ParsingProfileDialog extends Dialog<ParsingProfileDialog.Selection>
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                     if (data == ButtonBar.ButtonData.OK_DONE) {
-
-                        return new Selection(controller.getCustomProfiles(), controller.getSelectedProfile());
+                        UserPreferences.getInstance().userParsingProfiles.set(controller.getCustomProfiles());
+                        return controller.getSelectedProfile();
                     }
                     return null;
                 }
         );
-
-    }
-    public record Selection(ParsingProfile[] customProfiles, ParsingProfile selectedProfile){
-
     }
 
 }

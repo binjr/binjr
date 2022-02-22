@@ -28,6 +28,7 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
