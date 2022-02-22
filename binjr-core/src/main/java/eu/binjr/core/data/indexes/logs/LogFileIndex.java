@@ -216,18 +216,20 @@ public class LogFileIndex implements Searchable {
                         }
                         aggregator.yield(n.incrementAndGet(), line).ifPresent(CheckedLambdas.wrap(queue::put));
                     }
+                    while (!taskAborted.get() && queue.size() > 0) {
+                        try {
+                            Thread.sleep(200);
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
+                    }
                 } catch (InterruptedException e) {
                     logger.error("Put to queue interrupted", e);
                     Thread.currentThread().interrupt();
+                } finally {
+                    taskDone.set(true);
                 }
-                while (!taskAborted.get() && queue.size() > 0) {
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
-                    }
-                }
-                taskDone.set(true);
+
                 for (Future<Integer> f : results) {
                     //signal exceptions that may have happened on thread pool
                     try {
@@ -360,10 +362,10 @@ public class LogFileIndex implements Searchable {
                 return proc;
             });
             SearchHitsProcessor hitProc;
-            if (ignoreCache){
+            if (ignoreCache) {
                 hitProc = fillHitResultCache.apply(hitCacheKey);
-                hitResultCache.put(hitCacheKey, hitProc);}
-            else {
+                hitResultCache.put(hitCacheKey, hitProc);
+            } else {
                 hitProc = hitResultCache.computeIfAbsent(hitCacheKey, fillHitResultCache);
             }
             Function<String, SearchHitsProcessor> doFacetSearch = CheckedLambdas.wrap(k -> {
@@ -399,10 +401,10 @@ public class LogFileIndex implements Searchable {
                 return proc;
             });
             SearchHitsProcessor facetProc;
-            if (ignoreCache){
+            if (ignoreCache) {
                 facetProc = doFacetSearch.apply(facetCacheKey);
-                facetResultCache.put(facetCacheKey, facetProc);}
-            else {
+                facetResultCache.put(facetCacheKey, facetProc);
+            } else {
                 facetProc = facetResultCache.computeIfAbsent(facetCacheKey, doFacetSearch);
             }
             hitProc.mergeFacetResults(facetProc);
