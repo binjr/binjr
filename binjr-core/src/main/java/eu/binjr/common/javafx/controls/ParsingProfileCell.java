@@ -29,19 +29,17 @@ import javafx.scene.control.*;
  * @author Frederic Thevenet
  */
 public class ParsingProfileCell<T> extends TableCell<T, ParsingProfile> {
-    private final BindingManager bindingManager;
     private final ButtonBase button;
     private ParsingProfile current;
 
     public ParsingProfileCell(TableColumn<T, ParsingProfile> column,
                               BindingManager bindingManager,
                               Runnable onEdit) {
-        this.bindingManager = bindingManager;
         button = new ToolButtonBuilder<>(bindingManager)
                 .setText("")
                 .setTooltip("Edit")
                 .setStyleClass("dialog-button")
-                .setIconStyleClass("edit-icon", "small-icon")
+                .setIconStyleClass("settings-icon", "small-icon")
                 .setFocusTraversable(false)
                 .setAction(event -> {
                    // getTableView().getSelectionModel().select(getTableRow().getIndex());

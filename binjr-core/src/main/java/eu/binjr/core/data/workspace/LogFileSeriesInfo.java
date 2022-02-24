@@ -111,7 +111,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     }
 
     public static String makePathFacetValue(ParsingProfile parsingProfile, TimeSeriesInfo<?> tsInfo) {
-        return parsingProfile.hashCode() + "://" + tsInfo.getBinding().getPath();
+        return parsingProfile.getProfileId() + "/" + tsInfo.getBinding().getPath();
     }
 
 

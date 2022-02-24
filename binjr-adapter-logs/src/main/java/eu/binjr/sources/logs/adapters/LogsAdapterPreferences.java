@@ -22,7 +22,6 @@ import eu.binjr.common.preferences.ObservablePreference;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterPreferences;
 import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
-import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 
 /**
@@ -59,7 +58,7 @@ public class LogsAdapterPreferences extends DataAdapterPreferences {
      * The most recently used {@link ParsingProfile}
      */
     public ObservablePreference<String> mostRecentlyUsedParsingProfile =
-            stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.ISO.name());
+            stringPreference("mostRecentlyUsedParsingProfile", BuiltInParsingProfile.ISO.getProfileId());
 
     /**
      * Initialize a new instance of the {@link LogsAdapterPreferences} class associated to

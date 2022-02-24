@@ -28,7 +28,6 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
-import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -335,7 +334,7 @@ public class ParsingProfilesController implements Initializable {
             colorLineTemplateField(newText);
         });
         profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
-                .filter(p -> p.equals(selectedProfile))
+                .filter(p -> Objects.equals(p.getProfileId(), selectedProfile.getProfileId()))
                 .findAny().orElse(BuiltInParsingProfile.ISO));
         NamedCaptureGroup[] knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
         System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);

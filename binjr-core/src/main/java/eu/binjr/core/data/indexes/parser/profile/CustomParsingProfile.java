@@ -22,22 +22,32 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CustomParsingProfile implements ParsingProfile {
-    private  Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
+    private Map<NamedCaptureGroup, String> captureGroups = new HashMap<>();
     private String lineTemplateExpression;
     private String profileName;
     private static final Gson GSON = new Gson();
+    private String id;
 
-    public CustomParsingProfile(){
+    public CustomParsingProfile() {
 
     }
 
     public CustomParsingProfile(String profileName,
                                 Map<NamedCaptureGroup, String> captureGroups,
                                 String lineTemplateExpression) {
-        this.profileName = profileName;
+        this(profileName, UUID.randomUUID().toString(), captureGroups,lineTemplateExpression);
+    }
 
+    private CustomParsingProfile(String profileName,
+                                 String id,
+                                 Map<NamedCaptureGroup,
+                                         String> captureGroups,
+                                 String lineTemplateExpression) {
+        this.profileName = profileName;
+        this.id = id;
         this.captureGroups.putAll(captureGroups);
         this.lineTemplateExpression = lineTemplateExpression;
     }
@@ -47,26 +57,33 @@ public class CustomParsingProfile implements ParsingProfile {
     }
 
     public static CustomParsingProfile of(ParsingProfile profile) {
-        if (profile == null){
+        if (profile == null) {
             return null;
         }
         return new CustomParsingProfile(profile.getProfileName(),
+                profile.getProfileId(),
                 profile.getCaptureGroups(),
                 profile.getLineTemplateExpression());
     }
 
     public static CustomParsingProfile copyOf(ParsingProfile profile) {
+        Objects.requireNonNull(profile);
         return new CustomParsingProfile("Copy of " + profile.getProfileName(),
                 profile.getCaptureGroups(),
                 profile.getLineTemplateExpression());
     }
 
-    public static CustomParsingProfile fromJson(String jsonString){
+    public static CustomParsingProfile fromJson(String jsonString) {
         return GSON.fromJson(jsonString, CustomParsingProfile.class);
     }
 
-    public String toJson(){
+    public String toJson() {
         return GSON.toJson(this);
+    }
+
+    @Override
+    public String getProfileId() {
+        return this.id;
     }
 
     @Override

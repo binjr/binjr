@@ -19,13 +19,13 @@ package eu.binjr.core.data.indexes.parser.profile;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 
-import java.util.Collections;
 import java.util.Map;
 
 import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
     ISO("ISO-like timestamps",
+            "BUILTIN_ISO",
             Map.of(YEAR, "\\d{4}",
                     MONTH, "\\d{2}",
                     DAY, "\\d{2}",
@@ -36,6 +36,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR[\\/-]$MONTH[\\/-]$DAY[-\\sT]$HOUR:$MINUTE:$SECOND([\\.,]$FRACTION)?\\]\\s*(\\[\\s?$SEVERITY\\s?\\])?.*"),
     BINJR_STRICT("binjr logs",
+            "BUILTIN_BJR",
             Map.of(YEAR, "\\d{4}",
                     MONTH, "\\d{2}",
                     DAY, "\\d{2}",
@@ -46,22 +47,27 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL"),
             "\\[$YEAR-$MONTH-$DAY\\s$HOUR:$MINUTE:$SECOND\\.$FRACTION\\]\\s+\\[$SEVERITY\\s?\\].*"),
     GC("JVM Unified Logging",
+            "BUILTIN_JVM",
             Map.of(EPOCH, "\\d+",
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
                     CaptureGroup.of("TAGS"), ".*"),
             "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*"),
     ALL("All non empty lines",
+            "BUILTIN_ALL",
             Map.of(CaptureGroup.of("LINE"), ".+"),
             "$LINE");
 
     private final String profileName;
     private final String lineTemplateExpression;
     private final Map<NamedCaptureGroup, String> captureGroups;
+    private final String id;
 
     BuiltInParsingProfile(String profileName,
+                          String id,
                           Map<NamedCaptureGroup, String> groups,
                           String lineTemplateExpression) {
+        this.id = id;
         this.profileName = profileName;
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
@@ -70,6 +76,11 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     @Override
     public String getLineTemplateExpression() {
         return lineTemplateExpression;
+    }
+
+    @Override
+    public String getProfileId() {
+        return this.id;
     }
 
     @Override

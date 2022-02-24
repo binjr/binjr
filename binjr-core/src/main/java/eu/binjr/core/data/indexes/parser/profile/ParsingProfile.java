@@ -21,6 +21,9 @@ import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import java.util.Map;
 
 public interface ParsingProfile {
+
+    String getProfileId();
+
     String getProfileName();
 
     Map<NamedCaptureGroup, String> getCaptureGroups();

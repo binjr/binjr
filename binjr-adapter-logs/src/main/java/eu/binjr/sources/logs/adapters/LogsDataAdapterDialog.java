@@ -48,6 +48,7 @@ import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An implementation of the {@link DataAdapterDialog} class that presents a dialog box to retrieve the parameters specific {@link LogsDataAdapterDialog}
@@ -66,7 +67,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         parsingChoiceBox.getItems().setAll(BuiltInParsingProfile.values());
         parsingChoiceBox.getItems().addAll(newValue);
         parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
-                .filter(p -> p.getProfileName().equals(prefs.mostRecentlyUsedParsingProfile.get()))
+                .filter(p -> Objects.equals(p.getProfileId(), prefs.mostRecentlyUsedParsingProfile.get()))
                 .findAny().orElse(BuiltInParsingProfile.ISO));
     }
 
@@ -94,7 +95,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         editParsingButton.setOnAction(event -> {
             try {
                 new ParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
-                    prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileName());
+                    prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileId());
                     updateProfileList( UserPreferences.getInstance().userParsingProfiles.get());
                 });
             } catch (Exception e) {
@@ -155,7 +156,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         }
         getMostRecentList().push(path);
         prefs.fileExtensionFilters.set(Arrays.stream(extensionFiltersTextField.getText().split("[,;\" ]+")).filter(e -> !e.isBlank()).toArray(String[]::new));
-        prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileName());
+        prefs.mostRecentlyUsedParsingProfile.set(parsingChoiceBox.getValue().getProfileId());
 
         return List.of(new LogsDataAdapter(path,
                 ZoneId.of(getSourceTimezone()),
