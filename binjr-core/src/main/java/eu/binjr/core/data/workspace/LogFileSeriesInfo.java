@@ -66,11 +66,11 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
      *
      * @param seriesInfo the {@link LogFileSeriesInfo} instance to clone.
      */
-    public LogFileSeriesInfo(TimeSeriesInfo<SearchHit> seriesInfo) {
+    public LogFileSeriesInfo(LogFileSeriesInfo seriesInfo) {
         this(seriesInfo.getDisplayName(),
                 seriesInfo.isSelected(),
                 ColorUtils.copy(seriesInfo.getDisplayColor()),
-                null,
+                seriesInfo.getParsingProfile(),
                 seriesInfo.getBinding());
     }
 
@@ -85,7 +85,7 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
     public LogFileSeriesInfo(String displayName,
                              Boolean selected,
                              Color displayColor,
-                             CustomParsingProfile parsingProfile,
+                             ParsingProfile parsingProfile,
                              SourceBinding<SearchHit> binding) {
         super(displayName, selected, displayColor, binding);
         this.parsingProfile = new SimpleObjectProperty<>(parsingProfile);
