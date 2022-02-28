@@ -335,7 +335,7 @@ public class ParsingProfilesController implements Initializable {
         });
         profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
                 .filter(p -> Objects.equals(p.getProfileId(), selectedProfile.getProfileId()))
-                .findAny().orElse(BuiltInParsingProfile.ISO));
+                .findAny().orElse(BuiltInParsingProfile.ALL));
         NamedCaptureGroup[] knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
         System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);
         knownGroups[TemporalCaptureGroup.values().length] = CaptureGroup.of(SEVERITY);

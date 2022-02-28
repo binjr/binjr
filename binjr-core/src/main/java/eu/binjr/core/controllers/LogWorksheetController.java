@@ -1097,7 +1097,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         TableColumn<LogFileSeriesInfo, ParsingProfile> parsingColumn = new TableColumn<>("Parsing rules");
         parsingColumn.setSortable(false);
         parsingColumn.setResizable(true);
-        parsingColumn.setPrefWidth(200);
+        parsingColumn.setPrefWidth(150);
         parsingColumn.setEditable(true);
         parsingColumn.setCellFactory(param -> new ParsingProfileCell<>(parsingColumn, getBindingManager(), this::refresh));
         parsingColumn.setCellValueFactory(p -> p.getValue().parsingProfileProperty());

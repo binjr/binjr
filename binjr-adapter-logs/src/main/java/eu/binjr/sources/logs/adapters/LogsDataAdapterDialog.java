@@ -68,7 +68,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         parsingChoiceBox.getItems().addAll(newValue);
         parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
                 .filter(p -> Objects.equals(p.getProfileId(), prefs.mostRecentlyUsedParsingProfile.get()))
-                .findAny().orElse(BuiltInParsingProfile.ISO));
+                .findAny().orElse(BuiltInParsingProfile.ALL));
     }
 
     /**

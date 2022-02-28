@@ -24,6 +24,10 @@ import java.util.Map;
 import static eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup.*;
 
 public enum BuiltInParsingProfile implements ParsingProfile {
+    ALL("All non empty lines",
+            "BUILTIN_ALL",
+            Map.of(CaptureGroup.of("LINE"), ".+"),
+            "$LINE"),
     ISO("ISO-like timestamps",
             "BUILTIN_ISO",
             Map.of(YEAR, "\\d{4}",
@@ -52,11 +56,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
                     FRACTION, "\\d{3}",
                     CaptureGroup.of("SEVERITY"), "(?i)TRACE|DEBUG|PERF|NOTE|INFO|WARN|ERROR|FATAL|STDOUT|STDERR",
                     CaptureGroup.of("TAGS"), ".*"),
-            "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*"),
-    ALL("All non empty lines",
-            "BUILTIN_ALL",
-            Map.of(CaptureGroup.of("LINE"), ".+"),
-            "$LINE");
+            "\\[$EPOCH[\\.,]($FRACTION)s\\s*\\]\\[$SEVERITY\\s*\\]\\[$TAGS\\s*\\].*");
 
     private final String profileName;
     private final String lineTemplateExpression;
@@ -95,7 +95,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
 
     @Override
     public String toString() {
-        return "[Built-in] " + profileName;
+        return profileName;
     }
 
 }
