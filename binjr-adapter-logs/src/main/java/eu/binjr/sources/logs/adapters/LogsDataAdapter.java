@@ -18,6 +18,8 @@ package eu.binjr.sources.logs.adapters;
 
 
 import com.google.gson.Gson;
+import eu.binjr.common.function.CheckedFunction;
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.FileSystemBrowser;
 import eu.binjr.common.io.IOUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
@@ -308,11 +310,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 .filter(p -> forceUpdate || !indexedFiles.contains(getPathFacetValue(p)))
                 .toList();
         if (toDo.size() > 0) {
-            final long totalSizeInBytes = (fileBrowser.listEntries(path ->
-                            toDo.stream().anyMatch(e -> e.getBinding().getPath().equals(getId() + "/" + path.toString())))
-                    .stream()
-                    .mapToLong(FileSystemBrowser.FileSystemEntry::getSize)
-                    .reduce(Long::sum).orElse(0));
+            final long totalSizeInBytes = toDo.stream()
+                    .map(CheckedLambdas.wrap((CheckedFunction<TimeSeriesInfo<SearchHit>, Long, IOException>)
+                            e -> fileBrowser.getEntry(e.getBinding().getPath().replace(getId() + "/", "")).getSize()))
+                    .reduce(Long::sum).orElse(0L);
             final ChangeListener<Number> progressListener = (observable, oldValue, newValue) -> {
                 if (newValue != null && totalSizeInBytes > 0) {
                     var oldProgress = (oldValue.longValue() * 100 / totalSizeInBytes) / 100.0;

@@ -16,22 +16,17 @@
 
 package eu.binjr.common.io;
 
-import eu.binjr.common.function.CheckedFunction;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
 
 import java.io.Closeable;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.*;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 /**
  * Defines methods to help list entries in a file system, and obtain input streams on files it contains.
@@ -40,7 +35,7 @@ import java.util.stream.Collectors;
  */
 public class FileSystemBrowser implements Closeable {
     private static final Logger logger = Logger.create(FileSystemBrowser.class);
-    private final List<Path> fsRoots;
+    private final Path fsRoot;
     private final FileSystem fs;
 
     /**
@@ -51,23 +46,21 @@ public class FileSystemBrowser implements Closeable {
      */
     private FileSystemBrowser(Path fsRoot) throws IOException {
         this.fs = fsRoot.getFileSystem();
-        this.fsRoots = List.of(fsRoot);
+        this.fsRoot = fsRoot;
     }
 
     /**
      * Initialize a new browser from a list of roots and a {@link FileSystem}
      * NB: All roots must belong to the same FileSystem
      *
-     * @param fs      the FileSystem for the browser
-     * @param fsRoots a list of root directories to browse
+     * @param fs     the FileSystem for the browser
+     * @param fsRoot a list of root directories to browse
      * @throws IOException if an error occurs while initializing the browser.
      */
-    private FileSystemBrowser(FileSystem fs, List<Path> fsRoots) throws IOException {
-        if (fsRoots.isEmpty()) {
-            throw new IOException("Cannot create a FileSystemBrowser with no root");
-        }
+    private FileSystemBrowser(FileSystem fs, Path fsRoot) throws IOException {
+        Objects.requireNonNull(fsRoot);
         this.fs = fs;
-        this.fsRoots = fsRoots;
+        this.fsRoot = fsRoot;
     }
 
     /**
@@ -82,28 +75,17 @@ public class FileSystemBrowser implements Closeable {
         if (Files.isDirectory(path)) {
             return new FileSystemBrowser(path);
         }
-        List<Path> roots = new ArrayList<>();
-        var fs = FileSystems.newFileSystem(path, (ClassLoader) null);
-        fs.getRootDirectories()
-                .iterator()
-                .forEachRemaining(roots::add);
-
-        return new FileSystemBrowser(fs, roots);
-    }
-
-    /**
-     * Return a new {@link FileSystemBrowser} instance for the provided URI.
-     * Valid URI can point to a zip or a jar file.
-     *
-     * @param uri the URI to browse.
-     * @return a new {@link FileSystemBrowser} instance for the provided URI
-     * @throws IOException if an error occurs while initializing the browser.
-     */
-    public static FileSystemBrowser of(URI uri) throws IOException {
-        List<Path> roots = new ArrayList<>();
-        var fs = FileSystems.newFileSystem(uri, Collections.emptyMap());
-        fs.getRootDirectories().iterator().forEachRemaining(roots::add);
-        return new FileSystemBrowser(fs, roots);
+        if (path.toString().toLowerCase(Locale.ROOT).endsWith(".zip") ||
+                (path.toString().toLowerCase(Locale.ROOT).endsWith(".jar"))) {
+            var fs = FileSystems.newFileSystem(path, (ClassLoader) null);
+            for (var root : fs.getRootDirectories()) {
+                // we only care about the first root in a zip file
+                return new FileSystemBrowser(fs, root);
+            }
+        } else {
+                return new FileSystemBrowser(path);
+        }
+        throw new UnsupportedOperationException("Unsupported operation: path is not a folder nor a zip file");
     }
 
     /**
@@ -131,10 +113,7 @@ public class FileSystemBrowser implements Closeable {
      * @throws IOException If no entry could be identified in the underlying file system for the provided path.
      */
     public InputStream getData(String path) throws IOException {
-        return getData(p -> p.equals(toInternalPath(path)))
-                .stream()
-                .findAny()
-                .orElseThrow(CheckedLambdas.wrap(() -> new FileNotFoundException("Could not find file system entry " + path)));
+        return Files.newInputStream(getRootDirectory().resolve(path), StandardOpenOption.READ);
     }
 
     /**
@@ -142,34 +121,90 @@ public class FileSystemBrowser implements Closeable {
      * <p>
      * <b>NOTE:</b> It is the caller's responsibility to close the returned stream when no longer needed.
      * </p>
+     *
      * @param filter a predicate that filters the file system entries to return a stream for.
      * @return a collection of {@link InputStream} for all file system entries matching the provided path predicate.
      * @throws IOException If no entry could be identified in the underlying file system for the provided path.
      */
     public Collection<InputStream> getData(Predicate<Path> filter) throws IOException {
-        return getRootDirectories().stream().flatMap(CheckedLambdas.wrap(root -> {
-            return Files.walk(root).map(root::relativize)
-                    .filter(filter)
-                    .map(CheckedLambdas.wrap((CheckedFunction<Path, InputStream, IOException>)
-                            path -> Files.newInputStream(root.resolve(path), StandardOpenOption.READ)));
-        })).collect(Collectors.toList());
+        var streams = new ArrayList<InputStream>();
+        Files.walkFileTree(fsRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+
+            @Override
+            public FileVisitResult visitFile(Path p, BasicFileAttributes attrs) throws IOException {
+                if (filter.test(p)) {
+                    streams.add(Files.newInputStream(fsRoot.resolve(p), StandardOpenOption.READ));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                logger.warn(() -> "An error occurred while accessing file " + file + ": " + exc.getMessage());
+                logger.debug(() -> "Full stack", exc);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return streams;
+    }
+
+    /**
+     * Returns a collection of {@link FileSystemEntry} for all paths specified in the target file system
+     *
+     * @param paths list of paths to return a {@link FileSystemEntry} for.
+     * @return a collection of {@link FileSystemEntry}.
+     * @throws IOException If an error occurs while listing file system entries.
+     */
+    public Collection<FileSystemEntry> listEntries(Collection<Path> paths) throws IOException {
+        return paths.stream()
+                .map(fsRoot::resolve)
+                .filter(Files::exists)
+                .map(CheckedLambdas.wrap(p -> {
+                    return new FileSystemEntry(Files.isDirectory(p), fsRoot.relativize(p), Files.size(fsRoot.resolve(p)));
+                }))
+                .sorted(FileSystemEntry::compareTo)
+                .toList();
+    }
+
+    /**
+     * * Returns a {@link FileSystemEntry}  instance for the path specified in the target file system
+     *
+     * @param path path to return a {@link FileSystemEntry} for.
+     * @return a {@link FileSystemEntry}  instance for the path specified
+     * @throws IOException If an error occurs while listing file system entries.
+     */
+    public FileSystemEntry getEntry(String path) throws IOException {
+        var p = getRootDirectory().resolve(path);
+        return new FileSystemEntry(Files.isDirectory(p), p, Files.size(p));
     }
 
     /**
      * Returns a collection of {@link FileSystemEntry} for all file system entries matching the provided path predicate.
      *
      * @param filter a predicate that filters the file system entries to return a {@link FileSystemEntry} for.
-     * @return a collection of {@link FileSystemEntry} for all file system entries matching the provided path predicate.gradle
+     * @return a collection of {@link FileSystemEntry} for all file system entries matching the provided path predicate.
      * @throws IOException If an error occurs while listing file system entries.
      */
     public Collection<FileSystemEntry> listEntries(Predicate<Path> filter) throws IOException {
-        return getRootDirectories().stream().flatMap(CheckedLambdas.wrap(root -> {
-            return Files.walk(root).map(root::relativize)
-                    .filter(filter)
-                    .map(CheckedLambdas.wrap(p -> {
-                        return new FileSystemEntry(Files.isDirectory(p), p, Files.size(root.resolve(p)));
-                    })).sorted(FileSystemEntry::compareTo);
-        })).collect(Collectors.toList());
+        var subEntries = new ArrayList<FileSystemEntry>();
+        Files.walkFileTree(fsRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
+
+            @Override
+            public FileVisitResult visitFile(Path p, BasicFileAttributes attrs) throws IOException {
+                if (filter.test(p)) {
+                    subEntries.add(new FileSystemEntry(Files.isDirectory(p), fsRoot.relativize(p), Files.size(fsRoot.resolve(p))));
+                }
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+                logger.warn(() -> "An error occurred while accessing file " + file + ": " + exc.getMessage());
+                logger.debug(() -> "Full stack", exc);
+                return FileVisitResult.CONTINUE;
+            }
+        });
+        return subEntries.stream().sorted(FileSystemEntry::compareTo).toList();
     }
 
     /**
@@ -177,8 +212,8 @@ public class FileSystemBrowser implements Closeable {
      *
      * @return the file system root directories for this {@link FileSystemBrowser} instance
      */
-    public List<Path> getRootDirectories() {
-        return fsRoots;
+    public Path getRootDirectory() {
+        return fsRoot;
     }
 
     /**
