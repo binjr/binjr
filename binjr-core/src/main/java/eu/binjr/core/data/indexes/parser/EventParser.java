@@ -31,7 +31,6 @@ import java.util.regex.Pattern;
 public class EventParser {
     private static final Logger logger = Logger.create(EventParser.class);
     private final Pattern parsingRegex;
-    private final Set<String> namedGroups = new HashSet<>();
     private final ParsingProfile profile;
     private final ZoneId zoneId;
     private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
