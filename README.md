@@ -1,4 +1,4 @@
-# <a href="https://binjr.eu"> <img alt="binjr" width="30%" height="auto" src="https://binjr.eu/assets/images/binjr_title_dark.png"/></a>  
+# [![binjr](https://binjr.eu/assets/images/binjr_readme_title.png)](https://binjr.eu)
 
 [![Build Status](https://dev.azure.com/binjr/binjr/_apis/build/status/binjr.binjr)](https://dev.azure.com/binjr/binjr/_build/latest?definitionId=1) [![Github Release](https://img.shields.io/github/release/binjr/binjr.svg?label=Github%20Release)](https://github.com/binjr/binjr/releases/latest) [![Maven Central](https://img.shields.io/maven-central/v/eu.binjr/binjr-core.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22eu.binjr%22) 
 
