@@ -61,13 +61,13 @@ public enum BuiltInParsingProfile implements ParsingProfile {
     private final String profileName;
     private final String lineTemplateExpression;
     private final Map<NamedCaptureGroup, String> captureGroups;
-    private final String id;
+    private final String profileId;
 
     BuiltInParsingProfile(String profileName,
                           String id,
                           Map<NamedCaptureGroup, String> groups,
                           String lineTemplateExpression) {
-        this.id = id;
+        this.profileId = id;
         this.profileName = profileName;
         this.captureGroups = groups;
         this.lineTemplateExpression = lineTemplateExpression;
@@ -80,7 +80,7 @@ public enum BuiltInParsingProfile implements ParsingProfile {
 
     @Override
     public String getProfileId() {
-        return this.id;
+        return this.profileId;
     }
 
     @Override

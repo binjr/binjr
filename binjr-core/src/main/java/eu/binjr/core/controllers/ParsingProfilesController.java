@@ -108,7 +108,7 @@ public class ParsingProfilesController implements Initializable {
     private final AtomicInteger groupSequence = new AtomicInteger(0);
 
     private final ParsingProfile selectedProfile;
-    private final ParsingProfile[] userParsingProfiles;
+    private final Set<ParsingProfile> userParsingProfiles;
 
 
     @FXML
@@ -260,7 +260,8 @@ public class ParsingProfilesController implements Initializable {
      */
     public ParsingProfilesController(ParsingProfile[] userParsingProfiles, ParsingProfile selectedProfile) {
         this.selectedProfile = selectedProfile;
-        this.userParsingProfiles = userParsingProfiles;
+        this.userParsingProfiles = new HashSet<>(Arrays.asList(userParsingProfiles));
+        this.userParsingProfiles.add(selectedProfile);
     }
 
     @FXML

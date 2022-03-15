@@ -29,25 +29,25 @@ public class CustomParsingProfile implements ParsingProfile {
     private String lineTemplateExpression;
     private String profileName;
     private static final Gson GSON = new Gson();
-    private String id;
+    private final String profileId;
 
-    public CustomParsingProfile() {
-
+    private CustomParsingProfile() {
+        profileId = "";
     }
 
     public CustomParsingProfile(String profileName,
                                 Map<NamedCaptureGroup, String> captureGroups,
                                 String lineTemplateExpression) {
-        this(profileName, UUID.randomUUID().toString(), captureGroups,lineTemplateExpression);
+        this(profileName, UUID.randomUUID().toString(), captureGroups, lineTemplateExpression);
     }
 
-    private CustomParsingProfile(String profileName,
-                                 String id,
-                                 Map<NamedCaptureGroup,
-                                         String> captureGroups,
-                                 String lineTemplateExpression) {
+    public CustomParsingProfile(String profileName,
+                                String profileId,
+                                Map<NamedCaptureGroup,
+                                        String> captureGroups,
+                                String lineTemplateExpression) {
         this.profileName = profileName;
-        this.id = id;
+        this.profileId = profileId;
         this.captureGroups.putAll(captureGroups);
         this.lineTemplateExpression = lineTemplateExpression;
     }
@@ -83,7 +83,7 @@ public class CustomParsingProfile implements ParsingProfile {
 
     @Override
     public String getProfileId() {
-        return this.id;
+        return this.profileId;
     }
 
     @Override
@@ -118,12 +118,12 @@ public class CustomParsingProfile implements ParsingProfile {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         CustomParsingProfile that = (CustomParsingProfile) o;
-        return captureGroups.equals(that.captureGroups) && lineTemplateExpression.equals(that.lineTemplateExpression) && profileName.equals(that.profileName);
+        return Objects.equals(profileId, that.profileId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(captureGroups, lineTemplateExpression, profileName);
+        return Objects.hash(profileId);
     }
 
     @Override
