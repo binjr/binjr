@@ -83,7 +83,7 @@ public class FileSystemBrowser implements Closeable {
                 return new FileSystemBrowser(fs, root);
             }
         } else {
-                return new FileSystemBrowser(path);
+            return new FileSystemBrowser(path);
         }
         throw new UnsupportedOperationException("Unsupported operation: path is not a folder nor a zip file");
     }
@@ -131,7 +131,8 @@ public class FileSystemBrowser implements Closeable {
         Files.walkFileTree(fsRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
 
             @Override
-            public FileVisitResult visitFile(Path p, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                var p = fsRoot.relativize(path);
                 if (filter.test(p)) {
                     streams.add(Files.newInputStream(fsRoot.resolve(p), StandardOpenOption.READ));
                 }
@@ -190,9 +191,10 @@ public class FileSystemBrowser implements Closeable {
         Files.walkFileTree(fsRoot, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<>() {
 
             @Override
-            public FileVisitResult visitFile(Path p, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path path, BasicFileAttributes attrs) throws IOException {
+                var p = fsRoot.relativize(path);
                 if (filter.test(p)) {
-                    subEntries.add(new FileSystemEntry(Files.isDirectory(p), fsRoot.relativize(p), Files.size(fsRoot.resolve(p))));
+                    subEntries.add(new FileSystemEntry(Files.isDirectory(p), p, Files.size(fsRoot.resolve(p))));
                 }
                 return FileVisitResult.CONTINUE;
             }
