@@ -22,6 +22,9 @@ import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
 import eu.binjr.core.preferences.SysInfoProperty;
 import eu.binjr.core.update.UpdateManager;
+import javafx.animation.Animation;
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +33,8 @@ import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.effect.Bloom;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -38,12 +43,15 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.List;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 //import javafx.scene.web.WebView;
@@ -58,6 +66,8 @@ public class AboutBoxController implements Initializable {
     public TextFlow licenseView;
     public TextFlow acknowledgementView;
     public Label copyrightText;
+    @FXML
+    private ImageView logo;
 
     @FXML
     private DialogPane aboutRoot;
@@ -85,6 +95,7 @@ public class AboutBoxController implements Initializable {
 
     @FXML
     private TitledPane acknowledgementPane;
+    private final NeonLogo neon = new NeonLogo();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -107,6 +118,9 @@ public class AboutBoxController implements Initializable {
             if (event.getCode() == KeyCode.ESCAPE) {
                 Dialogs.getStage(aboutRoot).close();
             }
+            if (event.getCode() == KeyCode.L) {
+                neon.toggle();
+            }
         });
 
         aboutRoot.sceneProperty().addListener((observable, oldValue, scene) -> {
@@ -119,7 +133,6 @@ public class AboutBoxController implements Initializable {
                 licenseView.maxHeightProperty().unbind();
             }
         });
-
         Platform.runLater(() -> {
             overrideCss();
             Pane header = (Pane) sysInfoListTable.lookup("TableHeaderRow");
@@ -129,7 +142,13 @@ public class AboutBoxController implements Initializable {
                 header.setPrefHeight(0);
                 header.setVisible(false);
             }
+            var p = new PauseTransition(Duration.millis(500));
+            p.setOnFinished(e -> neon.liteUp());
+            p.setCycleCount(1);
+            p.play();
         });
+
+        logo.setOnMouseClicked(event -> neon.toggle());
 
         versionCheckFlow.getChildren().clear();
         Label l = new Label("Checking for updates...");
@@ -161,6 +180,64 @@ public class AboutBoxController implements Initializable {
         Node closeButton = aboutRoot.lookupButton(ButtonType.CLOSE);
         closeButton.managedProperty().bind(closeButton.visibleProperty());
         closeButton.setVisible(false);
+    }
+
+
+    // private SequentialTransition makeNeonAnimation() {
+    private class NeonLogo {
+        private boolean isLit = false;
+        final Runnable dim = () -> logo.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/eu/binjr/images/neon_logo_med_dim.png"))));
+        final Runnable lit = () -> logo.setImage(new Image(Objects.requireNonNull(getClass().getResourceAsStream("/eu/binjr/images/neon_logo_med_lit.png"))));
+
+        public boolean isLit() {
+            return isLit;
+        }
+
+        record Cue(double duration, Runnable action) {
+        }
+
+        final SequentialTransition seq = new SequentialTransition();
+
+        public NeonLogo() {
+            List.of(new Cue(100, lit),
+                    new Cue(400, dim),
+                    new Cue(70, lit),
+                    new Cue(70, dim),
+                    new Cue(700, lit),
+                    new Cue(70, dim),
+                    new Cue(70, lit),
+                    new Cue(70, dim),
+                    new Cue(70, lit),
+                    new Cue(70, dim),
+                    new Cue(70, lit),
+                    new Cue(50000, dim)).forEach(f -> {
+                var p = new PauseTransition(Duration.millis(f.duration()));
+                p.setOnFinished(e -> f.action().run());
+                seq.getChildren().add(p);
+            });
+            seq.setCycleCount(Animation.INDEFINITE);
+        }
+
+        public void liteUp() {
+            this.seq.playFromStart();
+            isLit = true;
+        }
+
+        public void dim() {
+            this.seq.pause();
+            dim.run();
+            isLit = false;
+        }
+
+        public boolean toggle() {
+            if (neon.isLit()) {
+                neon.dim();
+            } else {
+                neon.liteUp();
+            }
+            return isLit();
+        }
+
     }
 
     private void fillTextFlow(TextFlow textFlow, URL sourceUrl) {

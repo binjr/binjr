@@ -39,8 +39,8 @@
         <VBox>
             <children>
                 <AnchorPane minWidth="0.0">
-                    <ImageView fitHeight="264.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                        <Image url="@../images/logo_med.png" />
+                    <ImageView fx:id="logo" fitHeight="264.0" fitWidth="600.0" layoutX="56.0" layoutY="80.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                        <Image url="@../images/neon_logo_med_dim.png" />
                     </ImageView>
                     <VBox layoutX="437.0" layoutY="202.0" AnchorPane.leftAnchor="442.0" AnchorPane.topAnchor="205.0">
                         <Label fx:id="versionLabel" text="version 0.0.0" textFill="WHITE" wrapText="true">
