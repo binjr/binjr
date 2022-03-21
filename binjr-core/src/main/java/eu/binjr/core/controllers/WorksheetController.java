@@ -210,7 +210,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         }
     }
 
-    protected < T extends TimeSeriesInfo<?>> TableRow<T> seriesTableRowFactory(TableView<T> tv) {
+    protected <T extends TimeSeriesInfo<?>> TableRow<T> seriesTableRowFactory(TableView<T> tv) {
         TableRow<T> row = new TableRow<>();
         var selectionIsEmpty = Bindings.createBooleanBinding(
                 () -> tv.getSelectionModel().getSelectedItems().isEmpty(),
@@ -255,12 +255,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         copyAllMenuItem.setOnAction(getBindingManager().registerHandler(e -> {
             Clipboard.getSystemClipboard().setContent(Map.of(
                     DataFormat.PLAIN_TEXT, tv.getSelectionModel().getSelectedItems().stream()
-                            .map(s -> String.join("\t",
-                                    s.getDisplayName(),
-                                    s.getProcessor().getMinValue().toString(),
-                                    s.getProcessor().getMaxValue().toString(),
-                                    s.getProcessor().getAverageValue().toString(),
-                                    s.getBinding().getTreeHierarchy()))
+                            .map(s -> s.asTabSeparatedValues())
                             .collect(Collectors.joining("\n"))));
         }));
 
@@ -352,7 +347,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
                 } else {
                     dropIndex = row.getIndex();
                 }
-               tv.getItems().add(dropIndex, draggedseries);
+                tv.getItems().add(dropIndex, draggedseries);
                 event.setDropCompleted(true);
                 tv.getSelectionModel().clearAndSelect(dropIndex);
                 refresh();

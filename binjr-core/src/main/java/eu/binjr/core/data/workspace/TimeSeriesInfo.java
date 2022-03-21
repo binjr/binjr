@@ -232,6 +232,16 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     }
 
     @XmlTransient
+    public String asTabSeparatedValues() {
+        return String.join("\t",
+                this.getDisplayName(),
+                this.getProcessor().getMinValue().toString(),
+                this.getProcessor().getMaxValue().toString(),
+                this.getProcessor().getAverageValue().toString(),
+                this.getBinding().getTreeHierarchy());
+    }
+
+    @XmlTransient
     @Override
     public Boolean isDirty() {
         return status.isDirty();
@@ -261,4 +271,6 @@ public class TimeSeriesInfo<T> implements Dirtyable {
     public void close() {
         this.status.close();
     }
+
+
 }

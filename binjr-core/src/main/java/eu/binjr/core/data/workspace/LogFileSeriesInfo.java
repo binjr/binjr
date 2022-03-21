@@ -114,6 +114,14 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         return parsingProfile.getProfileId() + "/" + tsInfo.getBinding().getPath();
     }
 
+    @XmlTransient
+    @Override
+    public String asTabSeparatedValues() {
+        return String.join("\t",
+                this.getDisplayName(),
+                this.getParsingProfile().getProfileName(),
+                this.getBinding().getTreeHierarchy());
+    }
 
     @Override
     public String toString() {
