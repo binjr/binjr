@@ -231,7 +231,6 @@ public class TimeSeriesInfo<T> implements Dirtyable {
         return this.processor;
     }
 
-    @XmlTransient
     public String asTabSeparatedValues() {
         return String.join("\t",
                 this.getDisplayName(),

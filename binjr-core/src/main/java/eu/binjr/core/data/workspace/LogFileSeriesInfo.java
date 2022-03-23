@@ -114,7 +114,6 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         return parsingProfile.getProfileId() + "/" + tsInfo.getBinding().getPath();
     }
 
-    @XmlTransient
     @Override
     public String asTabSeparatedValues() {
         return String.join("\t",
