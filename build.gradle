@@ -37,6 +37,7 @@ ext.IS_RELEASE = IS_TAG && !(System.getenv('REPO_TAG_NAME').endsWith('-SNAPSHOT'
 ext.IS_BETA = false
 ext.BINJR_BETA_VERSION = "0.0.0"
 ext.BINJR_VERSION_STEM = "3.7.0"
+ext.LINUX_APP_RELEASE = "1"
 ext.BINJR_VERSION = "${BINJR_VERSION_STEM}${IS_RELEASE ? '' : '-SNAPSHOT'}"
 ext.BINJR_BUILD_NUMBER = System.getenv('BINJR_BUILD_NUMBER') == null ? ("000") : System.getenv('BINJR_BUILD_NUMBER')
 ext.GROUP_ID = 'eu.binjr'
@@ -583,6 +584,7 @@ task jpackageDeb(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--linux-package-name", "binjr",
             "--linux-deb-maintainer", "binjr@free.fr",
             "--linux-app-category", "Utility",
+            "--linux-app-release", LINUX_APP_RELEASE,
             "--linux-menu-group", "Utility",
             "--linux-rpm-license-type", "Apache-2.0",
             "--linux-shortcut",
@@ -625,6 +627,7 @@ task jpackageRpm(type: Exec, dependsOn: [prepareAppBundle, copyJpackageInputLibs
             "--arguments", "--packaging=LINUX_RPM",
             "--linux-package-name", "binjr",
             "--linux-app-category", "Utility",
+            "--linux-app-release", LINUX_APP_RELEASE,
             "--linux-menu-group", "Utility",
             "--linux-rpm-license-type", "Apache-2.0",
             "--linux-shortcut",
@@ -721,23 +724,23 @@ def craftPlatformClassifier() {
     def classifier
     if (IS_MAC) {
         classifier = "mac"
-        if (OS_ARCH == "aarch64"){
+        if (OS_ARCH == "aarch64") {
             classifier += "-aarch64"
         }
     } else if (IS_LINUX) {
         classifier = "linux"
-        if (OS_ARCH == "aarch64"){
+        if (OS_ARCH == "aarch64") {
             classifier += "-aarch64"
-        } else if (OS_ARCH == "aarch32" || OS_ARCH == "arm32"){
+        } else if (OS_ARCH == "aarch32" || OS_ARCH == "arm32") {
             classifier += "-arm32"
         }
     } else if (IS_WINDOWS) {
         classifier = "win"
-        if (OS_ARCH == "x86"){
+        if (OS_ARCH == "x86") {
             classifier += "-x86"
         }
     }
-    if (IS_MONOCLE){
+    if (IS_MONOCLE) {
         classifier += "-monocle"
     }
     return classifier

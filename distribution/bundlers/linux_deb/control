@@ -1,5 +1,5 @@
 Package: binjr
-Version: APPLICATION_VERSION-APPLICATION_RELEASE
+Version: APPLICATION_VERSION_WITH_RELEASE
 Section: Utility
 Maintainer: Frederic Thevenet <binjr@free.fr>
 Priority: optional
