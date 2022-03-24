@@ -1,5 +1,18 @@
+## [binjr v3.7.0](https://github.com/binjr/binjr/releases/tag/v3.7.0)
+Released on Wed, 23 Mar 2022
+
+* _[New]_ It is now possible to set distinct parsing rules for log files retrieved from a single source, and to swap or edit parsing profiles after a file was added to a worksheet.
+* _[New]_ Enhanced snapshot feature to provide a preview of the snapped image and allows users to either save it to a file or to the clipboard.
+* _[New]_ Added contextual menu entries for copying series details from tree view and table view.
+* _[New]_ *binjr* can now be built to run natively on aarch64 architectures on Linux and macOS.
+* _[New]_ Updated Java and JavaFX Runtimes to version 18.
+* _[Fixed]_ Pressing the "delete" key while editing series name removes it from worksheet.
+* _[Fixed]_ Leaves in source treeview are not sorted in alphabetical order.
+* _[Fixed]_ A deadlock can occur if an error is raised while parsing log events.
+* _[Fixed]_ It is not possible to browse a folder for log files if some of its children are not accessible to the current user (e.g. due to lack of permission for instance).
+* 
 ## [binjr v3.6.0](https://github.com/binjr/binjr/releases/tag/v3.6.0)
-Released on Fri, 21 Jan 2021
+Released on Fri, 21 Jan 2022
 
 * _[New]_ Added support for proxy on all HTTP-based data adapters.
 * _[New]_ It is now possible to use regular expressions when filtering the source tree view.
