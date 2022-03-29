@@ -23,7 +23,6 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Line?>
-<?import javafx.scene.text.*?>
 <?import org.controlsfx.control.MaskerPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
@@ -41,7 +40,7 @@
                         <Region styleClass="addSource-icon"/>
                     </graphic>
                     <tooltip>
-                       <Tooltip showDelay="500ms" text="Click to add a new source"/>
+                        <Tooltip showDelay="500ms" text="Click to add a new source"/>
                     </tooltip>
                 </Label>
                 <Accordion fx:id="sourcesPane" minWidth="0.0" mouseTransparent="true" prefHeight="798.0"
@@ -71,7 +70,7 @@
                         <Region prefHeight="32.0" prefWidth="0.0" styleClass="find-icon"/>
                     </graphic>
                     <tooltip>
-                       <Tooltip showDelay="500ms" text="Find next occurrence"/>
+                        <Tooltip showDelay="500ms" text="Find next occurrence"/>
                     </tooltip>
                 </Button>
                 <ToggleButton fx:id="searchCaseSensitiveToggle"
@@ -81,7 +80,7 @@
                         <Region styleClass="match-case-icon"/>
                     </graphic>
                     <tooltip>
-                       <Tooltip showDelay="500ms" text="Toggle case sensitivity"/>
+                        <Tooltip showDelay="500ms" text="Toggle case sensitivity"/>
                     </tooltip>
                 </ToggleButton>
                 <Button fx:id="hideSearchBarButton" alignment="BASELINE_LEFT" graphicTextGap="10.0"
@@ -90,17 +89,21 @@
                         <Region styleClass="cross-icon"/>
                     </graphic>
                     <tooltip>
-                       <Tooltip showDelay="500ms" text="Hide the search bar"/>
+                        <Tooltip showDelay="500ms" text="Hide the search bar"/>
                     </tooltip>
                 </Button>
             </HBox>
         </AnchorPane>
         <StackPane fx:id="worksheetArea" SplitPane.resizableWithParent="true">
-            <TearableTabPane fx:id="tearableTabPane" mouseTransparent="false" prefHeight="200.0" prefWidth="200.0"
-                             side="TOP" tabClosingPolicy="SELECTED_TAB" AnchorPane.bottomAnchor="0.0"
-                             AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-                <tabs>
-                </tabs>
+            <TearableTabPane fx:id="tearableTabPane"
+                             tearable="true"
+                             reorderable="true"
+                             prefHeight="200.0"
+                             prefWidth="200.0"
+                             AnchorPane.bottomAnchor="0.0"
+                             AnchorPane.leftAnchor="0.0"
+                             AnchorPane.rightAnchor="0.0"
+                             AnchorPane.topAnchor="0.0">
             </TearableTabPane>
             <Label fx:id="addWorksheetLabel" alignment="CENTER" onMouseClicked="#handleAddNewWorksheet"
                    onDragDropped="#handleDragDroppedOnWorksheetArea"
@@ -112,7 +115,7 @@
                             onDragEntered="#handleOnDragEnteredNewWorksheet"/>
                 </graphic>
                 <tooltip>
-                   <Tooltip showDelay="500ms" text="Click to add a new worksheet"/>
+                    <Tooltip showDelay="500ms" text="Click to add a new worksheet"/>
                 </tooltip>
             </Label>
             <StackPane fx:id="newWorksheetDropTarget" styleClass="chart-viewport-parent"
@@ -151,7 +154,7 @@
                 prefHeight="40.0" styleClass="command-bar-menu-button" AnchorPane.leftAnchor="0"
                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <tooltip>
-               <Tooltip showDelay="500ms" text="Expand"/>
+                <Tooltip showDelay="500ms" text="Expand"/>
             </tooltip>
             <graphic>
                 <HBox styleClass="command-bar-menu-graphic">
@@ -168,7 +171,7 @@
                     text="Workspaces" AnchorPane.leftAnchor="0" AnchorPane.rightAnchor="0.0"
                     AnchorPane.topAnchor="45.0">
             <tooltip>
-               <Tooltip showDelay="500ms" text="Workspaces"/>
+                <Tooltip showDelay="500ms" text="Workspaces"/>
             </tooltip>
             <graphic>
                 <HBox styleClass="icon-container">
@@ -238,7 +241,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-               <Tooltip showDelay="500ms" text="Sources"/>
+                <Tooltip showDelay="500ms" text="Sources"/>
             </tooltip>
             <items>
                 <Menu fx:id="addSourceMenu" mnemonicParsing="false" text="New Source...">
@@ -279,17 +282,18 @@
                 </HBox>
             </graphic>
             <tooltip>
-               <Tooltip showDelay="500ms" text="Worksheets"/>
+                <Tooltip showDelay="500ms" text="Worksheets"/>
             </tooltip>
             <items>
-                <MenuItem  mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
+                <MenuItem mnemonicParsing="false" onAction="#handleAddNewWorksheet" text="New Worksheet">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="addWorksheet-icon"/>
                         </HBox>
                     </graphic>
                 </MenuItem>
-                <MenuItem fx:id="restoreClosedWorksheetMenu" mnemonicParsing="false" onAction="#handleRestoreClosedWorksheet" text="Restore Closed Worksheet">
+                <MenuItem fx:id="restoreClosedWorksheetMenu" mnemonicParsing="false"
+                          onAction="#handleRestoreClosedWorksheet" text="Restore Closed Worksheet">
                     <graphic>
                         <HBox styleClass="icon-container">
                             <Region styleClass="undo-icon"/>
@@ -308,7 +312,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-               <Tooltip showDelay="500ms" text="Help"/>
+                <Tooltip showDelay="500ms" text="Help"/>
             </tooltip>
             <items>
                 <MenuItem accelerator="F1" mnemonicParsing="false" onAction="#handleHelpAction" text="Help">
@@ -344,7 +348,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-               <Tooltip showDelay="500ms" text="Settings"/>
+                <Tooltip showDelay="500ms" text="Settings"/>
             </tooltip>
         </Button>
         <Button contentDisplay="GRAPHIC_ONLY" mnemonicParsing="false" onAction="#handleQuitAction" prefHeight="40.0"
@@ -356,7 +360,7 @@
                 </HBox>
             </graphic>
             <tooltip>
-               <Tooltip showDelay="500ms" text="Exit"/>
+                <Tooltip showDelay="500ms" text="Exit"/>
             </tooltip>
         </Button>
     </DrawerPane>

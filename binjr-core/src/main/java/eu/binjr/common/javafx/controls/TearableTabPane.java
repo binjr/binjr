@@ -28,9 +28,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
+import javafx.css.PseudoClass;
+import javafx.css.Styleable;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
@@ -51,16 +54,16 @@ import java.awt.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
-import java.util.stream.Collectors;
+
 
 /**
  * A TabPane container with a button to add a new tab that also supports tearing away tabs into a separate window.
  * <p>It relies on the {@link TabPaneManager} class to keep track of all tabs spread over many windows and {@link TabPane} instances</p>
- * <p><b>TODO: Reordering of the tabs is currently not implemented.</b></p>
  *
  * @author Frederic Thevenet
  */
 public class TearableTabPane extends TabPane implements AutoCloseable {
+    private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
     private static final Logger logger = Logger.create(TearableTabPane.class);
     private boolean tearable;
     private boolean reorderable;
@@ -79,7 +82,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
      * Initializes a new instance of the {@link TearableTabPane} class.
      */
     public TearableTabPane() {
-        this(new TabPaneManager(), false, false,StageStyle.DECORATED, (Tab[]) null);
+        this(new TabPaneManager(), false, false, StageStyle.DECORATED, (Tab[]) null);
     }
 
     /**
@@ -100,16 +103,65 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         bindingManager.attachListener(this.getSelectionModel().selectedItemProperty(), (ChangeListener<Tab>)
                 (observable, oldValue, newValue) -> this.manager.setSelectedTab(newValue)
         );
+
+
         bindingManager.attachListener(this.getTabs(), (ListChangeListener<Tab>) c -> {
             while (c.next()) {
                 if (c.wasAdded()) {
-                    for (Tab t : c.getAddedSubList()) {
-                        this.tearableTabMap.put(t, new TabState(true));
-                        this.manager.addTab(t, this);
+                    for (Tab newTab : c.getAddedSubList()) {
+                        this.tearableTabMap.put(newTab, new TabState(true));
+                        this.manager.addTab(newTab, this);
+                        if (newTab != null) {
+                            Node target = newTab.getGraphic();
+                            if (target.getOnDragEntered() == null) {
+                                target.setOnDragEntered(bindingManager.registerHandler(event ->
+                                        findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true))));
+                            }
+                            if (target.getOnDragExited() == null) {
+                                target.setOnDragExited(bindingManager.registerHandler(event ->
+                                        findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false))));
+                            }
+                            if (target.getOnDragDropped() == null) {
+                                target.setOnDragDropped(bindingManager.registerHandler(event -> {
+                                    Dragboard db = event.getDragboard();
+                                    if (db.hasContent(manager.getDragAndDropFormat())) {
+                                        logger.trace(() -> "setOnDragDropped fired");
+                                        if (manager.completeDragAndDrop()) {
+                                            String id = (String) db.getContent(manager.getDragAndDropFormat());
+                                            Tab draggedTab = manager.getTab(id);
+                                            if (draggedTab != null) {
+                                                TearableTabPane draggedTabPane = (TearableTabPane) manager.getTabPane(draggedTab);
+                                                if (draggedTabPane.isReorderable()) {
+                                                    manager.setMovingTab(true);
+                                                    try {
+                                                        var draggedIndex = draggedTabPane.getTabs().indexOf(draggedTab);
+                                                        var droppedTabPane = manager.getTabPane(newTab);
+                                                        var dropIndex = droppedTabPane.getTabs().indexOf(newTab);
+                                                        if (!newTab.equals(draggedTab)) {
+                                                            draggedTabPane.getTabs().remove(draggedIndex);
+                                                            droppedTabPane.getTabs().add(dropIndex, draggedTab);
+                                                            droppedTabPane.getSelectionModel().clearAndSelect(dropIndex);
+                                                        }
+                                                    } finally {
+                                                        manager.setMovingTab(false);
+                                                    }
+                                                } else {
+                                                    logger.debug(() -> "Tabs on this pane cannot be reordered");
+                                                }
+                                            } else {
+                                                logger.debug(() -> "Failed to retrieve targetTab with id " + (id != null ? id : "null"));
+                                            }
+                                        }
+                                        event.consume();
+                                    }
+                                }));
+                            }
+                        }
                     }
                 }
                 if (c.wasRemoved()) {
                     for (Tab t : c.getRemoved()) {
+                     //TODO remove drag and drop handlers
                         this.tearableTabMap.remove(t);
                         this.manager.removeTab(t);
                     }
@@ -181,7 +233,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     Tab t = manager.getTab(id);
                     if (t != null) {
                         TabPane p = manager.getTabPane(t);
-                        if (reorderable || !this.equals(p)) {
+                        if (!this.equals(p)) {
                             manager.setMovingTab(true);
                             try {
                                 p.getTabs().remove(t);
@@ -191,8 +243,6 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                             } finally {
                                 manager.setMovingTab(false);
                             }
-                        } else {
-                            logger.debug(() -> "Tabs on this pane cannot be reordered");
                         }
                     } else {
                         logger.debug(() -> "Failed to retrieve tab with id " + (id != null ? id : "null"));
@@ -220,9 +270,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     }
                 });
 
-        this.getTabs().addListener((InvalidationListener)  observable -> {
+        bindingManager.attachListener(this.getTabs(), ((InvalidationListener) observable -> {
             empty.setValue(this.getTabs().size() == 0);
-        });
+        }));
     }
 
 
@@ -444,8 +494,20 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         }
     }
 
+    private Optional<Node> findTabHeader(Tab t) {
+        Styleable styleable = t.getGraphic();
+        while (styleable != null && !styleable.getStyleClass().contains("tab")) {
+            styleable = styleable.getStyleableParent();
+        }
+        if (styleable instanceof Node node) {
+            return Optional.of(node);
+        } else {
+            return Optional.empty();
+        }
+    }
+
     private void tearOffTab(Tab tab) {
-        TearableTabPane detachedTabPane = new TearableTabPane(this.manager, false, true, this.getDetachedStageStyle());
+        TearableTabPane detachedTabPane = new TearableTabPane(this.manager, isReorderable(), true, this.getDetachedStageStyle());
         detachedTabPane.setId("tearableTabPane");
         detachedTabPane.setOnOpenNewWindow(this.onOpenNewWindow);
         detachedTabPane.setNewTabFactory(this.getNewTabFactory());
@@ -516,20 +578,7 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
     /**
      * Represents the state of a single tab
      */
-    private class TabState {
-        private boolean attached;
-
-        public boolean isAttached() {
-            return attached;
-        }
-
-        public void setAttached(boolean attached) {
-            this.attached = attached;
-        }
-
-        public TabState(boolean attached) {
-            this.attached = attached;
-        }
+    private record TabState(boolean attached) {
     }
 
     /**
@@ -617,10 +666,9 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
             tabToPaneMap.values()
                     .stream()
                     .distinct()
-                    .collect(Collectors.toList())
+                    .toList()
                     .forEach(p -> p.getTabs().clear());
         }
-
 
 
     }

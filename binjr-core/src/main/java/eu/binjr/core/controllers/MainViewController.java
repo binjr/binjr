@@ -263,7 +263,6 @@ public class MainViewController implements Initializable {
         tearableTabPane.setDetachedStageStyle(AppEnvironment.getInstance().getWindowsStyle());
         tearableTabPane.setNewTabFactory(this::worksheetTabFactory);
         tearableTabPane.getGlobalTabs().addListener((ListChangeListener<? super Tab>) this::onWorksheetTabChanged);
-        tearableTabPane.setTearable(true);
         tearableTabPane.setOnOpenNewWindow(event -> {
             Stage stage = (Stage) event.getSource();
             stage.setTitle(AppEnvironment.APP_NAME);

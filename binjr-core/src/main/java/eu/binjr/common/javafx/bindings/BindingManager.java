@@ -293,6 +293,11 @@ public class BindingManager implements AutoCloseable {
         return new WeakEventHandler<T>(handler);
     }
 
+    public <T extends Event> void unregisterHandler(EventHandler<T> handler) {
+        // Remove strong ref to handler, so it can be collected.
+        registeredHandlers.remove(handler);
+    }
+
     private <T, U> void register(T observable, U listener, Map<T, List<U>> map, BiConsumer<T, U> attachAction) {
         Objects.requireNonNull(observable, "observable parameter cannot be null");
         Objects.requireNonNull(listener, "listener parameter cannot be null");
