@@ -19,7 +19,6 @@ package eu.binjr.common.javafx.controls;
 import com.google.gson.Gson;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
-import eu.binjr.core.dialogs.Dialogs;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.PasswordField;
@@ -80,7 +79,7 @@ public class ExtendedPropertyEditorFactory extends DefaultPropertyEditorFactory 
                 } catch (Exception e) {
                     logger.debug("Could not initialize working dir for DirectoryChooser", e);
                 }
-                File folder = fileChooser.showDialog(Dialogs.getStage(node));
+                File folder = fileChooser.showDialog(NodeUtils.getStage(node));
                 if (folder != null) {
                     return Optional.of(folder.toPath());
                 }

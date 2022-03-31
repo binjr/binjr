@@ -1,5 +1,5 @@
 /*
- *    Copyright 2019 Frederic Thevenet
+ *    Copyright 2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -17,14 +17,12 @@
 package eu.binjr.common.javafx.controls;
 
 import javafx.scene.Node;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
-import javafx.scene.transform.Transform;
 
+@Deprecated
 public final class SnapshotUtils {
+    @Deprecated
     public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
-        SnapshotParameters spa = new SnapshotParameters();
-        spa.setTransform(Transform.scale(scaleX, scaleY));
-        return node.snapshot(spa, null);
+        return NodeUtils.scaledSnapshot(node, scaleX, scaleY);
     }
 }

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -83,7 +84,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
      */
     public DataAdapterDialog(Node owner, Mode mode, String mostRecentListName, boolean showTimezone) {
         if (owner != null) {
-            this.initOwner(Dialogs.getStage(owner));
+            this.initOwner(NodeUtils.getStage(owner));
         }
         this.setTitle("Source");
 
@@ -207,7 +208,7 @@ public abstract class DataAdapterDialog<T> extends Dialog<Collection<DataAdapter
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Open");
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        return fileChooser.showOpenDialog(Dialogs.getStage(owner));
+        return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
     }
 
     private void updateUriAutoCompletionBinding() {

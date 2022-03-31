@@ -19,6 +19,7 @@ package eu.binjr.core.update;
 import eu.binjr.common.github.GithubApiHelper;
 import eu.binjr.common.github.GithubRelease;
 import eu.binjr.common.io.ProxyConfiguration;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.version.Version;
 import eu.binjr.core.data.async.AsyncTaskManager;
@@ -299,7 +300,7 @@ public class UpdateManager {
     }
 
     private void restartApp(Node root) {
-        var stage = Dialogs.getStage(root);
+        var stage = NodeUtils.getStage(root);
         restartRequested = true;
         if (stage != null) {
             var handler = stage.getOnCloseRequest();

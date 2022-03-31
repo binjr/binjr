@@ -334,7 +334,7 @@ public class MainViewController implements Initializable {
 
     protected void runAfterInitialize() {
         UserPreferences userPrefs = UserPreferences.getInstance();
-        Stage stage = Dialogs.getStage(root);
+        Stage stage = NodeUtils.getStage(root);
         stage.titleProperty().bind(Bindings.createStringBinding(
                 () -> String.format("%s%s - %s",
                         (workspace.isDirty() ? "*" : ""),
@@ -431,7 +431,7 @@ public class MainViewController implements Initializable {
         dialog.initStyle(StageStyle.DECORATED);
         dialog.setTitle("About " + AppEnvironment.APP_NAME);
         dialog.setDialogPane(FXMLLoader.load(getResourceUrl("/eu/binjr/views/AboutBoxView.fxml")));
-        dialog.initOwner(Dialogs.getStage(root));
+        dialog.initOwner(NodeUtils.getStage(root));
         dialog.getDialogPane().getStylesheets().add(getResourceUrl(StageAppearanceManager.getFontFamilyCssPath()).toExternalForm());
         dialog.showAndWait();
     }
@@ -719,7 +719,7 @@ public class MainViewController implements Initializable {
         }
         // Make sure that main stage is visible before invoking modal dialog, else modal dialog may appear
         // behind main stage when made visible again.
-        Dialogs.getStage(root).setIconified(false);
+        NodeUtils.getStage(root).setIconified(false);
         ButtonType res = Dialogs.confirmSaveDialog(root,
                 (workspace.hasPath() ? workspace.getPath().getFileName().toString() : "Untitled"));
         if (res == ButtonType.CANCEL) {
@@ -753,7 +753,7 @@ public class MainViewController implements Initializable {
         fileChooser.setTitle("Open Workspace");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentWorkspaces).ifPresent(fileChooser::setInitialDirectory);
-        File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (selectedFile != null) {
             loadWorkspace(selectedFile);
         }
@@ -844,7 +844,7 @@ public class MainViewController implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr workspaces", BINJR_FILE_PATTERN));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentWorkspaces).ifPresent(fileChooser::setInitialDirectory);
         fileChooser.setInitialFileName(BINJR_FILE_PATTERN[0]);
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        File selectedFile = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (selectedFile != null) {
             try {
                 workspace.save(selectedFile);
@@ -1244,7 +1244,7 @@ public class MainViewController implements Initializable {
         label.getStyleClass().add("tooltip");
         // The label must be added to a scene so that CSS and layout are applied.
         StageAppearanceManager.getInstance().applyUiTheme(new Scene(label, Color.RED));
-        return SnapshotUtils.scaledSnapshot(label, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root));
+        return NodeUtils.scaledSnapshot(label);
     }
 
     private Optional<TreeView<SourceBinding>> buildTreeViewForTarget(DataAdapter<?> dp) {
@@ -1568,7 +1568,7 @@ public class MainViewController implements Initializable {
     }
 
     private void saveWindowPositionAndQuit() {
-        Stage stage = Dialogs.getStage(root);
+        Stage stage = NodeUtils.getStage(root);
         if (stage != null) {
             UserPreferences.getInstance().windowLastPosition.set(
                     new Rectangle2D(

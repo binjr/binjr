@@ -16,6 +16,7 @@
 
 package eu.binjr.core.controllers;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.ObfuscatedString;
@@ -394,7 +395,7 @@ public class PreferenceDialogController implements Initializable {
         } catch (Exception e) {
             logger.debug("Could not initialize working dir for DirectoryChooser", e);
         }
-        File newPluginLocation = fileChooser.showDialog(Dialogs.getStage(root));
+        File newPluginLocation = fileChooser.showDialog(NodeUtils.getStage(root));
         if (newPluginLocation != null) {
             pluginLocTextfield.setText(newPluginLocation.getPath());
         }
@@ -406,7 +407,7 @@ public class PreferenceDialogController implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr settings", "*.xml"));
         fileChooser.setInitialFileName("binjr_settings.xml");
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        var exportPath = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (exportPath != null) {
             try {
                 Files.deleteIfExists(exportPath.toPath());
@@ -424,7 +425,7 @@ public class PreferenceDialogController implements Initializable {
         fileChooser.setTitle("Import Settings");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr settings", "*.xml"));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
                 UserPreferences.getInstance().importFromFile(importPath.toPath());

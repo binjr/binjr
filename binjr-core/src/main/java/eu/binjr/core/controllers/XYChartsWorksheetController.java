@@ -398,7 +398,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             toolBar.visibleProperty().bind(yAxis.getSelectionMarker().hoverProperty());
             yAxis.getSelectionMarker().setOnDragDetected(getBindingManager().registerHandler(event -> {
                 Dragboard db = viewPort.startDragAndDrop(TransferMode.MOVE);
-                db.setDragView(SnapshotUtils.scaledSnapshot(viewPort, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
+                db.setDragView(NodeUtils.scaledSnapshot(viewPort));
                 ClipboardContent cc = new ClipboardContent();
                 cc.put(VIEWPORT_DRAG_FORMAT, currentIndex);
                 db.setContent(cc);
@@ -1506,12 +1506,12 @@ public class XYChartsWorksheetController extends WorksheetController {
             navigationToolbar.setManaged(false);
             navigationToolbar.setVisible(false);
             var scaleX = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
-                    Dialogs.getOutputScaleX(root) :
+                    NodeUtils.getOutputScaleX(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
             var scaleY = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
-                    Dialogs.getOutputScaleY(root) :
+                    NodeUtils.getOutputScaleY(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
-            return SnapshotUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
+            return NodeUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return null;

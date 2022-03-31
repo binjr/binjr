@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.rrd4j.adapters;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.core.data.adapters.DataAdapter;
@@ -61,7 +62,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<Collection<DataAdapter>> {
      */
     public Rrd4jFileAdapterDialog(Node owner) {
         if (owner != null) {
-            this.initOwner(Dialogs.getStage(owner));
+            this.initOwner(NodeUtils.getStage(owner));
         }
         this.setTitle("Source");
         Button browseButton = new Button("Browse");
@@ -124,7 +125,7 @@ public class Rrd4jFileAdapterDialog extends Dialog<Collection<DataAdapter>> {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("RRD XML dumps", "*.xml"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
             Dialogs.getInitialDir(mostRecentRrdFiles).ifPresent(fileChooser::setInitialDirectory);
-            List<File> rrdFiles = fileChooser.showOpenMultipleDialog(Dialogs.getStage(owner));
+            List<File> rrdFiles = fileChooser.showOpenMultipleDialog(NodeUtils.getStage(owner));
             if (rrdFiles != null) {
                 pathsField.setText(rrdFiles.stream().map(File::getPath).collect(Collectors.joining(";")));
             }

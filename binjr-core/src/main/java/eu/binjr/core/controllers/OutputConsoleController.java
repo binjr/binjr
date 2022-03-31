@@ -19,6 +19,7 @@ package eu.binjr.core.controllers;
 import eu.binjr.common.diagnostic.DiagnosticCommand;
 import eu.binjr.common.diagnostic.DiagnosticException;
 import eu.binjr.common.javafx.controls.ExtendedPropertyEditorFactory;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
 import eu.binjr.common.javafx.richtext.HighlightPatternException;
@@ -293,7 +294,7 @@ public class OutputConsoleController implements Initializable {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
             Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
             fileChooser.setInitialFileName("binjr_console_output.txt");
-            File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(textOutput));
+            File selectedFile = fileChooser.showSaveDialog(NodeUtils.getStage(textOutput));
             if (selectedFile != null) {
                 try (Writer writer = new BufferedWriter(new FileWriter(selectedFile))) {
                     writer.write(textOutput.getText());
@@ -395,7 +396,7 @@ public class OutputConsoleController implements Initializable {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Import User History");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr user history", "*.xml"));
-        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
                 UserHistory.getInstance().importFromFile(importPath.toPath());
@@ -411,7 +412,7 @@ public class OutputConsoleController implements Initializable {
         fileChooser.setTitle("Export User History");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("binjr user history", "*.xml"));
         fileChooser.setInitialFileName("binjr_history.xml");
-        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        var exportPath = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (exportPath != null) {
             try {
                 Files.deleteIfExists(exportPath.toPath());
@@ -436,7 +437,7 @@ public class OutputConsoleController implements Initializable {
         fileChooser.setTitle("Dump Heap");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("heap dump", "*.hprof"));
         fileChooser.setInitialFileName(String.format("binjr_jvm_pid%d.hprof", ProcessHandle.current().pid()));
-        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        var exportPath = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (exportPath != null) {
             try {
                 Files.deleteIfExists(exportPath.toPath());

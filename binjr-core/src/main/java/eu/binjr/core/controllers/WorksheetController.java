@@ -17,7 +17,7 @@
 package eu.binjr.core.controllers;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
-import eu.binjr.common.javafx.controls.SnapshotUtils;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.controls.ToolButtonBuilder;
 import eu.binjr.common.logging.Logger;
@@ -105,7 +105,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Image Files", "*.png"));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
         fileChooser.setInitialFileName(String.format("binjr_snapshot_%s.png", getWorksheet().getName()));
-        File selectedFile = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        File selectedFile = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (selectedFile != null) {
             try {
                 if (selectedFile.getParent() != null) {
@@ -320,7 +320,7 @@ public abstract class WorksheetController implements Initializable, Closeable {
             if (!row.isEmpty()) {
                 Integer index = row.getIndex();
                 Dragboard db = row.startDragAndDrop(TransferMode.MOVE);
-                db.setDragView(SnapshotUtils.scaledSnapshot(row, Dialogs.getOutputScaleX(root), Dialogs.getOutputScaleY(root)));
+                db.setDragView(NodeUtils.scaledSnapshot(row));
                 ClipboardContent cc = new ClipboardContent();
                 cc.put(SERIALIZED_MIME_TYPE, index);
                 db.setContent(cc);

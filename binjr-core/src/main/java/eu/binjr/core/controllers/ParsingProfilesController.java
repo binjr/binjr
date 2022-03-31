@@ -16,6 +16,7 @@
 package eu.binjr.core.controllers;
 
 import com.google.gson.Gson;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.javafx.controls.TableViewUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.indexes.parser.EventParser;
@@ -149,7 +150,7 @@ public class ParsingProfilesController implements Initializable {
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Parsing Profiles", "*.json"));
         fileChooser.setInitialFileName("parsing_profiles.json");
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        var exportPath = fileChooser.showSaveDialog(Dialogs.getStage(root));
+        var exportPath = fileChooser.showSaveDialog(NodeUtils.getStage(root));
         if (exportPath != null) {
             try {
                 Files.deleteIfExists(exportPath.toPath());
@@ -172,7 +173,7 @@ public class ParsingProfilesController implements Initializable {
         fileChooser.setTitle("Import Profiles");
         fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Parsing Profiles", "*.json"));
         Dialogs.getInitialDir(UserHistory.getInstance().mostRecentSaveFolders).ifPresent(fileChooser::setInitialDirectory);
-        File importPath = fileChooser.showOpenDialog(Dialogs.getStage(root));
+        File importPath = fileChooser.showOpenDialog(NodeUtils.getStage(root));
         if (importPath != null) {
             try {
                 profileComboBox.getItems().addAll(gson.fromJson(Files.readString(importPath.toPath()), CustomParsingProfile[].class));
@@ -252,7 +253,7 @@ public class ParsingProfilesController implements Initializable {
 
     @FXML
     private void handleOnCancel(ActionEvent actionEvent) {
-        Dialogs.getStage(root).close();
+        NodeUtils.getStage(root).close();
     }
 
     /**

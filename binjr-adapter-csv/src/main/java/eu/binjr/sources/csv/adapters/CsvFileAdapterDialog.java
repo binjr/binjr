@@ -16,13 +16,12 @@
 
 package eu.binjr.sources.csv.adapters;
 
-import eu.binjr.common.preferences.MostRecentlyUsedList;
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
-import eu.binjr.core.preferences.UserHistory;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
@@ -34,7 +33,6 @@ import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
 import java.io.File;
-import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -83,7 +81,7 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Comma-separated values files", "*.csv"));
             fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
             Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
-            return fileChooser.showOpenDialog(Dialogs.getStage(owner));
+            return fileChooser.showOpenDialog(NodeUtils.getStage(owner));
         } catch (Exception e) {
             Dialogs.notifyException("Error while displaying file chooser: " + e.getMessage(), e, owner);
         }

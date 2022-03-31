@@ -16,6 +16,7 @@
 
 package eu.binjr.sources.logs.adapters;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.adapters.DataAdapterFactory;
@@ -121,7 +122,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Zip archive", "*.zip"));
                 fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
                 Dialogs.getInitialDir(getMostRecentList()).ifPresent(fileChooser::setInitialDirectory);
-                File selectedFile = fileChooser.showOpenDialog(Dialogs.getStage(owner));
+                File selectedFile = fileChooser.showOpenDialog(NodeUtils.getStage(owner));
                 if (selectedFile != null) {
                     setSourceUri(selectedFile.getPath());
                 }
@@ -132,7 +133,7 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
                 DirectoryChooser dirChooser = new DirectoryChooser();
                 dirChooser.setTitle("Open Folder");
                 Dialogs.getInitialDir(getMostRecentList()).ifPresent(dirChooser::setInitialDirectory);
-                File selectedFile = dirChooser.showDialog(Dialogs.getStage(owner));
+                File selectedFile = dirChooser.showDialog(NodeUtils.getStage(owner));
                 if (selectedFile != null) {
                     setSourceUri(selectedFile.getPath());
                 }

@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.ParsingProfilesController;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
@@ -50,7 +51,7 @@ public class ParsingProfileDialog extends Dialog<ParsingProfile> {
         this.initOwner(owner);
         this.initStyle(StageStyle.UTILITY);
         this.initModality(Modality.APPLICATION_MODAL);
-        StageAppearanceManager.getInstance().register(Dialogs.getStage(root),
+        StageAppearanceManager.getInstance().register(NodeUtils.getStage(root),
                 StageAppearanceManager.AppearanceOptions.SET_ICON,
                 StageAppearanceManager.AppearanceOptions.SET_THEME);
 

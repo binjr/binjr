@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.AppEnvironment;
@@ -116,7 +117,7 @@ public class AboutBoxController implements Initializable {
 
         aboutRoot.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ESCAPE) {
-                Dialogs.getStage(aboutRoot).close();
+                NodeUtils.getStage(aboutRoot).close();
             }
             if (event.getCode() == KeyCode.L) {
                 neon.toggle();
@@ -261,7 +262,7 @@ public class AboutBoxController implements Initializable {
     }
 
     private void overrideCss() {
-        Stage aboutStage = Dialogs.getStage(aboutRoot);
+        Stage aboutStage = NodeUtils.getStage(aboutRoot);
         if (aboutStage == null || aboutStage.getScene() == null) {
             logger.warn("Cannot set css: About dialog scene is not ready.");
             return;

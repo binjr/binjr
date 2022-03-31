@@ -16,6 +16,7 @@
 
 package eu.binjr.core.dialogs;
 
+import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.common.preferences.MostRecentlyUsedList;
 import eu.binjr.common.preferences.ObservablePreference;
@@ -36,8 +37,7 @@ import org.controlsfx.control.Notifications;
 import org.controlsfx.control.action.Action;
 import org.controlsfx.dialog.ExceptionDialog;
 
-
-import java.awt.Desktop;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -223,25 +223,24 @@ public class Dialogs {
 
     /**
      * Returns the {@link Stage} instance to which the provided {@link Node} is attached
+     * (Deprecated: Use NodeUtils.getStage instead)
      *
      * @param node the node to get the stage for.
      * @return the {@link Stage} instance to which the provided {@link Node} is attached
      */
+    @Deprecated
     public static Stage getStage(Node node) {
-        if (node != null && node.getScene() != null) {
-            return (Stage) node.getScene().getWindow();
-        }
-        return null;
+        return NodeUtils.getStage(node);
     }
 
+    @Deprecated
     public static double getOutputScaleX(Node node) {
-        var stage = Dialogs.getStage(node);
-        return stage == null ? Screen.getPrimary().getOutputScaleX() : stage.getOutputScaleX();
+       return NodeUtils.getOutputScaleX(node);
     }
 
+    @Deprecated
     public static double getOutputScaleY(Node node) {
-        var stage = Dialogs.getStage(node);
-        return stage == null ? Screen.getPrimary().getOutputScaleY() : stage.getOutputScaleY();
+        return NodeUtils.getOutputScaleY(node);
     }
 
     /**
@@ -346,7 +345,7 @@ public class Dialogs {
                                            ObservablePreference<Boolean> doNotAskAgain,
                                            boolean isCancelable) {
         Dialog<ButtonType> dlg = new Dialog<>();
-        dlg.initOwner(Dialogs.getStage(node));
+        dlg.initOwner(NodeUtils.getStage(node));
         setAlwaysOnTop(dlg);
         dlg.setTitle(AppEnvironment.APP_NAME);
         // Workaround JDK-8179073 (ref: https://bugs.openjdk.java.net/browse/JDK-8179073)
@@ -397,7 +396,7 @@ public class Dialogs {
         if (dialog == null) {
             throw new IllegalArgumentException("Dialog cannot be null");
         }
-        Stage dlgStage = Dialogs.getStage(dialog.getDialogPane());
+        Stage dlgStage = NodeUtils.getStage(dialog.getDialogPane());
         if (dlgStage != null) {
             dlgStage.setAlwaysOnTop(true);
         } else {

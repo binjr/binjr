@@ -18,7 +18,6 @@ package eu.binjr.common.javafx.controls;
 
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
-import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.dialogs.ParsingProfileDialog;
 import javafx.scene.control.*;
 
@@ -43,7 +42,7 @@ public class ParsingProfileCell<T> extends TableCell<T, ParsingProfile> {
                 .setFocusTraversable(false)
                 .setAction(event -> {
                    // getTableView().getSelectionModel().select(getTableRow().getIndex());
-                    var dlg = new ParsingProfileDialog(Dialogs.getStage(getTableView()), current);
+                    var dlg = new ParsingProfileDialog(NodeUtils.getStage(getTableView()), current);
                     dlg.showAndWait().ifPresent(selection -> {
                         getTableView().edit(getTableRow().getIndex(), column);
                         commitEdit(selection);
