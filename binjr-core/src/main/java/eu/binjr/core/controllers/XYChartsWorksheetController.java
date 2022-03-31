@@ -355,7 +355,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
 
             viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
-                if (closed.get()) {
+                if (closed.get() || !isCompatibleDataFormat(event.getDragboard())) {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
@@ -368,7 +368,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 }
             }));
             viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
-                if (closed.get()) {
+                if (closed.get() || !isCompatibleDataFormat(event.getDragboard())) {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
@@ -495,6 +495,11 @@ public class XYChartsWorksheetController extends WorksheetController {
         if (viewPorts.size() > 0) {
             getBindingManager().attachListener(worksheet.selectedChartProperty(), (ChangeListener<Integer>) (observable, oldValue, newValue) -> setSelectedChart(newValue));
         }
+    }
+
+    private boolean isCompatibleDataFormat(Dragboard dragboard) {
+        return dragboard.hasContent(VIEWPORT_DRAG_FORMAT) ||
+                dragboard.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE));
     }
 
     private void setSelectedChart(int selectedChartIndex) {

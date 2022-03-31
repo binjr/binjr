@@ -35,11 +35,9 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.image.WritableImage;
 import javafx.scene.input.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
@@ -111,57 +109,60 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
                     for (Tab newTab : c.getAddedSubList()) {
                         this.tearableTabMap.put(newTab, new TabState(true));
                         this.manager.addTab(newTab, this);
-                        if (newTab != null) {
-                            Node target = newTab.getGraphic();
-                            if (target.getOnDragEntered() == null) {
-                                target.setOnDragEntered(bindingManager.registerHandler(event ->
-                                        findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true))));
-                            }
-                            if (target.getOnDragExited() == null) {
-                                target.setOnDragExited(bindingManager.registerHandler(event ->
-                                        findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false))));
-                            }
-                            if (target.getOnDragDropped() == null) {
-                                target.setOnDragDropped(bindingManager.registerHandler(event -> {
-                                    Dragboard db = event.getDragboard();
-                                    if (db.hasContent(manager.getDragAndDropFormat())) {
-                                        logger.trace(() -> "setOnDragDropped fired");
-                                        if (manager.completeDragAndDrop()) {
-                                            String id = (String) db.getContent(manager.getDragAndDropFormat());
-                                            Tab draggedTab = manager.getTab(id);
-                                            if (draggedTab != null) {
-                                                TearableTabPane draggedTabPane = (TearableTabPane) manager.getTabPane(draggedTab);
-                                                if (draggedTabPane.isReorderable()) {
-                                                    manager.setMovingTab(true);
-                                                    try {
-                                                        var draggedIndex = draggedTabPane.getTabs().indexOf(draggedTab);
-                                                        var droppedTabPane = manager.getTabPane(newTab);
-                                                        var dropIndex = droppedTabPane.getTabs().indexOf(newTab);
-                                                        if (!newTab.equals(draggedTab)) {
-                                                            draggedTabPane.getTabs().remove(draggedIndex);
-                                                            droppedTabPane.getTabs().add(dropIndex, draggedTab);
-                                                            droppedTabPane.getSelectionModel().clearAndSelect(dropIndex);
-                                                        }
-                                                    } finally {
-                                                        manager.setMovingTab(false);
+                        Node target = newTab.getGraphic();
+                        if (target.getOnDragEntered() == null) {
+                            target.setOnDragEntered(bindingManager.registerHandler(event -> {
+                                if (event.getDragboard().hasContent(manager.getDragAndDropFormat())) {
+                                    findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true));
+                                }
+                            }));
+                        }
+                        if (target.getOnDragExited() == null) {
+                            target.setOnDragExited(bindingManager.registerHandler(event -> {
+                                if (event.getDragboard().hasContent(manager.getDragAndDropFormat())) {
+                                    findTabHeader(newTab).ifPresent(node -> node.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false));
+                                }
+                            }));
+                        }
+                        if (target.getOnDragDropped() == null) {
+                            target.setOnDragDropped(bindingManager.registerHandler(event -> {
+                                Dragboard db = event.getDragboard();
+                                if (db.hasContent(manager.getDragAndDropFormat())) {
+                                    logger.trace(() -> "setOnDragDropped fired");
+                                    if (manager.completeDragAndDrop()) {
+                                        String id = (String) db.getContent(manager.getDragAndDropFormat());
+                                        Tab draggedTab = manager.getTab(id);
+                                        if (draggedTab != null) {
+                                            TearableTabPane draggedTabPane = (TearableTabPane) manager.getTabPane(draggedTab);
+                                            if (draggedTabPane.isReorderable()) {
+                                                manager.setMovingTab(true);
+                                                try {
+                                                    var draggedIndex = draggedTabPane.getTabs().indexOf(draggedTab);
+                                                    var droppedTabPane = manager.getTabPane(newTab);
+                                                    var dropIndex = droppedTabPane.getTabs().indexOf(newTab);
+                                                    if (!newTab.equals(draggedTab)) {
+                                                        draggedTabPane.getTabs().remove(draggedIndex);
+                                                        droppedTabPane.getTabs().add(dropIndex, draggedTab);
+                                                        droppedTabPane.getSelectionModel().clearAndSelect(dropIndex);
                                                     }
-                                                } else {
-                                                    logger.debug(() -> "Tabs on this pane cannot be reordered");
+                                                } finally {
+                                                    manager.setMovingTab(false);
                                                 }
                                             } else {
-                                                logger.debug(() -> "Failed to retrieve targetTab with id " + (id != null ? id : "null"));
+                                                logger.debug(() -> "Tabs on this pane cannot be reordered");
                                             }
+                                        } else {
+                                            logger.debug(() -> "Failed to retrieve targetTab with id " + (id != null ? id : "null"));
                                         }
-                                        event.consume();
                                     }
-                                }));
-                            }
+                                    event.consume();
+                                }
+                            }));
                         }
                     }
                 }
                 if (c.wasRemoved()) {
                     for (Tab t : c.getRemoved()) {
-                     //TODO remove drag and drop handlers
                         this.tearableTabMap.remove(t);
                         this.manager.removeTab(t);
                     }
@@ -462,24 +463,17 @@ public class TearableTabPane extends TabPane implements AutoCloseable {
         tabHeaderBg.getChildren().add(newTabButton);
         StackPane.setAlignment(newTabButton, Pos.CENTER_LEFT);
         switch (getSide()) {
-            case TOP:
-            case BOTTOM:
-                newTabButton.translateXProperty().bind(
-                        headersRegion.widthProperty()
-                                .add(Bindings.createDoubleBinding(() -> headerArea.getInsets().getLeft(), headerArea.insetsProperty()))
-                );
-                break;
-            case LEFT:
-            case RIGHT:
-                newTabButton.translateXProperty().bind(
-                        tabHeaderBg.widthProperty()
-                                .subtract(headersRegion.widthProperty())
-                                .subtract(newTabButton.widthProperty())
-                                .subtract(Bindings.createDoubleBinding(() -> headerArea.getInsets().getTop(), headerArea.insetsProperty()))
-                );
-                break;
-            default:
-                throw new IllegalStateException("Invalid value for side enum");
+            case TOP, BOTTOM -> newTabButton.translateXProperty().bind(
+                    headersRegion.widthProperty()
+                            .add(Bindings.createDoubleBinding(() -> headerArea.getInsets().getLeft(), headerArea.insetsProperty()))
+            );
+            case LEFT, RIGHT -> newTabButton.translateXProperty().bind(
+                    tabHeaderBg.widthProperty()
+                            .subtract(headersRegion.widthProperty())
+                            .subtract(newTabButton.widthProperty())
+                            .subtract(Bindings.createDoubleBinding(() -> headerArea.getInsets().getTop(), headerArea.insetsProperty()))
+            );
+            default -> throw new IllegalStateException("Invalid value for side enum");
         }
     }
 
