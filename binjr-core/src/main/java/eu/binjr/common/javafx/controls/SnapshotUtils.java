@@ -23,6 +23,6 @@ import javafx.scene.image.WritableImage;
 public final class SnapshotUtils {
     @Deprecated
     public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
-        return NodeUtils.scaledSnapshot(node, scaleX, scaleY);
+        return NodeUtils.scaledSnapshot(node, node.getScene().getFill(),  scaleX, scaleY);
     }
 }

@@ -19,6 +19,8 @@ package eu.binjr.common.javafx.controls;
 import javafx.scene.Node;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.image.WritableImage;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.transform.Transform;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
@@ -35,19 +37,32 @@ public final class NodeUtils {
      * @return the rendered image.
      */
     public static WritableImage scaledSnapshot(Node node) {
-        return scaledSnapshot(node, getOutputScaleX(node), getOutputScaleY(node));
+        return scaledSnapshot(node, Color.TRANSPARENT, getOutputScaleX(node), getOutputScaleY(node));
     }
 
     /**
      * Takes a snapshot of the provided node and render an image using the specified output scale.
      *
-     * @param node   the node to take a snapshot of.
-     * @param scaleX the X output scale to use.
-     * @param scaleY the Y output scale to use.
+     * @param node      the node to take a snapshot of.
+     * @param fillColor the fill color.
      * @return the rendered image.
      */
-    public static WritableImage scaledSnapshot(Node node, double scaleX, double scaleY) {
+    public static WritableImage scaledSnapshot(Node node, Paint fillColor) {
+        return scaledSnapshot(node, fillColor, getOutputScaleX(node), getOutputScaleY(node));
+    }
+
+    /**
+     * Takes a snapshot of the provided node and render an image using the specified output scale.
+     *
+     * @param node      the node to take a snapshot of.
+     * @param fillColor the fill color.
+     * @param scaleX    the X output scale to use.
+     * @param scaleY    the Y output scale to use.
+     * @return the rendered image.
+     */
+    public static WritableImage scaledSnapshot(Node node, Paint fillColor, double scaleX, double scaleY) {
         SnapshotParameters spa = new SnapshotParameters();
+        spa.setFill(fillColor);
         spa.setTransform(Transform.scale(scaleX, scaleY));
         return node.snapshot(spa, null);
     }

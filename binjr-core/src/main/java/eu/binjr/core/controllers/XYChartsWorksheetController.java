@@ -1509,7 +1509,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             var scaleY = userPrefs.snapshotOutputScale.get() == SnapshotOutputScale.AUTO ?
                     NodeUtils.getOutputScaleY(root) :
                     userPrefs.snapshotOutputScale.get().getScaleFactor();
-            return NodeUtils.scaledSnapshot(screenshotCanvas, scaleX, scaleY);
+            return NodeUtils.scaledSnapshot(screenshotCanvas, screenshotCanvas.getScene().getFill(), scaleX, scaleY);
         } catch (Exception e) {
             Dialogs.notifyException("Failed to create snapshot", e, root);
             return null;
