@@ -61,12 +61,13 @@
 ;
     SCROLL_BAR_TRACK: #1B1B1B
 ;
-
     -fx-base: black
 ;
     -fx-accent: -binjr-dark-blue-color
 ;
-    -fx-accent-translucide: rgba(65, 142, 173, 0.2)
+    -fx-accent-translucide: rgba(65, 142, 173, 0.2);
+    -fx-control-inner-background: -binjr-pane-background-color;
+    -fx-control-inner-background-alt:  -binjr-pane-background-color;
 ;
 /****/
 
@@ -463,12 +464,12 @@
 }
 
 .text-viewport-parent,
-.chart-viewport-parent {
+.chart-viewport-parent,
+.chart {
     -fx-background-color: -binjr-pane-background-color;
 }
 
 .binjr-content-view {
-    /*-fx-border-color:  red;*/
     -fx-border-width: 0;
 }
 
@@ -1854,6 +1855,7 @@
 .facet-pill .box {
     -fx-border-width: 0.5;
 }
+
 .facet-pill:selected .box .mark {
     -fx-border-width: 0;
 }
@@ -1870,12 +1872,12 @@
 }
 
 .facet-pill-trace .box {
-    -fx-text-fill:  -trace-color;
+    -fx-text-fill: -trace-color;
     -fx-border-color: -trace-color;
 }
 
-.facet-pill-trace:selected .box .mark{
-    -fx-background-color:  -trace-color;
+.facet-pill-trace:selected .box .mark {
+    -fx-background-color: -trace-color;
 }
 
 .styled-text-area .trace,
@@ -1895,12 +1897,12 @@
 }
 
 .facet-pill-debug .box {
-    -fx-text-fill:  -debug-color;
+    -fx-text-fill: -debug-color;
     -fx-border-color: -debug-color;
 }
 
-.facet-pill-debug:selected .box .mark{
-    -fx-background-color:  -debug-color;
+.facet-pill-debug:selected .box .mark {
+    -fx-background-color: -debug-color;
 }
 
 .styled-text-area .debug,
@@ -1920,12 +1922,12 @@
 }
 
 .facet-pill-perf .box {
-    -fx-text-fill:  -perf-color;
+    -fx-text-fill: -perf-color;
     -fx-border-color: -perf-color;
 }
 
-.facet-pill-perf:selected .box .mark{
-    -fx-background-color:  -perf-color;
+.facet-pill-perf:selected .box .mark {
+    -fx-background-color: -perf-color;
 }
 
 .styled-text-area .perf,
@@ -1939,15 +1941,16 @@
 }
 .facet-pill-info {
     -fx-background-color: #ffffff50;
-    -fx-text-fill:  -info-color;
+    -fx-text-fill: -info-color;
     -fx-border-color: -info-color;
 }
+
 .facet-pill-info .box {
     -fx-text-fill: -info-color;
     -fx-border-color: -info-color;
 }
 
-.facet-pill-info:selected .box .mark{
+.facet-pill-info:selected .box .mark {
     -fx-background-color: -info-color;
 }
 
@@ -1962,15 +1965,16 @@
 }
 .facet-pill-unknown {
     -fx-background-color: #ffffff50;
-    -fx-text-fill:  -unknown-color;
+    -fx-text-fill: -unknown-color;
     -fx-border-color: -unknown-color;
 }
+
 .facet-pill-unknown .box {
     -fx-text-fill: -unknown-color;
     -fx-border-color: -unknown-color;
 }
 
-.facet-pill-unknown:selected .box .mark{
+.facet-pill-unknown:selected .box .mark {
     -fx-background-color: -unknown-color;
 }
 
@@ -1986,17 +1990,17 @@
 
 .facet-pill-warn {
     -fx-background-color: #fbca0450;
-    -fx-text-fill:  -warn-color;
-    -fx-border-color:  -warn-color;
+    -fx-text-fill: -warn-color;
+    -fx-border-color: -warn-color;
 }
 
 .facet-pill-warn .box {
-    -fx-text-fill:  -warn-color;
-    -fx-border-color:  -warn-color;
+    -fx-text-fill: -warn-color;
+    -fx-border-color: -warn-color;
 }
 
-.facet-pill-warn:selected .box .mark{
-    -fx-background-color:  -warn-color;
+.facet-pill-warn:selected .box .mark {
+    -fx-background-color: -warn-color;
 }
 
 .styled-text-area .warn,
@@ -2016,17 +2020,17 @@
 }
 
 .facet-pill-error .box {
-    -fx-text-fill:  -error-color;
+    -fx-text-fill: -error-color;
     -fx-border-color: -error-color;
 }
 
-.facet-pill-error:selected .box .mark{
-    -fx-background-color:  -error-color;
+.facet-pill-error:selected .box .mark {
+    -fx-background-color: -error-color;
 }
 
 .styled-text-area .error,
 .log-error {
-    -fx-fill:  -error-color;
+    -fx-fill: -error-color;
 }
 
 /**** FATAL ****/
@@ -2041,12 +2045,12 @@
 }
 
 .facet-pill-fatal .box {
-    -fx-text-fill:  -fatal-color;
+    -fx-text-fill: -fatal-color;
     -fx-border-color: -fatal-color;
 }
 
-.facet-pill-fatal:selected .box .mark{
-    -fx-background-color:  -fatal-color;
+.facet-pill-fatal:selected .box .mark {
+    -fx-background-color: -fatal-color;
 }
 
 .styled-text-area .fatal,

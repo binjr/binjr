@@ -99,7 +99,7 @@ public class MainViewController implements Initializable {
     private static final Logger logger = Logger.create(MainViewController.class);
     private static final String[] BINJR_FILE_PATTERN = new String[]{"*.bjr", "*.xml"};
     private static final double SEARCH_BAR_PANE_DISTANCE = 40;
-    private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
     private static final DataFormat GENERIC_BINDING_FORMAT = new DataFormat(SourceBinding.MIME_TYPE);
     private static final DataFormat TIME_SERIES_BINDING_FORMAT = new DataFormat(TimeSeriesBinding.MIME_TYPE);
     private static final DataFormat TEXT_FILES_BINDING_FORMAT = new DataFormat(TextFilesBinding.MIME_TYPE);
@@ -1632,12 +1632,12 @@ public class MainViewController implements Initializable {
 
     @FXML
     private void handleOnDragExitedNewWorksheet(DragEvent event) {
-        ((Region) event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+        ((Region) event.getSource()).pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false);
     }
 
     @FXML
     private void handleOnDragEnteredNewWorksheet(DragEvent event) {
-        ((Region) event.getSource()).pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+        ((Region) event.getSource()).pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, true);
     }
 
     public boolean isTreeItemDragAndDropInProgress() {

@@ -1,6 +1,6 @@
 /*
  * Copyright 2013 Jason Winnebeck
- * Copyright 2019-2021 Frederic Thevenet
+ * Copyright 2019-2022 Frederic Thevenet
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -132,7 +132,7 @@ public class StableTicksAxis<T extends Number> extends ValueAxis<T> {
         this.dividers = dividers != null ? dividers : new double[]{1.0, 2.5, 5.0};
         getStyleClass().setAll("axis");
 
-        selectionMarker.getStyleClass().add("selection-marker");
+        selectionMarker.getStyleClass().addAll("selection-marker", "drop-target");
         var states = selectionMarker.getPseudoClassStates();
         this.getChildren().add(selectionMarker);
 

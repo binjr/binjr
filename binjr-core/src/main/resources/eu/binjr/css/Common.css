@@ -93,7 +93,9 @@
     -fx-border-style: dotted;
 }
 
-.drop-zone:hover {
+.drop-zone:hover,
+.drop-zone:draggedover,
+.drop-target:draggedover {
     -fx-background-color: -fx-accent-translucide;
 }
 

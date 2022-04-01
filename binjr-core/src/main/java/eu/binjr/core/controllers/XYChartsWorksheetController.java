@@ -1,5 +1,5 @@
 /*
- *    Copyright 2016-2021 Frederic Thevenet
+ *    Copyright 2016-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -93,7 +93,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     private static final DataFormat VIEWPORT_DRAG_FORMAT = new DataFormat("viewport_drag_format");
     private static final Logger logger = Logger.create(XYChartsWorksheetController.class);
     private static final double Y_AXIS_SEPARATION = 10;
-    private static final PseudoClass HOVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("hover");
+    private static final PseudoClass DRAGGED_OVER_PSEUDO_CLASS = PseudoClass.getPseudoClass("draggedover");
     private final UserPreferences userPrefs = UserPreferences.getInstance();
     private final ToggleGroup editButtonsGroup = new ToggleGroup();
     private final IntegerProperty nbBusyPlotTasks = new SimpleIntegerProperty(0);
@@ -258,8 +258,8 @@ public class XYChartsWorksheetController extends WorksheetController {
 
             newChartDropTarget.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverNewChartTarget));
             newChartDropTarget.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedONewChartTarget));
-            newChartDropTarget.setOnDragEntered(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true)));
-            newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false)));
+            newChartDropTarget.setOnDragEntered(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, true)));
+            newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false)));
             getBindingManager().bind(newChartDropTarget.managedProperty(), getParentController().treeItemDragAndDropInProgressProperty());
             getBindingManager().bind(newChartDropTarget.visibleProperty(), getParentController().treeItemDragAndDropInProgressProperty());
 
@@ -337,6 +337,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     viewPort = new LineChart<>(xAxis, yAxis);
                     ((LineChart<ZonedDateTime, Double>) viewPort).setCreateSymbols(false);
             }
+            viewPort.getStyleClass().add("drop-target");
             viewPort.setCache(true);
             viewPort.setCacheHint(CacheHint.SPEED);
             viewPort.setCacheShape(true);
@@ -351,20 +352,63 @@ public class XYChartsWorksheetController extends WorksheetController {
             viewPort.getYAxis().addEventFilter(MouseEvent.MOUSE_CLICKED, getBindingManager().registerHandler(event ->
                     worksheet.setSelectedChart(currentIndex, event.isControlDown())));
             getBindingManager().bind(((StableTicksAxis<Double>) viewPort.getYAxis()).selectionMarkerVisibleProperty(), worksheet.editModeEnabledProperty());
-            viewPort.setOnDragOver(getBindingManager().registerHandler(this::handleDragOverWorksheetView));
-            viewPort.setOnDragDropped(getBindingManager().registerHandler(this::handleDragDroppedOnWorksheetView));
+            viewPort.setOnDragOver(getBindingManager().registerHandler(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE)) ||
+                        (db.hasContent(VIEWPORT_DRAG_FORMAT) && currentIndex != (Integer) db.getContent(VIEWPORT_DRAG_FORMAT))) {
+                    event.acceptTransferModes(TransferMode.MOVE);
+                    event.consume();
+                }
+            }));
+
+            viewPort.setOnDragDropped(getBindingManager().registerHandler(event -> {
+                Dragboard db = event.getDragboard();
+                if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
+                    TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
+                    if (treeView != null) {
+                        TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
+                        if (item != null) {
+                            Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+                            if (targetStage != null) {
+                                targetStage.requestFocus();
+                            }
+                            Chart targetChart = null;
+                            if (event.getSource() instanceof XYChart<?, ?>) {
+                                for (var v : viewPorts) {
+                                    if (v.getChart().equals(event.getSource())) {
+                                        targetChart = v.getDataStore();
+                                    }
+                                }
+                            }
+                            var items = treeView.getSelectionModel().getSelectedItems();
+                            if (targetChart == null) {
+                                getChartListContextMenu(items).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
+                            } else {
+                                addToCurrentWorksheet(items, targetChart);
+                            }
+                        } else {
+                            logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
+                        }
+                    } else {
+                        logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
+                    }
+                    event.consume();
+                } else if (db.hasContent(VIEWPORT_DRAG_FORMAT)) {
+                    int draggedIndex = (Integer) db.getContent(VIEWPORT_DRAG_FORMAT);
+                    event.setDropCompleted(true);
+                    event.consume();
+                    moveChartOrder(viewPorts.get(draggedIndex).getDataStore(), currentIndex - draggedIndex);
+                }
+            }));
 
             viewPort.setOnDragEntered(getBindingManager().registerHandler(event -> {
                 if (closed.get() || !isCompatibleDataFormat(event.getDragboard())) {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, true);
+                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, true);
                 } else {
-                    //FIXME WARNING: Caught 'java.lang.ClassCastException: class java.lang.String cannot be cast to class javafx.scene.paint.Paint
-                    // (java.lang.String is in module java.base of loader 'bootstrap'; javafx.scene.paint.Paint is in unnamed module of loader 'app')'
-                    // while converting value for '-fx-background-color' from inline style on StackedAreaChart@d8b1439[styleClass=chart]
-                    viewPort.setStyle("-fx-background-color:  -fx-accent-translucide;");
+                    viewPort.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, true);
                 }
             }));
             viewPort.setOnDragExited(getBindingManager().registerHandler(event -> {
@@ -372,9 +416,9 @@ public class XYChartsWorksheetController extends WorksheetController {
                     return;
                 }
                 if (worksheet.getChartLayout() == ChartLayout.OVERLAID) {
-                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(HOVER_PSEUDO_CLASS, false);
+                    ((StableTicksAxis<Double>) viewPort.getYAxis()).getSelectionMarker().pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false);
                 } else {
-                    viewPort.setStyle("-fx-background-color:  -binjr-pane-background-color;");
+                    viewPort.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false);
                 }
             }));
             // Add buttons to chart axis
@@ -403,24 +447,8 @@ public class XYChartsWorksheetController extends WorksheetController {
                 cc.put(VIEWPORT_DRAG_FORMAT, currentIndex);
                 db.setContent(cc);
                 event.consume();
+            }));
 
-            }));
-            yAxis.getSelectionMarker().setOnDragOver(getBindingManager().registerHandler(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(VIEWPORT_DRAG_FORMAT) && currentIndex != (Integer) db.getContent(VIEWPORT_DRAG_FORMAT)) {
-                    event.acceptTransferModes(TransferMode.COPY_OR_MOVE);
-                    event.consume();
-                }
-            }));
-            yAxis.getSelectionMarker().setOnDragDropped(getBindingManager().registerHandler(event -> {
-                Dragboard db = event.getDragboard();
-                if (db.hasContent(VIEWPORT_DRAG_FORMAT)) {
-                    int draggedIndex = (Integer) db.getContent(VIEWPORT_DRAG_FORMAT);
-                    event.setDropCompleted(true);
-                    event.consume();
-                    moveChartOrder(viewPorts.get(draggedIndex).getDataStore(), currentIndex - draggedIndex);
-                }
-            }));
             yAxis.getSelectionMarker().getChildren().add(toolBar);
         }
 
@@ -1087,41 +1115,6 @@ public class XYChartsWorksheetController extends WorksheetController {
                         Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
                     }
                     logger.debug("dropped to " + event);
-                } else {
-                    logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
-                }
-            } else {
-                logger.warn("Cannot complete drag and drop operation: selected TreeView is null");
-            }
-            event.consume();
-        }
-    }
-
-    private void handleDragDroppedOnWorksheetView(DragEvent event) {
-        Dragboard db = event.getDragboard();
-        if (db.hasContent(DataFormat.lookupMimeType(TimeSeriesBinding.MIME_TYPE))) {
-            TreeView<SourceBinding> treeView = getParentController().getSelectedTreeView();
-            if (treeView != null) {
-                TreeItem<SourceBinding> item = treeView.getSelectionModel().getSelectedItem();
-                if (item != null) {
-                    Stage targetStage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-                    if (targetStage != null) {
-                        targetStage.requestFocus();
-                    }
-                    Chart targetChart = null;
-                    if (event.getSource() instanceof XYChart<?, ?>) {
-                        for (var v : viewPorts) {
-                            if (v.getChart().equals(event.getSource())) {
-                                targetChart = v.getDataStore();
-                            }
-                        }
-                    }
-                    var items = treeView.getSelectionModel().getSelectedItems();
-                    if (targetChart == null) {
-                        getChartListContextMenu(items).show((Node) event.getTarget(), event.getScreenX(), event.getSceneY());
-                    } else {
-                        addToCurrentWorksheet(items, targetChart);
-                    }
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
