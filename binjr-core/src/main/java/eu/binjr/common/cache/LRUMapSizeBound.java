@@ -29,6 +29,7 @@ import java.util.Map;
  * @param <V> type of values
  * @author Frederic Thevenet
  */
+@Deprecated
 public class LRUMapSizeBound<K, V extends Cacheable> extends LinkedHashMap<K, V> {
     private long maxSize;
 

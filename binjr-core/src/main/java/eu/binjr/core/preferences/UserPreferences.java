@@ -339,7 +339,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.toJson(s),
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
-
+    public ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB =
+            longPreference("dataAdapterFetchCacheMaxSizeMiB", 32L * 1024 * 1024);
 
     public static class UserFavorites extends MruFactory {
 

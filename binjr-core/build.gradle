@@ -32,6 +32,7 @@ dependencies {
     implementation 'org.apache.lucene:lucene-core:9.0.0'
     implementation 'org.apache.lucene:lucene-facet:9.0.0'
     implementation 'org.apache.lucene:lucene-queryparser:9.0.0'
+    implementation 'com.github.ben-manes.caffeine:caffeine:3.0.6'
     // Only to prepare POM for Maven central upload
     compileOnlyApi "org.openjfx:javafx-base:${OPENJFX_VERSION}"
     compileOnlyApi "org.openjfx:javafx-graphics:${OPENJFX_VERSION}"

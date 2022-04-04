@@ -16,7 +16,8 @@
 
 package eu.binjr.core.data.indexes.logs;
 
-import eu.binjr.common.cache.LRUMapCapacityBound;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.IOUtils;
@@ -93,14 +94,16 @@ public class LogFileIndex implements Searchable {
     private TaxonomyReader taxonomyReader;
     private DirectoryReader indexReader;
     private IndexSearcher searcher;
-    private final Map<String, SearchHitsProcessor> facetResultCache;
-    private final Map<String, SearchHitsProcessor> hitResultCache;
+    private final Cache<String, SearchHitsProcessor> facetResultCache;
+    private final Cache<String, SearchHitsProcessor> hitResultCache;
 
     public LogFileIndex() throws IOException {
-        this.facetResultCache =
-                Collections.synchronizedMap(new LRUMapCapacityBound<>(prefs.facetResultCacheEntries.get().intValue()));
-        this.hitResultCache =
-                Collections.synchronizedMap(new LRUMapCapacityBound<>(prefs.hitResultCacheEntries.get().intValue()));
+        this.facetResultCache = Caffeine.newBuilder()
+                .maximumSize(prefs.facetResultCacheEntries.get().intValue())
+                .build();
+        this.hitResultCache = Caffeine.newBuilder()
+                .maximumSize(prefs.hitResultCacheEntries.get().intValue())
+                .build();
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
                 Math.min(Runtime.getRuntime().availableProcessors(), prefs.parsingThreadNumber.get().intValue());
@@ -359,15 +362,15 @@ public class LogFileIndex implements Searchable {
                     proc.setHitsPerPage(pageSize);
                     proc.setData(logs);
                 }
+                logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Hit cache was explicitly bypassed" : "Hit cache miss", k));
                 return proc;
             });
             SearchHitsProcessor hitProc;
             if (ignoreCache) {
-                hitProc = fillHitResultCache.apply(hitCacheKey);
-                hitResultCache.put(hitCacheKey, hitProc);
-            } else {
-                hitProc = hitResultCache.computeIfAbsent(hitCacheKey, fillHitResultCache);
+                hitResultCache.invalidate(hitCacheKey);
             }
+            hitProc = hitResultCache.get(hitCacheKey, fillHitResultCache);
+
             Function<String, SearchHitsProcessor> doFacetSearch = CheckedLambdas.wrap(k -> {
                 var proc = new SearchHitsProcessor();
                 try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
@@ -398,15 +401,15 @@ public class LogFileIndex implements Searchable {
                                 makeFacetResult(TIMESTAMP, facets, params).values());
                     }
                 }
+                logger.perf(() -> String.format("%s for entry %s", ignoreCache ? "Facet cache was explicitly bypassed" : "Facet cache miss", k));
                 return proc;
             });
             SearchHitsProcessor facetProc;
             if (ignoreCache) {
-                facetProc = doFacetSearch.apply(facetCacheKey);
-                facetResultCache.put(facetCacheKey, facetProc);
-            } else {
-                facetProc = facetResultCache.computeIfAbsent(facetCacheKey, doFacetSearch);
+                facetResultCache.invalidate(facetCacheKey);
             }
+            facetProc = facetResultCache.get(facetCacheKey, doFacetSearch);
+
             hitProc.mergeFacetResults(facetProc);
             return hitProc;
         });
@@ -419,8 +422,8 @@ public class LogFileIndex implements Searchable {
         IOUtils.close(taxonomyWriter);
         IOUtils.close(indexWriter);
         IOUtils.close(indexDirectory);
-        hitResultCache.clear();
-        facetResultCache.clear();
+        hitResultCache.invalidateAll();
+        facetResultCache.invalidateAll();
         if (parsingThreadPool != null) {
             try {
                 parsingThreadPool.shutdown();

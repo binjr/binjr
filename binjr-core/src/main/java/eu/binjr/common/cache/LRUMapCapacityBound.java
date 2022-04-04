@@ -26,6 +26,7 @@ import java.util.Map;
  * @param <V> type of values
  * @author Frederic Thevenet
  */
+@Deprecated
 public class LRUMapCapacityBound<K, V> extends LinkedHashMap<K, V> {
     private int cacheSize;
 

@@ -16,15 +16,17 @@
 
 package eu.binjr.core.data.adapters;
 
-import eu.binjr.common.cache.LRUMapCapacityBound;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.preferences.UserPreferences;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.lang.ref.SoftReference;
+import java.nio.ByteBuffer;
 import java.time.Instant;
-import java.util.Map;
 
 /**
  * An abstract implementation of {@link SerializedDataAdapter} that manages a cache in between the adapter and the data source.
@@ -35,47 +37,48 @@ import java.util.Map;
  * @author Frederic Thevenet
  */
 public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<T> {
-    public static final int DEFAULT_CACHE_SIZE = 128;
     private static final Logger logger = Logger.create(SimpleCachingDataAdapter.class);
-    private final Map<String, SoftReference<byte[]>> cache;
+    private final Cache<String, ByteBuffer> cache;
 
     /**
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class
      */
     public SimpleCachingDataAdapter() {
-        this(DEFAULT_CACHE_SIZE);
+        this(UserPreferences.getInstance().dataAdapterFetchCacheMaxSizeMiB.get().longValue() * 1024L);
     }
 
     /**
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class with the specified maximum number of entries
      *
-     * @param maxCacheEntries the  maximum number of entries in the cache
+     * @param maxCacheSizeInByte the  maximum number of entries in the cache
      */
-    public SimpleCachingDataAdapter(int maxCacheEntries) {
-        cache = new LRUMapCapacityBound<>(maxCacheEntries);
+    public SimpleCachingDataAdapter(long maxCacheSizeInByte) {
+        this.cache = Caffeine.newBuilder()
+                .recordStats()
+                .maximumWeight(maxCacheSizeInByte)
+                .weigher((String key, ByteBuffer buffer) -> buffer.array().length)
+                .build();
     }
 
     @Override
     public InputStream fetchRawData(String path, Instant begin, Instant end, boolean bypassCache) throws DataAdapterException {
-        byte[] payload = null;
-        String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
-        if (!bypassCache) {
-            SoftReference<byte[]> cacheHit = cache.get(cacheEntryKey);
-            payload = cacheHit != null ? cacheHit.get() : null;
+        final String cacheEntryKey = String.format("%s%d%d", path, begin.toEpochMilli(), end.toEpochMilli());
+        if (bypassCache) {
+            cache.invalidate(cacheEntryKey);
         }
-        if (payload == null) {
-            logger.trace(() -> String.format(
-                    "%s for entry %s %s %s",
+        var is = new ByteArrayInputStream(cache.get(cacheEntryKey, CheckedLambdas.wrap(key -> {
+            var data = onCacheMiss(path, begin, end);
+            logger.perf(() -> String.format(
+                    "%s for entry %s %s %s - payload size=%d",
                     bypassCache ? "Cache was explicitly bypassed" : "Cache miss",
                     path,
-                    begin.toString(),
-                    end.toString()));
-            payload = onCacheMiss(path, begin, end);
-            cache.put(cacheEntryKey, new SoftReference<>(payload));
-        } else {
-            logger.trace(() -> String.format("Data successfully retrieved from cache for %s %s %s", path, begin.toString(), end.toString()));
-        }
-        return new ByteArrayInputStream(payload);
+                    begin,
+                    end,
+                    data.length));
+            return ByteBuffer.wrap(data);
+        })).array());
+        logger.perf(this::printCacheStats);
+        return is;
     }
 
     /**
@@ -89,10 +92,32 @@ public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<
      */
     public abstract byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
 
+    private String printCacheStats() {
+        var stats = cache.stats();
+        return String.format("""
+                        Data adapters fetch cache statistics:
+                         - requestCount=%d
+                         - hitCount=%d
+                         - hitRate=%f
+                         - missCount=%d
+                         - missRate=%f
+                         - evictionCount=%d
+                         - evictionWeight=%d
+                        """,
+                stats.requestCount(),
+                stats.hitCount(),
+                stats.hitRate(),
+                stats.missCount(),
+                stats.missRate(),
+                stats.evictionCount(),
+                stats.evictionWeight()
+        );
+    }
+
     @Override
     public void close() {
         try {
-            this.cache.clear();
+            this.cache.invalidateAll();
         } catch (Exception e) {
             logger.error("Error closing SimpleCacheAdapter", e);
         }
