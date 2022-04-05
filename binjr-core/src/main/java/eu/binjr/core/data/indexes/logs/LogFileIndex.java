@@ -18,6 +18,7 @@ package eu.binjr.core.data.indexes.logs;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.stats.CacheStats;
 import eu.binjr.common.concurrent.ReadWriteLockHelper;
 import eu.binjr.common.function.CheckedLambdas;
 import eu.binjr.common.io.IOUtils;
@@ -81,6 +82,7 @@ public class LogFileIndex implements Searchable {
     public static final String PATH = "filePath";
     private static final Logger logger = Logger.create(LogFileIndex.class);
     public static final String DOC_URI = "docUri";
+    public static final float SEARCH_HIT_WEIGHT_FACTOR = 2.0f;
     protected final UserPreferences prefs = UserPreferences.getInstance();
     private final Directory indexDirectory;
     private final Directory taxonomyDirectory;
@@ -99,10 +101,15 @@ public class LogFileIndex implements Searchable {
 
     public LogFileIndex() throws IOException {
         this.facetResultCache = Caffeine.newBuilder()
+                .recordStats()
                 .maximumSize(prefs.facetResultCacheEntries.get().intValue())
                 .build();
         this.hitResultCache = Caffeine.newBuilder()
-                .maximumSize(prefs.hitResultCacheEntries.get().intValue())
+                .recordStats()
+                .maximumWeight(prefs.hitResultCacheMaxSizeMiB.get().longValue() * 1082768)
+                .weigher((String key, SearchHitsProcessor value) -> Math.round(value.getData().stream()
+                        .map(e -> e.getYValue().getText().length())
+                        .reduce(Integer::sum).orElseThrow() * SEARCH_HIT_WEIGHT_FACTOR))
                 .build();
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
@@ -370,7 +377,7 @@ public class LogFileIndex implements Searchable {
                 hitResultCache.invalidate(hitCacheKey);
             }
             hitProc = hitResultCache.get(hitCacheKey, fillHitResultCache);
-
+            logger.perf(() -> printCacheStats("Hit result cache stats", hitResultCache.stats()));
             Function<String, SearchHitsProcessor> doFacetSearch = CheckedLambdas.wrap(k -> {
                 var proc = new SearchHitsProcessor();
                 try (Profiler p = Profiler.start("Retrieving facets", logger::perf)) {
@@ -435,6 +442,18 @@ public class LogFileIndex implements Searchable {
         if (indexDirectoryPath != null) {
             IOUtils.attemptDeleteTempPath(indexDirectoryPath);
         }
+    }
+
+    private String printCacheStats(String title, CacheStats stats) {
+        return String.format("%s: requestCount=%d hitCount=%d hitRate=%f missCount=%d evictionCount=%d evictionWeight=%d",
+                title,
+                stats.requestCount(),
+                stats.hitCount(),
+                stats.hitRate(),
+                stats.missCount(),
+                stats.evictionCount(),
+                stats.evictionWeight()
+        );
     }
 
     private LongRange[] computeRanges(long start, long end) {

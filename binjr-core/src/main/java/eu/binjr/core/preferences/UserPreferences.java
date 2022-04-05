@@ -303,7 +303,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public final ObservablePreference<Number> facetResultCacheEntries = integerPreference("facetResultCacheEntries", 150);
 
-    public final ObservablePreference<Number> hitResultCacheEntries = integerPreference("hitResultCacheEntries", 10);
+    public final ObservablePreference<Number> hitResultCacheMaxSizeMiB = integerPreference("hitResultCacheMaxSizeMiB", 64);
 
     public final ObservablePreference<Boolean> enableHttpProxy = booleanPreference("enableHttpProxy", false);
 
