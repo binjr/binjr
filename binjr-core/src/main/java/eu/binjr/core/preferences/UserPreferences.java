@@ -329,6 +329,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> httpSSLConnectionTTLMs = integerPreference("httpSSLConnectionTTLMs", 120000);
 
+    public ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB = integerPreference("dataAdapterFetchCacheMaxSizeMiB", 32);
+
     /**
      * A list of user defined {@link ParsingProfile}
      */
@@ -339,8 +341,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.toJson(s),
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
-    public ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB =
-            longPreference("dataAdapterFetchCacheMaxSizeMiB", 32L * 1024 * 1024);
 
     public static class UserFavorites extends MruFactory {
 

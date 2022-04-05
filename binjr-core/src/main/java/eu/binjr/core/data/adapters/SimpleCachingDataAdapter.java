@@ -44,7 +44,7 @@ public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<
      * Initializes a new instance of the {@link SimpleCachingDataAdapter} class
      */
     public SimpleCachingDataAdapter() {
-        this(UserPreferences.getInstance().dataAdapterFetchCacheMaxSizeMiB.get().longValue() * 1024L);
+        this(UserPreferences.getInstance().dataAdapterFetchCacheMaxSizeMiB.get().longValue() * 1048576L);
     }
 
     /**
@@ -92,28 +92,6 @@ public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<
      */
     public abstract byte[] onCacheMiss(String path, Instant begin, Instant end) throws DataAdapterException;
 
-    private String printCacheStats() {
-        var stats = cache.stats();
-        return String.format("""
-                        Data adapters fetch cache statistics:
-                         - requestCount=%d
-                         - hitCount=%d
-                         - hitRate=%f
-                         - missCount=%d
-                         - missRate=%f
-                         - evictionCount=%d
-                         - evictionWeight=%d
-                        """,
-                stats.requestCount(),
-                stats.hitCount(),
-                stats.hitRate(),
-                stats.missCount(),
-                stats.missRate(),
-                stats.evictionCount(),
-                stats.evictionWeight()
-        );
-    }
-
     @Override
     public void close() {
         try {
@@ -122,6 +100,18 @@ public abstract class SimpleCachingDataAdapter<T> extends SerializedDataAdapter<
             logger.error("Error closing SimpleCacheAdapter", e);
         }
         super.close();
+    }
+
+    private String printCacheStats() {
+        var stats = cache.stats();
+        return String.format("Adapter fetch cache stats: requestCount=%d hitCount=%d hitRate=%f missCount=%d evictionCount=%d evictionWeight=%d",
+                stats.requestCount(),
+                stats.hitCount(),
+                stats.hitRate(),
+                stats.missCount(),
+                stats.evictionCount(),
+                stats.evictionWeight()
+        );
     }
 
 }
