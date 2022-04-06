@@ -109,7 +109,8 @@ public class LogFileIndex implements Searchable {
                 .maximumWeight(prefs.hitResultCacheMaxSizeMiB.get().longValue() * 1082768)
                 .weigher((String key, SearchHitsProcessor value) -> Math.round(value.getData().stream()
                         .map(e -> e.getYValue().getText().length())
-                        .reduce(Integer::sum).orElseThrow() * SEARCH_HIT_WEIGHT_FACTOR))
+                        .reduce(Integer::sum)
+                        .orElse(100) * SEARCH_HIT_WEIGHT_FACTOR))
                 .build();
         this.parsingThreadsNumber = prefs.parsingThreadNumber.get().intValue() < 1 ?
                 Math.max(1, Runtime.getRuntime().availableProcessors() - 1) :
