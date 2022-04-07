@@ -331,6 +331,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
 
     public ObservablePreference<Number> dataAdapterFetchCacheMaxSizeMiB = integerPreference("dataAdapterFetchCacheMaxSizeMiB", 32);
 
+    public ObservablePreference<Path> temporaryFilesRoot = pathPreference("temporaryFilesRoot", Path.of(System.getProperty("java.io.tmpdir")));
+
     /**
      * A list of user defined {@link ParsingProfile}
      */
@@ -341,6 +343,7 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.toJson(s),
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
+
 
     public static class UserFavorites extends MruFactory {
 

@@ -1307,7 +1307,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     private Path getTmpCssPath() throws IOException {
         if (this.tmpCssPath == null) {
-            tmpCssPath = Files.createTempFile("tmp_", ".css");
+            tmpCssPath = Files.createTempFile(UserPreferences.getInstance().temporaryFilesRoot.get(), "tmp_", ".css");
             tmpCssPath.toFile().deleteOnExit();
         }
         return tmpCssPath;

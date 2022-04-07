@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import eu.binjr.common.io.ProxyConfiguration;
 import eu.binjr.common.logging.Logger;
+import eu.binjr.core.preferences.UserPreferences;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -117,7 +118,7 @@ public class GithubApiHelper {
     /**
      * Initializes a new instance of the {@link ClosableGitHubApiHelper} class.
      *
-     * @param apiEndpoint the URI that specifies the API endpoint.
+     * @param apiEndpoint        the URI that specifies the API endpoint.
      * @param proxyConfiguration Configuration for http proxy
      * @return a new instance of the {@link ClosableGitHubApiHelper} class.
      */
@@ -246,7 +247,7 @@ public class GithubApiHelper {
      * @throws URISyntaxException if the crafted URI is incorrect.
      */
     public Path downloadAsset(GithubAsset asset) throws IOException, URISyntaxException {
-        return downloadAsset(asset, Files.createTempDirectory("binjr-updates_"));
+        return downloadAsset(asset, Files.createTempDirectory(UserPreferences.getInstance().temporaryFilesRoot.get(), "binjr-updates_"));
     }
 
     /**

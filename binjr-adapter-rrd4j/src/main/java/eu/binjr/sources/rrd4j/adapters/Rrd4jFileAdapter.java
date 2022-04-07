@@ -1,5 +1,5 @@
 /*
- *    Copyright 2018-2020 Frederic Thevenet
+ *    Copyright 2018-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import eu.binjr.core.data.exceptions.FetchingDataFromAdapterException;
 import eu.binjr.core.data.timeseries.DoubleTimeSeriesProcessor;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
+import eu.binjr.core.preferences.UserPreferences;
 import javafx.scene.chart.XYChart;
 import javafx.scene.control.TreeItem;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
@@ -214,7 +215,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
         logger.debug(()-> "Opening rrd file using backend factory= " + factory.getName());
         if ("text/xml".equalsIgnoreCase(Files.probeContentType(rrdPath))) {
             logger.debug(() -> "Attempting to import as an rrd XML dump");
-            Path temp = Files.createTempFile("binjr_", "_imported.rrd");
+            Path temp = Files.createTempFile(UserPreferences.getInstance().temporaryFilesRoot.get(), "binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
             return RrdDb.getBuilder()
                     .setBackendFactory(factory)
@@ -233,7 +234,7 @@ public class Rrd4jFileAdapter extends BaseDataAdapter<Double> {
             // Possibly a rrd db created with RrdTool.
             // Try to convert and import.
             logger.debug(() -> "Failed to open " + rrdPath + " as an Rrd4j db: attempting to import as an rrdTool db");
-            Path temp = Files.createTempFile("binjr_", "_imported.rrd");
+            Path temp = Files.createTempFile(UserPreferences.getInstance().temporaryFilesRoot.get(), "binjr_", "_imported.rrd");
             tempPathToCollect.add(temp);
             return RrdDb.getBuilder()
                     .setBackendFactory(factory)

@@ -59,6 +59,8 @@ import java.util.function.Consumer;
  */
 public class UpdateManager {
     private static final Logger logger = Logger.create(UpdateManager.class);
+    private final UserPreferences userPrefs = UserPreferences.getInstance();
+    private final AppEnvironment appEnv = AppEnvironment.getInstance();
     private Path updatePackage = null;
     private Version updateVersion = null;
     private boolean restartRequested = false;
@@ -72,24 +74,24 @@ public class UpdateManager {
     private UpdateManager() {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
         this.github = GithubApiHelper.createCloseable(URI.create(AppEnvironment.HTTP_WWW_BINJR_EU),
-                new ProxyConfiguration(UserPreferences.getInstance().enableHttpProxy.get(),
-                        UserPreferences.getInstance().httpProxyHost.get(),
-                        UserPreferences.getInstance().httpProxyPort.get().intValue(),
-                        UserPreferences.getInstance().useHttpProxyAuth.get(),
-                        UserPreferences.getInstance().httpProxyLogin.get(),
-                        UserPreferences.getInstance().httpProxyPassword.get().toPlainText().toCharArray()));
+                new ProxyConfiguration(userPrefs.enableHttpProxy.get(),
+                        userPrefs.httpProxyHost.get(),
+                        userPrefs.httpProxyPort.get().intValue(),
+                        userPrefs.useHttpProxyAuth.get(),
+                        userPrefs.httpProxyLogin.get(),
+                        userPrefs.httpProxyPassword.get().toPlainText().toCharArray()));
 
-        UserPreferences.getInstance().githubUserName.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(newValue, UserPreferences.getInstance().githubAuthToken.get().toPlainText());
+        userPrefs.githubUserName.property().addListener((observable, oldValue, newValue) -> {
+            github.setUserCredentials(newValue, userPrefs.githubAuthToken.get().toPlainText());
         });
-        UserPreferences.getInstance().githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
-            github.setUserCredentials(UserPreferences.getInstance().githubUserName.get(), newValue.toPlainText());
+        userPrefs.githubAuthToken.property().addListener((observable, oldValue, newValue) -> {
+            github.setUserCredentials(userPrefs.githubUserName.get(), newValue.toPlainText());
         });
         github.setUserCredentials(
-                UserPreferences.getInstance().githubUserName.get(),
-                UserPreferences.getInstance().githubAuthToken.get().toPlainText());
+                userPrefs.githubUserName.get(),
+                userPrefs.githubAuthToken.get().toPlainText());
 
-        switch (AppEnvironment.getInstance().getPackaging()) {
+        switch (appEnv.getPackaging()) {
             case LINUX_TAR:
                 platformUpdater = new LinuxTarballUpdater();
                 break;
@@ -140,34 +142,34 @@ public class UpdateManager {
     }
 
     private void asyncCheckForUpdate(Consumer<GithubRelease> newReleaseAvailable, Consumer<Version> upToDate, Runnable onFailure, boolean forceCheck) {
-        if (AppEnvironment.getInstance().isDisableUpdateCheck()) {
+        if (appEnv.isDisableUpdateCheck()) {
             logger.trace(() -> "Update check is explicitly disabled.");
             if (onFailure != null) {
                 onFailure.run();
             }
             return;
         }
-        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(UserPreferences.getInstance().lastCheckForUpdate.get())) {
+        if (!forceCheck && LocalDateTime.now().minus(1, ChronoUnit.HOURS).isBefore(userPrefs.lastCheckForUpdate.get())) {
             logger.trace(() -> "Available update check ignored as it already took place less than 1 hour ago.");
             if (onFailure != null) {
                 onFailure.run();
             }
             return;
         }
-        UserPreferences.getInstance().lastCheckForUpdate.set(LocalDateTime.now());
+        userPrefs.lastCheckForUpdate.set(LocalDateTime.now());
         Task<Optional<GithubRelease>> getLatestTask = new Task<>() {
             @Override
             protected Optional<GithubRelease> call() throws Exception {
                 logger.trace("getNewRelease running on " + Thread.currentThread().getName());
                 return github
-                        .getLatestRelease(AppEnvironment.getInstance().getUpdateRepoSlug())
-                        .filter(r -> r.getVersion().compareTo(AppEnvironment.getInstance().getVersion()) > 0);
+                        .getLatestRelease(appEnv.getUpdateRepoSlug())
+                        .filter(r -> r.getVersion().compareTo(appEnv.getVersion()) > 0);
             }
         };
         getLatestTask.setOnSucceeded(workerStateEvent -> {
             logger.trace("UI update running on " + Thread.currentThread().getName());
             Optional<GithubRelease> latest = getLatestTask.getValue();
-            Version current = AppEnvironment.getInstance().getVersion();
+            Version current = appEnv.getVersion();
             if (latest.isPresent()) {
                 newReleaseAvailable.accept(latest.get());
             } else {
@@ -189,13 +191,13 @@ public class UpdateManager {
         Task<Path> downloadTask = new Task<Path>() {
             @Override
             protected Path call() throws Exception {
-                var targetDir = Files.createTempDirectory("binjr-update_");
+                var targetDir = Files.createTempDirectory(userPrefs.temporaryFilesRoot.get(), "binjr-update_");
                 String packageAssetName = String.format("binjr-%s_%s.%s",
                         release.getVersion(),
-                        AppEnvironment.getInstance().getOsFamily().getPlatformClassifier(),
-                        AppEnvironment.getInstance().getPackaging().getBundleExtension());
+                        appEnv.getOsFamily().getPlatformClassifier(),
+                        appEnv.getPackaging().getBundleExtension());
                 var packagePath = downloadAsset(release, packageAssetName, targetDir);
-                if (!AppEnvironment.getInstance().isSignatureVerificationDisabled()) {
+                if (!appEnv.isSignatureVerificationDisabled()) {
                     var sigPath = downloadAsset(release, packageAssetName + ".asc", targetDir);
                     verifyUpdatePackage(packagePath, sigPath);
                 }
@@ -218,7 +220,7 @@ public class UpdateManager {
     }
 
     public void startUpdate() {
-        if (!AppEnvironment.getInstance().isDisableUpdateCheck() && updatePackage != null) {
+        if (!appEnv.isDisableUpdateCheck() && updatePackage != null) {
             try {
                 platformUpdater.launchUpdater(updatePackage, updateVersion, restartRequested);
             } catch (Exception e) {
@@ -239,7 +241,7 @@ public class UpdateManager {
         Notifications n = Notifications.create()
                 .title("New release available!")
                 .text("You are currently running " + AppEnvironment.APP_NAME + " version " +
-                        AppEnvironment.getInstance().getVersion() +
+                        appEnv.getVersion() +
                         "\t\t\nVersion " + release.getVersion() + " is now available.")
                 .hideAfter(Duration.seconds(20))
                 .position(Pos.BOTTOM_RIGHT)
@@ -329,8 +331,8 @@ public class UpdateManager {
         Objects.requireNonNull(signature, "Signature input stream cannot be null");
         Objects.requireNonNull(keyIn, "Key input stream cannot be null");
         signature = PGPUtil.getDecoderStream(signature);
-        JcaPGPObjectFactory pgpFact = new JcaPGPObjectFactory(signature);
-        PGPSignature sig = ((PGPSignatureList) pgpFact.nextObject()).get(0);
+        JcaPGPObjectFactory pgpFactory = new JcaPGPObjectFactory(signature);
+        PGPSignature sig = ((PGPSignatureList) pgpFactory.nextObject()).get(0);
         PGPPublicKeyRingCollection pgpPubRingCollection = new PGPPublicKeyRingCollection(PGPUtil.getDecoderStream(keyIn),
                 new JcaKeyFingerprintCalculator());
         PGPPublicKey key = pgpPubRingCollection.getPublicKey(sig.getKeyID());
