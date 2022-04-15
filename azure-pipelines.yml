@@ -14,6 +14,7 @@ variables:
   system.debug: false
   isTag: 'false'
   isSnapshot: 'false'
+  javaVersion: '18'
   jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-linux_x64.tar.gz'
   jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-macosx_x64.tar.gz'
   jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-win_x64.zip'
@@ -28,8 +29,9 @@ stages:
           platform: linux
           jdkDownloadUrl: $(jdkUrlLinux)
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
+          javaVersion: $(javaVersion)
           pool:
-            vmImage: 'ubuntu-18.04'
+            vmImage: 'ubuntu-20.04'
 
       # MacOS app bundle job
       - template: build-job.yml
@@ -38,8 +40,9 @@ stages:
           platform: mac
           jdkDownloadUrl: $(jdkUrlMacos)
           jdkFile: $(Agent.TempDirectory)/jdk-latest-macosx_x64.tar.gz
+          javaVersion: $(javaVersion)
           pool:
-            vmImage: 'macOS-10.15'
+            vmImage: 'macOS-11'
 
       # Windows app bundle job
       - template: build-job.yml
@@ -48,8 +51,9 @@ stages:
           platform: win
           jdkDownloadUrl: $(jdkUrlWin64)
           jdkFile: $(Agent.TempDirectory)/jdk-latest-win_x64.zip
+          javaVersion: $(javaVersion)
           pool:
-            vmImage: 'windows-2019'
+            vmImage: 'windows-2022'
 
       # Finalize release
   - stage: deploy_site
@@ -58,14 +62,14 @@ stages:
     jobs:
     - job: deploy_site
       pool:
-        vmImage: 'ubuntu-18.04'
+        vmImage: 'ubuntu-20.04'
       steps:
         - script: |
             curl $(jdkUrlLinux) --output $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
 
         - task: JavaToolInstaller@0
           inputs:
-            versionSpec: "17"
+            versionSpec: $(javaVersion)
             jdkArchitectureOption: x64
             jdkSourceOption: LocalDirectory
             jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
@@ -90,7 +94,7 @@ stages:
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'
-            jdkVersionOption: '1.17'
+            jdkVersionOption: 1.$(javaVersion)
             jdkArchitectureOption: 'x64'
             publishJUnitResults: false
             tasks: 'expandMdTemplates'
@@ -122,7 +126,7 @@ stages:
     # Publish to Maven repo
     - job: maven_publish
       pool:
-        vmImage: 'ubuntu-18.04'
+        vmImage: 'ubuntu-20.04'
       steps:
         - script: |
             echo '##vso[task.setvariable variable=isTag;]true'
@@ -133,7 +137,7 @@ stages:
 
         - task: JavaToolInstaller@0
           inputs:
-            versionSpec: "17"
+            versionSpec: $(javaVersion)
             jdkArchitectureOption: x64
             jdkSourceOption: LocalDirectory
             jdkFile: $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
@@ -159,7 +163,7 @@ stages:
           inputs:
             gradleWrapperFile: 'gradlew'
             javaHomeOption: 'JDKVersion'
-            jdkVersionOption: '1.17'
+            jdkVersionOption: 1.$(javaVersion)
             jdkArchitectureOption: 'x64'
             publishJUnitResults: false
             tasks: 'publishArtifacts'
