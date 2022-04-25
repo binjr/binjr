@@ -65,9 +65,7 @@
 ;
     -fx-accent: -binjr-dark-blue-color
 ;
-    -fx-accent-translucide: rgba(65, 142, 173, 0.2);
-    -fx-control-inner-background: -binjr-pane-background-color;
-    -fx-control-inner-background-alt:  -binjr-pane-background-color;
+    -fx-accent-translucide: rgba(65, 142, 173, 0.2)
 ;
 /****/
 
