@@ -15,9 +15,9 @@ variables:
   isTag: 'false'
   isSnapshot: 'false'
   javaVersion: '18'
-  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-linux_x64.tar.gz'
-  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-macosx_x64.tar.gz'
-  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu18.28.13-ca-jdk18.0.0-win_x64.zip'
+  jdkUrlLinux: 'https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-linux_x64.tar.gz'
+  jdkUrlMacos: 'https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-macosx_x64.tar.gz'
+  jdkUrlWin64: 'https://cdn.azul.com/zulu/bin/zulu18.30.11-ca-jdk18.0.1-win_x64.zip'
 
 stages:
   - stage: build
