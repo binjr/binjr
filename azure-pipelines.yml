@@ -31,7 +31,7 @@ stages:
           jdkFile:  $(Agent.TempDirectory)/jdk-latest-linux_x64.tar.gz
           javaVersion: $(javaVersion)
           pool:
-            vmImage: 'ubuntu-20.04'
+            vmImage: 'ubuntu-18.04'
 
       # MacOS app bundle job
       - template: build-job.yml
