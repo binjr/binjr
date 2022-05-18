@@ -1,3 +1,10 @@
+## [binjr v3.7.0](https://github.com/binjr/binjr/releases/tag/v3.8.0)
+Released on Wed, 18 May 2022
+
+* _[New]_ It is now possible to reorder worksheet tabs using drag and drop.
+* _[New]_ Use a more robust cache mechanism for data fetched from data adapters.
+* _[New]_ It is now possible to override the root location for *binjr* temporary folders and files, by setting the `temporaryFilesRoot` property.
+
 ## [binjr v3.7.0](https://github.com/binjr/binjr/releases/tag/v3.7.0)
 Released on Wed, 23 Mar 2022
 
