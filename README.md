@@ -95,17 +95,21 @@ setup nor maintenance to speak of.
   * Cross-platform: works great on Linux, macOS and Windows desktops!
   * Strong performances, even under heavy load (dozens of charts with dozens of series and thousands of samples).  
 
-  
 ## Supported data sources
 
 ***binjr*** can consume time series data provided by the following data sources:
 
-* [JRDS](https://github.com/fbacchella/jrds): A performance monitoring application written in Java.
-* [Netdata](https://www.netdata.cloud):  distributed, real-time performance and health monitoring for systems and applications
-* Round-Robin Database (RRD) files, produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j).
-* Comma Separated Values (CSV) files.
-* Text based, semi-structured log files.
-* [A stand-alone demonstration data source.](#trying-it-out)
+|Name   | Description | Built-in[1]          | Source type  |
+|-------|-------------|-----------------------|--------------|
+| CSV Files | Comma Separated Values files. |    ✓    | Local files | 
+| [Demo Adapter](https://github.com/binjr/binjr-adapter-demo) |A plugin for binjr that provides data sources for demonstration purposes.|         |Local files |
+| [JRDS](https://github.com/fbacchella/jrds)      | A performance monitoring application written in Java. |    ✓    | Remote |
+| Log Files | Text based, semi-structured log files. |    ✓    | Local files | 
+| [Netdata](https://www.netdata.cloud)   | Distributed, real-time performance and health monitoring for systems and applications. |    ✓    | Remote |
+| RRD Files | Round-Robin Database files produced by [RRDtool](https://oss.oetiker.ch/rrdtool/) and [RRD4J](https://github.com/rrd4j/rrd4j). |    ✓    | Local files | 
+
+
+[1]: Support for data sources not marked as *'Built-in'* requires additional plugins.
 
 ## Getting started
 
@@ -130,24 +134,6 @@ Simply clone the [repo from Github](https://github.com/binjr/binjr/) and run:
 * `./gradlew clean packageDistribution` to build an application bundle for the platform on which you ran the build.
 > Please note that it is mandatory to run the `clean` task in between two executions of the `packageDistribution` in 
 > the same environment.
-
-
-#### Download and run the latest version from the command line.
-  
- Alternatively, if your environment is properly set up to run Java 11+ and Apache Maven, you can start ***binjr*** simply 
- by running a single command line:
- * Linux / macOS:
-   ```
-   mvn exec:java -f <(curl https://binjr.eu/run-binjr.pom)
-   ```
- * Windows:
-   ```
-   curl https://binjr.eu/run-binjr.pom > %temp%\run-binjr.pom & mvn exec:java -f %temp%\run-binjr.pom  
-   ```
- 
- See [Launch the latest version via Apache Maven](https://github.com/binjr/binjr/wiki/getting-started#launch-the-latest-version-via-apache-maven) 
- in the wiki form more details.
-
   
 ## Trying it out
 
@@ -166,7 +152,7 @@ It is a plugin which embeds a small, stand-alone data source that you can readil
   
 ## Getting help
 
-The documentation can be found [here](https://github.com/binjr/binjr/wiki/).
+The documentation can be found [here](https://binjr.eu/documentation/getting-started/).
 
 If you encounter an issue, or would like to suggest an enhancement or a new feature, you may do so [here](https://github.com/binjr/binjr/issues).
 
