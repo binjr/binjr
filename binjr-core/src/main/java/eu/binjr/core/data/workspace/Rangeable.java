@@ -17,6 +17,7 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.core.data.adapters.DataAdapter;
 import eu.binjr.core.data.exceptions.DataAdapterException;
 
@@ -27,7 +28,7 @@ import java.util.Map;
 import static java.util.stream.Collectors.groupingBy;
 
 public interface Rangeable<T> {
-
+    static final Logger logger = Logger.create(Rangeable.class);
     /**
      * Returns all the {@link TimeSeriesInfo} for this the {@link Rangeable}
      *
@@ -41,7 +42,7 @@ public interface Rangeable<T> {
      * @return the preferred time range to initialize a new {@link Rangeable} with.
      * @throws DataAdapterException if an error occurs while fetching data from an adapter.
      */
-    default TimeRange getInitialTimeRange() throws DataAdapterException {
+    default TimeRange getInitialTimeRange() {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
 
@@ -54,7 +55,16 @@ public interface Rangeable<T> {
                     byAdapterEntry.getValue().stream().collect(groupingBy(o -> o.getBinding().getPath()));
             for (var byPathEntry : bindingsByPath.entrySet()) {
                 String path = byPathEntry.getKey();
-                var timeRange = adapter.getInitialTimeRange(path, byPathEntry.getValue());
+
+                TimeRange timeRange = null;
+                try {
+                    timeRange = adapter.getInitialTimeRange(path, byPathEntry.getValue());
+                } catch (DataAdapterException e) {
+                    logger.warn("An error occured while attempting to retrieve inital time range for adapter " +
+                            adapter.getId() + ": " + e.getMessage());
+                    logger.debug(() -> "Stack trace", e);
+                    timeRange = TimeRange.last24Hours();
+                }
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();
                 }

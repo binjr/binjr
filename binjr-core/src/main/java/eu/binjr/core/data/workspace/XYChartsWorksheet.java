@@ -27,6 +27,7 @@ import eu.binjr.core.data.adapters.TimeSeriesBinding;
 import eu.binjr.core.data.dirtyable.ChangeWatcher;
 import eu.binjr.core.data.dirtyable.IsDirtyable;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserPreferences;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.*;
@@ -47,7 +48,7 @@ import java.util.stream.Collectors;
  * @author Frederic Thevenet
  */
 @XmlAccessorType(XmlAccessType.PROPERTY)
-public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
+public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Rangeable<Double> {
     private static final Logger logger = Logger.create(XYChartsWorksheet.class);
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
@@ -180,7 +181,7 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
         this.timeRangeLinked = new SimpleBooleanProperty(timeRangeLinked);
         this.selectedChart = new SimpleObjectProperty<>(0);
         this.dividerPosition = new SimpleDoubleProperty(0.7);
-        this.minChartHeight =  new SimpleDoubleProperty(UserPreferences.getInstance().minChartHeight.get().doubleValue());
+        this.minChartHeight = new SimpleDoubleProperty(UserPreferences.getInstance().minChartHeight.get().doubleValue());
         // Change watcher must be initialized after dirtyable properties or they will not be tracked.
         this.status = new ChangeWatcher(this);
     }
@@ -309,12 +310,12 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
             this.multiSelectedIndices.clear();
             this.multiSelectedIndices.add(selectedChart);
             this.selectedChart.setValue(selectedChart);
-        } else{
-            if (multiSelectedIndices.contains(selectedChart) && multiSelectedIndices.size() > 1){
+        } else {
+            if (multiSelectedIndices.contains(selectedChart) && multiSelectedIndices.size() > 1) {
                 // Remove selected index from multiple selection
                 this.multiSelectedIndices.remove(selectedChart);
                 this.selectedChart.setValue(multiSelectedIndices.stream().findFirst().orElse(0));
-            }else{
+            } else {
                 this.multiSelectedIndices.add(selectedChart);
                 this.selectedChart.setValue(selectedChart);
             }
@@ -423,6 +424,29 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
     @Override
     public void setTimeRangeLinked(Boolean timeRangeLinked) {
         this.timeRangeLinked.setValue(timeRangeLinked);
+    }
+
+    @Override
+    public List<? extends TimeSeriesInfo<Double>> getSeries() {
+        return this.getCharts().stream().flatMap(chart -> chart.getSeries().stream()).toList();
+    }
+
+    @Override
+    public TimeRange getInitialTimeRange(){
+        ZonedDateTime end = null;
+        ZonedDateTime beginning = null;
+        for (var c : this.getCharts()) {
+            var timeRange = c.getInitialTimeRange();
+            if (end == null || timeRange.getEnd().isAfter(end)) {
+                end = timeRange.getEnd();
+            }
+            if (beginning == null || timeRange.getEnd().isBefore(beginning)) {
+                beginning = timeRange.getBeginning();
+            }
+        }
+        return TimeRange.of(
+                beginning == null ? ZonedDateTime.now().minusHours(24) : beginning,
+                end == null ? ZonedDateTime.now() : end);
     }
 
     @XmlAttribute

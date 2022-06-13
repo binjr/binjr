@@ -726,21 +726,14 @@ public class XYChartsWorksheetController extends WorksheetController {
         timeRangePicker.initSelectedRange(TimeRange.of(currentState.getStartX(), currentState.getEndX()));
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) ->
                 currentState.setSelection(currentState.selectTimeRange(newValue.getBeginning(), newValue.getEnd()), true));
-        timeRangePicker.setOnResetInterval(() -> {
-            try {
-                return worksheet.getCharts().get(0).getInitialTimeRange();
-            } catch (Exception e) {
-                Dialogs.notifyException("Error resetting range", e);
-            }
-            return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
-        });
-
+        timeRangePicker.setOnResetInterval(() -> worksheet.getInitialTimeRange());
         currentState.timeRangeProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 timeRangePicker.updateSelectedRange(newValue);
             }
         });
     }
+
 
     private Map<Chart, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
@@ -1154,11 +1147,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 // Set the time range of the whole worksheet to accommodate the new bindings
                 // if there are no other series present.
                 if (worksheet.getTotalNumberOfSeries() == 0) {
-                    try {
-                        this.timeRangePicker.selectedRangeProperty().setValue(charts.get(0).getInitialTimeRange());
-                    } catch (DataAdapterException e) {
-                        logger.error("Failed to reset time range", e);
-                    }
+                    this.timeRangePicker.selectedRangeProperty().setValue(worksheet.getInitialTimeRange());
                 }
                 worksheet.getCharts().addAll(charts);
             });
@@ -1307,11 +1296,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         // Set the time range of the whole worksheet to accommodate the new bindings
         // if there are no other series present.
         if (worksheet.getTotalNumberOfSeries() == timeSeriesBindings.size()) {
-            try {
-                this.timeRangePicker.selectedRangeProperty().setValue(targetChart.getInitialTimeRange());
-            } catch (DataAdapterException e) {
-                logger.error("Failed to reset time range", e);
-            }
+            this.timeRangePicker.selectedRangeProperty().setValue(targetChart.getInitialTimeRange());
         }
         invalidate(false, false, false);
     }

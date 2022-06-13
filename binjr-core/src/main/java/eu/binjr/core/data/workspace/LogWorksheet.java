@@ -17,6 +17,7 @@
 package eu.binjr.core.data.workspace;
 
 import eu.binjr.common.javafx.controls.TimeRange;
+import eu.binjr.common.logging.Logger;
 import eu.binjr.common.navigation.NavigationHistory;
 import eu.binjr.core.controllers.LogWorksheetController;
 import eu.binjr.core.controllers.WorksheetController;
@@ -44,7 +45,7 @@ import static java.util.stream.Collectors.groupingBy;
 
 @XmlAccessorType(XmlAccessType.PROPERTY)
 public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rangeable<SearchHit> {
-
+    private static final Logger logger = Logger.create(LogWorksheet.class);
     private transient final NavigationHistory<LogQueryParameters> history = new NavigationHistory<>();
     private final transient ChangeWatcher status;
     private boolean syntaxHighlightEnabled = true;
@@ -144,7 +145,7 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
             // we're only interested in the leaves
             for (var b : root.getBindings()) {
                 if (b instanceof LogFilesBinding logBinding) {
-                    this.seriesInfo.add( LogFileSeriesInfo.fromBinding(logBinding));
+                    this.seriesInfo.add(LogFileSeriesInfo.fromBinding(logBinding));
                 }
             }
         }
@@ -269,14 +270,22 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     }
 
     @Override
-    public TimeRange getInitialTimeRange() throws DataAdapterException {
+    public TimeRange getInitialTimeRange() {
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
         Map<DataAdapter<SearchHit>, List<TimeSeriesInfo<SearchHit>>> bindingsByAdapters =
                 getSeries().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
             if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
-                var timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
+                TimeRange timeRange = null;
+                try {
+                    timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
+                } catch (DataAdapterException e) {
+                    logger.warn("An error occured while attempting to retrieve inital time range for adapter " +
+                            adapter.getId() + ": " + e.getMessage());
+                    logger.debug(() -> "Stack trace", e);
+                    timeRange = TimeRange.last24Hours();
+                }
                 if (end == null || timeRange.getEnd().isAfter(end)) {
                     end = timeRange.getEnd();
                 }
