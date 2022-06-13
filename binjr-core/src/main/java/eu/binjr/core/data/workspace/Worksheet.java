@@ -100,9 +100,6 @@ public abstract class Worksheet<T> implements Dirtyable {
     @Override
     public abstract void close();
 
-    @Deprecated
-    public abstract Worksheet<T> clone();
-
     public abstract void initWithBindings(String title, BindingsHierarchy... rootItems) throws DataAdapterException;
 
     protected abstract List<? extends TimeSeriesInfo<T>> listAllSeriesInfo();

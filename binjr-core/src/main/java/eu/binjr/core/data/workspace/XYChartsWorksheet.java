@@ -160,12 +160,6 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable {
                 true);
     }
 
-    @Override
-    @Deprecated
-    public XYChartsWorksheet clone(){
-      return duplicate();
-    }
-
     private XYChartsWorksheet(String name,
                               List<Chart> charts,
                               ZoneId timezone,

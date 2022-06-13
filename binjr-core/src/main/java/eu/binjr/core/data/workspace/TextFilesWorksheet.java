@@ -82,12 +82,6 @@ public class TextFilesWorksheet extends Worksheet<String> {
     }
 
     @Override
-    @Deprecated
-    public TextFilesWorksheet clone(){
-        return duplicate();
-    }
-
-    @Override
     public void initWithBindings(String title, BindingsHierarchy... bindingsHierarchies) throws DataAdapterException {
         this.setName(title);
         for (var root : bindingsHierarchies) {
