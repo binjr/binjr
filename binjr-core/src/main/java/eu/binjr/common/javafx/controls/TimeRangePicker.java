@@ -68,6 +68,12 @@ public class TimeRangePicker extends HBox {
     private final BindingManager bindingManager = new BindingManager();
     private final ObjectProperty<Supplier<TimeRange>> onResetInterval = new SimpleObjectProperty<>();
 
+    public void setReferenceEndDateSupplier(Supplier<ZonedDateTime> referenceEndDateSupplier) {
+        this.referenceEndDateSupplier = referenceEndDateSupplier;
+    }
+
+    private Supplier<ZonedDateTime> referenceEndDateSupplier;
+
     public TimeRangePicker() throws IOException {
         super();
         this.previousIntervalBtn = new ToolButtonBuilder<>()
@@ -194,6 +200,7 @@ public class TimeRangePicker extends HBox {
                         }
                     }
                 });
+        referenceEndDateSupplier = () -> ZonedDateTime.now(zoneId.getValue());
     }
 
     public String getText() {
@@ -379,7 +386,6 @@ public class TimeRangePicker extends HBox {
         private BiConsumer<ZonedDateTime, ZonedDateTime> applyNewTimeRange = (start, end) -> {
             startDate.dateTimeValueProperty().setValue(start);
             endDate.dateTimeValueProperty().setValue(end);
-
         };
 
         private void stepBy(Duration intervalDuration) {
@@ -387,12 +393,11 @@ public class TimeRangePicker extends HBox {
         }
 
         private void last(Duration duration) {
-            ZonedDateTime end = ZonedDateTime.now(zoneId.getValue());
+            ZonedDateTime end = referenceEndDateSupplier.get();
             applyNewTimeRange.accept(end.minus(duration), end);
             // hide popup
             popup.hide();
         }
-
 
         private void forward(Duration duration) {
             shift(duration, ZonedDateTime::plus);

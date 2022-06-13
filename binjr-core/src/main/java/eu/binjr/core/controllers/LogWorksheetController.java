@@ -244,6 +244,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnMouseClicked(getBindingManager().registerHandler(event -> refresh(event.isControlDown())));
         // TimeRange Picker initialization
+        timeRangePicker.setReferenceEndDateSupplier(() -> worksheet.getInitialTimeRange().getEnd());
         getBindingManager().bindBidirectional(timeRangePicker.timeRangeLinkedProperty(), worksheet.timeRangeLinkedProperty());
         timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> invalidateFilter(true));
