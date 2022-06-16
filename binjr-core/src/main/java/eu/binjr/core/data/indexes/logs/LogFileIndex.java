@@ -485,9 +485,8 @@ public class LogFileIndex implements Searchable {
         doc.add(new FacetField(SEVERITY, severity));
         doc.add(new StoredField(SEVERITY, severity));
         // add all other sections as prefixed search fields
-        event.getSections().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e -> {
-            doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO));
-        });
+        event.getSections().entrySet().stream().filter(e -> !e.getKey().equals(SEVERITY)).forEach(e ->
+                doc.add(new TextField(e.getKey(), e.getValue(), Field.Store.NO)));
         indexWriter.addDocument(facetsConfig.build(taxonomyWriter, doc));
     }
 

@@ -735,7 +735,6 @@ public class XYChartsWorksheetController extends WorksheetController {
         });
     }
 
-
     private Map<Chart, XYChartSelection<ZonedDateTime, Double>> convertSelection(Map<XYChart<ZonedDateTime, Double>, XYChartSelection<ZonedDateTime, Double>> selection) {
         Map<Chart, XYChartSelection<ZonedDateTime, Double>> result = new HashMap<>();
         selection.forEach((xyChart, xyChartSelection) -> viewPorts.stream()

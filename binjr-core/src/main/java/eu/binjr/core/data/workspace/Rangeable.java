@@ -40,7 +40,6 @@ public interface Rangeable<T> {
      * Returns the preferred time range to initialize a new {@link Rangeable} with.
      *
      * @return the preferred time range to initialize a new {@link Rangeable} with.
-     * @throws DataAdapterException if an error occurs while fetching data from an adapter.
      */
     default TimeRange getInitialTimeRange() {
         ZonedDateTime end = null;
