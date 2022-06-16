@@ -325,12 +325,6 @@ public class OutputConsoleController implements Initializable {
         }
     }
 
-    public void handleDebugRunFinalization(ActionEvent actionEvent) {
-        try (Profiler p = Profiler.start("Force runFinalization", Binjr.runtimeDebuggingFeatures::debug)) {
-            System.runFinalization();
-        }
-    }
-
     public void handleDebugDumpHeapStats(ActionEvent actionEvent) {
         Binjr.runtimeDebuggingFeatures.debug(this::getJvmHeapStats);
     }
@@ -456,7 +450,6 @@ public class OutputConsoleController implements Initializable {
         addMenuItem(debugMenuButton, "Dump VM System Properties", "debug-low-icon", this::handleDebugDumpVmSystemProperties, true);
 
         addMenuItem(debugMenuButton, "Run GC", "debug-med-icon", this::handleDebugForceGC, false);
-        addMenuItem(debugMenuButton, "Run Finalization", "debug-med-icon", this::handleDebugRunFinalization, false);
         addMenuItem(debugMenuButton, "List Hotspot VM Options", "debug-med-icon", this::handleListHotspotVmOptions, true);
         addMenuItem(debugMenuButton, "Export User History", "debug-med-icon", this::handleExportUserHistory, false);
         addMenuItem(debugMenuButton, "Import User History", "debug-med-icon", this::handleImportUserHistory, false);
