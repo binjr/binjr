@@ -42,9 +42,7 @@ import eu.binjr.core.data.workspace.LogFileSeriesInfo;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.dialogs.Dialogs;
 import eu.binjr.core.preferences.UserHistory;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.LongProperty;
-import javafx.beans.property.SimpleLongProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
@@ -70,10 +68,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private static final Gson gson = new Gson();
     private static final String DEFAULT_PREFIX = "[Logs]";
     private static final String ZONE_ID_PARAM_NAME = "zoneId";
-    public static final String ROOT_PATH_PARAM_NAME = "rootPath";
-    public static final String FOLDER_FILTERS_PARAM_NAME = "folderFilters";
-    public static final String EXTENSIONS_FILTERS_PARAM_NAME = "fileExtensionsFilters";
-    public static final String PARSING_PROFILE_PARAM_NAME = "parsingProfile";
+    private static final String ROOT_PATH_PARAM_NAME = "rootPath";
+    private static final String FOLDER_FILTERS_PARAM_NAME = "folderFilters";
+    private static final String EXTENSIONS_FILTERS_PARAM_NAME = "fileExtensionsFilters";
+    private static final String PARSING_PROFILE_PARAM_NAME = "parsingProfile";
+    private static final BooleanProperty NO_CANCELLATION_REQUESTED = ReadOnlyBooleanWrapper.booleanProperty(new SimpleBooleanProperty(false));
     private final String sourceNamePrefix;
 
     private final Set<String> indexedFiles = new HashSet<>();
@@ -278,22 +277,23 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                                                                     boolean bypassCache) throws DataAdapterException {
-        return fetchData(path, begin, end, seriesInfo, bypassCache, null);
+        return fetchData(path, begin, end, seriesInfo, bypassCache, null, NO_CANCELLATION_REQUESTED);
     }
 
     @Deprecated
     @Override
     public TimeRange getInitialTimeRange(String path,
                                          List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
-        return getInitialTimeRange(path, seriesInfo, null);
+        return getInitialTimeRange(path, seriesInfo, null, null);
     }
 
     @Override
     public TimeRange getInitialTimeRange(String path,
                                          List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                         DoubleProperty progress) throws DataAdapterException {
+                                         DoubleProperty progress,
+                                         BooleanProperty cancellationRequested) throws DataAdapterException {
         try {
-            ensureIndexed(seriesInfo, progress, false);
+            ensureIndexed(seriesInfo, progress, false, cancellationRequested);
             return index.getTimeRangeBoundaries(
                     seriesInfo.stream()
                             .map(this::getPathFacetValue)
@@ -305,7 +305,8 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
 
     private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                             DoubleProperty progress,
-                                            boolean forceUpdate) throws IOException {
+                                            boolean forceUpdate,
+                                            BooleanProperty cancellationRequested) throws IOException {
         final var toDo = seriesInfo.stream()
                 .filter(p -> forceUpdate || !indexedFiles.contains(getPathFacetValue(p)))
                 .toList();
@@ -323,6 +324,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                     }
                 }
             };
+
             final LongProperty charRead = new SimpleLongProperty(0);
             charRead.addListener(progressListener);
             try {
@@ -331,15 +333,25 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                     String path = tsInfo.getBinding().getPath();
                     var parser = getEventParser(tsInfo);
                     var key = getPathFacetValue(tsInfo);
-                    index.add(key, fileBrowser.getData(path.replace(getId() + "/", "")), (i == toDo.size() - 1), parser, charRead);
+                    index.add(key,
+                            fileBrowser.getData(path.replace(getId() + "/", "")),
+                            (i == toDo.size() - 1), // commit if last file
+                            parser,
+                            charRead,
+                            cancellationRequested);
                     indexedFiles.add(key);
+                    if (cancellationRequested.get()) {
+                        break;
+                    }
                 }
             } finally {
-                //remove listener
+                // remove listener
                 charRead.removeListener(progressListener);
                 if (progress != null) {
                     Dialogs.runOnFXThread(() -> progress.setValue(-1));
                 }
+                // reset cancellation request
+                cancellationRequested.setValue(false);
             }
         }
     }
@@ -350,10 +362,11 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                                                                                     Instant end,
                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
                                                                                     boolean forceUpdate,
-                                                                                    DoubleProperty progress) throws DataAdapterException {
+                                                                                    DoubleProperty progress,
+                                                                                    BooleanProperty cancellationRequested) throws DataAdapterException {
         Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
         try {
-            ensureIndexed(seriesInfo, progress, forceUpdate);
+            ensureIndexed(seriesInfo, progress, forceUpdate, cancellationRequested);
         } catch (Exception e) {
             throw new DataAdapterException("Error fetching logs from " + path, e);
         }

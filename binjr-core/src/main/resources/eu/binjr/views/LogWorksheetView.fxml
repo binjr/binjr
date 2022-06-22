@@ -410,6 +410,7 @@
                     </Label>
                     <ProgressBar fx:id="progressIndicator" prefWidth="200.0"/>
                     <Label fx:id="progressStatus" text=""/>
+                    <Button fx:id="cancelIndexButton" text="Cancel"/>
                 </children>
             </VBox>
         </children>

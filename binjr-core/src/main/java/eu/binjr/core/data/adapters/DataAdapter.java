@@ -74,8 +74,7 @@ public interface DataAdapter<T> extends AutoCloseable {
      * @throws DataAdapterException if an error occurs.
      */
     default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<T>> seriesInfo) throws DataAdapterException {
-        var end = ZonedDateTime.now(getTimeZoneId());
-        return TimeRange.of(end.minusHours(24), end);
+        return TimeRange.last24Hours();
     }
 
     /**

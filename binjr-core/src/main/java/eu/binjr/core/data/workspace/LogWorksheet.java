@@ -69,6 +69,8 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
 
     private transient final DoubleProperty progress = new SimpleDoubleProperty(-1);
 
+    private transient final BooleanProperty cancellationRequested = new SimpleBooleanProperty(false);
+
     public LogWorksheet() {
         this("New File (" + globalCounter.getAndIncrement() + ")",
                 LogQueryParameters.empty(),
@@ -279,9 +281,12 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
             if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 TimeRange timeRange = null;
                 try {
-                    timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue(), progressProperty());
+                    timeRange = adapter.getInitialTimeRange("",
+                            byAdapterEntry.getValue(),
+                            progressProperty(),
+                            cancellationRequestedProperty());
                 } catch (DataAdapterException e) {
-                    logger.warn("An error occured while attempting to retrieve inital time range for adapter " +
+                    logger.warn("An error occurred while attempting to retrieve inital time range for adapter " +
                             adapter.getId() + ": " + e.getMessage());
                     logger.debug(() -> "Stack trace", e);
                     timeRange = TimeRange.last24Hours();
@@ -310,4 +315,13 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
     public DoubleProperty progressProperty() {
         return progress;
     }
+
+    public boolean isCancellationRequested() {
+        return cancellationRequested.get();
+    }
+
+    public BooleanProperty cancellationRequestedProperty() {
+        return cancellationRequested;
+    }
+
 }

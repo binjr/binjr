@@ -172,6 +172,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private Label progressStatus;
     @FXML
+    private Button cancelIndexButton;
+    @FXML
     private FacetPillsContainer severityListView;
     @FXML
     private TextField filterTextField;
@@ -248,14 +250,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bindBidirectional(timeRangePicker.timeRangeLinkedProperty(), worksheet.timeRangeLinkedProperty());
         timeRangePicker.initSelectedRange(worksheet.getQueryParameters().getTimeRange());
         timeRangePicker.setOnSelectedRangeChanged((observable, oldValue, newValue) -> invalidateFilter(true));
-        timeRangePicker.setOnResetInterval(() -> {
-            try {
-                return worksheet.getInitialTimeRange();
-            } catch (Exception e) {
-                Dialogs.notifyException("Error resetting time range", e);
-            }
-            return TimeRange.of(ZonedDateTime.now().minusHours(24), ZonedDateTime.now());
-        });
+        timeRangePicker.setOnResetInterval(worksheet::getInitialTimeRange);
         // Init navigation
         backButton.setOnAction(getBindingManager().registerHandler(event -> this.navigateBackward()));
         forwardButton.setOnAction(getBindingManager().registerHandler(event -> this.navigateForward()));
@@ -582,6 +577,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         textOutput.setOnDragExited(getBindingManager().registerHandler(event ->
                 textOutput.setStyle("-fx-background-color:  -binjr-pane-background-color;")));
 
+        // Setup progress and cancel controls
         getBindingManager().bind(progressStatus.textProperty(), Bindings.createStringBinding(() -> {
             if (progressIndicator.getProgress() < 0) {
                 return "";
@@ -591,6 +587,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         }, progressIndicator.progressProperty()));
         getBindingManager().bind(progressIndicator.progressProperty(), worksheet.progressProperty());
+
+        getBindingManager().bind(cancelIndexButton.visibleProperty(), Bindings.createBooleanBinding(() -> (progressIndicator.getProgress() >= 0), progressIndicator.progressProperty()));
+        cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.cancellationRequestedProperty().setValue(true)));
 
         // Init heatmap
         initHeatmap();
@@ -988,7 +987,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         }
                     }, event -> {
                         busyIndicator.setVisible(false);
-                        Dialogs.notifyException("An error occurred while loading text file: " +
+                        Dialogs.notifyException("An error occurred while indexing log file: " +
                                         event.getSource().getException().getMessage(),
                                 event.getSource().getException(),
                                 root);
@@ -1265,7 +1264,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         bindingsByPath.values().stream()
                                 .flatMap(Collection::stream)
                                 .filter(TimeSeriesInfo::isSelected)
-                                .collect(Collectors.toList()), forceUpdate, worksheet.progressProperty());
+                                .collect(Collectors.toList()),
+                        forceUpdate,
+                        worksheet.progressProperty(),
+                        worksheet.cancellationRequestedProperty());
             }
         }
         Map<String, Collection<String>> facets = new HashMap<>();

@@ -21,6 +21,7 @@ import eu.binjr.core.data.exceptions.DataAdapterException;
 import eu.binjr.core.data.timeseries.TimeSeriesProcessor;
 import eu.binjr.core.data.workspace.TimeSeriesInfo;
 import eu.binjr.core.data.workspace.XYChartsWorksheet;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 
 import java.time.Instant;
@@ -50,7 +51,8 @@ public interface ProgressAdapter<T> extends DataAdapter<T> {
                                                              Instant end,
                                                              List<TimeSeriesInfo<T>> seriesInfo,
                                                              boolean bypassCache,
-                                                             DoubleProperty progress) throws DataAdapterException;
+                                                             DoubleProperty progress,
+                                                             BooleanProperty cancellationRequested) throws DataAdapterException;
 
     /**
      * Returns a {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with so that it is
@@ -63,9 +65,11 @@ public interface ProgressAdapter<T> extends DataAdapter<T> {
      * @return the {@link TimeRange} to initiate a new {@link XYChartsWorksheet} with
      * @throws DataAdapterException if an error occurs.
      */
-    default TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<T>> seriesInfo, DoubleProperty progress) throws DataAdapterException {
-        var end = ZonedDateTime.now(getTimeZoneId());
-        return TimeRange.of(end.minusHours(24), end);
+    default TimeRange getInitialTimeRange(String path,
+                                          List<TimeSeriesInfo<T>> seriesInfo,
+                                          DoubleProperty progress,
+                                          BooleanProperty cancellationRequested) throws DataAdapterException {
+        return TimeRange.last24Hours();
     }
 
 }

@@ -32,6 +32,7 @@ import eu.binjr.core.data.indexes.parser.EventParser;
 import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.timeseries.FacetEntry;
 import eu.binjr.core.preferences.UserPreferences;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.LongProperty;
 import javafx.scene.chart.XYChart;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -165,12 +166,21 @@ public class LogFileIndex implements Searchable {
     }
 
     @Override
-    public void add(String path, InputStream ias, EventParser parser, LongProperty progress) throws IOException {
-        add(path, ias, true, parser, progress);
+    public void add(String path,
+                    InputStream ias,
+                    EventParser parser,
+                    LongProperty progress,
+                    BooleanProperty cancellationRequested) throws IOException {
+        add(path, ias, true, parser, progress, cancellationRequested);
     }
 
     @Override
-    public void add(String path, InputStream ias, boolean commit, EventParser parser, LongProperty progress) throws IOException {
+    public void add(String path,
+                    InputStream ias,
+                    boolean commit,
+                    EventParser parser,
+                    LongProperty progress,
+                    BooleanProperty cancellationRequested) throws IOException {
         try (Profiler ignored = Profiler.start("Clear docs from " + path, logger::perf)) {
             indexWriter.deleteDocuments(new Term(DOC_URI, path));
         }
@@ -219,7 +229,7 @@ public class LogFileIndex implements Searchable {
                 try (var reader = new BufferedReader(new InputStreamReader(ias, StandardCharsets.UTF_8))) {
                     String line;
                     int charRead = 0;
-                    while (!taskAborted.get() && (line = reader.readLine()) != null) {
+                    while (!taskAborted.get() && !cancellationRequested.get() && (line = reader.readLine()) != null) {
                         charRead += line.length();
                         if (charRead >= 10240) {
                             progress.set(progress.get() + charRead);
