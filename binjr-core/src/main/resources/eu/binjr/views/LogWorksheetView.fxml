@@ -70,7 +70,7 @@
                         <Font size="10.0"/>
                     </font>
                     <tooltip>
-                        <Tooltip showDelay="500ms" text="Refresh"/>
+                        <Tooltip showDelay="500ms" text="Refresh (Crtl+click for forced reload)"/>
                     </tooltip>
                 </Button>
                 <Pane HBox.hgrow="ALWAYS"/>
@@ -409,8 +409,33 @@
                         </font>
                     </Label>
                     <ProgressBar fx:id="progressIndicator" prefWidth="200.0"/>
-                    <Label fx:id="progressStatus" text=""/>
-                    <Button fx:id="cancelIndexButton" text="Cancel"/>
+                    <Label fx:id="progressStatus" text="">
+                        <padding>
+                            <Insets bottom="10.0" left="0.0" right="0.0" top="0.0"/>
+                        </padding>
+                    </Label>
+                    <Button fx:id="cancelIndexButton" alignment="CENTER"
+                            contentDisplay="LEFT"
+                            disable="false"
+                            graphicTextGap="12.0"
+                            maxHeight="-Infinity"
+                            maxWidth="-Infinity"
+                            minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false"
+
+                            styleClass="dialog-button" text="Cancel"
+                            textAlignment="CENTER">
+                        <padding>
+                            <Insets bottom="4.0" left="14.0" right="6.0" top="4.0"/>
+                        </padding>
+                        <graphic>
+                            <HBox alignment="CENTER" styleClass="icon-container">
+                                <Region styleClass="cancel-icon, medium-icon"/>
+                            </HBox>
+                        </graphic>
+                        <tooltip>
+                            <Tooltip showDelay="500ms" text="Cancel loading"/>
+                        </tooltip>
+                    </Button>
                 </children>
             </VBox>
         </children>
