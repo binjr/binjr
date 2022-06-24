@@ -1,4 +1,4 @@
-## [binjr v3.7.0](https://github.com/binjr/binjr/releases/tag/v3.8.0)
+## [binjr v3.8.0](https://github.com/binjr/binjr/releases/tag/v3.8.0)
 Released on Wed, 18 May 2022
 
 * _[New]_ It is now possible to reorder worksheet tabs using drag and drop.
