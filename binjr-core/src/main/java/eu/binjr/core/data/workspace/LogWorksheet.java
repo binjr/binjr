@@ -281,12 +281,9 @@ public class LogWorksheet extends Worksheet<SearchHit> implements Syncable, Rang
             if (byAdapterEntry.getKey() instanceof ProgressAdapter<SearchHit> adapter) {
                 TimeRange timeRange = null;
                 try {
-                    timeRange = adapter.getInitialTimeRange("",
-                            byAdapterEntry.getValue(),
-                            progressProperty(),
-                            cancellationRequestedProperty());
+                    timeRange = adapter.getInitialTimeRange("", byAdapterEntry.getValue());
                 } catch (DataAdapterException e) {
-                    logger.warn("An error occurred while attempting to retrieve inital time range for adapter " +
+                    logger.warn("An error occurred while attempting to retrieve initial time range for adapter " +
                             adapter.getId() + ": " + e.getMessage());
                     logger.debug(() -> "Stack trace", e);
                     timeRange = TimeRange.last24Hours();

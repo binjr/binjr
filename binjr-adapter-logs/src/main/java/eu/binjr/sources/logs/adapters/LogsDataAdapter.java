@@ -75,7 +75,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
     private static final BooleanProperty NO_CANCELLATION_REQUESTED = ReadOnlyBooleanWrapper.booleanProperty(new SimpleBooleanProperty(false));
     private final String sourceNamePrefix;
 
-    private final Set<String> indexedFiles = new HashSet<>();
+    private final Map<String, Boolean> indexedFiles = new HashMap<>();
     private final BinaryPrefixFormatter binaryPrefixFormatter = new BinaryPrefixFormatter("###,###.## ");
     private final MostRecentlyUsedList<String> defaultParsingProfiles =
             UserHistory.getInstance().stringMostRecentlyUsedList("defaultParsingProfiles", 100);
@@ -270,30 +270,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         return parent;
     }
 
-    @Deprecated
     @Override
-    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,
-                                                                                    Instant begin,
-                                                                                    Instant end,
-                                                                                    List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                    boolean bypassCache) throws DataAdapterException {
-        return fetchData(path, begin, end, seriesInfo, bypassCache, null, NO_CANCELLATION_REQUESTED);
-    }
-
-    @Deprecated
-    @Override
-    public TimeRange getInitialTimeRange(String path,
-                                         List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
-        return getInitialTimeRange(path, seriesInfo, null, null);
-    }
-
-    @Override
-    public TimeRange getInitialTimeRange(String path,
-                                         List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                         DoubleProperty progress,
-                                         BooleanProperty cancellationRequested) throws DataAdapterException {
+    public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<SearchHit>> seriesInfo) throws DataAdapterException {
         try {
-            ensureIndexed(seriesInfo, progress, false, cancellationRequested);
+            //  ensureIndexed(seriesInfo, progress, false, cancellationRequested);
             return index.getTimeRangeBoundaries(
                     seriesInfo.stream()
                             .map(this::getPathFacetValue)
@@ -303,18 +283,55 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
         }
     }
 
-    private synchronized void ensureIndexed(List<TimeSeriesInfo<SearchHit>> seriesInfo,
+
+    @Deprecated
+    @Override
+    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,
+                                                                                    Instant begin,
+                                                                                    Instant end,
+                                                                                    List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                                                                                    boolean bypassCache) throws DataAdapterException {
+        return loadSeries(path, seriesInfo, bypassCache ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, null, NO_CANCELLATION_REQUESTED);
+    }
+
+    @Override
+    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> loadSeries(String path,
+                                                                                     List<TimeSeriesInfo<SearchHit>> seriesInfo,
+                                                                                     ReloadPolicy reloadPolicy,
+                                                                                     DoubleProperty progress,
+                                                                                     BooleanProperty cancellationRequested) throws DataAdapterException {
+        Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
+        try {
+            ensureIndexed(seriesInfo.stream()
+                            .filter(s -> s instanceof LogFileSeriesInfo)
+                            .map(s -> (LogFileSeriesInfo) s)
+                            .toList(),
+                    progress,
+                    reloadPolicy,
+                    cancellationRequested);
+        } catch (Exception e) {
+            throw new DataAdapterException("Error fetching logs from " + path, e);
+        }
+        return data;
+    }
+
+    private synchronized void ensureIndexed(List<LogFileSeriesInfo> seriesInfo,
                                             DoubleProperty progress,
-                                            boolean forceUpdate,
+                                            ReloadPolicy reloadPolicy,
                                             BooleanProperty cancellationRequested) throws IOException {
         final var toDo = seriesInfo.stream()
-                .filter(p -> forceUpdate || !indexedFiles.contains(getPathFacetValue(p)))
+                .filter(p -> switch (reloadPolicy) {
+                      case ALL -> true;
+                      case UNLOADED -> !indexedFiles.containsKey(getPathFacetValue(p));
+                      case INCOMPLETE -> indexedFiles.getOrDefault(getPathFacetValue(p), true);
+                  })
                 .toList();
         if (toDo.size() > 0) {
             final long totalSizeInBytes = toDo.stream()
-                    .map(CheckedLambdas.wrap((CheckedFunction<TimeSeriesInfo<SearchHit>, Long, IOException>)
+                    .map(CheckedLambdas.wrap((CheckedFunction<LogFileSeriesInfo, Long, IOException>)
                             e -> fileBrowser.getEntry(e.getBinding().getPath().replace(getId() + "/", "")).getSize()))
                     .reduce(Long::sum).orElse(0L);
+
             final ChangeListener<Number> progressListener = (observable, oldValue, newValue) -> {
                 if (newValue != null && totalSizeInBytes > 0) {
                     var oldProgress = (oldValue.longValue() * 100 / totalSizeInBytes) / 100.0;
@@ -339,10 +356,7 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                             parser,
                             charRead,
                             cancellationRequested);
-                    indexedFiles.add(key);
-                    if (cancellationRequested.get()) {
-                        break;
-                    }
+                    indexedFiles.put(key, cancellationRequested.get());
                 }
             } finally {
                 // remove listener
@@ -354,23 +368,10 @@ public class LogsDataAdapter extends BaseDataAdapter<SearchHit> implements Progr
                 cancellationRequested.setValue(false);
             }
         }
-    }
-
-    @Override
-    public Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> fetchData(String path,
-                                                                                    Instant start,
-                                                                                    Instant end,
-                                                                                    List<TimeSeriesInfo<SearchHit>> seriesInfo,
-                                                                                    boolean forceUpdate,
-                                                                                    DoubleProperty progress,
-                                                                                    BooleanProperty cancellationRequested) throws DataAdapterException {
-        Map<TimeSeriesInfo<SearchHit>, TimeSeriesProcessor<SearchHit>> data = new HashMap<>();
-        try {
-            ensureIndexed(seriesInfo, progress, forceUpdate, cancellationRequested);
-        } catch (Exception e) {
-            throw new DataAdapterException("Error fetching logs from " + path, e);
+        // Update loading status for series
+        for (var series : seriesInfo) {
+            series.setLoadIncomplete(indexedFiles.get(getPathFacetValue(series)));
         }
-        return data;
     }
 
     private String readTextFile(String path) throws IOException {

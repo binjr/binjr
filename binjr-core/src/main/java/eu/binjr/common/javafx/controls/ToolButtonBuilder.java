@@ -16,6 +16,7 @@
 
 package eu.binjr.common.javafx.controls;
 
+import eu.binjr.common.colors.ColorUtils;
 import eu.binjr.common.javafx.bindings.BindingManager;
 import eu.binjr.core.preferences.UserPreferences;
 import javafx.beans.binding.Bindings;
@@ -30,6 +31,7 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
+import javafx.scene.paint.Color;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
@@ -52,6 +54,7 @@ public class ToolButtonBuilder<T extends ButtonBase> {
     private final List<Consumer<T>> bindings = new ArrayList<>();
     private boolean focusTraversable = true;
     private ContentDisplay contentDisplay = ContentDisplay.GRAPHIC_ONLY;
+    private String iconColorString = null;
 
     public ToolButtonBuilder() {
         this(null);
@@ -77,6 +80,9 @@ public class ToolButtonBuilder<T extends ButtonBase> {
         if (iconStyleClass != null && !iconStyleClass.isEmpty()) {
             Region icon = new Region();
             icon.getStyleClass().addAll(iconStyleClass);
+            if (iconColorString != null){
+                icon.setStyle("-fx-background-color:" + iconColorString + ";");
+            }
             btn.setGraphic(icon);
             btn.setAlignment(Pos.CENTER);
             btn.setContentDisplay(contentDisplay);
@@ -123,6 +129,11 @@ public class ToolButtonBuilder<T extends ButtonBase> {
 
     public ToolButtonBuilder<T> setIconStyleClass(String... iconStyleClass) {
         this.iconStyleClass = new ArrayList<>(Arrays.asList(iconStyleClass));
+        return this;
+    }
+
+    public ToolButtonBuilder<T> setIconColor(Color color){
+        this.iconColorString = ColorUtils.toHex(color);
         return this;
     }
 

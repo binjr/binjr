@@ -594,7 +594,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         // Init heatmap
         initHeatmap();
 
-        invalidate(false, false, false, false);
+        invalidate(false, false, ReloadPolicy.UNLOADED, false);
         super.initialize(location, resources);
     }
 
@@ -846,7 +846,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 }
             }
         }
-        this.invalidate(false, false, false, true);
+        this.invalidate(false, false, ReloadPolicy.UNLOADED, true);
     }
 
     @Override
@@ -879,14 +879,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
     @Override
     public void refresh(boolean force) {
-        invalidate(false, false, force, true);
+        invalidate(false, false, force ? ReloadPolicy.ALL : ReloadPolicy.UNLOADED, true);
     }
 
     private void invalidate(boolean saveToHistory, boolean resetPage) {
-        invalidate(saveToHistory, resetPage, false, false);
+        invalidate(saveToHistory, resetPage, ReloadPolicy.UNLOADED, false);
     }
 
-    private void invalidate(boolean saveToHistory, boolean resetPage, boolean requestUpdate, boolean ignoreCache) {
+    private void invalidate(boolean saveToHistory, boolean resetPage, ReloadPolicy requestUpdate, boolean ignoreCache) {
         Dialogs.runOnFXThread(() -> {
             makeFilesCss(worksheet.getSeriesInfo());
             if (resetPage) {
@@ -899,11 +899,11 @@ public class LogWorksheetController extends WorksheetController implements Synca
         });
     }
 
-    private void queryLogIndex(boolean forceUpdate, boolean ignoreCache) {
+    private void queryLogIndex(ReloadPolicy reloadPolicy, boolean ignoreCache) {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
                         busyIndicator.setVisible(true);
-                        return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters(), forceUpdate, ignoreCache);
+                        return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters(), reloadPolicy, ignoreCache);
                     },
                     event -> {
                         getBindingManager().suspend();
@@ -1082,6 +1082,25 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 t -> t.getTableView().getItems().get(
                         t.getTablePosition().getRow()).setDisplayName(t.getNewValue()))
         );
+        TableColumn<LogFileSeriesInfo, Boolean> incompleteLoad = new TableColumn<>();
+        incompleteLoad.setEditable(false);
+        incompleteLoad.setSortable(false);
+        incompleteLoad.setResizable(false);
+        incompleteLoad.setPrefWidth(40);
+        incompleteLoad.setCellValueFactory(p -> p.getValue().loadIncompleteProperty());
+        incompleteLoad.setCellFactory(param -> {
+                    var icon = new ToolButtonBuilder<Button>(getBindingManager())
+                            .setText("warning")
+                            .setTooltip("This series was not completely loaded. Click here to reload.")
+                            .setStyleClass("dialog-button")
+                            .setIconStyleClass("warning-icon", "medium-icon")
+                            .setFocusTraversable(false)
+                            .setIconColor(Color.ORANGE)
+                            .setAction(event -> invalidate(false, false, ReloadPolicy.INCOMPLETE, true))
+                            .build(Button::new);
+                    return new IconTableCell<>(icon);
+                }
+        );
 
         TableColumn<LogFileSeriesInfo, String> eventNumColumn = new TableColumn<>("Nb events");
         eventNumColumn.setSortable(false);
@@ -1130,6 +1149,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 visibleColumn,
                 colorColumn,
                 nameColumn,
+                incompleteLoad,
                 eventNumColumn,
                 parsingColumn,
                 pathColumn);
@@ -1233,7 +1253,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     }
 
     private TimeSeriesProcessor<SearchHit> fetchDataFromSources(LogQueryParameters filter,
-                                                                boolean forceUpdate,
+                                                                ReloadPolicy forceUpdate,
                                                                 boolean ignoreCache) throws DataAdapterException {
         // prune series from closed adapters
         worksheet.getSeriesInfo().removeIf(seriesInfo -> {
@@ -1244,15 +1264,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
             }
             return false;
         });
-        if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
-                filter.getTimeRange().getDuration() == java.time.Duration.ZERO) {
-            var initialRange = worksheet.getInitialTimeRange();
-            worksheet.setQueryParameters(new LogQueryParameters.Builder(filter).setTimeRange(initialRange).build());
-            timeRangePicker.updateSelectedRange(initialRange);
-        }
         var queryArgs = gson.toJson(filter);
-        var start = worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant();
-        var end = worksheet.getQueryParameters().getTimeRange().getEnd().toInstant();
         var bindingsByAdapters =
                 worksheet.getSeriesInfo().stream().collect(groupingBy(o -> o.getBinding().getAdapter()));
         for (var byAdapterEntry : bindingsByAdapters.entrySet()) {
@@ -1260,7 +1272,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
                 // Group all queries with the same adapter and path
                 var bindingsByPath =
                         byAdapterEntry.getValue().stream().collect(groupingBy(LogFileSeriesInfo::getPathFacetValue));
-                var data = adapter.fetchData(queryArgs, start, end,
+                adapter.loadSeries(queryArgs,
                         bindingsByPath.values().stream()
                                 .flatMap(Collection::stream)
                                 .filter(TimeSeriesInfo::isSelected)
@@ -1270,6 +1282,14 @@ public class LogWorksheetController extends WorksheetController implements Synca
                         worksheet.cancellationRequestedProperty());
             }
         }
+        if (filter.getTimeRange().getBeginning().toInstant().equals(Instant.EPOCH) &&
+                filter.getTimeRange().getDuration() == java.time.Duration.ZERO) {
+            var initialRange = worksheet.getInitialTimeRange();
+            worksheet.setQueryParameters(new LogQueryParameters.Builder(filter).setTimeRange(initialRange).build());
+            timeRangePicker.updateSelectedRange(initialRange);
+        }
+        var start = worksheet.getQueryParameters().getTimeRange().getBeginning().toInstant();
+        var end = worksheet.getQueryParameters().getTimeRange().getEnd().toInstant();
         Map<String, Collection<String>> facets = new HashMap<>();
         facets.put(LogFileIndex.PATH, worksheet.getSeriesInfo()
                 .stream()

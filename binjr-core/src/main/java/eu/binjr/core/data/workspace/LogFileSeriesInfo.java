@@ -27,6 +27,7 @@ import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import jakarta.xml.bind.annotation.*;
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.paint.Color;
 
@@ -40,11 +41,12 @@ import javafx.scene.paint.Color;
 public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
 
     @IsDirtyable
-   private final Property<ParsingProfile> parsingProfile;
+    private final Property<ParsingProfile> parsingProfile;
+
+    private final Property<Boolean> loadIncomplete = new SimpleBooleanProperty(false);
 
     @XmlTransient
     private final ChangeWatcher status;
-
 
     /**
      * Parameter-less constructor (needed for XMl serialization)
@@ -146,12 +148,25 @@ public class LogFileSeriesInfo extends TimeSeriesInfo<SearchHit> {
         this.parsingProfile.setValue(parsingProfile);
     }
 
-    public Property<ParsingProfile> parsingProfileProperty(){
+    public Property<ParsingProfile> parsingProfileProperty() {
         return this.parsingProfile;
     }
 
     @XmlTransient
-    public String getPathFacetValue(){
-        return makePathFacetValue(getParsingProfile(), this) ;
+    public String getPathFacetValue() {
+        return makePathFacetValue(getParsingProfile(), this);
+    }
+
+    @XmlTransient
+    public Boolean isLoadComplete() {
+        return loadIncomplete.getValue();
+    }
+
+    public Property<Boolean> loadIncompleteProperty() {
+        return loadIncomplete;
+    }
+
+    public void setLoadIncomplete(Boolean loadComplete) {
+        this.loadIncomplete.setValue(loadComplete);
     }
 }
