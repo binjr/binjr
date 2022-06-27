@@ -24,10 +24,10 @@ import eu.binjr.core.data.indexes.parser.ParsedEvent;
 import eu.binjr.core.data.indexes.parser.capture.CaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.NamedCaptureGroup;
 import eu.binjr.core.data.indexes.parser.capture.TemporalCaptureGroup;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.CustomParsingProfile;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.Dialogs;
+
 import eu.binjr.core.preferences.UserHistory;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -66,8 +66,9 @@ import static eu.binjr.core.data.indexes.parser.capture.CaptureGroup.SEVERITY;
 public class ParsingProfilesController implements Initializable {
     private static final Logger logger = Logger.create(ParsingProfilesController.class);
     private static final Pattern GROUP_TAG_PATTERN = Pattern.compile("\\$[a-zA-Z0-9]{2,}");
-    //private final LogsAdapterPreferences userPrefs;
     private static final Gson gson = new Gson();
+    private final ParsingProfile[] builtinParsingProfiles;
+    private final ParsingProfile defaultProfile;
 
 
     @FXML
@@ -110,6 +111,7 @@ public class ParsingProfilesController implements Initializable {
 
     private final ParsingProfile selectedProfile;
     private final Set<ParsingProfile> userParsingProfiles;
+    private final boolean allowTemporalCaptureGroupsOnly;
 
 
     @FXML
@@ -259,9 +261,26 @@ public class ParsingProfilesController implements Initializable {
     /**
      * Initalizes a new instance of the {@link ParsingProfilesController} class.
      */
-    public ParsingProfilesController(ParsingProfile[] userParsingProfiles, ParsingProfile selectedProfile) {
+    public ParsingProfilesController(ParsingProfile[] builtinParsingProfiles,
+                                     ParsingProfile[] userParsingProfiles,
+                                     ParsingProfile defaultProfile,
+                                     ParsingProfile selectedProfile) {
+        this(builtinParsingProfiles, userParsingProfiles, defaultProfile, selectedProfile, false);
+    }
+
+    /**
+     * Initalizes a new instance of the {@link ParsingProfilesController} class.
+     */
+    public ParsingProfilesController(ParsingProfile[] builtinParsingProfiles,
+                                     ParsingProfile[] userParsingProfiles,
+                                     ParsingProfile defaultProfile,
+                                     ParsingProfile selectedProfile,
+                                     boolean allowTemporalCaptureGroupsOnly) {
+        this.builtinParsingProfiles = builtinParsingProfiles;
+        this.defaultProfile = defaultProfile;
         this.selectedProfile = selectedProfile;
         this.userParsingProfiles = new HashSet<>(Arrays.asList(userParsingProfiles));
+        this.allowTemporalCaptureGroupsOnly = allowTemporalCaptureGroupsOnly;
         this.userParsingProfiles.add(selectedProfile);
     }
 
@@ -281,7 +300,7 @@ public class ParsingProfilesController implements Initializable {
         assert importProfileButton != null : "fx:id=\"importProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
         assert exportProfileButton != null : "fx:id=\"exportProfileButton\" was not injected: check your FXML file 'ParsingRulesView.fxml'.";
 
-        this.profileComboBox.getItems().setAll(BuiltInParsingProfile.values());
+        this.profileComboBox.getItems().setAll(builtinParsingProfiles);
         if (userParsingProfiles != null) {
             this.profileComboBox.getItems().addAll(userParsingProfiles);
         }
@@ -337,10 +356,15 @@ public class ParsingProfilesController implements Initializable {
         });
         profileComboBox.getSelectionModel().select(profileComboBox.getItems().stream()
                 .filter(p -> Objects.equals(p.getProfileId(), selectedProfile.getProfileId()))
-                .findAny().orElse(BuiltInParsingProfile.ALL));
-        NamedCaptureGroup[] knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
-        System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);
-        knownGroups[TemporalCaptureGroup.values().length] = CaptureGroup.of(SEVERITY);
+                .findAny().orElse(this.defaultProfile));
+        NamedCaptureGroup[] knownGroups;
+        if (allowTemporalCaptureGroupsOnly) {
+            knownGroups = TemporalCaptureGroup.values();
+        } else {
+            knownGroups = new NamedCaptureGroup[TemporalCaptureGroup.values().length + 1];
+            System.arraycopy(TemporalCaptureGroup.values(), 0, knownGroups, 0, TemporalCaptureGroup.values().length);
+            knownGroups[TemporalCaptureGroup.values().length] = CaptureGroup.of(SEVERITY);
+        }
         this.nameColumn.setCellFactory(list -> new ColoredTableCell(new StringConverter<>() {
             @Override
             public String toString(NamedCaptureGroup object) {

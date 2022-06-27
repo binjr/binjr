@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2020 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ import eu.binjr.core.preferences.AppEnvironment;
         siteUrl = AppEnvironment.HTTP_WWW_BINJR_EU,
         adapterClass = CsvFileAdapter.class,
         dialogClass = CsvFileAdapterDialog.class,
+        preferencesClass = CsvAdapterPreferences.class,
         sourceLocality = SourceLocality.LOCAL,
         apiLevel = AppEnvironment.PLUGIN_API_LEVEL
 )

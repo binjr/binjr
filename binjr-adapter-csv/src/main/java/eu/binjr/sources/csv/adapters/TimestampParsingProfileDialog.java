@@ -14,14 +14,14 @@
  *    limitations under the License.
  */
 
-package eu.binjr.core.dialogs;
+package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.appearance.StageAppearanceManager;
 import eu.binjr.core.controllers.ParsingProfilesController;
-import eu.binjr.core.data.indexes.parser.profile.BuiltInParsingProfile;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
 import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
-import eu.binjr.core.preferences.UserPreferences;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.control.*;
@@ -31,17 +31,21 @@ import javafx.stage.Window;
 
 import java.io.IOException;
 
-public class ParsingProfileDialog extends Dialog<ParsingProfile> {
+public class TimestampParsingProfileDialog extends Dialog<ParsingProfile> {
 
     private final DialogPane root;
 
-    public ParsingProfileDialog(Window owner, ParsingProfile selectedProfile) {
+    public TimestampParsingProfileDialog(Window owner, ParsingProfile selectedProfile) throws NoAdapterFoundException {
         FXMLLoader fXMLLoader = new FXMLLoader(getClass().getResource("/eu/binjr/views/ParsingProfilesDialogView.fxml"));
+        final CsvAdapterPreferences prefs;
+
+        prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
+
         var controller = new ParsingProfilesController(
-                BuiltInParsingProfile.values(),
-                UserPreferences.getInstance().userLogEventsParsingProfiles.get(),
-                BuiltInParsingProfile.ALL,
-                selectedProfile);
+                BuiltInCsvTimestampParsingProfile.values(),
+                prefs.csvTimestampParsingProfiles.get(),
+                BuiltInCsvTimestampParsingProfile.ISO,
+                selectedProfile, true);
         fXMLLoader.setController(controller);
 
         try {
@@ -62,7 +66,7 @@ public class ParsingProfileDialog extends Dialog<ParsingProfile> {
 
         Button okButton = (Button) getDialogPane().lookupButton(ButtonType.OK);
         okButton.addEventFilter(ActionEvent.ACTION, ae -> {
-            if (!controller.applyChanges()){
+            if (!controller.applyChanges()) {
                 ae.consume();
             }
         });
@@ -70,7 +74,7 @@ public class ParsingProfileDialog extends Dialog<ParsingProfile> {
         this.setResultConverter(dialogButton -> {
                     ButtonBar.ButtonData data = dialogButton == null ? null : dialogButton.getButtonData();
                     if (data == ButtonBar.ButtonData.OK_DONE) {
-                        UserPreferences.getInstance().userLogEventsParsingProfiles.set(controller.getCustomProfiles());
+                        prefs.csvTimestampParsingProfiles.set(controller.getCustomProfiles());
                         return controller.getSelectedProfile();
                     }
                     return null;

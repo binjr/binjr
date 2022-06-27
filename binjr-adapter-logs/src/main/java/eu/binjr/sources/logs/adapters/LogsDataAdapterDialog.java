@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020-2021 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -90,14 +90,14 @@ public class LogsDataAdapterDialog extends DataAdapterDialog<Path> {
         var parsingLabel = new Label("Parsing:");
         var parsingHBox = new HBox();
         parsingHBox.setSpacing(5);
-        updateProfileList(UserPreferences.getInstance().userParsingProfiles.get());
+        updateProfileList(UserPreferences.getInstance().userLogEventsParsingProfiles.get());
         parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
         var editParsingButton = new Button("Edit");
         editParsingButton.setOnAction(event -> {
             try {
                 new ParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
                     prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileId());
-                    updateProfileList( UserPreferences.getInstance().userParsingProfiles.get());
+                    updateProfileList( UserPreferences.getInstance().userLogEventsParsingProfiles.get());
                 });
             } catch (Exception e) {
                 Dialogs.notifyException("Failed to show parsing profile windows", e, owner);

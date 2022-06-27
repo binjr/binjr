@@ -1,5 +1,5 @@
 /*
- *    Copyright 2020 Frederic Thevenet
+ *    Copyright 2020-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -27,6 +27,8 @@ public enum TemporalCaptureGroup implements NamedCaptureGroup {
     MINUTE(ChronoField.MINUTE_OF_HOUR),
     SECOND(ChronoField.SECOND_OF_MINUTE),
     EPOCH(ChronoField.INSTANT_SECONDS),
+    MILLI(ChronoField.MILLI_OF_SECOND),
+    NANO(ChronoField.NANO_OF_SECOND),
     FRACTION(ChronoField.MILLI_OF_SECOND);
 
     private final TemporalField temporalMapping;

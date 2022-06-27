@@ -1,5 +1,5 @@
 /*
- *    Copyright 2017-2021 Frederic Thevenet
+ *    Copyright 2017-2022 Frederic Thevenet
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
  *    you may not use this file except in compliance with the License.
@@ -18,17 +18,23 @@ package eu.binjr.sources.csv.adapters;
 
 import eu.binjr.common.javafx.controls.NodeUtils;
 import eu.binjr.core.data.adapters.DataAdapter;
+import eu.binjr.core.data.adapters.DataAdapterFactory;
 import eu.binjr.core.data.exceptions.CannotInitializeDataAdapterException;
 import eu.binjr.core.data.exceptions.DataAdapterException;
+import eu.binjr.core.data.exceptions.NoAdapterFoundException;
+import eu.binjr.core.data.indexes.parser.profile.ParsingProfile;
 import eu.binjr.core.dialogs.DataAdapterDialog;
 import eu.binjr.core.dialogs.Dialogs;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.stage.FileChooser;
 
@@ -39,6 +45,7 @@ import java.nio.file.Paths;
 import java.time.ZoneId;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 
 /**
@@ -47,22 +54,51 @@ import java.util.List;
  * @author Frederic Thevenet
  */
 public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
-    private final TextField dateFormatPattern = new TextField("yyyy-MM-dd HH:mm:ss");
-    private final TextField encodingField = new TextField("utf-8");
-    private final TextField separatorField = new TextField(",");
+    private final TextField encodingField;
+    private final TextField separatorField;
     private int pos = 2;
+    private final CsvAdapterPreferences prefs;
+    private final ChoiceBox<ParsingProfile> parsingChoiceBox = new ChoiceBox<>();
 
     /**
      * Initializes a new instance of the {@link CsvFileAdapterDialog} class.
      *
      * @param owner the owner window for the dialog
      */
-    public CsvFileAdapterDialog(Node owner) {
-        super(owner, Mode.PATH,"mostRecentCsvFiles", true);
+    public CsvFileAdapterDialog(Node owner) throws NoAdapterFoundException {
+        super(owner, Mode.PATH, "mostRecentCsvFiles", true);
+        this.prefs = (CsvAdapterPreferences) DataAdapterFactory.getInstance().getAdapterPreferences(CsvFileAdapter.class.getName());
         this.setDialogHeaderText("Add a csv file");
-        addParamField(this.dateFormatPattern, "Date Format:");
+        this.encodingField = new TextField(prefs.mruEncoding.get());
+        this.separatorField= new TextField(prefs.mruCsvSeparator.get());
+        addParsingField(owner);
         addParamField(this.encodingField, "Encoding:");
         addParamField(this.separatorField, "Separator:");
+    }
+
+    private void addParsingField(Node owner) {
+        var parsingLabel = new Label("Date Format:");
+        var parsingHBox = new HBox();
+        parsingHBox.setSpacing(5);
+        updateProfileList(prefs.csvTimestampParsingProfiles.get());
+        parsingChoiceBox.setMaxWidth(Double.MAX_VALUE);
+        var editParsingButton = new Button("Edit");
+        editParsingButton.setOnAction(event -> {
+            try {
+                new TimestampParsingProfileDialog(this.getOwner(), parsingChoiceBox.getValue()).showAndWait().ifPresent(selection -> {
+                    prefs.mostRecentlyUsedParsingProfile.set(selection.getProfileId());
+                    updateProfileList(prefs.csvTimestampParsingProfiles.get());
+                });
+            } catch (Exception e) {
+                Dialogs.notifyException("Failed to show parsing profile windows", e, owner);
+            }
+        });
+        parsingHBox.getChildren().addAll(parsingChoiceBox, editParsingButton);
+        HBox.setHgrow(parsingChoiceBox, Priority.ALWAYS);
+        GridPane.setConstraints(parsingLabel, 0, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        GridPane.setConstraints(parsingHBox, 1, pos, 1, 1, HPos.LEFT, VPos.CENTER, Priority.ALWAYS, Priority.ALWAYS, new Insets(4, 0, 4, 0));
+        getParamsGridPane().getChildren().addAll(parsingLabel, parsingHBox);
+        pos++;
     }
 
     private void addParamField(TextField field, String label) {
@@ -98,11 +134,23 @@ public class CsvFileAdapterDialog extends DataAdapterDialog<Path> {
             throw new CannotInitializeDataAdapterException("The provided path is not valid.");
         }
         getMostRecentList().push(csvPath);
+        prefs.mruEncoding.set(encodingField.getText());
+        prefs.mruCsvSeparator.set(separatorField.getText());
         return List.of(new CsvFileAdapter(
                 getSourceUri(),
                 ZoneId.of(getSourceTimezone()),
                 encodingField.getText(),
-                dateFormatPattern.getText(),
+                parsingChoiceBox.getValue(),
                 separatorField.getText().charAt(0)));
     }
+
+    private void updateProfileList(ParsingProfile[] newValue) {
+        parsingChoiceBox.getItems().clear();
+        parsingChoiceBox.getItems().setAll(BuiltInCsvTimestampParsingProfile.values());
+        parsingChoiceBox.getItems().addAll(newValue);
+        parsingChoiceBox.getSelectionModel().select(parsingChoiceBox.getItems().stream()
+                .filter(p -> Objects.equals(p.getProfileId(), prefs.mostRecentlyUsedParsingProfile.get()))
+                .findAny().orElse(BuiltInCsvTimestampParsingProfile.ISO));
+    }
+
 }

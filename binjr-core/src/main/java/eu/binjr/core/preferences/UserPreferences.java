@@ -334,9 +334,9 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Path> temporaryFilesRoot = pathPreference("temporaryFilesRoot", Path.of(System.getProperty("java.io.tmpdir")));
 
     /**
-     * A list of user defined {@link ParsingProfile}
+     * A list of user defined {@link ParsingProfile} for parsing log events
      */
-    public ObservablePreference<ParsingProfile[]> userParsingProfiles =
+    public ObservablePreference<ParsingProfile[]> userLogEventsParsingProfiles =
             objectPreference(ParsingProfile[].class,
                     "userParsingProfiles",
                     new ParsingProfile[0],
