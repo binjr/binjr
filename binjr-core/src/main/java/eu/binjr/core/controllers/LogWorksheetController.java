@@ -96,7 +96,6 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -116,7 +115,6 @@ public class LogWorksheetController extends WorksheetController implements Synca
     public static final String PSEUDOCLASS_FAVORITES = "favorites";
     public static final String PSEUDOCLASS_HISTORY = "history";
     public static final String PSEUDOCLASS_CATEGORY = "category";
-    private static final DateTimeFormatter TIMELINE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
     public static final double AXIS_WIDTH = 15.0;
     public static final double AXIS_HEIGHT = 15.0;
     private final LogWorksheet worksheet;
@@ -675,7 +673,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
 
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);
-        var crossHair = new XYChartCrosshair<>(map, heatmapArea, TIMELINE_FORMATTER::format);
+        var crossHair = new XYChartCrosshair<>(map, heatmapArea,dateTime ->
+                userPrefs.CrosshairLabelDateTimeStyle.get().getDateTimeFormatter().format(dateTime));
         crossHair.setDisplayFullHeightMarker(false);
         crossHair.setVerticalMarkerVisible(true);
         crossHair.setHorizontalMarkerVisible(false);
