@@ -92,7 +92,7 @@ public class ChartViewportsState implements AutoCloseable {
          */
         public AxisState(ChartViewPort chartViewPort, double startY, double endY) {
             this.chartViewPort = chartViewPort;
-            this.onRefreshViewportRequired = (observable, oldValue, newValue) ->  parent.invalidate(chartViewPort.getDataStore().isSaveHistoryArmed(), true, false);
+            this.onRefreshViewportRequired = (observable, oldValue, newValue) -> parent.invalidate(chartViewPort.getDataStore().isSaveHistoryArmed(), true, false);
             this.startY = new SimpleDoubleProperty(startY);
             this.endY = new SimpleDoubleProperty(endY);
             this.addListeners();
@@ -202,8 +202,8 @@ public class ChartViewportsState implements AutoCloseable {
     public ChartViewportsState(XYChartsWorksheetController parent, ZonedDateTime startX, ZonedDateTime endX) {
         this.parent = parent;
         onRefreshAllRequired = (observable, oldValue, newValue) -> parent.invalidate(true, false, false);
-        this.startX = new SimpleObjectProperty<>(roundDateTime(startX));
-        this.endX = new SimpleObjectProperty<>(roundDateTime(endX));
+        this.startX = new SimpleObjectProperty<>(startX);
+        this.endX = new SimpleObjectProperty<>(endX);
         this.startX.addListener(onRefreshAllRequired);
         this.endX.addListener(onRefreshAllRequired);
         for (ChartViewPort viewPort : parent.getViewPorts()) {
@@ -294,8 +294,8 @@ public class ChartViewportsState implements AutoCloseable {
         try {
             selectionMap.forEach((chart, xyChartSelection) -> get(chart).ifPresent(y -> y.setSelection(xyChartSelection, toHistory)));
             selectionMap.entrySet().stream().findFirst().ifPresent(entry -> {
-                ZonedDateTime newStartX = roundDateTime(entry.getValue().getStartX());
-                ZonedDateTime newEndX = roundDateTime(entry.getValue().getEndX());
+                final ZonedDateTime newStartX = entry.getValue().getStartX();
+                final ZonedDateTime newEndX = entry.getValue().getEndX();
                 boolean dontPlotChart = newStartX.isEqual(startX.get()) && newEndX.isEqual(endX.get());
                 this.startX.set(newStartX);
                 this.endX.set(newEndX);
@@ -332,17 +332,5 @@ public class ChartViewportsState implements AutoCloseable {
         }
         logger.debug(() -> "Could not find a saved state for chart " + chart.getName());
         return Optional.empty();
-    }
-
-    private ZonedDateTime roundDateTime(ZonedDateTime zdt) {
-        return ZonedDateTime.of(zdt.getYear(),
-                zdt.getMonthValue(),
-                zdt.getDayOfMonth(),
-                zdt.getHour(),
-                zdt.getMinute(),
-                zdt.getSecond(),
-                0,
-                zdt.getZone()
-        );
     }
 }
