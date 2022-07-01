@@ -594,7 +594,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         viewPorts.forEach(v -> map.put(v.getChart(), v.getPrefixFormatter()::format));
         var crossHair = new XYChartCrosshair<>(map, pane,
-                dateTime -> userPrefs.CrosshairLabelDateTimeStyle.get().getDateTimeFormatter().format(dateTime));
+                dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
         viewPorts.forEach(v -> v.setCrosshair(crossHair));
         crossHair.onSelectionDone(s -> {
             logger.debug(() -> "Applying zoom selection: " + s.toString());
@@ -645,7 +645,7 @@ public class XYChartsWorksheetController extends WorksheetController {
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(viewPorts.get(0).getChart(), viewPorts.get(0).getPrefixFormatter()::format);
         var crossHair = new XYChartCrosshair<>(map, chartParent,
-                dateTime -> userPrefs.CrosshairLabelDateTimeStyle.get().getDateTimeFormatter().format(dateTime));
+                dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
         var nbChartObs = new SimpleIntegerProperty(viewPorts.size());
         var crosshairHeightBinding = BooleanBinding.booleanExpression(userPrefs.fullHeightCrosshairMarker.property())
                 .and(Bindings.greaterThan(nbChartObs, 1));
@@ -671,7 +671,7 @@ public class XYChartsWorksheetController extends WorksheetController {
             LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> m = new LinkedHashMap<>();
             m.put(viewPorts.get(i).getChart(), viewPorts.get(i).getPrefixFormatter()::format);
             XYChartCrosshair<ZonedDateTime, Double> ch = new XYChartCrosshair<>(m, chartParent,
-                    dateTime -> userPrefs.CrosshairLabelDateTimeStyle.get().getDateTimeFormatter().format(dateTime));
+                    dateTime -> userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
             ch.displayFullHeightMarkerProperty().bind(crosshairHeightBinding);
             ch.onSelectionDone(s -> {
                 logger.debug(() -> "Applying zoom selection: " + s.toString());

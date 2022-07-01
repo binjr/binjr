@@ -343,8 +343,8 @@ public class UserPreferences extends ObservablePreferenceFactory {
                     s -> gson.toJson(s),
                     s -> gson.fromJson(s, CustomParsingProfile[].class)
             );
-    public ObservablePreference<DateTimeStyle> CrosshairLabelDateTimeStyle =
-            enumPreference(DateTimeStyle.class, "CrosshairLabelDateTimeStyle", DateTimeStyle.PRECISE);
+    public ObservablePreference<DateFormat> labelDateFormat =
+            enumPreference(DateFormat.class, "labelDateFormat", DateFormat.RFC_1123);
 
 
     public static class UserFavorites extends MruFactory {

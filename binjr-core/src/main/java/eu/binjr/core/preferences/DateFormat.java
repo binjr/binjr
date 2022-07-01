@@ -18,14 +18,13 @@ package eu.binjr.core.preferences;
 
 import java.time.format.DateTimeFormatter;
 
-public enum DateTimeStyle {
-    PRECISE(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS Z")),
-    PRETTY(DateTimeFormatter.RFC_1123_DATE_TIME);
+public enum DateFormat {
+    ISO(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss[.SSS] Z")),
+    RFC_1123(DateTimeFormatter.ofPattern("eee, dd MMM yyyy HH:mm:ss[.SSS] Z"));
 
     private final DateTimeFormatter dateTimeFormatter;
 
-    DateTimeStyle(DateTimeFormatter dateTimeFormatter) {
-
+    DateFormat(DateTimeFormatter dateTimeFormatter) {
         this.dateTimeFormatter = dateTimeFormatter;
     }
 

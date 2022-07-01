@@ -674,7 +674,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
         LinkedHashMap<XYChart<ZonedDateTime, Double>, Function<Double, String>> map = new LinkedHashMap<>();
         map.put(timeline, Object::toString);
         var crossHair = new XYChartCrosshair<>(map, heatmapArea,dateTime ->
-                userPrefs.CrosshairLabelDateTimeStyle.get().getDateTimeFormatter().format(dateTime));
+                userPrefs.labelDateFormat.get().getDateTimeFormatter().format(dateTime));
         crossHair.setDisplayFullHeightMarker(false);
         crossHair.setVerticalMarkerVisible(true);
         crossHair.setHorizontalMarkerVisible(false);
