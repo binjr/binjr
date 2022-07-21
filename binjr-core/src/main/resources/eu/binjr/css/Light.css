@@ -1,32 +1,59 @@
 {
-    -binjr-background-color: #204656;
-    -binjr-window-background-color: #F4F4F4;
-    -binjr-control-background-color: #E8E8E8;
-    -binjr-pane-background-color: white;
-    -binjr-button-background-color: transparent;
-    -binjr-color-lighter-gray: #E1E1E1;
-    -binjr-color-light-gray: #C2C2C2;
-    -binjr-color-gray: #999999;
-    -binjr-color-dark-gray: #666666;
-    -binjr-color-darker-gray: #333333;
-    -binjr-color-red: #E81123;
-    -binjr-color-light-red: #F1707A;
-    -binjr-dark-blue-color: #336F87;
-    -binjr-blue-color: #4BACC6;
-    -binjr-command-bar-title-color: #285668;
-    -binjr-command-bar-border-color: #152E38;
-    -binjr-light-blue-color: #92CDDC;
-    -binjr-lighter-blue-color: #B7DEE8;
-    -binjr-foreground-color: #DAEEF3;
-    -binjr-gray-border-color: #C8C8C8;
-    -binjr-warning-color: TOMATO;
-    -binjr-control-border-color: -binjr-color-dark-gray;
-    -icon-color: #494949;
-    SCROLL_BAR_THUMB: #BABABA;
-    SCROLL_BAR_TRACK: #f0f0f0;
+    -binjr-background-color: #204656
+;
+    -binjr-window-background-color: #F4F4F4
+;
+    -binjr-control-background-color: #E8E8E8
+;
+    -binjr-pane-background-color: white
+;
+    -binjr-button-background-color: transparent
+;
+    -binjr-color-lighter-gray: #E1E1E1
+;
+    -binjr-color-light-gray: #C2C2C2
+;
+    -binjr-color-gray: #999999
+;
+    -binjr-color-dark-gray: #666666
+;
+    -binjr-color-darker-gray: #333333
+;
+    -binjr-color-red: #E81123
+;
+    -binjr-color-light-red: #F1707A
+;
+    -binjr-dark-blue-color: #336F87
+;
+    -binjr-blue-color: #4BACC6
+;
+    -binjr-command-bar-title-color: #285668
+;
+    -binjr-command-bar-border-color: #152E38
+;
+    -binjr-light-blue-color: #92CDDC
+;
+    -binjr-lighter-blue-color: #B7DEE8
+;
+    -binjr-foreground-color: #DAEEF3
+;
+    -binjr-gray-border-color: #C8C8C8
+;
+    -binjr-warning-color: TOMATO
+;
+    -binjr-control-border-color: -binjr-color-dark-gray
+;
+    -icon-color: #494949
+;
+    SCROLL_BAR_THUMB: #BABABA
+;
+    SCROLL_BAR_TRACK: #f0f0f0
+;
 
-    -fx-accent: -binjr-lighter-blue-color;
-    -fx-accent-translucide: rgba(183, 222, 232, 0.2);
+    -fx-accent: -binjr-lighter-blue-color
+;
+    -fx-accent-translucide: rgba(183, 222, 232, 0.2)
+;
 
 }
 
@@ -1260,13 +1287,19 @@
  * MaskerPane                                                                  *
  *                                                                             *
  ******************************************************************************/
-.masker-pane {
+.binjr-loading-pane .binjr-logo-view {
+    -fx-opacity: .8;
 }
 
-.masker-pane .masker-glass {
-    /* -fx-background-color: rgba(0, 0, 0, .3);*/
+.binjr-loading-pane:loading {
     -fx-background-color: rgba(255, 255, 255, .6);
-    /* -fx-background-color: transparent;*/
+}
+
+.masker-pane {
+}
+.canvas-masker-pane,
+.masker-pane .masker-glass {
+    -fx-background-color: rgba(255, 255, 255, .6);
 }
 
 .masker-pane .masker-text {
@@ -1635,20 +1668,29 @@
 .facet-pill .box {
     -fx-border-width: 0.5;
 }
+
 .facet-pill:selected .box .mark {
     -fx-border-width: 0;
 }
 
 /**** Lookup colors ****/
 {
-    -trace-color:  #808080;
-    -debug-color: STEELBLUE;
-    -perf-color: #268f69;
-    -info-color: black;
-    -unknown-color: black;
-    -warn-color: DARKORANGE;
-    -error-color: red;
-    -fatal-color: DARKRED;
+    -trace-color: #808080
+;
+    -debug-color: STEELBLUE
+;
+    -perf-color: #268f69
+;
+    -info-color: black
+;
+    -unknown-color: black
+;
+    -warn-color: DARKORANGE
+;
+    -error-color: red
+;
+    -fatal-color: DARKRED
+;
 }
 /**** TRACE ****/
 .facet-pill-trace,
@@ -1658,7 +1700,7 @@
     -fx-border-color: derive(-trace-color, -20%);
 }
 
-.facet-pill-trace:selected .box .mark{
+.facet-pill-trace:selected .box .mark {
     -fx-background-color: derive(-trace-color, -20%);
 }
 
@@ -1675,7 +1717,7 @@
     -fx-border-color: derive(-debug-color, -20%);
 }
 
-.facet-pill-debug:selected .box .mark{
+.facet-pill-debug:selected .box .mark {
     -fx-background-color: derive(-debug-color, -20%);
 }
 
@@ -1692,7 +1734,7 @@
     -fx-border-color: derive(-perf-color, -20%);
 }
 
-.facet-pill-perf:selected .box .mark{
+.facet-pill-perf:selected .box .mark {
     -fx-background-color: derive(-perf-color, -20%);
 }
 
@@ -1705,11 +1747,11 @@
 .facet-pill-info,
 .facet-pill-info .box {
     -fx-background-color: derive(-info-color, 80%);
-    -fx-text-fill:  derive(-info-color, -20%);
+    -fx-text-fill: derive(-info-color, -20%);
     -fx-border-color: derive(-info-color, -20%);
 }
 
-.facet-pill-info:selected .box .mark{
+.facet-pill-info:selected .box .mark {
     -fx-background-color: derive(-info-color, -20%);
 }
 
@@ -1726,7 +1768,7 @@
     -fx-border-color: derive(-unknown-color, -20%);
 }
 
-.facet-pill-unknown:selected .box .mark{
+.facet-pill-unknown:selected .box .mark {
     -fx-background-color: derive(-unknown-color, -20%);
 }
 
@@ -1739,11 +1781,11 @@
 .facet-pill-warn,
 .facet-pill-warn .box {
     -fx-background-color: derive(-warn-color, 80%);
-    -fx-text-fill:  derive(-warn-color, -20%);
-    -fx-border-color:  derive(-warn-color, -20%);
+    -fx-text-fill: derive(-warn-color, -20%);
+    -fx-border-color: derive(-warn-color, -20%);
 }
 
-.facet-pill-warn:selected .box .mark{
+.facet-pill-warn:selected .box .mark {
     -fx-background-color: derive(-warn-color, -20%);
 }
 
@@ -1760,13 +1802,13 @@
     -fx-border-color: derive(-error-color, -20%);
 }
 
-.facet-pill-error:selected .box .mark{
-    -fx-background-color:  derive(-error-color, -20%);
+.facet-pill-error:selected .box .mark {
+    -fx-background-color: derive(-error-color, -20%);
 }
 
 .styled-text-area .error,
 .log-error {
-    -fx-fill:  -error-color;
+    -fx-fill: -error-color;
 }
 
 /**** FATAL ****/
@@ -1777,7 +1819,7 @@
     -fx-border-color: derive(-fatal-color, -20%);
 }
 
-.facet-pill-fatal:selected .box .mark{
+.facet-pill-fatal:selected .box .mark {
     -fx-background-color: derive(-fatal-color, -20%);
 }
 
@@ -1785,6 +1827,7 @@
 .log-fatal {
     -fx-fill: -fatal-color;
 }
+
 /****************************************************************************/
 
 .horizontal-separator {
@@ -1807,7 +1850,7 @@
 
 .busy-indicator .title-frame {
     -fx-background-radius: 8;
-    -fx-background-color:  rgba(255, 255, 255, .8);
+    -fx-background-color: rgba(255, 255, 255, .8);
 }
 
 .progress-bar {
@@ -1816,17 +1859,20 @@
     -fx-indeterminate-bar-flip: false;
     -fx-indeterminate-bar-animation-time: 2;
 }
+
 .progress-bar > .bar {
     -fx-background-color: -binjr-dark-blue-color;
     -fx-background-insets: 2 2 2 2;
     -fx-background-radius: 0;
     -fx-padding: 0.75em;
 }
+
 .progress-bar:indeterminate > .bar {
     -fx-background-color: linear-gradient(to left, transparent, -binjr-dark-blue-color);
 }
+
 .progress-bar > .track {
-    -fx-background-color:  white, -binjr-color-gray, white, white;
+    -fx-background-color: white, -binjr-color-gray, white, white;
     -fx-background-insets: 0, 0 0 0 0, 1 1 1 1;
     -fx-background-radius: 0, 0, 0;
 }

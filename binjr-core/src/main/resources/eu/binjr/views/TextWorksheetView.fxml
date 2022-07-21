@@ -20,9 +20,9 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.MaskerPane?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import eu.binjr.common.javafx.controls.BinjrLoadingPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0"
             styleClass="skinnable-pane-border"
             xmlns="http://javafx.com/javafx/11.0.1"
@@ -205,6 +205,6 @@
             </VirtualizedScrollPane>
         </AnchorPane>
     </VBox>
-    <MaskerPane fx:id="busyIndicator" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+    <BinjrLoadingPane fx:id="busyIndicator" targetFps="2" animationSize="LARGE" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                 AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 </AnchorPane>

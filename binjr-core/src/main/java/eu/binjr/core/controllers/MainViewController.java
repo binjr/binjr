@@ -71,7 +71,7 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.util.Callback;
 import javafx.util.Duration;
-import org.controlsfx.control.MaskerPane;
+
 import org.eclipse.fx.ui.controls.tree.FilterableTreeItem;
 
 import java.io.File;
@@ -128,9 +128,9 @@ public class MainViewController implements Initializable {
     @FXML
     private Label addWorksheetLabel;
     @FXML
-    private MaskerPane sourceMaskerPane;
+    private BinjrLoadingPane sourceMaskerPane;
     @FXML
-    private MaskerPane worksheetMaskerPane;
+    private BinjrLoadingPane worksheetMaskerPane;
     @FXML
     private Pane searchBarRoot;
     @FXML
@@ -862,7 +862,7 @@ public class MainViewController implements Initializable {
     private void addSource(DataAdapter<?> da) {
         Source newSource = Source.of(da);
         TitledPane newSourcePane = newSourcePane(newSource);
-        newSourcePane.setContent(new MaskerPane());
+        newSourcePane.setContent(new BinjrLoadingPane());
         sourcesAdapters.put(newSourcePane, newSource);
         sourcesPane.getPanes().add(newSourcePane);
         newSourcePane.setExpanded(true);

@@ -23,7 +23,7 @@
 <?import javafx.scene.input.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.shape.Line?>
-<?import org.controlsfx.control.MaskerPane?>
+<?import eu.binjr.common.javafx.controls.BinjrLoadingPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/11.0.1"
             xmlns:fx="http://javafx.com/fxml/1" fx:controller="eu.binjr.core.controllers.MainViewController">
     <SplitPane fx:id="contentView" cache="true" cacheHint="SCALE" dividerPositions="0.3382608695652174"
@@ -47,7 +47,7 @@
                            prefWidth="416.0" styleClass="series-table" AnchorPane.bottomAnchor="0.0"
                            AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                 </Accordion>
-                <MaskerPane fx:id="sourceMaskerPane" text="" visible="false"/>
+                <BinjrLoadingPane fx:id="sourceMaskerPane" targetFps="2" animationSize="LARGE" visible="false"/>
             </StackPane>
             <HBox fx:id="searchBarRoot"
                   alignment="CENTER"
@@ -140,7 +140,7 @@
                     </Label>
                 </StackPane>
             </StackPane>
-            <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false"/>
+            <BinjrLoadingPane fx:id="worksheetMaskerPane" targetFps="2" animationSize="LARGE" visible="false"/>
         </StackPane>
     </SplitPane>
     <DrawerPane fx:id="commandBar" cache="true" cacheHint="SPEED"

@@ -16,6 +16,7 @@
   ~    limitations under the License.
   -->
 
+<?import eu.binjr.common.javafx.controls.BinjrLoadingPane?>
 <?import eu.binjr.common.javafx.controls.DrawerPane?>
 <?import eu.binjr.common.javafx.controls.TimeRangePicker?>
 <?import javafx.geometry.Insets?>
@@ -23,7 +24,6 @@
 <?import javafx.scene.Cursor?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.MaskerPane?>
 <AnchorPane fx:id="root" prefHeight="600.0" prefWidth="651.0"
             styleClass="skinnable-pane-border"
             xmlns="http://javafx.com/javafx/8.0.111"
@@ -242,6 +242,6 @@
             </AnchorPane>
         </SplitPane>
     </VBox>
-    <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false" AnchorPane.bottomAnchor="0.0"
-                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+    <BinjrLoadingPane fx:id="worksheetMaskerPane" targetFps="2" animationSize="LARGE" visible="false" AnchorPane.bottomAnchor="0.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
 </AnchorPane>

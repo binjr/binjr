@@ -66,7 +66,6 @@ import javafx.scene.shape.Path;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import org.controlsfx.control.MaskerPane;
 
 import java.io.IOException;
 import java.net.URL;
@@ -133,7 +132,7 @@ public class XYChartsWorksheetController extends WorksheetController {
     @FXML
     private Button addChartButton;
     @FXML
-    private MaskerPane worksheetMaskerPane;
+    private BinjrLoadingPane worksheetMaskerPane;
     @FXML
     private ContextMenu seriesListMenu;
     @FXML
@@ -261,7 +260,6 @@ public class XYChartsWorksheetController extends WorksheetController {
             newChartDropTarget.setOnDragExited(getBindingManager().registerHandler(event -> newChartDropTarget.pseudoClassStateChanged(DRAGGED_OVER_PSEUDO_CLASS, false)));
             getBindingManager().bind(newChartDropTarget.managedProperty(), getParentController().treeItemDragAndDropInProgressProperty());
             getBindingManager().bind(newChartDropTarget.visibleProperty(), getParentController().treeItemDragAndDropInProgressProperty());
-
             setSelectedChart(worksheet.getSelectedChart());
         } catch (Exception e) {
             Platform.runLater(() -> Dialogs.notifyException("Error loading worksheet controller", e, root));

@@ -17,6 +17,7 @@
 package eu.binjr.core.controllers;
 
 
+import eu.binjr.common.javafx.controls.BinjrLoadingPane;
 import eu.binjr.common.javafx.controls.TextFieldValidator;
 import eu.binjr.common.javafx.controls.TimeRange;
 import eu.binjr.common.javafx.richtext.CodeAreaHighlighter;
@@ -44,7 +45,6 @@ import javafx.scene.chart.XYChart;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.util.Duration;
-import org.controlsfx.control.MaskerPane;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
@@ -126,7 +126,7 @@ public class TextWorksheetController extends WorksheetController {
     }
 
     @FXML
-    public MaskerPane busyIndicator;
+    public BinjrLoadingPane busyIndicator;
 
     @Override
     public Property<TimeRange> selectedRangeProperty() {
@@ -199,7 +199,6 @@ public class TextWorksheetController extends WorksheetController {
         textOutput.setEditable(false);
         getBindingManager().bind(textOutput.wrapTextProperty(), wordWrapButton.selectedProperty());
         refreshButton.setOnAction(getBindingManager().registerHandler(event -> refresh()));
-
         //Search bar initialization
         prevOccurrenceButton.setOnAction(getBindingManager().registerHandler(event -> {
             if (searchHitIterator.hasPrevious()) {

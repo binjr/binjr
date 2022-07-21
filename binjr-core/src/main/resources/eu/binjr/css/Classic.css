@@ -1,14 +1,24 @@
 {
-    -binjr-background-color: #204656;
-    -binjr-pane-background-color: white;
-    -binjr-control-border-color: #333333;
-    -binjr-dark-blue-color: #336F87;
-    -binjr-blue-color: #4BACC6;
-    -binjr-light-blue-color: #92CDDC;
-    -binjr-lighter-blue-color: #B7DEE8;
-    -binjr-foreground-color: #DAEEF3;
-    -binjr-warning-color:tomato;
-    -fx-accent-translucide: rgba(183,222,232,0.2);
+    -binjr-background-color: #204656
+;
+    -binjr-pane-background-color: white
+;
+    -binjr-control-border-color: #333333
+;
+    -binjr-dark-blue-color: #336F87
+;
+    -binjr-blue-color: #4BACC6
+;
+    -binjr-light-blue-color: #92CDDC
+;
+    -binjr-lighter-blue-color: #B7DEE8
+;
+    -binjr-foreground-color: #DAEEF3
+;
+    -binjr-warning-color: tomato
+;
+    -fx-accent-translucide: rgba(183, 222, 232, 0.2)
+;
 
 }
 
@@ -16,66 +26,69 @@
 *      button icons
 ********************************/
 {
-    -icon-scale-x: 3;
-    -icon-scale-y: 3;
-    /*-icon-color:black;*/
+    -icon-scale-x: 3
+;
+    -icon-scale-y: 3
+;
+/*-icon-color:black;*/
 }
 
-.command-bar *{
+.command-bar * {
     -icon-scale-x: 2.5;
     -icon-scale-y: 2.5;
-   /* -icon-color: black;*/
+    /* -icon-color: black;*/
 }
 
 .command-bar .context-menu * {
-  -icon-scale-x: 2.5;
-  -icon-scale-y: 2.5;
+    -icon-scale-x: 2.5;
+    -icon-scale-y: 2.5;
 }
 
-.command-bar  .icon-container {
-  -fx-padding: 10;
+.command-bar .icon-container {
+    -fx-padding: 10;
 }
 
- .menu-button .arrow-button {
-    -fx-padding:-2;
-     visibility: hidden;
- }
+.menu-button .arrow-button {
+    -fx-padding: -2;
+    visibility: hidden;
+}
+
 .add-tab-button {
-    -size:20;
+    -size: 20;
     -fx-min-height: -size;
     -fx-min-width: -size;
     -fx-max-height: -size;
     -fx-max-width: -size;
     -fx-content-display: graphic-only;
-    -fx-padding:5;
+    -fx-padding: 5;
 }
 
 .command-bar-menu-graphic {
-    -fx-padding:2;
+    -fx-padding: 2;
 }
 
 .command-bar-menu-graphic Line {
-    -fx-stroke:black;
+    -fx-stroke: black;
 }
 
 .chart-properties-button {
-     -fx-opacity: 50%;
-      -fx-scale-x: 0.75;
-      -fx-scale-y: 0.75;
+    -fx-opacity: 50%;
+    -fx-scale-x: 0.75;
+    -fx-scale-y: 0.75;
 }
 
 .chart-properties-button:hover {
-     -fx-opacity: 100%;
+    -fx-opacity: 100%;
 }
 
 .chart-properties-button:hover:pressed {
-     -fx-opacity: 100%;
+    -fx-opacity: 100%;
 }
 
 .toolPane {
-  -fx-background-color: linear-gradient(to right, #EEEEEE  , #DADADA );
-/*  -fx-border-width:1;
-  -fx-border-color:#DADADA;*/
+    -fx-background-color: linear-gradient(to right, #EEEEEE, #DADADA);
+    /*  -fx-border-width:1;
+      -fx-border-color:#DADADA;*/
 }
 
 .toolPane .content,
@@ -83,51 +96,51 @@
 .toolPane .scroll-pane,
 .toolPane .scroll-pane .viewport {
     -fx-background-color: transparent;
-  }
-
- .add-source-background-icon,
- .add-worksheet-background-icon{
-    -fx-text-fill:  #DADADA;
- }
-
-
- .add-source-background-icon:hover,
- .add-worksheet-background-icon:hover{
-    -fx-text-fill:  #C2C2C2;
- }
-
- .add-worksheet-background-icon .addWorksheet-icon,
- .add-source-background-icon .addSource-icon {
-  -fx-scale-x:20;
-  -fx-scale-y:20;
-  -fx-background-color:#DADADA;
 }
 
- .add-worksheet-background-icon .addWorksheet-icon:hover,
- .add-source-background-icon .addSource-icon:hover,
- .add-worksheet-background-icon .addWorksheet-icon:hover:pressed,
- .add-source-background-icon .addSource-icon:hover:pressed {
-  -fx-background-color:#969696;
+.add-source-background-icon,
+.add-worksheet-background-icon {
+    -fx-text-fill: #DADADA;
 }
 
-  /*******************
-    Command bar
- *******************/
+
+.add-source-background-icon:hover,
+.add-worksheet-background-icon:hover {
+    -fx-text-fill: #C2C2C2;
+}
+
+.add-worksheet-background-icon .addWorksheet-icon,
+.add-source-background-icon .addSource-icon {
+    -fx-scale-x: 20;
+    -fx-scale-y: 20;
+    -fx-background-color: #DADADA;
+}
+
+.add-worksheet-background-icon .addWorksheet-icon:hover,
+.add-source-background-icon .addSource-icon:hover,
+.add-worksheet-background-icon .addWorksheet-icon:hover:pressed,
+.add-source-background-icon .addSource-icon:hover:pressed {
+    -fx-background-color: #969696;
+}
+
+/*******************
+  Command bar
+*******************/
 
 .command-bar {
- /*  -fx-pref-width: 48;
-   -fx-min-width: 48;*/
-    -fx-padding:5;
-    -fx-background-color: linear-gradient(to right, #EEEEEE  , #DADADA );/* #F4F4F4;*/
-/*
-    -fx-border-width:1;
-    -fx-border-color: #C2C2C2;*/
+    /*  -fx-pref-width: 48;
+      -fx-min-width: 48;*/
+    -fx-padding: 5;
+    -fx-background-color: linear-gradient(to right, #EEEEEE, #DADADA); /* #F4F4F4;*/
+    /*
+        -fx-border-width:1;
+        -fx-border-color: #C2C2C2;*/
 }
 
 .command-bar:expanded {
-/*  -fx-min-width: 160;
- /*  -fx-pref-width: 200;
-   -fx-max-width: 200;*/
+    /*  -fx-min-width: 160;
+     /*  -fx-pref-width: 200;
+       -fx-max-width: 200;*/
 }
 
 .horizontal-separator {
@@ -136,51 +149,51 @@
 }
 
 
- .command-bar .menu-button .arrow-button {
-    -fx-padding:-2;
-     visibility: hidden;
- }
+.command-bar .menu-button .arrow-button {
+    -fx-padding: -2;
+    visibility: hidden;
+}
 
- .command-bar .command-bar-menu-button .menu-icon{
-    -fx-fill:red;
+.command-bar .command-bar-menu-button .menu-icon {
+    -fx-fill: red;
     -fx-scale-x: 3;
     -fx-scale-y: 3.5;
- }
+}
 
- .command-bar:expanded .menu-button .arrow-button {
-    -fx-padding:10;
+.command-bar:expanded .menu-button .arrow-button {
+    -fx-padding: 10;
     -fx-fill: white;
-     visibility: visible;
- }
+    visibility: visible;
+}
 
- .command-bar:expanded .menu-button .arrow-button .arrow {
-    -fx-background-color:black;
- }
+.command-bar:expanded .menu-button .arrow-button .arrow {
+    -fx-background-color: black;
+}
 
- .command-bar:expanded .menu-button .label,
- .command-bar:expanded .button {
-    -fx-margins:5;
-    -fx-content-display:left;
- }
+.command-bar:expanded .menu-button .label,
+.command-bar:expanded .button {
+    -fx-margins: 5;
+    -fx-content-display: left;
+}
 
- .command-bar .menu-button .label,
- .command-bar .button {
+.command-bar .menu-button .label,
+.command-bar .button {
     -fx-alignment: center_left;
-    -fx-graphic-text-gap:15;
-    -fx-text-fill:black;
- }
+    -fx-graphic-text-gap: 15;
+    -fx-text-fill: black;
+}
 
-  .command-bar .square-button {
-     -fx-alignment: center;
-   }
+.command-bar .square-button {
+    -fx-alignment: center;
+}
 
- .command-bar .menu-item {
-      -fx-padding: 10 10 10 17 ;
-  }
+.command-bar .menu-item {
+    -fx-padding: 10 10 10 17;
+}
 
 .command-bar .hyperlink {
     -fx-alignment: center_left;
-    -fx-graphic-text-gap:20;
+    -fx-graphic-text-gap: 20;
     -fx-text-fill: -binjr-blue-color;
 
     -fx-font-size: 10pt;
@@ -193,8 +206,8 @@
     -fx-background-color: transparent;
     -fx-background-radius: 0;
     -fx-background-insets: 0;
-    -fx-border-width:0;
-    -fx-border-radius:0;
+    -fx-border-width: 0;
+    -fx-border-radius: 0;
     -fx-alignment: center;
 }
 
@@ -210,76 +223,84 @@
 
 
 .popup-control-parent {
-  -fx-background-color: white;
-    -fx-border-width:1;
+    -fx-background-color: white;
+    -fx-border-width: 1;
 }
 
-  .chart-viewport-parent {
-   -fx-background-color: white;
-  }
+.chart-viewport-parent {
+    -fx-background-color: white;
+}
 
-  .worksheet-tool-bar{
-       -fx-padding:5;
-       -fx-spacing:5;
-  }
+.worksheet-tool-bar {
+    -fx-padding: 5;
+    -fx-spacing: 5;
+}
 
-.title-pane-tool-bar{
-   -fx-spacing:3;
+.title-pane-tool-bar {
+    -fx-spacing: 3;
 }
 
 
-  /*******************************************************************************
-   *                                                                             *
-   * MaskerPane                                                                  *
-   *                                                                             *
-   ******************************************************************************/
-   .masker-pane {}
+/*******************************************************************************
+ *                                                                             *
+ * MaskerPane                                                                  *
+ *                                                                             *
+ ******************************************************************************/
+.binjr-loading-pane .binjr-logo-view {
+    -fx-opacity: .8;
+}
 
-   .masker-pane .masker-glass {
-      /* -fx-background-color: rgba(0, 0, 0, .3);*/
-       -fx-background-color: rgba(255, 255, 255, .6);
-      /* -fx-background-color: transparent;*/
-   }
+.binjr-loading-pane:loading {
+    -fx-background-color: rgba(255, 255, 255, .6);
+}
+.masker-pane {
+}
 
-   .masker-pane .masker-text {
-      -visibility:false;
-       -fx-text-fill: white;
-       -fx-font-weight: bold;
-   }
+.canvas-masker-pane,
+.masker-pane .masker-glass {
+    /* -fx-background-color: rgba(0, 0, 0, .3);*/
+    -fx-background-color: rgba(255, 255, 255, .6);
+    /* -fx-background-color: transparent;*/
+}
 
-   .masker-pane .masker-center {
-       -fx-background-color:transparent;
-      /*  -fx-background-color: rgba(255, 255, 255, .6);
-     /*  -fx-background-color: rgba(0, 0, 0, .6);*/
+.masker-pane .masker-text {
+    -visibility: false;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
 
-       -fx-max-height: 1.50in;
-       -fx-padding: .25in;
-       -fx-background-radius: .1in;
-   }
+.masker-pane .masker-center {
+    -fx-background-color: transparent;
+    /*  -fx-background-color: rgba(255, 255, 255, .6);
+   /*  -fx-background-color: rgba(0, 0, 0, .6);*/
+
+    -fx-max-height: 1.50in;
+    -fx-padding: .25in;
+    -fx-background-radius: .1in;
+}
 
 .crosshair-axis-label {
     -fx-text-fill: white;
     -fx-font-size: 10;
     -fx-background-radius: 4;
-    -fx-padding:4;
-    -fx-background-color: rgba(10,10,10,0.7);
+    -fx-padding: 4;
+    -fx-background-color: rgba(10, 10, 10, 0.7);
 }
 
 
 .pagination-popup,
 .interval-picker-popup {
-     -fx-background-color:
-        linear-gradient(to bottom,
-            derive(-fx-color,-17%),
-            derive(-fx-color,-30%)
-        ),
-        -fx-control-inner-background;
+    -fx-background-color: linear-gradient(to bottom,
+    derive(-fx-color, -17%),
+    derive(-fx-color, -30%)
+    ),
+    -fx-control-inner-background;
     -fx-background-insets: 0, 1;
     -fx-background-radius: 0;
     -fx-alignment: CENTER; /* VBox */
     -fx-spacing: 0; /* VBox */
     -fx-padding: 0.083333em; /* 1 1 1 1 */
-    -fx-effect: dropshadow( gaussian , rgba(0,0,0,0.2) , 12, 0.0 , 0 , 8 );
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.2), 12, 0.0, 0, 8);
 }
 
 .tooltip {
@@ -349,7 +370,7 @@
 }
 
 .styled-text-area .tagmark {
-    -fx-fill:  #800000;
+    -fx-fill: #800000;
 }
 
 .styled-text-area .anytag {
@@ -397,20 +418,29 @@
 .facet-pill .box {
     -fx-border-width: 0.5;
 }
+
 .facet-pill:selected .box .mark {
     -fx-border-width: 0;
 }
 
 /**** Lookup colors ****/
 {
-    -trace-color:  #808080;
-    -debug-color: STEELBLUE;
-    -perf-color: #268f69;
-    -info-color: black;
-    -unknown-color: black;
-    -warn-color: DARKORANGE;
-    -error-color: red;
-    -fatal-color: DARKRED;
+    -trace-color: #808080
+;
+    -debug-color: STEELBLUE
+;
+    -perf-color: #268f69
+;
+    -info-color: black
+;
+    -unknown-color: black
+;
+    -warn-color: DARKORANGE
+;
+    -error-color: red
+;
+    -fatal-color: DARKRED
+;
 }
 /**** TRACE ****/
 .facet-pill-trace,
@@ -420,7 +450,7 @@
     -fx-border-color: derive(-trace-color, -20%);
 }
 
-.facet-pill-trace:selected .box .mark{
+.facet-pill-trace:selected .box .mark {
     -fx-background-color: derive(-trace-color, -20%);
 }
 
@@ -437,7 +467,7 @@
     -fx-border-color: derive(-debug-color, -20%);
 }
 
-.facet-pill-debug:selected .box .mark{
+.facet-pill-debug:selected .box .mark {
     -fx-background-color: derive(-debug-color, -20%);
 }
 
@@ -454,7 +484,7 @@
     -fx-border-color: derive(-perf-color, -20%);
 }
 
-.facet-pill-perf:selected .box .mark{
+.facet-pill-perf:selected .box .mark {
     -fx-background-color: derive(-perf-color, -20%);
 }
 
@@ -467,11 +497,11 @@
 .facet-pill-info,
 .facet-pill-info .box {
     -fx-background-color: derive(-info-color, 80%);
-    -fx-text-fill:  derive(-info-color, -20%);
+    -fx-text-fill: derive(-info-color, -20%);
     -fx-border-color: derive(-info-color, -20%);
 }
 
-.facet-pill-info:selected .box .mark{
+.facet-pill-info:selected .box .mark {
     -fx-background-color: derive(-info-color, -20%);
 }
 
@@ -488,7 +518,7 @@
     -fx-border-color: derive(-unknown-color, -20%);
 }
 
-.facet-pill-unknown:selected .box .mark{
+.facet-pill-unknown:selected .box .mark {
     -fx-background-color: derive(-unknown-color, -20%);
 }
 
@@ -501,11 +531,11 @@
 .facet-pill-warn,
 .facet-pill-warn .box {
     -fx-background-color: derive(-warn-color, 80%);
-    -fx-text-fill:  derive(-warn-color, -20%);
-    -fx-border-color:  derive(-warn-color, -20%);
+    -fx-text-fill: derive(-warn-color, -20%);
+    -fx-border-color: derive(-warn-color, -20%);
 }
 
-.facet-pill-warn:selected .box .mark{
+.facet-pill-warn:selected .box .mark {
     -fx-background-color: derive(-warn-color, -20%);
 }
 
@@ -522,13 +552,13 @@
     -fx-border-color: derive(-error-color, -20%);
 }
 
-.facet-pill-error:selected .box .mark{
-    -fx-background-color:  derive(-error-color, -20%);
+.facet-pill-error:selected .box .mark {
+    -fx-background-color: derive(-error-color, -20%);
 }
 
 .styled-text-area .error,
 .log-error {
-    -fx-fill:  -error-color;
+    -fx-fill: -error-color;
 }
 
 /**** FATAL ****/
@@ -539,7 +569,7 @@
     -fx-border-color: derive(-fatal-color, -20%);
 }
 
-.facet-pill-fatal:selected .box .mark{
+.facet-pill-fatal:selected .box .mark {
     -fx-background-color: derive(-fatal-color, -20%);
 }
 
@@ -547,6 +577,7 @@
 .log-fatal {
     -fx-fill: -fatal-color;
 }
+
 /****************************************************************************/
 
 .busy-indicator {
@@ -555,5 +586,5 @@
 
 .busy-indicator .title-frame {
     -fx-background-radius: 8;
-    -fx-background-color:  rgba(160, 160, 160, .8);
+    -fx-background-color: rgba(160, 160, 160, .8);
 }

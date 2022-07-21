@@ -349,7 +349,6 @@ public class UserPreferences extends ObservablePreferenceFactory {
     public ObservablePreference<Number> numIdxMaxPageSize =
             integerPreference("numIdxMaxPageSize", 2000000);
 
-
     public static class UserFavorites extends MruFactory {
 
         public final MostRecentlyUsedList<String> favoriteLogFilters =

@@ -1376,13 +1376,21 @@
  * MaskerPane                                                                  *
  *                                                                             *
  ******************************************************************************/
+.binjr-loading-pane .binjr-logo-view {
+    -fx-opacity: .8;
+}
+
+.binjr-loading-pane:loading {
+    /*-fx-background-color: rgba(56, 121, 147, .6);*/
+    -fx-background-color: rgba(0, 0, 0, .6);
+}
+
 .masker-pane {
 }
 
+.canvas-masker-pane,
 .masker-pane .masker-glass {
-    /* -fx-background-color: rgba(0, 0, 0, .3);*/
     -fx-background-color: rgba(0, 0, 0, .6);
-    /* -fx-background-color: transparent;*/
 }
 
 .masker-pane .masker-text {
