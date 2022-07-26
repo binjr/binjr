@@ -53,13 +53,14 @@ public class NavigationHistory<T> {
         return backward;
     }
 
-    public void clear(){
+    public synchronized void clear() {
         forward.clear();
         backward.clear();
     }
 
-    public void setHead(T item, boolean save){
+    public synchronized void setHead(T item, boolean save) {
         if (save) {
+            logger.debug((() -> "Saving to history: item=" + item.toString() + " previous=" + previousItem.toString()));
             this.backward.push(previousItem);
             this.forward.clear();
         }
@@ -68,21 +69,23 @@ public class NavigationHistory<T> {
     }
 
     public Optional<T> getPrevious() {
-       return restoreSelectionFromHistory(backward, forward);
+        return restoreSelectionFromHistory(backward, forward);
     }
-
 
     public Optional<T> getNext() {
-      return  restoreSelectionFromHistory(forward, backward);
+        return restoreSelectionFromHistory(forward, backward);
     }
 
+    public synchronized String dump() {
+        return "Backward navigation history:\n" + backward.dump() +
+                "Forward navigation history:\n" + forward.dump();
+    }
 
-    private Optional<T> restoreSelectionFromHistory(HistoryQueue<T> history, HistoryQueue<T> toHistory) {
+    private synchronized Optional<T> restoreSelectionFromHistory(HistoryQueue<T> history, HistoryQueue<T> toHistory) {
         if (!history.isEmpty()) {
             toHistory.push(getHead());
             return Optional.of(history.pop());
-        }
-        else {
+        } else {
             logger.debug(() -> "NavigationHistory is empty: nothing to go back to.");
             return Optional.empty();
         }
@@ -95,7 +98,7 @@ public class NavigationHistory<T> {
         private final SimpleBooleanProperty empty = new SimpleBooleanProperty(true);
 
 
-        public void push(T state) {
+        private void push(T state) {
             if (state == null) {
                 logger.warn(() -> "Trying to push null state into backwardHistory");
                 return;
@@ -107,13 +110,13 @@ public class NavigationHistory<T> {
         /**
          * Clears the history
          */
-        public void clear() {
+        private void clear() {
             this.stack.clear();
             empty.set(true);
         }
 
 
-        public T pop() {
+        private T pop() {
             T r = this.stack.pop();
             empty.set(stack.isEmpty());
             return r;
@@ -133,24 +136,18 @@ public class NavigationHistory<T> {
             return empty.get();
         }
 
-        @Override
-        public String toString() {
-            return this.dump();
-        }
-
         /**
          * Dumps the content of the stack as a string
          *
          * @return the content of the stack as a string
          */
-        public String dump() {
-            final StringBuilder sb = new StringBuilder("NavigationHistory:");
+        private String dump() {
+            final StringBuilder sb = new StringBuilder("");
             AtomicInteger pos = new AtomicInteger(0);
             if (this.isEmpty()) {
                 sb.append(" { empty }");
-            }
-            else {
-                stack.forEach(h -> sb.append("\n").append(pos.incrementAndGet()).append(" ->").append(h.toString()));
+            } else {
+                stack.forEach(h -> sb.append(pos.incrementAndGet()).append(" ->").append(h.toString()).append("\n"));
             }
             return sb.toString();
         }

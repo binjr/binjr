@@ -1341,7 +1341,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                 "forceRefresh=" + forceRefresh + "]", logger::perf);
         if (dontPlotChart) {
             worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
-            logger.debug(() -> worksheet.getHistory().backward().dump());
+            logger.debug(() -> worksheet.getHistory().dump());
             return CompletableFuture.completedFuture(null);
         }
         CompletableFuture<?>[] futurePlots = new CompletableFuture<?>[viewPorts.size()];
@@ -1350,12 +1350,11 @@ public class XYChartsWorksheetController extends WorksheetController {
         }
         return CompletableFuture.allOf(futurePlots).whenComplete((o, throwable) -> {
             worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
-            logger.debug(() -> worksheet.getHistory().backward().dump());
+            logger.debug(() -> worksheet.getHistory().dump());
             // Stop perf monitor
             p.close();
         });
     }
-
 
     public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh) {
         if (currentState.get(viewPort.getDataStore()).isEmpty()) {
