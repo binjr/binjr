@@ -123,6 +123,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private StyleSpans<Collection<String>> syntaxHighlightStyleSpans;
     private RingIterator<CodeAreaHighlighter.SearchHitRange> searchHitIterator = RingIterator.of(Collections.emptyList());
     private final BooleanProperty filterApplied = new SimpleBooleanProperty(true);
+    private final BooleanProperty controllerBusy = new SimpleBooleanProperty(false);
     private Path tmpCssPath;
     @FXML
     private AnchorPane root;
@@ -161,7 +162,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     @FXML
     private Button querySyntaxButton;
     @FXML
-    private VBox busyIndicator;
+    private VBox progressPane;
     @FXML
     private ProgressBar progressIndicator;
     @FXML
@@ -202,6 +203,8 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private Button showSuggestButton;
     @FXML
     private Button favoriteButton;
+    @FXML
+    private BinjrLoadingPane loadingPane;
     private StackedBarChart<String, Integer> heatmap;
     private XYChart<ZonedDateTime, Double> timeline;
     private LogFileIndex index = (LogFileIndex) Indexes.LOG_FILES.get();
@@ -587,6 +590,9 @@ public class LogWorksheetController extends WorksheetController implements Synca
         getBindingManager().bind(cancelIndexButton.visibleProperty(), Bindings.createBooleanBinding(() -> (progressIndicator.getProgress() >= 0), progressIndicator.progressProperty()));
         cancelIndexButton.setOnAction(getBindingManager().registerHandler(event -> worksheet.indexingStatusProperty().setValue(IndexingStatus.CANCELED)));
 
+        getBindingManager().bind(progressPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() >= 0),controllerBusy,  worksheet.progressProperty()));
+        getBindingManager().bind(loadingPane.visibleProperty(), Bindings.createBooleanBinding(() -> controllerBusy.get() && (worksheet.getProgress() < 0),controllerBusy,  worksheet.progressProperty()));
+
         // Init heatmap
         initHeatmap();
 
@@ -899,7 +905,7 @@ public class LogWorksheetController extends WorksheetController implements Synca
     private void queryLogIndex(ReloadPolicy reloadPolicy, boolean ignoreCache) {
         try {
             AsyncTaskManager.getInstance().submit(() -> {
-                        busyIndicator.setVisible(true);
+                        controllerBusy.setValue(true);
                         return (SearchHitsProcessor) fetchDataFromSources(worksheet.getQueryParameters(), reloadPolicy, ignoreCache);
                     },
                     event -> {
@@ -980,10 +986,10 @@ public class LogWorksheetController extends WorksheetController implements Synca
                             }
                         } finally {
                             getBindingManager().resume();
-                            busyIndicator.setVisible(false);
+                            controllerBusy.setValue(false);
                         }
                     }, event -> {
-                        busyIndicator.setVisible(false);
+                        controllerBusy.setValue(false);
                         Dialogs.notifyException("An error occurred while indexing log file: " +
                                         event.getSource().getException().getMessage(),
                                 event.getSource().getException(),

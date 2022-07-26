@@ -25,6 +25,7 @@
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
 <?import eu.binjr.common.javafx.controls.EnhancedPagination?>
+<?import eu.binjr.common.javafx.controls.BinjrLoadingPane?>
 <AnchorPane fx:id="root" prefHeight="800.0" prefWidth="1200.0"
             xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
     <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -387,7 +388,9 @@
             </SplitPane>
         </AnchorPane>
     </VBox>
-    <VBox fx:id="busyIndicator" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
+    <BinjrLoadingPane fx:id="loadingPane" targetFps="2" animationSize="LARGE" visible="false" AnchorPane.bottomAnchor="0.0"
+                      AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+    <VBox fx:id="progressPane" visible="false" cache="true" alignment="CENTER" maxHeight="-Infinity"
           maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
           styleClass="busy-indicator"
           fillWidth="false"
