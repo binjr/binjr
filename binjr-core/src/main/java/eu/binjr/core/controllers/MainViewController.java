@@ -1393,27 +1393,37 @@ public class MainViewController implements Initializable {
     }
 
     private void addToNewWorksheet(TabPane tabPane, Collection<TreeItem<SourceBinding>> rootItems) {
-        // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
-        Platform.runLater(() -> {
-            try {
-                var charts = treeItemsAsChartList(rootItems, root);
-                var title = StringUtils.ellipsize(rootItems.stream()
-                        .map(t -> t.getValue().getLegend())
-                        .collect(Collectors.joining(", ")), 50);
-                if (charts.isPresent()) {
-                    for (var t : rootItems
-                            .stream()
-                            .map(s -> s.getValue().getWorksheetClass())
-                            .distinct()
-                            .toList()) {
-                        var worksheet = WorksheetFactory.getInstance().createWorksheet(t, title, charts.get());
-                        editWorksheet(tabPane, worksheet);
-                    }
+        worksheetMaskerPane.setVisible(true);
+        try {
+            var charts = treeItemsAsChartList(rootItems, root);
+            var title = StringUtils.ellipsize(rootItems.stream()
+                    .map(t -> t.getValue().getLegend())
+                    .collect(Collectors.joining(", ")), 50);
+            if (charts.isPresent()) {
+                for (var t : rootItems
+                        .stream()
+                        .map(s -> s.getValue().getWorksheetClass())
+                        .distinct()
+                        .toList()) {
+                    // Schedule call to createWorksheet for async  execution as  may invoke long-lived  operation
+                    // such as initial time range computation.
+                    AsyncTaskManager.getInstance().submit(
+                            () -> WorksheetFactory.getInstance().createWorksheet(t, title, charts.get()),
+                            event -> {
+                                try {
+                                    editWorksheet(tabPane, (Worksheet<?>) event.getSource().getValue());
+                                } catch (CannotLoadWorksheetException e) {
+                                    throw new RuntimeException(e);
+                                } finally {
+                                    worksheetMaskerPane.setVisible(false);
+                                }
+                            },
+                            event -> Dialogs.notifyException("Error adding bindings to new worksheet", event.getSource().getException(), root));
                 }
-            } catch (Exception e) {
-                Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
             }
-        });
+        } catch (Exception e) {
+            Dialogs.notifyException("Error adding bindings to new worksheet", e, root);
+        }
     }
 
     private void findNext() {

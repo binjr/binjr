@@ -159,6 +159,7 @@ public class CsvFileAdapter extends BaseDataAdapter<Double> {
     @Override
     public TimeRange getInitialTimeRange(String path, List<TimeSeriesInfo<Double>> seriesInfo) throws DataAdapterException {
         try {
+            ensureIndexed(seriesInfo.stream().map(TimeSeriesInfo::getBinding).collect(Collectors.toSet()), ReloadPolicy.UNLOADED);
             return index.getTimeRangeBoundaries(seriesInfo.stream().map(ts -> ts.getBinding().getPath()).toList(), getTimeZoneId());
         } catch (IOException e) {
             throw new DataAdapterException("Error retrieving initial time range", e);

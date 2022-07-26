@@ -66,6 +66,11 @@ public class AsyncTaskManager {
         return CompletableFuture.runAsync(task, mainthreadPool);
     }
 
+//    public <V> CompletableFuture<?> submit(Runnable task) {
+//        logger.trace(() -> "Runnable " + task.toString() + " submitted");
+//        return CompletableFuture.runAsync(task, mainthreadPool);
+//    }
+
     /**
      * Submit an action as a {@link Callable} instance to be run asynchronously, as well as callback to handle success and failure of the main action.
      *

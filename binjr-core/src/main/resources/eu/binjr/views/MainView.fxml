@@ -140,6 +140,7 @@
                     </Label>
                 </StackPane>
             </StackPane>
+            <MaskerPane fx:id="worksheetMaskerPane" text="" visible="false"/>
         </StackPane>
     </SplitPane>
     <DrawerPane fx:id="commandBar" cache="true" cacheHint="SPEED"

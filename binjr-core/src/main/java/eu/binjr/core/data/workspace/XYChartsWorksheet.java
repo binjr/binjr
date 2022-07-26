@@ -53,8 +53,6 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
     private transient final NavigationHistory<Map<Chart, XYChartSelection<ZonedDateTime, Double>>> history = new NavigationHistory<>();
     private transient final ChangeWatcher status;
     private final transient Property<Integer> selectedChart;
-    private final transient AtomicBoolean resetTimeRangeRequested = new AtomicBoolean(true);
-
     private final transient Set<Integer> multiSelectedIndices = new HashSet<>();
     @IsDirtyable
     private ObservableList<Chart> charts;
@@ -434,9 +432,14 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
 
     @Override
     public TimeRange getInitialTimeRange() {
+        return mergeInitialTimeRange(this.charts);
+    }
+
+
+    public static TimeRange mergeInitialTimeRange(List<Chart> charts){
         ZonedDateTime end = null;
         ZonedDateTime beginning = null;
-        for (var c : this.getCharts()) {
+        for (var c : charts) {
             var timeRange = c.getInitialTimeRange();
             if (end == null || timeRange.getEnd().isAfter(end)) {
                 end = timeRange.getEnd();
@@ -551,14 +554,6 @@ public class XYChartsWorksheet extends Worksheet<Double> implements Syncable, Ra
             allInfo.addAll(chart.getSeries());
         }
         return allInfo;
-    }
-
-    public boolean verifyResetTimeRangeRequest() {
-        return resetTimeRangeRequested.compareAndSet(true, false);
-    }
-
-    public void rearmResetTimeRangeRequest() {
-        resetTimeRangeRequested.set(true);
     }
 
 }

@@ -77,6 +77,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static javafx.scene.layout.Region.USE_COMPUTED_SIZE;
@@ -1131,8 +1132,7 @@ public class XYChartsWorksheetController extends WorksheetController {
                     if (targetStage != null) {
                         targetStage.requestFocus();
                     }
-                    // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
-                    Platform.runLater(() -> addToNewChart(items));
+                    addToNewChart(items);
                 } else {
                     logger.warn("Cannot complete drag and drop operation: selected TreeItem is null");
                 }
@@ -1146,24 +1146,43 @@ public class XYChartsWorksheetController extends WorksheetController {
     private void addToNewChart(Collection<TreeItem<SourceBinding>> treeItems) {
         try {
             treeItemsAsChartList(treeItems, root).ifPresent(charts -> {
-                worksheet.getCharts().addAll(charts);
+                if (worksheet.getTotalNumberOfSeries() == 0) {
+                    // Set the time range of the whole worksheet to accommodate the new bindings
+                    // if there are no other series present.
+                    asyncResetToInitialTimerange(() -> XYChartsWorksheet.mergeInitialTimeRange(charts))
+                            .whenComplete((o, throwable) -> Dialogs.runOnFXThread(() -> worksheet.getCharts().addAll(charts)));
+                } else {
+                    worksheet.getCharts().addAll(charts);
+                }
             });
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to new chart", e, null);
         }
     }
 
+    private CompletableFuture<?> asyncResetToInitialTimerange(Supplier<TimeRange> rangeSupplier) {
+        logger.debug(() -> "Reset worksheet time range to initial value");
+        nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
+        return AsyncTaskManager.getInstance().submit(
+                rangeSupplier::get,
+                event -> {
+                    nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
+                    this.timeRangePicker.selectedRangeProperty().setValue((TimeRange) event.getSource().getValue());
+                },
+                event -> {
+                    nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() - 1);
+                    Dialogs.notifyException("Failed to retrieve data from source", event.getSource().getException(), root);
+                });
+    }
+
     private void addToCurrentWorksheet(Collection<TreeItem<SourceBinding>> treeItems, Chart targetChart) {
         try {
-            // Schedule for later execution in order to let other drag and dropped event to complete before modal dialog gets displayed
-            Platform.runLater(() -> {
-                if (treeItems != null && !treeItems.isEmpty()) {
-                    addBindings(treeItems.stream()
-                            .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
-                            .collect(Collectors.toList()
-                            ), targetChart);
-                }
-            });
+            if (treeItems != null && !treeItems.isEmpty()) {
+                addBindings(treeItems.stream()
+                        .flatMap(item -> TreeViewUtils.flattenLeaves(item, true).stream())
+                        .collect(Collectors.toList()
+                        ), targetChart);
+            }
         } catch (Exception e) {
             Dialogs.notifyException("Error adding bindings to existing worksheet", e, root);
         }
@@ -1289,12 +1308,14 @@ public class XYChartsWorksheetController extends WorksheetController {
             // Explicitly call the listener to initialize the proper status of the checkbox
             isVisibleListener.invalidated(null);
         }
-        //Set the time range of the whole worksheet to accommodate the new bindings
-        // if there are no other series present.
+
         if (worksheet.getTotalNumberOfSeries() == timeSeriesBindings.size()) {
-            worksheet.rearmResetTimeRangeRequest();
+            // Set the time range of the whole worksheet to accommodate the new bindings
+            // if there are no other series present.
+            asyncResetToInitialTimerange(targetChart::getInitialTimeRange);
+        } else {
+            invalidate(false, false, false);
         }
-        invalidate(false, false, false);
     }
 
     private void removeSelectedBinding(TableView<TimeSeriesInfo<Double>> seriesTable) {
@@ -1339,39 +1360,28 @@ public class XYChartsWorksheetController extends WorksheetController {
                 " [saveToHistory=" + saveToHistory + ", " +
                 "dontPlotChart=" + dontPlotChart + ", " +
                 "forceRefresh=" + forceRefresh + "]", logger::perf);
+        worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
+        logger.debug(() -> worksheet.getHistory().dump());
         if (dontPlotChart) {
-            worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
-            logger.debug(() -> worksheet.getHistory().dump());
             return CompletableFuture.completedFuture(null);
         }
         CompletableFuture<?>[] futurePlots = new CompletableFuture<?>[viewPorts.size()];
         for (int i = 0; i < viewPorts.size(); i++) {
             futurePlots[i] = plotChart(viewPorts.get(i), forceRefresh);
         }
-        return CompletableFuture.allOf(futurePlots).whenComplete((o, throwable) -> {
-            worksheet.getHistory().setHead(currentState.asSelection(), saveToHistory);
-            logger.debug(() -> worksheet.getHistory().dump());
-            // Stop perf monitor
-            p.close();
-        });
+        return CompletableFuture.allOf(futurePlots).whenComplete((o, throwable) -> p.close());
     }
 
     public CompletableFuture<?> plotChart(ChartViewPort viewPort, boolean forceRefresh) {
         if (currentState.get(viewPort.getDataStore()).isEmpty()) {
+            logger.warn(() -> "Empty state!");
             return CompletableFuture.completedFuture(null);
         }
+        XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
+        logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
         nbBusyPlotTasks.setValue(nbBusyPlotTasks.get() + 1);
         return AsyncTaskManager.getInstance().submit(() -> {
-                    XYChartSelection<ZonedDateTime, Double> currentSelection = currentState.get(viewPort.getDataStore()).get().asSelection();
-                    logger.debug(() -> "currentSelection=" + (currentSelection == null ? "null" : currentSelection.toString()));
                     viewPort.getDataStore().fetchDataFromSources(currentSelection.getStartX(), currentSelection.getEndX(), forceRefresh);
-                    // Set the time range of the whole worksheet to accommodate the new bindings
-                    // if there are no other series present.
-                    if (worksheet.verifyResetTimeRangeRequest()) {
-                        logger.debug(() -> "Setting worksheet to source initial time range");
-                        var range = worksheet.getInitialTimeRange();
-                        currentState.setSelection(currentState.selectTimeRange(range.getBeginning(), range.getEnd()), false);
-                    }
                     return viewPort.getDataStore().getSeries()
                             .stream()
                             .filter(series -> {

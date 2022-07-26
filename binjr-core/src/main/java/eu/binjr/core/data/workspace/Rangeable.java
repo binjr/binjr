@@ -59,7 +59,7 @@ public interface Rangeable<T> {
                 try {
                     timeRange = adapter.getInitialTimeRange(path, byPathEntry.getValue());
                 } catch (DataAdapterException e) {
-                    logger.warn("An error occured while attempting to retrieve inital time range for adapter " +
+                    logger.warn("An error occurred while attempting to retrieve initial time range for adapter " +
                             adapter.getId() + ": " + e.getMessage());
                     logger.debug(() -> "Stack trace", e);
                     timeRange = TimeRange.last24Hours();
